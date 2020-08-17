@@ -69,9 +69,8 @@ export class ServerDescription {
   /**
    * Create a ServerDescription
    *
-   * @param address The address of the server
-   * @param ismaster An optional ismaster response for this server
-   * @param options Optioanl settings
+   * @param address - The address of the server
+   * @param ismaster - An optional ismaster response for this server
    */
   constructor(address: string, ismaster?: Document, options?: ServerDescriptionOptions) {
     this.address = address;
@@ -129,23 +128,17 @@ export class ServerDescription {
     return this.hosts.concat(this.arbiters).concat(this.passives);
   }
 
-  /**
-   * @returns {boolean} Is this server available for reads
-   */
+  /** Is this server available for reads*/
   get isReadable(): boolean {
     return this.type === ServerType.RSSecondary || this.isWritable;
   }
 
-  /**
-   * @returns {boolean} Is this server data bearing
-   */
+  /** Is this server data bearing */
   get isDataBearing(): boolean {
     return DATA_BEARING_SERVER_TYPES.has(this.type);
   }
 
-  /**
-   * @returns {boolean} Is this server available for writes
-   */
+  /** Is this server available for writes */
   get isWritable(): boolean {
     return WRITABLE_SERVER_TYPES.has(this.type);
   }
@@ -163,9 +156,6 @@ export class ServerDescription {
   /**
    * Determines if another `ServerDescription` is equal to this one per the rules defined
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
-   *
-   * @param {ServerDescription} other
-   * @returns {boolean}
    */
   equals(other: ServerDescription): boolean {
     const topologyVersionsEqual =

@@ -24,10 +24,8 @@ export interface IndexInformationOptions {
 /**
  * Retrieves this collections index info.
  *
- * @param db The Db instance on which to retrieve the index info.
- * @param name The name of the collection.
- * @param [options] Optional settings.
- * @param [callback] The command result callback
+ * @param db - The Db instance on which to retrieve the index info.
+ * @param name - The name of the collection.
  */
 export function indexInformation(db: Db, name: string, callback: Callback): void;
 export function indexInformation(

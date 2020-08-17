@@ -19,15 +19,15 @@ export type Sort =
 export interface FindOptions extends QueryOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
-  /** Set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc. */
+  /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
   sort?: Sort;
-  /** The fields to return in the query. Object of fields to either include or exclude (one of, not both), {'a':1, 'b': 1} **or** {'a': 0, 'b': 0} */
+  /** The fields to return in the query. Object of fields to either include or exclude (one of, not both), `{'a':1, 'b': 1}` **or** `{'a': 0, 'b': 0}` */
   projection?: Document;
   /** @deprecated Use `options.projection` instead */
   fields?: Document;
   /** Set to skip N documents ahead in your query (useful for pagination). */
   skip?: number;
-  /** Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1} */
+  /** Tell the query to use specific indexes in the query. Object of indexes to use, `{'_id':1}` */
   hint?: Hint;
   /** Explain the query instead of returning the data. */
   explain?: boolean;

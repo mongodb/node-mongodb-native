@@ -31,7 +31,7 @@ export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
 export interface MapReduceOptions extends CommandOperationOptions {
-  /** Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}* */
+  /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
   query?: Document;
@@ -45,7 +45,7 @@ export interface MapReduceOptions extends CommandOperationOptions {
   finalize?: FinalizeFunction | string;
   /** Can pass in variables that can be access from map/reduce/finalize. */
   scope?: Document;
-  /** It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X. */
+  /** It is possible to make the execution stay in JS. Provided in MongoDB \> 2.0.X. */
   jsMode?: boolean;
   /** Provide statistics on job execution time. */
   verbose?: boolean;
@@ -59,27 +59,21 @@ interface MapReduceStats {
   timing?: number;
 }
 
-/**
- * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
- *
- * @class
- * @property {Collection} collection Collection instance.
- * @property {(Function|string)} map The mapping function.
- * @property {(Function|string)} reduce The reduce function.
- * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
- */
+/** Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection. */
 export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
   collection: Collection;
+  /** The mapping function. */
   map: MapFunction | string;
+  /** The reduce function. */
   reduce: ReduceFunction | string;
 
   /**
    * Constructs a MapReduce operation.
    *
-   * @param {Collection} collection Collection instance.
-   * @param {(Function|string)} map The mapping function.
-   * @param {(Function|string)} reduce The reduce function.
-   * @param {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
+   * @param collection - Collection instance.
+   * @param map - The mapping function.
+   * @param reduce - The reduce function.
+   * @param options - Optional settings. See Collection.prototype.mapReduce for a list of options.
    */
   constructor(
     collection: Collection,

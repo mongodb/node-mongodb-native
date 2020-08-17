@@ -76,7 +76,7 @@ gulp.task('typedoc', async () => {
 
 gulp.task('api-extractor', async () => {
   try {
-    const { stdout, stderr } = await run('npx api-extractor run --local --verbose');
+    const { stdout, stderr } = await run('npx api-extractor run --local');
     console.log(stdout);
     console.log(stderr);
     await run('npx rimraf lib/*.d.ts lib/**/*.d.ts');

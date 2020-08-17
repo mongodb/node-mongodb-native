@@ -11,8 +11,9 @@ import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
 import type { Document } from '../bson';
 import type { MongoClient } from '../mongo_client';
-import type { ConnectionOptions } from '../cmap/connection';
+import { ConnectionOptions, Connection } from '../cmap/connection';
 import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
+import { Server } from '../sdam/server';
 
 const VALID_AUTH_MECHANISMS = new Set([
   'DEFAULT',
@@ -460,10 +461,7 @@ function generateCredentials(
   const mechanismProperties = options.authMechanismProperties;
 
   if (!VALID_AUTH_MECHANISMS.has(authMechanism)) {
-    throw MongoError.create({
-      message: `authentication mechanism ${authMechanism} not supported`,
-      driver: true
-    });
+    throw new MongoError(`authentication mechanism ${authMechanism} not supported`);
   }
 
   return new MongoCredentials({
@@ -490,20 +488,20 @@ function mergeOptions<T, S>(target: T, source: S, flatten: boolean): S & T {
 function relayEvents(mongoClient: MongoClient, topology: Topology) {
   const serverOrCommandEvents = [
     // APM
-    'commandStarted',
-    'commandSucceeded',
-    'commandFailed',
+    Connection.COMMAND_STARTED,
+    Connection.COMMAND_SUCCEEDED,
+    Connection.COMMAND_FAILED,
 
     // SDAM
-    'serverOpening',
-    'serverClosed',
-    'serverDescriptionChanged',
-    'serverHeartbeatStarted',
-    'serverHeartbeatSucceeded',
-    'serverHeartbeatFailed',
-    'topologyOpening',
-    'topologyClosed',
-    'topologyDescriptionChanged',
+    Topology.SERVER_OPENING,
+    Topology.SERVER_CLOSED,
+    Topology.SERVER_DESCRIPTION_CHANGED,
+    Server.SERVER_HEARTBEAT_STARTED,
+    Server.SERVER_HEARTBEAT_SUCCEEDED,
+    Server.SERVER_HEARTBEAT_FAILED,
+    Topology.TOPOLOGY_OPENING,
+    Topology.TOPOLOGY_CLOSED,
+    Topology.TOPOLOGY_DESCRIPTION_CHANGED,
 
     // Legacy
     'joined',

@@ -311,10 +311,10 @@ export function mergeOptionsAndWriteConcern(
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param topology The topology to execute this operation on
- * @param operation The operation to execute
- * @param args Arguments to apply the provided operation
- * @param [options] Options that modify the behavior of the method
+ * @param topology - The topology to execute this operation on
+ * @param operation - The operation to execute
+ * @param args - Arguments to apply the provided operation
+ * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
   topology: Topology,
@@ -470,15 +470,15 @@ export function applyWriteConcern<T extends HasWriteConcern>(
 }
 
 /**
- * @internal
  * Checks if a given value is a Promise
  *
- * @param {any} maybePromise
+ * @typeParam T - The result type of maybePromise
+ * @param maybePromise - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-export function isPromiseLike(
-  maybePromise?: PromiseLike<any> | void
-): maybePromise is Promise<any> {
+export function isPromiseLike<T = any>(
+  maybePromise?: PromiseLike<T> | void
+): maybePromise is Promise<T> {
   return !!maybePromise && typeof maybePromise.then === 'function';
 }
 
@@ -546,9 +546,9 @@ export function emitDeprecationWarning(msg: string): void {
  * @internal
  * Default message handler for generating deprecation warnings.
  *
- * @param {string} name function name
- * @param {string} option option name
- * @returns {string} warning message
+ * @param name - function name
+ * @param option - option name
+ * @returns warning message
  */
 export function defaultMsgHandler(name: string, option: string): string {
   return `${name} option [${option}] is deprecated and will be removed in a later version.`;
@@ -631,8 +631,8 @@ export class MongoDBNamespace {
   /**
    * Create a namespace object
    *
-   * @param {string} db The database name
-   * @param {string} [collection] An optional collection name
+   * @param db - database name
+   * @param collection - collection name
    */
   constructor(db: string, collection?: string) {
     this.db = db;

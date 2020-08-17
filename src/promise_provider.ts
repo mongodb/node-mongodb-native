@@ -8,7 +8,10 @@ const store: PromiseStore = {
   [kPromise]: undefined
 };
 
-/** Global promise store allowing user-provided promises */
+/**
+ * @public
+ * Global promise store allowing user-provided promises
+ */
 export class PromiseProvider {
   /** Validates the passed in promise library */
   static validate(lib: any): lib is PromiseConstructor {

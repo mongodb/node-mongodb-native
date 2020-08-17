@@ -5,9 +5,9 @@ import type { Callback } from '../utils';
 /**
  * Add to internal list of Operations
  *
- * @param {UnorderedBulkOperation} bulkOperation
- * @param {number} docType number indicating the document type
- * @param {any} document
+ * @param bulkOperation
+ * @param docType number indicating the document type
+ * @param document
  * @returns {UnorderedBulkOperation}
  */
 function addToOperationsList(
@@ -115,8 +115,8 @@ export class UnorderedBulkOperation extends BulkOperationBase {
   }
 
   /**
-   * @param {Function} callback
-   * @param {any} writeResult
+   * @param callback
+   * @param writeResult
    * @returns {boolean|undefined}
    */
   handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
@@ -131,9 +131,9 @@ export class UnorderedBulkOperation extends BulkOperationBase {
 /**
  * Returns an unordered batch object
  *
- * @param {any} topology
- * @param {any} collection
- * @param {any} options
+ * @param topology
+ * @param collection
+ * @param options
  */
 export function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
   return new UnorderedBulkOperation(topology, collection, options);

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@microsoft/api-extractor": "^7.9.4",
+    "@microsoft/tsdoc-config": "^0.13.5",
     "@types/aws4": "^1.5.1",
     "@types/bl": "^2.1.0",
     "@types/bson": "^4.0.2",

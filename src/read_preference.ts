@@ -38,11 +38,11 @@ export interface ReadPreferenceLikeOptions {
 }
 
 /**
+ * @public
  * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
  *
  * @see https://docs.mongodb.com/manual/core/read-preference/
- * @returns {ReadPreference}
  */
 export class ReadPreference {
   mode: ReadPreferenceMode;
@@ -64,14 +64,9 @@ export class ReadPreference {
   public static nearest = new ReadPreference(ReadPreferenceMode.nearest);
 
   /**
-   * Create a read preference
-   *
-   * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
-   * @param {object[]} [tags] A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
-   * @param {object} [options] Additional read preference options
-   * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
-   * @param {object} [options.hedge] Server mode in which the same query is dispatched in parallel to multiple replica set members.
-   * @param {boolean} [options.hedge.enabled] Explicitly enable or disable hedged reads.
+   * @param mode - A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+   * @param tags - A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
+   * @param options - Additional read preference options
    */
   constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
@@ -128,8 +123,7 @@ export class ReadPreference {
   /**
    * Construct a ReadPreference given an options object.
    *
-   * @param {any} options The options object from which to extract the read preference.
-   * @returns {ReadPreference|null}
+   * @param options - The options object from which to extract the read preference.
    */
   static fromOptions(options: any): ReadPreference | undefined {
     const readPreference = options.readPreference;
@@ -159,10 +153,8 @@ export class ReadPreference {
    * determine the read preference (if there is one), but will also ensure the returned value is a
    * properly constructed instance of `ReadPreference`.
    *
-   * @param {Collection|Db|MongoClient} parent The parent of the operation on which to determine the read
-   * preference, used for determining the inherited read preference.
-   * @param {any} options The options passed into the method, potentially containing a read preference
-   * @returns {(ReadPreference|null)} The resolved read preference
+   * @param parent - The parent of the operation on which to determine the read preference, used for determining the inherited read preference.
+   * @param options - The options passed into the method, potentially containing a read preference
    */
   static resolve(parent?: OperationParent, options?: any): ReadPreference {
     options = options || {};
@@ -213,9 +205,7 @@ export class ReadPreference {
   /**
    * Validate if a mode is legal
    *
-   * @function
-   * @param {string} mode The string representing the read preference mode.
-   * @returns {boolean} True if a mode is valid
+   * @param mode - The string representing the read preference mode.
    */
   static isValid(mode: string): boolean {
     const VALID_MODES = new Set([
@@ -233,9 +223,7 @@ export class ReadPreference {
   /**
    * Validate if a mode is legal
    *
-   * @function
-   * @param {string} mode The string representing the read preference mode.
-   * @returns {boolean} True if a mode is valid
+   * @param mode - The string representing the read preference mode.
    */
   isValid(mode?: string): boolean {
     return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
@@ -244,8 +232,6 @@ export class ReadPreference {
   /**
    * Indicates that this readPreference needs the "slaveOk" bit when sent over the wire
    *
-   * @function
-   * @returns {boolean}
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean {
@@ -260,22 +246,15 @@ export class ReadPreference {
   }
 
   /**
-   * Are the two read preference equal
+   * Check if the two ReadPreferences are equivalent
    *
-   * @function
-   * @param {ReadPreference} readPreference The read preference with which to check equality
-   * @returns {boolean} True if the two ReadPreferences are equivalent
+   * @param readPreference - The read preference with which to check equality
    */
   equals(readPreference: ReadPreference): boolean {
     return readPreference.mode === this.mode;
   }
 
-  /**
-   * Return JSON representation
-   *
-   * @function
-   * @returns {object} A JSON representation of the ReadPreference
-   */
+  /** Return JSON representation */
   toJSON(): object {
     const readPreference = { mode: this.mode } as any;
     if (Array.isArray(this.tags)) readPreference.tags = this.tags;

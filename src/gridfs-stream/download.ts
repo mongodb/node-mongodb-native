@@ -61,24 +61,42 @@ export interface GridFSBucketReadStreamPrivate {
  * A readable stream that enables you to read buffers from GridFS.
  *
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
- *
- * @class
- * @extends external:Readable
- * @param {Collection} chunks Handle for chunks collection
- * @param {Collection} files Handle for files collection
- * @param {object} readPreference The read preference to use
- * @param {object} filter The query to use to find the file document
- * @param {object} [options] Optional settings.
- * @param {number} [options.sort] Optional sort for the file find query
- * @param {number} [options.skip] Optional skip for the file find query
- * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
- * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
- * @fires GridFSBucketReadStream#error
- * @fires GridFSBucketReadStream#file
  */
 export class GridFSBucketReadStream extends Readable {
   s: GridFSBucketReadStreamPrivate;
 
+  /**
+   * An error occurred
+   * @event
+   */
+  static readonly ERROR = 'error' as const;
+  /**
+   * Fires when the stream loaded the file document corresponding to the provided id.
+   * @event
+   */
+  static readonly FILE = 'file' as const;
+  /**
+   * Emitted when a chunk of data is available to be consumed.
+   * @event
+   */
+  static readonly DATA = 'data' as const;
+  /**
+   * Fired when the stream is exhausted (no more data events).
+   * @event
+   */
+  static readonly END = 'end' as const;
+  /**
+   * Fired when the stream is exhausted and the underlying cursor is killed
+   * @event
+   */
+  static readonly CLOSE = 'close' as const;
+
+  /** @internal
+   * @param chunks - Handle for chunks collection
+   * @param files - Handle for files collection
+   * @param readPreference - The read preference to use
+   * @param filter - The query to use to find the file document
+   */
   constructor(
     chunks: Collection,
     files: Collection,
@@ -105,42 +123,6 @@ export class GridFSBucketReadStream extends Readable {
       readPreference
     };
   }
-
-  /**
-   * An error occurred
-   *
-   * @event GridFSBucketReadStream#error
-   * @type {Error}
-   */
-
-  /**
-   * Fires when the stream loaded the file document corresponding to the
-   * provided id.
-   *
-   * @event GridFSBucketReadStream#file
-   * @type {object}
-   */
-
-  /**
-   * Emitted when a chunk of data is available to be consumed.
-   *
-   * @event GridFSBucketReadStream#data
-   * @type {object}
-   */
-
-  /**
-   * Fired when the stream is exhausted (no more data events).
-   *
-   * @event GridFSBucketReadStream#end
-   * @type {object}
-   */
-
-  /**
-   * Fired when the stream is exhausted and the underlying cursor is killed
-   *
-   * @event GridFSBucketReadStream#close
-   * @type {object}
-   */
 
   /**
    * Reads from the cursor and pushes to the stream.
@@ -182,24 +164,21 @@ export class GridFSBucketReadStream extends Readable {
    * and kills the underlying cursor. Will emit the 'end' event, and then
    * the 'close' event once the cursor is successfully killed.
    *
-   * @function
-   * @param {GridFSBucket~errorCallback} [callback] called when the cursor is successfully closed or an error occurred.
-   * @fires GridFSBucketWriteStream#close
-   * @fires GridFSBucketWriteStream#end
+   * @param callback - called when the cursor is successfully closed or an error occurred.
    */
   abort(callback?: Callback<void>): void {
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
       this.s.cursor.close((error?: Error) => {
-        this.emit('close');
+        this.emit(GridFSBucketReadStream.CLOSE);
         callback && callback(error);
       });
     } else {
       if (!this.s.init) {
         // If not initialized, fire close event because we will never
         // get a cursor
-        this.emit('close');
+        this.emit(GridFSBucketReadStream.CLOSE);
       }
       callback && callback();
     }
@@ -235,7 +214,7 @@ function doRead(stream: GridFSBucketReadStream): void {
             return;
           }
 
-          stream.emit('close');
+          stream.emit(GridFSBucketReadStream.CLOSE);
         });
       });
 
@@ -339,7 +318,7 @@ function init(stream: GridFSBucketReadStream): void {
       // If user destroys the stream before we have a cursor, wait
       // until the query is done to say we're 'closed' because we can't
       // cancel a query.
-      stream.emit('close');
+      stream.emit(GridFSBucketReadStream.CLOSE);
       return;
     }
 
@@ -375,7 +354,7 @@ function init(stream: GridFSBucketReadStream): void {
       return __handleError(stream, error);
     }
 
-    stream.emit('file', doc);
+    stream.emit(GridFSBucketReadStream.FILE, doc);
   });
 }
 
@@ -465,5 +444,5 @@ function handleEndOption(
 }
 
 function __handleError(stream: GridFSBucketReadStream, error?: AnyError): void {
-  stream.emit('error', error);
+  stream.emit(GridFSBucketReadStream.ERROR, error);
 }

@@ -83,6 +83,15 @@ export class Connection extends EventEmitter {
   [kIsMaster]: Document;
   [kClusterTime]: Document;
 
+  /** @event */
+  static readonly COMMAND_STARTED = 'commandStarted' as const;
+  /** @event */
+  static readonly COMMAND_SUCCEEDED = 'commandSucceeded' as const;
+  /** @event */
+  static readonly COMMAND_FAILED = 'commandFailed' as const;
+  /** @event */
+  static readonly CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
+
   constructor(stream: Stream, options: ConnectionOptions) {
     super(options);
     this.id = options.id;
@@ -324,7 +333,7 @@ function messageHandler(conn: Connection) {
 
       if (document.$clusterTime) {
         conn[kClusterTime] = document.$clusterTime;
-        conn.emit('clusterTimeReceived', document.$clusterTime);
+        conn.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
       }
 
       if (operationDescription.command) {
@@ -406,24 +415,24 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (this.monitorCommands) {
-    this.emit('commandStarted', new CommandStartedEvent(this, command));
+    this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
         this.emit(
-          'commandFailed',
+          Connection.COMMAND_FAILED,
           new CommandFailedEvent(this, command, err, operationDescription.started)
         );
       } else {
         if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
           this.emit(
-            'commandFailed',
+            Connection.COMMAND_FAILED,
             new CommandFailedEvent(this, command, reply.result, operationDescription.started)
           );
         } else {
           this.emit(
-            'commandSucceeded',
+            Connection.COMMAND_SUCCEEDED,
             new CommandSucceededEvent(this, command, reply, operationDescription.started)
           );
         }

@@ -21,12 +21,14 @@ interface AdminPrivate {
 }
 
 /**
+ * @internal
  * The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  *
  * **ADMIN Cannot directly be instantiated**
  *
  * @example
+ * ```js
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
  * // Connection url
@@ -46,8 +48,8 @@ interface AdminPrivate {
  *     client.close();
  *   });
  * });
+ * ```
  */
-
 export class Admin {
   s: AdminPrivate;
 

@@ -15,11 +15,7 @@ export enum ReadConcernLevel {
 export class ReadConcern {
   level: ReadConcernLevel;
 
-  /**
-   * Constructs a ReadConcern from the read concern properties.
-   *
-   * @param level - The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
-   */
+  /** Constructs a ReadConcern from the read concern level.*/
   constructor(level: ReadConcernLevel) {
     this.level = level;
   }

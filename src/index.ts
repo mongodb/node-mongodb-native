@@ -11,6 +11,7 @@ import { GridFSBucket } from './gridfs-stream';
 import type { Callback } from './utils';
 
 // Set up the instrumentation method
+/** @public */
 function instrument(options: any, callback: Callback) {
   if (typeof options === 'function') {
     callback = options;

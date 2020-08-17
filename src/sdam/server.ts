@@ -33,8 +33,8 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
+import { Connection } from '../cmap/connection';
 import type { Topology } from './topology';
-import type { Connection } from '../cmap/connection';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
@@ -103,19 +103,30 @@ interface ServerPrivate {
 }
 
 export interface DestroyOptions {
+  /** Force the destruction of the pool. */
   force?: boolean;
 }
 
-/**
- * @fires Server#serverHeartbeatStarted
- * @fires Server#serverHeartbeatSucceeded
- * @fires Server#serverHeartbeatFailed
- */
 export class Server extends EventEmitter {
   s: ServerPrivate;
   clusterTime?: ClusterTime;
   ismaster?: Document;
   [kMonitor]: Monitor;
+
+  /** @event */
+  static readonly SERVER_HEARTBEAT_STARTED = 'serverHeartbeatStarted' as const;
+  /** @event */
+  static readonly SERVER_HEARTBEAT_SUCCEEDED = 'serverHeartbeatSucceeded' as const;
+  /** @event */
+  static readonly SERVER_HEARTBEAT_FAILED = 'serverHeartbeatFailed' as const;
+  /** @event */
+  static readonly CONNECT = 'connect' as const;
+  /** @event */
+  static readonly DESCRIPTION_RECEIVED = 'descriptionReceived' as const;
+  /** @event */
+  static readonly CLOSED = 'closed' as const;
+  /** @event */
+  static readonly ENDED = 'ended' as const;
 
   /**
    * Create a server
@@ -138,16 +149,16 @@ export class Server extends EventEmitter {
       ['commandStarted', 'commandSucceeded', 'commandFailed'].concat(CMAP_EVENT_NAMES)
     );
 
-    this.s.pool.on('clusterTimeReceived', (clusterTime: ClusterTime) => {
+    this.s.pool.on(Connection.CLUSTER_TIME_RECEIVED, (clusterTime: ClusterTime) => {
       this.clusterTime = clusterTime;
     });
 
     // create the monitor
     this[kMonitor] = new Monitor(this, this.s.options);
     relayEvents(this[kMonitor], this, [
-      'serverHeartbeatStarted',
-      'serverHeartbeatSucceeded',
-      'serverHeartbeatFailed',
+      Server.SERVER_HEARTBEAT_STARTED,
+      Server.SERVER_HEARTBEAT_SUCCEEDED,
+      Server.SERVER_HEARTBEAT_FAILED,
 
       // legacy events
       'monitoring'
@@ -158,9 +169,9 @@ export class Server extends EventEmitter {
     });
 
     this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
-    this[kMonitor].on('serverHeartbeatSucceeded', (event: ServerHeartbeatSucceededEvent) => {
+    this[kMonitor].on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
       this.emit(
-        'descriptionReceived',
+        Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.address, event.reply, {
           roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
         })
@@ -168,7 +179,7 @@ export class Server extends EventEmitter {
 
       if (this.s.state === STATE_CONNECTING) {
         stateTransition(this, STATE_CONNECTED);
-        this.emit('connect', this);
+        this.emit(Server.CONNECT, this);
       }
     });
   }
@@ -199,13 +210,7 @@ export class Server extends EventEmitter {
     this[kMonitor].connect();
   }
 
-  /**
-   * Destroy the server connection
-   *
-   * @param {object} [options] Optional settings
-   * @param {boolean} [options.force=false] Force destroy the pool
-   * @param {any} callback
-   */
+  /** Destroy the server connection */
   destroy(options?: DestroyOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, { force: false }, options);
@@ -241,16 +246,10 @@ export class Server extends EventEmitter {
   /**
    * Execute a command
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command hash
-   * @param {object} [options] Optional settings
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.checkKeys=false] Specify if the bson parser should validate keys.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command hash
+   * @param options - Optional settings
+   * @param callback - A callback function
    */
   command(ns: string, cmd: Document, callback: Callback): void;
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
@@ -313,11 +312,9 @@ export class Server extends EventEmitter {
   /**
    * Execute a query against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd The command document for the query
-   * @param cursorState
-   * @param options Optional settings
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command document for the query
+   * @param cursorState - Internal state of the cursor
    */
   query(
     ns: string,
@@ -350,11 +347,8 @@ export class Server extends EventEmitter {
   /**
    * Execute a `getMore` against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState State data associated with the cursor calling this method
-   * @param batchSize
-   * @param options Optional settings
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState - State data associated with the cursor calling this method
    */
   getMore(
     ns: string,
@@ -387,9 +381,8 @@ export class Server extends EventEmitter {
   /**
    * Execute a `killCursors` command against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState State data associated with the cursor calling this method
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState - State data associated with the cursor calling this method
    */
   killCursors(ns: string, cursorState: InternalCursorState, callback?: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
@@ -417,10 +410,8 @@ export class Server extends EventEmitter {
   /**
    * Insert one or more documents
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of documents to insert
-   * @param {object} options
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of documents to insert
    */
   insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
@@ -429,10 +420,8 @@ export class Server extends EventEmitter {
   /**
    * Perform one or more update operations
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of updates
-   * @param {object} options
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of updates
    */
   update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
@@ -441,10 +430,10 @@ export class Server extends EventEmitter {
   /**
    * Perform one or more remove operations
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of removes
-   * @param {object} options options for removal
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of removes
+   * @param options - options for removal
+   * @param callback - A callback function
    */
   remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
@@ -547,7 +536,7 @@ function markServerUnknown(server: Server, error?: MongoError) {
   }
 
   server.emit(
-    'descriptionReceived',
+    Server.DESCRIPTION_RECEIVED,
     new ServerDescription(server.description.address, undefined, {
       error,
       topologyVersion:

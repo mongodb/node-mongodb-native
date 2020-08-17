@@ -10,21 +10,15 @@ export interface CollStatsOptions extends CommandOperationOptions {
   scale?: number;
 }
 
-/**
- * Get all the collection statistics.
- *
- * @class
- * @property {Collection} collection Collection instance.
- * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
- */
+/** Get all the collection statistics. */
 export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 
   /**
    * Construct a Stats operation.
    *
-   * @param {Collection} collection Collection instance
-   * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
+   * @param collection - Collection instance
+   * @param options - Optional settings. See Collection.prototype.stats for a list of options.
    */
   constructor(collection: Collection, options?: CollStatsOptions) {
     super(collection, options);

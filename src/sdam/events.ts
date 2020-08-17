@@ -2,20 +2,18 @@ import type { ServerDescription } from './server_description';
 import type { TopologyDescription } from './topology_description';
 import type { Document } from '../bson';
 
-/**
- * Published when server description changes, but does NOT include changes to the RTT.
- *
- * @property {object} topologyId A unique identifier for the topology
- * @property {ServerAddress} address The address (host/port pair) of the server
- * @property {ServerDescription} previousDescription The previous server description
- * @property {ServerDescription} newDescription The new server description
- */
+/** Emitted when server description changes, but does NOT include changes to the RTT. */
 export class ServerDescriptionChangedEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
+  /** The address (host/port pair) of the server */
   address: string;
+  /** The previous server description */
   previousDescription: ServerDescription;
+  /** The new server description */
   newDescription: ServerDescription;
 
+  /** @internal */
   constructor(
     topologyId: number,
     address: string,
@@ -29,50 +27,44 @@ export class ServerDescriptionChangedEvent {
   }
 }
 
-/**
- * Published when server is initialized.
- *
- * @property {object} topologyId A unique identifier for the topology
- * @property {ServerAddress} address The address (host/port pair) of the server
- */
+/** Emitted when server is initialized. */
 export class ServerOpeningEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
+  /** The address (host/port pair) of the server */
   address: string;
 
+  /** @internal */
   constructor(topologyId: number, address: string) {
     this.topologyId = topologyId;
     this.address = address;
   }
 }
 
-/**
- * Published when server is closed.
- *
- * @property {ServerAddress} address The address (host/port pair) of the server
- * @property {object} topologyId A unique identifier for the topology
- */
+/** Emitted when server is closed. */
 export class ServerClosedEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
+  /** The address (host/port pair) of the server */
   address: string;
 
+  /** @internal */
   constructor(topologyId: number, address: string) {
     this.topologyId = topologyId;
     this.address = address;
   }
 }
 
-/**
- * Published when topology description changes.
- *
- * @property {object} topologyId A unique identifier for the topology
- * @property {TopologyDescription} previousDescription The old topology description
- * @property {TopologyDescription} newDescription The new topology description
- */
+/** Emitted when topology description changes. */
 export class TopologyDescriptionChangedEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
+  /** The old topology description */
   previousDescription: TopologyDescription;
+  /** The new topology description */
   newDescription: TopologyDescription;
 
+  /** @internal */
   constructor(
     topologyId: number,
     previousDescription: TopologyDescription,
@@ -84,58 +76,52 @@ export class TopologyDescriptionChangedEvent {
   }
 }
 
-/**
- * Published when topology is initialized.
- *
- * @param {object} topologyId A unique identifier for the topology
- */
+/** Emitted when topology is initialized. */
 export class TopologyOpeningEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
 
+  /** @internal */
   constructor(topologyId: number) {
     this.topologyId = topologyId;
   }
 }
 
-/**
- * Published when topology is closed.
- *
- * @param {object} topologyId A unique identifier for the topology
- */
+/** Emitted when topology is closed. */
 export class TopologyClosedEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
 
+  /** @internal */
   constructor(topologyId: number) {
     this.topologyId = topologyId;
   }
 }
 
 /**
- * Fired when the server monitor’s ismaster command is started - immediately before
+ * Emitted when the server monitor’s ismaster command is started - immediately before
  * the ismaster command is serialized into raw BSON and written to the socket.
- *
- * @property {object} connectionId The connection id for the command
  */
 export class ServerHeartbeatStartedEvent {
+  /** The connection id for the command */
   connectionId: string;
 
+  /** @internal */
   constructor(connectionId: string) {
     this.connectionId = connectionId;
   }
 }
 
-/**
- * Fired when the server monitor’s ismaster succeeds.
- *
- * @param {number} duration The execution time of the event in ms
- * @param {object} reply The command reply
- * @param {object} connectionId The connection id for the command
- */
+/** Emitted when the server monitor’s ismaster succeeds. */
 export class ServerHeartbeatSucceededEvent {
+  /** The connection id for the command */
   connectionId: string;
+  /** The execution time of the event in ms */
   duration: number;
+  /** The command reply */
   reply: Document;
 
+  /** @internal */
   constructor(connectionId: string, duration: number, reply: Document) {
     this.connectionId = connectionId;
     this.duration = duration;
@@ -143,18 +129,16 @@ export class ServerHeartbeatSucceededEvent {
   }
 }
 
-/**
- * Fired when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception.
- *
- * @param {number} duration The execution time of the event in ms
- * @param {MongoError|object} failure The command failure
- * @param {object} connectionId The connection id for the command
- */
+/** Emitted when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception. */
 export class ServerHeartbeatFailedEvent {
+  /** The connection id for the command */
   connectionId: string;
+  /** The execution time of the event in ms */
   duration: number;
+  /** The command failure */
   failure: Error;
 
+  /** @internal */
   constructor(connectionId: string, duration: number, failure: Error) {
     this.connectionId = connectionId;
     this.duration = duration;

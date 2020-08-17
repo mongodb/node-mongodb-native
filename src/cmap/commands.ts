@@ -843,9 +843,8 @@ export class BinMsg {
 /**
  * Creates a new CommandResult instance
  *
- * @param {object} result CommandResult object
- * @param {Connection} connection A connection instance associated with this result
- * @returns {CommandResult} A cursor instance
+ * @param result - CommandResult object
+ * @param connection - A connection instance associated with this result
  */
 export class CommandResult {
   ok?: number;
@@ -859,24 +858,14 @@ export class CommandResult {
     this.message = message;
   }
 
-  /**
-   * Convert CommandResult to JSON
-   *
-   * @function
-   * @returns {object}
-   */
+  /** Convert CommandResult to JSON */
   toJSON(): Document {
     const result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }
 
-  /**
-   * Convert CommandResult to String representation
-   *
-   * @function
-   * @returns {string}
-   */
+  /** Convert CommandResult to String representation */
   toString(): string {
     return JSON.stringify(this.toJSON());
   }

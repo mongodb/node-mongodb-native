@@ -6,9 +6,9 @@ import { EventEmitter } from 'events';
  * Determines whether a provided address matches the provided parent domain in order
  * to avoid certain attack vectors.
  *
- * @param {string} srvAddress The address to check against a domain
- * @param {string} parentDomain The domain to check the provided address against
- * @returns {boolean} Whether the provided address matches the parent domain
+ * @param srvAddress - The address to check against a domain
+ * @param parentDomain - The domain to check the provided address against
+ * @returns Whether the provided address matches the parent domain
  */
 function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
   const regex = /^.*?\./;

@@ -27,9 +27,7 @@ export interface LoggerOptions {
 }
 
 /**
- * @callback LoggerCallback
- * @param {string} msg message being logged
- * @param {object} state an object containing more metadata about the logging message
+ * @public
  */
 export class Logger {
   className: string;
@@ -237,7 +235,7 @@ export class Logger {
   /**
    * Set the current log level
    *
-   * @param newLevel Set current log level (debug, warn, info, error)
+   * @param newLevel - Set current log level (debug, warn, info, error)
    */
   static setLevel(newLevel: LoggerLevel): void {
     if (

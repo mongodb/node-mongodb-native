@@ -31,7 +31,8 @@ import {
   CreateIndexOperation,
   EnsureIndexOperation,
   IndexInformationOperation,
-  CreateIndexesOptions
+  CreateIndexesOptions,
+  IndexSpecification
 } from './operations/indexes';
 import {
   DropCollectionOperation,
@@ -112,10 +113,11 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
 }
 
 /**
+ * @public
  * The **Db** class is a class that represents a MongoDB Database.
  *
  * @example
- *
+ * ```js
  * const { MongoClient } = require('mongodb');
  * // Connection url
  * const url = 'mongodb://localhost:27017';
@@ -127,6 +129,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
  *   const testDb = client.db(dbName);
  *   client.close();
  * });
+ * ```
  */
 export class Db implements OperationParent {
   s: DbPrivate;
@@ -141,9 +144,9 @@ export class Db implements OperationParent {
   /**
    * Creates a new Db instance
    *
-   * @param databaseName The name of the database this instance represents.
-   * @param topology The server topology for the database.
-   * @param options Optional settings for Db construction
+   * @param databaseName - The name of the database this instance represents.
+   * @param topology - The server topology for the database.
+   * @param options - Optional settings for Db construction
    */
   constructor(databaseName: string, topology: Topology, options?: DbOptions) {
     options = options || {};
@@ -220,9 +223,9 @@ export class Db implements OperationParent {
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
    *
-   * @param name The name of the collection to create
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - The name of the collection to create
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   createCollection(name: string): Promise<Collection>;
   createCollection(name: string, callback: Callback<Collection>): void;
@@ -253,9 +256,9 @@ export class Db implements OperationParent {
   /**
    * Execute a command
    *
-   * @param command The command to run
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param command - The command to run
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   command(command: Document): Promise<Document>;
   command(command: Document, callback: Callback<Document>): void;
@@ -277,7 +280,7 @@ export class Db implements OperationParent {
   }
 
   /**
-   * Execute an aggregation framework pipeline against the database, needs MongoDB >= 3.6
+   * Execute an aggregation framework pipeline against the database, needs MongoDB \>= 3.6
    *
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command
@@ -313,20 +316,8 @@ export class Db implements OperationParent {
    * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you
    * can use it without a callback in the following way: `const collection = db.collection('mycollection');`
    *
-   * @param {string} name the collection name we wish to access.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
-   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.strict=false] Returns an error if the collection does not exist
-   * @param {object} [options.readConcern] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
-   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
-   * @param {Db~collectionResultCallback} [callback] The collection result callback
-   * @returns {Collection} return the new Collection instance if not in strict mode
+   * @param name - the collection name we wish to access.
+   * @returns return the new Collection instance if not in strict mode
    */
   collection(name: string): Collection;
   collection(name: string, options: CollectionOptions): Collection;
@@ -553,9 +544,9 @@ export class Db implements OperationParent {
   /**
    * Runs a command on the database as admin.
    *
-   * @param command The command to run
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param command - The command to run
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   executeDbAdminCommand(command: Document): Promise<void>;
   executeDbAdminCommand(command: Document, callback: Callback): void;
@@ -583,27 +574,27 @@ export class Db implements OperationParent {
   /**
    * Creates an index on the db and collection.
    *
-   * @param name Name of the collection to create the index on.
-   * @param fieldOrSpec Specify the field to index, or an index specification
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - Name of the collection to create the index on.
+   * @param indexSpec - Specify the field to index, or an index specification
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
-  createIndex(name: string, fieldOrSpec: string | Document, callback?: Callback<Document>): void;
+  createIndex(name: string, indexSpec: IndexSpecification): Promise<Document>;
+  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<Document>): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions
   ): Promise<Document>;
   createIndex(
     name: string,
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options?: CreateIndexesOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
@@ -612,7 +603,7 @@ export class Db implements OperationParent {
 
     return executeOperation(
       this.s.topology,
-      new CreateIndexOperation(this, name, fieldOrSpec, options),
+      new CreateIndexOperation(this, name, indexSpec, options),
       callback
     );
   }
@@ -620,10 +611,10 @@ export class Db implements OperationParent {
   /**
    * Add a user to the database
    *
-   * @param username The username for the new user
-   * @param password An optional password for the new user
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username for the new user
+   * @param password - An optional password for the new user
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   addUser(username: string): Promise<Document>;
   addUser(username: string, callback: Callback<Document>): void;
@@ -814,10 +805,10 @@ export class Db implements OperationParent {
    * Evaluate JavaScript on the server
    *
    * @deprecated Eval is deprecated on MongoDB 3.2 and forward
-   * @param code JavaScript to execute on server.
-   * @param parameters The parameters for the call.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param code - JavaScript to execute on server.
+   * @param parameters - The parameters for the call.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   eval(code: Code, parameters: Document | Document[]): Promise<Document>;
   eval(code: Code, parameters: Document | Document[], callback: Callback<Document>): void;
@@ -848,10 +839,10 @@ export class Db implements OperationParent {
    * Ensures that an index exists, if it does not it creates it
    *
    * @deprecated since version 2.0
-   * @param name The index name
-   * @param fieldOrSpec Defines the index.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - The index name
+   * @param fieldOrSpec - Defines the index.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   ensureIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
   ensureIndex(name: string, fieldOrSpec: string | Document, callback: Callback<Document>): void;
@@ -886,8 +877,8 @@ export class Db implements OperationParent {
    * Retrieve the current profiling information for MongoDB
    *
    * @deprecated Query the `system.profile` collection directly.
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   profilingInfo(): Promise<Document[]>;
   profilingInfo(callback: Callback<Document[]>): void;
@@ -938,18 +929,13 @@ Db.prototype.profilingInfo = deprecate(
 
 // Validate the database name
 function validateDatabaseName(databaseName: string) {
-  if (typeof databaseName !== 'string')
-    throw MongoError.create({ message: 'database name must be a string', driver: true });
-  if (databaseName.length === 0)
-    throw MongoError.create({ message: 'database name cannot be the empty string', driver: true });
+  if (typeof databaseName !== 'string') throw new MongoError('database name must be a string');
+  if (databaseName.length === 0) throw new MongoError('database name cannot be the empty string');
   if (databaseName === '$external') return;
 
   const invalidChars = [' ', '.', '$', '/', '\\'];
   for (let i = 0; i < invalidChars.length; i++) {
     if (databaseName.indexOf(invalidChars[i]) !== -1)
-      throw MongoError.create({
-        message: "database names cannot contain the character '" + invalidChars[i] + "'",
-        driver: true
-      });
+      throw new MongoError(`database names cannot contain the character '${invalidChars[i]}'`);
   }
 }

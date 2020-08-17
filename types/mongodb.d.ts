@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { Binary } from 'bson';
-import type * as BSON from 'bson';
 import BufferList = require('bl');
 import { Code } from 'bson';
 import type { ConnectionOptions as ConnectionOptions_2 } from 'tls';
+import * as crypto from 'crypto';
 import { DBRef } from 'bson';
 import { Decimal128 } from 'bson';
 import Denque = require('denque');
@@ -19,6 +19,7 @@ import { MaxKey } from 'bson';
 import { MinKey } from 'bson';
 import { ObjectId } from 'bson';
 import { Readable } from 'stream';
+import type { SerializeOptions } from 'bson';
 import type { Socket } from 'net';
 import type { TcpNetConnectOpts } from 'net';
 import { Timestamp } from 'bson';
@@ -36,12 +37,14 @@ declare interface AddUserOptions extends CommandOperationOptions {
 }
 
 /**
+ * @internal
  * The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  *
  * **ADMIN Cannot directly be instantiated**
  *
  * @example
+ * ```js
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
  * // Connection url
@@ -61,162 +64,156 @@ declare interface AddUserOptions extends CommandOperationOptions {
  *     client.close();
  *   });
  * });
+ * ```
  */
 export declare class Admin {
-  s: any;
-  /**
-   * Create a new Admin instance (INTERNAL TYPE, do not instantiate directly)
-   *
-   * @param {any} db
-   * @param {any} topology
-   * @returns {Admin} a collection instance.
-   */
-  constructor(db: any, topology: any);
-  /**
-   * The callback format for results
-   *
-   * @callback Admin@callback Admin~resultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {object} result The result object if the command was executed successfully.
-   */
+  s: AdminPrivate;
+  /** Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
+  constructor(db: Db);
   /**
    * Execute a command
    *
-   * @function
-   * @param {object} command The command hash
-   * @param {object} [options] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param command - The command to execute
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  command(command: object, options?: any, callback?: Callback<Document>): Promise<Document> | void;
+  command(command: Document): Promise<Document>;
+  command(command: Document, callback: Callback<Document>): void;
+  command(command: Document, options: RunCommandOptions): Promise<Document>;
+  command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   /**
-   * Retrieve the server information for the current
-   * instance of the db client
+   * Retrieve the server build information
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  buildInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void;
+  buildInfo(): Promise<Document>;
+  buildInfo(callback: Callback<Document>): void;
+  buildInfo(options: CommandOperationOptions): Promise<Document>;
+  buildInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   /**
-   * Retrieve the server information for the current
-   * instance of the db client
+   * Retrieve the server build information
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  serverInfo(options?: any, callback?: Callback<Document>): Promise<Document> | void;
+  serverInfo(): Promise<Document>;
+  serverInfo(callback: Callback<Document>): void;
+  serverInfo(options: CommandOperationOptions): Promise<Document>;
+  serverInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   /**
    * Retrieve this db's server status.
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  serverStatus(options?: any, callback?: Callback<Document>): Promise<Document> | void;
+  serverStatus(): Promise<Document>;
+  serverStatus(callback: Callback<Document>): void;
+  serverStatus(options: CommandOperationOptions): Promise<Document>;
+  serverStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   /**
    * Ping the MongoDB server and retrieve results
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  ping(options?: any, callback?: Callback<Document>): Promise<Document> | void;
+  ping(): Promise<Document>;
+  ping(callback: Callback<Document>): void;
+  ping(options: CommandOperationOptions): Promise<Document>;
+  ping(options: CommandOperationOptions, callback: Callback<Document>): void;
   /**
    * Add a user to the database
    *
-   * @param username The username for the new user
-   * @param password An optional password for the new user
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username for the new user
+   * @param password - An optional password for the new user
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  addUser(username: string): Promise<Document>;
+  addUser(username: string, callback: Callback<Document>): void;
+  addUser(username: string, password: string): Promise<Document>;
+  addUser(username: string, password: string, callback: Callback<Document>): void;
+  addUser(username: string, options: AddUserOptions): Promise<Document>;
+  addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
+  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
   addUser(
     username: string,
-    password?: string,
-    options?: AddUserOptions,
-    callback?: Callback<Document>
-  ): Promise<Document> | void;
+    password: string,
+    options: AddUserOptions,
+    callback: Callback<Document>
+  ): void;
   /**
    * Remove a user from a database
    *
-   * @param username The username to remove
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username to remove
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  removeUser(
-    username: string,
-    options?: RemoveUserOptions,
-    callback?: Callback<boolean>
-  ): Promise<boolean> | void;
+  removeUser(username: string): Promise<boolean>;
+  removeUser(username: string, callback: Callback<boolean>): void;
+  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
+  removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   /**
    * Validate an existing collection
    *
-   * @param {string} collectionName The name of the collection to validate.
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.background] Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+)
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param collectionName - The name of the collection to validate.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  validateCollection(collectionName: string): Promise<Document>;
+  validateCollection(collectionName: string, callback: Callback<Document>): void;
+  validateCollection(collectionName: string, options: ValidateCollectionOptions): Promise<Document>;
   validateCollection(
     collectionName: string,
-    options?: any,
-    callback?: Callback<Document>
-  ): Promise<Document> | void;
+    options: ValidateCollectionOptions,
+    callback: Callback<Document>
+  ): void;
   /**
    * List the available databases
    *
-   * @param {object} [options] Optional settings.
-   * @param {boolean} [options.nameOnly=false] Whether the command should return only db names, or names and size info.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  listDatabases(
-    options?: ListDatabasesOptions,
-    callback?: Callback<string[]>
-  ): Promise<string[]> | void;
+  listDatabases(): Promise<ListDatabasesResult>;
+  listDatabases(callback: Callback<ListDatabasesResult>): void;
+  listDatabases(options: ListDatabasesOptions): Promise<ListDatabasesResult>;
+  listDatabases(options: ListDatabasesOptions, callback: Callback<ListDatabasesResult>): void;
   /**
    * Get ReplicaSet status
    *
-   * @param {object} [options] optional parameters for this operation
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {Admin~resultCallback} [callback] The command result callback.
-   * @returns {Promise<void> | void} returns Promise if no callback passed
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  replSetGetStatus(
-    options?: CommandOperationOptions,
-    callback?: Callback<Document>
-  ): Promise<Document> | void;
+  replSetGetStatus(): Promise<Document>;
+  replSetGetStatus(callback: Callback<Document>): void;
+  replSetGetStatus(options: CommandOperationOptions): Promise<Document>;
+  replSetGetStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
 }
 
-declare class AggregateOperation extends CommandOperation<AggregateOptions> {
+declare interface AdminPrivate {
+  db: Db;
+}
+
+declare class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
-  constructor(parent: Parent, pipeline: Document[], options?: AggregateOptions);
+  constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions);
   get canRetryRead(): boolean;
   addToPipeline(stage: Document): void;
-  execute(server: Server, callback: Callback<Document>): void;
+  execute(server: Server, callback: Callback<T>): void;
 }
 
 declare interface AggregateOptions extends CommandOperationOptions {
-  /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >). */
+  /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 \>). */
   allowDiskUse?: boolean;
   /** The number of documents to return per batch. See [aggregation documentation](https://docs.mongodb.com/manual/reference/command/aggregate). */
   batchSize?: number;
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
-  /** Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
-  cursor?: Cursor;
-  /** Explain returns the aggregation execution plan (requires mongodb 2.6 >) */
+  /** Return the query as cursor, on 2.6 \> it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
+  cursor?: Document;
+  /** Explain returns the aggregation execution plan (requires mongodb 2.6 \>) */
   explain?: boolean;
   /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
   maxTimeMS?: number;
@@ -231,20 +228,17 @@ declare interface AggregateOptions extends CommandOperationOptions {
 }
 
 /**
- * Creates a new Aggregation Cursor instance (INTERNAL TYPE, do not instantiate directly)
- *
- * @class AggregationCursor
- * @extends external:Readable
- * @fires AggregationCursor#data
- * @fires AggregationCursor#end
- * @fires AggregationCursor#close
- * @fires AggregationCursor#readable
- * @returns {AggregationCursor} an AggregationCursor instance.
+ * @public
+ * The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
+ * or higher stream
  */
 export declare class AggregationCursor extends Cursor<
   AggregateOperation,
   AggregationCursorOptions
 > {
+  /** @internal */
   constructor(
     topology: Topology,
     operation: AggregateOperation,
@@ -278,38 +272,6 @@ export declare class AggregationCursor extends Cursor<
   geoNear: ($geoNear: Document) => this;
 }
 
-/**
- * @file The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
- * allowing for iteration over the results returned from the underlying query. It supports
- * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
- * or higher stream
- *
- * **AGGREGATIONCURSOR Cannot directly be instantiated**
- * @example
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('createIndexExample1');
- *   // Insert a bunch of documents
- *   col.insert([{a:1, b:1}
- *     , {a:2, b:2}, {a:3, b:3}
- *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     expect(err).to.not.exist;
- *     // Show that duplicate records got dropped
- *     col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
- *       expect(err).to.not.exist;
- *       test.equal(4, items.length);
- *       client.close();
- *     });
- *   });
- * });
- */
 declare interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
 declare type AnyError = MongoError | Error;
@@ -401,7 +363,7 @@ export { Binary };
 export declare const BSONRegExp: any;
 
 /** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-declare interface BSONSerializeOptions extends BSON.SerializeOptions {
+declare interface BSONSerializeOptions extends SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: {
     [key: string]: boolean;
@@ -416,6 +378,7 @@ declare interface BSONSerializeOptions extends BSON.SerializeOptions {
   serializeFunctions?: boolean;
   /** Specify if the BSON serializer should ignore undefined fields */
   ignoreUndefined?: boolean;
+  raw?: boolean;
 }
 
 export declare const BSONSymbol: any;
@@ -450,7 +413,7 @@ declare class BulkWriteResult {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} bulkResult
+   * @param bulkResult
    */
   constructor(bulkResult: any);
   /**
@@ -504,7 +467,7 @@ declare class BulkWriteResult {
   /**
    * Returns the upserted id at the given index
    *
-   * @param {number} index the number of the upserted id to return, returns undefined if no result for passed in index
+   * @param index the number of the upserted id to return, returns undefined if no result for passed in index
    * @returns {object}
    */
   getUpsertedIdAt(index: number): object;
@@ -529,7 +492,7 @@ declare class BulkWriteResult {
   /**
    * Returns a specific write error object
    *
-   * @param {number} index of the write error to return, returns null if there is no result for passed in index
+   * @param index of the write error to return, returns null if there is no result for passed in index
    * @returns {WriteError|undefined}
    */
   getWriteErrorAt(index: number): WriteError | undefined;
@@ -567,22 +530,11 @@ declare class BulkWriteResult {
 
 declare type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
-declare type Callback2<T0 = any, T1 = any> = (error?: AnyError, result0?: T0, result1?: T1) => void;
-
-/**
- * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
- *
- * @fires ChangeStream#close
- * @fires ChangeStream#change
- * @fires ChangeStream#end
- * @fires ChangeStream#error
- * @fires ChangeStream#resumeTokenChanged
- * @returns {ChangeStream} a ChangeStream instance.
- */
+/** Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}. */
 declare class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
-  parent: Parent;
+  parent: OperationParent;
   namespace: MongoDBNamespace;
   type: symbol;
   topology: Topology;
@@ -591,58 +543,69 @@ declare class ChangeStream extends EventEmitter {
   pipeDestinations: Writable[];
   streamOptions?: StreamOptions;
   [kResumeQueue]: Denque;
+  /** @event */
+  static readonly CLOSE: 'close';
+  /**
+   * Fired for each new matching change in the specified namespace. Attaching a `change`
+   * event listener to a Change Stream will switch the stream into flowing mode. Data will
+   * then be passed as soon as it is available.
+   * @event
+   */
+  static readonly CHANGE: 'change';
+  /** @event */
+  static readonly END: 'end';
+  /** @event */
+  static readonly ERROR: 'error';
+  /**
+   * Emitted each time the change stream stores a new resume token.
+   * @event
+   */
+  static readonly RESUME_TOKEN_CHANGED: 'resumeTokenChanged';
   /**
    * @param parent - The parent object that created this change stream
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
-  constructor(parent: Parent, pipeline?: Document[], options?: ChangeStreamOptions);
-  /**
-   * @property {ResumeToken} resumeToken
-   * The cached resume token that will be used to resume
-   * after the most recently returned change.
-   */
+  constructor(parent: OperationParent, pipeline?: Document[], options?: ChangeStreamOptions);
+  /** The cached resume token that is used to resume after the most recently returned change. */
   get resumeToken(): ResumeToken;
-  /**
-   * Check if there is any document still available in the Change Stream
-   *
-   * @function ChangeStream.prototype.hasNext
-   * @param {ChangeStream~resultCallback} [callback] The result callback.
-   * @throws {MongoError}
-   * @returns {Promise<void>|void} returns Promise if no callback passed
-   */
+  /** Check if there is any document still available in the Change Stream */
   hasNext(callback?: Callback): Promise<void> | void;
-  /**
-   * Get the next available document from the Change Stream, returns null if no more documents are available.
-   *
-   * @function ChangeStream.prototype.next
-   * @param {ChangeStream~resultCallback} [callback] The result callback.
-   * @throws {MongoError}
-   * @returns {Promise<void>|void} returns Promise if no callback passed
-   */
+  /** Get the next available document from the Change Stream. */
   next(callback?: Callback): Promise<void> | void;
   /** Is the cursor closed */
   isClosed(): boolean;
   /** Close the Change Stream */
   close(callback?: Callback): Promise<void> | void;
   /**
-   * This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
+   * This method pulls all the data out of a readable stream, and writes it to the supplied destination,
+   * automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
    *
-   * @function
-   * @param {Writable} destination The destination for writing data
-   * @param {object} [options] {@link https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options|Pipe options}
+   * @param destination - The destination for writing data
+   * @param options - {@link https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options| NodeJS Pipe options}
+   * @throws MongoError if this.cursor is undefined
    */
   pipe(destination: Writable, options?: PipeOptions): Writable;
   /**
    * This method will remove the hooks set up for a previous pipe() call.
    *
-   * @param {Writable} [destination] The destination for writing data
+   * @param destination - The destination for writing data
+   * @throws MongoError if this.cursor is undefined
    */
   unpipe(destination?: Writable): ChangeStreamCursor;
-  /** Return a modified Readable stream including a possible transform method. */
+  /**
+   * Return a modified Readable stream including a possible transform method.
+   * @throws MongoError if this.cursor is undefined
+   */
   stream(options?: StreamOptions): ChangeStreamCursor;
-  /** This method will cause a stream in flowing mode to stop emitting data events. Any data that becomes available will remain in the internal buffer. */
+  /**
+   * This method will cause a stream in flowing mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
+   * @throws MongoError if this.cursor is undefined
+   */
   pause(): ChangeStreamCursor;
-  /** This method will cause the readable stream to resume emitting data events. */
+  /**
+   * This method will cause the readable stream to resume emitting data events.
+   * @throws MongoError if this.cursor is undefined
+   */
   resume(): ChangeStreamCursor;
 }
 
@@ -661,7 +624,7 @@ declare class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStream
   get resumeToken(): unknown;
   get resumeOptions(): Document;
   cacheResumeToken(resumeToken: ResumeToken): void;
-  _processBatch(batchName: string, response: Document): void;
+  _processBatch(batchName: string, response?: Document): void;
   _initializeCursor(callback: Callback): void;
   _getMore(callback: Callback): void;
 }
@@ -754,10 +717,12 @@ declare class ClientSession extends EventEmitter {
   /**
    * Ends this session on the server
    *
-   * @param {object} [options] Optional settings. Currently reserved for future use
-   * @param {Function} [callback] Optional callback for completion of this operation
+   * @param options - Optional settings. Currently reserved for future use
+   * @param callback - Optional callback for completion of this operation
    */
-  endSession(options?: object, callback?: Callback<void>): void;
+  endSession(): void;
+  endSession(callback: Callback<void>): void;
+  endSession(options: Record<string, unknown>, callback: Callback<void>): void;
   /**
    * Advances the operationTime for a ClientSession.
    *
@@ -846,27 +811,10 @@ declare interface CollationOptions {
   backwards: boolean;
 }
 
+/** @public */
 export declare interface Collection {
-  /** @deprecated */
-  find(query: any, options: any): Cursor;
-  insert(docs: any, options: any, callback: any): void;
-  update(selector: any, update: any, options: any, callback: any): void;
-  remove(selector: any, options: any, callback: any): void;
-  findOne(query: any, options: any, callback: any): void;
+  /** @deprecated Use {@link Collection.dropIndexes} instead */
   dropAllIndexes(): void;
-  ensureIndex(fieldOrSpec: any, options: any, callback: any): void;
-  count(query: any, options: any, callback: any): void;
-  findAndRemove(query: any, sort: any, options: any, callback: any): void;
-  group(
-    keys: any,
-    condition: any,
-    initial: any,
-    reduce: any,
-    finalize: any,
-    command: any,
-    options: any,
-    callback: any
-  ): void;
   removeMany(
     filter: Document,
     options?: DeleteOptions,
@@ -878,16 +826,17 @@ export declare interface Collection {
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void;
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
-  _findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
 
 /**
+ * @public
  * The **Collection** class is an internal class that embodies a MongoDB collection
  * allowing for insert/update/remove/find and other command operation on that MongoDB collection.
  *
  * **COLLECTION Cannot directly be instantiated**
  *
  * @example
+ * ```js
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
  * // Connection url
@@ -905,73 +854,48 @@ export declare interface Collection {
  *     client.close();
  *   });
  * });
+ * ```
  */
-export declare class Collection {
-  s: {
-    db: Db;
-    [key: string]: any;
-  };
-  /** Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
-  constructor(db: any, topology: any, dbName: any, name: any, pkFactory: any, options: any);
+export declare class Collection implements OperationParent {
+  s: CollectionPrivate;
+  /** @internal Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
+  constructor(db: Db, name: string, options?: CollectionOptions);
   /**
    * The name of the database this collection belongs to
-   *
-   * @member {string} dbName
-   * @memberof Collection#
    * @readonly
    */
   get dbName(): string;
   /**
    * The name of this collection
-   *
-   * @member {string} collectionName
-   * @memberof Collection#
    * @readonly
    */
   get collectionName(): string;
   /**
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
-   *
-   * @member {string} namespace
-   * @memberof Collection#
    * @readonly
    */
-  get namespace(): any;
+  get namespace(): string;
   /**
    * The current readConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {ReadConcern} [readConcern]
-   * @memberof Collection#
    * @readonly
    */
-  get readConcern(): any;
+  get readConcern(): ReadConcern | undefined;
   /**
    * The current readPreference of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {ReadPreference} [readPreference]
-   * @memberof Collection#
    * @readonly
    */
-  get readPreference(): any;
+  get readPreference(): ReadPreference | undefined;
   /**
    * The current writeConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {WriteConcern} [writeConcern]
-   * @memberof Collection#
    * @readonly
    */
-  get writeConcern(): any;
-  /**
-   * The current index hint for the collection
-   *
-   * @member {object} [hint]
-   * @memberof Collection#
-   */
-  get hint(): any;
-  set hint(v: any);
+  get writeConcern(): WriteConcern | undefined;
+  /** The current index hint for the collection */
+  get hint(): Hint | undefined;
+  set hint(v: Hint | undefined);
   /**
    * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -1007,6 +931,7 @@ export declare class Collection {
    *
    * Legal operation types are
    *
+   * ```js
    *  { insertOne: { document: { a: 1 } } }
    *
    *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -1020,6 +945,7 @@ export declare class Collection {
    *  { deleteMany: { filter: {c:1} } }
    *
    *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
+   *```
    *
    * If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -1028,6 +954,7 @@ export declare class Collection {
    * @param operations - Bulk operations to perform
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
+   * @throws MongoError if operations is not an array
    */
   bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
   bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
@@ -1136,6 +1063,28 @@ export declare class Collection {
   drop(options: DropCollectionOptions): Promise<boolean>;
   drop(options: DropCollectionOptions, callback: Callback<boolean>): void;
   /**
+   * Fetches the first document that matches the query
+   *
+   * @param query - Query for find Operation
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  findOne(): Promise<Document>;
+  findOne(callback: Callback<Document>): void;
+  findOne(query: Document): Promise<Document>;
+  findOne(query: Document, callback?: Callback<Document>): void;
+  findOne(query: Document, options: FindOptions): Promise<Document>;
+  findOne(query: Document, options: FindOptions, callback: Callback<Document>): void;
+  /**
+   * Creates a cursor for a query that can be used to iterate over results from MongoDB
+   *
+   * @param query - The cursor query object.
+   * @param options - Optional settings for the command
+   */
+  find(): Cursor;
+  find(query: Document): Cursor;
+  find(query: Document, options: FindOptions): Cursor;
+  /**
    * Returns the options of the collection.
    *
    * @param options - Optional settings for the command
@@ -1158,11 +1107,12 @@ export declare class Collection {
   /**
    * Creates an index on the db and collection collection.
    *
-   * @param fieldOrSpec - The field name or index specification to create an index for
+   * @param indexSpec - The field name or index specification to create an index for
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
+   * ```js
    * const collection = client.db('foo').collection('bar');
    *
    * await collection.createIndex({ a: 1, b: -1 });
@@ -1181,12 +1131,13 @@ export declare class Collection {
    *
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
+   * ```
    */
-  createIndex(fieldOrSpec: string | Document): Promise<Document>;
-  createIndex(fieldOrSpec: string | Document, callback: Callback<Document>): void;
-  createIndex(fieldOrSpec: string | Document, options: CreateIndexesOptions): Promise<Document>;
+  createIndex(indexSpec: IndexSpecification): Promise<Document>;
+  createIndex(indexSpec: IndexSpecification, callback: Callback<Document>): void;
+  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<Document>;
   createIndex(
-    fieldOrSpec: string | Document,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
@@ -1195,14 +1146,15 @@ export declare class Collection {
    * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
    * error.
    *
-   * **Note**: Unlike {@link Collection#createIndex createIndex}, this function takes in raw index specifications.
-   * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/ here}.
+   * **Note**: Unlike {@link (Collection:class).createIndex| createIndex}, this function takes in raw index specifications.
+   * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
+   * ```js
    * const collection = client.db('foo').collection('bar');
    * await collection.createIndexes([
    *   // Simple index on field fizz
@@ -1219,11 +1171,16 @@ export declare class Collection {
    *     name: 'tanagra'
    *   }
    * ]);
+   * ```
    */
-  createIndexes(indexSpecs: any): Promise<Document>;
-  createIndexes(indexSpecs: any, callback: Callback<Document>): void;
-  createIndexes(indexSpecs: any, options: CreateIndexesOptions): Promise<Document>;
-  createIndexes(indexSpecs: any, options: CreateIndexesOptions, callback: Callback<Document>): void;
+  createIndexes(indexSpecs: IndexDescription[]): Promise<Document>;
+  createIndexes(indexSpecs: IndexDescription[], callback: Callback<Document>): void;
+  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<Document>;
+  createIndexes(
+    indexSpecs: IndexDescription[],
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
   /**
    * Drops an index from this collection.
    *
@@ -1288,8 +1245,8 @@ export declare class Collection {
   estimatedDocumentCount(options: EstimatedDocumentCountOptions, callback: Callback<number>): void;
   /**
    * Gets the number of documents matching the filter.
-   * For a fast count of the total documents in a collection see {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
-   * **Note**: When migrating from {@link Collection#count count} to {@link Collection#countDocuments countDocuments}
+   * For a fast count of the total documents in a collection see {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
+   * **Note**: When migrating from {@link Collection.count| count} to {@link Collection.countDocuments| countDocuments}
    * the following query operators must be replaced:
    *
    * | Operator | Replacement |
@@ -1327,9 +1284,9 @@ export declare class Collection {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   distinct(key: string): Promise<Document[]>;
-  distinct(key: string, callback?: Callback<Document[]>): void;
+  distinct(key: string, callback: Callback<Document[]>): void;
   distinct(key: string, query: Document): Promise<Document[]>;
-  distinct(key: string, query: Document): void;
+  distinct(key: string, query: Document, callback: Callback<Document[]>): void;
   distinct(key: string, query: Document, options: DistinctOptions): Promise<Document[]>;
   distinct(
     key: string,
@@ -1415,12 +1372,12 @@ export declare class Collection {
     callback: Callback<Document>
   ): void;
   /**
-   * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
+   * Execute an aggregation framework pipeline against the collection, needs MongoDB \>= 2.2
    *
    * @param pipeline - An array of aggregation pipelines to execute
    * @param options - Optional settings for the command
    */
-  aggregate(pipeline: Document[]): AggregationCursor;
+  aggregate(pipeline?: Document[], options?: AggregateOptions): AggregationCursor;
   /**
    * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
    *
@@ -1458,39 +1415,191 @@ export declare class Collection {
     options: MapReduceOptions,
     callback: Callback<Document | Document[]>
   ): void;
-  /**
-   * Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
-   *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {UnorderedBulkOperation}
-   */
+  /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: any): any;
-  /**
-   * Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types.
-   *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @returns {OrderedBulkOperation}
-   */
+  /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: any): any;
+  /** Get the db scoped logger */
+  getLogger(): Logger;
+  get logger(): Logger;
   /**
-   * Return the db logger
+   * @deprecated Use insertOne, insertMany or bulkWrite instead.
    *
-   * @function
-   * @returns {Logger} return the db logger
+   * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
+   * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+   * can be overridden by setting the **forceServerObjectId** flag.
+   *
+   * @deprecated Use insertOne, insertMany or bulkWrite
+   * @param docs - The documents to insert
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  getLogger(): any;
+  insert(
+    docs: Document[],
+    options: InsertOptions_2,
+    callback: Callback<InsertManyResult>
+  ): Promise<InsertManyResult> | void;
+  /**
+   * Updates documents.
+   *
+   * @deprecated use updateOne, updateMany or bulkWrite
+   * @param selector - The selector for the update operation.
+   * @param update - The update operations to be applied to the documents
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  update(
+    selector: Document,
+    update: Document,
+    options: UpdateOptions_2,
+    callback: Callback<Document>
+  ): Promise<UpdateResult> | void;
+  /**
+   * Remove documents.
+   *
+   * @deprecated use deleteOne, deleteMany or bulkWrite
+   * @param selector - The selector for the update operation.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  remove(
+    selector: Document,
+    options: DeleteOptions,
+    callback: Callback
+  ): Promise<DeleteResult> | void;
+  /**
+   * Ensures that an index exists, if it does not it creates it
+   *
+   * @deprecated use createIndexes instead
+   * @param fieldOrSpec - Defines the index.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  ensureIndex(
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): Promise<Document> | void;
+  /**
+   * An estimated count of matching documents in the db to a query.
+   *
+   * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
+   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection.countDocuments| countDocuments}.
+   * To obtain an estimated count of all documents in the collection, use {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
+   *
+   * @deprecated use {@link Collection.countDocuments| countDocuments} or {@link Collection.estimatedDocumentCount| estimatedDocumentCount} instead
+   *
+   * @param query - The query for the count.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  count(): Promise<number>;
+  count(callback: Callback<number>): void;
+  count(query: Document): Promise<number>;
+  count(query: Document, callback: Callback<number>): void;
+  count(query: Document, options: CountOptions): Promise<number>;
+  count(query: Document, options: CountOptions, callback: Callback<number>): Promise<number> | void;
+  /**
+   * Find and remove a document.
+   *
+   * @deprecated use findOneAndDelete instead
+   *
+   * @param query - Query object to locate the object to modify.
+   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  findAndRemove(
+    query: Document,
+    sort: Document,
+    options: FindAndModifyOptions,
+    callback: Callback
+  ): Promise<Document> | void;
+  /**
+   * Run a group command across a collection
+   *
+   * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
+   * @param keys - An object, array or function expressing the keys to group by.
+   * @param condition - An optional condition that must be true for a row to be considered.
+   * @param initial - Initial value of the aggregation counter object.
+   * @param reduce - The reduce function aggregates (reduces) the objects iterated
+   * @param finalize - An optional function to be run on each item in the result set just before the item is returned.
+   * @param command - Specify if you wish to run using the internal group command or using eval, default is true.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  group(
+    keys: any,
+    condition: any,
+    initial: any,
+    reduce: any,
+    finalize: any,
+    command: any,
+    options: any,
+    callback: Callback
+  ): void;
+  /**
+   * Find and modify a document.
+   *
+   * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
+   *
+   * @param query - Query object to locate the object to modify.
+   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+   * @param doc - The fields/vals to be updated.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  _findAndModify(query: Document, sort: Document, doc: Document): Promise<Document>;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    callback: Callback<Document>
+  ): void;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    options: FindAndModifyOptions
+  ): Promise<Document>;
+  _findAndModify(
+    query: Document,
+    sort: Document,
+    doc: Document,
+    options: FindAndModifyOptions,
+    callback: Callback<Document>
+  ): Promise<Document> | void;
+}
+
+declare interface CollectionOptions
+  extends BSONSerializeOptions,
+    WriteConcernOptions,
+    LoggerOptions {
+  slaveOk?: boolean;
+  /** Returns an error if the collection does not exist */
+  strict?: boolean;
+  /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcern;
+  /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
+  readPreference?: ReadPreferenceLike;
+}
+
+declare interface CollectionPrivate {
+  pkFactory: PkFactory | typeof ObjectId;
+  db: Db;
+  topology: Topology;
+  options: any;
+  namespace: MongoDBNamespace;
+  readPreference?: ReadPreference;
+  slaveOk?: boolean;
+  serializeFunctions?: boolean;
+  raw?: boolean;
+  promoteLongs?: boolean;
+  promoteValues?: boolean;
+  promoteBuffers?: boolean;
+  collectionHint?: Hint;
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
 }
 
 declare interface CollStatsOptions extends CommandOperationOptions {
@@ -1499,78 +1608,41 @@ declare interface CollStatsOptions extends CommandOperationOptions {
 }
 
 /**
- * Creates a new Command Cursor instance (INTERNAL TYPE, do not instantiate directly)
- *
- * @class CommandCursor
- * @extends external:Readable
- * @fires CommandCursor#data
- * @fires CommandCursor#end
- * @fires CommandCursor#close
- * @fires CommandCursor#readable
- * @returns {CommandCursor} an CommandCursor instance.
+ * @public
+ * The **CommandCursor** class is an internal class that embodies a
+ * generalized cursor based on a MongoDB command allowing for iteration over the
+ * results returned. It supports one by one document iteration, conversion to an
+ * array or can be iterated as a Node 0.10.X or higher stream
  */
 export declare class CommandCursor extends Cursor<CommandOperation, CommandCursorOptions> {
+  /** @internal */
   constructor(topology: Topology, operation: CommandOperation, options?: CommandCursorOptions);
   /**
    * Set the ReadPreference for the cursor.
    *
-   * @param {(string|ReadPreference)} readPreference The new read preference for the cursor.
-   * @throws {MongoError}
-   * @returns {Cursor}
+   * @param readPreference - The new read preference for the cursor.
    */
   setReadPreference(readPreference: ReadPreferenceLike): this;
   /**
    * Set the batch size for the cursor.
    *
-   * @param {number} value The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
-   * @throws {MongoError}
-   * @returns {CommandCursor}
+   * @param value - The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
+   * @throws MongoError if cursor is closed/dead or value is not a number
    */
   batchSize(value: number): this;
   /**
    * Add a maxTimeMS stage to the aggregation pipeline
    *
-   * @param {number} value The state maxTimeMS value.
-   * @returns {CommandCursor}
+   * @param value - The state maxTimeMS value.
    */
   maxTimeMS(value: number): this;
 }
 
-/**
- * @file The **CommandCursor** class is an internal class that embodies a
- * generalized cursor based on a MongoDB command allowing for iteration over the
- * results returned. It supports one by one document iteration, conversion to an
- * array or can be iterated as a Node 0.10.X or higher stream
- *
- * **CommandCursor Cannot directly be instantiated**
- * @example
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('listCollectionsExample1');
- *   // Insert a bunch of documents
- *   col.insert([{a:1, b:1}
- *     , {a:2, b:2}, {a:3, b:3}
- *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     expect(err).to.not.exist;
- *     // List the database collections available
- *     db.listCollections().toArray(function(err, items) {
- *       expect(err).to.not.exist;
- *       client.close();
- *     });
- *   });
- * });
- */
 declare type CommandCursorOptions = CursorOptions;
 
-declare class CommandOperation<
-  T extends CommandOperationOptions = CommandOperationOptions
+declare abstract class CommandOperation<
+  T extends CommandOperationOptions = CommandOperationOptions,
+  TResult = Document
 > extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
@@ -1579,25 +1651,26 @@ declare class CommandOperation<
   explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
-  constructor(parent: Parent, options?: T);
+  constructor(parent: OperationParent, options?: T);
+  abstract execute(server: Server, callback: Callback<TResult>): void;
   executeCommand(server: Server, cmd: Document, callback: Callback): void;
 }
 
-declare interface CommandOperationOptions extends OperationOptions {
+declare interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
   /** Specify ClientSession for this command */
   session?: ClientSession;
-  /** WriteConcern for this command */
-  writeConcern?: WriteConcern;
   /** Collation */
   collation?: CollationOptions;
   maxTimeMS?: number;
   /** A user-provided comment to attach to this command */
   comment?: string | Document;
+  /** Should retry failed writes */
+  retryWrites?: boolean;
   dbName?: string;
   authdb?: string;
 }
@@ -1605,11 +1678,13 @@ declare interface CommandOperationOptions extends OperationOptions {
 declare interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
+  /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;
   socketTimeout?: number;
+  /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;
@@ -1621,9 +1696,8 @@ declare interface CommandOptions extends BSONSerializeOptions {
 /**
  * Creates a new CommandResult instance
  *
- * @param {object} result CommandResult object
- * @param {Connection} connection A connection instance associated with this result
- * @returns {CommandResult} A cursor instance
+ * @param result - CommandResult object
+ * @param connection - A connection instance associated with this result
  */
 declare class CommandResult {
   ok?: number;
@@ -1631,19 +1705,9 @@ declare class CommandResult {
   connection: Connection;
   message: Document;
   constructor(result: Document, connection: Connection, message: Document);
-  /**
-   * Convert CommandResult to JSON
-   *
-   * @function
-   * @returns {object}
-   */
+  /** Convert CommandResult to JSON */
   toJSON(): Document;
-  /**
-   * Convert CommandResult to String representation
-   *
-   * @function
-   * @returns {string}
-   */
+  /** Convert CommandResult to String representation */
   toString(): string;
 }
 
@@ -1672,6 +1736,14 @@ declare class Connection extends EventEmitter {
   [kStream]: Stream;
   [kIsMaster]: Document;
   [kClusterTime]: Document;
+  /** @event */
+  static readonly COMMAND_STARTED: 'commandStarted';
+  /** @event */
+  static readonly COMMAND_SUCCEEDED: 'commandSucceeded';
+  /** @event */
+  static readonly COMMAND_FAILED: 'commandFailed';
+  /** @event */
+  static readonly CLUSTER_TIME_RECEIVED: 'clusterTimeReceived';
   constructor(stream: Stream, options: ConnectionOptions);
   get description(): StreamDescription;
   get ismaster(): Document;
@@ -1683,8 +1755,8 @@ declare class Connection extends EventEmitter {
   markAvailable(): void;
   destroy(): void;
   destroy(callback?: Callback): void;
-  destroy(options?: DestroyOptions): void;
-  destroy(options?: DestroyOptions, callback?: Callback): void;
+  destroy(options?: DestroyOptions_2): void;
+  destroy(options?: DestroyOptions_2, callback?: Callback): void;
   command(ns: string, cmd: Document, callback: Callback): void;
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   query(
@@ -1711,7 +1783,8 @@ declare interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<ConnectionOptions_2>,
-    StreamDescriptionOptions {
+    StreamDescriptionOptions,
+    LoggerOptions {
   id: number;
   monitorCommands: boolean;
   generation: number;
@@ -1734,64 +1807,95 @@ declare interface ConnectionPool {
   isConnected(): boolean;
   write(
     message: any,
-    commandOptions: any,
+    commandOptions: CommandOptions,
     callback: (err: MongoError, ...args: CommandResult[]) => void
   ): void;
 }
 
-/**
- * A pool of connections which dynamically resizes, and emit events related to pool activity
- *
- * @property {number} generation An integer representing the SDAM generation of the pool
- * @property {number} totalConnectionCount An integer expressing how many total connections (active + in use) the pool currently has
- * @property {number} availableConnectionCount An integer expressing how many connections are currently available in the pool.
- * @property {string} address The address of the endpoint the pool is connected to
- *
- * @fires ConnectionPool#connectionPoolCreated
- * @fires ConnectionPool#connectionPoolClosed
- * @fires ConnectionPool#connectionCreated
- * @fires ConnectionPool#connectionReady
- * @fires ConnectionPool#connectionClosed
- * @fires ConnectionPool#connectionCheckOutStarted
- * @fires ConnectionPool#connectionCheckOutFailed
- * @fires ConnectionPool#connectionCheckedOut
- * @fires ConnectionPool#connectionCheckedIn
- * @fires ConnectionPool#connectionPoolCleared
- */
+/** A pool of connections which dynamically resizes, and emit events related to pool activity */
 declare class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   [kLogger]: Logger;
   [kConnections]: Denque<Connection>;
+  /** An integer expressing how many total connections are permitted */
   [kPermits]: number;
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
+  /** An integer representing the SDAM generation of the pool */
   [kGeneration_2]: number;
   [kConnectionCounter]: Generator<number>;
   [kCancellationToken]: EventEmitter;
   [kWaitQueue]: Denque<WaitQueueMember>;
   /**
-   * Create a new Connection Pool
-   *
-   * @param {ConnectionPoolOptions} options
+   * Emitted when the connection pool is created.
+   * @event
    */
+  static readonly CONNECTION_POOL_CREATED: 'connectionPoolCreated';
+  /**
+   * Emitted once when the connection pool is closed
+   * @event
+   */
+  static readonly CONNECTION_POOL_CLOSED: 'connectionPoolClosed';
+  /**
+   * Emitted when a connection is created.
+   * @event
+   */
+  static readonly CONNECTION_CREATED: 'connectionCreated';
+  /**
+   * Emitted when a connection becomes established, and is ready to use
+   * @event
+   */
+  static readonly CONNECTION_READY: 'connectionReady';
+  /**
+   * Emitted when a connection is closed
+   * @event
+   */
+  static readonly CONNECTION_CLOSED: 'connectionClosed';
+  /**
+   * Emitted when an attempt to check out a connection begins
+   * @event
+   */
+  static readonly CONNECTION_CHECK_OUT_STARTED: 'connectionCheckOutStarted';
+  /**
+   * Emitted when an attempt to check out a connection fails
+   * @event
+   */
+  static readonly CONNECTION_CHECK_OUT_FAILED: 'connectionCheckOutFailed';
+  /**
+   * Emitted each time a connection is successfully checked out of the connection pool
+   * @event
+   */
+  static readonly CONNECTION_CHECKED_OUT: 'connectionCheckedOut';
+  /**
+   * Emitted each time a connection is successfully checked into the connection pool
+   * @event
+   */
+  static readonly CONNECTION_CHECKED_IN: 'connectionCheckedIn';
+  /**
+   * Emitted each time the connection pool is cleared and it's generation incremented
+   * @event
+   */
+  static readonly CONNECTION_POOL_CLEARED: 'connectionPoolCleared';
   constructor(options: Partial<ConnectionPoolOptions>);
+  /** The address of the endpoint the pool is connected to */
   get address(): string;
+  /** An integer representing the SDAM generation of the pool */
   get generation(): number;
+  /** An integer expressing how many total connections (active + in use) the pool currently has */
   get totalConnectionCount(): number;
+  /** An integer expressing how many connections are currently available in the pool. */
   get availableConnectionCount(): number;
   get waitQueueSize(): number;
   /**
    * Check a connection out of this pool. The connection will continue to be tracked, but no reference to it
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
-   *
-   * @param {ConnectionPool~checkOutCallback} callback
    */
   checkOut(callback: Callback<Connection>): void;
   /**
    * Check a connection into the pool.
    *
-   * @param {Connection} connection The connection to check in
+   * @param connection - The connection to check in
    */
   checkIn(connection: Connection): void;
   /**
@@ -1801,13 +1905,7 @@ declare class ConnectionPool extends EventEmitter {
    * previous generation will eventually be pruned during subsequent checkouts.
    */
   clear(): void;
-  /**
-   * Close the pool
-   *
-   * @param {object} [options] Optional settings
-   * @param {boolean} [options.force] Force close connections
-   * @param {Function} callback
-   */
+  /** Close the pool */
   close(callback: Callback<void>): void;
   close(options: CloseOptions, callback: Callback<void>): void;
   /**
@@ -1816,11 +1914,10 @@ declare class ConnectionPool extends EventEmitter {
    *
    * NOTE: please note the required signature of `fn`
    *
-   * @param {ConnectionPool~withConnectionCallback} fn A function which operates on a managed connection
-   * @param {Function} callback The original callback
-   * @returns {void}
+   * @param fn - A function which operates on a managed connection
+   * @param callback - The original callback
    */
-  withConnection(fn: WithConnectionCallback, callback: Callback<Connection>): void;
+  withConnection(fn: WithConnectionCallback, callback?: Callback<Connection>): void;
 }
 
 declare interface ConnectionPoolOptions extends ConnectionOptions {
@@ -1839,10 +1936,9 @@ declare interface ConnectOptions {
 }
 
 /**
+ * @internal
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
- *
- * **CURSORS Cannot directly be instantiated**
  */
 declare class CoreCursor<
   O extends OperationBase = OperationBase,
@@ -1859,13 +1955,29 @@ declare class CoreCursor<
   logger: Logger;
   query?: Document;
   s: CoreCursorPrivate;
+  /** @event */
+  static readonly CLOSE: 'close';
+  /** @event */
+  static readonly DATA: 'data';
+  /** @event */
+  static readonly END: 'end';
+  /** @event */
+  static readonly FINISH: 'finish';
+  /** @event */
+  static readonly ERROR: 'error';
+  /** @event */
+  static readonly PAUSE: 'pause';
+  /** @event */
+  static readonly READABLE: 'readable';
+  /** @event */
+  static readonly RESUME: 'resume';
   /**
    * Create a new core `Cursor` instance.
    * **NOTE** Not to be instantiated directly
    *
-   * @param topology The server topology instance.
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd The selector (can be a command or a cursorId)
+   * @param topology - The server topology instance.
+   * @param operation - The cursor-generating operation to run
+   * @param options - Optional settings for the cursor
    */
   constructor(topology: Topology, operation: O, options?: T);
   set cursorBatchSize(value: number);
@@ -1874,7 +1986,7 @@ declare class CoreCursor<
   get cursorLimit(): number;
   set cursorSkip(value: number);
   get cursorSkip(): number;
-  /** Retrieve the next document from the cursor */
+  /** @internal Retrieve the next document from the cursor */
   _next(callback: Callback<Document>): void;
   /** Clone the cursor */
   clone(): this;
@@ -1892,15 +2004,21 @@ declare class CoreCursor<
   kill(callback?: Callback): void;
   /** Resets the cursor */
   rewind(): void;
+  /** @internal */
   _read(): void;
   close(): void;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
+  /** @internal */
   _endSession(): boolean;
+  /** @internal */
   _endSession(options: CloseOptions): boolean;
-  _endSession(callback: Callback): void;
-  _getMore(callback: Callback2): void;
+  /** @internal */
+  _endSession(callback: Callback<void>): void;
+  /** @internal */
+  _getMore(callback: Callback<Document>): void;
+  /** @internal */
   _initializeCursor(callback: Callback): void;
 }
 
@@ -1928,6 +2046,7 @@ declare interface CoreCursorPrivate {
   explicitlyIgnoreSession: boolean;
   batchSize: number;
   state: CursorState;
+  readConcern?: ReadConcern;
 }
 
 declare interface CountDocumentsOptions extends AggregateOptions {
@@ -1946,6 +2065,37 @@ declare interface CountOptions extends CommandOperationOptions {
   maxTimeMS?: number;
   /** An index name hint for the query. */
   hint?: string | Document;
+}
+
+declare interface CreateCollectionOptions extends CommandOperationOptions {
+  /** Returns an error if the collection does not exist */
+  strict?: boolean;
+  /** Create a capped collection */
+  capped?: boolean;
+  /** @deprecated Create an index on the _id field of the document, True by default on MongoDB 2.6 - 3.0 */
+  autoIndexId?: boolean;
+  /** The size of the capped collection in bytes */
+  size?: number;
+  /** The maximum number of documents in the capped collection */
+  max?: number;
+  /** Available for the MMAPv1 storage engine only to set the usePowerOf2Sizes and the noPadding flag */
+  flags?: number;
+  /** Allows users to specify configuration to the storage engine on a per-collection basis when creating a collection on MongoDB 3.0 or higher */
+  storageEngine?: Document;
+  /** Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation on MongoDB 3.2 or higher */
+  validator?: Document;
+  /** Determines how strictly MongoDB applies the validation rules to existing documents during an update on MongoDB 3.2 or higher */
+  validationLevel?: string;
+  /** Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted on MongoDB 3.2 or higher */
+  validationAction?: string;
+  /** Allows users to specify a default configuration for indexes when creating a collection on MongoDB 3.2 or higher */
+  indexOptionDefaults?: Document;
+  /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view; i.e. does not include the database name and implies the same database as the view to create on MongoDB 3.4 or higher */
+  viewOn?: string;
+  /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
+  pipeline?: Document[];
+  /** A primary key factory object for generation of custom _id keys. */
+  pkFactory?: PkFactory;
 }
 
 declare interface CreateIndexesOptions extends CommandOperationOptions {
@@ -1979,49 +2129,73 @@ declare interface CreateIndexesOptions extends CommandOperationOptions {
 }
 
 /**
- * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
+ * @public
+ * **CURSORS Cannot directly be instantiated**
+ * The `Cursor` class is an internal class that embodies a cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
+ * or higher stream
  *
- * @property {string} sortValue Cursor query sort setting.
- * @property {boolean} timeout Is Cursor able to time out.
- * @property {ReadPreference} readPreference Get cursor ReadPreference.
- * @fires Cursor#data
- * @fires Cursor#end
- * @fires Cursor#close
- * @fires Cursor#readable
  * @example
- * Cursor cursor options.
- *
- * collection.find({}).project({a:1})                             // Create a projection of field a
- * collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
- * collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
- * collection.find({}).filter({a:1})                              // Set query on the cursor
- * collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
- * collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
- * collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
- * collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
- * collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
- * collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
- * collection.find({}).max(10)                                    // Set the cursor max
- * collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
- * collection.find({}).min(100)                                   // Set the cursor min
- * collection.find({}).returnKey(true)                            // Set the cursor returnKey
- * collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
- * collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
- * collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
- * collection.find({}).hint('a_1')                                // Set the cursor hint
+ * ```js
+ * // Create a projection of field a
+ * collection.find({}).project({a:1})
+ * // Skip 1 and limit 10
+ * collection.find({}).skip(1).limit(10)
+ * // Set batchSize on cursor to 5
+ * collection.find({}).batchSize(5)
+ * // Set query on the cursor
+ * collection.find({}).filter({a:1})
+ * // Add a comment to the query, allowing to correlate queries
+ * collection.find({}).comment('add a comment')
+ * // Set cursor as tailable
+ * collection.find({}).addCursorFlag('tailable', true)
+ * // Set cursor as noCursorTimeout
+ * collection.find({}).addCursorFlag('noCursorTimeout', true)
+ * // Set cursor as awaitData
+ * collection.find({}).addCursorFlag('awaitData', true)
+ * // Set cursor as partial
+ * collection.find({}).addCursorFlag('partial', true)
+ * // Set $orderby {a:1}
+ * collection.find({}).addQueryModifier('$orderby', {a:1})
+ * // Set the cursor max
+ * collection.find({}).max(10)
+ * // Set the cursor maxTimeMS
+ * collection.find({}).maxTimeMS(1000)
+ * // Set the cursor min
+ * collection.find({}).min(100)
+ * // Set the cursor returnKey
+ * collection.find({}).returnKey(true)
+ * // Set the cursor readPreference
+ * collection.find({}).setReadPreference(ReadPreference.PRIMARY)
+ * // Set the cursor showRecordId
+ * collection.find({}).showRecordId(true)
+ * // Sets the sort order of the cursor query
+ * collection.find({}).sort([['a', 1]])
+ * // Set the cursor hint
+ * collection.find({}).hint('a_1')
+ * ```
  *
  * All options are chainable, so one can do the following.
  *
- * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+ * ```js
+ * const docs = await collection.find({})
+ *   .maxTimeMS(1000)
+ *   .maxScan(100)
+ *   .skip(1)
+ *   .toArray()
+ * ```
  */
 export declare class Cursor<
   O extends OperationBase = OperationBase,
   T extends CursorOptions = CursorOptions
 > extends CoreCursor<O, T> {
   s: CursorPrivate;
+  /** @internal */
   constructor(topology: Topology, operation: O, options?: T);
   get readPreference(): ReadPreference;
   get sortValue(): Sort;
+  /** @internal */
   _initializeCursor(callback: Callback): void;
   /** Check if there is any document still available in the cursor */
   hasNext(): Promise<void>;
@@ -2053,7 +2227,7 @@ export declare class Cursor<
   /**
    * Set the cursor max
    *
-   * @param max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
+   * @param max - Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    */
   max(max: number): this;
   /**
@@ -2089,8 +2263,7 @@ export declare class Cursor<
   /**
    * Add a cursor flag to the cursor
    *
-   * @param flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial' -.
-   *
+   * @param flag - The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial' -.
    * @param value - The flag boolean value.
    */
   addCursorFlag(flag: CursorFlag, value: boolean): this;
@@ -2122,7 +2295,7 @@ export declare class Cursor<
   /**
    * Sets a field projection for the query.
    *
-   * @param value The field projection object.
+   * @param value - The field projection object.
    */
   project(value: Document): this;
   /**
@@ -2157,11 +2330,11 @@ export declare class Cursor<
    */
   skip(value: number): this;
   /**
-   * @deprecated
-   * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+   * @deprecated Please use {@link Cursor.forEach} instead
+   * Iterates over all the documents for this cursor. As with `cursor.toArray`,
    * not all of the elements will be iterated if this cursor had been previously accessed.
-   * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
-   * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+   * In that case, `cursor.rewind` can be used to reset the cursor. However, unlike
+   * `cursor.toArray`, the cursor will only hold a maximum of batch size elements
    * at any given time if batch size is specified. Otherwise, the caller is responsible
    * for making sure that the entire result can fit the memory.
    */
@@ -2196,11 +2369,10 @@ export declare class Cursor<
    * @param applySkipLimit - Should the count command apply limit and skip settings on the cursor or in the passed in options.
    */
   count(): Promise<number>;
-  count(applySkipLimit: boolean): Promise<number>;
-  count(options: CountOptions): Promise<number>;
-  count(applySkipLimit: boolean, options: CountOptions): Promise<number>;
   count(callback: Callback<number>): void;
+  count(applySkipLimit: boolean): Promise<number>;
   count(applySkipLimit: boolean, callback: Callback<number>): void;
+  count(applySkipLimit: boolean, options: CountOptions): Promise<number>;
   count(applySkipLimit: boolean, options: CountOptions, callback: Callback<number>): void;
   /** Close the cursor, sending a KillCursor command and emitting close. */
   close(): void;
@@ -2244,22 +2416,14 @@ declare interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
-  cursor?: Cursor;
+  cursor?: Document;
   /** The internal topology of the created cursor */
   topology?: Topology;
   /** Session to use for the operation */
   numberOfRetries?: number;
 }
 
-declare interface CursorPrivate extends CoreCursorPrivate {
-  /** Transforms functions */
-  transforms?: DocumentTransforms;
-  numberOfRetries: number;
-  tailableRetryInterval: number;
-  currentNumberOfRetries: number;
-  explicitlyIgnoreSession: boolean;
-  state: number;
-}
+declare type CursorPrivate = CoreCursorPrivate;
 
 declare enum CursorState {
   INIT = 0,
@@ -2268,18 +2432,12 @@ declare enum CursorState {
   GET_MORE = 3
 }
 
-export declare interface Db {
-  createCollection(name: any, options: any, callback: any): void;
-  eval(code: any, parameters: any, options: any, callback: any): void;
-  ensureIndex(name: any, fieldOrSpec: any, options: any, callback: any): void;
-  profilingInfo(options: any, callback: any): void;
-}
-
 /**
+ * @public
  * The **Db** class is a class that represents a MongoDB Database.
  *
  * @example
- *
+ * ```js
  * const { MongoClient } = require('mongodb');
  * // Connection url
  * const url = 'mongodb://localhost:27017';
@@ -2291,8 +2449,9 @@ export declare interface Db {
  *   const testDb = client.db(dbName);
  *   client.close();
  * });
+ * ```
  */
-export declare class Db {
+export declare class Db implements OperationParent {
   s: DbPrivate;
   static SYSTEM_NAMESPACE_COLLECTION: string;
   static SYSTEM_INDEX_COLLECTION: string;
@@ -2303,60 +2462,66 @@ export declare class Db {
   /**
    * Creates a new Db instance
    *
-   * @param databaseName The name of the database this instance represents.
-   * @param topology The server topology for the database.
-   * @param options Optional settings for Db construction
+   * @param databaseName - The name of the database this instance represents.
+   * @param topology - The server topology for the database.
+   * @param options - Optional settings for Db construction
    */
   constructor(databaseName: string, topology: Topology, options?: DbOptions);
   get databaseName(): string;
   get topology(): Topology;
   get options(): DbOptions | undefined;
-  get slaveOk(): boolean | undefined;
+  get slaveOk(): boolean;
   get readConcern(): ReadConcern | undefined;
   get readPreference(): ReadPreference;
   get writeConcern(): WriteConcern | undefined;
   get namespace(): string;
   /**
+   * Create a new collection on a server with the specified options. Use this to create capped collections.
+   * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
+   *
+   * @param name - The name of the collection to create
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  createCollection(name: string): Promise<Collection>;
+  createCollection(name: string, callback: Callback<Collection>): void;
+  createCollection(name: string, options: CreateCollectionOptions): Promise<Collection>;
+  createCollection(
+    name: string,
+    options: CreateCollectionOptions,
+    callback: Callback<Collection>
+  ): void;
+  /**
    * Execute a command
    *
-   * @param command The command to run
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param command - The command to run
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   command(command: Document): Promise<Document>;
   command(command: Document, callback: Callback<Document>): void;
   command(command: Document, options: RunCommandOptions): Promise<Document>;
   command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   /**
-   * Execute an aggregation framework pipeline against the database, needs MongoDB >= 3.6
+   * Execute an aggregation framework pipeline against the database, needs MongoDB \>= 3.6
    *
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command
    */
   aggregate(pipeline?: Document[], options?: AggregateOptions): AggregationCursor;
   /** Return the Admin db instance */
-  admin(): any;
+  admin(): Admin;
   /**
    * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you
    * can use it without a callback in the following way: `const collection = db.collection('mycollection');`
    *
-   * @param {string} name the collection name we wish to access.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
-   * @param {object} [options.pkFactory] A primary key factory object for generation of custom _id keys.
-   * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
-   * @param {boolean} [options.strict=false] Returns an error if the collection does not exist
-   * @param {object} [options.readConcern] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
-   * @param {ReadConcernLevel} [options.readConcern.level='local'] Specify a read concern level for the collection operations (only MongoDB 3.2 or higher supported)
-   * @param {Db~collectionResultCallback} [callback] The collection result callback
-   * @returns {Collection} return the new Collection instance if not in strict mode
+   * @param name - the collection name we wish to access.
+   * @returns return the new Collection instance if not in strict mode
    */
-  collection(name: string, options?: any): Collection;
-  collection(name: string, options: any, callback: Callback): void;
+  collection(name: string): Collection;
+  collection(name: string, options: CollectionOptions): Collection;
+  collection(name: string, callback: Callback<Collection>): void;
+  collection(name: string, options: CollectionOptions, callback: Callback<Collection>): void;
   /**
    * Get all the db statistics.
    *
@@ -2433,9 +2598,9 @@ export declare class Db {
   /**
    * Runs a command on the database as admin.
    *
-   * @param command The command to run
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param command - The command to run
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   executeDbAdminCommand(command: Document): Promise<void>;
   executeDbAdminCommand(command: Document, callback: Callback): void;
@@ -2448,31 +2613,31 @@ export declare class Db {
   /**
    * Creates an index on the db and collection.
    *
-   * @param name Name of the collection to create the index on.
-   * @param fieldOrSpec Specify the field to index, or an index specification
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param name - Name of the collection to create the index on.
+   * @param indexSpec - Specify the field to index, or an index specification
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, fieldOrSpec: string | object): Promise<Document>;
-  createIndex(name: string, fieldOrSpec: string | object, callback?: Callback<Document>): void;
+  createIndex(name: string, indexSpec: IndexSpecification): Promise<Document>;
+  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<Document>): void;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions
   ): Promise<Document>;
   createIndex(
     name: string,
-    fieldOrSpec: string | object,
+    indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
     callback: Callback<Document>
   ): void;
   /**
    * Add a user to the database
    *
-   * @param username The username for the new user
-   * @param password An optional password for the new user
-   * @param options Optional settings for the command
-   * @param callback An optional callback, a Promise will be returned if none is provided
+   * @param username - The username for the new user
+   * @param password - An optional password for the new user
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   addUser(username: string): Promise<Document>;
   addUser(username: string, callback: Callback<Document>): void;
@@ -2533,10 +2698,14 @@ export declare class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(name: string): Promise<void>;
-  indexInformation(name: string, callback: Callback<void>): void;
-  indexInformation(name: string, options: IndexInformationOptions): Promise<void>;
-  indexInformation(name: string, options: IndexInformationOptions, callback: Callback<void>): void;
+  indexInformation(name: string): Promise<Document>;
+  indexInformation(name: string, callback: Callback<Document>): void;
+  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
+  indexInformation(
+    name: string,
+    options: IndexInformationOptions,
+    callback: Callback<Document>
+  ): void;
   /** Unref all sockets */
   unref(): void;
   /**
@@ -2551,11 +2720,63 @@ export declare class Db {
   watch(pipeline?: Document[]): ChangeStream;
   /** Return the db logger */
   getLogger(): Logger;
+  get logger(): Logger;
+  /**
+   * Evaluate JavaScript on the server
+   *
+   * @deprecated Eval is deprecated on MongoDB 3.2 and forward
+   * @param code - JavaScript to execute on server.
+   * @param parameters - The parameters for the call.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  eval(code: Code, parameters: Document | Document[]): Promise<Document>;
+  eval(code: Code, parameters: Document | Document[], callback: Callback<Document>): void;
+  eval(code: Code, parameters: Document | Document[], options: EvalOptions): Promise<Document>;
+  eval(
+    code: Code,
+    parameters: Document | Document[],
+    options: EvalOptions,
+    callback: Callback<Document>
+  ): Promise<Document>;
+  /**
+   * Ensures that an index exists, if it does not it creates it
+   *
+   * @deprecated since version 2.0
+   * @param name - The index name
+   * @param fieldOrSpec - Defines the index.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  ensureIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
+  ensureIndex(name: string, fieldOrSpec: string | Document, callback: Callback<Document>): void;
+  ensureIndex(
+    name: string,
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions
+  ): Promise<Document>;
+  ensureIndex(
+    name: string,
+    fieldOrSpec: string | Document,
+    options: CreateIndexesOptions,
+    callback: Callback<Document>
+  ): void;
+  /**
+   * Retrieve the current profiling information for MongoDB
+   *
+   * @deprecated Query the `system.profile` collection directly.
+   * @param options - Optional settings for the command
+   * @param callback - An optional callback, a Promise will be returned if none is provided
+   */
+  profilingInfo(): Promise<Document[]>;
+  profilingInfo(callback: Callback<Document[]>): void;
+  profilingInfo(options: ProfilingLevelOptions): Promise<Document[]>;
+  profilingInfo(options: ProfilingLevelOptions, callback: Callback<Document[]>): void;
 }
 
 declare const DB_AGGREGATE_COLLECTION: 1;
 
-declare interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
+declare interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
@@ -2566,6 +2787,8 @@ declare interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   pkFactory?: PkFactory;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
+  /** Should retry failed writes */
+  retryWrites?: boolean;
 }
 
 declare interface DbPrivate {
@@ -2598,10 +2821,11 @@ declare interface DeleteResult {
   /** The raw result returned from MongoDB. Will vary depending on server version */
   result: Document;
   /** The connection object used for the operation */
-  connection: Connection;
+  connection?: Connection;
 }
 
 declare interface DestroyOptions {
+  /** Force the destruction of the pool. */
   force?: boolean;
 }
 
@@ -2637,10 +2861,22 @@ declare type DropIndexesOptions = CommandOperationOptions;
 
 declare type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
+declare interface ErrorDescription {
+  message?: string;
+  errmsg?: string;
+  $err?: string;
+  errorLabels?: string[];
+  [key: string]: any;
+}
+
 declare interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   skip?: number;
   limit?: number;
   hint?: Hint;
+}
+
+declare interface EvalOptions extends CommandOperationOptions {
+  nolock?: boolean;
 }
 
 declare const FIELDS: readonly ['numberOfRetries', 'tailableRetryInterval'];
@@ -2669,38 +2905,57 @@ declare interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
-/**
- * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
- * allowing for iteration over the results returned from the underlying query. It supports
- * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
- * or higher stream
- *
- * **CURSORS Cannot directly be instantiated**
- * @example
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('createIndexExample1');
- *   // Insert a bunch of documents
- *   col.insert([{a:1, b:1}
- *     , {a:2, b:2}, {a:3, b:3}
- *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     expect(err).to.not.exist;
- *     // Show that duplicate records got dropped
- *     col.find({}).toArray(function(err, items) {
- *       expect(err).to.not.exist;
- *       test.equal(4, items.length);
- *       client.close();
- *     });
- *   });
- * });
- */
+declare interface FindOptions extends QueryOptions {
+  /** Sets the limit of documents returned in the query. */
+  limit?: number;
+  /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
+  sort?: Sort;
+  /** The fields to return in the query. Object of fields to either include or exclude (one of, not both), `{'a':1, 'b': 1}` **or** `{'a': 0, 'b': 0}` */
+  projection?: Document;
+  /** @deprecated Use `options.projection` instead */
+  fields?: Document;
+  /** Set to skip N documents ahead in your query (useful for pagination). */
+  skip?: number;
+  /** Tell the query to use specific indexes in the query. Object of indexes to use, `{'_id':1}` */
+  hint?: Hint;
+  /** Explain the query instead of returning the data. */
+  explain?: boolean;
+  /** @deprecated Snapshot query. */
+  snapshot?: boolean;
+  /** Specify if the cursor can timeout. */
+  timeout?: boolean;
+  /** Specify if the cursor is tailable. */
+  tailable?: boolean;
+  /** Specify if the cursor is a a tailable-await cursor. Requires `tailable` to be true */
+  awaitData?: boolean;
+  /** Set the batchSize for the getMoreCommand when iterating over the query results. */
+  batchSize?: number;
+  /** Only return the index key. */
+  returnKey?: boolean;
+  /** @deprecated Limit the number of items to scan. */
+  maxScan?: number;
+  /** Set index bounds. */
+  min?: number;
+  /** Set index bounds. */
+  max?: number;
+  /** Show disk location of results. */
+  showDiskLoc?: boolean;
+  /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
+  comment?: string | Document;
+  /** Specify if the cursor should return partial results when querying against a sharded system */
+  partial?: boolean;
+  /** Number of milliseconds to wait before aborting the query. */
+  maxTimeMS?: number;
+  /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `tailable` and `awaitData` to be true */
+  maxAwaitTimeMS?: number;
+  /** The server normally times out idle cursors after an inactivity period (10 minutes) to prevent excess memory use. Set this option to prevent that. */
+  noCursorTimeout?: boolean;
+  /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
+  collation?: CollationOptions;
+  /** Enables writing to temporary files on the server. */
+  allowDiskUse?: boolean;
+}
+
 declare const FLAGS: readonly [
   'tailable',
   'oplogReplay',
@@ -2725,198 +2980,151 @@ declare class GetMore {
 declare type GetMoreOptions = CommandOptions;
 
 /**
+ * @public
  * Constructor for a streaming GridFS interface
- *
- * @class
- * @extends external:EventEmitter
- * @param {Db} db A db handle
- * @param {object} [options] Optional settings.
- * @param {string} [options.bucketName="fs"] The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot.
- * @param {number} [options.chunkSizeBytes=255 * 1024] Number of bytes stored in each chunk. Defaults to 255KB
- * @param {object} [options.writeConcern] Optional write concern to be passed to write operations, for instance `{ w: 1 }`
- * @param {object} [options.readPreference] Optional read preference to be passed to read operations
- * @fires GridFSBucketWriteStream#index
  */
 export declare class GridFSBucket extends EventEmitter {
-  s: any;
-  constructor(db: any, options: any);
+  s: GridFSBucketPrivate;
   /**
    * When the first call to openUploadStream is made, the upload stream will
    * check to see if it needs to create the proper indexes on the chunks and
    * files collections. This event is fired either when 1) it determines that
    * no index creation is necessary, 2) when it successfully creates the
    * necessary indexes.
-   *
-   * @event GridFSBucket#index
-   * @type {Error}
+   * @event
    */
+  static readonly INDEX: 'index';
+  constructor(db: Db, options?: GridFSBucketOptions);
   /**
    * Returns a writable stream (GridFSBucketWriteStream) for writing
    * buffers to GridFS. The stream's 'id' property contains the resulting
    * file's id.
    *
-   * @function
-   * @param {string} filename The value of the 'filename' key in the files doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.chunkSizeBytes] Optional overwrite this bucket's chunkSizeBytes for this file
-   * @param {object} [options.metadata] Optional object to store in the file document's `metadata` field
-   * @param {string} [options.contentType] Optional string to store in the file document's `contentType` field
-   * @param {Array} [options.aliases] Optional array of strings to store in the file document's `aliases` field
-   * @param {boolean} [options.disableMD5=false] If true, disables adding an md5 field to file data
-   * @returns {GridFSBucketWriteStream}
+   * @param filename - The value of the 'filename' key in the files doc
+   * @param options - Optional settings.
    */
-  openUploadStream(filename: any, options: any): GridFSBucketWriteStream;
+  openUploadStream(
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream;
   /**
    * Returns a writable stream (GridFSBucketWriteStream) for writing
    * buffers to GridFS for a custom file id. The stream's 'id' property contains the resulting
    * file's id.
-   *
-   * @function
-   * @param {string|number|object} id A custom id used to identify the file
-   * @param {string} filename The value of the 'filename' key in the files doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.chunkSizeBytes] Optional overwrite this bucket's chunkSizeBytes for this file
-   * @param {object} [options.metadata] Optional object to store in the file document's `metadata` field
-   * @param {string} [options.contentType] Optional string to store in the file document's `contentType` field
-   * @param {Array} [options.aliases] Optional array of strings to store in the file document's `aliases` field
-   * @param {boolean} [options.disableMD5=false] If true, disables adding an md5 field to file data
-   * @returns {GridFSBucketWriteStream}
    */
-  openUploadStreamWithId(id: any, filename: any, options: any): GridFSBucketWriteStream;
-  /**
-   * Returns a readable stream (GridFSBucketReadStream) for streaming file
-   * data from GridFS.
-   *
-   * @function
-   * @param {ObjectId} id The id of the file doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
-   * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
-   * @returns {GridFSBucketReadStream}
-   */
-  openDownloadStream(id: any, options: any): GridFSBucketReadStream;
+  openUploadStreamWithId(
+    id: TFileId,
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream;
+  /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
+  openDownloadStream(id: TFileId, options?: GridFSBucketReadStreamOptions): GridFSBucketReadStream;
   /**
    * Deletes a file with the given id
    *
-   * @function
-   * @param {ObjectId} id The id of the file doc
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - The id of the file doc
    */
-  delete(id: any, callback: Callback): any;
-  /**
-   * Convenience wrapper around find on the files collection
-   *
-   * @function
-   * @param {object} filter
-   * @param {object} [options] Optional settings for cursor
-   * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find|find command documentation}.
-   * @param {number} [options.limit] Optional limit for cursor
-   * @param {number} [options.maxTimeMS] Optional maxTimeMS for cursor
-   * @param {boolean} [options.noCursorTimeout] Optionally set cursor's `noCursorTimeout` flag
-   * @param {number} [options.skip] Optional skip for cursor
-   * @param {object} [options.sort] Optional sort for cursor
-   * @returns {Cursor}
-   */
-  find(filter: any, options: any): any;
+  delete(id: TFileId): Promise<undefined>;
+  delete(id: TFileId, callback: Callback<void>): void;
+  /** Convenience wrapper around find on the files collection */
+  find(filter: Document, options?: FindOptions): Cursor;
   /**
    * Returns a readable stream (GridFSBucketReadStream) for streaming the
    * file with the given name from GridFS. If there are multiple files with
    * the same name, this will stream the most recent file with the given name
    * (as determined by the `uploadDate` field). You can set the `revision`
    * option to change this behavior.
-   *
-   * @function
-   * @param {string} filename The name of the file to stream
-   * @param {object} [options] Optional settings
-   * @param {number} [options.revision=-1] The revision number relative to the oldest file with the given filename. 0 gets you the oldest file, 1 gets you the 2nd oldest, -1 gets you the newest.
-   * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
-   * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
-   * @returns {GridFSBucketReadStream}
    */
-  openDownloadStreamByName(filename: any, options: any): GridFSBucketReadStream;
+  openDownloadStreamByName(
+    filename: string,
+    options?: GridFSBucketReadStreamOptionsWithRevision
+  ): GridFSBucketReadStream;
   /**
    * Renames the file with the given _id to the given string
    *
-   * @function
-   * @param {ObjectId} id the id of the file to rename
-   * @param {string} filename new name for the file
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - the id of the file to rename
+   * @param filename - new name for the file
    */
-  rename(id: any, filename: any, callback: Callback): any;
-  /**
-   * Removes this bucket's files collection, followed by its chunks collection.
-   *
-   * @function
-   * @param {GridFSBucket~errorCallback} [callback]
-   */
-  drop(callback: Callback): any;
-  /**
-   * Return the db logger
-   *
-   * @function
-   * @returns {Logger} return the db logger
-   */
-  getLogger(): any;
+  rename(id: TFileId, filename: string): Promise<void>;
+  rename(id: TFileId, filename: string, callback: Callback<void>): void;
+  /** Removes this bucket's files collection, followed by its chunks collection. */
+  drop(): Promise<void>;
+  drop(callback: Callback<void>): void;
+  /** Get the Db scoped logger. */
+  getLogger(): Logger;
+}
+
+declare interface GridFSBucketOptions extends WriteConcernOptions {
+  /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
+  bucketName?: string;
+  /** Number of bytes stored in each chunk. Defaults to 255KB */
+  chunkSizeBytes?: number;
+  /** Read preference to be passed to read operations */
+  readPreference?: ReadPreference;
+}
+
+declare interface GridFSBucketPrivate {
+  db: Db;
+  options: {
+    bucketName: string;
+    chunkSizeBytes: number;
+    readPreference?: ReadPreference;
+    writeConcern: WriteConcern | undefined;
+  };
+  _chunksCollection: Collection;
+  _filesCollection: Collection;
+  checkedIndexes: boolean;
+  calledOpenUploadStream: boolean;
 }
 
 /**
  * A readable stream that enables you to read buffers from GridFS.
  *
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
- *
- * @class
- * @extends external:Readable
- * @param {Collection} chunks Handle for chunks collection
- * @param {Collection} files Handle for files collection
- * @param {object} readPreference The read preference to use
- * @param {object} filter The query to use to find the file document
- * @param {object} [options] Optional settings.
- * @param {number} [options.sort] Optional sort for the file find query
- * @param {number} [options.skip] Optional skip for the file find query
- * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
- * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
- * @fires GridFSBucketReadStream#error
- * @fires GridFSBucketReadStream#file
  */
 declare class GridFSBucketReadStream extends Readable {
-  s: any;
-  constructor(chunks: any, files: any, readPreference: any, filter: any, options: any);
+  s: GridFSBucketReadStreamPrivate;
   /**
    * An error occurred
-   *
-   * @event GridFSBucketReadStream#error
-   * @type {Error}
+   * @event
    */
+  static readonly ERROR: 'error';
   /**
-   * Fires when the stream loaded the file document corresponding to the
-   * provided id.
-   *
-   * @event GridFSBucketReadStream#file
-   * @type {object}
+   * Fires when the stream loaded the file document corresponding to the provided id.
+   * @event
    */
+  static readonly FILE: 'file';
   /**
    * Emitted when a chunk of data is available to be consumed.
-   *
-   * @event GridFSBucketReadStream#data
-   * @type {object}
+   * @event
    */
+  static readonly DATA: 'data';
   /**
    * Fired when the stream is exhausted (no more data events).
-   *
-   * @event GridFSBucketReadStream#end
-   * @type {object}
+   * @event
    */
+  static readonly END: 'end';
   /**
    * Fired when the stream is exhausted and the underlying cursor is killed
-   *
-   * @event GridFSBucketReadStream#close
-   * @type {object}
+   * @event
    */
+  static readonly CLOSE: 'close';
+  /** @internal
+   * @param chunks - Handle for chunks collection
+   * @param files - Handle for files collection
+   * @param readPreference - The read preference to use
+   * @param filter - The query to use to find the file document
+   */
+  constructor(
+    chunks: Collection,
+    files: Collection,
+    readPreference: ReadPreference | undefined,
+    filter: Document,
+    options?: GridFSBucketReadStreamOptions
+  );
   /**
    * Reads from the cursor and pushes to the stream.
    * Private Impl, do not call directly
-   *
-   * @function
    */
   _read(): void;
   /**
@@ -2924,112 +3132,169 @@ declare class GridFSBucketReadStream extends Readable {
    * an error if this stream has entered flowing mode
    * (e.g. if you've already called `on('data')`)
    *
-   * @function
-   * @param {number} start Offset in bytes to start reading at
-   * @returns {GridFSBucketReadStream} Reference to Self
+   * @param start - 0-based offset in bytes to start streaming from
    */
-  start(start: any): this;
+  start(start?: number): this;
   /**
    * Sets the 0-based offset in bytes to start streaming from. Throws
    * an error if this stream has entered flowing mode
    * (e.g. if you've already called `on('data')`)
    *
-   * @function
-   * @param {number} end Offset in bytes to stop reading at
-   * @returns {GridFSBucketReadStream} Reference to self
+   * @param end - Offset in bytes to stop reading at
    */
-  end(end: any): this;
+  end(end?: number): this;
   /**
    * Marks this stream as aborted (will never push another `data` event)
    * and kills the underlying cursor. Will emit the 'end' event, and then
    * the 'close' event once the cursor is successfully killed.
    *
-   * @function
-   * @param {GridFSBucket~errorCallback} [callback] called when the cursor is successfully closed or an error occurred.
-   * @fires GridFSBucketWriteStream#close
-   * @fires GridFSBucketWriteStream#end
+   * @param callback - called when the cursor is successfully closed or an error occurred.
    */
-  abort(callback: Callback): void;
+  abort(callback?: Callback<void>): void;
+}
+
+declare interface GridFSBucketReadStreamOptions {
+  sort?: Sort;
+  skip?: number;
+  /** 0-based offset in bytes to start streaming from */
+  start?: number;
+  /** 0-based offset in bytes to stop streaming before */
+  end?: number;
+}
+
+declare interface GridFSBucketReadStreamOptionsWithRevision extends GridFSBucketReadStreamOptions {
+  /** The revision number relative to the oldest file with the given filename. 0
+   * gets you the oldest file, 1 gets you the 2nd oldest, -1 gets you the
+   * newest. */
+  revision?: number;
+}
+
+declare interface GridFSBucketReadStreamPrivate {
+  bytesRead: number;
+  bytesToTrim: number;
+  bytesToSkip: number;
+  chunks: Collection;
+  cursor?: Cursor;
+  expected: number;
+  files: Collection;
+  filter: Document;
+  init: boolean;
+  expectedEnd: number;
+  file?: GridFSFile;
+  options: {
+    sort?: Sort;
+    skip?: number;
+    start: number;
+    end: number;
+  };
+  readPreference?: ReadPreference;
 }
 
 /**
  * A writable stream that enables you to write buffers to GridFS.
  *
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
- *
- * @class
- * @extends external:Writable
- * @param {GridFSBucket} bucket Handle for this stream's corresponding bucket
- * @param {string} filename The value of the 'filename' key in the files doc
- * @param {object} [options] Optional settings.
- * @param {string|number|object} [options.id] Custom file id for the GridFS file.
- * @param {number} [options.chunkSizeBytes] The chunk size to use, in bytes
- * @param {number} [options.w] The write concern
- * @param {number} [options.wtimeout] The write concern timeout
- * @param {number} [options.j] The journal write concern
- * @param {boolean} [options.disableMD5=false] If true, disables adding an md5 field to file data
- * @fires GridFSBucketWriteStream#error
- * @fires GridFSBucketWriteStream#finish
  */
 declare class GridFSBucketWriteStream extends Writable {
-  bucket: any;
-  chunks: any;
-  filename: any;
-  files: any;
-  options: any;
-  done: any;
-  id: any;
-  chunkSizeBytes: any;
-  bufToStore: any;
-  length: any;
-  md5: any;
-  n: any;
-  pos: any;
-  state: any;
-  constructor(bucket: any, filename: any, options: any);
+  bucket: GridFSBucket;
+  chunks: Collection;
+  filename: string;
+  files: Collection;
+  options: GridFSBucketWriteStreamOptions;
+  done: boolean;
+  id: TFileId;
+  chunkSizeBytes: number;
+  bufToStore: Buffer;
+  length: number;
+  md5: false | crypto.Hash;
+  n: number;
+  pos: number;
+  state: {
+    streamEnd: boolean;
+    outstandingRequests: number;
+    errored: boolean;
+    aborted: boolean;
+  };
+  writeConcern?: WriteConcern;
+  /** @event */
+  static readonly ERROR = 'error';
   /**
-   * An error occurred
-   *
-   * @event GridFSBucketWriteStream#error
-   * @type {Error}
+   * `end()` was called and the write stream successfully wrote the file metadata and all the chunks to MongoDB.
+   * @event
    */
-  /**
-   * `end()` was called and the write stream successfully wrote the file
-   * metadata and all the chunks to MongoDB.
-   *
-   * @event GridFSBucketWriteStream#finish
-   * @type {object}
+  static readonly FINISH = 'finish';
+  /** @internal
+   * @param bucket - Handle for this stream's corresponding bucket
+   * @param filename - The value of the 'filename' key in the files doc
+   * @param options - Optional settings.
    */
+  constructor(bucket: GridFSBucket, filename: string, options?: GridFSBucketWriteStreamOptions);
   /**
    * Write a buffer to the stream.
    *
-   * @function
-   * @param {Buffer} chunk Buffer to write
-   * @param {string} encoding Optional encoding for the buffer
-   * @param {GridFSBucket~errorCallback} callback Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
-   * @returns {boolean} False if this write required flushing a chunk to MongoDB. True otherwise.
+   * @param chunk - Buffer to write
+   * @param encodingOrCallback - Optional encoding for the buffer
+   * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
+   * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
-  write(chunk: any, encoding: any, callback?: Callback): boolean;
+  write(chunk: Buffer): boolean;
+  write(chunk: Buffer, callback: Callback<void>): boolean;
+  write(chunk: Buffer, encoding: BufferEncoding | undefined): boolean;
+  write(chunk: Buffer, encoding: BufferEncoding | undefined, callback: Callback<void>): boolean;
   /**
    * Places this write stream into an aborted state (all future writes fail)
    * and deletes all chunks that have already been written.
    *
-   * @function
-   * @param {GridFSBucket~errorCallback} callback called when chunks are successfully removed or error occurred
-   * @returns {Promise<void>} if no callback specified
+   * @param callback - called when chunks are successfully removed or error occurred
    */
-  abort(callback: Callback): void | Promise<never>;
+  abort(): Promise<void>;
+  abort(callback: Callback<void>): void;
   /**
    * Tells the stream that no more data will be coming in. The stream will
    * persist the remaining data to MongoDB, write the files document, and
    * then emit a 'finish' event.
    *
-   * @function
-   * @param {Buffer} chunk Buffer to write
-   * @param {string} encoding Optional encoding for the buffer
-   * @param {GridFSBucket~errorCallback} callback Function to call when all files and chunks have been persisted to MongoDB
+   * @param chunk - Buffer to write
+   * @param encoding - Optional encoding for the buffer
+   * @param callback - Function to call when all files and chunks have been persisted to MongoDB
    */
-  end(chunk: any, encoding?: any, callback?: Callback): void;
+  end(): void;
+  end(chunk: Buffer): void;
+  end(callback: Callback<GridFSFile | void>): void;
+  end(chunk: Buffer, callback: Callback<GridFSFile | void>): void;
+  end(chunk: Buffer, encoding: BufferEncoding): void;
+  end(
+    chunk: Buffer,
+    encoding: BufferEncoding | undefined,
+    callback: Callback<GridFSFile | void>
+  ): void;
+}
+
+declare interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
+  /** Overwrite this bucket's chunkSizeBytes for this file */
+  chunkSizeBytes?: number;
+  /** Custom file id for the GridFS file. */
+  id?: TFileId;
+  /** Object to store in the file document's `metadata` field */
+  metadata?: Document;
+  /** String to store in the file document's `contentType` field */
+  contentType?: string;
+  /** Array of strings to store in the file document's `aliases` field */
+  aliases?: string[];
+  /** If true, disables adding an md5 field to file data */
+  disableMD5?: boolean;
+}
+
+declare interface GridFSFile {
+  _id: GridFSBucketWriteStream['id'];
+  length: GridFSBucketWriteStream['length'];
+  chunkSize: GridFSBucketWriteStream['chunkSizeBytes'];
+  md5?: boolean | string;
+  filename: GridFSBucketWriteStream['filename'];
+  contentType?: GridFSBucketWriteStream['options']['contentType'];
+  aliases?: GridFSBucketWriteStream['options']['aliases'];
+  metadata?: GridFSBucketWriteStream['options']['metadata'];
+  uploadDate: Date;
 }
 
 declare interface HedgeOptions {
@@ -3039,11 +3304,31 @@ declare interface HedgeOptions {
 
 declare type Hint = string | Document;
 
+declare interface IndexDescription {
+  collation?: CollationOptions;
+  name?: string;
+  key: Document;
+}
+
+declare type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+
 declare interface IndexInformationOptions {
   full?: boolean;
   readPreference?: ReadPreference;
   session?: ClientSession;
 }
+
+declare type IndexSpecification =
+  | string
+  | [string, IndexDirection]
+  | {
+      [key: string]: IndexDirection;
+    }
+  | [string, IndexDirection][]
+  | {
+      [key: string]: IndexDirection;
+    }[]
+  | IndexSpecification[];
 
 declare interface InsertManyResult {
   /** The total amount of documents inserted. */
@@ -3062,11 +3347,11 @@ declare interface InsertOneResult {
   /** The total amount of documents inserted */
   insertedCount: number;
   /** The driver generated ObjectId for the insert operation */
-  insertedId: ObjectId;
+  insertedId?: ObjectId;
   /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
-  ops: Document[];
+  ops?: Document[];
   /** The connection object used for the operation */
-  connection: Connection;
+  connection?: Connection;
   /** The raw command result object returned from MongoDB (content might vary by server version) */
   result: Document;
 }
@@ -3084,11 +3369,18 @@ declare interface InsertOptions_2 extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/** @public */
 export declare function instrument(options: any, callback: Callback): Instrumentation;
 
 declare class Instrumentation extends EventEmitter {
   $MongoClient: any;
   $prototypeConnect: any;
+  /** @event */
+  static readonly STARTED: 'started';
+  /** @event */
+  static readonly SUCCEEDED: 'succeeded';
+  /** @event */
+  static readonly FAILED: 'failed';
   constructor();
   instrument(MongoClient: any, callback: Callback): void;
   uninstrument(): void;
@@ -3212,130 +3504,98 @@ declare interface ListDatabasesOptions extends CommandOperationOptions {
   authorizedDatabases?: boolean;
 }
 
+declare type ListDatabasesResult = string[] | Document[];
+
 declare interface ListIndexesOptions extends CommandOperationOptions {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
 
 /**
- * @callback LoggerCallback@callback LoggerCallback
- * @param {string} msg message being logged
- * @param {object} state an object containing more metadata about the logging message
+ * @public
  */
 export declare class Logger {
-  className: any;
+  className: string;
   /**
    * Creates a new Logger instance
    *
-   * @param {string} className The Class name associated with the logging instance
-   * @param {object} [options] Optional settings.
-   * @param {LoggerCallback} [options.logger=null] Custom logger function;
-   * @param {string} [options.loggerLevel=error] Override default global log level.
+   * @param className - The Class name associated with the logging instance
+   * @param options - Optional logging settings
    */
-  constructor(className: string, options?: any);
+  constructor(className: string, options?: LoggerOptions);
   /**
    * Log a message at the debug level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   debug(message: string, object?: any): void;
   /**
    * Log a message at the warn level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   warn(message: string, object?: any): void;
   /**
    * Log a message at the info level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   info(message: string, object?: any): void;
   /**
    * Log a message at the error level
    *
-   * @function
-   * @param {string} message The message to log
-   * @param {any} [object] additional meta data to log
-   * @returns {void}
+   * @param message - The message to log
+   * @param object - Additional meta data to log
    */
   error(message: string, object?: any): void;
-  /**
-   * Is the logger set at info level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at info level */
   isInfo(): boolean;
-  /**
-   * Is the logger set at error level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at error level */
   isError(): boolean;
-  /**
-   * Is the logger set at error level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at error level */
   isWarn(): boolean;
-  /**
-   * Is the logger set at debug level
-   *
-   * @function
-   * @returns {boolean}
-   */
+  /** Is the logger set at debug level */
   isDebug(): boolean;
-  /**
-   * Resets the logger to default settings, error and no filtered classes
-   *
-   * @function
-   * @returns {void}
-   */
+  /** Resets the logger to default settings, error and no filtered classes */
   static reset(): void;
-  /**
-   * Get the current logger function
-   *
-   * @function
-   * @returns {LoggerCallback}
-   */
-  static currentLogger(): any;
+  /** Get the current logger function */
+  static currentLogger(): LoggerFunction;
   /**
    * Set the current logger function
    *
-   * @function
-   * @param {LoggerCallback} logger Logger function.
-   * @returns {void}
+   * @param logger - Custom logging function
    */
-  static setCurrentLogger(logger: any): void;
+  static setCurrentLogger(logger: LoggerFunction): void;
   /**
-   * Set what classes to log.
+   * Filter log messages for a particular classs
    *
-   * @function
-   * @param {string} type The type of filter (currently only class)
-   * @param {string[]} values The filters to apply
-   * @returns {void}
+   * @param type - The type of filter (currently only class)
+   * @param values - The filters to apply
    */
-  static filter(type: string, values: any): void;
+  static filter(type: string, values: string[]): void;
   /**
    * Set the current log level
    *
-   * @function
-   * @param {string} _level Set current log level (debug, info, error)
-   * @returns {void}
+   * @param newLevel - Set current log level (debug, warn, info, error)
    */
-  static setLevel(_level: string): void;
+  static setLevel(newLevel: LoggerLevel): void;
+}
+
+declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
+
+declare enum LoggerLevel {
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug'
+}
+
+declare interface LoggerOptions {
+  logger?: LoggerFunction;
+  loggerLevel?: LoggerLevel;
 }
 
 declare enum LogLevel {
@@ -3352,7 +3612,7 @@ export { Map_2 as Map };
 declare type MapFunction = () => void;
 
 declare interface MapReduceOptions extends CommandOperationOptions {
-  /** Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}* */
+  /** Sets the output target for the map reduce job. */
   out?:
     | 'inline'
     | {
@@ -3379,7 +3639,7 @@ declare interface MapReduceOptions extends CommandOperationOptions {
   finalize?: FinalizeFunction | string;
   /** Can pass in variables that can be access from map/reduce/finalize. */
   scope?: Document;
-  /** It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X. */
+  /** It is possible to make the execution stay in JS. Provided in MongoDB \> 2.0.X. */
   jsMode?: boolean;
   /** Provide statistics on job execution time. */
   verbose?: boolean;
@@ -3415,20 +3675,18 @@ export declare class MongoBulkWriteError extends MongoError {
   /**
    * Creates a new BulkWriteError
    *
-   * @param {Error|string|object} error The error message
-   * @param {BulkWriteResult} result The result of the bulk write operation
+   * @param error The error message
+   * @param result The result of the bulk write operation
    */
   constructor(error?: any, result?: BulkWriteResult);
 }
 
-export declare interface MongoClient {
-  logout(options: any, callback: Callback): void;
-}
-
 /**
+ * @public
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  *
  * @example
+ * ```js
  * // Connect using a MongoClient instance
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
@@ -3442,8 +3700,10 @@ export declare interface MongoClient {
  *   const db = client.db(dbName);
  *   client.close();
  * });
+ * ```
  *
  * @example
+ * ```js
  * // Connect using the MongoClient.connect static method
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
@@ -3456,13 +3716,16 @@ export declare interface MongoClient {
  *   const db = client.db(dbName);
  *   client.close();
  * });
+ * ```
  */
-export declare class MongoClient extends EventEmitter {
+export declare class MongoClient extends EventEmitter implements OperationParent {
   s: MongoClientPrivate;
   topology?: Topology;
   constructor(url: string, options?: MongoClientOptions);
+  get readConcern(): ReadConcern | undefined;
   get writeConcern(): WriteConcern | undefined;
   get readPreference(): ReadPreference;
+  get logger(): Logger;
   /**
    * Connect to MongoDB using a url
    *
@@ -3513,7 +3776,7 @@ export declare class MongoClient extends EventEmitter {
    * Runs a given operation with an implicitly created session. The lifetime of the session
    * will be handled without the need for user interaction.
    *
-   * NOTE: presently the operation MUST return a Promise (either explicit or implicity as an async function)
+   * NOTE: presently the operation MUST return a Promise (either explicit or implicitly as an async function)
    *
    * @param options - Optional settings for the command
    * @param callback - An callback to execute with an implicitly created session
@@ -3532,6 +3795,10 @@ export declare class MongoClient extends EventEmitter {
   watch(pipeline?: Document[]): ChangeStream;
   /** Return the mongo client logger */
   getLogger(): Logger;
+  /**
+   * @deprecated You cannot logout a MongoClient, you can create a new instance.
+   */
+  logout: (options: any, callback: Callback) => void;
 }
 
 declare interface MongoClientOptions
@@ -3618,51 +3885,32 @@ declare interface MongoClientPrivate {
   options?: MongoClientOptions;
   dbCache: Map<string, Db>;
   sessions: Set<ClientSession>;
+  readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   namespace: MongoDBNamespace;
   logger: Logger;
 }
 
-/**
- * A representation of the credentials used by MongoDB
- *
- * @class
- * @property {string} mechanism The method used to authenticate
- * @property {string} [username] The username used for authentication
- * @property {string} [password] The password used for authentication
- * @property {string} [source] The database that the user should authenticate against
- * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
- */
+/** A representation of the credentials used by MongoDB */
 declare class MongoCredentials {
+  /** The username used for authentication */
   readonly username: string;
+  /** The password used for authentication */
   readonly password: string;
+  /** The database that the user should authenticate against */
   readonly source: string;
+  /** The method used to authenticate */
   readonly mechanism: AuthMechanism;
+  /** Special properties used by some types of auth mechanisms */
   readonly mechanismProperties: Document;
-  /**
-   * Creates a new MongoCredentials object
-   *
-   * @param {object} [options]
-   * @param {string} [options.username] The username used for authentication
-   * @param {string} [options.password] The password used for authentication
-   * @param {string} [options.source] The database that the user should authenticate against
-   * @param {string} [options.mechanism] The method used to authenticate
-   * @param {object} [options.mechanismProperties] Special properties used by some types of auth mechanisms
-   */
   constructor(options: MongoCredentialsOptions);
-  /**
-   * Determines if two MongoCredentials objects are equivalent
-   *
-   * @param {MongoCredentials} other another MongoCredentials object
-   * @returns {boolean} true if the two objects are equal.
-   */
+  /** Determines if two MongoCredentials objects are equivalent */
   equals(other: MongoCredentials): boolean;
   /**
    * If the authentication mechanism is set to "default", resolves the authMechanism
    * based on the server version and server supported sasl mechanisms.
    *
-   * @param {object} [ismaster] An ismaster response from the server
-   * @returns {MongoCredentials}
+   * @param ismaster - An ismaster response from the server
    */
   resolveAuthMechanism(ismaster?: Document): MongoCredentials;
 }
@@ -3682,8 +3930,8 @@ declare class MongoDBNamespace {
   /**
    * Create a namespace object
    *
-   * @param {string} db The database name
-   * @param {string} [collection] An optional collection name
+   * @param db - database name
+   * @param collection - collection name
    */
   constructor(db: string, collection?: string);
   toString(): string;
@@ -3691,99 +3939,67 @@ declare class MongoDBNamespace {
   static fromString(namespace?: string): MongoDBNamespace;
 }
 
-/**
- * Creates a new MongoError
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @property {string} stack The error call stack
- */
+/** @public */
 export declare class MongoError extends Error {
-  [kErrorLabels]: any;
+  [kErrorLabels]: Set<string>;
   code?: number;
   codeName?: string;
   writeConcernError?: Document;
   topologyVersion?: TopologyVersion;
-  constructor(message: any);
-  /**
-   * Legacy name for server error responses
-   */
+  constructor(message: string | Error | ErrorDescription);
+  /** Legacy name for server error responses */
   get errmsg(): string;
   /**
    * Creates a new MongoError object
    *
-   * @param {Error|string|object} options The options used to create the error.
-   * @returns {MongoError} A MongoError instance
+   * @param options - The options used to create the error.
    * @deprecated Use `new MongoError()` instead.
    */
   static create(options: any): MongoError;
   /**
    * Checks the error to see if it has an error label
    *
-   * @param {string} label The error label to check for
-   * @returns {boolean} returns true if the error has the provided error label
+   * @param label - The error label to check for
+   * @returns returns true if the error has the provided error label
    */
   hasErrorLabel(label: string): boolean;
   addErrorLabel(label: any): void;
-  get errorLabels(): unknown[];
+  get errorLabels(): string[];
 }
 
 /**
- * An error indicating an issue with the network, including TCP
- * errors and timeouts.
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @property {string} stack The error call stack
- * @extends MongoError
+ * @public
+ * An error indicating an issue with the network, including TCP errors and timeouts.
  */
 export declare class MongoNetworkError extends MongoError {
   [kBeforeHandshake]?: boolean;
-  /**
-   * Create a network error
-   *
-   * @param {any} message
-   * @param {any} [options]
-   */
-  constructor(message: any, options?: any);
+  constructor(message: string | Error, options?: any);
 }
 
 /**
+ * @public
  * An error used when attempting to parse a value (like a connection string)
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @extends MongoError
  */
 export declare class MongoParseError extends MongoError {
-  constructor(message: any);
+  constructor(message: string);
 }
 
 /**
+ * @public
  * An error signifying a client-side server selection error
- *
- * @param {Error|string|object} message The error message
- * @param {string|object} [reason] The reason the timeout occured
- * @property {string} message The error message
- * @property {string} [reason] An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers
- * @extends MongoError
  */
 export declare class MongoServerSelectionError extends MongoTimeoutError {
-  constructor(message: any, reason: any);
+  constructor(message: string, reason: any);
 }
 
 /**
+ * @public
  * An error signifying a client-side timeout event
- *
- * @param {Error|string|object} message The error message
- * @param {string|object} [reason] The reason the timeout occured
- * @property {string} message The error message
- * @property {string} [reason] An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers
- * @extends MongoError
  */
 export declare class MongoTimeoutError extends MongoError {
+  /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
   reason?: string;
-  constructor(message: any, reason: any);
+  constructor(message: string, reason: any);
 }
 
 /**
@@ -3867,17 +4083,13 @@ declare interface MongoURIOptions
 }
 
 /**
+ * @public
  * An error thrown when the server reports a writeConcernError
- *
- * @param {Error|string|object} message The error message
- * @param {object} result The result document (provided if ok: 1)
- * @property {string} message The error message
- * @property {object} [result] The result document (provided if ok: 1)
- * @extends MongoError
  */
 export declare class MongoWriteConcernError extends MongoError {
-  result?: any;
-  constructor(message: any, result: any);
+  /** The result document (provided if ok: 1) */
+  result?: Document;
+  constructor(message: string, result: Document);
 }
 
 declare class Monitor extends EventEmitter {
@@ -3933,26 +4145,25 @@ export { ObjectId };
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-declare class OperationBase<T extends OperationOptions = OperationOptions> {
+declare abstract class OperationBase<
+  T extends OperationOptions = OperationOptions,
+  TResult = Document
+> {
   options: T;
   ns: MongoDBNamespace;
   cmd: Document;
-  readPreference?: ReadPreference;
+  readPreference: ReadPreference;
   server: Server;
   cursorState?: InternalCursorState;
   fullResponse?: boolean;
   constructor(options?: T);
+  abstract execute(server: Server, callback: Callback<TResult>): void;
   hasAspect(aspect: symbol): boolean;
   set session(session: ClientSession);
   get session(): ClientSession;
   clearSession(): void;
   get canRetryRead(): boolean;
   get canRetryWrite(): boolean;
-  /**
-   * @param {any} [server]
-   * @param {any} [callback]
-   */
-  execute(server?: any, callback?: any): void;
 }
 
 declare interface OperationDescription extends BSONSerializeOptions {
@@ -3976,10 +4187,20 @@ declare interface OperationOptions extends BSONSerializeOptions {
   session?: ClientSession;
 }
 
+declare interface OperationParent {
+  s: {
+    namespace: MongoDBNamespace;
+  };
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
+  readPreference?: ReadPreference;
+  logger?: Logger;
+}
+
 /**
- * @typedef OperationTime
- * @description Represents a specific point in time on a server. Can be retrieved by using {@link Db#command}
- * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
+ * Represents a specific point in time on a server. Can be retrieved by using {@link Db.command}
+ * @remarks
+ * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
  */
 declare type OperationTime = Timestamp;
 
@@ -4006,14 +4227,6 @@ declare interface OpQueryOptions {
   readPreference?: ReadPreference;
 }
 
-declare type Parent =
-  | MongoClient
-  | Db
-  | Collection
-  | {
-      s: any;
-    };
-
 declare interface PipeOptions {
   end?: boolean;
 }
@@ -4036,7 +4249,10 @@ declare enum ProfilingLevel {
 
 declare type ProfilingLevelOptions = CommandOperationOptions;
 
-/** Global promise store allowing user-provided promises */
+/**
+ * @public
+ * Global promise store allowing user-provided promises
+ */
 declare class Promise_2 {
   /** Validates the passed in promise library */
   static validate(lib: any): lib is PromiseConstructor;
@@ -4082,7 +4298,7 @@ declare class Query {
 }
 
 declare interface QueryOptions extends CommandOptions {
-  readPreference?: ReadPreference;
+  readPreference?: ReadPreferenceLike;
 }
 
 /**
@@ -4093,11 +4309,7 @@ declare interface QueryOptions extends CommandOptions {
  */
 declare class ReadConcern {
   level: ReadConcernLevel;
-  /**
-   * Constructs a ReadConcern from the read concern properties.
-   *
-   * @param level - The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
-   */
+  /** Constructs a ReadConcern from the read concern level.*/
   constructor(level: ReadConcernLevel);
   /**
    * Construct a ReadConcern given an options object.
@@ -4105,10 +4317,10 @@ declare class ReadConcern {
    * @param options - The options object from which to extract the write concern.
    */
   static fromOptions(options: any): ReadConcern | undefined;
-  static get MAJORITY(): ReadConcernLevel;
-  static get AVAILABLE(): ReadConcernLevel;
-  static get LINEARIZABLE(): ReadConcernLevel;
-  static get SNAPSHOT(): ReadConcernLevel;
+  static get MAJORITY(): string;
+  static get AVAILABLE(): string;
+  static get LINEARIZABLE(): string;
+  static get SNAPSHOT(): string;
 }
 
 declare enum ReadConcernLevel {
@@ -4120,11 +4332,11 @@ declare enum ReadConcernLevel {
 }
 
 /**
+ * @public
  * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
  *
  * @see https://docs.mongodb.com/manual/core/read-preference/
- * @returns {ReadPreference}
  */
 export declare class ReadPreference {
   mode: ReadPreferenceMode;
@@ -4143,14 +4355,9 @@ export declare class ReadPreference {
   static secondaryPreferred: ReadPreference;
   static nearest: ReadPreference;
   /**
-   * Create a read preference
-   *
-   * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
-   * @param {object[]} [tags] A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
-   * @param {object} [options] Additional read preference options
-   * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
-   * @param {object} [options.hedge] Server mode in which the same query is dispatched in parallel to multiple replica set members.
-   * @param {boolean} [options.hedge.enabled] Explicitly enable or disable hedged reads.
+   * @param mode - A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+   * @param tags - A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
+   * @param options - Additional read preference options
    */
   constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions);
   get preference(): ReadPreferenceMode;
@@ -4158,8 +4365,7 @@ export declare class ReadPreference {
   /**
    * Construct a ReadPreference given an options object.
    *
-   * @param {any} options The options object from which to extract the read preference.
-   * @returns {ReadPreference|null}
+   * @param options - The options object from which to extract the read preference.
    */
   static fromOptions(options: any): ReadPreference | undefined;
   /**
@@ -4167,12 +4373,10 @@ export declare class ReadPreference {
    * determine the read preference (if there is one), but will also ensure the returned value is a
    * properly constructed instance of `ReadPreference`.
    *
-   * @param {Collection|Db|MongoClient} parent The parent of the operation on which to determine the read
-   * preference, used for determining the inherited read preference.
-   * @param {any} options The options passed into the method, potentially containing a read preference
-   * @returns {(ReadPreference|null)} The resolved read preference
+   * @param parent - The parent of the operation on which to determine the read preference, used for determining the inherited read preference.
+   * @param options - The options passed into the method, potentially containing a read preference
    */
-  static resolve(parent: any, options: any): ReadPreference;
+  static resolve(parent?: OperationParent, options?: any): ReadPreference;
   /**
    * Replaces options.readPreference with a ReadPreference instance
    */
@@ -4180,41 +4384,28 @@ export declare class ReadPreference {
   /**
    * Validate if a mode is legal
    *
-   * @function
-   * @param {string} mode The string representing the read preference mode.
-   * @returns {boolean} True if a mode is valid
+   * @param mode - The string representing the read preference mode.
    */
   static isValid(mode: string): boolean;
   /**
    * Validate if a mode is legal
    *
-   * @function
-   * @param {string} mode The string representing the read preference mode.
-   * @returns {boolean} True if a mode is valid
+   * @param mode - The string representing the read preference mode.
    */
   isValid(mode?: string): boolean;
   /**
    * Indicates that this readPreference needs the "slaveOk" bit when sent over the wire
    *
-   * @function
-   * @returns {boolean}
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean;
   /**
-   * Are the two read preference equal
+   * Check if the two ReadPreferences are equivalent
    *
-   * @function
-   * @param {ReadPreference} readPreference The read preference with which to check equality
-   * @returns {boolean} True if the two ReadPreferences are equivalent
+   * @param readPreference - The read preference with which to check equality
    */
   equals(readPreference: ReadPreference): boolean;
-  /**
-   * Return JSON representation
-   *
-   * @function
-   * @returns {object} A JSON representation of the ReadPreference
-   */
+  /** Return JSON representation */
   toJSON(): object;
 }
 
@@ -4274,7 +4465,7 @@ declare interface ReplaceOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
-/**  Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token|Change Stream} on the server. */
+/**  Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server. */
 declare type ResumeToken = unknown;
 
 declare class RTTPinger {
@@ -4296,20 +4487,30 @@ declare type RunCommandOptions = CommandOperationOptions;
 
 declare interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
+  /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
 }
 
-/**
- * @fires Server#serverHeartbeatStarted
- * @fires Server#serverHeartbeatSucceeded
- * @fires Server#serverHeartbeatFailed
- */
 declare class Server extends EventEmitter {
   s: ServerPrivate;
   clusterTime?: ClusterTime;
   ismaster?: Document;
   [kMonitor]: Monitor;
+  /** @event */
+  static readonly SERVER_HEARTBEAT_STARTED: 'serverHeartbeatStarted';
+  /** @event */
+  static readonly SERVER_HEARTBEAT_SUCCEEDED: 'serverHeartbeatSucceeded';
+  /** @event */
+  static readonly SERVER_HEARTBEAT_FAILED: 'serverHeartbeatFailed';
+  /** @event */
+  static readonly CONNECT: 'connect';
+  /** @event */
+  static readonly DESCRIPTION_RECEIVED: 'descriptionReceived';
+  /** @event */
+  static readonly CLOSED: 'closed';
+  /** @event */
+  static readonly ENDED: 'ended';
   /**
    * Create a server
    */
@@ -4321,14 +4522,8 @@ declare class Server extends EventEmitter {
    * Initiate server connect
    */
   connect(): void;
-  /**
-   * Destroy the server connection
-   *
-   * @param {object} [options] Optional settings
-   * @param {boolean} [options.force=false] Force destroy the pool
-   * @param {any} callback
-   */
-  destroy(options?: DestroyOptions_2, callback?: Callback): void;
+  /** Destroy the server connection */
+  destroy(options?: DestroyOptions, callback?: Callback): void;
   /**
    * Immediately schedule monitoring of this server. If there already an attempt being made
    * this will be a no-op.
@@ -4337,26 +4532,19 @@ declare class Server extends EventEmitter {
   /**
    * Execute a command
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command hash
-   * @param {object} [options] Optional settings
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.checkKeys=false] Specify if the bson parser should validate keys.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
-   * @param {ClientSession} [options.session] Session to use for the operation
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command hash
+   * @param options - Optional settings
+   * @param callback - A callback function
    */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
+  command(ns: string, cmd: Document, callback: Callback): void;
+  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   /**
    * Execute a query against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd The command document for the query
-   * @param cursorState
-   * @param options Optional settings
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command document for the query
+   * @param cursorState - Internal state of the cursor
    */
   query(
     ns: string,
@@ -4368,52 +4556,44 @@ declare class Server extends EventEmitter {
   /**
    * Execute a `getMore` against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState State data associated with the cursor calling this method
-   * @param batchSize
-   * @param options Optional settings
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState - State data associated with the cursor calling this method
    */
   getMore(
     ns: string,
     cursorState: InternalCursorState,
     batchSize: number,
     options: GetMoreOptions,
-    callback: Callback2
+    callback: Callback<Document>
   ): void;
   /**
    * Execute a `killCursors` command against the server
    *
-   * @param ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState State data associated with the cursor calling this method
-   * @param callback
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cursorState - State data associated with the cursor calling this method
    */
   killCursors(ns: string, cursorState: InternalCursorState, callback?: Callback): void;
   /**
    * Insert one or more documents
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of documents to insert
-   * @param {object} options
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of documents to insert
    */
   insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void;
   /**
    * Perform one or more update operations
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of updates
-   * @param {object} options
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of updates
    */
   update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void;
   /**
    * Perform one or more remove operations
    *
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {Array} ops An array of removes
-   * @param {object} options options for removal
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param ops - An array of removes
+   * @param options - options for removal
+   * @param callback - A callback function
    */
   remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void;
 }
@@ -4425,7 +4605,17 @@ declare interface ServerAddress {
 }
 
 declare class ServerCapabilities {
+  maxWireVersion: number;
+  minWireVersion: number;
   constructor(ismaster: Document);
+  get hasAggregationCursor(): boolean;
+  get hasWriteCommands(): boolean;
+  get hasTextSearch(): boolean;
+  get hasAuthCommands(): boolean;
+  get hasListCollectionsCommand(): boolean;
+  get hasListIndexesCommand(): boolean;
+  get commandsTakeWriteConcern(): boolean;
+  get commandsTakeCollation(): boolean;
 }
 
 /**
@@ -4457,32 +4647,22 @@ declare class ServerDescription {
   /**
    * Create a ServerDescription
    *
-   * @param address The address of the server
-   * @param ismaster An optional ismaster response for this server
-   * @param options Optioanl settings
+   * @param address - The address of the server
+   * @param ismaster - An optional ismaster response for this server
    */
   constructor(address: string, ismaster?: Document, options?: ServerDescriptionOptions);
   get allHosts(): string[];
-  /**
-   * @returns {boolean} Is this server available for reads
-   */
+  /** Is this server available for reads*/
   get isReadable(): boolean;
-  /**
-   * @returns {boolean} Is this server data bearing
-   */
+  /** Is this server data bearing */
   get isDataBearing(): boolean;
-  /**
-   * @returns {boolean} Is this server available for writes
-   */
+  /** Is this server available for writes */
   get isWritable(): boolean;
   get host(): string;
   get port(): number;
   /**
    * Determines if another `ServerDescription` is equal to this one per the rules defined
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
-   *
-   * @param {ServerDescription} other
-   * @returns {boolean}
    */
   equals(other: ServerDescription): boolean;
 }
@@ -4543,8 +4723,7 @@ declare class ServerSession {
   /**
    * Determines if the server session has timed out.
    *
-   * @param {number} sessionTimeoutMinutes The server's "logicalSessionTimeoutMinutes"
-   * @returns {boolean} true if the session has timed out.
+   * @param sessionTimeoutMinutes - The server's "logicalSessionTimeoutMinutes"
    */
   hasTimedOut(sessionTimeoutMinutes: number): boolean;
 }
@@ -4567,10 +4746,7 @@ declare class ServerSessionPool {
    * Acquire a Server Session from the pool.
    * Iterates through each session in the pool, removing any stale sessions
    * along the way. The first non-stale session found is removed from the
-   * pool and returned. If no non-stale session is found, a new ServerSession
-   * is created.
-   *
-   * @returns {ServerSession}
+   * pool and returned. If no non-stale session is found, a new ServerSession is created.
    */
   acquire(): ServerSession;
   /**
@@ -4578,7 +4754,7 @@ declare class ServerSessionPool {
    * Adds the session back to the session pool if the session has not timed out yet.
    * This method also removes any stale sessions from the pool.
    *
-   * @param {ServerSession} session The session to release to the pool
+   * @param session - The session to release to the pool
    */
   release(session: ServerSession): void;
 }
@@ -4633,7 +4809,7 @@ declare class SrvPoller extends EventEmitter {
   _poll(): void;
 }
 
-declare interface SrvPollerOptions {
+declare interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
@@ -4678,37 +4854,39 @@ declare type TagSet = {
   [key: string]: string;
 };
 
+declare type TFileId = string | number | object | ObjectId;
+
 declare type TimerQueue = Set<NodeJS.Timeout>;
 export { Timestamp };
 
 /**
  * A container of server instances representing a connection to a MongoDB topology.
- *
- * @fires Topology#serverOpening
- * @fires Topology#serverClosed
- * @fires Topology#serverDescriptionChanged
- * @fires Topology#topologyOpening
- * @fires Topology#topologyClosed
- * @fires Topology#topologyDescriptionChanged
- * @fires Topology#serverHeartbeatStarted
- * @fires Topology#serverHeartbeatSucceeded
- * @fires Topology#serverHeartbeatFailed
  */
 declare class Topology extends EventEmitter {
   s: TopologyPrivate;
   [kWaitQueue_2]: Denque<ServerSelectionRequest>;
   ismaster?: Document;
   _type?: string;
+  /** @event */
+  static readonly SERVER_OPENING: 'serverOpening';
+  /** @event */
+  static readonly SERVER_CLOSED: 'serverClosed';
+  /** @event */
+  static readonly SERVER_DESCRIPTION_CHANGED: 'serverDescriptionChanged';
+  /** @event */
+  static readonly TOPOLOGY_OPENING: 'topologyOpening';
+  /** @event */
+  static readonly TOPOLOGY_CLOSED: 'topologyClosed';
+  /** @event */
+  static readonly TOPOLOGY_DESCRIPTION_CHANGED: 'topologyDescriptionChanged';
+  /** @event */
+  static readonly ERROR: 'error';
+  /** @event */
+  static readonly OPEN: 'open';
+  /** @event */
+  static readonly CONNECT: 'connect';
   /**
-   * Create a topology
-   *
-   * @param {Array|string} [seedlist] a string list, or array of Server instances to connect to
-   * @param {object} [options] Optional settings
-   * @param {number} [options.localThresholdMS=15] The size of the latency window for selecting among multiple suitable servers
-   * @param {number} [options.serverSelectionTimeoutMS=30000] How long to block for server selection before throwing an error
-   * @param {number} [options.heartbeatFrequencyMS=10000] The frequency with which topology updates are scheduled
-   * @param {boolean} [options.directConnection] Indicates that a client should directly connect to a node without attempting to discover its topology type
-   * @param {string} [options.replicaSet] The name of the replica set to connect to
+   * @param seedlist - a string list, or array of ServerAddress instances to connect to
    */
   constructor(seedlist: string | ServerAddress[], options?: TopologyOptions);
   /**
@@ -4723,11 +4901,10 @@ declare class Topology extends EventEmitter {
   /**
    * Selects a server according to the selection predicate provided
    *
-   * @param selector An optional selector to select servers by, defaults to a random selection within a latency window
-   * @param {object} [options] Optional settings related to server selection
-   * @param {number} [options.serverSelectionTimeoutMS] How long to block for server selection before throwing an error
-   * @param {(error: Error, server: Server) => void} callback The callback used to indicate success or failure
-   * @returns {void} An instance of a `Server` meeting the criteria of the predicate provided
+   * @param selector - An optional selector to select servers by, defaults to a random selection within a latency window
+   * @param options - Optional settings related to server selection
+   * @param callback - The callback used to indicate success or failure
+   * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
   selectServer(options: SelectServerOptions, callback: Callback<Server>): void;
   selectServer(
@@ -4754,7 +4931,7 @@ declare class Topology extends EventEmitter {
   /**
    * Update the internal TopologyDescription with a ServerDescription
    *
-   * @param {ServerDescription} serverDescription The server to update in the internal list of server descriptions
+   * @param serverDescription - The server to update in the internal list of server descriptions
    */
   serverUpdateHandler(serverDescription: ServerDescription): void;
   auth(credentials?: MongoCredentials, callback?: Callback): void;
@@ -4762,26 +4939,16 @@ declare class Topology extends EventEmitter {
   /**
    * Execute a command
    *
-   * @function
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command hash
-   * @param {object} options
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {Connection} [options.connection] Specify connection object to execute command against
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session=null] Session to use for the operation
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command
    */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   /**
    * Create a new cursor
    *
-   * @function
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object|Long} cmd Can be either a command returning a cursor or a cursorId
-   * @param {object} [options] Options for the cursor
-   * @returns {Cursor}
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - Can be either a command returning a cursor or a cursorId
+   * @param options - Options for the cursor
    */
   cursor(ns: string, cmd: Document, options?: CursorOptions): Cursor;
   get clientMetadata(): ClientMetadata;
@@ -4843,17 +5010,15 @@ declare class TopologyDescription {
   hasServer(address: string): boolean;
 }
 
-/**
- * Published when topology description changes.
- *
- * @property {object} topologyId A unique identifier for the topology
- * @property {TopologyDescription} previousDescription The old topology description
- * @property {TopologyDescription} newDescription The new topology description
- */
+/** Emitted when topology description changes. */
 declare class TopologyDescriptionChangedEvent {
+  /** A unique identifier for the topology */
   topologyId: number;
+  /** The old topology description */
   previousDescription: TopologyDescription;
+  /** The new topology description */
   newDescription: TopologyDescription;
+  /** @internal */
   constructor(
     topologyId: number,
     previousDescription: TopologyDescription,
@@ -4866,22 +5031,24 @@ declare interface TopologyDescriptionOptions {
   localThresholdMS?: number;
 }
 
-declare interface TopologyOptions extends ServerOptions, BSONSerializeOptions {
+declare interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
   reconnect: boolean;
   retryWrites?: boolean;
   retryReads?: boolean;
   host: string;
   port?: number;
   credentials?: MongoCredentials;
+  /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS: number;
+  /** The frequency with which topology updates are scheduled */
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
+  /** The name of the replica set to connect to */
   replicaSet?: string;
   cursorFactory: typeof Cursor;
   srvHost?: string;
   srvPoller?: SrvPoller;
-  logger?: Logger;
-  loggerLevel?: string;
+  /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   metadata: ClientMetadata;
   useRecoveryToken: boolean;
@@ -4952,7 +5119,7 @@ declare class Transaction {
   /**
    * Transition the transaction in the state machine
    *
-   * @param nextState The new state to transition to
+   * @param nextState - The new state to transition to
    */
   transition(nextState: TxnState): void;
   pinServer(server: Server): void;
@@ -4961,7 +5128,7 @@ declare class Transaction {
 
 /** Configuration options for a transaction. */
 declare interface TransactionOptions extends CommandOperationOptions {
-  /** @property {ReadConcern} [readConcern] A default read concern for commands in this transaction */
+  /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
   writeConcern?: WriteConcern;
@@ -5008,6 +5175,11 @@ declare interface UpdateResult {
   result: Document;
 }
 
+declare interface ValidateCollectionOptions extends CommandOperationOptions {
+  /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
+  background?: boolean;
+}
+
 declare type W = number | 'majority';
 
 declare interface WaitQueueMember {
@@ -5019,10 +5191,9 @@ declare interface WaitQueueMember {
 /**
  * A callback provided to `withConnection`
  *
- * @callback ConnectionPool@callback ConnectionPool~withConnectionCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Connection} connection The managed connection which was checked out of the pool.
- * @param {Function} callback A function to call back after connection management is complete
+ * @param error - An error instance representing the error during the execution.
+ * @param connection - The managed connection which was checked out of the pool.
+ * @param callback - A function to call back after connection management is complete
  */
 declare type WithConnectionCallback = (
   error: MongoError,
@@ -5084,7 +5255,7 @@ declare class WriteConcernError {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} err
+   * @param err
    */
   constructor(err: any);
   /**
@@ -5136,7 +5307,7 @@ declare class WriteError {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} err
+   * @param err
    */
   constructor(err: any);
   /**

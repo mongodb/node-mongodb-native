@@ -12,11 +12,13 @@ import type { ReadPreferenceLike } from '../../read_preference';
 export interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
+  /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;
   socketTimeout?: number;
+  /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;

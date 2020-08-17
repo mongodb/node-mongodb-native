@@ -91,10 +91,9 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 }
 
 /**
+ * @internal
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
- *
- * **CURSORS Cannot directly be instantiated**
  */
 export class CoreCursor<
   O extends OperationBase = OperationBase,
@@ -111,6 +110,23 @@ export class CoreCursor<
   logger: Logger;
   query?: Document;
   s!: CoreCursorPrivate;
+
+  /** @event */
+  static readonly CLOSE = 'close' as const;
+  /** @event */
+  static readonly DATA = 'data' as const;
+  /** @event */
+  static readonly END = 'end' as const;
+  /** @event */
+  static readonly FINISH = 'finish' as const;
+  /** @event */
+  static readonly ERROR = 'error' as const;
+  /** @event */
+  static readonly PAUSE = 'pause' as const;
+  /** @event */
+  static readonly READABLE = 'readable' as const;
+  /** @event */
+  static readonly RESUME = 'resume' as const;
 
   /**
    * Create a new core `Cursor` instance.
@@ -229,7 +245,7 @@ export class CoreCursor<
     return this.cursorState.skip;
   }
 
-  /** Retrieve the next document from the cursor */
+  /** @internal Retrieve the next document from the cursor */
   _next(callback: Callback<Document>): void {
     nextFunction(this, callback);
   }
@@ -339,6 +355,7 @@ export class CoreCursor<
   }
 
   // Internal methods
+  /** @internal */
   _read(): void {
     if ((this.s && this.s.state === CursorState.CLOSED) || this.isDead()) {
       this.push(null);
@@ -348,14 +365,14 @@ export class CoreCursor<
     // Get the next item
     this._next((err, result) => {
       if (err) {
-        if (this.listeners('error') && this.listeners('error').length > 0) {
-          this.emit('error', err);
+        if (this.listeners(CoreCursor.ERROR) && this.listeners(CoreCursor.ERROR).length > 0) {
+          this.emit(CoreCursor.ERROR, err);
         }
         if (!this.isDead()) this.close();
 
         // Emit end event
-        this.emit('end');
-        this.emit('finish');
+        this.emit(CoreCursor.END);
+        this.emit(CoreCursor.FINISH);
         return;
       }
 
@@ -373,9 +390,9 @@ export class CoreCursor<
       this.push(result);
 
       if (result === null && this.isDead()) {
-        this.once('end', () => {
+        this.once(CoreCursor.END, () => {
           this.close();
-          this.emit('finish');
+          this.emit(CoreCursor.FINISH);
         });
       }
     });
@@ -390,8 +407,11 @@ export class CoreCursor<
     throw new Error('Method not implemented.');
   }
 
+  /** @internal */
   _endSession(): boolean;
+  /** @internal */
   _endSession(options: CloseOptions): boolean;
+  /** @internal */
   _endSession(callback: Callback<void>): void;
   _endSession(options?: CloseOptions | Callback<void>, callback?: Callback<void>): boolean {
     if (typeof options === 'function') {
@@ -420,6 +440,7 @@ export class CoreCursor<
     return false;
   }
 
+  /** @internal */
   _getMore(callback: Callback<Document>): void {
     if (this.logger.isDebug()) {
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
@@ -448,6 +469,7 @@ export class CoreCursor<
     });
   }
 
+  /** @internal */
   _initializeCursor(callback: Callback): void {
     // NOTE: this goes away once cursors use `executeOperation`
     if (this.topology.shouldCheckForSessionSupport()) {
@@ -613,6 +635,7 @@ function setCursorNotified(self: CoreCursor, callback: Callback) {
   _setCursorNotifiedImpl(self, () => callback(undefined, null));
 }
 
+/** @internal */
 function _setCursorNotifiedImpl(self: CoreCursor, callback: Callback) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
@@ -626,6 +649,7 @@ function _setCursorNotifiedImpl(self: CoreCursor, callback: Callback) {
   return callback();
 }
 
+/** @internal */
 function nextFunction(self: CoreCursor, callback: Callback) {
   // We have notified about it
   if (self.cursorState.notified) {
@@ -778,6 +802,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
   }
 }
 
+/** @internal */
 function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
   cmd = cmd ? cmd : {};
   let limit = options.limit;

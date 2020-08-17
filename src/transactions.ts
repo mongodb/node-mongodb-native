@@ -43,7 +43,7 @@ const stateMachine = {
 
 /** Configuration options for a transaction. */
 export interface TransactionOptions extends CommandOperationOptions {
-  /** @property {ReadConcern} [readConcern] A default read concern for commands in this transaction */
+  /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
   writeConcern?: WriteConcern;
@@ -119,7 +119,7 @@ export class Transaction {
   /**
    * Transition the transaction in the state machine
    *
-   * @param nextState The new state to transition to
+   * @param nextState - The new state to transition to
    */
   transition(nextState: TxnState): void {
     const nextStates = stateMachine[this.state];

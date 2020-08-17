@@ -145,8 +145,8 @@ export class CommandStartedEvent {
   /**
    * Create a started event
    *
-   * @param {Pool} pool the pool that originated the command
-   * @param {object} command the command
+   * @param pool - the pool that originated the command
+   * @param command - the command
    */
   constructor(pool: Connection | ConnectionPool, command: WriteProtocolMessageType) {
     const cmd = extractCommand(command);
@@ -180,10 +180,10 @@ export class CommandSucceededEvent {
   /**
    * Create a succeeded event
    *
-   * @param {Pool} pool the pool that originated the command
-   * @param {object} command the command
-   * @param {object} reply the reply for this command from the server
-   * @param {number} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
+   * @param pool - the pool that originated the command
+   * @param command - the command
+   * @param reply - the reply for this command from the server
+   * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
     pool: Connection | ConnectionPool,
@@ -215,10 +215,10 @@ export class CommandFailedEvent {
   /**
    * Create a failure event
    *
-   * @param {Connection | ConnectionPool} pool the pool that originated the command
-   * @param {object} command the command
-   * @param {MongoError | object} error the generated error or a server error response
-   * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
+   * @param pool - the pool that originated the command
+   * @param command - the command
+   * @param error - the generated error or a server error response
+   * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
     pool: Connection | ConnectionPool,

@@ -29,9 +29,9 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param {any} topology The topology to execute this operation on
- * @param {Operation} operation The operation to execute
- * @param {Function} callback The command result callback
+ * @param topology - The topology to execute this operation on
+ * @param operation - The operation to execute
+ * @param callback - The command result callback
  */
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,

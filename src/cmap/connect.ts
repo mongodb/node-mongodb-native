@@ -351,7 +351,7 @@ function makeConnection(
   socket.once(connectEvent, connectHandler);
 }
 
-function connectionFailureError(type: string, err?: Error) {
+function connectionFailureError(type: string, err: Error) {
   switch (type) {
     case 'error':
       return new MongoNetworkError(err);

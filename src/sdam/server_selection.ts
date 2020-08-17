@@ -31,10 +31,10 @@ export function writableServerSelector(): ServerSelector {
  * Reduces the passed in array of servers by the rules of the "Max Staleness" specification
  * found here: https://github.com/mongodb/specifications/blob/master/source/max-staleness/max-staleness.rst
  *
- * @param {ReadPreference} readPreference The read preference providing max staleness guidance
- * @param {topologyDescription} topologyDescription The topology description
- * @param {ServerDescription[]} servers The list of server descriptions to be reduced
- * @returns {ServerDescription[]} The list of servers that satisfy the requirements of max staleness
+ * @param readPreference - The read preference providing max staleness guidance
+ * @param topologyDescription - The topology description
+ * @param servers - The list of server descriptions to be reduced
+ * @returns The list of servers that satisfy the requirements of max staleness
  */
 function maxStalenessReducer(
   readPreference: ReadPreference,
@@ -109,8 +109,8 @@ function maxStalenessReducer(
 /**
  * Determines whether a server's tags match a given set of tags
  *
- * @param tagSet The requested tag set to match
- * @param serverTags The server's tags
+ * @param tagSet - The requested tag set to match
+ * @param serverTags - The server's tags
  */
 function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
   const keys = Object.keys(tagSet);
@@ -128,9 +128,9 @@ function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
 /**
  * Reduces a set of server descriptions based on tags requested by the read preference
  *
- * @param {ReadPreference} readPreference The read preference providing the requested tags
- * @param {ServerDescription[]} servers The list of server descriptions to reduce
- * @returns {ServerDescription[]} The list of servers matching the requested tags
+ * @param readPreference - The read preference providing the requested tags
+ * @param servers - The list of server descriptions to reduce
+ * @returns The list of servers matching the requested tags
  */
 function tagSetReducer(
   readPreference: ReadPreference,
@@ -166,9 +166,9 @@ function tagSetReducer(
  * further specified in the "Server Selection" specification, found here:
  * https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.rst
  *
- * @param {topologyDescription} topologyDescription The topology description
- * @param {ServerDescription[]} servers The list of servers to reduce
- * @returns {ServerDescription[]} The servers which fall within an acceptable latency window
+ * @param topologyDescription - The topology description
+ * @param servers - The list of servers to reduce
+ * @returns The servers which fall within an acceptable latency window
  */
 function latencyWindowReducer(
   topologyDescription: TopologyDescription,
@@ -207,7 +207,7 @@ function knownFilter(server: ServerDescription): boolean {
 /**
  * Returns a function which selects servers based on a provided read preference
  *
- * @param {ReadPreference} readPreference The read preference to select with
+ * @param readPreference - The read preference to select with
  */
 export function readPreferenceServerSelector(readPreference: ReadPreference): ServerSelector {
   if (!readPreference.isValid()) {

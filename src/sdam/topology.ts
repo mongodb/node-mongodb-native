@@ -53,7 +53,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { LoggerOptions } from '../logger';
-import type { DestroyOptions } from '../cmap/connection';
+import { DestroyOptions, Connection } from '../cmap/connection';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
 import type { CursorOptions } from '../cursor/cursor';
@@ -64,19 +64,19 @@ let globalTopologyCounter = 0;
 
 // events that we relay to the `Topology`
 const SERVER_RELAY_EVENTS = [
-  'serverHeartbeatStarted',
-  'serverHeartbeatSucceeded',
-  'serverHeartbeatFailed',
-  'commandStarted',
-  'commandSucceeded',
-  'commandFailed',
+  Server.SERVER_HEARTBEAT_STARTED,
+  Server.SERVER_HEARTBEAT_SUCCEEDED,
+  Server.SERVER_HEARTBEAT_FAILED,
+  Connection.COMMAND_STARTED,
+  Connection.COMMAND_SUCCEEDED,
+  Connection.COMMAND_FAILED,
 
   // NOTE: Legacy events
   'monitoring'
 ].concat(CMAP_EVENT_NAMES);
 
 // all events we listen to from `Server` instances
-const LOCAL_SERVER_EVENTS = ['connect', 'descriptionReceived', 'close', 'ended'];
+const LOCAL_SERVER_EVENTS = ['connect', 'descriptionReceived', 'closed', 'ended'];
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -143,13 +143,17 @@ export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, Lo
   host: string;
   port?: number;
   credentials?: MongoCredentials;
+  /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS: number;
+  /** The frequency with which topology updates are scheduled */
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
+  /** The name of the replica set to connect to */
   replicaSet?: string;
   cursorFactory: typeof Cursor;
   srvHost?: string;
   srvPoller?: SrvPoller;
+  /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
 
   metadata: ClientMetadata;
@@ -162,21 +166,12 @@ interface ConnectOptions {
 
 export interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
+  /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
 }
 /**
  * A container of server instances representing a connection to a MongoDB topology.
- *
- * @fires Topology#serverOpening
- * @fires Topology#serverClosed
- * @fires Topology#serverDescriptionChanged
- * @fires Topology#topologyOpening
- * @fires Topology#topologyClosed
- * @fires Topology#topologyDescriptionChanged
- * @fires Topology#serverHeartbeatStarted
- * @fires Topology#serverHeartbeatSucceeded
- * @fires Topology#serverHeartbeatFailed
  */
 export class Topology extends EventEmitter {
   s: TopologyPrivate;
@@ -184,16 +179,27 @@ export class Topology extends EventEmitter {
   ismaster?: Document;
   _type?: string;
 
+  /** @event */
+  static readonly SERVER_OPENING = 'serverOpening' as const;
+  /** @event */
+  static readonly SERVER_CLOSED = 'serverClosed' as const;
+  /** @event */
+  static readonly SERVER_DESCRIPTION_CHANGED = 'serverDescriptionChanged' as const;
+  /** @event */
+  static readonly TOPOLOGY_OPENING = 'topologyOpening' as const;
+  /** @event */
+  static readonly TOPOLOGY_CLOSED = 'topologyClosed' as const;
+  /** @event */
+  static readonly TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as const;
+  /** @event */
+  static readonly ERROR = 'error' as const;
+  /** @event */
+  static readonly OPEN = 'open' as const;
+  /** @event */
+  static readonly CONNECT = 'connect' as const;
+
   /**
-   * Create a topology
-   *
-   * @param {Array|string} [seedlist] a string list, or array of Server instances to connect to
-   * @param {object} [options] Optional settings
-   * @param {number} [options.localThresholdMS=15] The size of the latency window for selecting among multiple suitable servers
-   * @param {number} [options.serverSelectionTimeoutMS=30000] How long to block for server selection before throwing an error
-   * @param {number} [options.heartbeatFrequencyMS=10000] The frequency with which topology updates are scheduled
-   * @param {boolean} [options.directConnection] Indicates that a client should directly connect to a node without attempting to discover its topology type
-   * @param {string} [options.replicaSet] The name of the replica set to connect to
+   * @param seedlist - a string list, or array of ServerAddress instances to connect to
    */
   constructor(seedlist: string | ServerAddress[], options?: TopologyOptions) {
     super();
@@ -286,7 +292,7 @@ export class Topology extends EventEmitter {
         }
       };
 
-      this.on('topologyDescriptionChanged', this.s.detectTopologyDescriptionChange);
+      this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectTopologyDescriptionChange);
     }
 
     // NOTE: remove this when NODE-1709 is resolved
@@ -319,11 +325,11 @@ export class Topology extends EventEmitter {
     stateTransition(this, STATE_CONNECTING);
 
     // emit SDAM monitoring events
-    this.emit('topologyOpening', new TopologyOpeningEvent(this.s.id));
+    this.emit(Topology.TOPOLOGY_OPENING, new TopologyOpeningEvent(this.s.id));
 
     // emit an event for the topology change
     this.emit(
-      'topologyDescriptionChanged',
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
       new TopologyDescriptionChangedEvent(
         this.s.id,
         new TopologyDescription(TopologyType.Unknown), // initial is always Unknown
@@ -343,15 +349,15 @@ export class Topology extends EventEmitter {
         if (typeof callback === 'function') {
           callback(err);
         } else {
-          this.emit('error', err);
+          this.emit(Topology.ERROR, err);
         }
 
         return;
       }
 
       stateTransition(this, STATE_CONNECTED);
-      this.emit('open', err, this);
-      this.emit('connect', this);
+      this.emit(Topology.OPEN, err, this);
+      this.emit(Topology.CONNECT, this);
 
       if (typeof callback === 'function') callback(err, this);
     };
@@ -399,7 +405,10 @@ export class Topology extends EventEmitter {
     }
 
     if (this.s.detectTopologyDescriptionChange) {
-      this.removeListener('topologyDescriptionChanged', this.s.detectTopologyDescriptionChange);
+      this.removeListener(
+        Topology.SERVER_DESCRIPTION_CHANGED,
+        this.s.detectTopologyDescriptionChange
+      );
       delete this.s.detectTopologyDescriptionChange;
     }
 
@@ -412,7 +421,7 @@ export class Topology extends EventEmitter {
           this.s.servers.clear();
 
           // emit an event for close
-          this.emit('topologyClosed', new TopologyClosedEvent(this.s.id));
+          this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
 
           stateTransition(this, STATE_CLOSED);
           this.emit('close');
@@ -428,11 +437,10 @@ export class Topology extends EventEmitter {
   /**
    * Selects a server according to the selection predicate provided
    *
-   * @param selector An optional selector to select servers by, defaults to a random selection within a latency window
-   * @param {object} [options] Optional settings related to server selection
-   * @param {number} [options.serverSelectionTimeoutMS] How long to block for server selection before throwing an error
-   * @param {(error: Error, server: Server) => void} callback The callback used to indicate success or failure
-   * @returns {void} An instance of a `Server` meeting the criteria of the predicate provided
+   * @param selector - An optional selector to select servers by, defaults to a random selection within a latency window
+   * @param options - Optional settings related to server selection
+   * @param callback - The callback used to indicate success or failure
+   * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
   selectServer(options: SelectServerOptions, callback: Callback<Server>): void;
   selectServer(
@@ -564,7 +572,7 @@ export class Topology extends EventEmitter {
   /**
    * Update the internal TopologyDescription with a ServerDescription
    *
-   * @param {ServerDescription} serverDescription The server to update in the internal list of server descriptions
+   * @param serverDescription - The server to update in the internal list of server descriptions
    */
   serverUpdateHandler(serverDescription: ServerDescription): void {
     if (!this.s.description.hasServer(serverDescription.address)) {
@@ -598,7 +606,7 @@ export class Topology extends EventEmitter {
     // first update the TopologyDescription
     this.s.description = this.s.description.update(serverDescription);
     if (this.s.description.compatibilityError) {
-      this.emit('error', new MongoError(this.s.description.compatibilityError));
+      this.emit(Topology.ERROR, new MongoError(this.s.description.compatibilityError));
       return;
     }
 
@@ -607,7 +615,7 @@ export class Topology extends EventEmitter {
       const newDescription = this.s.description.servers.get(serverDescription.address);
       if (newDescription) {
         this.emit(
-          'serverDescriptionChanged',
+          Topology.SERVER_DESCRIPTION_CHANGED,
           new ServerDescriptionChangedEvent(
             this.s.id,
             serverDescription.address,
@@ -628,7 +636,7 @@ export class Topology extends EventEmitter {
 
     if (!equalDescriptions) {
       this.emit(
-        'topologyDescriptionChanged',
+        Topology.TOPOLOGY_DESCRIPTION_CHANGED,
         new TopologyDescriptionChangedEvent(
           this.s.id,
           previousTopologyDescription,
@@ -650,16 +658,8 @@ export class Topology extends EventEmitter {
   /**
    * Execute a command
    *
-   * @function
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object} cmd The command hash
-   * @param {object} options
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {Connection} [options.connection] Specify connection object to execute command against
-   * @param {boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session=null] Session to use for the operation
-   * @param {opResultCallback} callback A callback function
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - The command
    */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
     if (typeof options === 'function') {
@@ -708,11 +708,9 @@ export class Topology extends EventEmitter {
   /**
    * Create a new cursor
    *
-   * @function
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {object|Long} cmd Can be either a command returning a cursor or a cursorId
-   * @param {object} [options] Options for the cursor
-   * @returns {Cursor}
+   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param cmd - Can be either a command returning a cursor or a cursorId
+   * @param options - Options for the cursor
    */
   cursor(ns: string, cmd: Document, options?: CursorOptions): Cursor {
     options = options || {};
@@ -795,7 +793,10 @@ function destroyServer(
   LOCAL_SERVER_EVENTS.forEach((event: string) => server.removeAllListeners(event));
 
   server.destroy(options, () => {
-    topology.emit('serverClosed', new ServerClosedEvent(topology.s.id, server.description.address));
+    topology.emit(
+      Topology.SERVER_CLOSED,
+      new ServerClosedEvent(topology.s.id, server.description.address)
+    );
 
     SERVER_RELAY_EVENTS.forEach((event: string) => server.removeAllListeners(event));
     if (typeof callback === 'function') {
@@ -807,7 +808,7 @@ function destroyServer(
 /**
  * Parses a basic seedlist in string form
  *
- * @param {string} seedlist The seedlist to parse
+ * @param seedlist - The seedlist to parse
  */
 function parseStringSeedlist(seedlist: string): ServerAddress[] {
   return seedlist.split(',').map((seed: string) => ({
@@ -816,14 +817,7 @@ function parseStringSeedlist(seedlist: string): ServerAddress[] {
   }));
 }
 
-/**
- * Gets the TopologyType from the client options
- *
- * @param {object} options mongo client options
- * @param {boolean} [options.directConnection] Indicates that a client should directly connect to a node without attempting to discover its topology type
- * @param {string} [options.replicaSet] The name of the replica set to connect to
- * @returns TopologyType
- */
+/** Predicts the TopologyType from options */
 function topologyTypeFromOptions(options: TopologyOptions) {
   if (options.directConnection) {
     return TopologyType.Single;
@@ -843,21 +837,24 @@ function randomSelection(array: ServerDescription[]): ServerDescription {
 /**
  * Creates new server instances and attempts to connect them
  *
- * @param {Topology} topology The topology that this server belongs to
- * @param {ServerDescription} serverDescription The description for the server to initialize and connect to
- * @param {number} [connectDelay] Time to wait before attempting initial connection
+ * @param topology - The topology that this server belongs to
+ * @param serverDescription - The description for the server to initialize and connect to
+ * @param connectDelay - Time to wait before attempting initial connection
  */
 function createAndConnectServer(
   topology: Topology,
   serverDescription: ServerDescription,
   connectDelay?: number
 ) {
-  topology.emit('serverOpening', new ServerOpeningEvent(topology.s.id, serverDescription.address));
+  topology.emit(
+    Topology.SERVER_OPENING,
+    new ServerOpeningEvent(topology.s.id, serverDescription.address)
+  );
 
   const server = new Server(topology, serverDescription, topology.s.options);
   relayEvents(server, topology, SERVER_RELAY_EVENTS);
 
-  server.on('descriptionReceived', topology.serverUpdateHandler.bind(topology));
+  server.on(Server.DESCRIPTION_RECEIVED, topology.serverUpdateHandler.bind(topology));
 
   if (connectDelay) {
     const connectTimer = setTimeout(() => {
@@ -877,8 +874,8 @@ function createAndConnectServer(
  * Create `Server` instances for all initially known servers, connect them, and assign
  * them to the passed in `Topology`.
  *
- * @param {Topology} topology The topology responsible for the servers
- * @param {ServerDescription[]} serverDescriptions A list of server descriptions to connect
+ * @param topology - The topology responsible for the servers
+ * @param serverDescriptions - A list of server descriptions to connect
  */
 function connectServers(topology: Topology, serverDescriptions: ServerDescription[]) {
   topology.s.servers = serverDescriptions.reduce(
@@ -892,8 +889,8 @@ function connectServers(topology: Topology, serverDescriptions: ServerDescriptio
 }
 
 /**
- * @param {Topology} topology
- * @param {ServerDescription[]} [incomingServerDescription]
+ * @param topology - Topology to update.
+ * @param incomingServerDescription - New server description.
  */
 function updateServers(topology: Topology, incomingServerDescription?: ServerDescription) {
   // update the internal server's description
@@ -949,7 +946,7 @@ function srvPollingHandler(topology: Topology) {
     updateServers(topology);
 
     topology.emit(
-      'topologyDescriptionChanged',
+      Topology.SERVER_DESCRIPTION_CHANGED,
       new TopologyDescriptionChangedEvent(
         topology.s.id,
         previousTopologyDescription,

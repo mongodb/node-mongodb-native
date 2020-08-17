@@ -33,33 +33,19 @@ export interface MongoCredentialsOptions {
   mechanismProperties: Document;
 }
 
-/**
- * A representation of the credentials used by MongoDB
- *
- * @class
- * @property {string} mechanism The method used to authenticate
- * @property {string} [username] The username used for authentication
- * @property {string} [password] The password used for authentication
- * @property {string} [source] The database that the user should authenticate against
- * @property {object} [mechanismProperties] Special properties used by some types of auth mechanisms
- */
+/** A representation of the credentials used by MongoDB */
 export class MongoCredentials {
+  /** The username used for authentication */
   readonly username: string;
+  /** The password used for authentication */
   readonly password: string;
+  /** The database that the user should authenticate against */
   readonly source: string;
+  /** The method used to authenticate */
   readonly mechanism: AuthMechanism;
+  /** Special properties used by some types of auth mechanisms */
   readonly mechanismProperties: Document;
 
-  /**
-   * Creates a new MongoCredentials object
-   *
-   * @param {object} [options]
-   * @param {string} [options.username] The username used for authentication
-   * @param {string} [options.password] The password used for authentication
-   * @param {string} [options.source] The database that the user should authenticate against
-   * @param {string} [options.mechanism] The method used to authenticate
-   * @param {object} [options.mechanismProperties] Special properties used by some types of auth mechanisms
-   */
   constructor(options: MongoCredentialsOptions) {
     this.username = options.username;
     this.password = options.password;
@@ -88,12 +74,7 @@ export class MongoCredentials {
     Object.freeze(this);
   }
 
-  /**
-   * Determines if two MongoCredentials objects are equivalent
-   *
-   * @param {MongoCredentials} other another MongoCredentials object
-   * @returns {boolean} true if the two objects are equal.
-   */
+  /** Determines if two MongoCredentials objects are equivalent */
   equals(other: MongoCredentials): boolean {
     return (
       this.mechanism === other.mechanism &&
@@ -107,8 +88,7 @@ export class MongoCredentials {
    * If the authentication mechanism is set to "default", resolves the authMechanism
    * based on the server version and server supported sasl mechanisms.
    *
-   * @param {object} [ismaster] An ismaster response from the server
-   * @returns {MongoCredentials}
+   * @param ismaster - An ismaster response from the server
    */
   resolveAuthMechanism(ismaster?: Document): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved

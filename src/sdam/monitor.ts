@@ -16,7 +16,7 @@ import {
   ServerHeartbeatFailedEvent
 } from './events';
 
-import type { Server } from './server';
+import { Server } from './server';
 import type { InterruptableAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
 import type { ConnectionOptions } from '../cmap/connection';
@@ -183,14 +183,14 @@ function resetMonitorState(monitor: Monitor) {
 
 function checkServer(monitor: Monitor, callback: Callback<Document>) {
   let start = now();
-  monitor.emit('serverHeartbeatStarted', new ServerHeartbeatStartedEvent(monitor.address));
+  monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
   function failureHandler(err: AnyError) {
     monitor[kConnection]?.destroy({ force: true });
     monitor[kConnection] = undefined;
 
     monitor.emit(
-      'serverHeartbeatFailed',
+      Server.SERVER_HEARTBEAT_FAILED,
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
     );
 
@@ -237,14 +237,17 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
         isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);
 
       monitor.emit(
-        'serverHeartbeatSucceeded',
+        Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, duration, isMaster)
       );
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
       if (isAwaitable && isMaster.topologyVersion) {
-        monitor.emit('serverHeartbeatStarted', new ServerHeartbeatStartedEvent(monitor.address));
+        monitor.emit(
+          Server.SERVER_HEARTBEAT_STARTED,
+          new ServerHeartbeatStartedEvent(monitor.address)
+        );
         start = now();
       } else {
         monitor[kRTTPinger]?.close();
@@ -279,7 +282,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
       monitor[kConnection] = conn;
       monitor.emit(
-        'serverHeartbeatSucceeded',
+        Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
           calculateDurationInMs(start),
@@ -307,7 +310,7 @@ function monitorServer(monitor: Monitor) {
     process.nextTick(() => monitor.emit('monitoring', monitor[kServer]));
     checkServer(monitor, (err, isMaster) => {
       if (err) {
-        // otherwise an error occured on initial discovery, also bail
+        // otherwise an error occurred on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
           monitor.emit('resetServer', err);
           return done();

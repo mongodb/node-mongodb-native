@@ -93,8 +93,9 @@ import type { OperationParent } from './operations/command';
 
 const mergeKeys = ['ignoreUndefined'];
 
+/** @public */
 export interface Collection {
-  /** @deprecated */
+  /** @deprecated Use {@link Collection.dropIndexes} instead */
   dropAllIndexes(): void;
   removeMany(
     filter: Document,
@@ -114,6 +115,7 @@ export interface CollectionOptions
     WriteConcernOptions,
     LoggerOptions {
   slaveOk?: boolean;
+  /** Returns an error if the collection does not exist */
   strict?: boolean;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
@@ -140,12 +142,14 @@ interface CollectionPrivate {
 }
 
 /**
+ * @public
  * The **Collection** class is an internal class that embodies a MongoDB collection
  * allowing for insert/update/remove/find and other command operation on that MongoDB collection.
  *
  * **COLLECTION Cannot directly be instantiated**
  *
  * @example
+ * ```js
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
  * // Connection url
@@ -163,11 +167,12 @@ interface CollectionPrivate {
  *     client.close();
  *   });
  * });
+ * ```
  */
 export class Collection implements OperationParent {
   s: CollectionPrivate;
 
-  /** Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
+  /** @internal Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
@@ -205,9 +210,6 @@ export class Collection implements OperationParent {
 
   /**
    * The name of the database this collection belongs to
-   *
-   * @member {string} dbName
-   * @memberof Collection#
    * @readonly
    */
   get dbName(): string {
@@ -216,9 +218,6 @@ export class Collection implements OperationParent {
 
   /**
    * The name of this collection
-   *
-   * @member {string} collectionName
-   * @memberof Collection#
    * @readonly
    */
   get collectionName(): string {
@@ -227,9 +226,6 @@ export class Collection implements OperationParent {
 
   /**
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
-   *
-   * @member {string} namespace
-   * @memberof Collection#
    * @readonly
    */
   get namespace(): string {
@@ -239,9 +235,6 @@ export class Collection implements OperationParent {
   /**
    * The current readConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {ReadConcern} [readConcern]
-   * @memberof Collection#
    * @readonly
    */
   get readConcern(): ReadConcern | undefined {
@@ -254,9 +247,6 @@ export class Collection implements OperationParent {
   /**
    * The current readPreference of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {ReadPreference} [readPreference]
-   * @memberof Collection#
    * @readonly
    */
   get readPreference(): ReadPreference | undefined {
@@ -270,9 +260,6 @@ export class Collection implements OperationParent {
   /**
    * The current writeConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   *
-   * @member {WriteConcern} [writeConcern]
-   * @memberof Collection#
    * @readonly
    */
   get writeConcern(): WriteConcern | undefined {
@@ -282,12 +269,7 @@ export class Collection implements OperationParent {
     return this.s.writeConcern;
   }
 
-  /**
-   * The current index hint for the collection
-   *
-   * @member {object} [hint]
-   * @memberof Collection#
-   */
+  /** The current index hint for the collection */
   get hint(): Hint | undefined {
     return this.s.collectionHint;
   }
@@ -359,6 +341,7 @@ export class Collection implements OperationParent {
    *
    * Legal operation types are
    *
+   * ```js
    *  { insertOne: { document: { a: 1 } } }
    *
    *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -372,6 +355,7 @@ export class Collection implements OperationParent {
    *  { deleteMany: { filter: {c:1} } }
    *
    *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
+   *```
    *
    * If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -380,6 +364,7 @@ export class Collection implements OperationParent {
    * @param operations - Bulk operations to perform
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
+   * @throws MongoError if operations is not an array
    */
   bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
   bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
@@ -398,10 +383,7 @@ export class Collection implements OperationParent {
     options = options || { ordered: true };
 
     if (!Array.isArray(operations)) {
-      throw MongoError.create({
-        message: 'operations must be an array of documents',
-        driver: true
-      });
+      throw new MongoError('operations must be an array of documents');
     }
 
     return executeOperation(
@@ -778,7 +760,7 @@ export class Collection implements OperationParent {
 
     // Ensure the query is an object
     if (selector != null && typeof selector !== 'object') {
-      throw MongoError.create({ message: 'query selector must be an object', driver: true });
+      throw new MongoError('query selector must be an object');
     }
 
     // Build the find command
@@ -887,6 +869,7 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
+   * ```js
    * const collection = client.db('foo').collection('bar');
    *
    * await collection.createIndex({ a: 1, b: -1 });
@@ -905,6 +888,7 @@ export class Collection implements OperationParent {
    *
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
+   * ```
    */
   createIndex(indexSpec: IndexSpecification): Promise<Document>;
   createIndex(indexSpec: IndexSpecification, callback: Callback<Document>): void;
@@ -934,14 +918,15 @@ export class Collection implements OperationParent {
    * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
    * error.
    *
-   * **Note**: Unlike {@link Collection#createIndex createIndex}, this function takes in raw index specifications.
-   * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/ here}.
+   * **Note**: Unlike {@link (Collection:class).createIndex| createIndex}, this function takes in raw index specifications.
+   * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
+   * ```js
    * const collection = client.db('foo').collection('bar');
    * await collection.createIndexes([
    *   // Simple index on field fizz
@@ -958,6 +943,7 @@ export class Collection implements OperationParent {
    *     name: 'tanagra'
    *   }
    * ]);
+   * ```
    */
   createIndexes(indexSpecs: IndexDescription[]): Promise<Document>;
   createIndexes(indexSpecs: IndexDescription[], callback: Callback<Document>): void;
@@ -1127,8 +1113,8 @@ export class Collection implements OperationParent {
 
   /**
    * Gets the number of documents matching the filter.
-   * For a fast count of the total documents in a collection see {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
-   * **Note**: When migrating from {@link Collection#count count} to {@link Collection#countDocuments countDocuments}
+   * For a fast count of the total documents in a collection see {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
+   * **Note**: When migrating from {@link Collection.count| count} to {@link Collection.countDocuments| countDocuments}
    * the following query operators must be replaced:
    *
    * | Operator | Replacement |
@@ -1368,7 +1354,7 @@ export class Collection implements OperationParent {
   }
 
   /**
-   * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
+   * Execute an aggregation framework pipeline against the collection, needs MongoDB \>= 2.2
    *
    * @param pipeline - An array of aggregation pipelines to execute
    * @param options - Optional settings for the command
@@ -1475,18 +1461,7 @@ export class Collection implements OperationParent {
     );
   }
 
-  /**
-   * Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
-   *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @returns {UnorderedBulkOperation}
-   */
+  /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: any): any {
     options = options || {};
     // Give function's options precedence over session options.
@@ -1497,18 +1472,7 @@ export class Collection implements OperationParent {
     return unordered(this.s.topology, this, options);
   }
 
-  /**
-   * Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types.
-   *
-   * @function
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {ClientSession} [options.session] optional session to use for this operation
-   * @param {boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
-   * @returns {OrderedBulkOperation}
-   */
+  /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: any): any {
     options = options || {};
     // Give function's options precedence over session's options.
@@ -1519,12 +1483,7 @@ export class Collection implements OperationParent {
     return ordered(this.s.topology, this, options);
   }
 
-  /**
-   * Return the db logger
-   *
-   * @function
-   * @returns {Logger} return the db logger
-   */
+  /** Get the db scoped logger */
   getLogger(): Logger {
     return this.s.db.s.logger;
   }
@@ -1533,8 +1492,9 @@ export class Collection implements OperationParent {
     return this.s.db.s.logger;
   }
 
-  /** @deprecated */
   /**
+   * @deprecated Use insertOne, insertMany or bulkWrite instead.
+   *
    * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
@@ -1639,10 +1599,10 @@ export class Collection implements OperationParent {
    * An estimated count of matching documents in the db to a query.
    *
    * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
-   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments countDocuments}.
-   * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount estimatedDocumentCount}.
+   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection.countDocuments| countDocuments}.
+   * To obtain an estimated count of all documents in the collection, use {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
    *
-   * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
+   * @deprecated use {@link Collection.countDocuments| countDocuments} or {@link Collection.estimatedDocumentCount| estimatedDocumentCount} instead
    *
    * @param query - The query for the count.
    * @param options - Optional settings for the command
