@@ -57,8 +57,8 @@ export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
 /**
- * @public
  * Describes all possible URI query options for the mongo client
+ * @public
  * @see https://docs.mongodb.com/manual/reference/connection-string
  */
 export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
@@ -233,8 +233,8 @@ export interface MongoClientPrivate {
 }
 
 /**
- * @public
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
+ * @public
  *
  * @example
  * ```js

@@ -9,11 +9,11 @@ import type { CommandOperation } from '../operations/command';
 export type CommandCursorOptions = CursorOptions;
 
 /**
- * @public
  * The **CommandCursor** class is an internal class that embodies a
  * generalized cursor based on a MongoDB command allowing for iteration over the
  * results returned. It supports one by one document iteration, conversion to an
  * array or can be iterated as a Node 0.10.X or higher stream
+ * @public
  */
 export class CommandCursor extends Cursor<CommandOperation, CommandCursorOptions> {
   /** @internal */

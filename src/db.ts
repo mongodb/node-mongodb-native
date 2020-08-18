@@ -115,8 +115,8 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
 }
 
 /**
- * @public
  * The **Db** class is a class that represents a MongoDB Database.
+ * @public
  *
  * @example
  * ```js

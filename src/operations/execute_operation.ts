@@ -21,9 +21,10 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
   : never;
 
 /**
- * @internal
  * Executes the given operation with provided arguments.
+ * @internal
  *
+ * @remarks
  * This method reduces large amounts of duplication in the entire codebase by providing
  * a single point for determining whether callbacks or promises should be used. Additionally
  * it allows for a single point of entry to provide features such as implicit sessions, which

@@ -11,11 +11,11 @@ import type { Topology } from '../sdam/topology';
 export interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
 /**
- * @public
  * The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query. It supports
  * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
  * or higher stream
+ * @public
  */
 export class AggregationCursor extends Cursor<AggregateOperation, AggregationCursorOptions> {
   /** @internal */

@@ -40,10 +40,10 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
 }
 
 /**
- * @public
  * A writable stream that enables you to write buffers to GridFS.
  *
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
+ * @public
  */
 export class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;

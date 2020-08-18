@@ -26,11 +26,11 @@ export interface OperationOptions extends BSONSerializeOptions {
 }
 
 /**
- * @internal
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
+ * @internal
  */
 export abstract class OperationBase<
   T extends OperationOptions = OperationOptions,

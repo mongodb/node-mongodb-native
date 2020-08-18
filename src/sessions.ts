@@ -52,10 +52,10 @@ export interface ClientSessionOptions {
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
 /**
- * @public
  * A class representing a client session on the server
  *
  * NOTE: not meant to be instantiated directly.
+ * @public
  */
 class ClientSession extends EventEmitter {
   topology: Topology;
@@ -550,9 +550,9 @@ function supportsRecoveryToken(session: ClientSession) {
 export type ServerSessionId = { id: Binary };
 
 /**
- * @public
  * Reflects the existence of a session on the server. Can be reused by the session pool.
  * WARNING: not meant to be instantiated directly. For internal use only.
+ * @public
  */
 class ServerSession {
   id: ServerSessionId;
@@ -585,9 +585,9 @@ class ServerSession {
 }
 
 /**
- * @internal
  * Maintains a pool of Server Sessions.
  * For internal use only
+ * @internal
  */
 class ServerSessionPool {
   topology: Topology;

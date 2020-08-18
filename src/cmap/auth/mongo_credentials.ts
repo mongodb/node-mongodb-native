@@ -35,8 +35,8 @@ export interface MongoCredentialsOptions {
 }
 
 /**
- * @public
  * A representation of the credentials used by MongoDB
+ * @public
  */
 export class MongoCredentials {
   /** The username used for authentication */

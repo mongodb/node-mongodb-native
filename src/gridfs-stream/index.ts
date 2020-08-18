@@ -50,8 +50,8 @@ export interface GridFSBucketPrivate {
 }
 
 /**
- * @public
  * Constructor for a streaming GridFS interface
+ * @public
  */
 export class GridFSBucket extends EventEmitter {
   /** @internal */

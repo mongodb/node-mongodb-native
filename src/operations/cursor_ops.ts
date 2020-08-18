@@ -8,8 +8,8 @@ import type { Document } from '../bson';
 export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
 /**
- * @internal
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
+ * @internal
  *
  * @deprecated Please use forEach instead
  * @param cursor - The Cursor instance on which to run.
@@ -57,8 +57,8 @@ function loop(cursor: Cursor, callback: Callback) {
 }
 
 /**
- * @internal
  * Returns an array of documents. See Cursor.prototype.toArray for more information.
+ * @internal
  *
  * @param cursor - The Cursor instance from which to get the next document.
  */

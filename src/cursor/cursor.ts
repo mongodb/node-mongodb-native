@@ -56,12 +56,12 @@ export interface CursorOptions extends CoreCursorOptions {
 }
 
 /**
- * @public
  * **CURSORS Cannot directly be instantiated**
  * The `Cursor` class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query. It supports
  * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
  * or higher stream
+ * @public
  *
  * @example
  * ```js

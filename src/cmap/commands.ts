@@ -850,8 +850,8 @@ export class BinMsg {
 }
 
 /**
- * @internal
  * Creates a new CommandResult instance
+ * @internal
  *
  * @param result - CommandResult object
  * @param connection - A connection instance associated with this result

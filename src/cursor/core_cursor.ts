@@ -97,9 +97,9 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 }
 
 /**
- * @internal
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
+ * @internal
  */
 export class CoreCursor<
   O extends OperationBase = OperationBase,

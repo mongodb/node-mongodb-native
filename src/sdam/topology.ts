@@ -180,8 +180,8 @@ export interface SelectServerOptions {
 }
 
 /**
- * @public
  * A container of server instances representing a connection to a MongoDB topology.
+ * @public
  */
 export class Topology extends EventEmitter {
   /** @internal */

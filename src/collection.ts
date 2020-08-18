@@ -144,11 +144,11 @@ export interface CollectionPrivate {
 }
 
 /**
- * @public
  * The **Collection** class is an internal class that embodies a MongoDB collection
  * allowing for insert/update/remove/find and other command operation on that MongoDB collection.
  *
  * **COLLECTION Cannot directly be instantiated**
+ * @public
  *
  * @example
  * ```js

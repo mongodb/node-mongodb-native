@@ -39,10 +39,10 @@ export interface ServerDescriptionOptions {
 }
 
 /**
- * @public
  * The client's view of a single server, based on the most recent ismaster outcome.
  *
  * Internal type, not meant to be directly instantiated
+ * @public
  */
 export class ServerDescription {
   address: string;
@@ -71,8 +71,8 @@ export class ServerDescription {
   $clusterTime?: ClusterTime;
 
   /**
-   * @internal
    * Create a ServerDescription
+   * @internal
    *
    * @param address - The address of the server
    * @param ismaster - An optional ismaster response for this server

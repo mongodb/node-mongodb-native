@@ -9,8 +9,8 @@ const store: PromiseStore = {
 };
 
 /**
- * @public
  * Global promise store allowing user-provided promises
+ * @public
  */
 export class PromiseProvider {
   /** Validates the passed in promise library */

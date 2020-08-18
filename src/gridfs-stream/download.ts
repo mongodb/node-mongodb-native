@@ -62,10 +62,10 @@ export interface GridFSBucketReadStreamPrivate {
 }
 
 /**
- * @public
  * A readable stream that enables you to read buffers from GridFS.
  *
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
+ * @public
  */
 export class GridFSBucketReadStream extends Readable {
   /** @internal */

@@ -22,11 +22,11 @@ export interface AdminPrivate {
 }
 
 /**
- * @public
  * The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  *
  * **ADMIN Cannot directly be instantiated**
+ * @public
  *
  * @example
  * ```js

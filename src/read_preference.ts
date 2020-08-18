@@ -43,9 +43,9 @@ export interface ReadPreferenceLikeOptions {
 }
 
 /**
- * @public
  * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
+ * @public
  *
  * @see https://docs.mongodb.com/manual/core/read-preference/
  */

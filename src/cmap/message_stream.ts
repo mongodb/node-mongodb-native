@@ -51,9 +51,9 @@ export interface OperationDescription extends BSONSerializeOptions {
 }
 
 /**
- * @internal
  * A duplex stream that is capable of reading and writing raw wire protocol messages, with
  * support for optional compression
+ * @internal
  */
 export class MessageStream extends Duplex {
   maxBsonMessageSize: number;

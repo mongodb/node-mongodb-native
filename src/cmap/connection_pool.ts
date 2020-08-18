@@ -601,8 +601,8 @@ function processWaitQueue(pool: ConnectionPool) {
 }
 
 /**
- * @public
  * A callback provided to `withConnection`
+ * @public
  *
  * @param error - An error instance representing the error during the execution.
  * @param connection - The managed connection which was checked out of the pool.

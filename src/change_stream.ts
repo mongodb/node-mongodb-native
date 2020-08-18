@@ -34,14 +34,14 @@ const CHANGE_DOMAIN_TYPES = {
 };
 
 /**
- * @public
  * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server.
+ * @public
  */
 export type ResumeToken = unknown;
 
 /**
- * @public
  * Represents a specific point in time on a server. Can be retrieved by using {@link Db.command}
+ * @public
  * @remarks
  * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
  */
@@ -53,8 +53,8 @@ export interface PipeOptions {
 }
 
 /**
- * @public
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
+ * @public
  */
 export interface ChangeStreamOptions extends AggregateOptions {
   /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
@@ -146,8 +146,8 @@ interface UpdateDescription {
 }
 
 /**
- * @public
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
+ * @public
  */
 export class ChangeStream extends EventEmitter {
   pipeline: Document[];
