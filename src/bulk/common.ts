@@ -654,9 +654,8 @@ class FindOperators {
   };
 
   /**
-   * Creates a new FindOperators object.
-   *
    * @internal
+   * Creates a new FindOperators object.
    */
   constructor(bulkOperation: any) {
     this.s = bulkOperation.s;
@@ -816,9 +815,8 @@ export interface BulkOptions extends BSONSerializeOptions, WriteConcernOptions, 
 }
 
 /**
- * Parent class to OrderedBulkOperation and UnorderedBulkOperation
- *
  * @internal
+ * Parent class to OrderedBulkOperation and UnorderedBulkOperation
  */
 class BulkOperationBase {
   isOrdered: boolean;
@@ -1175,9 +1173,8 @@ class BulkOperationBase {
   }
 
   /**
-   * Handles final options before executing command
-   *
    * @internal
+   * Handles final options before executing command
    */
   finalOptionsHandler(
     config: { options: FinalOptionsConfigOptions; batch: Batch; resultHandler: ResultHandler },
@@ -1258,9 +1255,8 @@ class BulkOperationBase {
   }
 
   /**
-   * Handles the write error before executing commands
-   *
    * @internal
+   * Handles the write error before executing commands
    */
   handleWriteError(callback: Callback<any>, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.bulkResult.writeErrors.length > 0) {

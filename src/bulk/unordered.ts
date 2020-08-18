@@ -103,9 +103,8 @@ export function addToOperationsList(
 }
 
 /**
- * Create a new UnorderedBulkOperation instance
- *
  * @internal
+ * Create a new UnorderedBulkOperation instance
  */
 export class UnorderedBulkOperation extends BulkOperationBase {
   constructor(
