@@ -54,6 +54,7 @@
     "gulp": "^4.0.2",
     "gulp-prettier": "^3.0.0",
     "gulp-typescript": "^6.0.0-alpha.1",
+    "jsdoc": "^3.6.4",
     "lodash.camelcase": "^4.3.0",
     "madge": "^3.9.0",
     "mocha": "^8.0.1",
