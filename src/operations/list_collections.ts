@@ -25,6 +25,7 @@ function listCollectionsTransforms(databaseName: string): DocumentTransforms {
   };
 }
 
+/** @public */
 export interface ListCollectionsOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
@@ -32,6 +33,7 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
   batchSize?: number;
 }
 
+/** @internal */
 export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
   db: Db;
   filter: Document;

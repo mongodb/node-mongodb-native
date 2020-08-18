@@ -86,7 +86,8 @@ const legalOptionNames = [
   'retryWrites'
 ];
 
-interface DbPrivate {
+/** @internal */
+export interface DbPrivate {
   topology: Topology;
   options?: DbOptions;
   logger: Logger;
@@ -97,6 +98,7 @@ interface DbPrivate {
   namespace: MongoDBNamespace;
 }
 
+/** @public */
 export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;

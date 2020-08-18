@@ -27,7 +27,8 @@ import type { TLSSocket } from 'tls';
 import { Transform } from 'stream';
 import { Writable } from 'stream';
 
-declare interface AddUserOptions extends CommandOperationOptions {
+/** @public */
+export declare interface AddUserOptions extends CommandOperationOptions {
   /** @deprecated Please use db.command('createUser', ...) instead for this option */
   digestPassword?: null;
   /** Roles associated with the created user (only Mongodb 2.6 or higher) */
@@ -37,7 +38,7 @@ declare interface AddUserOptions extends CommandOperationOptions {
 }
 
 /**
- * @internal
+ * @public
  * The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  *
@@ -190,11 +191,16 @@ export declare class Admin {
   replSetGetStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
 }
 
-declare interface AdminPrivate {
+/** @internal */
+export declare interface AdminPrivate {
   db: Db;
 }
 
-declare class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
+/** @internal */
+export declare class AggregateOperation<T = Document> extends CommandOperation<
+  AggregateOptions,
+  T
+> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
@@ -204,7 +210,8 @@ declare class AggregateOperation<T = Document> extends CommandOperation<Aggregat
   execute(server: Server, callback: Callback<T>): void;
 }
 
-declare interface AggregateOptions extends CommandOperationOptions {
+/** @public */
+export declare interface AggregateOptions extends CommandOperationOptions {
   /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 \>). */
   allowDiskUse?: boolean;
   /** The number of documents to return per batch. See [aggregation documentation](https://docs.mongodb.com/manual/reference/command/aggregate). */
@@ -272,18 +279,22 @@ export declare class AggregationCursor extends Cursor<
   geoNear: ($geoNear: Document) => this;
 }
 
-declare interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
+/** @public */
+export declare interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
-declare type AnyError = MongoError | Error;
+/** @public */
+export declare type AnyError = MongoError | Error;
 
-declare interface Auth {
+/** @public */
+export declare interface Auth {
   /** The username for auth */
   user?: string;
   /** The password for auth */
   pass?: string;
 }
 
-declare enum AuthMechanism {
+/** @public */
+export declare enum AuthMechanism {
   MONGODB_AWS = 'MONGODB-AWS',
   MONGODB_CR = 'MONGODB-CR',
   MONGODB_DEFAULT = 'DEFAULT',
@@ -294,14 +305,16 @@ declare enum AuthMechanism {
   MONGODB_X509 = 'MONGODB-X509'
 }
 
-declare interface AutoEncrypter {
+/** @public */
+export declare interface AutoEncrypter {
   init(cb: Callback): void;
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
 }
 
-declare const enum AutoEncryptionLoggerLevels {
+/** @public */
+export declare const enum AutoEncryptionLoggerLevels {
   FatalError = 0,
   Error = 1,
   Warning = 2,
@@ -309,7 +322,8 @@ declare const enum AutoEncryptionLoggerLevels {
   Trace = 4
 }
 
-declare interface AutoEncryptionOptions {
+/** @public */
+export declare interface AutoEncryptionOptions {
   /** A `MongoClient` used to fetch keys from a key vault */
   keyVaultClient?: MongoClient;
   /** The namespace where keys are stored in the key vault */
@@ -360,10 +374,11 @@ declare interface AutoEncryptionOptions {
 }
 export { Binary };
 
+/** @public */
 export declare const BSONRegExp: any;
 
-/** BSON Serialization options. TODO: Remove me when types from BSON are updated */
-declare interface BSONSerializeOptions extends SerializeOptions {
+/** @public BSON Serialization options. TODO: Remove me when types from BSON are updated */
+export declare interface BSONSerializeOptions extends SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: {
     [key: string]: boolean;
@@ -381,13 +396,14 @@ declare interface BSONSerializeOptions extends SerializeOptions {
   raw?: boolean;
 }
 
+/** @public */
 export declare const BSONSymbol: any;
 
 /**
- * @classdesc
+ * @public
  * The result of a bulk write.
  */
-declare class BulkWriteResult {
+export declare class BulkWriteResult {
   result: any;
   n: number;
   /** Number of documents inserted. */
@@ -528,10 +544,14 @@ declare class BulkWriteResult {
   isOk(): boolean;
 }
 
-declare type Callback<T = any> = (error?: AnyError, result?: T) => void;
+/** @public MongoDB Driver style callback */
+export declare type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
-/** Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}. */
-declare class ChangeStream extends EventEmitter {
+/**
+ * @public
+ * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
+ */
+export declare class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: OperationParent;
@@ -609,7 +629,11 @@ declare class ChangeStream extends EventEmitter {
   resume(): ChangeStreamCursor;
 }
 
-declare class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamCursorOptions> {
+/** @internal */
+export declare class ChangeStreamCursor extends Cursor<
+  AggregateOperation,
+  ChangeStreamCursorOptions
+> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
@@ -629,14 +653,18 @@ declare class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStream
   _getMore(callback: Callback): void;
 }
 
-declare interface ChangeStreamCursorOptions extends CursorOptions {
+/** @public */
+export declare interface ChangeStreamCursorOptions extends CursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
   startAfter?: boolean;
 }
 
-/** Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified. */
-declare interface ChangeStreamOptions extends AggregateOptions {
+/**
+ * @public
+ * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
+ */
+export declare interface ChangeStreamOptions extends AggregateOptions {
   /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
   fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
@@ -651,7 +679,8 @@ declare interface ChangeStreamOptions extends AggregateOptions {
   batchSize?: number;
 }
 
-declare interface ClientMetadata {
+/** @public */
+export declare interface ClientMetadata {
   driver: {
     name: string;
     version: string;
@@ -669,7 +698,8 @@ declare interface ClientMetadata {
   };
 }
 
-declare interface ClientMetadataOptions {
+/** @public */
+export declare interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;
     version?: string;
@@ -679,11 +709,12 @@ declare interface ClientMetadataOptions {
 }
 
 /**
+ * @public
  * A class representing a client session on the server
  *
  * NOTE: not meant to be instantiated directly.
  */
-declare class ClientSession extends EventEmitter {
+export declare class ClientSession extends EventEmitter {
   topology: Topology;
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
@@ -777,7 +808,8 @@ declare class ClientSession extends EventEmitter {
   withTransaction(fn: WithTransactionCallback, options?: TransactionOptions): Promise<any>;
 }
 
-declare interface ClientSessionOptions {
+/** @public */
+export declare interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
   causalConsistency?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
@@ -787,11 +819,13 @@ declare interface ClientSessionOptions {
   initialClusterTime?: ClusterTime;
 }
 
-declare interface CloseOptions {
+/** @public */
+export declare interface CloseOptions {
   force?: boolean;
 }
 
-declare interface ClusterTime {
+/** @public */
+export declare interface ClusterTime {
   clusterTime: Timestamp;
   signature: {
     hash: Binary;
@@ -800,7 +834,8 @@ declare interface ClusterTime {
 }
 export { Code };
 
-declare interface CollationOptions {
+/** @public */
+export declare interface CollationOptions {
   locale: string;
   caseLevel: boolean;
   caseFirst: string;
@@ -813,7 +848,7 @@ declare interface CollationOptions {
 
 /** @public */
 export declare interface Collection {
-  /** @deprecated Use {@link Collection.dropIndexes} instead */
+  /** @deprecated Use {@link Collection.dropIndexes#Class} instead */
   dropAllIndexes(): void;
   removeMany(
     filter: Document,
@@ -907,8 +942,8 @@ export declare class Collection implements OperationParent {
    */
   insertOne(doc: Document): Promise<InsertOneResult>;
   insertOne(doc: Document, callback: Callback<InsertOneResult>): void;
-  insertOne(doc: Document, options: InsertOptions_2): Promise<InsertOneResult>;
-  insertOne(doc: Document, options: InsertOptions_2, callback: Callback<InsertOneResult>): void;
+  insertOne(doc: Document, options: InsertOptions): Promise<InsertOneResult>;
+  insertOne(doc: Document, options: InsertOptions, callback: Callback<InsertOneResult>): void;
   /**
    * Inserts an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -920,12 +955,8 @@ export declare class Collection implements OperationParent {
    */
   insertMany(docs: Document[]): Promise<InsertManyResult>;
   insertMany(docs: Document[], callback: Callback<InsertManyResult>): void;
-  insertMany(docs: Document[], options: InsertOptions_2): Promise<InsertManyResult>;
-  insertMany(
-    docs: Document[],
-    options: InsertOptions_2,
-    callback: Callback<InsertManyResult>
-  ): void;
+  insertMany(docs: Document[], options: InsertOptions): Promise<InsertManyResult>;
+  insertMany(docs: Document[], options: InsertOptions, callback: Callback<InsertManyResult>): void;
   /**
    * Perform a bulkWrite operation without a fluent API
    *
@@ -958,10 +989,10 @@ export declare class Collection implements OperationParent {
    */
   bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
   bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
-  bulkWrite(operations: Document[], options: InsertOptions_2): Promise<BulkWriteResult>;
+  bulkWrite(operations: Document[], options: InsertOptions): Promise<BulkWriteResult>;
   bulkWrite(
     operations: Document[],
-    options: InsertOptions_2,
+    options: InsertOptions,
     callback: Callback<BulkWriteResult>
   ): void;
   /**
@@ -974,11 +1005,11 @@ export declare class Collection implements OperationParent {
    */
   updateOne(filter: Document, update: Document): Promise<UpdateResult>;
   updateOne(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateOne(filter: Document, update: Document, options: UpdateOptions_2): Promise<UpdateResult>;
+  updateOne(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
   updateOne(
     filter: Document,
     update: Document,
-    options: UpdateOptions_2,
+    options: UpdateOptions,
     callback: Callback<UpdateResult>
   ): void;
   /**
@@ -1012,11 +1043,11 @@ export declare class Collection implements OperationParent {
    */
   updateMany(filter: Document, update: Document): Promise<UpdateResult>;
   updateMany(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateMany(filter: Document, update: Document, options: UpdateOptions_2): Promise<UpdateResult>;
+  updateMany(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
   updateMany(
     filter: Document,
     update: Document,
-    options: UpdateOptions_2,
+    options: UpdateOptions,
     callback: Callback<UpdateResult>
   ): void;
   /**
@@ -1436,7 +1467,7 @@ export declare class Collection implements OperationParent {
    */
   insert(
     docs: Document[],
-    options: InsertOptions_2,
+    options: InsertOptions,
     callback: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void;
   /**
@@ -1451,7 +1482,7 @@ export declare class Collection implements OperationParent {
   update(
     selector: Document,
     update: Document,
-    options: UpdateOptions_2,
+    options: UpdateOptions,
     callback: Callback<Document>
   ): Promise<UpdateResult> | void;
   /**
@@ -1571,7 +1602,8 @@ export declare class Collection implements OperationParent {
   ): Promise<Document> | void;
 }
 
-declare interface CollectionOptions
+/** @public */
+export declare interface CollectionOptions
   extends BSONSerializeOptions,
     WriteConcernOptions,
     LoggerOptions {
@@ -1584,7 +1616,8 @@ declare interface CollectionOptions
   readPreference?: ReadPreferenceLike;
 }
 
-declare interface CollectionPrivate {
+/** @internal */
+export declare interface CollectionPrivate {
   pkFactory: PkFactory | typeof ObjectId;
   db: Db;
   topology: Topology;
@@ -1602,7 +1635,8 @@ declare interface CollectionPrivate {
   writeConcern?: WriteConcern;
 }
 
-declare interface CollStatsOptions extends CommandOperationOptions {
+/** @public */
+export declare interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
@@ -1638,9 +1672,11 @@ export declare class CommandCursor extends Cursor<CommandOperation, CommandCurso
   maxTimeMS(value: number): this;
 }
 
-declare type CommandCursorOptions = CursorOptions;
+/** @public */
+export declare type CommandCursorOptions = CursorOptions;
 
-declare abstract class CommandOperation<
+/** @internal */
+export declare abstract class CommandOperation<
   T extends CommandOperationOptions = CommandOperationOptions,
   TResult = Document
 > extends OperationBase<T> {
@@ -1656,7 +1692,8 @@ declare abstract class CommandOperation<
   executeCommand(server: Server, cmd: Document, callback: Callback): void;
 }
 
-declare interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
+/** @public */
+export declare interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
@@ -1675,7 +1712,8 @@ declare interface CommandOperationOptions extends OperationOptions, WriteConcern
   authdb?: string;
 }
 
-declare interface CommandOptions extends BSONSerializeOptions {
+/** @internal */
+export declare interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
   /** Specify read preference if command supports it */
@@ -1694,12 +1732,13 @@ declare interface CommandOptions extends BSONSerializeOptions {
 }
 
 /**
+ * @internal
  * Creates a new CommandResult instance
  *
  * @param result - CommandResult object
  * @param connection - A connection instance associated with this result
  */
-declare class CommandResult {
+export declare class CommandResult {
   ok?: number;
   result: Document;
   connection: Connection;
@@ -1711,15 +1750,18 @@ declare class CommandResult {
   toString(): string;
 }
 
-declare enum Compressor {
+/** @public */
+export declare enum Compressor {
   none = 0,
   snappy = 1,
   zlib = 2
 }
 
-declare type CompressorName = keyof typeof Compressor;
+/** @public */
+export declare type CompressorName = keyof typeof Compressor;
 
-declare class Connection extends EventEmitter {
+/** @public */
+export declare class Connection extends EventEmitter {
   id: number;
   address: string;
   socketTimeout: number;
@@ -1755,8 +1797,8 @@ declare class Connection extends EventEmitter {
   markAvailable(): void;
   destroy(): void;
   destroy(callback?: Callback): void;
-  destroy(options?: DestroyOptions_2): void;
-  destroy(options?: DestroyOptions_2, callback?: Callback): void;
+  destroy(options?: DestroyOptions): void;
+  destroy(options?: DestroyOptions, callback?: Callback): void;
   command(ns: string, cmd: Document, callback: Callback): void;
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   query(
@@ -1774,12 +1816,13 @@ declare class Connection extends EventEmitter {
     callback: Callback
   ): void;
   killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void;
-  insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void;
-  update(ns: string, ops: Document[], options: UpdateOptions, callback: Callback): void;
-  remove(ns: string, ops: Document[], options: RemoveOptions, callback: Callback): void;
+  insert(ns: string, ops: Document[], options: WireInsertOptions, callback: Callback): void;
+  update(ns: string, ops: Document[], options: WireUpdateOptions, callback: Callback): void;
+  remove(ns: string, ops: Document[], options: WireRemoveOptions, callback: Callback): void;
 }
 
-declare interface ConnectionOptions
+/** @public */
+export declare interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<ConnectionOptions_2>,
@@ -1803,7 +1846,8 @@ declare interface ConnectionOptions
   captureRejections?: boolean;
 }
 
-declare interface ConnectionPool {
+/** @public NOTE: to be removed as part of NODE-2745 */
+export declare interface ConnectionPool {
   isConnected(): boolean;
   write(
     message: any,
@@ -1812,8 +1856,8 @@ declare interface ConnectionPool {
   ): void;
 }
 
-/** A pool of connections which dynamically resizes, and emit events related to pool activity */
-declare class ConnectionPool extends EventEmitter {
+/** @public A pool of connections which dynamically resizes, and emit events related to pool activity */
+export declare class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   [kLogger]: Logger;
@@ -1920,7 +1964,8 @@ declare class ConnectionPool extends EventEmitter {
   withConnection(fn: WithConnectionCallback, callback?: Callback<Connection>): void;
 }
 
-declare interface ConnectionPoolOptions extends ConnectionOptions {
+/** @public */
+export declare interface ConnectionPoolOptions extends ConnectionOptions {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
   /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
@@ -1931,7 +1976,8 @@ declare interface ConnectionPoolOptions extends ConnectionOptions {
   waitQueueTimeoutMS: number;
 }
 
-declare interface ConnectOptions {
+/** @public */
+export declare interface ConnectOptions {
   readPreference?: ReadPreference;
 }
 
@@ -1940,7 +1986,7 @@ declare interface ConnectOptions {
  * The **CoreCursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
  */
-declare class CoreCursor<
+export declare class CoreCursor<
   O extends OperationBase = OperationBase,
   T extends CoreCursorOptions = CoreCursorOptions
 > extends Readable {
@@ -2022,7 +2068,8 @@ declare class CoreCursor<
   _initializeCursor(callback: Callback): void;
 }
 
-declare interface CoreCursorOptions extends CommandOperationOptions {
+/** @public */
+export declare interface CoreCursorOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   tailable?: boolean;
   raw?: boolean;
@@ -2037,7 +2084,8 @@ declare interface CoreCursorOptions extends CommandOperationOptions {
   transforms?: DocumentTransforms;
 }
 
-declare interface CoreCursorPrivate {
+/** @internal */
+export declare interface CoreCursorPrivate {
   /** Transforms functions */
   transforms?: DocumentTransforms;
   numberOfRetries: number;
@@ -2049,14 +2097,16 @@ declare interface CoreCursorPrivate {
   readConcern?: ReadConcern;
 }
 
-declare interface CountDocumentsOptions extends AggregateOptions {
+/** @public */
+export declare interface CountDocumentsOptions extends AggregateOptions {
   /** The number of documents to skip. */
   skip?: number;
   /** The maximum amounts to count before aborting. */
   limit?: number;
 }
 
-declare interface CountOptions extends CommandOperationOptions {
+/** @public */
+export declare interface CountOptions extends CommandOperationOptions {
   /** The number of documents to skip. */
   skip?: number;
   /** The maximum amounts to count before aborting. */
@@ -2067,7 +2117,8 @@ declare interface CountOptions extends CommandOperationOptions {
   hint?: string | Document;
 }
 
-declare interface CreateCollectionOptions extends CommandOperationOptions {
+/** @public */
+export declare interface CreateCollectionOptions extends CommandOperationOptions {
   /** Returns an error if the collection does not exist */
   strict?: boolean;
   /** Create a capped collection */
@@ -2098,7 +2149,8 @@ declare interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
 }
 
-declare interface CreateIndexesOptions extends CommandOperationOptions {
+/** @public */
+export declare interface CreateIndexesOptions extends CommandOperationOptions {
   /** Creates the index in the background, yielding whenever possible. */
   background?: boolean;
   /** Creates an unique index. */
@@ -2259,7 +2311,7 @@ export declare class Cursor<
    *
    * @param value - The field value.
    */
-  setCursorOption(field: typeof FIELDS[number], value: number): this;
+  setCursorOption(field: typeof CURSOR_FIELDS[number], value: number): this;
   /**
    * Add a cursor flag to the cursor
    *
@@ -2330,13 +2382,14 @@ export declare class Cursor<
    */
   skip(value: number): this;
   /**
-   * @deprecated Please use {@link Cursor.forEach} instead
    * Iterates over all the documents for this cursor. As with `cursor.toArray`,
    * not all of the elements will be iterated if this cursor had been previously accessed.
    * In that case, `cursor.rewind` can be used to reset the cursor. However, unlike
    * `cursor.toArray`, the cursor will only hold a maximum of batch size elements
    * at any given time if batch size is specified. Otherwise, the caller is responsible
    * for making sure that the entire result can fit the memory.
+   *
+   * @deprecated Please use {@link Cursor.forEach} instead
    */
   each(callback: EachCallback): void;
   /**
@@ -2405,14 +2458,30 @@ export declare class Cursor<
   getLogger(): Logger;
 }
 
-declare interface CursorCloseOptions {
+/** @public */
+export declare const CURSOR_FIELDS: readonly ['numberOfRetries', 'tailableRetryInterval'];
+
+/** @public Flags allowed for cursor */
+export declare const CURSOR_FLAGS: readonly [
+  'tailable',
+  'oplogReplay',
+  'noCursorTimeout',
+  'awaitData',
+  'exhaust',
+  'partial'
+];
+
+/** @public */
+export declare interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
 }
 
-declare type CursorFlag = typeof FLAGS[number];
+/** @public */
+export declare type CursorFlag = typeof CURSOR_FLAGS[number];
 
-declare interface CursorOptions extends CoreCursorOptions {
+/** @public */
+export declare interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
@@ -2423,9 +2492,11 @@ declare interface CursorOptions extends CoreCursorOptions {
   numberOfRetries?: number;
 }
 
-declare type CursorPrivate = CoreCursorPrivate;
+/** @internal */
+export declare type CursorPrivate = CoreCursorPrivate;
 
-declare enum CursorState {
+/** @public Possible states for a cursor */
+export declare enum CursorState {
   INIT = 0,
   OPEN = 1,
   CLOSED = 2,
@@ -2774,9 +2845,14 @@ export declare class Db implements OperationParent {
   profilingInfo(options: ProfilingLevelOptions, callback: Callback<Document[]>): void;
 }
 
-declare const DB_AGGREGATE_COLLECTION: 1;
+/** @internal */
+export declare const DB_AGGREGATE_COLLECTION: 1;
 
-declare interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
+/** @public */
+export declare interface DbOptions
+  extends BSONSerializeOptions,
+    WriteConcernOptions,
+    LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
@@ -2791,7 +2867,8 @@ declare interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, L
   retryWrites?: boolean;
 }
 
-declare interface DbPrivate {
+/** @internal */
+export declare interface DbPrivate {
   topology: Topology;
   options?: DbOptions;
   logger: Logger;
@@ -2803,17 +2880,20 @@ declare interface DbPrivate {
 }
 export { DBRef };
 
-declare interface DbStatsOptions extends CommandOperationOptions {
+/** @public */
+export declare interface DbStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
 export { Decimal128 };
 
-declare interface DeleteOptions extends CommandOperationOptions {
+/** @public */
+export declare interface DeleteOptions extends CommandOperationOptions {
   single?: boolean;
 }
 
-declare interface DeleteResult {
+/** @public */
+export declare interface DeleteResult {
   /** Indicates whether this write result was acknowledged */
   acknowledged: boolean;
   /** The number of documents that were deleted */
@@ -2824,22 +2904,22 @@ declare interface DeleteResult {
   connection?: Connection;
 }
 
-declare interface DestroyOptions {
-  /** Force the destruction of the pool. */
+/** @public */
+export declare interface DestroyOptions {
+  /** Force the destruction. */
   force?: boolean;
 }
 
-declare interface DestroyOptions_2 {
-  force?: boolean;
-}
+/** @public */
+export declare type DistinctOptions = CommandOperationOptions;
 
-declare type DistinctOptions = CommandOperationOptions;
-
-declare interface Document {
+/** @public */
+export declare interface Document {
   [key: string]: any;
 }
 
-declare interface DocumentTransforms {
+/** @public */
+export declare interface DocumentTransforms {
   /** Transform each document returned */
   doc(doc: Document): Document;
   /** Transform the value returned from the initial query */
@@ -2847,21 +2927,27 @@ declare interface DocumentTransforms {
 }
 export { Double };
 
-declare interface DriverInfo {
+/** @public */
+export declare interface DriverInfo {
   name?: string;
   version?: string;
   platform?: string;
 }
 
-declare type DropCollectionOptions = CommandOperationOptions;
+/** @public */
+export declare type DropCollectionOptions = CommandOperationOptions;
 
-declare type DropDatabaseOptions = CommandOperationOptions;
+/** @public */
+export declare type DropDatabaseOptions = CommandOperationOptions;
 
-declare type DropIndexesOptions = CommandOperationOptions;
+/** @public */
+export declare type DropIndexesOptions = CommandOperationOptions;
 
-declare type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
+/** @public */
+export declare type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
-declare interface ErrorDescription {
+/** @public */
+export declare interface ErrorDescription {
   message?: string;
   errmsg?: string;
   $err?: string;
@@ -2869,21 +2955,23 @@ declare interface ErrorDescription {
   [key: string]: any;
 }
 
-declare interface EstimatedDocumentCountOptions extends CommandOperationOptions {
+/** @public */
+export declare interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   skip?: number;
   limit?: number;
   hint?: Hint;
 }
 
-declare interface EvalOptions extends CommandOperationOptions {
+/** @public */
+export declare interface EvalOptions extends CommandOperationOptions {
   nolock?: boolean;
 }
 
-declare const FIELDS: readonly ['numberOfRetries', 'tailableRetryInterval'];
+/** @public */
+export declare type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
-declare type FinalizeFunction = (key: string, reducedValue: Document) => Document;
-
-declare interface FindAndModifyOptions extends CommandOperationOptions {
+/** @public */
+export declare interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */
@@ -2905,7 +2993,8 @@ declare interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
-declare interface FindOptions extends QueryOptions {
+/** @public */
+export declare interface FindOptions extends QueryOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -2956,19 +3045,11 @@ declare interface FindOptions extends QueryOptions {
   allowDiskUse?: boolean;
 }
 
-declare const FLAGS: readonly [
-  'tailable',
-  'oplogReplay',
-  'noCursorTimeout',
-  'awaitData',
-  'exhaust',
-  'partial'
-];
-
 /**************************************************************
  * GETMORE
  **************************************************************/
-declare class GetMore {
+/** @internal */
+export declare class GetMore {
   numberToReturn: number;
   requestId: number;
   ns: string;
@@ -2977,13 +3058,15 @@ declare class GetMore {
   toBin(): Buffer[];
 }
 
-declare type GetMoreOptions = CommandOptions;
+/** @internal */
+export declare type GetMoreOptions = CommandOptions;
 
 /**
  * @public
  * Constructor for a streaming GridFS interface
  */
 export declare class GridFSBucket extends EventEmitter {
+  /** @internal */
   s: GridFSBucketPrivate;
   /**
    * When the first call to openUploadStream is made, the upload stream will
@@ -3054,7 +3137,8 @@ export declare class GridFSBucket extends EventEmitter {
   getLogger(): Logger;
 }
 
-declare interface GridFSBucketOptions extends WriteConcernOptions {
+/** @public */
+export declare interface GridFSBucketOptions extends WriteConcernOptions {
   /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
   bucketName?: string;
   /** Number of bytes stored in each chunk. Defaults to 255KB */
@@ -3063,7 +3147,8 @@ declare interface GridFSBucketOptions extends WriteConcernOptions {
   readPreference?: ReadPreference;
 }
 
-declare interface GridFSBucketPrivate {
+/** @internal */
+export declare interface GridFSBucketPrivate {
   db: Db;
   options: {
     bucketName: string;
@@ -3078,11 +3163,12 @@ declare interface GridFSBucketPrivate {
 }
 
 /**
+ * @public
  * A readable stream that enables you to read buffers from GridFS.
  *
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
  */
-declare class GridFSBucketReadStream extends Readable {
+export declare class GridFSBucketReadStream extends Readable {
   s: GridFSBucketReadStreamPrivate;
   /**
    * An error occurred
@@ -3153,7 +3239,8 @@ declare class GridFSBucketReadStream extends Readable {
   abort(callback?: Callback<void>): void;
 }
 
-declare interface GridFSBucketReadStreamOptions {
+/** @public */
+export declare interface GridFSBucketReadStreamOptions {
   sort?: Sort;
   skip?: number;
   /** 0-based offset in bytes to start streaming from */
@@ -3162,14 +3249,17 @@ declare interface GridFSBucketReadStreamOptions {
   end?: number;
 }
 
-declare interface GridFSBucketReadStreamOptionsWithRevision extends GridFSBucketReadStreamOptions {
+/** @public */
+export declare interface GridFSBucketReadStreamOptionsWithRevision
+  extends GridFSBucketReadStreamOptions {
   /** The revision number relative to the oldest file with the given filename. 0
    * gets you the oldest file, 1 gets you the 2nd oldest, -1 gets you the
    * newest. */
   revision?: number;
 }
 
-declare interface GridFSBucketReadStreamPrivate {
+/** @internal */
+export declare interface GridFSBucketReadStreamPrivate {
   bytesRead: number;
   bytesToTrim: number;
   bytesToSkip: number;
@@ -3191,11 +3281,12 @@ declare interface GridFSBucketReadStreamPrivate {
 }
 
 /**
+ * @public
  * A writable stream that enables you to write buffers to GridFS.
  *
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
  */
-declare class GridFSBucketWriteStream extends Writable {
+export declare class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;
   chunks: Collection;
   filename: string;
@@ -3270,7 +3361,8 @@ declare class GridFSBucketWriteStream extends Writable {
   ): void;
 }
 
-declare interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
+/** @public */
+export declare interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
   /** Custom file id for the GridFS file. */
@@ -3285,7 +3377,8 @@ declare interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   disableMD5?: boolean;
 }
 
-declare interface GridFSFile {
+/** @public */
+export declare interface GridFSFile {
   _id: GridFSBucketWriteStream['id'];
   length: GridFSBucketWriteStream['length'];
   chunkSize: GridFSBucketWriteStream['chunkSizeBytes'];
@@ -3297,28 +3390,34 @@ declare interface GridFSFile {
   uploadDate: Date;
 }
 
-declare interface HedgeOptions {
+/** @public */
+export declare interface HedgeOptions {
   /** Explicitly enable or disable hedged reads. */
   enabled?: boolean;
 }
 
-declare type Hint = string | Document;
+/** @public */
+export declare type Hint = string | Document;
 
-declare interface IndexDescription {
+/** @internal */
+export declare interface IndexDescription {
   collation?: CollationOptions;
   name?: string;
   key: Document;
 }
 
-declare type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+/** @public */
+export declare type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
 
-declare interface IndexInformationOptions {
+/** @internal */
+export declare interface IndexInformationOptions {
   full?: boolean;
   readPreference?: ReadPreference;
   session?: ClientSession;
 }
 
-declare type IndexSpecification =
+/** @public */
+export declare type IndexSpecification =
   | string
   | [string, IndexDirection]
   | {
@@ -3330,7 +3429,8 @@ declare type IndexSpecification =
     }[]
   | IndexSpecification[];
 
-declare interface InsertManyResult {
+/** @public */
+export declare interface InsertManyResult {
   /** The total amount of documents inserted. */
   insertedCount: number;
   /** Map of the index of the inserted document to the id of the inserted document. */
@@ -3343,7 +3443,8 @@ declare interface InsertManyResult {
   result: Document;
 }
 
-declare interface InsertOneResult {
+/** @public */
+export declare interface InsertOneResult {
   /** The total amount of documents inserted */
   insertedCount: number;
   /** The driver generated ObjectId for the insert operation */
@@ -3356,9 +3457,8 @@ declare interface InsertOneResult {
   result: Document;
 }
 
-declare type InsertOptions = WriteCommandOptions;
-
-declare interface InsertOptions_2 extends CommandOperationOptions {
+/** @public */
+export declare interface InsertOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
   /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
@@ -3372,7 +3472,8 @@ declare interface InsertOptions_2 extends CommandOperationOptions {
 /** @public */
 export declare function instrument(options: any, callback: Callback): Instrumentation;
 
-declare class Instrumentation extends EventEmitter {
+/** @public */
+export declare class Instrumentation extends EventEmitter {
   $MongoClient: any;
   $prototypeConnect: any;
   /** @event */
@@ -3387,7 +3488,8 @@ declare class Instrumentation extends EventEmitter {
 }
 export { Int32 };
 
-declare interface InternalCursorState extends BSONSerializeOptions {
+/** @internal */
+export declare interface InternalCursorState extends BSONSerializeOptions {
   postBatchResumeToken?: ResumeToken;
   batchSize: number;
   cmd: Document;
@@ -3410,7 +3512,8 @@ declare interface InternalCursorState extends BSONSerializeOptions {
   raw?: boolean;
 }
 
-declare interface InterruptableAsyncInterval {
+/** @internal */
+export declare interface InterruptableAsyncInterval {
   wake(): void;
   stop(): void;
 }
@@ -3448,7 +3551,8 @@ declare const kGeneration_2: unique symbol;
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
-declare class KillCursor {
+/** @internal */
+export declare class KillCursor {
   ns: string;
   requestId: number;
   cursorIds: Long[];
@@ -3488,14 +3592,16 @@ declare const kWaitQueue: unique symbol;
 
 declare const kWaitQueue_2: unique symbol;
 
-declare interface ListCollectionsOptions extends CommandOperationOptions {
+/** @public */
+export declare interface ListCollectionsOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
 
-declare interface ListDatabasesOptions extends CommandOperationOptions {
+/** @public */
+export declare interface ListDatabasesOptions extends CommandOperationOptions {
   /** A query predicate that determines which databases are listed */
   filter?: Document;
   /** A flag to indicate whether the command should return just the database names, or return both database names and size information */
@@ -3504,9 +3610,11 @@ declare interface ListDatabasesOptions extends CommandOperationOptions {
   authorizedDatabases?: boolean;
 }
 
-declare type ListDatabasesResult = string[] | Document[];
+/** @public */
+export declare type ListDatabasesResult = string[] | Document[];
 
-declare interface ListIndexesOptions extends CommandOperationOptions {
+/** @public */
+export declare interface ListIndexesOptions extends CommandOperationOptions {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
@@ -3584,21 +3692,25 @@ export declare class Logger {
   static setLevel(newLevel: LoggerLevel): void;
 }
 
-declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
+/** @public */
+export declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 
-declare enum LoggerLevel {
+/** @public */
+export declare enum LoggerLevel {
   ERROR = 'error',
   WARN = 'warn',
   INFO = 'info',
   DEBUG = 'debug'
 }
 
-declare interface LoggerOptions {
+/** @public */
+export declare interface LoggerOptions {
   logger?: LoggerFunction;
   loggerLevel?: LoggerLevel;
 }
 
-declare enum LogLevel {
+/** @public */
+export declare enum LogLevel {
   'error' = 'error',
   'warn' = 'warn',
   'info' = 'info',
@@ -3606,12 +3718,15 @@ declare enum LogLevel {
 }
 export { Long };
 
+/** @public */
 declare const Map_2: any;
 export { Map_2 as Map };
 
-declare type MapFunction = () => void;
+/** @public */
+export declare type MapFunction = () => void;
 
-declare interface MapReduceOptions extends CommandOperationOptions {
+/** @public */
+export declare interface MapReduceOptions extends CommandOperationOptions {
   /** Sets the output target for the map reduce job. */
   out?:
     | 'inline'
@@ -3649,10 +3764,11 @@ declare interface MapReduceOptions extends CommandOperationOptions {
 export { MaxKey };
 
 /**
+ * @internal
  * A duplex stream that is capable of reading and writing raw wire protocol messages, with
  * support for optional compression
  */
-declare class MessageStream extends Duplex {
+export declare class MessageStream extends Duplex {
   maxBsonMessageSize: number;
   [kBuffer]: BufferList;
   constructor(options?: MessageStreamOptions);
@@ -3661,13 +3777,14 @@ declare class MessageStream extends Duplex {
   writeCommand(command: WriteProtocolMessageType, operationDescription: OperationDescription): void;
 }
 
-declare interface MessageStreamOptions extends DuplexOptions {
+/** @internal */
+export declare interface MessageStreamOptions extends DuplexOptions {
   maxBsonMessageSize?: number;
 }
 export { MinKey };
 
 /**
- * @classdesc An error indicating an unsuccessful Bulk Write
+ * @public An error indicating an unsuccessful Bulk Write
  * @extends {MongoError}
  */
 export declare class MongoBulkWriteError extends MongoError {
@@ -3719,6 +3836,7 @@ export declare class MongoBulkWriteError extends MongoError {
  * ```
  */
 export declare class MongoClient extends EventEmitter implements OperationParent {
+  /** @internal */
   s: MongoClientPrivate;
   topology?: Topology;
   constructor(url: string, options?: MongoClientOptions);
@@ -3801,7 +3919,8 @@ export declare class MongoClient extends EventEmitter implements OperationParent
   logout: (options: any, callback: Callback) => void;
 }
 
-declare interface MongoClientOptions
+/** @public */
+export declare interface MongoClientOptions
   extends WriteConcernOptions,
     MongoURIOptions,
     BSONSerializeOptions {
@@ -3880,7 +3999,8 @@ declare interface MongoClientOptions
   dbName?: string;
 }
 
-declare interface MongoClientPrivate {
+/** @internal */
+export declare interface MongoClientPrivate {
   url: string;
   options?: MongoClientOptions;
   dbCache: Map<string, Db>;
@@ -3891,8 +4011,11 @@ declare interface MongoClientPrivate {
   logger: Logger;
 }
 
-/** A representation of the credentials used by MongoDB */
-declare class MongoCredentials {
+/**
+ * @public
+ * A representation of the credentials used by MongoDB
+ */
+export declare class MongoCredentials {
   /** The username used for authentication */
   readonly username: string;
   /** The password used for authentication */
@@ -3915,7 +4038,8 @@ declare class MongoCredentials {
   resolveAuthMechanism(ismaster?: Document): MongoCredentials;
 }
 
-declare interface MongoCredentialsOptions {
+/** @public */
+export declare interface MongoCredentialsOptions {
   username: string;
   password: string;
   source: string;
@@ -3924,7 +4048,8 @@ declare interface MongoCredentialsOptions {
   mechanismProperties: Document;
 }
 
-declare class MongoDBNamespace {
+/** @public */
+export declare class MongoDBNamespace {
   db: string;
   collection?: string;
   /**
@@ -4003,10 +4128,11 @@ export declare class MongoTimeoutError extends MongoError {
 }
 
 /**
+ * @public
  * Describes all possible URI query options for the mongo client
- * https://docs.mongodb.com/manual/reference/connection-string
+ * @see https://docs.mongodb.com/manual/reference/connection-string
  */
-declare interface MongoURIOptions
+export declare interface MongoURIOptions
   extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
@@ -4092,7 +4218,9 @@ export declare class MongoWriteConcernError extends MongoError {
   constructor(message: string, result: Document);
 }
 
-declare class Monitor extends EventEmitter {
+/** @public */
+export declare class Monitor extends EventEmitter {
+  /** @internal */
   s: MonitorPrivate;
   address: string;
   options: MonitorOptions;
@@ -4109,17 +4237,20 @@ declare class Monitor extends EventEmitter {
   close(): void;
 }
 
-declare interface MonitorOptions {
+/** @public */
+export declare interface MonitorOptions {
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
 }
 
-declare interface MonitorPrivate {
+/** @internal */
+export declare interface MonitorPrivate {
   state: string;
 }
 
-declare class Msg {
+/** @internal */
+export declare class Msg {
   ns: string;
   command: Document;
   options: OpQueryOptions;
@@ -4140,12 +4271,13 @@ declare class Msg {
 export { ObjectId };
 
 /**
+ * @internal
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
  * a specific aspect.
  */
-declare abstract class OperationBase<
+export declare abstract class OperationBase<
   T extends OperationOptions = OperationOptions,
   TResult = Document
 > {
@@ -4166,7 +4298,8 @@ declare abstract class OperationBase<
   get canRetryWrite(): boolean;
 }
 
-declare interface OperationDescription extends BSONSerializeOptions {
+/** @internal */
+export declare interface OperationDescription extends BSONSerializeOptions {
   started: number;
   cb: Callback<CommandResult>;
   command: boolean;
@@ -4182,12 +4315,14 @@ declare interface OperationDescription extends BSONSerializeOptions {
   $clusterTime?: Document;
 }
 
-declare interface OperationOptions extends BSONSerializeOptions {
+/** @internal */
+export declare interface OperationOptions extends BSONSerializeOptions {
   explain?: boolean;
   session?: ClientSession;
 }
 
-declare interface OperationParent {
+/** @internal */
+export declare interface OperationParent {
   s: {
     namespace: MongoDBNamespace;
   };
@@ -4198,17 +4333,20 @@ declare interface OperationParent {
 }
 
 /**
+ * @public
  * Represents a specific point in time on a server. Can be retrieved by using {@link Db.command}
  * @remarks
  * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
  */
-declare type OperationTime = Timestamp;
+export declare type OperationTime = Timestamp;
 
-declare interface OpGetMoreOptions {
+/** @internal */
+export declare interface OpGetMoreOptions {
   numberToReturn?: number;
 }
 
-declare interface OpQueryOptions {
+/** @internal */
+export declare interface OpQueryOptions {
   socketTimeout?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
@@ -4227,27 +4365,33 @@ declare interface OpQueryOptions {
   readPreference?: ReadPreference;
 }
 
-declare interface PipeOptions {
+/** @public */
+export declare interface PipeOptions {
   end?: boolean;
 }
 
-declare type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
+/** @public */
+export declare type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
 
-declare abstract class PkFactoryAbstract {
+/** @public */
+export declare abstract class PkFactoryAbstract {
   abstract createPk(): any;
 }
 
-declare interface PkFactoryLiteral {
+/** @public */
+export declare interface PkFactoryLiteral {
   createPk(): any;
 }
 
-declare enum ProfilingLevel {
+/** @public */
+export declare enum ProfilingLevel {
   off = 'off',
   slowOnly = 'slow_only',
   all = 'all'
 }
 
-declare type ProfilingLevelOptions = CommandOperationOptions;
+/** @public */
+export declare type ProfilingLevelOptions = CommandOperationOptions;
 
 /**
  * @public
@@ -4266,7 +4410,8 @@ export { Promise_2 as Promise };
 /**************************************************************
  * QUERY
  **************************************************************/
-declare class Query {
+/** @internal */
+export declare class Query {
   ns: string;
   query: Document;
   numberToSkip: number;
@@ -4297,17 +4442,19 @@ declare class Query {
   toBin(): Buffer[];
 }
 
-declare interface QueryOptions extends CommandOptions {
+/** @internal */
+export declare interface QueryOptions extends CommandOptions {
   readPreference?: ReadPreferenceLike;
 }
 
 /**
+ * @public
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
  *
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
-declare class ReadConcern {
+export declare class ReadConcern {
   level: ReadConcernLevel;
   /** Constructs a ReadConcern from the read concern level.*/
   constructor(level: ReadConcernLevel);
@@ -4323,7 +4470,8 @@ declare class ReadConcern {
   static get SNAPSHOT(): string;
 }
 
-declare enum ReadConcernLevel {
+/** @public */
+export declare enum ReadConcernLevel {
   local = 'local',
   majority = 'majority',
   linearizable = 'linearizable',
@@ -4409,12 +4557,14 @@ export declare class ReadPreference {
   toJSON(): object;
 }
 
-declare type ReadPreferenceLike =
+/** @public */
+export declare type ReadPreferenceLike =
   | ReadPreference
   | ReadPreferenceMode
   | keyof typeof ReadPreferenceMode;
 
-declare interface ReadPreferenceLikeOptions {
+/** @public */
+export declare interface ReadPreferenceLikeOptions {
   readPreference?:
     | ReadPreferenceLike
     | {
@@ -4425,7 +4575,8 @@ declare interface ReadPreferenceLikeOptions {
       };
 }
 
-declare enum ReadPreferenceMode {
+/** @public */
+export declare enum ReadPreferenceMode {
   primary = 'primary',
   primaryPreferred = 'primaryPreferred',
   secondary = 'secondary',
@@ -4433,27 +4584,30 @@ declare enum ReadPreferenceMode {
   nearest = 'nearest'
 }
 
-declare interface ReadPreferenceOptions {
+/** @public */
+export declare interface ReadPreferenceOptions {
   /** Max secondary read staleness in seconds, Minimum value is 90 seconds.*/
   maxStalenessSeconds?: number;
   /** Server mode in which the same query is dispatched in parallel to multiple replica set members. */
   hedge?: HedgeOptions;
 }
 
-declare type ReduceFunction = (key: string, values: Document[]) => Document;
+/** @public */
+export declare type ReduceFunction = (key: string, values: Document[]) => Document;
 
-declare type RemoveOptions = WriteCommandOptions;
+/** @public */
+export declare type RemoveUserOptions = CommandOperationOptions;
 
-declare type RemoveUserOptions = CommandOperationOptions;
-
-declare interface RenameOptions extends CommandOperationOptions {
+/** @public */
+export declare interface RenameOptions extends CommandOperationOptions {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
   /** Unclear */
   new_collection?: boolean;
 }
 
-declare interface ReplaceOptions extends CommandOperationOptions {
+/** @public */
+export declare interface ReplaceOptions extends CommandOperationOptions {
   /** If true, allows the write to opt-out of document level validation */
   bypassDocumentValidation?: boolean;
   /** Specifies a collation */
@@ -4465,13 +4619,21 @@ declare interface ReplaceOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
-/**  Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server. */
-declare type ResumeToken = unknown;
+/**
+ * @public
+ * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server.
+ */
+export declare type ResumeToken = unknown;
 
-declare class RTTPinger {
+/** @public */
+export declare class RTTPinger {
+  /** @internal */
   [kConnection]?: Connection;
+  /** @internal */
   [kCancellationToken_2]: EventEmitter;
+  /** @internal */
   [kRoundTripTime]: number;
+  /** @internal */
   [kMonitorId]: NodeJS.Timeout;
   closed: boolean;
   constructor(cancellationToken: EventEmitter, options: RTTPingerOptions);
@@ -4479,20 +4641,25 @@ declare class RTTPinger {
   close(): void;
 }
 
-declare interface RTTPingerOptions extends ConnectionOptions {
+/** @public */
+export declare interface RTTPingerOptions extends ConnectionOptions {
   heartbeatFrequencyMS: number;
 }
 
-declare type RunCommandOptions = CommandOperationOptions;
+/** @public */
+export declare type RunCommandOptions = CommandOperationOptions;
 
-declare interface SelectServerOptions {
+/** @public */
+export declare interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
 }
 
-declare class Server extends EventEmitter {
+/** @public */
+export declare class Server extends EventEmitter {
+  /** @internal */
   s: ServerPrivate;
   clusterTime?: ClusterTime;
   ismaster?: Document;
@@ -4598,13 +4765,15 @@ declare class Server extends EventEmitter {
   remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void;
 }
 
-declare interface ServerAddress {
+/** @public */
+export declare interface ServerAddress {
   host: string;
   port: number;
   domain_socket?: string;
 }
 
-declare class ServerCapabilities {
+/** @public */
+export declare class ServerCapabilities {
   maxWireVersion: number;
   minWireVersion: number;
   constructor(ismaster: Document);
@@ -4619,11 +4788,12 @@ declare class ServerCapabilities {
 }
 
 /**
+ * @public
  * The client's view of a single server, based on the most recent ismaster outcome.
  *
  * Internal type, not meant to be directly instantiated
  */
-declare class ServerDescription {
+export declare class ServerDescription {
   address: string;
   type: ServerType;
   hosts: string[];
@@ -4645,6 +4815,7 @@ declare class ServerDescription {
   logicalSessionTimeoutMinutes?: number;
   $clusterTime?: ClusterTime;
   /**
+   * @internal
    * Create a ServerDescription
    *
    * @param address - The address of the server
@@ -4667,7 +4838,8 @@ declare class ServerDescription {
   equals(other: ServerDescription): boolean;
 }
 
-declare interface ServerDescriptionOptions {
+/** @internal */
+export declare interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
   error?: Error;
   /** The round trip time to ping this server (in ms) */
@@ -4676,11 +4848,13 @@ declare interface ServerDescriptionOptions {
   topologyVersion?: TopologyVersion;
 }
 
-declare interface ServerOptions extends ConnectionPoolOptions, ClientMetadataOptions {
+/** @public */
+export declare interface ServerOptions extends ConnectionPoolOptions, ClientMetadataOptions {
   credentials?: MongoCredentials;
 }
 
-declare interface ServerPrivate {
+/** @internal */
+export declare interface ServerPrivate {
   /** The server description for this server */
   description: ServerDescription;
   /** A copy of the options used to construct this instance */
@@ -4695,9 +4869,11 @@ declare interface ServerPrivate {
   pool: ConnectionPool;
 }
 
-declare type ServerSelectionCallback = Callback<Server>;
+/** @public */
+export declare type ServerSelectionCallback = Callback<Server>;
 
-declare interface ServerSelectionRequest {
+/** @internal */
+export declare interface ServerSelectionRequest {
   serverSelector: ServerSelector;
   transaction?: Transaction;
   callback: ServerSelectionCallback;
@@ -4705,20 +4881,23 @@ declare interface ServerSelectionRequest {
   [kCancelled_2]?: boolean;
 }
 
-declare type ServerSelector = (
+/** @internal */
+export declare type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[]
 ) => ServerDescription[];
 
 /**
+ * @public
  * Reflects the existence of a session on the server. Can be reused by the session pool.
  * WARNING: not meant to be instantiated directly. For internal use only.
  */
-declare class ServerSession {
+export declare class ServerSession {
   id: ServerSessionId;
   lastUse: number;
   txnNumber: number;
   isDirty: boolean;
+  /** @internal */
   constructor();
   /**
    * Determines if the server session has timed out.
@@ -4728,15 +4907,17 @@ declare class ServerSession {
   hasTimedOut(sessionTimeoutMinutes: number): boolean;
 }
 
-declare type ServerSessionId = {
+/** @internal */
+export declare type ServerSessionId = {
   id: Binary;
 };
 
 /**
+ * @internal
  * Maintains a pool of Server Sessions.
  * For internal use only
  */
-declare class ServerSessionPool {
+export declare class ServerSessionPool {
   topology: Topology;
   sessions: ServerSession[];
   constructor(topology: Topology);
@@ -4759,7 +4940,8 @@ declare class ServerSessionPool {
   release(session: ServerSession): void;
 }
 
-declare enum ServerType {
+/** @public An enumeration of server types we know about */
+export declare enum ServerType {
   Standalone = 'Standalone',
   Mongos = 'Mongos',
   PossiblePrimary = 'PossiblePrimary',
@@ -4771,16 +4953,19 @@ declare enum ServerType {
   Unknown = 'Unknown'
 }
 
-declare type SetProfilingLevelOptions = CommandOperationOptions;
+/** @public */
+export declare type SetProfilingLevelOptions = CommandOperationOptions;
 
-declare type Sort =
+/** @public */
+export declare type Sort =
   | {
       [key: string]: SortDirection;
     }
   | [string, SortDirection][]
   | [string, SortDirection];
 
-declare type SortDirection =
+/** @public */
+export declare type SortDirection =
   | 1
   | -1
   | 'asc'
@@ -4789,7 +4974,8 @@ declare type SortDirection =
       $meta: string;
     };
 
-declare class SrvPoller extends EventEmitter {
+/** @internal */
+export declare class SrvPoller extends EventEmitter {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;
@@ -4809,20 +4995,24 @@ declare class SrvPoller extends EventEmitter {
   _poll(): void;
 }
 
-declare interface SrvPollerOptions extends LoggerOptions {
+/** @internal */
+export declare interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
 
-declare class SrvPollingEvent {
+/** @public */
+export declare class SrvPollingEvent {
   srvRecords: dns.SrvRecord[];
   constructor(srvRecords: dns.SrvRecord[]);
   addresses(): Set<string>;
 }
 
-declare type Stream = Socket | TLSSocket;
+/** @public */
+export declare type Stream = Socket | TLSSocket;
 
-declare class StreamDescription {
+/** @public */
+export declare class StreamDescription {
   address: string;
   type: string;
   minWireVersion?: number;
@@ -4839,33 +5029,43 @@ declare class StreamDescription {
   receiveResponse(response: Document): void;
 }
 
-declare interface StreamDescriptionOptions {
+/** @public */
+export declare interface StreamDescriptionOptions {
   compression: {
     compressors: CompressorName[];
   };
 }
 
-declare interface StreamOptions {
+/** @public */
+export declare interface StreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
 
-declare type TagSet = {
+/** @public */
+export declare type TagSet = {
   [key: string]: string;
 };
 
-declare type TFileId = string | number | object | ObjectId;
+/** @public */
+export declare type TFileId = string | number | object | ObjectId;
 
-declare type TimerQueue = Set<NodeJS.Timeout>;
+/** @internal */
+export declare type TimerQueue = Set<NodeJS.Timeout>;
 export { Timestamp };
 
 /**
+ * @public
  * A container of server instances representing a connection to a MongoDB topology.
  */
-declare class Topology extends EventEmitter {
+export declare class Topology extends EventEmitter {
+  /** @internal */
   s: TopologyPrivate;
+  /** @internal */
   [kWaitQueue_2]: Denque<ServerSelectionRequest>;
+  /** @internal */
   ismaster?: Document;
+  /** @internal */
   _type?: string;
   /** @event */
   static readonly SERVER_OPENING: 'serverOpening';
@@ -4962,7 +5162,8 @@ declare class Topology extends EventEmitter {
   destroy: (options?: CloseOptions | undefined, callback?: Callback<any> | undefined) => void;
 }
 
-declare class TopologyDescription {
+/** @public Representation of a deployment of servers */
+export declare class TopologyDescription {
   type: TopologyType;
   setName?: string;
   maxSetVersion?: number;
@@ -5010,8 +5211,8 @@ declare class TopologyDescription {
   hasServer(address: string): boolean;
 }
 
-/** Emitted when topology description changes. */
-declare class TopologyDescriptionChangedEvent {
+/** @public Emitted when topology description changes. */
+export declare class TopologyDescriptionChangedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
   /** The old topology description */
@@ -5026,12 +5227,17 @@ declare class TopologyDescriptionChangedEvent {
   );
 }
 
-declare interface TopologyDescriptionOptions {
+/** @public */
+export declare interface TopologyDescriptionOptions {
   heartbeatFrequencyMS?: number;
   localThresholdMS?: number;
 }
 
-declare interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
+/** @public */
+export declare interface TopologyOptions
+  extends ServerOptions,
+    BSONSerializeOptions,
+    LoggerOptions {
   reconnect: boolean;
   retryWrites?: boolean;
   retryReads?: boolean;
@@ -5054,7 +5260,8 @@ declare interface TopologyOptions extends ServerOptions, BSONSerializeOptions, L
   useRecoveryToken: boolean;
 }
 
-declare interface TopologyPrivate {
+/** @internal */
+export declare interface TopologyPrivate {
   /** the id of this topology */
   id: number;
   /** passed in options */
@@ -5086,7 +5293,8 @@ declare interface TopologyPrivate {
   handleSrvPolling?: (event: SrvPollingEvent) => void;
 }
 
-declare enum TopologyType {
+/** @public An enumeration of topology types we know about */
+export declare enum TopologyType {
   Single = 'Single',
   ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
   ReplicaSetWithPrimary = 'ReplicaSetWithPrimary',
@@ -5094,15 +5302,17 @@ declare enum TopologyType {
   Unknown = 'Unknown'
 }
 
-declare interface TopologyVersion {
+/** @internal */
+export declare interface TopologyVersion {
   processId: ObjectId;
   counter: Long;
 }
 
 /**
+ * @public
  * A class maintaining state related to a server transaction. Internal Only
  */
-declare class Transaction {
+export declare class Transaction {
   state: TxnState;
   options: TransactionOptions;
   _pinnedServer?: Server;
@@ -5126,8 +5336,8 @@ declare class Transaction {
   unpinServer(): void;
 }
 
-/** Configuration options for a transaction. */
-declare interface TransactionOptions extends CommandOperationOptions {
+/** @public Configuration options for a transaction. */
+export declare interface TransactionOptions extends CommandOperationOptions {
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
@@ -5137,7 +5347,8 @@ declare interface TransactionOptions extends CommandOperationOptions {
   maxCommitTimeMS?: number;
 }
 
-declare enum TxnState {
+/** @internal */
+export declare enum TxnState {
   NO_TRANSACTION = 'NO_TRANSACTION',
   STARTING_TRANSACTION = 'STARTING_TRANSACTION',
   TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS',
@@ -5146,9 +5357,8 @@ declare enum TxnState {
   TRANSACTION_ABORTED = 'TRANSACTION_ABORTED'
 }
 
-declare type UpdateOptions = WriteCommandOptions;
-
-declare interface UpdateOptions_2 extends CommandOperationOptions {
+/** @public */
+export declare interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
   arrayFilters?: Document[];
   /** If true, allows the write to opt-out of document level validation */
@@ -5163,7 +5373,8 @@ declare interface UpdateOptions_2 extends CommandOperationOptions {
   multi?: boolean;
 }
 
-declare interface UpdateResult {
+/** @public */
+export declare interface UpdateResult {
   /** The number of documents that matched the filter */
   matchedCount: number;
   /** The number of documents that were modified */
@@ -5175,37 +5386,53 @@ declare interface UpdateResult {
   result: Document;
 }
 
-declare interface ValidateCollectionOptions extends CommandOperationOptions {
+/** @public */
+export declare interface ValidateCollectionOptions extends CommandOperationOptions {
   /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
   background?: boolean;
 }
 
-declare type W = number | 'majority';
+/** @public */
+export declare type W = number | 'majority';
 
-declare interface WaitQueueMember {
+/** @internal */
+export declare interface WaitQueueMember {
   callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
 }
 
+/** @internal */
+export declare type WireInsertOptions = WriteCommandOptions;
+
+/** @internal */
+export declare type WireRemoveOptions = WriteCommandOptions;
+
+/** @internal */
+export declare type WireUpdateOptions = WriteCommandOptions;
+
 /**
+ * @public
  * A callback provided to `withConnection`
  *
  * @param error - An error instance representing the error during the execution.
  * @param connection - The managed connection which was checked out of the pool.
  * @param callback - A function to call back after connection management is complete
  */
-declare type WithConnectionCallback = (
+export declare type WithConnectionCallback = (
   error: MongoError,
   connection: Connection | undefined,
   callback: Callback<Connection>
 ) => void;
 
-declare type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
+/** @public */
+export declare type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
 
-declare type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
+/** @public */
+export declare type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
-declare interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
+/** @internal */
+export declare interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
   ordered?: boolean;
   writeConcern?: WriteConcern;
   collation?: CollationOptions;
@@ -5213,12 +5440,13 @@ declare interface WriteCommandOptions extends BSONSerializeOptions, CommandOptio
 }
 
 /**
+ * @public
  * A MongoDB WriteConcern, which describes the level of acknowledgement
  * requested from MongoDB for write operations.
  *
  * @see https://docs.mongodb.com/manual/reference/write-concern/
  */
-declare class WriteConcern {
+export declare class WriteConcern {
   /** The write concern */
   w?: W;
   /** The write concern timeout */
@@ -5246,9 +5474,10 @@ declare class WriteConcern {
 }
 
 /**
- * @classdesc An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * @public
+ * An error representing a failure by the server to apply the requested write concern to the bulk operation.
  */
-declare class WriteConcernError {
+export declare class WriteConcernError {
   err: any;
   /**
    * Create a new WriteConcernError instance
@@ -5280,7 +5509,8 @@ declare class WriteConcernError {
   toString(): string;
 }
 
-declare interface WriteConcernOptions {
+/** @public */
+export declare interface WriteConcernOptions {
   /** The write concern */
   w?: W;
   /** The write concern timeout */
@@ -5298,9 +5528,9 @@ declare interface WriteConcernOptions {
 }
 
 /**
- * @classdesc An error that occurred during a BulkWrite on the server.
+ * @public An error that occurred during a BulkWrite on the server.
  */
-declare class WriteError {
+export declare class WriteError {
   err: any;
   /**
    * Create a new WriteError instance
@@ -5344,6 +5574,7 @@ declare class WriteError {
   toString(): string;
 }
 
-declare type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
+/** @internal */
+export declare type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
 export {};

@@ -33,21 +33,29 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-/**  Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server. */
+/**
+ * @public
+ * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server.
+ */
 export type ResumeToken = unknown;
 
 /**
+ * @public
  * Represents a specific point in time on a server. Can be retrieved by using {@link Db.command}
  * @remarks
  * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
  */
 export type OperationTime = Timestamp;
 
+/** @public */
 export interface PipeOptions {
   end?: boolean;
 }
 
-/** Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified. */
+/**
+ * @public
+ * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
+ */
 export interface ChangeStreamOptions extends AggregateOptions {
   /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
   fullDocument?: string;
@@ -137,7 +145,10 @@ interface UpdateDescription {
   removedFields: string[];
 }
 
-/** Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}. */
+/**
+ * @public
+ * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
+ */
 export class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
@@ -362,13 +373,15 @@ export class ChangeStream extends EventEmitter {
   }
 }
 
+/** @public */
 export interface ChangeStreamCursorOptions extends CursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
   startAfter?: boolean;
 }
 
-class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamCursorOptions> {
+/** @internal */
+export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamCursorOptions> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;

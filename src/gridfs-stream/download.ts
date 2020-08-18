@@ -8,6 +8,7 @@ import type { Collection } from '../collection';
 import type { ReadPreference } from '../read_preference';
 import type { GridFSBucketWriteStream } from './upload';
 
+/** @public */
 export interface GridFSBucketReadStreamOptions {
   sort?: Sort;
   skip?: number;
@@ -17,6 +18,7 @@ export interface GridFSBucketReadStreamOptions {
   end?: number;
 }
 
+/** @public */
 export interface GridFSBucketReadStreamOptionsWithRevision extends GridFSBucketReadStreamOptions {
   /** The revision number relative to the oldest file with the given filename. 0
    * gets you the oldest file, 1 gets you the 2nd oldest, -1 gets you the
@@ -24,6 +26,7 @@ export interface GridFSBucketReadStreamOptionsWithRevision extends GridFSBucketR
   revision?: number;
 }
 
+/** @public */
 export interface GridFSFile {
   _id: GridFSBucketWriteStream['id'];
   length: GridFSBucketWriteStream['length'];
@@ -36,6 +39,7 @@ export interface GridFSFile {
   uploadDate: Date;
 }
 
+/** @internal */
 export interface GridFSBucketReadStreamPrivate {
   bytesRead: number;
   bytesToTrim: number;
@@ -58,6 +62,7 @@ export interface GridFSBucketReadStreamPrivate {
 }
 
 /**
+ * @public
  * A readable stream that enables you to read buffers from GridFS.
  *
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.

@@ -36,6 +36,7 @@ function assertAlive(session: ClientSession, callback?: Callback): boolean {
   return true;
 }
 
+/** @public */
 export interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
   causalConsistency?: boolean;
@@ -47,9 +48,11 @@ export interface ClientSessionOptions {
   initialClusterTime?: ClusterTime;
 }
 
+/** @public */
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
 /**
+ * @public
  * A class representing a client session on the server
  *
  * NOTE: not meant to be instantiated directly.
@@ -543,9 +546,11 @@ function supportsRecoveryToken(session: ClientSession) {
   return !!topology.s.options.useRecoveryToken;
 }
 
+/** @internal */
 export type ServerSessionId = { id: Binary };
 
 /**
+ * @public
  * Reflects the existence of a session on the server. Can be reused by the session pool.
  * WARNING: not meant to be instantiated directly. For internal use only.
  */
@@ -555,6 +560,7 @@ class ServerSession {
   txnNumber: number;
   isDirty: boolean;
 
+  /** @internal */
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
@@ -579,6 +585,7 @@ class ServerSession {
 }
 
 /**
+ * @internal
  * Maintains a pool of Server Sessions.
  * For internal use only
  */

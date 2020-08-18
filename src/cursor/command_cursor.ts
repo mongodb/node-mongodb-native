@@ -5,6 +5,7 @@ import { CursorState } from './core_cursor';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperation } from '../operations/command';
 
+/** @public */
 export type CommandCursorOptions = CursorOptions;
 
 /**

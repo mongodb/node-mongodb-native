@@ -12,6 +12,7 @@ const pid = process.pid;
 // current logger
 let currentLogger: LoggerFunction;
 
+/** @public */
 export enum LoggerLevel {
   ERROR = 'error',
   WARN = 'warn',
@@ -19,8 +20,10 @@ export enum LoggerLevel {
   DEBUG = 'debug'
 }
 
-type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
+/** @public */
+export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 
+/** @public */
 export interface LoggerOptions {
   logger?: LoggerFunction;
   loggerLevel?: LoggerLevel;

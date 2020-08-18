@@ -4,18 +4,19 @@ import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
 
-// contstants related to compatability checks
+// constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
 const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION;
 const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
 const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
 
-interface TopologyDescriptionOptions {
+/** @public */
+export interface TopologyDescriptionOptions {
   heartbeatFrequencyMS?: number;
   localThresholdMS?: number;
 }
 
-// Representation of a deployment of servers
+/** @public Representation of a deployment of servers */
 export class TopologyDescription {
   type: TopologyType;
   setName?: string;

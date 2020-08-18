@@ -55,7 +55,7 @@ export class ServerClosedEvent {
   }
 }
 
-/** Emitted when topology description changes. */
+/** @public Emitted when topology description changes. */
 export class TopologyDescriptionChangedEvent {
   /** A unique identifier for the topology */
   topologyId: number;

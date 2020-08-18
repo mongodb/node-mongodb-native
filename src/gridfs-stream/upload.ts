@@ -13,6 +13,7 @@ import type { WriteConcernOptions } from '../write_concern';
 
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 
+/** @public */
 export type TFileId = string | number | object | ObjectId;
 
 export interface ChunkDoc {
@@ -22,6 +23,7 @@ export interface ChunkDoc {
   data: Buffer;
 }
 
+/** @public */
 export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
@@ -38,6 +40,7 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
 }
 
 /**
+ * @public
  * A writable stream that enables you to write buffers to GridFS.
  *
  * Do not instantiate this class directly. Use `openUploadStream()` instead.

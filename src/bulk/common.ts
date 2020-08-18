@@ -49,7 +49,7 @@ class Batch {
 }
 
 /**
- * @classdesc
+ * @public
  * The result of a bulk write.
  */
 export class BulkWriteResult {
@@ -294,9 +294,10 @@ export class BulkWriteResult {
 }
 
 /**
- * @classdesc An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * @public
+ * An error representing a failure by the server to apply the requested write concern to the bulk operation.
  */
-class WriteConcernError {
+export class WriteConcernError {
   err: any;
 
   /**
@@ -344,9 +345,9 @@ class WriteConcernError {
 }
 
 /**
- * @classdesc An error that occurred during a BulkWrite on the server.
+ * @public An error that occurred during a BulkWrite on the server.
  */
-class WriteError {
+export class WriteError {
   err: any;
 
   /**
@@ -613,7 +614,7 @@ function handleMongoWriteConcernError(
 }
 
 /**
- * @classdesc An error indicating an unsuccessful Bulk Write
+ * @public An error indicating an unsuccessful Bulk Write
  * @extends {MongoError}
  */
 class BulkWriteError extends MongoError {

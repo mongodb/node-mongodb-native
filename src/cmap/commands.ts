@@ -24,8 +24,10 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
+/** @internal */
 export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
+/** @internal */
 export interface OpQueryOptions {
   socketTimeout?: number;
   session?: ClientSession;
@@ -49,6 +51,7 @@ export interface OpQueryOptions {
 /**************************************************************
  * QUERY
  **************************************************************/
+/** @internal */
 export class Query {
   ns: string;
   query: Document;
@@ -263,6 +266,7 @@ export class Query {
   }
 }
 
+/** @internal */
 export interface OpGetMoreOptions {
   numberToReturn?: number;
 }
@@ -270,6 +274,7 @@ export interface OpGetMoreOptions {
 /**************************************************************
  * GETMORE
  **************************************************************/
+/** @internal */
 export class GetMore {
   numberToReturn: number;
   requestId: number;
@@ -362,6 +367,7 @@ export class GetMore {
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
+/** @internal */
 export class KillCursor {
   ns: string;
   requestId: number;
@@ -461,6 +467,7 @@ export interface OpResponseOptions extends BSONSerializeOptions {
   documentsReturnedIn?: string | null;
 }
 
+/** @internal */
 export class Response {
   parsed: boolean;
   raw: Buffer;
@@ -631,6 +638,7 @@ export interface OpMsgOptions {
   readPreference: ReadPreference;
 }
 
+/** @internal */
 export class Msg {
   ns: string;
   command: Document;
@@ -841,6 +849,7 @@ export class BinMsg {
 }
 
 /**
+ * @internal
  * Creates a new CommandResult instance
  *
  * @param result - CommandResult object

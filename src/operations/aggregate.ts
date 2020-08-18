@@ -8,9 +8,11 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
-const DB_AGGREGATE_COLLECTION = 1 as const;
+/** @internal */
+export const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
 
+/** @public */
 export interface AggregateOptions extends CommandOperationOptions {
   /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 \>). */
   allowDiskUse?: boolean;
@@ -34,6 +36,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   out?: string;
 }
 
+/** @internal */
 export class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];

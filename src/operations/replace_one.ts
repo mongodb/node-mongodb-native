@@ -8,6 +8,7 @@ import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { UpdateResult } from './update';
 
+/** @public */
 export interface ReplaceOptions extends CommandOperationOptions {
   /** If true, allows the write to opt-out of document level validation */
   bypassDocumentValidation?: boolean;
@@ -22,6 +23,7 @@ export interface ReplaceOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
+/** @internal */
 export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
   collection: Collection;
   filter: Document;

@@ -26,10 +26,14 @@ const exclusionList = [
   'scope' // this option is reformatted thus exclude the original
 ];
 
+/** @public */
 export type MapFunction = () => void;
+/** @public */
 export type ReduceFunction = (key: string, values: Document[]) => Document;
+/** @public */
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
+/** @public */
 export interface MapReduceOptions extends CommandOperationOptions {
   /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };

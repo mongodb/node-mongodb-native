@@ -12,12 +12,14 @@ const RESPONSE_FIELDS = [
   'logicalSessionTimeoutMinutes'
 ] as const;
 
+/** @public */
 export interface StreamDescriptionOptions {
   compression: {
     compressors: CompressorName[];
   };
 }
 
+/** @public */
 export class StreamDescription {
   address: string;
   type: string;

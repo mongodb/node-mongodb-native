@@ -88,8 +88,11 @@ const stateTransition = makeStateMachine({
 const kCancelled = Symbol('cancelled');
 const kWaitQueue = Symbol('waitQueue');
 
-type ServerSelectionCallback = Callback<Server>;
-interface ServerSelectionRequest {
+/** @public */
+export type ServerSelectionCallback = Callback<Server>;
+
+/** @internal */
+export interface ServerSelectionRequest {
   serverSelector: ServerSelector;
   transaction?: Transaction;
   callback: ServerSelectionCallback;
@@ -97,7 +100,8 @@ interface ServerSelectionRequest {
   [kCancelled]?: boolean;
 }
 
-interface TopologyPrivate {
+/** @internal */
+export interface TopologyPrivate {
   /** the id of this topology */
   id: number;
   /** passed in options */
@@ -130,12 +134,14 @@ interface TopologyPrivate {
   handleSrvPolling?: (event: SrvPollingEvent) => void;
 }
 
+/** @public */
 export interface ServerAddress {
   host: string;
   port: number;
   domain_socket?: string;
 }
 
+/** @public */
 export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
   reconnect: boolean;
   retryWrites?: boolean;
@@ -160,23 +166,31 @@ export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, Lo
   useRecoveryToken: boolean;
 }
 
-interface ConnectOptions {
+/** @public */
+export interface ConnectOptions {
   readPreference?: ReadPreference;
 }
 
+/** @public */
 export interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
 }
+
 /**
+ * @public
  * A container of server instances representing a connection to a MongoDB topology.
  */
 export class Topology extends EventEmitter {
+  /** @internal */
   s: TopologyPrivate;
+  /** @internal */
   [kWaitQueue]: Denque<ServerSelectionRequest>;
+  /** @internal */
   ismaster?: Document;
+  /** @internal */
   _type?: string;
 
   /** @event */
@@ -1066,7 +1080,9 @@ function isRetryableWritesSupported(topology: Topology) {
 
   return true;
 }
-class ServerCapabilities {
+
+/** @public */
+export class ServerCapabilities {
   maxWireVersion: number;
   minWireVersion: number;
 

@@ -12,17 +12,21 @@ export const Aspect = {
   NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS')
 } as const;
 
+/** @public */
 export type Hint = string | Document;
 
 export interface OperationConstructor extends Function {
   aspects?: Set<symbol>;
 }
+
+/** @internal */
 export interface OperationOptions extends BSONSerializeOptions {
   explain?: boolean;
   session?: ClientSession;
 }
 
 /**
+ * @internal
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
  * Additionally, this class implements `hasAspect`, which determines whether an operation has

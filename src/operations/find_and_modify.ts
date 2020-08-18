@@ -16,6 +16,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
 
+/** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;

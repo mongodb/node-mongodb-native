@@ -9,10 +9,12 @@ import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
 
+/** @public */
 export interface DeleteOptions extends CommandOperationOptions {
   single?: boolean;
 }
 
+/** @public */
 export interface DeleteResult {
   /** Indicates whether this write result was acknowledged */
   acknowledged: boolean;

@@ -4,8 +4,10 @@ import { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
 
+/** @public */
 export type RunCommandOptions = CommandOperationOptions;
 
+/** @internal */
 export class RunCommandOperation<
   T extends RunCommandOptions = RunCommandOptions,
   TResult = Document

@@ -24,7 +24,8 @@ const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   chunkSizeBytes: 255 * 1024
 };
 
-interface GridFSBucketOptions extends WriteConcernOptions {
+/** @public */
+export interface GridFSBucketOptions extends WriteConcernOptions {
   /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
   bucketName?: string;
   /** Number of bytes stored in each chunk. Defaults to 255KB */
@@ -33,7 +34,8 @@ interface GridFSBucketOptions extends WriteConcernOptions {
   readPreference?: ReadPreference;
 }
 
-interface GridFSBucketPrivate {
+/** @internal */
+export interface GridFSBucketPrivate {
   db: Db;
   options: {
     bucketName: string;
@@ -52,6 +54,7 @@ interface GridFSBucketPrivate {
  * Constructor for a streaming GridFS interface
  */
 export class GridFSBucket extends EventEmitter {
+  /** @internal */
   s: GridFSBucketPrivate;
 
   /**

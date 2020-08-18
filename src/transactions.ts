@@ -6,6 +6,7 @@ import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
 import type { Document } from './bson';
 
+/** @internal */
 export enum TxnState {
   NO_TRANSACTION = 'NO_TRANSACTION',
   STARTING_TRANSACTION = 'STARTING_TRANSACTION',
@@ -41,7 +42,7 @@ const stateMachine = {
   ]
 };
 
-/** Configuration options for a transaction. */
+/** @public Configuration options for a transaction. */
 export interface TransactionOptions extends CommandOperationOptions {
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
@@ -54,6 +55,7 @@ export interface TransactionOptions extends CommandOperationOptions {
 }
 
 /**
+ * @public
  * A class maintaining state related to a server transaction. Internal Only
  */
 export class Transaction {

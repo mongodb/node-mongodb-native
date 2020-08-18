@@ -5,6 +5,7 @@ import { Connection } from './cmap/connection';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { MongoClient } from './mongo_client';
 
+/** @public */
 export class Instrumentation extends EventEmitter {
   $MongoClient: any;
   $prototypeConnect: any;

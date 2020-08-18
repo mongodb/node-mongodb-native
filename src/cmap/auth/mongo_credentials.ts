@@ -24,6 +24,7 @@ function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
+/** @public */
 export interface MongoCredentialsOptions {
   username: string;
   password: string;
@@ -33,7 +34,10 @@ export interface MongoCredentialsOptions {
   mechanismProperties: Document;
 }
 
-/** A representation of the credentials used by MongoDB */
+/**
+ * @public
+ * A representation of the credentials used by MongoDB
+ */
 export class MongoCredentials {
   /** The username used for authentication */
   readonly username: string;

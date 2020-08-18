@@ -36,6 +36,7 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
+/** @public */
 export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
@@ -61,10 +62,13 @@ export interface ConnectionOptions
   captureRejections?: boolean;
 }
 
+/** @public */
 export interface DestroyOptions {
+  /** Force the destruction. */
   force?: boolean;
 }
 
+/** @public */
 export class Connection extends EventEmitter {
   id: number;
   address: string;

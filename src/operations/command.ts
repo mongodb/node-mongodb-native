@@ -13,6 +13,7 @@ import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
+/** @public */
 export interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
@@ -34,6 +35,7 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
   authdb?: string;
 }
 
+/** @internal */
 export interface OperationParent {
   s: { namespace: MongoDBNamespace };
   readConcern?: ReadConcern;
@@ -42,6 +44,7 @@ export interface OperationParent {
   logger?: Logger;
 }
 
+/** @internal */
 export abstract class CommandOperation<
   T extends CommandOperationOptions = CommandOperationOptions,
   TResult = Document

@@ -8,6 +8,7 @@ import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
+/** @internal */
 export interface QueryOptions extends CommandOptions {
   readPreference?: ReadPreferenceLike;
 }

@@ -24,8 +24,8 @@ import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
 
-// Flags allowed for cursor
-const FLAGS = [
+/** @public Flags allowed for cursor */
+export const FLAGS = [
   'tailable',
   'oplogReplay',
   'noCursorTimeout',
@@ -34,12 +34,16 @@ const FLAGS = [
   'partial'
 ] as const;
 
+/** @public */
 export type CursorFlag = typeof FLAGS[number];
 
-const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
+/** @public */
+export const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
 
+/** @internal */
 export type CursorPrivate = CoreCursorPrivate;
 
+/** @public */
 export interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
@@ -113,6 +117,7 @@ export class Cursor<
   O extends OperationBase = OperationBase,
   T extends CursorOptions = CursorOptions
 > extends CoreCursor<O, T> {
+  /** @internal */
   s: CursorPrivate;
   /** @internal */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
@@ -259,9 +264,9 @@ export class Cursor<
   }
 
   /**
-   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * Set the cursor maxScan
    *
+   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * @param maxScan - Constrains the query to only scan the specified number of documents when fulfilling the query
    */
   maxScan(maxScan: number): this {
@@ -624,13 +629,14 @@ export class Cursor<
   }
 
   /**
-   * @deprecated Please use {@link Cursor.forEach} instead
    * Iterates over all the documents for this cursor. As with `cursor.toArray`,
    * not all of the elements will be iterated if this cursor had been previously accessed.
    * In that case, `cursor.rewind` can be used to reset the cursor. However, unlike
    * `cursor.toArray`, the cursor will only hold a maximum of batch size elements
    * at any given time if batch size is specified. Otherwise, the caller is responsible
    * for making sure that the entire result can fit the memory.
+   *
+   * @deprecated Please use {@link Cursor.forEach} instead
    */
   each(callback: EachCallback): void {
     // Rewind cursor state

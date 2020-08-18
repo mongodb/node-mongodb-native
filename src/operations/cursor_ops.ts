@@ -4,6 +4,7 @@ import type { Cursor } from '../cursor';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 
+/** @public */
 export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
 /**

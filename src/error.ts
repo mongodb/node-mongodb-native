@@ -1,6 +1,7 @@
 import type { TopologyVersion } from './sdam/server_description';
 import type { Document } from './bson';
 
+/** @public */
 export type AnyError = MongoError | Error;
 
 const kErrorLabels = Symbol('errorLabels');
@@ -27,6 +28,7 @@ export const GET_MORE_RESUMABLE_CODES = new Set([
   43 // CursorNotFound
 ]);
 
+/** @public */
 export interface ErrorDescription {
   message?: string;
   errmsg?: string;

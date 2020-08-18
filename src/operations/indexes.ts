@@ -43,7 +43,9 @@ const VALID_INDEX_OPTIONS = new Set([
   'wildcardProjection'
 ]);
 
+/** @public */
 export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+/** @public */
 export type IndexSpecification =
   | string
   | [string, IndexDirection]
@@ -52,12 +54,14 @@ export type IndexSpecification =
   | { [key: string]: IndexDirection }[]
   | IndexSpecification[];
 
+/** @internal */
 export interface IndexDescription {
   collation?: CollationOptions;
   name?: string;
   key: Document;
 }
 
+/** @public */
 export interface CreateIndexesOptions extends CommandOperationOptions {
   /** Creates the index in the background, yielding whenever possible. */
   background?: boolean;
@@ -112,6 +116,7 @@ function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescri
   return finalIndexSpec as IndexDescription;
 }
 
+/** @internal */
 export class IndexesOperation extends OperationBase<IndexInformationOptions, Document> {
   collection: Collection;
 
@@ -129,6 +134,7 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions, Doc
   }
 }
 
+/** @internal */
 export class CreateIndexesOperation extends CommandOperation<CreateIndexesOptions, Document> {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
@@ -206,6 +212,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   }
 }
 
+/** @internal */
 export class CreateIndexOperation extends CreateIndexesOperation {
   constructor(
     parent: OperationParent,
@@ -223,6 +230,7 @@ export class CreateIndexOperation extends CreateIndexesOperation {
   }
 }
 
+/** @internal */
 export class EnsureIndexOperation extends CreateIndexOperation {
   db: Db;
   collectionName: string;
@@ -262,8 +270,10 @@ export class EnsureIndexOperation extends CreateIndexOperation {
   }
 }
 
+/** @public */
 export type DropIndexesOptions = CommandOperationOptions;
 
+/** @internal */
 export class DropIndexOperation extends CommandOperation<DropIndexesOptions, Document> {
   collection: Collection;
   indexName: string;
@@ -284,6 +294,7 @@ export class DropIndexOperation extends CommandOperation<DropIndexesOptions, Doc
   }
 }
 
+/** @internal */
 export class DropIndexesOperation extends DropIndexOperation {
   constructor(collection: Collection, options: DropIndexesOptions) {
     super(collection, '*', options);
@@ -297,11 +308,13 @@ export class DropIndexesOperation extends DropIndexOperation {
   }
 }
 
+/** @public */
 export interface ListIndexesOptions extends CommandOperationOptions {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
 
+/** @internal */
 export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, Document> {
   collectionNamespace: MongoDBNamespace;
 
@@ -336,6 +349,7 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
   }
 }
 
+/** @internal */
 export class IndexExistsOperation extends OperationBase<IndexInformationOptions, boolean> {
   collection: Collection;
   indexes: string | string[];
@@ -374,6 +388,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions,
   }
 }
 
+/** @internal */
 export class IndexInformationOperation extends OperationBase<IndexInformationOptions, Document> {
   db: Db;
   name: string;

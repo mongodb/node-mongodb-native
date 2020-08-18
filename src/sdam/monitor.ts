@@ -42,17 +42,21 @@ function isInCloseState(monitor: Monitor) {
   return monitor.s.state === STATE_CLOSED || monitor.s.state === STATE_CLOSING;
 }
 
-interface MonitorPrivate {
+/** @internal */
+export interface MonitorPrivate {
   state: string;
 }
 
-interface MonitorOptions {
+/** @public */
+export interface MonitorOptions {
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
 }
 
+/** @public */
 export class Monitor extends EventEmitter {
+  /** @internal */
   s: MonitorPrivate;
   address: string;
   options: MonitorOptions;
@@ -341,14 +345,20 @@ function makeTopologyVersion(tv: TopologyVersion) {
   };
 }
 
-interface RTTPingerOptions extends ConnectionOptions {
+/** @public */
+export interface RTTPingerOptions extends ConnectionOptions {
   heartbeatFrequencyMS: number;
 }
 
-class RTTPinger {
+/** @public */
+export class RTTPinger {
+  /** @internal */
   [kConnection]?: Connection;
+  /** @internal */
   [kCancellationToken]: EventEmitter;
+  /** @internal */
   [kRoundTripTime]: number;
+  /** @internal */
   [kMonitorId]: NodeJS.Timeout;
   closed: boolean;
 

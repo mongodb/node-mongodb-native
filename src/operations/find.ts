@@ -10,12 +10,15 @@ import type { InternalCursorState } from '../cursor/core_cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 
+/** @public */
 export type SortDirection = 1 | -1 | 'asc' | 'desc' | { $meta: string };
+/** @public */
 export type Sort =
   | { [key: string]: SortDirection }
   | [string, SortDirection][]
   | [string, SortDirection];
 
+/** @public */
 export interface FindOptions extends QueryOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;

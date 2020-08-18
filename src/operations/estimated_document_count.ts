@@ -5,6 +5,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
+/** @public */
 export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   skip?: number;
   limit?: number;

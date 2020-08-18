@@ -7,6 +7,7 @@ import type { Document } from '../bson';
 import type { Sort } from '../operations/find';
 import type { Topology } from '../sdam/topology';
 
+/** @public */
 export interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
 /**

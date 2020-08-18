@@ -17,14 +17,17 @@ const DATA_BEARING_SERVER_TYPES = new Set([
   ServerType.Standalone
 ]);
 
+/** @internal */
 export interface TopologyVersion {
   processId: ObjectId;
   counter: Long;
 }
 
+/** @public */
 export type TagSet = { [key: string]: string };
 
-interface ServerDescriptionOptions {
+/** @internal */
+export interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
   error?: Error;
 
@@ -36,6 +39,7 @@ interface ServerDescriptionOptions {
 }
 
 /**
+ * @public
  * The client's view of a single server, based on the most recent ismaster outcome.
  *
  * Internal type, not meant to be directly instantiated
@@ -67,6 +71,7 @@ export class ServerDescription {
   $clusterTime?: ClusterTime;
 
   /**
+   * @internal
    * Create a ServerDescription
    *
    * @param address - The address of the server

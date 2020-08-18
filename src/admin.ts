@@ -16,12 +16,13 @@ import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
 
-interface AdminPrivate {
+/** @internal */
+export interface AdminPrivate {
   db: Db;
 }
 
 /**
- * @internal
+ * @public
  * The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  *

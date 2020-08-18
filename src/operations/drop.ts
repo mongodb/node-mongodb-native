@@ -4,6 +4,7 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export type DropCollectionOptions = CommandOperationOptions;
 
 export class DropCollectionOperation extends CommandOperation<DropCollectionOptions, boolean> {
@@ -23,6 +24,7 @@ export class DropCollectionOperation extends CommandOperation<DropCollectionOpti
   }
 }
 
+/** @public */
 export type DropDatabaseOptions = CommandOperationOptions;
 export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions, boolean> {
   execute(server: Server, callback: Callback<boolean>): void {

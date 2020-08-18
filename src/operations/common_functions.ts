@@ -16,6 +16,7 @@ import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
+/** @internal */
 export interface IndexInformationOptions {
   full?: boolean;
   readPreference?: ReadPreference;

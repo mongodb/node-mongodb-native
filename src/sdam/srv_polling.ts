@@ -17,7 +17,8 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
   return srv.endsWith(parent);
 }
 
-class SrvPollingEvent {
+/** @public */
+export class SrvPollingEvent {
   srvRecords: dns.SrvRecord[];
   constructor(srvRecords: dns.SrvRecord[]) {
     this.srvRecords = srvRecords;
@@ -28,12 +29,14 @@ class SrvPollingEvent {
   }
 }
 
-interface SrvPollerOptions extends LoggerOptions {
+/** @internal */
+export interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
 
-class SrvPoller extends EventEmitter {
+/** @internal */
+export class SrvPoller extends EventEmitter {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;
@@ -139,5 +142,3 @@ class SrvPoller extends EventEmitter {
     });
   }
 }
-
-export { SrvPollingEvent, SrvPoller };

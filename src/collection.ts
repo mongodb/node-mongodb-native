@@ -95,7 +95,7 @@ const mergeKeys = ['ignoreUndefined'];
 
 /** @public */
 export interface Collection {
-  /** @deprecated Use {@link Collection.dropIndexes} instead */
+  /** @deprecated Use {@link Collection.dropIndexes#Class} instead */
   dropAllIndexes(): void;
   removeMany(
     filter: Document,
@@ -110,6 +110,7 @@ export interface Collection {
   findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
 }
 
+/** @public */
 export interface CollectionOptions
   extends BSONSerializeOptions,
     WriteConcernOptions,
@@ -123,7 +124,8 @@ export interface CollectionOptions
   readPreference?: ReadPreferenceLike;
 }
 
-interface CollectionPrivate {
+/** @internal */
+export interface CollectionPrivate {
   pkFactory: PkFactory | typeof ObjectId;
   db: Db;
   topology: Topology;
@@ -1493,13 +1495,11 @@ export class Collection implements OperationParent {
   }
 
   /**
-   * @deprecated Use insertOne, insertMany or bulkWrite instead.
-   *
    * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @deprecated Use insertOne, insertMany or bulkWrite
+   * @deprecated Use insertOne, insertMany or bulkWrite instead.
    * @param docs - The documents to insert
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided

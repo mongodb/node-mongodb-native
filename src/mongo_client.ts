@@ -18,6 +18,7 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 
+/** @public */
 export enum LogLevel {
   'error' = 'error',
   'warn' = 'warn',
@@ -25,12 +26,14 @@ export enum LogLevel {
   'debug' = 'debug'
 }
 
+/** @public */
 export interface DriverInfo {
   name?: string;
   version?: string;
   platform?: string;
 }
 
+/** @public */
 export interface Auth {
   /** The username for auth */
   user?: string;
@@ -38,21 +41,25 @@ export interface Auth {
   pass?: string;
 }
 
+/** @public */
 export abstract class PkFactoryAbstract {
   abstract createPk(): any;
 }
 
+/** @public */
 export interface PkFactoryLiteral {
   createPk(): any;
 }
 
+/** @public */
 export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
 
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
 /**
+ * @public
  * Describes all possible URI query options for the mongo client
- * https://docs.mongodb.com/manual/reference/connection-string
+ * @see https://docs.mongodb.com/manual/reference/connection-string
  */
 export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
@@ -129,6 +136,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   directConnection?: boolean;
 }
 
+/** @public */
 export interface MongoClientOptions
   extends WriteConcernOptions,
     MongoURIOptions,
@@ -209,9 +217,11 @@ export interface MongoClientOptions
   dbName?: string;
 }
 
+/** @public */
 export type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
 
-interface MongoClientPrivate {
+/** @internal */
+export interface MongoClientPrivate {
   url: string;
   options?: MongoClientOptions;
   dbCache: Map<string, Db>;
@@ -260,6 +270,7 @@ interface MongoClientPrivate {
  * ```
  */
 export class MongoClient extends EventEmitter implements OperationParent {
+  /** @internal */
   s: MongoClientPrivate;
   topology?: Topology;
 

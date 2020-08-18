@@ -7,6 +7,7 @@ import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
+/** @internal */
 export type GetMoreOptions = CommandOptions;
 
 export function getMore(

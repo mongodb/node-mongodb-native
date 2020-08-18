@@ -4,6 +4,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
+/** @public */
 export interface CountDocumentsOptions extends AggregateOptions {
   /** The number of documents to skip. */
   skip?: number;

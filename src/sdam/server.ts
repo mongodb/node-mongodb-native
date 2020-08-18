@@ -33,7 +33,7 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import { Connection } from '../cmap/connection';
+import { Connection, DestroyOptions } from '../cmap/connection';
 import type { Topology } from './topology';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
@@ -83,11 +83,13 @@ const stateTransition = makeStateMachine({
 
 const kMonitor = Symbol('monitor');
 
+/** @public */
 export interface ServerOptions extends ConnectionPoolOptions, ClientMetadataOptions {
   credentials?: MongoCredentials;
 }
 
-interface ServerPrivate {
+/** @internal */
+export interface ServerPrivate {
   /** The server description for this server */
   description: ServerDescription;
   /** A copy of the options used to construct this instance */
@@ -102,12 +104,9 @@ interface ServerPrivate {
   pool: ConnectionPool;
 }
 
-export interface DestroyOptions {
-  /** Force the destruction of the pool. */
-  force?: boolean;
-}
-
+/** @public */
 export class Server extends EventEmitter {
+  /** @internal */
   s: ServerPrivate;
   clusterTime?: ClusterTime;
   ismaster?: Document;

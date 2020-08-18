@@ -4,8 +4,10 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export type RemoveUserOptions = CommandOperationOptions;
 
+/** @internal */
 export class RemoveUserOperation extends CommandOperation<RemoveUserOptions, boolean> {
   username: string;
 

@@ -103,6 +103,7 @@ function resolveOptions(
   return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
 }
 
+/** @public */
 export interface ConnectionPoolOptions extends ConnectionOptions {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
@@ -114,17 +115,19 @@ export interface ConnectionPoolOptions extends ConnectionOptions {
   waitQueueTimeoutMS: number;
 }
 
-interface WaitQueueMember {
+/** @internal */
+export interface WaitQueueMember {
   callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
 }
 
+/** @public */
 export interface CloseOptions {
   force?: boolean;
 }
 
-// NOTE: to be removed as part of NODE-2745
+/** @public NOTE: to be removed as part of NODE-2745 */
 export interface ConnectionPool {
   isConnected(): boolean;
   write(
@@ -134,7 +137,7 @@ export interface ConnectionPool {
   ): void;
 }
 
-/** A pool of connections which dynamically resizes, and emit events related to pool activity */
+/** @public A pool of connections which dynamically resizes, and emit events related to pool activity */
 export class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
@@ -598,13 +601,14 @@ function processWaitQueue(pool: ConnectionPool) {
 }
 
 /**
+ * @public
  * A callback provided to `withConnection`
  *
  * @param error - An error instance representing the error during the execution.
  * @param connection - The managed connection which was checked out of the pool.
  * @param callback - A function to call back after connection management is complete
  */
-type WithConnectionCallback = (
+export type WithConnectionCallback = (
   error: MongoError,
   connection: Connection | undefined,
   callback: Callback<Connection>

@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
 
+/** @public */
 export interface CountOptions extends CommandOperationOptions {
   /** The number of documents to skip. */
   skip?: number;

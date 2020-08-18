@@ -18,7 +18,9 @@ import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 
+/** @public MongoDB Driver style callback */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
+/** @public */
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
@@ -625,6 +627,7 @@ export function deprecateOptions(
   return deprecated;
 }
 
+/** @public */
 export class MongoDBNamespace {
   db: string;
   collection?: string;
@@ -909,6 +912,7 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
+/** @public */
 export interface ClientMetadata {
   driver: {
     name: string;
@@ -927,6 +931,7 @@ export interface ClientMetadata {
   };
 }
 
+/** @public */
 export interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;
@@ -1027,6 +1032,7 @@ export interface InterruptableAsyncIntervalOptions {
   immediate: boolean;
 }
 
+/** @internal */
 export interface InterruptableAsyncInterval {
   wake(): void;
   stop(): void;

@@ -25,6 +25,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern'
 ]);
 
+/** @public */
 export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Returns an error if the collection does not exist */
   strict?: boolean;

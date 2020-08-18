@@ -17,6 +17,7 @@ import type { EventEmitter } from 'events';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 
+/** @public */
 export type Stream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();

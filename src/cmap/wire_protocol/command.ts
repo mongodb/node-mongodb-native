@@ -9,6 +9,7 @@ import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
 import type { ReadPreferenceLike } from '../../read_preference';
 
+/** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;

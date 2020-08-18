@@ -5,12 +5,13 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
+/** @public */
 export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
 
-/** Get all the collection statistics. */
+/** @internal Get all the collection statistics. */
 export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 
@@ -35,11 +36,13 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions, Docum
   }
 }
 
+/** @public */
 export interface DbStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
 
+/** @internal */
 export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
   execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };

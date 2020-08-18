@@ -14,6 +14,7 @@ import type { CommandOperationOptions } from '../operations/command';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { ReadConcern } from '../read_concern';
 
+/** @public */
 export interface DocumentTransforms {
   /** Transform each document returned */
   doc(doc: Document): Document;
@@ -21,6 +22,7 @@ export interface DocumentTransforms {
   query?(doc: Document): Document | Document[];
 }
 
+/** @internal */
 export interface CoreCursorPrivate {
   /** Transforms functions */
   transforms?: DocumentTransforms;
@@ -34,16 +36,19 @@ export interface CoreCursorPrivate {
   readConcern?: ReadConcern;
 }
 
+/** @public */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
 }
 
+/** @public */
 export interface StreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
 
+/** @internal */
 export interface InternalCursorState extends BSONSerializeOptions {
   postBatchResumeToken?: ResumeToken;
   batchSize: number;
@@ -67,7 +72,7 @@ export interface InternalCursorState extends BSONSerializeOptions {
   raw?: boolean;
 }
 
-// Possible states for a cursor
+/** @public Possible states for a cursor */
 export enum CursorState {
   INIT = 0,
   OPEN = 1,
@@ -75,6 +80,7 @@ export enum CursorState {
   GET_MORE = 3
 }
 
+/** @public */
 export interface CoreCursorOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   tailable?: boolean;

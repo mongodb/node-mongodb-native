@@ -5,6 +5,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
+/** @public */
 export type DistinctOptions = CommandOperationOptions;
 
 /** Return a list of distinct values for the given key across a collection. */

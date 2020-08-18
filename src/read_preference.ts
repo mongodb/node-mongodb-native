@@ -1,11 +1,13 @@
 import type { TagSet } from './sdam/server_description';
 import type { OperationParent } from './operations/command';
 
+/** @public */
 export type ReadPreferenceLike =
   | ReadPreference
   | ReadPreferenceMode
   | keyof typeof ReadPreferenceMode;
 
+/** @public */
 export enum ReadPreferenceMode {
   primary = 'primary',
   primaryPreferred = 'primaryPreferred',
@@ -14,11 +16,13 @@ export enum ReadPreferenceMode {
   nearest = 'nearest'
 }
 
+/** @public */
 export interface HedgeOptions {
   /** Explicitly enable or disable hedged reads. */
   enabled?: boolean;
 }
 
+/** @public */
 export interface ReadPreferenceOptions {
   /** Max secondary read staleness in seconds, Minimum value is 90 seconds.*/
   maxStalenessSeconds?: number;
@@ -26,6 +30,7 @@ export interface ReadPreferenceOptions {
   hedge?: HedgeOptions;
 }
 
+/** @public */
 export interface ReadPreferenceLikeOptions {
   readPreference?:
     | ReadPreferenceLike

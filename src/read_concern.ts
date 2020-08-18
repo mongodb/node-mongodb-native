@@ -1,3 +1,4 @@
+/** @public */
 export enum ReadConcernLevel {
   local = 'local',
   majority = 'majority',
@@ -7,6 +8,7 @@ export enum ReadConcernLevel {
 }
 
 /**
+ * @public
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
  *
