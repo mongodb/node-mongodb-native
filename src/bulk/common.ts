@@ -130,19 +130,6 @@ interface BulkResult {
   n?: number;
 }
 
-const DEFAULT_BULK_RESULT: BulkResult = {
-  ok: 1,
-  writeErrors: [],
-  writeConcernErrors: [],
-  insertedIds: [],
-  nInserted: 0,
-  nUpserted: 0,
-  nMatched: 0,
-  nModified: 0,
-  nRemoved: 0,
-  upserted: []
-};
-
 /**
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
@@ -821,16 +808,12 @@ class FindOperators {
     return this.s.options.addToOperationsList(this, REMOVE, document);
   }
 
-  /**
-   * backwards compatibility for deleteOne
-   */
+  /** backwards compatibility for deleteOne */
   removeOne() {
     return this.deleteOne();
   }
 
-  /**
-   * backwards compatibility for delete
-   */
+  /** backwards compatibility for delete */
   remove() {
     return this.delete();
   }
@@ -932,15 +915,29 @@ class BulkOperationBase {
     const maxKeySize = (maxWriteBatchSize - 1).toString(10).length + 2;
 
     // Final options for retryable writes and write concern
-    let finalOptions = { ...options };
+    let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, collection.s.db);
     finalOptions = applyWriteConcern(finalOptions, { collection: collection }, options);
     const writeConcern = WriteConcern.fromOptions(finalOptions.writeConcern);
 
+    // Final results
+    const bulkResult: BulkResult = {
+      ok: 1,
+      writeErrors: [],
+      writeConcernErrors: [],
+      insertedIds: [],
+      nInserted: 0,
+      nUpserted: 0,
+      nMatched: 0,
+      nModified: 0,
+      nRemoved: 0,
+      upserted: []
+    };
+
     // Internal state
     this.s = {
       // Final result
-      bulkResult: DEFAULT_BULK_RESULT,
+      bulkResult,
       // Current batch state
       currentBatch: null,
       currentIndex: 0,
