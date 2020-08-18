@@ -52,7 +52,7 @@ export class GSSAPI extends AuthProvider {
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
 
-    const authProcess: KerberosAuthContext = {
+    const context: KerberosAuthContext = {
       retries: 10,
       host,
       port,
@@ -71,9 +71,9 @@ export class GSSAPI extends AuthProvider {
       ) => void
     ) => connection.command('$external.$cmd', command, cb);
 
-    initialize(authProcess, username, password, err => {
+    initialize(context, username, password, err => {
       if (err) return callback(err, false);
-      authProcess.client!.step('', (err, payload) => {
+      context.client!.step('', (err, payload) => {
         if (err) return callback(err, false);
 
         const command = {
@@ -87,7 +87,7 @@ export class GSSAPI extends AuthProvider {
           if (err) return callback(err, false);
 
           const doc = result.result;
-          negotiate(authProcess, doc.payload, (err, payload) => {
+          negotiate(context, doc.payload, (err, payload) => {
             if (err) return callback(err, false);
             externalCommand(
               {
@@ -99,7 +99,7 @@ export class GSSAPI extends AuthProvider {
                 if (err) return callback(err, false);
 
                 const doc = result.result;
-                finalize(authProcess, doc.payload, (err, payload) => {
+                finalize(context, doc.payload, (err, payload) => {
                   if (err) return callback(err, false);
                   externalCommand(
                     {
