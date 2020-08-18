@@ -83,12 +83,9 @@ export function addToOperationsList(
 }
 
 /**
- * Create a new OrderedBulkOperation instance (INTERNAL TYPE, do not instantiate directly)
+ * Create a new OrderedBulkOperation instance
  *
- * @class
- * @extends BulkOperationBase
- * @property {number} length Get the number of operations in the bulk.
- * @returns {OrderedBulkOperation} a OrderedBulkOperation instance.
+ * @internal
  */
 export class OrderedBulkOperation extends BulkOperationBase {
   constructor(

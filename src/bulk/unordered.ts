@@ -82,7 +82,7 @@ export function addToOperationsList(
   bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
 
   // Save back the current Batch to the right type
-  if (batchType === INSERT) {
+  if (batchType === INSERT && document._id) {
     bulkOperation.s.currentInsertBatch = bulkOperation.s.currentBatch;
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.bulkResult.insertedIds.length,
@@ -103,16 +103,11 @@ export function addToOperationsList(
 }
 
 /**
- * Create a new UnorderedBulkOperation instance (INTERNAL TYPE, do not instantiate directly)
+ * Create a new UnorderedBulkOperation instance
  *
- * @class
- * @extends BulkOperationBase
- * @property {number} length Get the number of operations in the bulk.
- * @returns {UnorderedBulkOperation} a UnorderedBulkOperation instance.
+ * @internal
  */
 export class UnorderedBulkOperation extends BulkOperationBase {
-  s: any;
-
   constructor(
     topology: Topology,
     collection: Collection,
@@ -121,11 +116,6 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     super(topology, collection, { ...options, addToOperationsList }, false);
   }
 
-  /**
-   * @param callback
-   * @param writeResult
-   * @returns {boolean|undefined}
-   */
   handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.batches.length) {
       return false;
