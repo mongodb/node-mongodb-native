@@ -77,50 +77,55 @@ export class GSSAPI extends AuthProvider {
       },
       (err, context) => {
         if (err) return callback(err, false);
+
         context!.client.step('', (err, payload) => {
           if (err) return callback(err, false);
 
-          const command = {
-            saslStart: 1,
-            mechanism: 'GSSAPI',
-            payload,
-            autoAuthorize: 1
-          };
-
-          externalCommand(command, (err, result) => {
-            if (err) return callback(err, false);
-
-            const doc = result.result;
-            negotiate(context!, doc.payload, (err, payload) => {
+          externalCommand(
+            {
+              saslStart: 1,
+              mechanism: 'GSSAPI',
+              payload,
+              autoAuthorize: 1
+            },
+            (err, result) => {
               if (err) return callback(err, false);
-              externalCommand(
-                {
-                  saslContinue: 1,
-                  conversationId: doc.conversationId,
-                  payload
-                },
-                (err, result) => {
-                  if (err) return callback(err, false);
 
-                  const doc = result.result;
-                  finalize(context!, doc.payload, (err, payload) => {
+              const doc = result.result;
+              negotiate(context!, doc.payload, (err, payload) => {
+                if (err) return callback(err, false);
+
+                externalCommand(
+                  {
+                    saslContinue: 1,
+                    conversationId: doc.conversationId,
+                    payload
+                  },
+                  (err, result) => {
                     if (err) return callback(err, false);
-                    externalCommand(
-                      {
-                        saslContinue: 1,
-                        conversationId: doc.conversationId,
-                        payload
-                      },
-                      (err, result) => {
-                        if (err) return callback(err, false);
-                        callback(undefined, result.result);
-                      }
-                    );
-                  });
-                }
-              );
-            });
-          });
+
+                    const doc = result.result;
+                    finalize(context!, doc.payload, (err, payload) => {
+                      if (err) return callback(err, false);
+
+                      externalCommand(
+                        {
+                          saslContinue: 1,
+                          conversationId: doc.conversationId,
+                          payload
+                        },
+                        (err, result) => {
+                          if (err) return callback(err, false);
+
+                          callback(undefined, result.result);
+                        }
+                      );
+                    });
+                  }
+                );
+              });
+            }
+          );
         });
       }
     );
