@@ -71,7 +71,7 @@ export class GSSAPI extends AuthProvider {
       ) => void
     ) => connection.command('$external.$cmd', command, cb);
 
-    stepOne(authProcess, username, password, err => {
+    initialize(authProcess, username, password, err => {
       if (err) return callback(err, false);
       authProcess.client!.step('', (err, payload) => {
         if (err) return callback(err, false);
@@ -87,7 +87,7 @@ export class GSSAPI extends AuthProvider {
           if (err) return callback(err, false);
 
           const doc = result.result;
-          stepTwo(authProcess, doc.payload, (err, payload) => {
+          negotiate(authProcess, doc.payload, (err, payload) => {
             if (err) return callback(err, false);
             externalCommand(
               {
@@ -99,7 +99,7 @@ export class GSSAPI extends AuthProvider {
                 if (err) return callback(err, false);
 
                 const doc = result.result;
-                stepThree(authProcess, doc.payload, (err, payload) => {
+                finalize(authProcess, doc.payload, (err, payload) => {
                   if (err) return callback(err, false);
                   externalCommand(
                     {
@@ -122,14 +122,14 @@ export class GSSAPI extends AuthProvider {
   }
 }
 
-function stepOne(
-  self: KerberosAuthContext,
+function initialize(
+  context: KerberosAuthContext,
   username: string,
   password: string,
   callback: (err?: Error | null, client?: KerberosClient | null) => void
 ) {
-  self.username = username;
-  self.password = password;
+  context.username = username;
+  context.password = password;
 
   // Canonicialize host name if needed
   function performGssapiCanonicalizeHostName(
@@ -145,7 +145,7 @@ function stepOne(
 
       // Get the first resolve host id
       if (Array.isArray(r) && r.length > 0) {
-        self.host = r[0];
+        context.host = r[0];
       }
 
       callback();
@@ -153,7 +153,7 @@ function stepOne(
   }
 
   // Canonicialize host name if needed
-  performGssapiCanonicalizeHostName(self.canonicalizeHostName, self.host, (err: Error) => {
+  performGssapiCanonicalizeHostName(context.canonicalizeHostName, context.host, (err: Error) => {
     if (err) return callback(err);
 
     const initOptions = {};
@@ -163,29 +163,29 @@ function stepOne(
 
     const service =
       process.platform === 'win32'
-        ? `${self.serviceName}/${self.host}`
-        : `${self.serviceName}@${self.host}`;
+        ? `${context.serviceName}/${context.host}`
+        : `${context.serviceName}@${context.host}`;
 
     Kerberos.initializeClient(service, initOptions, (err: string, client: KerberosClient): void => {
       if (err) return callback(new Error(err), null);
 
-      self.client = client;
+      context.client = client;
       callback(null, client);
     });
   });
 }
 
-function stepTwo(auth: KerberosAuthContext, payload: string, callback: TransitionCallback) {
-  auth.client!.step(payload, (err, response) => {
-    if (err && auth.retries === 0) return callback(err);
+function negotiate(context: KerberosAuthContext, payload: string, callback: TransitionCallback) {
+  context.client!.step(payload, (err, response) => {
+    if (err && context.retries === 0) return callback(err);
 
     // Attempt to re-establish a context
     if (err) {
       // Adjust the number of retries
-      auth.retries = auth.retries - 1;
+      context.retries = context.retries - 1;
 
       // Call same step again
-      return stepTwo(auth, payload, callback);
+      return negotiate(context, payload, callback);
     }
 
     // Return the payload
@@ -193,13 +193,13 @@ function stepTwo(auth: KerberosAuthContext, payload: string, callback: Transitio
   });
 }
 
-function stepThree(auth: KerberosAuthContext, payload: string, callback: TransitionCallback) {
+function finalize(context: KerberosAuthContext, payload: string, callback: TransitionCallback) {
   // GSS Client Unwrap
-  auth.client!.unwrap(payload, (err, response) => {
+  context.client!.unwrap(payload, (err, response) => {
     if (err) return callback(err, false);
 
     // Wrap the response
-    auth.client!.wrap(response, { user: auth.username! }, (err, wrapped) => {
+    context.client!.wrap(response, { user: context.username! }, (err, wrapped) => {
       if (err) return callback(err, false);
 
       // Return the payload
