@@ -1063,23 +1063,6 @@ class BulkOperationBase {
     return new FindOperators(this);
   }
 
-  // isReplaceOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof REPLACE_ONE] {
-  //   return op && key === REPLACE_ONE;
-  // }
-
-  // isInsertOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof INSERT_ONE] {
-  //   return op && key === INSERT_ONE;
-  // }
-
-  // isUpdateOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof UPDATE_ONE] {
-  //   return op && key === UPDATE_ONE;
-  // }
-
-  // isUpdateMany(key: string, op: AnyOperationOptions): op is BatchOperations[typeof UPDATE_MANY] {
-  //   return op && key === UPDATE_MANY;
-  // }
-
-  /** Specifies a raw operation to perform in the bulk write. */
   raw(op: Partial<BatchOperations> & { collation?: CollationOptions }): BulkOperationBase {
     const key = Object.keys(op)[0] as keyof BatchOperations;
     const opOptions = op[key] as AnyOperationOptions;
