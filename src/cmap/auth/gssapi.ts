@@ -15,7 +15,7 @@ interface KerberosClient {
   ) => Promise<string> | void;
   unwrap: (challenge: string, callback?: TransitionCallback) => Promise<string> | void;
 }
-interface KerberosAuthContext {
+interface GSSAPIContext {
   host: string;
   port: string | number;
   serviceName: string;
@@ -52,7 +52,7 @@ export class GSSAPI extends AuthProvider {
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
 
-    const context: KerberosAuthContext = {
+    const context: GSSAPIContext = {
       retries: 10,
       host,
       port,
@@ -63,13 +63,15 @@ export class GSSAPI extends AuthProvider {
           : false
     };
 
-    const externalCommand = (
+    function externalCommand(
       command: object,
       cb: (
         err: Error | MongoError | undefined,
         result: { result: { payload: string; conversationId: any } }
       ) => void
-    ) => connection.command('$external.$cmd', command, cb);
+    ) {
+      return connection.command('$external.$cmd', command, cb);
+    }
 
     initialize(context, username, password, err => {
       if (err) return callback(err, false);
@@ -123,7 +125,7 @@ export class GSSAPI extends AuthProvider {
 }
 
 function initialize(
-  context: KerberosAuthContext,
+  context: GSSAPIContext,
   username: string,
   password: string,
   callback: (err?: Error | null, client?: KerberosClient | null) => void
@@ -161,21 +163,20 @@ function initialize(
       Object.assign(initOptions, { user: username, password });
     }
 
-    const service =
-      process.platform === 'win32'
-        ? `${context.serviceName}/${context.host}`
-        : `${context.serviceName}@${context.host}`;
+    Kerberos.initializeClient(
+      `${context.serviceName}${process.platform === 'win32' ? '/' : '@'}${context.host}`,
+      initOptions,
+      (err: string, client: KerberosClient): void => {
+        if (err) return callback(new Error(err), null);
 
-    Kerberos.initializeClient(service, initOptions, (err: string, client: KerberosClient): void => {
-      if (err) return callback(new Error(err), null);
-
-      context.client = client;
-      callback(null, client);
-    });
+        context.client = client;
+        callback(null, client);
+      }
+    );
   });
 }
 
-function negotiate(context: KerberosAuthContext, payload: string, callback: TransitionCallback) {
+function negotiate(context: GSSAPIContext, payload: string, callback: TransitionCallback) {
   context.client!.step(payload, (err, response) => {
     if (err && context.retries === 0) return callback(err);
 
@@ -193,7 +194,7 @@ function negotiate(context: KerberosAuthContext, payload: string, callback: Tran
   });
 }
 
-function finalize(context: KerberosAuthContext, payload: string, callback: TransitionCallback) {
+function finalize(context: GSSAPIContext, payload: string, callback: TransitionCallback) {
   // GSS Client Unwrap
   context.client!.unwrap(payload, (err, response) => {
     if (err) return callback(err, false);
