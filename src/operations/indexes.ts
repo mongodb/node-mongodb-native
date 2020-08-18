@@ -319,7 +319,7 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(collection, { fullResponse: true, ...options });
+    super(collection, options);
 
     this.collectionNamespace = collection.s.namespace;
   }

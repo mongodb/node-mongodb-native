@@ -734,10 +734,7 @@ export class Topology extends EventEmitter {
 
     return new CursorClass(
       topology,
-      new RunCommandOperation({ s: { namespace: MongoDBNamespace.fromString(ns) } }, cmd, {
-        fullResponse: true,
-        ...options
-      }),
+      new RunCommandOperation({ s: { namespace: MongoDBNamespace.fromString(ns) } }, cmd, options),
       options
     );
   }

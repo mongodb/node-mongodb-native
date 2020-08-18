@@ -1,11 +1,10 @@
 'use strict';
-var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabsae = require('./shared').setupDatabase;
+const { setupDatabase } = require('./shared');
 
 describe('Remove', function () {
   before(function () {
-    return setupDatabsae(this.configuration);
+    return setupDatabase(this.configuration);
   });
 
   it('should correctly clear out collection', {
@@ -14,13 +13,13 @@ describe('Remove', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         expect(err).to.not.exist;
 
         db.createCollection('test_clear', function (err) {
@@ -37,15 +36,17 @@ describe('Remove', function () {
 
                 collection.count(function (err, count) {
                   expect(err).to.not.exist;
-                  test.equal(2, count);
+                  expect(count).to.equal(2);
+
                   // Clear the collection
                   collection.remove({}, { w: 1 }, function (err, r) {
                     expect(err).to.not.exist;
-                    test.equal(2, r.result.n);
+                    expect(r).property('deletedCount').to.equal(2);
 
                     collection.count(function (err, count) {
                       expect(err).to.not.exist;
-                      test.equal(0, count);
+                      expect(count).to.equal(0);
+
                       // Let's close the db
                       client.close(done);
                     });
@@ -65,13 +66,13 @@ describe('Remove', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         expect(err).to.not.exist;
 
         db.createCollection('test_remove_regexp', function (err) {
@@ -85,10 +86,12 @@ describe('Remove', function () {
 
               // Clear the collection
               collection.remove({ address: /485 7th ave/ }, { w: 1 }, function (err, r) {
-                test.equal(1, r.result.n);
+                expect(r).property('deletedCount').to.equal(1);
 
                 collection.count(function (err, count) {
-                  test.equal(0, count);
+                  expect(err).to.not.exist;
+                  expect(count).to.equal(0);
+
                   // Let's close the db
                   client.close(done);
                 });
@@ -106,13 +109,13 @@ describe('Remove', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         expect(err).to.not.exist;
 
         db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function (err) {
@@ -126,10 +129,10 @@ describe('Remove', function () {
 
               // Remove the first
               collection.remove({ a: 1 }, { w: 1, single: true }, function (err, r) {
-                test.equal(1, r.result.n);
+                expect(r).property('deletedCount').to.equal(1);
 
                 collection.find({ a: 1 }).count(function (err, result) {
-                  test.equal(3, result);
+                  expect(result).to.equal(3);
                   client.close(done);
                 });
               });
@@ -146,13 +149,13 @@ describe('Remove', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         poolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         expect(err).to.not.exist;
         const collection = db.collection('remove_test');
 

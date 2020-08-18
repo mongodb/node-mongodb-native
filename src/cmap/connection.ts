@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
-import { CommandResult, BinMsg, WriteProtocolMessageType, Response } from './commands';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
@@ -12,6 +11,7 @@ import {
   MongoNetworkTimeoutError,
   MongoWriteConcernError
 } from '../error';
+import type { BinMsg, WriteProtocolMessageType, Response } from './commands';
 import type { Document } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
@@ -350,20 +350,16 @@ function messageHandler(conn: Connection) {
           callback(new MongoError(document));
           return;
         }
+      } else {
+        // Pre 3.2 support
+        if (document.ok === 0 || document.$err || document.errmsg) {
+          callback(new MongoError(document));
+          return;
+        }
       }
     }
 
-    // NODE-2382: re-enable in our glorious non-leaky abstraction future
-    // callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
-
-    callback(
-      undefined,
-      new CommandResult(
-        operationDescription.fullResult ? message : message.documents[0],
-        conn,
-        message
-      )
-    );
+    callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
   };
 }
 
@@ -429,10 +425,10 @@ function write(
           new CommandFailedEvent(this, command, err, operationDescription.started)
         );
       } else {
-        if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
+        if (reply && (reply.ok === 0 || reply.$err)) {
           this.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(this, command, reply.result, operationDescription.started)
+            new CommandFailedEvent(this, command, reply, operationDescription.started)
           );
         } else {
           this.emit(

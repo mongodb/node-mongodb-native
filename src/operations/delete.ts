@@ -74,7 +74,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
         return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
       }
 
-      r.deletedCount = r.result.n;
+      r.deletedCount = r.n;
       if (callback) callback(undefined, r);
     });
   }
@@ -112,7 +112,7 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
         return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
       }
 
-      r.deletedCount = r.result.n;
+      r.deletedCount = r.n;
       if (callback) callback(undefined, r);
     });
   }

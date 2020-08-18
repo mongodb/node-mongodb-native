@@ -313,7 +313,7 @@ describe('CRUD API', function () {
         var insertOne = function () {
           db.collection('t2_3').insertOne({ a: 1 }, { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
             test.equal(1, r.insertedCount);
             test.ok(r.insertedId != null);
 
@@ -343,7 +343,7 @@ describe('CRUD API', function () {
         var bulkWriteUnOrdered = function () {
           db.collection('t2_5').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_5').bulkWrite(
               [
@@ -424,7 +424,7 @@ describe('CRUD API', function () {
         var bulkWriteOrdered = function () {
           db.collection('t2_7').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_7').bulkWrite(
               [
@@ -462,7 +462,7 @@ describe('CRUD API', function () {
         var bulkWriteOrderedCrudSpec = function () {
           db.collection('t2_8').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_8').bulkWrite(
               [
@@ -521,7 +521,7 @@ describe('CRUD API', function () {
             r
           ) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('upsertedCount').to.equal(1);
 
             updateOne();
           });
@@ -533,7 +533,7 @@ describe('CRUD API', function () {
         var updateOne = function () {
           db.collection('t3_2').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t3_2').updateOne(
               { a: 1 },
@@ -541,13 +541,13 @@ describe('CRUD API', function () {
               { upsert: true },
               function (err, r) {
                 expect(err).to.not.exist;
-                test.equal(1, r.result.n);
+                expect(r).property('upsertedCount').to.equal(1);
                 test.equal(0, r.matchedCount);
                 test.ok(r.upsertedId != null);
 
                 db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } }, function (err, r) {
                   expect(err).to.not.exist;
-                  test.equal(1, r.result.n);
+                  expect(r).property('modifiedCount').to.equal(1);
                   test.equal(1, r.matchedCount);
                   test.ok(r.upsertedId == null);
 
@@ -564,7 +564,7 @@ describe('CRUD API', function () {
         var replaceOne = function () {
           db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('upsertedCount').to.equal(1);
             test.equal(0, r.matchedCount);
             test.ok(r.upsertedId != null);
 
@@ -573,7 +573,7 @@ describe('CRUD API', function () {
               r
             ) {
               expect(err).to.not.exist;
-              test.equal(1, r.result.n);
+              expect(r).property('modifiedCount').to.equal(1);
               test.ok(r.result.upserted == null);
 
               test.equal(1, r.matchedCount);
@@ -590,7 +590,7 @@ describe('CRUD API', function () {
         var updateMany = function () {
           db.collection('t3_4').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
+            expect(r).property('insertedCount').to.equal(2);
 
             db.collection('t3_4').updateMany(
               { a: 1 },
@@ -598,7 +598,7 @@ describe('CRUD API', function () {
               { upsert: true, w: 1 },
               function (err, r) {
                 expect(err).to.not.exist;
-                test.equal(2, r.result.n);
+                expect(r).property('modifiedCount').to.equal(2);
                 test.equal(2, r.matchedCount);
                 test.ok(r.upsertedId == null);
 
@@ -643,11 +643,11 @@ describe('CRUD API', function () {
         var legacyRemove = function () {
           db.collection('t4_1').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
+            test.equal(2, r.insertedCount);
 
             db.collection('t4_1').remove({ a: 1 }, { single: true }, function (err, r) {
               expect(err).to.not.exist;
-              test.equal(1, r.result.n);
+              test.equal(1, r.deletedCount);
 
               deleteOne();
             });
@@ -658,14 +658,13 @@ describe('CRUD API', function () {
         // Update one method
         // -------------------------------------------------
         var deleteOne = function () {
-          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
+          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, (err, r) => {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
+            expect(r).property('insertedCount').to.equal(2);
 
-            db.collection('t4_2').deleteOne({ a: 1 }, function (err, r) {
+            db.collection('t4_2').deleteOne({ a: 1 }, (err, r) => {
               expect(err).to.not.exist;
-              test.equal(1, r.result.n);
-              test.equal(1, r.deletedCount);
+              expect(r).property('deletedCount').to.equal(1);
 
               deleteMany();
             });
@@ -676,14 +675,13 @@ describe('CRUD API', function () {
         // Update many method
         // -------------------------------------------------
         var deleteMany = function () {
-          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
+          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, (err, r) => {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
+            expect(r).property('insertedCount').to.equal(2);
 
-            db.collection('t4_3').deleteMany({ a: 1 }, function (err, r) {
+            db.collection('t4_3').deleteMany({ a: 1 }, (err, r) => {
               expect(err).to.not.exist;
-              test.equal(2, r.result.n);
-              test.equal(2, r.deletedCount);
+              expect(r).property('deletedCount').to.equal(2);
 
               client.close(done);
             });
@@ -714,7 +712,7 @@ describe('CRUD API', function () {
         var findOneAndRemove = function () {
           db.collection('t5_1').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_1').findOneAndDelete(
               { a: 1 },
@@ -736,7 +734,7 @@ describe('CRUD API', function () {
         var findOneAndReplace = function () {
           db.collection('t5_2').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_2').findOneAndReplace(
               { a: 1 },
@@ -765,7 +763,7 @@ describe('CRUD API', function () {
         var findOneAndUpdate = function () {
           db.collection('t5_3').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_3').findOneAndUpdate(
               { a: 1 },
@@ -834,27 +832,27 @@ describe('CRUD API', function () {
         var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
         col.insertOne({ a: 1 }, { w: 0 }, function (err, result) {
           expect(err).to.not.exist;
-          test.equal(1, result.result.ok);
+          test.equal(1, result.ok);
 
           col.insertMany([{ a: 1 }], { w: 0 }, function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, result.result.ok);
+            expect(result).to.exist;
 
             col.updateOne({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
               expect(err).to.not.exist;
-              test.equal(1, result.result.ok);
+              expect(result).to.exist;
 
               col.updateMany({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
                 expect(err).to.not.exist;
-                test.equal(1, result.result.ok);
+                expect(result).to.exist;
 
                 col.deleteOne({ a: 1 }, { w: 0 }, function (err, result) {
                   expect(err).to.not.exist;
-                  test.equal(1, result.result.ok);
+                  expect(result).to.exist;
 
                   col.deleteMany({ a: 1 }, { w: 0 }, function (err, result) {
                     expect(err).to.not.exist;
-                    test.equal(1, result.result.ok);
+                    expect(result).to.exist;
 
                     client.close(done);
                   });

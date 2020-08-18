@@ -41,7 +41,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   batchSize?: number;
 
   constructor(db: Db, filter: Document, options: ListCollectionsOptions) {
-    super(db, { fullResponse: true, ...options });
+    super(db, options);
 
     this.db = db;
     this.filter = filter;
@@ -85,13 +85,8 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
         { batchSize: this.batchSize || 1000 },
         {},
         (err, result) => {
-          if (
-            result &&
-            result.message &&
-            result.message.documents &&
-            Array.isArray(result.message.documents)
-          ) {
-            result.message.documents = result.message.documents.map(transforms.doc);
+          if (result && result.documents && Array.isArray(result.documents)) {
+            result.documents = result.documents.map(transforms.doc);
           }
 
           callback(err, result);

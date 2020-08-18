@@ -87,7 +87,6 @@ export type {
 export type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
-  CommandResult,
   WriteProtocolMessageType,
   Query,
   GetMore,
