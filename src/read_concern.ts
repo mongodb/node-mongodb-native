@@ -6,6 +6,8 @@ export enum ReadConcernLevel {
   snapshot = 'snapshot'
 }
 
+export type ReadConcernLevels = keyof typeof ReadConcernLevel;
+
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
@@ -13,7 +15,7 @@ export enum ReadConcernLevel {
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level: ReadConcernLevel;
+  level: ReadConcernLevels;
 
   /**
    * Constructs a ReadConcern from the read concern properties.

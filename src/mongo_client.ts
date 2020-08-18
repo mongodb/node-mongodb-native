@@ -9,11 +9,11 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import { ReadConcernLevel, ReadConcern } from './read_concern';
+import { ReadConcern, ReadConcernLevels } from './read_concern';
 import type { BSONSerializeOptions, Document } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import type { AuthMechanisms } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
@@ -24,6 +24,8 @@ export enum LogLevel {
   'info' = 'info',
   'debug' = 'debug'
 }
+
+export type LogLevels = keyof typeof LogLevel;
 
 export interface DriverInfo {
   name?: string;
@@ -78,7 +80,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
   socketTimeoutMS?: number;
   /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
-  compressors?: string;
+  compressors?: CompressorName[];
   /** An integer that specifies the compression level if using zlib for network compression. */
   zlibCompressionLevel?: number;
   /** The maximum number of connections in the connection pool. */
@@ -92,7 +94,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevel;
+  readConcernLevel?: ReadConcernLevels;
   /** Specifies the read preferences for this connection */
   readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
@@ -102,7 +104,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** Specify the database name associated with the user’s credentials. */
   authSource?: string;
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
-  authMechanism?: AuthMechanism;
+  authMechanism?: AuthMechanisms;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
   authMechanismProperties?: {
     SERVICE_NAME?: string;
@@ -176,7 +178,7 @@ export interface MongoClientOptions
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The logging level */
-  loggerLevel?: LogLevel;
+  loggerLevel?: LogLevels;
   /** Custom logger object */
   logger?: Logger;
   /** Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit */
@@ -205,8 +207,13 @@ export interface MongoClientOptions
   driverInfo?: DriverInfo;
   /** String containing the server name requested via TLS SNI. */
   servername?: string;
-
   dbName?: string;
+  auto_reconnect?: boolean;
+  autoReconnect?: MongoClientOptions['auto_reconnect'];
+  secondaryAcceptableLatencyMS?: number;
+  acceptableLatencyMS?: number;
+  connectWithNoPrimary?: boolean;
+  bufferMaxEntries?: number;
 }
 
 export interface MongoClient {
