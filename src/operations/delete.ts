@@ -26,6 +26,7 @@ export interface DeleteResult {
   connection?: Connection;
 }
 
+/** @internal */
 export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
   namespace: string;
   operations: Document[];

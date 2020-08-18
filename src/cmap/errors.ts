@@ -2,7 +2,10 @@ import { MongoError } from '../error';
 import type { Connection } from './connection';
 import type { ConnectionPool } from './connection_pool';
 
-/** An error indicating a connection pool is closed */
+/**
+ * An error indicating a connection pool is closed
+ * @category Error
+ */
 export class PoolClosedError extends MongoError {
   /** The address of the connection pool */
   address: string;
@@ -14,7 +17,10 @@ export class PoolClosedError extends MongoError {
   }
 }
 
-/** An error thrown when a request to check out a connection times out */
+/**
+ * An error thrown when a request to check out a connection times out
+ * @category Error
+ */
 export class WaitQueueTimeoutError extends MongoError {
   /** The address of the connection pool */
   address: string;

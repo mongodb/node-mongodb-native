@@ -70,6 +70,7 @@ export interface FindOptions extends QueryOptions {
   allowDiskUse?: boolean;
 }
 
+/** @internal */
 export class FindOperation extends OperationBase<FindOptions, Document> {
   cmd: Document;
   readPreference: ReadPreference;

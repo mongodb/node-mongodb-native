@@ -2,7 +2,10 @@ import type { ServerDescription } from './server_description';
 import type { TopologyDescription } from './topology_description';
 import type { Document } from '../bson';
 
-/** Emitted when server description changes, but does NOT include changes to the RTT. */
+/**
+ * Emitted when server description changes, but does NOT include changes to the RTT.
+ * @category Event
+ */
 export class ServerDescriptionChangedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -27,7 +30,10 @@ export class ServerDescriptionChangedEvent {
   }
 }
 
-/** Emitted when server is initialized. */
+/**
+ * Emitted when server is initialized.
+ * @category Event
+ */
 export class ServerOpeningEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -41,7 +47,10 @@ export class ServerOpeningEvent {
   }
 }
 
-/** Emitted when server is closed. */
+/**
+ * Emitted when server is closed.
+ * @category Event
+ */
 export class ServerClosedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -55,7 +64,11 @@ export class ServerClosedEvent {
   }
 }
 
-/** @public Emitted when topology description changes. */
+/**
+ * Emitted when topology description changes.
+ * @public
+ * @category Event
+ */
 export class TopologyDescriptionChangedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -76,7 +89,10 @@ export class TopologyDescriptionChangedEvent {
   }
 }
 
-/** Emitted when topology is initialized. */
+/**
+ * Emitted when topology is initialized.
+ * @category Event
+ */
 export class TopologyOpeningEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -87,7 +103,10 @@ export class TopologyOpeningEvent {
   }
 }
 
-/** Emitted when topology is closed. */
+/**
+ * Emitted when topology is closed.
+ * @category Event
+ */
 export class TopologyClosedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -101,6 +120,8 @@ export class TopologyClosedEvent {
 /**
  * Emitted when the server monitor’s ismaster command is started - immediately before
  * the ismaster command is serialized into raw BSON and written to the socket.
+ *
+ * @category Event
  */
 export class ServerHeartbeatStartedEvent {
   /** The connection id for the command */
@@ -112,7 +133,10 @@ export class ServerHeartbeatStartedEvent {
   }
 }
 
-/** Emitted when the server monitor’s ismaster succeeds. */
+/**
+ * Emitted when the server monitor’s ismaster succeeds.
+ * @category Event
+ */
 export class ServerHeartbeatSucceededEvent {
   /** The connection id for the command */
   connectionId: string;
@@ -129,7 +153,10 @@ export class ServerHeartbeatSucceededEvent {
   }
 }
 
-/** Emitted when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception. */
+/**
+ * Emitted when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception.
+ * @category Event
+ */
 export class ServerHeartbeatFailedEvent {
   /** The connection id for the command */
   connectionId: string;

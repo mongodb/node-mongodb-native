@@ -37,7 +37,10 @@ export interface ErrorDescription {
   [key: string]: any;
 }
 
-/** @public */
+/**
+ * @public
+ * @category Error
+ */
 export class MongoError extends Error {
   [kErrorLabels]: Set<string>;
   code?: number;
@@ -121,8 +124,9 @@ export function isNetworkErrorBeforeHandshake(err: any) {
 }
 
 /**
- * @public
  * An error indicating an issue with the network, including TCP errors and timeouts.
+ * @public
+ * @category Error
  */
 export class MongoNetworkError extends MongoError {
   [kBeforeHandshake]?: boolean;
@@ -143,8 +147,9 @@ interface MongoNetworkTimeoutErrorOptions {
 }
 
 /**
- * @public
  * An error indicating a network timeout occurred
+ * @public
+ * @category Error
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
   constructor(message: string, options?: MongoNetworkTimeoutErrorOptions) {
@@ -154,8 +159,9 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
 }
 
 /**
- * @public
  * An error used when attempting to parse a value (like a connection string)
+ * @public
+ * @category Error
  */
 export class MongoParseError extends MongoError {
   constructor(message: string) {
@@ -165,8 +171,9 @@ export class MongoParseError extends MongoError {
 }
 
 /**
- * @public
  * An error signifying a client-side timeout event
+ * @public
+ * @category Error
  */
 export class MongoTimeoutError extends MongoError {
   /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
@@ -187,8 +194,9 @@ export class MongoTimeoutError extends MongoError {
 }
 
 /**
- * @public
  * An error signifying a client-side server selection error
+ * @public
+ * @category Error
  */
 export class MongoServerSelectionError extends MongoTimeoutError {
   constructor(message: string, reason: any) {
@@ -211,8 +219,9 @@ function makeWriteConcernResultObject(input: any) {
 }
 
 /**
- * @public
  * An error thrown when the server reports a writeConcernError
+ * @public
+ * @category Error
  */
 export class MongoWriteConcernError extends MongoError {
   /** The result document (provided if ok: 1) */

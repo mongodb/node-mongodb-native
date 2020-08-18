@@ -40,6 +40,7 @@ export interface UpdateResult {
   result: Document;
 }
 
+/** @internal */
 export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   namespace: MongoDBNamespace;
   operations: Document[];
@@ -64,6 +65,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   }
 }
 
+/** @internal */
 export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
@@ -113,6 +115,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
   }
 }
 
+/** @internal */
 export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;

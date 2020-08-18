@@ -21,6 +21,7 @@ export interface InsertOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/** @internal */
 export class InsertOperation extends OperationBase<InsertOptions, Document> {
   namespace: string;
   operations: Document[];

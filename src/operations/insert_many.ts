@@ -21,6 +21,7 @@ export interface InsertManyResult {
   result: Document;
 }
 
+/** @internal */
 export class InsertManyOperation extends OperationBase<InsertOptions, InsertManyResult> {
   collection: Collection;
   docs: Document[];

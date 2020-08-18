@@ -21,6 +21,7 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
   : never;
 
 /**
+ * @internal
  * Executes the given operation with provided arguments.
  *
  * This method reduces large amounts of duplication in the entire codebase by providing

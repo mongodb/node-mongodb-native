@@ -12,6 +12,7 @@ export interface CountDocumentsOptions extends AggregateOptions {
   limit?: number;
 }
 
+/** @internal */
 export class CountDocumentsOperation extends AggregateOperation<number> {
   constructor(collection: Collection, query: Document, options: CountDocumentsOptions) {
     const pipeline = [];

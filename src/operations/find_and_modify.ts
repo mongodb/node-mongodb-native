@@ -41,6 +41,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
+/** @internal */
 export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
@@ -155,6 +156,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
   }
 }
 
+/** @internal */
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
     // Final options
@@ -171,6 +173,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   }
 }
 
+/** @internal */
 export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   constructor(
     collection: Collection,
@@ -201,6 +204,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   }
 }
 
+/** @internal */
 export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   constructor(
     collection: Collection,

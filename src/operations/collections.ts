@@ -11,6 +11,7 @@ export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
 }
 
+/** @internal */
 export class CollectionsOperation extends OperationBase<CollectionsOptions, Collection[]> {
   db: Db;
 

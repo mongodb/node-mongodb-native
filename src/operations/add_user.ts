@@ -17,6 +17,7 @@ export interface AddUserOptions extends CommandOperationOptions {
   customData?: Document;
 }
 
+/** @internal */
 export class AddUserOperation extends CommandOperation<AddUserOptions, Document> {
   db: Db;
   username: string;

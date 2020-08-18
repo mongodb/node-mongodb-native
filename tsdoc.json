@@ -8,6 +8,10 @@
         {
             "syntaxKind": "block",
             "tagName": "@since"
+        },
+        {
+            "syntaxKind": "block",
+            "tagName": "@category"
         }
     ]
 }

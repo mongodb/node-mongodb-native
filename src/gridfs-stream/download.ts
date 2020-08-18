@@ -68,6 +68,7 @@ export interface GridFSBucketReadStreamPrivate {
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
  */
 export class GridFSBucketReadStream extends Readable {
+  /** @internal */
   s: GridFSBucketReadStreamPrivate;
 
   /**

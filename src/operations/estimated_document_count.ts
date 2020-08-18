@@ -12,6 +12,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   hint?: Hint;
 }
 
+/** @internal */
 export class EstimatedDocumentCountOperation extends CommandOperation<
   EstimatedDocumentCountOptions,
   number

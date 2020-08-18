@@ -4,6 +4,7 @@ import { OperationOptions, OperationBase } from './operation';
 import type { Server } from '../sdam/server';
 import { MongoError } from '..';
 
+/** @internal */
 export class IsCappedOperation extends OperationBase<OperationOptions, boolean> {
   collection: Collection;
 

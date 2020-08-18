@@ -20,6 +20,7 @@ export interface CountOptions extends CommandOperationOptions {
 
 type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
+/** @internal */
 export class CountOperation extends CommandOperation<CountOptions, number> {
   cursor: Cursor;
   applySkipLimit: boolean;

@@ -8,6 +8,7 @@ import type { Document } from '../bson';
 export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
 /**
+ * @internal
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
  *
  * @deprecated Please use forEach instead
@@ -45,7 +46,7 @@ export function each(cursor: Cursor, callback: EachCallback): void {
   }
 }
 
-/** Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
 function loop(cursor: Cursor, callback: Callback) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;
@@ -56,6 +57,7 @@ function loop(cursor: Cursor, callback: Callback) {
 }
 
 /**
+ * @internal
  * Returns an array of documents. See Cursor.prototype.toArray for more information.
  *
  * @param cursor - The Cursor instance from which to get the next document.

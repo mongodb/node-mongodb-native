@@ -746,6 +746,7 @@ export class Msg {
   }
 }
 
+/** @internal */
 export class BinMsg {
   parsed: boolean;
   raw: Buffer;

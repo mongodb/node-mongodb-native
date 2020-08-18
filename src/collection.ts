@@ -172,6 +172,7 @@ export interface CollectionPrivate {
  * ```
  */
 export class Collection implements OperationParent {
+  /** @internal */
   s: CollectionPrivate;
 
   /** @internal Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */

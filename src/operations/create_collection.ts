@@ -57,6 +57,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
 }
 
+/** @internal */
 export class CreateCollectionOperation extends CommandOperation<
   CreateCollectionOptions,
   Collection

@@ -5,7 +5,10 @@ import type { Connection } from './connection';
 import type { Document } from '../bson';
 import type { AnyError } from '../error';
 
-/** The base export class for all monitoring events published from the connection pool */
+/**
+ * The base export class for all monitoring events published from the connection pool
+ * @category Event
+ */
 export class ConnectionPoolMonitoringEvent {
   /** A timestamp when the event was created  */
   time: Date;
@@ -18,7 +21,10 @@ export class ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is created */
+/**
+ * An event published when a connection pool is created
+ * @category Event
+ */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
   options?: ConnectionPoolOptions;
@@ -29,14 +35,20 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is closed */
+/**
+ * An event published when a connection pool is closed
+ * @category Event
+ */
 export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/** An event published when a connection pool creates a new connection */
+/**
+ * An event published when a connection pool creates a new connection
+ * @category Event
+ */
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** A monotonically increasing, per-pool id for the newly created connection */
   connectionId: number;
@@ -47,7 +59,10 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is ready for use */
+/**
+ * An event published when a connection is ready for use
+ * @category Event
+ */
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -58,7 +73,10 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is closed */
+/**
+ * An event published when a connection is closed
+ * @category Event
+ */
 export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -72,14 +90,17 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a request to check a connection out begins */
+/** An event published when a request to check a connection out begins @category Event */
 export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/** An event published when a request to check a connection out fails */
+/**
+ * An event published when a request to check a connection out fails
+ * @category Event
+ */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
   reason: AnyError | string;
@@ -90,7 +111,10 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
   }
 }
 
-/** An event published when a connection is checked out of the connection pool */
+/**
+ * An event published when a connection is checked out of the connection pool
+ * @category Event
+ */
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -101,7 +125,10 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is checked into the connection pool */
+/**
+ * An event published when a connection is checked into the connection pool
+ * @category Event
+ */
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -112,7 +139,10 @@ export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is cleared */
+/**
+ * An event published when a connection pool is cleared
+ * @category Event
+ */
 export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
@@ -132,7 +162,10 @@ export const CMAP_EVENT_NAMES = [
   'connectionPoolCleared'
 ];
 
-/** An event indicating the start of a given command */
+/**
+ * An event indicating the start of a given
+ * @category Event
+ */
 export class CommandStartedEvent {
   commandObj?: Document;
   requestId: number;
@@ -168,7 +201,10 @@ export class CommandStartedEvent {
   }
 }
 
-/** An event indicating the success of a given command */
+/**
+ * An event indicating the success of a given command
+ * @category Event
+ */
 export class CommandSucceededEvent {
   address: string;
   connectionId?: string | number;
@@ -204,7 +240,10 @@ export class CommandSucceededEvent {
   }
 }
 
-/** An event indicating the failure of a given command */
+/**
+ * An event indicating the failure of a given command
+ * @category Event
+ */
 export class CommandFailedEvent {
   address: string;
   connectionId?: string | number;

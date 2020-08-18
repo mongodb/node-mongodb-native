@@ -8,7 +8,7 @@ import type { Collection } from '../collection';
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
 
-/** Return a list of distinct values for the given key across a collection. */
+/** @internal Return a list of distinct values for the given key across a collection. */
 export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
   collection: Collection;
   /** Field of the document to find distinct values for. */

@@ -294,8 +294,9 @@ export class BulkWriteResult {
 }
 
 /**
- * @public
  * An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * @public
+ * @category Error
  */
 export class WriteConcernError {
   err: any;
@@ -345,7 +346,9 @@ export class WriteConcernError {
 }
 
 /**
- * @public An error that occurred during a BulkWrite on the server.
+ * An error that occurred during a BulkWrite on the server.
+ * @public
+ * @category Error
  */
 export class WriteError {
   err: any;
@@ -614,8 +617,9 @@ function handleMongoWriteConcernError(
 }
 
 /**
- * @public An error indicating an unsuccessful Bulk Write
- * @extends {MongoError}
+ * An error indicating an unsuccessful Bulk Write
+ * @public
+ * @category Error
  */
 class BulkWriteError extends MongoError {
   result: any;

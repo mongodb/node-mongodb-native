@@ -52,9 +52,10 @@ export interface AdminPrivate {
  * ```
  */
 export class Admin {
+  /** @internal */
   s: AdminPrivate;
 
-  /** Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
+  /** @internal Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: Db) {
     this.s = { db };
   }

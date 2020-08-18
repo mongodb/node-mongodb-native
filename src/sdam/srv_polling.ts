@@ -17,7 +17,10 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
   return srv.endsWith(parent);
 }
 
-/** @public */
+/**
+ * @public
+ * @category Event
+ */
 export class SrvPollingEvent {
   srvRecords: dns.SrvRecord[];
   constructor(srvRecords: dns.SrvRecord[]) {

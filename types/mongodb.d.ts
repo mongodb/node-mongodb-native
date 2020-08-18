@@ -68,8 +68,9 @@ export declare interface AddUserOptions extends CommandOperationOptions {
  * ```
  */
 export declare class Admin {
+  /** @internal */
   s: AdminPrivate;
-  /** Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
+  /** @internal Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: Db);
   /**
    * Execute a command
@@ -892,6 +893,7 @@ export declare interface Collection {
  * ```
  */
 export declare class Collection implements OperationParent {
+  /** @internal */
   s: CollectionPrivate;
   /** @internal Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: Db, name: string, options?: CollectionOptions);
@@ -1454,13 +1456,11 @@ export declare class Collection implements OperationParent {
   getLogger(): Logger;
   get logger(): Logger;
   /**
-   * @deprecated Use insertOne, insertMany or bulkWrite instead.
-   *
    * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
    * can be overridden by setting the **forceServerObjectId** flag.
    *
-   * @deprecated Use insertOne, insertMany or bulkWrite
+   * @deprecated Use insertOne, insertMany or bulkWrite instead.
    * @param docs - The documents to insert
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
@@ -2242,6 +2242,7 @@ export declare class Cursor<
   O extends OperationBase = OperationBase,
   T extends CursorOptions = CursorOptions
 > extends CoreCursor<O, T> {
+  /** @internal */
   s: CursorPrivate;
   /** @internal */
   constructor(topology: Topology, operation: O, options?: T);
@@ -2258,9 +2259,9 @@ export declare class Cursor<
   /** Set the cursor query */
   filter(filter: Document): this;
   /**
-   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * Set the cursor maxScan
    *
+   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * @param maxScan - Constrains the query to only scan the specified number of documents when fulfilling the query
    */
   maxScan(maxScan: number): this;
@@ -2523,6 +2524,7 @@ export declare enum CursorState {
  * ```
  */
 export declare class Db implements OperationParent {
+  /** @internal */
   s: DbPrivate;
   static SYSTEM_NAMESPACE_COLLECTION: string;
   static SYSTEM_INDEX_COLLECTION: string;
@@ -3169,6 +3171,7 @@ export declare interface GridFSBucketPrivate {
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
  */
 export declare class GridFSBucketReadStream extends Readable {
+  /** @internal */
   s: GridFSBucketReadStreamPrivate;
   /**
    * An error occurred
@@ -3784,8 +3787,9 @@ export declare interface MessageStreamOptions extends DuplexOptions {
 export { MinKey };
 
 /**
- * @public An error indicating an unsuccessful Bulk Write
- * @extends {MongoError}
+ * An error indicating an unsuccessful Bulk Write
+ * @public
+ * @category Error
  */
 export declare class MongoBulkWriteError extends MongoError {
   result: any;
@@ -4064,7 +4068,10 @@ export declare class MongoDBNamespace {
   static fromString(namespace?: string): MongoDBNamespace;
 }
 
-/** @public */
+/**
+ * @public
+ * @category Error
+ */
 export declare class MongoError extends Error {
   [kErrorLabels]: Set<string>;
   code?: number;
@@ -4093,8 +4100,9 @@ export declare class MongoError extends Error {
 }
 
 /**
- * @public
  * An error indicating an issue with the network, including TCP errors and timeouts.
+ * @public
+ * @category Error
  */
 export declare class MongoNetworkError extends MongoError {
   [kBeforeHandshake]?: boolean;
@@ -4102,24 +4110,27 @@ export declare class MongoNetworkError extends MongoError {
 }
 
 /**
- * @public
  * An error used when attempting to parse a value (like a connection string)
+ * @public
+ * @category Error
  */
 export declare class MongoParseError extends MongoError {
   constructor(message: string);
 }
 
 /**
- * @public
  * An error signifying a client-side server selection error
+ * @public
+ * @category Error
  */
 export declare class MongoServerSelectionError extends MongoTimeoutError {
   constructor(message: string, reason: any);
 }
 
 /**
- * @public
  * An error signifying a client-side timeout event
+ * @public
+ * @category Error
  */
 export declare class MongoTimeoutError extends MongoError {
   /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
@@ -4209,8 +4220,9 @@ export declare interface MongoURIOptions
 }
 
 /**
- * @public
  * An error thrown when the server reports a writeConcernError
+ * @public
+ * @category Error
  */
 export declare class MongoWriteConcernError extends MongoError {
   /** The result document (provided if ok: 1) */
@@ -5001,7 +5013,10 @@ export declare interface SrvPollerOptions extends LoggerOptions {
   heartbeatFrequencyMS: number;
 }
 
-/** @public */
+/**
+ * @public
+ * @category Event
+ */
 export declare class SrvPollingEvent {
   srvRecords: dns.SrvRecord[];
   constructor(srvRecords: dns.SrvRecord[]);
@@ -5211,7 +5226,11 @@ export declare class TopologyDescription {
   hasServer(address: string): boolean;
 }
 
-/** @public Emitted when topology description changes. */
+/**
+ * Emitted when topology description changes.
+ * @public
+ * @category Event
+ */
 export declare class TopologyDescriptionChangedEvent {
   /** A unique identifier for the topology */
   topologyId: number;
@@ -5474,8 +5493,9 @@ export declare class WriteConcern {
 }
 
 /**
- * @public
  * An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * @public
+ * @category Error
  */
 export declare class WriteConcernError {
   err: any;
@@ -5528,7 +5548,9 @@ export declare interface WriteConcernOptions {
 }
 
 /**
- * @public An error that occurred during a BulkWrite on the server.
+ * An error that occurred during a BulkWrite on the server.
+ * @public
+ * @category Error
  */
 export declare class WriteError {
   err: any;

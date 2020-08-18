@@ -134,6 +134,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
  * ```
  */
 export class Db implements OperationParent {
+  /** @internal */
   s: DbPrivate;
 
   public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
