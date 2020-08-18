@@ -1,6 +1,3 @@
-import { PromiseProvider } from '../promise_provider';
-import { Long, ObjectId } from '../bson';
-import { MongoError, MongoWriteConcernError } from '../error';
 import {
   applyWriteConcern,
   applyRetryableWrites,
@@ -8,13 +5,37 @@ import {
   isPromiseLike,
   hasAtomicOperators,
   maxWireVersion,
-  Callback
+  Callback,
+  MongoDBNamespace
 } from '../utils';
+import { PromiseProvider } from '../promise_provider';
+import { Long, ObjectId, Document, BSONSerializeOptions } from '../bson';
+import { MongoError, MongoWriteConcernError } from '../error';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
-import type { WriteConcern } from '../write_concern';
+import { WriteConcern, WriteConcernOptions } from '../write_concern';
+import type { HasRetryableWrites } from './../utils';
+import type { Collection } from '../collection';
+import type { Topology } from '../sdam/topology';
+import type { Hint } from './../operations/operation';
+import type { addToOperationsList as orderedAddToOperationsList } from './ordered';
+import type { addToOperationsList as unorderedAddToOperationsList } from './unordered';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { InsertOptions } from './../operations/insert';
+import type { RemoveOptions } from './../cmap/wire_protocol/index';
+import type { ReplaceOptions } from './../operations/replace_one';
+import type { UpdateOptions } from './../operations/update';
+
+interface FinalOptionsConfigOptions {
+  bypassDocumentValidation?: boolean;
+  retryWrites?: boolean;
+}
+interface ResultHandler {
+  (err?: any, result?: any): void;
+  operationId?: number;
+}
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
@@ -24,20 +45,118 @@ const INSERT = 1;
 const UPDATE = 2;
 const REMOVE = 3;
 
+export type BatchTypes = typeof INSERT | typeof UPDATE | typeof REMOVE;
+
+interface Operation {
+  selector: Document;
+  multi: boolean;
+  upsert: boolean;
+  limit: number;
+}
+
+const INSERT_ONE = 'insertOne';
+const INSERT_MANY = 'insertMany';
+const REPLACE_ONE = 'replaceOne';
+const UPDATE_ONE = 'updateOne';
+const UPDATE_MANY = 'updateMany';
+const REMOVE_ONE = 'removeOne';
+const REMOVE_MANY = 'removeMany';
+const DELETE_ONE = 'deleteOne';
+const DELETE_MANY = 'deleteMany';
+
+type BatchInsert = Document & InsertOptions & { document?: Document; _id?: ObjectId };
+interface BatchOperations {
+  [INSERT_ONE]: BatchInsert;
+  [INSERT_MANY]: BatchInsert[];
+  [REPLACE_ONE]: ReplaceOptions & { q?: Document; replacement: Document; filter?: Document };
+  [UPDATE_ONE]: UpdateOptions & { q?: Document; update: Document; filter?: Document };
+  [UPDATE_MANY]: UpdateOptions & { q?: Document; update: Document; filter?: Document };
+  [REMOVE_ONE]: RemoveOptions;
+  [REMOVE_MANY]: RemoveOptions & { limit?: number };
+  [DELETE_ONE]: RemoveOptions & { q: Document };
+  [DELETE_MANY]: RemoveOptions & { q: Document };
+}
+
+export type AnyOperationOptions = BatchOperations[typeof INSERT_ONE] &
+  BatchOperations[typeof REPLACE_ONE] &
+  BatchOperations[typeof UPDATE_ONE] &
+  BatchOperations[typeof UPDATE_MANY] &
+  BatchOperations[typeof REPLACE_ONE] &
+  BatchOperations[typeof REMOVE_MANY];
+
+type BatchOpNested<T extends keyof BatchOperations> = Record<T, BatchOperations[T]>;
+
+export type AnyOperation =
+  | BatchOpNested<typeof INSERT_ONE>
+  | BatchOpNested<typeof INSERT_MANY>
+  | BatchOpNested<typeof REPLACE_ONE>
+  | BatchOpNested<typeof UPDATE_ONE>
+  | BatchOpNested<typeof UPDATE_MANY>
+  | BatchOpNested<typeof REPLACE_ONE>
+  | BatchOpNested<typeof REMOVE_MANY>;
+
+export type Operations = AnyOperation[];
+
+interface BulkOp {
+  _bsontype: string;
+  ts: Long | number;
+  t: Long | number;
+  greaterThan: (arg: BulkOp) => BulkOp;
+  equals: (arg: BulkOp) => BulkOp;
+}
+
+interface BulkIdDocument {
+  index: number;
+  _id: ObjectId;
+}
+
+interface BulkResult {
+  nInserted: number;
+  nMatched: number;
+  nModified: number | null;
+  nRemoved: number;
+  nUpserted: number;
+  upserted: Document[];
+  insertedIds: BulkIdDocument[];
+  writeErrors: WriteError[];
+  writeConcernErrors: WriteConcernError[];
+  writeConcernError?: WriteConcernError;
+  lastOp?: BulkOp;
+  opTime?: BulkOp;
+  ok: number;
+  result?: BulkResult;
+  code?: number;
+  message?: string;
+  n?: number;
+}
+
+const DEFAULT_BULK_RESULT: BulkResult = {
+  ok: 1,
+  writeErrors: [],
+  writeConcernErrors: [],
+  insertedIds: [],
+  nInserted: 0,
+  nUpserted: 0,
+  nMatched: 0,
+  nModified: 0,
+  nRemoved: 0,
+  upserted: []
+};
+
 /**
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
  */
 class Batch {
-  originalZeroIndex: any;
-  currentIndex: any;
-  originalIndexes: any;
-  batchType: any;
-  operations: any;
-  size: any;
-  sizeBytes: any;
+  originalZeroIndex: number;
+  currentIndex: number;
+  originalIndexes: number[];
+  batchType: BatchTypes;
+  operations: Partial<AnyOperationOptions>[];
+  size: number;
+  sizeBytes: number;
 
-  constructor(batchType: any, originalZeroIndex: any) {
+  constructor(batchType: BatchTypes, originalZeroIndex: number) {
     this.originalZeroIndex = originalZeroIndex;
     this.currentIndex = 0;
     this.originalIndexes = [];
@@ -53,7 +172,7 @@ class Batch {
  * The result of a bulk write.
  */
 export class BulkWriteResult {
-  result: any;
+  result: BulkResult;
   n: number;
 
   /** Number of documents inserted. */
@@ -71,14 +190,8 @@ export class BulkWriteResult {
   /** Upserted document generated Id's, hash key is the index of the originating operation */
   upsertedIds: { [key: number]: ObjectId };
 
-  /**
-   * Create a new BulkWriteResult instance
-   *
-   * **NOTE:** Internal Type, do not instantiate directly
-   *
-   * @param bulkResult
-   */
-  constructor(bulkResult: any) {
+  /** Create a new BulkWriteResult instance */
+  constructor(bulkResult: BulkResult) {
     this.result = bulkResult;
     this.insertedCount = bulkResult.nInserted;
     this.matchedCount = bulkResult.nMatched;
@@ -89,7 +202,7 @@ export class BulkWriteResult {
     this.insertedIds = {};
 
     // Update the n
-    this.n = bulkResult.insertedCount;
+    this.n = this.insertedCount;
 
     // Inserted documents
     const inserted = bulkResult.insertedIds;
@@ -106,111 +219,66 @@ export class BulkWriteResult {
     }
   }
 
-  /**
-   * Evaluates to true if the bulk operation correctly executes
-   *
-   * @type {boolean}
-   */
-  get ok() {
+  /** Evaluates to true if the bulk operation correctly executes */
+  get ok(): number {
     return this.result.ok;
   }
 
-  /**
-   * The number of inserted documents
-   *
-   * @type {number}
-   */
-  get nInserted() {
+  /** The number of inserted documents */
+  get nInserted(): number {
     return this.result.nInserted;
   }
 
-  /**
-   * Number of upserted documents
-   *
-   * @type {number}
-   */
-  get nUpserted() {
+  /** Number of upserted documents */
+  get nUpserted(): number {
     return this.result.nUpserted;
   }
 
-  /**
-   * Number of matched documents
-   *
-   * @type {number}
-   */
-  get nMatched() {
+  /** Number of matched documents */
+  get nMatched(): number {
     return this.result.nMatched;
   }
 
-  /**
-   * Number of documents updated physically on disk
-   *
-   * @type {number}
-   */
-  get nModified() {
+  /** Number of documents updated physically on disk */
+  get nModified(): number | null {
     return this.result.nModified;
   }
 
-  /**
-   * Number of removed documents
-   *
-   * @type {number}
-   */
-  get nRemoved() {
+  /** Number of removed documents */
+  get nRemoved(): number {
     return this.result.nRemoved;
   }
 
-  /**
-   * Returns an array of all inserted ids
-   *
-   * @returns {object[]}
-   */
-  getInsertedIds(): object[] {
+  /** Returns an array of all inserted ids */
+  getInsertedIds(): BulkIdDocument[] {
     return this.result.insertedIds;
   }
 
-  /**
-   * Returns an array of all upserted ids
-   *
-   * @returns {object[]}
-   */
-  getUpsertedIds(): object[] {
+  /** Returns an array of all upserted ids */
+  getUpsertedIds(): Document[] {
     return this.result.upserted;
   }
 
   /**
    * Returns the upserted id at the given index
    *
-   * @param index the number of the upserted id to return, returns undefined if no result for passed in index
-   * @returns {object}
+   * @param index - the number of the upserted id to return, returns undefined if no result for passed in index
    */
-  getUpsertedIdAt(index: number): object {
+  getUpsertedIdAt(index: number): Document {
     return this.result.upserted[index];
   }
 
-  /**
-   * Returns raw internal result
-   *
-   * @returns {object}
-   */
-  getRawResponse(): object {
+  /** Returns raw internal result */
+  getRawResponse(): BulkResult {
     return this.result;
   }
 
-  /**
-   * Returns true if the bulk operation contains a write error
-   *
-   * @returns {boolean}
-   */
+  /** Returns true if the bulk operation contains a write error */
   hasWriteErrors(): boolean {
     return this.result.writeErrors.length > 0;
   }
 
-  /**
-   * Returns the number of write errors off the bulk operation
-   *
-   * @returns {number}
-   */
+  /** Returns the number of write errors off the bulk operation */
   getWriteErrorCount(): number {
     return this.result.writeErrors.length;
   }
@@ -218,8 +286,7 @@ export class BulkWriteResult {
   /**
    * Returns a specific write error object
    *
-   * @param index of the write error to return, returns null if there is no result for passed in index
-   * @returns {WriteError|undefined}
+   * @param index - the write error to return, returns null if there is no result for passed in index
    */
   getWriteErrorAt(index: number): WriteError | undefined {
     if (index < this.result.writeErrors.length) {
@@ -227,29 +294,17 @@ export class BulkWriteResult {
     }
   }
 
-  /**
-   * Retrieve all write errors
-   *
-   * @returns {WriteError[]}
-   */
+  /** Retrieve all write errors */
   getWriteErrors(): WriteError[] {
     return this.result.writeErrors;
   }
 
-  /**
-   * Retrieve lastOp if available
-   *
-   * @returns {object}
-   */
-  getLastOp(): object {
+  /** Retrieve lastOp if available */
+  getLastOp(): undefined | BulkOp {
     return this.result.lastOp;
   }
 
-  /**
-   * Retrieve the write concern error if any
-   *
-   * @returns {WriteConcernError|undefined}
-   */
+  /** Retrieve the write concern error if any */
   getWriteConcernError(): WriteConcernError | undefined {
     if (this.result.writeConcernErrors.length === 0) {
       return;
@@ -271,23 +326,14 @@ export class BulkWriteResult {
     }
   }
 
-  /**
-   * @returns {object}
-   */
-  toJSON(): object {
+  toJSON(): BulkResult {
     return this.result;
   }
 
-  /**
-   * @returns {string}
-   */
   toString(): string {
     return `BulkWriteResult(${this.toJSON()})`;
   }
 
-  /**
-   * @returns {boolean}
-   */
   isOk(): boolean {
     return this.result.ok === 1;
   }
@@ -312,34 +358,20 @@ export class WriteConcernError {
     this.err = err;
   }
 
-  /**
-   * Write concern error code.
-   *
-   * @type {number}
-   */
-  get code() {
+  /** Write concern error code. */
+  get code(): number {
     return this.err.code;
   }
 
-  /**
-   * Write concern error message.
-   *
-   * @type {string}
-   */
-  get errmsg() {
+  /** Write concern error message. */
+  get errmsg(): string {
     return this.err.errmsg;
   }
 
-  /**
-   * @returns {object}
-   */
-  toJSON(): object {
+  toJSON(): { code: number; errmsg: string } {
     return { code: this.err.code, errmsg: this.err.errmsg };
   }
 
-  /**
-   * @returns {string}
-   */
   toString(): string {
     return `WriteConcernError(${this.err.errmsg})`;
   }
@@ -364,52 +396,30 @@ export class WriteError {
     this.err = err;
   }
 
-  /**
-   * WriteError code.
-   *
-   * @type {number}
-   */
-  get code() {
+  /** WriteError code. */
+  get code(): number {
     return this.err.code;
   }
 
-  /**
-   * WriteError original bulk operation index.
-   *
-   * @type {number}
-   */
-  get index() {
+  /** WriteError original bulk operation index. */
+  get index(): number {
     return this.err.index;
   }
 
-  /**
-   * WriteError message.
-   *
-   * @type {string}
-   */
-  get errmsg() {
+  /** WriteError message. */
+  get errmsg(): string | undefined {
     return this.err.errmsg;
   }
 
-  /**
-   * Returns the underlying operation that caused the error
-   *
-   * @returns {object}
-   */
-  getOperation(): object {
+  /** Returns the underlying operation that caused the error */
+  getOperation(): Partial<AnyOperationOptions> {
     return this.err.op;
   }
 
-  /**
-   * @returns {object}
-   */
-  toJSON(): object {
+  toJSON(): { code: number; index: number; errmsg?: string; op: Partial<AnyOperationOptions> } {
     return { code: this.err.code, index: this.err.index, errmsg: this.err.errmsg, op: this.err.op };
   }
 
-  /**
-   * @returns {string}
-   */
   toString(): string {
     return `WriteError(${JSON.stringify(this.toJSON())})`;
   }
@@ -423,7 +433,12 @@ export class WriteError {
  * @param err
  * @param result
  */
-function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
+function mergeBatchResults(
+  batch: Batch,
+  bulkResult: BulkResult,
+  err: any,
+  result?: BulkResult | null
+) {
   // If we have an error set the result to be the err object
   if (err) {
     result = err;
@@ -434,7 +449,7 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   }
 
   // Do we have a top level error stop processing and return
-  if (result.ok === 0 && bulkResult.ok === 1) {
+  if (result && result.ok === 0 && bulkResult.ok === 1) {
     bulkResult.ok = 0;
 
     const writeError = {
@@ -446,12 +461,12 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
 
     bulkResult.writeErrors.push(new WriteError(writeError));
     return;
-  } else if (result.ok === 0 && bulkResult.ok === 0) {
+  } else if (result && result.ok === 0 && bulkResult.ok === 0) {
     return;
   }
 
   // Deal with opTime if available
-  if (result.opTime || result.lastOp) {
+  if (result && (result.opTime || result.lastOp)) {
     const opTime = result.lastOp || result.opTime;
     let lastOpTS = null;
     let lastOpT = null;
@@ -477,16 +492,16 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
       }
 
       // Current OpTime TS
-      const opTimeTS = typeof opTime.ts === 'number' ? Long.fromNumber(opTime.ts) : opTime.ts;
-      const opTimeT = typeof opTime.t === 'number' ? Long.fromNumber(opTime.t) : opTime.t;
+      const opTimeTS = typeof opTime?.ts === 'number' ? Long.fromNumber(opTime?.ts) : opTime?.ts;
+      const opTimeT = typeof opTime?.t === 'number' ? Long.fromNumber(opTime?.t) : opTime?.t;
 
       // Compare the opTime's
       if (bulkResult.lastOp == null) {
         bulkResult.lastOp = opTime;
-      } else if (opTimeTS.greaterThan(lastOpTS)) {
+      } else if (lastOpTS && opTimeTS?.greaterThan(lastOpTS)) {
         bulkResult.lastOp = opTime;
-      } else if (opTimeTS.equals(lastOpTS)) {
-        if (opTimeT.greaterThan(lastOpT)) {
+      } else if (lastOpTS && opTimeTS?.equals(lastOpTS)) {
+        if (lastOpT && opTimeT?.greaterThan(lastOpT)) {
           bulkResult.lastOp = opTime;
         }
       }
@@ -494,28 +509,28 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === INSERT && result.n) {
+  if (batch.batchType === INSERT && result?.n) {
     bulkResult.nInserted = bulkResult.nInserted + result.n;
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === REMOVE && result.n) {
+  if (batch.batchType === REMOVE && result?.n) {
     bulkResult.nRemoved = bulkResult.nRemoved + result.n;
   }
 
   let nUpserted = 0;
 
   // We have an array of upserted values, we need to rewrite the indexes
-  if (Array.isArray(result.upserted)) {
+  if (result && Array.isArray(result?.upserted)) {
     nUpserted = result.upserted.length;
 
-    for (let i = 0; i < result.upserted.length; i++) {
+    for (let i = 0; i < result?.upserted.length; i++) {
       bulkResult.upserted.push({
         index: result.upserted[i].index + batch.originalZeroIndex,
         _id: result.upserted[i]._id
       });
     }
-  } else if (result.upserted) {
+  } else if (result?.upserted) {
     nUpserted = 1;
 
     bulkResult.upserted.push({
@@ -525,19 +540,19 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   }
 
   // If we have an update Batch type
-  if (batch.batchType === UPDATE && result.n) {
+  if (batch.batchType === UPDATE && result?.n) {
     const nModified = result.nModified;
     bulkResult.nUpserted = bulkResult.nUpserted + nUpserted;
     bulkResult.nMatched = bulkResult.nMatched + (result.n - nUpserted);
 
-    if (typeof nModified === 'number') {
+    if (typeof bulkResult.nModified === 'number' && typeof nModified === 'number') {
       bulkResult.nModified = bulkResult.nModified + nModified;
     } else {
       bulkResult.nModified = null;
     }
   }
 
-  if (Array.isArray(result.writeErrors)) {
+  if (result && Array.isArray(result.writeErrors)) {
     for (let i = 0; i < result.writeErrors.length; i++) {
       const writeError = {
         index: batch.originalIndexes[result.writeErrors[i].index],
@@ -550,17 +565,21 @@ function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
     }
   }
 
-  if (result.writeConcernError) {
+  if (result?.writeConcernError) {
     bulkResult.writeConcernErrors.push(new WriteConcernError(result.writeConcernError));
   }
 }
 
-function executeCommands(bulkOperation: any, options: any, callback: Callback<BulkWriteResult>) {
+function executeCommands(
+  bulkOperation: BulkOperationBase,
+  options: any,
+  callback: Callback<BulkWriteResult>
+) {
   if (bulkOperation.s.batches.length === 0) {
     return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult));
   }
 
-  const batch = bulkOperation.s.batches.shift();
+  const batch = bulkOperation.s.batches.shift() as Batch;
 
   function resultHandler(err?: any, result?: any) {
     // Error is a driver related error not a bulk op error, terminate
@@ -599,8 +618,8 @@ function executeCommands(bulkOperation: any, options: any, callback: Callback<Bu
  * @param callback
  */
 function handleMongoWriteConcernError(
-  batch: object,
-  bulkResult: object,
+  batch: Batch,
+  bulkResult: BulkResult,
   err: any,
   callback: Callback
 ) {
@@ -641,12 +660,19 @@ class BulkWriteError extends MongoError {
   }
 }
 
+type DocumentWithHint = Document & { hint?: Hint };
+
 /**
  * @classdesc A builder object that is returned from {@link BulkOperationBase#find}.
  * Is used to build a write operation that involves a query filter.
  */
 class FindOperators {
-  s: any;
+  s: {
+    currentOp?: Partial<Operation>;
+    options: {
+      addToOperationsList: (self: FindOperators, batchType: BatchTypes, document: Document) => any;
+    };
+  };
 
   /**
    * Creates a new FindOperators object.
@@ -668,25 +694,25 @@ class FindOperators {
    * @throws MongoError If operation cannot be added to bulk write
    * @returns {any} A reference to the parent BulkOperation
    */
-  update(updateDocument: any): any {
+  update(updateDocument: DocumentWithHint) {
     // Perform upsert
-    const upsert = typeof this.s.currentOp.upsert === 'boolean' ? this.s.currentOp.upsert : false;
+    const upsert = typeof this.s.currentOp?.upsert === 'boolean' ? this.s.currentOp.upsert : false;
 
     // Establish the update command
     const document = {
-      q: this.s.currentOp.selector,
+      q: this.s.currentOp?.selector,
       u: updateDocument,
       multi: true,
-      upsert: upsert
-    } as any;
+      upsert: upsert,
+      ...(updateDocument.hint ? { hint: updateDocument.hint } : {})
+    };
 
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
-    }
-
-    // Clear out current Op
-    this.s.currentOp = null;
+    this.clearOutCurrentOp();
     return this.s.options.addToOperationsList(this, UPDATE, document);
+  }
+
+  clearOutCurrentOp() {
+    this.s.currentOp = undefined;
   }
 
   /**
@@ -698,28 +724,24 @@ class FindOperators {
    * @throws {MongoError} If operation cannot be added to bulk write
    * @returns {any} A reference to the parent BulkOperation
    */
-  updateOne(updateDocument: any): any {
+  updateOne(updateDocument: DocumentWithHint): any {
     // Perform upsert
-    const upsert = typeof this.s.currentOp.upsert === 'boolean' ? this.s.currentOp.upsert : false;
+    const upsert = typeof this.s.currentOp?.upsert === 'boolean' ? this.s.currentOp.upsert : false;
 
     // Establish the update command
     const document = {
-      q: this.s.currentOp.selector,
+      q: this.s.currentOp?.selector,
       u: updateDocument,
       multi: false,
-      upsert: upsert
-    } as any;
-
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
-    }
+      upsert: upsert,
+      ...(updateDocument.hint ? { hint: updateDocument.hint } : {})
+    };
 
     if (!hasAtomicOperators(updateDocument)) {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    // Clear out current Op
-    this.s.currentOp = null;
+    this.clearOutCurrentOp();
     return this.s.options.addToOperationsList(this, UPDATE, document);
   }
 
@@ -730,28 +752,24 @@ class FindOperators {
    * @throws {MongoError} If operation cannot be added to bulk write
    * @returns {void} A reference to the parent BulkOperation
    */
-  replaceOne(replacement: any) {
+  replaceOne(replacement: DocumentWithHint) {
     // Perform upsert
-    const upsert = typeof this.s.currentOp.upsert === 'boolean' ? this.s.currentOp.upsert : false;
+    const upsert = typeof this.s.currentOp?.upsert === 'boolean' ? this.s.currentOp.upsert : false;
 
     // Establish the update command
     const document = {
-      q: this.s.currentOp.selector,
+      q: this.s.currentOp?.selector,
       u: replacement,
       multi: false,
-      upsert: upsert
-    } as any;
-
-    if (replacement.hint) {
-      document.hint = replacement.hint;
-    }
+      upsert: upsert,
+      ...(replacement.hint ? { hint: replacement.hint } : {})
+    };
 
     if (hasAtomicOperators(replacement)) {
       throw new TypeError('Replacement document must not use atomic operators');
     }
 
-    // Clear out current Op
-    this.s.currentOp = null;
+    this.clearOutCurrentOp();
     return this.s.options.addToOperationsList(this, UPDATE, document);
   }
 
@@ -763,7 +781,7 @@ class FindOperators {
    * @returns {FindOperators} reference to self
    */
   upsert(): FindOperators {
-    this.s.currentOp.upsert = true;
+    this.s.currentOp = { ...this.s.currentOp, upsert: true };
     return this;
   }
 
@@ -777,12 +795,11 @@ class FindOperators {
   deleteOne(): any {
     // Establish the update command
     const document = {
-      q: this.s.currentOp.selector,
+      q: this.s.currentOp?.selector,
       limit: 1
     };
 
-    // Clear out current Op
-    this.s.currentOp = null;
+    this.clearOutCurrentOp();
     return this.s.options.addToOperationsList(this, REMOVE, document);
   }
 
@@ -796,28 +813,73 @@ class FindOperators {
   delete(): any {
     // Establish the update command
     const document = {
-      q: this.s.currentOp.selector,
+      q: this.s.currentOp?.selector,
       limit: 0
     };
 
-    // Clear out current Op
-    this.s.currentOp = null;
+    this.clearOutCurrentOp();
     return this.s.options.addToOperationsList(this, REMOVE, document);
   }
 
   /**
-   * backwards compatability for deleteOne
+   * backwards compatibility for deleteOne
    */
   removeOne() {
     return this.deleteOne();
   }
 
   /**
-   * backwards compatability for delete
+   * backwards compatibility for delete
    */
   remove() {
     return this.delete();
   }
+}
+
+interface BulkOperationPrivate {
+  bulkResult: BulkResult;
+  currentBatch: Batch | null;
+  currentIndex: number;
+  // ordered specific
+  currentBatchSize: number;
+  currentBatchSizeBytes: number;
+  // unordered specific
+  currentInsertBatch: Batch | null;
+  currentUpdateBatch: Batch | null;
+  currentRemoveBatch: Batch | null;
+  batches: Batch[];
+  // Write concern
+  writeConcern?: WriteConcern;
+  // Max batch size options
+  maxBsonObjectSize: number;
+  maxBatchSizeBytes: number;
+  maxWriteBatchSize: number;
+  maxKeySize: number;
+  // Namespace
+  namespace: MongoDBNamespace;
+  // Topology
+  topology: Topology;
+  // Options
+  options: BulkOptions;
+  // Current operation
+  currentOp: { selector: Document } | null;
+  // Executed
+  executed: boolean;
+  // Collection
+  collection: Collection;
+  // Fundamental error
+  err: null;
+  // check keys
+  checkKeys: boolean;
+  bypassDocumentValidation?: boolean;
+}
+
+type AddToOperationsList = typeof orderedAddToOperationsList | typeof unorderedAddToOperationsList;
+
+export interface BulkOptions extends BSONSerializeOptions, WriteConcernOptions, HasRetryableWrites {
+  bypassDocumentValidation?: boolean;
+  addToOperationsList?: AddToOperationsList;
+  forceServerObjectId?: boolean;
 }
 
 /**
@@ -826,20 +888,17 @@ class FindOperators {
  * **NOTE:** Internal Type, do not instantiate directly
  */
 class BulkOperationBase {
-  isOrdered: any;
-  s: any;
-  operationId: any;
+  isOrdered: boolean;
+  s: BulkOperationPrivate;
+  operationId?: number;
 
-  /**
-   * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
-   *
-   * @property {number} length Get the number of operations in the bulk.
-   * @param topology
-   * @param collection
-   * @param options
-   * @param isOrdered
-   */
-  constructor(topology: any, collection: any, options: any, isOrdered: any) {
+  /** Create a new OrderedBulkOperation or UnorderedBulkOperation instance */
+  constructor(
+    topology: Topology,
+    collection: Collection,
+    options: BulkOptions,
+    isOrdered: boolean
+  ) {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
@@ -873,29 +932,15 @@ class BulkOperationBase {
     const maxKeySize = (maxWriteBatchSize - 1).toString(10).length + 2;
 
     // Final options for retryable writes and write concern
-    let finalOptions = Object.assign({}, options);
+    let finalOptions = { ...options };
     finalOptions = applyRetryableWrites(finalOptions, collection.s.db);
     finalOptions = applyWriteConcern(finalOptions, { collection: collection }, options);
-    const writeConcern = finalOptions.writeConcern;
-
-    // Final results
-    const bulkResult = {
-      ok: 1,
-      writeErrors: [],
-      writeConcernErrors: [],
-      insertedIds: [],
-      nInserted: 0,
-      nUpserted: 0,
-      nMatched: 0,
-      nModified: 0,
-      nRemoved: 0,
-      upserted: []
-    };
+    const writeConcern = WriteConcern.fromOptions(finalOptions.writeConcern);
 
     // Internal state
     this.s = {
       // Final result
-      bulkResult: bulkResult,
+      bulkResult: DEFAULT_BULK_RESULT,
       // Current batch state
       currentBatch: null,
       currentIndex: 0,
@@ -938,6 +983,14 @@ class BulkOperationBase {
     }
   }
 
+  get forceServerObjectId(): boolean {
+    const result =
+      typeof this.s.options.forceServerObjectId === 'boolean'
+        ? this.s.options.forceServerObjectId
+        : this.s.collection.s.db.options?.forceServerObjectId;
+    return Boolean(result);
+  }
+
   /**
    * Add a single insert document to the bulk operation
    *
@@ -954,10 +1007,9 @@ class BulkOperationBase {
    *   .insert({ c: 3 });
    * await bulkOp.execute();
    */
-  insert(document: any): BulkOperationBase {
-    if (this.s.collection.s.db.options.forceServerObjectId !== true && document._id == null)
-      document._id = new ObjectId();
-    return this.s.options.addToOperationsList(this, INSERT, document);
+  insert(document: Document): BulkOperationBase {
+    if (this.forceServerObjectId !== true && document._id == null) document._id = new ObjectId();
+    return this.s.options.addToOperationsList!(this, INSERT, document);
   }
 
   /**
@@ -1011,22 +1063,28 @@ class BulkOperationBase {
     return new FindOperators(this);
   }
 
-  /**
-   * Specifies a raw operation to perform in the bulk write.
-   *
-   * @function
-   * @param op The raw operation to perform.
-   * @param reference for more information.
-   * @returns {BulkOperationBase} A reference to self
-   */
-  raw(op: any): BulkOperationBase {
-    const key = Object.keys(op)[0];
+  // isReplaceOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof REPLACE_ONE] {
+  //   return op && key === REPLACE_ONE;
+  // }
 
+  // isInsertOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof INSERT_ONE] {
+  //   return op && key === INSERT_ONE;
+  // }
+
+  // isUpdateOne(key: string, op: AnyOperationOptions): op is BatchOperations[typeof UPDATE_ONE] {
+  //   return op && key === UPDATE_ONE;
+  // }
+
+  // isUpdateMany(key: string, op: AnyOperationOptions): op is BatchOperations[typeof UPDATE_MANY] {
+  //   return op && key === UPDATE_MANY;
+  // }
+
+  /** Specifies a raw operation to perform in the bulk write. */
+  raw(op: Partial<BatchOperations> & { collation?: CollationOptions }): BulkOperationBase {
+    const key = Object.keys(op)[0] as keyof BatchOperations;
+    const opOptions = op[key] as AnyOperationOptions;
     // Set up the force server object id
-    const forceServerObjectId =
-      typeof this.s.options.forceServerObjectId === 'boolean'
-        ? this.s.options.forceServerObjectId
-        : this.s.collection.s.db.options.forceServerObjectId;
+    const forceServerObjectId = this.forceServerObjectId;
 
     // Update operations
     if (
@@ -1034,45 +1092,45 @@ class BulkOperationBase {
       (op.updateMany && op.updateMany.q) ||
       (op.replaceOne && op.replaceOne.q)
     ) {
-      op[key].multi = op.updateOne || op.replaceOne ? false : true;
-      return this.s.options.addToOperationsList(this, UPDATE, op[key]);
+      opOptions.multi = op.updateOne || op.replaceOne ? false : true;
+      return this.s.options.addToOperationsList!(this, UPDATE, opOptions);
     }
 
     // Crud spec update format
     if (op.updateOne || op.updateMany || op.replaceOne) {
-      if (op.replaceOne && hasAtomicOperators(op[key].replacement)) {
+      if (op.replaceOne && hasAtomicOperators(opOptions.replacement)) {
         throw new TypeError('Replacement document must not use atomic operators');
-      } else if ((op.updateOne || op.updateMany) && !hasAtomicOperators(op[key].update)) {
+      } else if ((op.updateOne || op.updateMany) && !hasAtomicOperators(opOptions.update)) {
         throw new TypeError('Update document requires atomic operators');
       }
 
       const multi = op.updateOne || op.replaceOne ? false : true;
       const operation = {
-        q: op[key].filter,
-        u: op[key].update || op[key].replacement,
+        q: opOptions.filter,
+        u: opOptions.update || opOptions.replacement,
         multi: multi
       } as any;
 
-      if (op[key].hint) {
-        operation.hint = op[key].hint;
+      if (opOptions.hint) {
+        operation.hint = opOptions.hint;
       }
 
       if (this.isOrdered) {
-        operation.upsert = op[key].upsert ? true : false;
+        operation.upsert = opOptions.upsert ? true : false;
         if (op.collation) operation.collation = op.collation;
       } else {
-        if (op[key].upsert) operation.upsert = true;
+        if (opOptions.upsert) operation.upsert = true;
       }
-      if (op[key].arrayFilters) {
+      if (opOptions.arrayFilters) {
         // TODO: this check should be done at command construction against a connection, not a topology
         if (maxWireVersion(this.s.topology) < 6) {
           throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
         }
 
-        operation.arrayFilters = op[key].arrayFilters;
+        operation.arrayFilters = opOptions.arrayFilters;
       }
 
-      return this.s.options.addToOperationsList(this, UPDATE, operation);
+      return this.s.options.addToOperationsList!(this, UPDATE, operation);
     }
 
     // Remove operations
@@ -1082,39 +1140,39 @@ class BulkOperationBase {
       (op.deleteOne && op.deleteOne.q) ||
       (op.deleteMany && op.deleteMany.q)
     ) {
-      op[key].limit = op.removeOne ? 1 : 0;
-      return this.s.options.addToOperationsList(this, REMOVE, op[key]);
+      opOptions.limit = op.removeOne ? 1 : 0;
+      return this.s.options.addToOperationsList!(this, REMOVE, opOptions);
     }
 
     // Crud spec delete operations, less efficient
     if (op.deleteOne || op.deleteMany) {
       const limit = op.deleteOne ? 1 : 0;
-      const operation = { q: op[key].filter, limit: limit } as any;
-      if (op[key].hint) {
-        operation.hint = op[key].hint;
+      const operation = { q: opOptions.filter, limit: limit } as any;
+      if (opOptions.hint) {
+        operation.hint = opOptions.hint;
       }
       if (this.isOrdered) {
         if (op.collation) operation.collation = op.collation;
       }
-      return this.s.options.addToOperationsList(this, REMOVE, operation);
+      return this.s.options.addToOperationsList!(this, REMOVE, operation);
     }
 
     // Insert operations
     if (op.insertOne && op.insertOne.document == null) {
       if (forceServerObjectId !== true && op.insertOne._id == null)
         op.insertOne._id = new ObjectId();
-      return this.s.options.addToOperationsList(this, INSERT, op.insertOne);
+      return this.s.options.addToOperationsList!(this, INSERT, op.insertOne);
     } else if (op.insertOne && op.insertOne.document) {
       if (forceServerObjectId !== true && op.insertOne.document._id == null)
         op.insertOne.document._id = new ObjectId();
-      return this.s.options.addToOperationsList(this, INSERT, op.insertOne.document);
+      return this.s.options.addToOperationsList!(this, INSERT, op.insertOne.document);
     }
 
     if (op.insertMany) {
       for (let i = 0; i < op.insertMany.length; i++) {
         if (forceServerObjectId !== true && op.insertMany[i]._id == null)
           op.insertMany[i]._id = new ObjectId();
-        this.s.options.addToOperationsList(this, INSERT, op.insertMany[i]);
+        this.s.options.addToOperationsList!(this, INSERT, op.insertMany[i]);
       }
 
       return this;
@@ -1232,8 +1290,11 @@ class BulkOperationBase {
    * @param config.resultHandler
    * @param callback
    */
-  finalOptionsHandler(config: any, callback: Callback) {
-    const finalOptions = Object.assign({ ordered: this.isOrdered }, config.options);
+  finalOptionsHandler(
+    config: { options: FinalOptionsConfigOptions; batch: Batch; resultHandler: ResultHandler },
+    callback: Callback
+  ) {
+    const finalOptions: any = Object.assign({ ordered: this.isOrdered }, config.options);
     if (this.s.writeConcern != null) {
       finalOptions.writeConcern = this.s.writeConcern;
     }
@@ -1316,7 +1377,7 @@ class BulkOperationBase {
    * @param writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback<any>, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg

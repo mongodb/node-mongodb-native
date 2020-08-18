@@ -1,19 +1,24 @@
+import {
+  BulkOperationBase,
+  Batch,
+  INSERT,
+  UPDATE,
+  REMOVE,
+  BatchTypes,
+  AnyOperationOptions,
+  BulkOptions,
+  BulkWriteResult
+} from './common';
 import * as BSON from '../bson';
-import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
+import type { Topology } from '../sdam/topology';
 import type { Callback } from '../utils';
+import type { Collection } from '../collection';
 
-/**
- * Add to internal list of Operations
- *
- * @param bulkOperation
- * @param docType number indicating the document type
- * @param document
- * @returns {UnorderedBulkOperation}
- */
-function addToOperationsList(
+/** Add to internal list of Operations */
+export function addToOperationsList(
   bulkOperation: UnorderedBulkOperation,
-  docType: number,
-  document: any
+  batchType: BatchTypes,
+  document: Partial<AnyOperationOptions>
 ): UnorderedBulkOperation {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
@@ -22,6 +27,7 @@ function addToOperationsList(
     // Since we don't know what the user selected for BSON options here,
     // err on the safe side, and check the size with ignoreUndefined: false.
     ignoreUndefined: false
+    // TODO: remove BSON any types when BSON is typed
   } as any);
   // Throw error if the doc is bigger than the max BSON size
   if (bsonSize >= bulkOperation.s.maxBsonObjectSize) {
@@ -33,11 +39,11 @@ function addToOperationsList(
   // Holds the current batch
   bulkOperation.s.currentBatch = null;
   // Get the right type of batch
-  if (docType === INSERT) {
+  if (batchType === INSERT) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentInsertBatch;
-  } else if (docType === UPDATE) {
+  } else if (batchType === UPDATE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentUpdateBatch;
-  } else if (docType === REMOVE) {
+  } else if (batchType === REMOVE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentRemoveBatch;
   }
 
@@ -45,7 +51,7 @@ function addToOperationsList(
 
   // Create a new batch object if we don't have a current one
   if (bulkOperation.s.currentBatch == null)
-    bulkOperation.s.currentBatch = new Batch(docType, bulkOperation.s.currentIndex);
+    bulkOperation.s.currentBatch = new Batch(batchType, bulkOperation.s.currentIndex);
 
   // Check if we need to create a new batch
   if (
@@ -57,13 +63,13 @@ function addToOperationsList(
       bulkOperation.s.currentBatch.sizeBytes + maxKeySize + bsonSize >=
         bulkOperation.s.maxBatchSizeBytes) ||
     // New batch if the new op does not have the same op type as the current batch
-    bulkOperation.s.currentBatch.batchType !== docType
+    bulkOperation.s.currentBatch.batchType !== batchType
   ) {
     // Save the batch to the execution stack
     bulkOperation.s.batches.push(bulkOperation.s.currentBatch);
 
     // Create a new batch
-    bulkOperation.s.currentBatch = new Batch(docType, bulkOperation.s.currentIndex);
+    bulkOperation.s.currentBatch = new Batch(batchType, bulkOperation.s.currentIndex);
   }
 
   // We have an array of documents
@@ -76,15 +82,15 @@ function addToOperationsList(
   bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
 
   // Save back the current Batch to the right type
-  if (docType === INSERT) {
+  if (batchType === INSERT) {
     bulkOperation.s.currentInsertBatch = bulkOperation.s.currentBatch;
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.bulkResult.insertedIds.length,
       _id: document._id
     });
-  } else if (docType === UPDATE) {
+  } else if (batchType === UPDATE) {
     bulkOperation.s.currentUpdateBatch = bulkOperation.s.currentBatch;
-  } else if (docType === REMOVE) {
+  } else if (batchType === REMOVE) {
     bulkOperation.s.currentRemoveBatch = bulkOperation.s.currentBatch;
   }
 
@@ -107,11 +113,12 @@ function addToOperationsList(
 export class UnorderedBulkOperation extends BulkOperationBase {
   s: any;
 
-  constructor(topology: any, collection: any, options: any) {
-    options = options || {};
-    options = Object.assign(options, { addToOperationsList });
-
-    super(topology, collection, options, false);
+  constructor(
+    topology: Topology,
+    collection: Collection,
+    options: Omit<BulkOptions, 'addToOperationsList'>
+  ) {
+    super(topology, collection, { ...options, addToOperationsList }, false);
   }
 
   /**
@@ -119,22 +126,10 @@ export class UnorderedBulkOperation extends BulkOperationBase {
    * @param writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.batches.length) {
       return false;
     }
-
     return super.handleWriteError(callback, writeResult);
   }
-}
-
-/**
- * Returns an unordered batch object
- *
- * @param topology
- * @param collection
- * @param options
- */
-export function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
-  return new UnorderedBulkOperation(topology, collection, options);
 }

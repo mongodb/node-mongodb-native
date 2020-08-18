@@ -1,18 +1,20 @@
+import {
+  BulkOperationBase,
+  Batch,
+  INSERT,
+  BatchTypes,
+  AnyOperationOptions,
+  BulkOptions
+} from './common';
 import * as BSON from '../bson';
-import { BulkOperationBase, Batch, INSERT } from './common';
+import type { Collection } from '../collection';
+import type { Topology } from '../sdam/topology';
 
-/**
- * Add to internal list of Operations
- *
- * @param bulkOperation
- * @param docType number indicating the document type
- * @param document
- * @returns {OrderedBulkOperation}
- */
-function addToOperationsList(
+/** Add to internal list of Operations */
+export function addToOperationsList(
   bulkOperation: OrderedBulkOperation,
-  docType: number,
-  document: any
+  batchType: BatchTypes,
+  document: Partial<AnyOperationOptions>
 ): OrderedBulkOperation {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
@@ -20,6 +22,7 @@ function addToOperationsList(
     // Since we don't know what the user selected for BSON options here,
     // err on the safe side, and check the size with ignoreUndefined: false.
     ignoreUndefined: false
+    // TODO: remove BSON any types when BSON is typed
   } as any);
 
   // Throw error if the doc is bigger than the max BSON size
@@ -30,7 +33,7 @@ function addToOperationsList(
 
   // Create a new batch object if we don't have a current one
   if (bulkOperation.s.currentBatch == null)
-    bulkOperation.s.currentBatch = new Batch(docType, bulkOperation.s.currentIndex);
+    bulkOperation.s.currentBatch = new Batch(batchType, bulkOperation.s.currentIndex);
 
   const maxKeySize = bulkOperation.s.maxKeySize;
 
@@ -44,20 +47,20 @@ function addToOperationsList(
       bulkOperation.s.currentBatchSizeBytes + maxKeySize + bsonSize >=
         bulkOperation.s.maxBatchSizeBytes) ||
     // New batch if the new op does not have the same op type as the current batch
-    bulkOperation.s.currentBatch.batchType !== docType
+    bulkOperation.s.currentBatch.batchType !== batchType
   ) {
     // Save the batch to the execution stack
     bulkOperation.s.batches.push(bulkOperation.s.currentBatch);
 
     // Create a new batch
-    bulkOperation.s.currentBatch = new Batch(docType, bulkOperation.s.currentIndex);
+    bulkOperation.s.currentBatch = new Batch(batchType, bulkOperation.s.currentIndex);
 
     // Reset the current size trackers
     bulkOperation.s.currentBatchSize = 0;
     bulkOperation.s.currentBatchSizeBytes = 0;
   }
 
-  if (docType === INSERT) {
+  if (batchType === INSERT && document._id) {
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.currentIndex,
       _id: document._id
@@ -88,21 +91,11 @@ function addToOperationsList(
  * @returns {OrderedBulkOperation} a OrderedBulkOperation instance.
  */
 export class OrderedBulkOperation extends BulkOperationBase {
-  constructor(topology: any, collection: any, options: any) {
-    options = options || {};
-    options = Object.assign(options, { addToOperationsList });
-
-    super(topology, collection, options, true);
+  constructor(
+    topology: Topology,
+    collection: Collection,
+    options: Omit<BulkOptions, 'addToOperationsList'>
+  ) {
+    super(topology, collection, { ...options, addToOperationsList }, true);
   }
-}
-
-/**
- * Returns an unordered batch object
- *
- * @param topology
- * @param collection
- * @param options
- */
-export function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
-  return new OrderedBulkOperation(topology, collection, options);
 }

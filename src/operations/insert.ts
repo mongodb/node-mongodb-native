@@ -1,7 +1,7 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback, MongoDBNamespace } from '../utils';
 import { prepareDocs } from './common_functions';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -23,10 +23,10 @@ export interface InsertOptions extends CommandOperationOptions {
 
 /** @internal */
 export class InsertOperation extends OperationBase<InsertOptions, Document> {
-  namespace: string;
+  namespace: MongoDBNamespace;
   operations: Document[];
 
-  constructor(ns: string, ops: Document[], options: InsertOptions) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: InsertOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
