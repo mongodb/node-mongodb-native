@@ -150,10 +150,10 @@ function typeURIOptions(input: QS.ParsedUrlQuery): URIValue<typeof MongoURIOptio
   function lookupRecursive(obj: URIObject): Lookup {
     const keys = ObjectKeys(obj);
     return keys.reduce((types, normalized) => {
-      const type = obj[normalized];
+      let type: URIType | URIObject | Lookup = obj[normalized];
       const keyLower = normalized.toString().toLowerCase();
       if (typeof type === 'object') {
-        return { ...types, [keyLower]: lookupRecursive(type) };
+        type = lookupRecursive(type);
       }
       return { ...types, [keyLower]: { normalized, type } };
     }, {});
@@ -174,6 +174,7 @@ function typeURIOptions(input: QS.ParsedUrlQuery): URIValue<typeof MongoURIOptio
     let results;
 
     function recursive(
+      normalized: string,
       value: string | string[] | undefined,
       type: URIType | Lookup
     ): URIValue<typeof MongoURIOptions> {
@@ -213,8 +214,10 @@ function typeURIOptions(input: QS.ParsedUrlQuery): URIValue<typeof MongoURIOptio
           const split = item.split(':');
           if (split.length === 2) {
             const [key, value] = split;
-            const { type } = objectType[key];
-            return { ...obj, [key]: recursive(value, type) };
+            const lookupKey = key.toLowerCase();
+            if (!objectType[lookupKey]) return obj;
+            const { type } = objectType[lookupKey];
+            return { ...obj, ...recursive(key, value, type) };
           }
           console.warn(`${key} is malformed`);
           return obj;
@@ -223,7 +226,7 @@ function typeURIOptions(input: QS.ParsedUrlQuery): URIValue<typeof MongoURIOptio
       }
     }
 
-    return recursive(value, type);
+    return recursive(normalized, value, type);
   }, {} as URIValue<typeof MongoURIOptions>);
 
   return options;
@@ -273,3 +276,4 @@ console.log(typeURI('localhost/?rEpLiCaSeT=helloWorld')); // { replicaSet: 'hell
 console.log(typeURI('localhost/?j=helloWorld').journal); // undefined
 console.log(typeURI('localhost/?j=true').journal); // true
 console.log(typeURI('localhost/?j=true', { journal: false }).j); // false
+console.log(typeURI('localhost/?authMechanismProperties=SERVICE_NAME:name'));
