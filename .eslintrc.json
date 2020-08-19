@@ -8,7 +8,7 @@
     "@typescript-eslint",
     "prettier",
     "promise",
-    "eslint-plugin-tsdoc"
+    "tsdoc"
   ],
   "extends": [
     "eslint:recommended",
@@ -55,14 +55,5 @@
     // "@typescript-eslint/no-var-requires": 2,
     // "no-var": 2,
     // "prefer-const": 2
-  },
-  "settings": {
-    "jsdoc": {
-      "check-types": false,
-      "mode": "typescript",
-      "tagNamePreference": {
-        "augments": "extends"
-      }
-    }
   }
 }

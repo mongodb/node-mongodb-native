@@ -16,7 +16,7 @@ import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
-import type { BulkOptions, AnyOperation } from './bulk/common';
+import type { AnyOperation } from './bulk/common';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
