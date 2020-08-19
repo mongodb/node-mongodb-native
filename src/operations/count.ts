@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
 
+/** @public */
 export interface CountOptions extends CommandOperationOptions {
   /** The number of documents to skip. */
   skip?: number;
@@ -19,6 +20,7 @@ export interface CountOptions extends CommandOperationOptions {
 
 type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
+/** @internal */
 export class CountOperation extends CommandOperation<CountOptions, number> {
   cursor: Cursor;
   applySkipLimit: boolean;
@@ -73,10 +75,9 @@ export class CountOperation extends CommandOperation<CountOptions, number> {
 /**
  * Build the count command.
  *
- * @function
- * @param {Collection|Cursor} collectionOrCursor an instance of a collection or cursor
- * @param {any} query The query for the count.
- * @param {any} [options] Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
+ * @param collectionOrCursor - an instance of a collection or cursor
+ * @param query - The query for the count.
+ * @param options - Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
  */
 function buildCountCommand(
   collectionOrCursor: Collection | Cursor,

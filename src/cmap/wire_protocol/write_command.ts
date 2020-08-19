@@ -5,6 +5,7 @@ import type { Server } from '../../sdam/server';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
 
+/** @public */
 export interface CollationOptions {
   locale: string;
   caseLevel: boolean;
@@ -16,6 +17,7 @@ export interface CollationOptions {
   backwards: boolean;
 }
 
+/** @internal */
 export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
   ordered?: boolean;
   writeConcern?: WriteConcern;

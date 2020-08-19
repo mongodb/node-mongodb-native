@@ -1,3 +1,4 @@
+/** @public */
 export enum ReadConcernLevel {
   local = 'local',
   majority = 'majority',
@@ -9,17 +10,14 @@ export enum ReadConcernLevel {
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
+ * @public
  *
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
   level: ReadConcernLevel;
 
-  /**
-   * Constructs a ReadConcern from the read concern properties.
-   *
-   * @param level - The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
-   */
+  /** Constructs a ReadConcern from the read concern level.*/
   constructor(level: ReadConcernLevel) {
     this.level = level;
   }

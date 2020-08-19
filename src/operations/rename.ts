@@ -7,6 +7,7 @@ import type { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
 import { MongoError } from '../error';
 
+/** @public */
 export interface RenameOptions extends CommandOperationOptions {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
@@ -14,6 +15,7 @@ export interface RenameOptions extends CommandOperationOptions {
   new_collection?: boolean;
 }
 
+/** @internal */
 export class RenameOperation extends RunAdminCommandOperation {
   collection: Collection;
   newName: string;

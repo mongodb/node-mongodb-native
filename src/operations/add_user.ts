@@ -7,6 +7,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export interface AddUserOptions extends CommandOperationOptions {
   /** @deprecated Please use db.command('createUser', ...) instead for this option */
   digestPassword?: null;
@@ -16,6 +17,7 @@ export interface AddUserOptions extends CommandOperationOptions {
   customData?: Document;
 }
 
+/** @internal */
 export class AddUserOperation extends CommandOperation<AddUserOptions, Document> {
   db: Db;
   username: string;

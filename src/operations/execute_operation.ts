@@ -22,16 +22,18 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
 
 /**
  * Executes the given operation with provided arguments.
+ * @internal
  *
+ * @remarks
  * This method reduces large amounts of duplication in the entire codebase by providing
  * a single point for determining whether callbacks or promises should be used. Additionally
  * it allows for a single point of entry to provide features such as implicit sessions, which
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param {any} topology The topology to execute this operation on
- * @param {Operation} operation The operation to execute
- * @param {Function} callback The command result callback
+ * @param topology - The topology to execute this operation on
+ * @param operation - The operation to execute
+ * @param callback - The command result callback
  */
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,

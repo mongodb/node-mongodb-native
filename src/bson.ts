@@ -23,13 +23,14 @@ export {
   calculateObjectSize
 } from 'bson';
 
+/** @public */
 export interface Document {
   [key: string]: any;
 }
 
 import type { SerializeOptions } from 'bson';
 
-/** BSON Serialization options. TODO: Remove me when types from BSON are updated */
+/** @public BSON Serialization options. TODO: Remove me when types from BSON are updated */
 export interface BSONSerializeOptions extends SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };

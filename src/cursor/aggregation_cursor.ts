@@ -7,53 +7,18 @@ import type { Document } from '../bson';
 import type { Sort } from '../operations/find';
 import type { Topology } from '../sdam/topology';
 
-/**
- * @file The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
- * allowing for iteration over the results returned from the underlying query. It supports
- * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
- * or higher stream
- *
- * **AGGREGATIONCURSOR Cannot directly be instantiated**
- * @example
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('createIndexExample1');
- *   // Insert a bunch of documents
- *   col.insert([{a:1, b:1}
- *     , {a:2, b:2}, {a:3, b:3}
- *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     expect(err).to.not.exist;
- *     // Show that duplicate records got dropped
- *     col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
- *       expect(err).to.not.exist;
- *       test.equal(4, items.length);
- *       client.close();
- *     });
- *   });
- * });
- */
-
+/** @public */
 export interface AggregationCursorOptions extends CursorOptions, AggregateOptions {}
 
 /**
- * Creates a new Aggregation Cursor instance (INTERNAL TYPE, do not instantiate directly)
- *
- * @class AggregationCursor
- * @extends external:Readable
- * @fires AggregationCursor#data
- * @fires AggregationCursor#end
- * @fires AggregationCursor#close
- * @fires AggregationCursor#readable
- * @returns {AggregationCursor} an AggregationCursor instance.
+ * The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
+ * or higher stream
+ * @public
  */
 export class AggregationCursor extends Cursor<AggregateOperation, AggregationCursorOptions> {
+  /** @internal */
   constructor(
     topology: Topology,
     operation: AggregateOperation,

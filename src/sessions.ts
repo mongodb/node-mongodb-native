@@ -22,10 +22,6 @@ import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 const minWireVersionForShardedTransactions = 8;
 
-/**
- * @param {ClientSession} session
- * @param {Function} [callback]
- */
 function assertAlive(session: ClientSession, callback?: Callback): boolean {
   if (session.serverSession == null) {
     const error = new MongoError('Cannot use a session that has ended');
@@ -40,6 +36,7 @@ function assertAlive(session: ClientSession, callback?: Callback): boolean {
   return true;
 }
 
+/** @public */
 export interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
   causalConsistency?: boolean;
@@ -51,12 +48,14 @@ export interface ClientSessionOptions {
   initialClusterTime?: ClusterTime;
 }
 
+/** @public */
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
 /**
  * A class representing a client session on the server
  *
  * NOTE: not meant to be instantiated directly.
+ * @public
  */
 class ClientSession extends EventEmitter {
   topology: Topology;
@@ -547,11 +546,13 @@ function supportsRecoveryToken(session: ClientSession) {
   return !!topology.s.options.useRecoveryToken;
 }
 
+/** @internal */
 export type ServerSessionId = { id: Binary };
 
 /**
  * Reflects the existence of a session on the server. Can be reused by the session pool.
  * WARNING: not meant to be instantiated directly. For internal use only.
+ * @public
  */
 class ServerSession {
   id: ServerSessionId;
@@ -559,6 +560,7 @@ class ServerSession {
   txnNumber: number;
   isDirty: boolean;
 
+  /** @internal */
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
@@ -569,8 +571,7 @@ class ServerSession {
   /**
    * Determines if the server session has timed out.
    *
-   * @param {number} sessionTimeoutMinutes The server's "logicalSessionTimeoutMinutes"
-   * @returns {boolean} true if the session has timed out.
+   * @param sessionTimeoutMinutes - The server's "logicalSessionTimeoutMinutes"
    */
   hasTimedOut(sessionTimeoutMinutes: number): boolean {
     // Take the difference of the lastUse timestamp and now, which will result in a value in
@@ -586,6 +587,7 @@ class ServerSession {
 /**
  * Maintains a pool of Server Sessions.
  * For internal use only
+ * @internal
  */
 class ServerSessionPool {
   topology: Topology;
@@ -625,10 +627,7 @@ class ServerSessionPool {
    * Acquire a Server Session from the pool.
    * Iterates through each session in the pool, removing any stale sessions
    * along the way. The first non-stale session found is removed from the
-   * pool and returned. If no non-stale session is found, a new ServerSession
-   * is created.
-   *
-   * @returns {ServerSession}
+   * pool and returned. If no non-stale session is found, a new ServerSession is created.
    */
   acquire(): ServerSession {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes || 10;
@@ -648,7 +647,7 @@ class ServerSessionPool {
    * Adds the session back to the session pool if the session has not timed out yet.
    * This method also removes any stale sessions from the pool.
    *
-   * @param {ServerSession} session The session to release to the pool
+   * @param session - The session to release to the pool
    */
   release(session: ServerSession): void {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
@@ -705,9 +704,9 @@ function commandSupportsReadConcern(command: Document, options?: Document): bool
 /**
  * Optionally decorate a command with sessions specific keys
  *
- * @param session the session tracking transaction state
- * @param command the command to decorate
- * @param options Optional settings passed to calling operation
+ * @param session - the session tracking transaction state
+ * @param command - the command to decorate
+ * @param options - Optional settings passed to calling operation
  */
 function applySession(
   session: ClientSession,

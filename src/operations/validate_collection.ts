@@ -4,11 +4,13 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
 
+/** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
   /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
   background?: boolean;
 }
 
+/** @internal */
 export class ValidateCollectionOperation extends CommandOperation<
   ValidateCollectionOptions,
   Document

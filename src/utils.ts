@@ -18,7 +18,9 @@ import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 
+/** @public MongoDB Driver style callback */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
+/** @public */
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
@@ -26,8 +28,8 @@ export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 type ArbitraryOptions = Document;
 
 /**
- * @internal
  * Add a readonly enumerable property.
+ * @internal
  */
 export function getSingleProperty(
   obj: ArbitraryOptions,
@@ -43,8 +45,8 @@ export function getSingleProperty(
 }
 
 /**
- * @internal
  * Translate the variety of sort specifiers into 1 or -1
+ * @internal
  */
 export function formatSortValue(sortDirection: SortDirection): -1 | 1 {
   const value = ('' + sortDirection).toLowerCase();
@@ -68,8 +70,8 @@ export function formatSortValue(sortDirection: SortDirection): -1 | 1 {
 }
 
 /**
- * @internal
  * Ensure the sort specifier is in a shape we expect, and maps keys to 1 or -1.
+ * @internal
  */
 export function formattedOrderClause(sortValue?: unknown): Sort | null {
   let orderBy: any = {};
@@ -101,8 +103,8 @@ export function formattedOrderClause(sortValue?: unknown): Sort | null {
 }
 
 /**
- * @internal
  * Throws if collectionName is not a valid mongodb collection namespace.
+ * @internal
  */
 export function checkCollectionName(collectionName: string): void {
   if ('string' !== typeof collectionName) {
@@ -131,10 +133,10 @@ export function checkCollectionName(collectionName: string): void {
 }
 
 /**
- * @internal
  * Ensure Hint field is in a shape we expect:
  * - object of index names mapping to 1 or -1
  * - just an index name
+ * @internal
  */
 export function normalizeHintField(hint?: Hint): Hint | undefined {
   let finalHint = undefined;
@@ -164,8 +166,8 @@ interface IndexOptions {
 }
 
 /**
- * @internal
  * Create an index specifier based on
+ * @internal
  */
 export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
   const fieldHash: { [key: string]: IndexDirection } = {};
@@ -215,9 +217,9 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
 }
 
 /**
- * @internal
  * Checks if arg is an Object:
  * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
+ * @internal
  */
 export function isObject(arg: unknown): arg is object {
   return '[object Object]' === Object.prototype.toString.call(arg);
@@ -302,19 +304,21 @@ export function mergeOptionsAndWriteConcern(
 }
 
 /**
- * @internal
  * Executes the given operation with provided arguments.
  *
+ * @remarks
  * This method reduces large amounts of duplication in the entire codebase by providing
  * a single point for determining whether callbacks or promises should be used. Additionally
  * it allows for a single point of entry to provide features such as implicit sessions, which
  * are required by the Driver Sessions specification in the event that a ClientSession is
  * not provided
  *
- * @param topology The topology to execute this operation on
- * @param operation The operation to execute
- * @param args Arguments to apply the provided operation
- * @param [options] Options that modify the behavior of the method
+ * @internal
+ *
+ * @param topology - The topology to execute this operation on
+ * @param operation - The operation to execute
+ * @param args - Arguments to apply the provided operation
+ * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
   topology: Topology,
@@ -409,8 +413,8 @@ interface HasRetryableWrites {
   retryWrites?: boolean;
 }
 /**
- * @internal
  * Applies retryWrites: true to a command if retryWrites is set on the command's database.
+ * @internal
  *
  * @param target - The target command to which we will apply retryWrites.
  * @param db - The database from which we can inherit a retryWrites value.
@@ -427,9 +431,9 @@ interface HasWriteConcern {
   writeConcern?: WriteConcernOptions | WriteConcern | W;
 }
 /**
- * @internal
  * Applies a write concern to a command based on well defined inheritance rules, optionally
  * detecting support for the write concern in the first place.
+ * @internal
  *
  * @param target - the target command we will be applying the write concern to
  * @param sources - sources where we can inherit default write concerns from
@@ -470,21 +474,21 @@ export function applyWriteConcern<T extends HasWriteConcern>(
 }
 
 /**
- * @internal
  * Checks if a given value is a Promise
  *
- * @param {any} maybePromise
+ * @typeParam T - The result type of maybePromise
+ * @param maybePromise - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-export function isPromiseLike(
-  maybePromise?: PromiseLike<any> | void
-): maybePromise is Promise<any> {
+export function isPromiseLike<T = any>(
+  maybePromise?: PromiseLike<T> | void
+): maybePromise is Promise<T> {
   return !!maybePromise && typeof maybePromise.then === 'function';
 }
 
 /**
- * @internal
  * Applies collation to a given command.
+ * @internal
  *
  * @param command - the command on which to apply collation
  * @param target - target of command
@@ -513,8 +517,8 @@ export function decorateWithCollation(
 }
 
 /**
- * @internal
  * Applies a read concern to a given command.
+ * @internal
  *
  * @param command - the command on which to apply the read concern
  * @param coll - the parent collection of the operation calling this method
@@ -543,12 +547,12 @@ export function emitDeprecationWarning(msg: string): void {
 }
 
 /**
- * @internal
  * Default message handler for generating deprecation warnings.
+ * @internal
  *
- * @param {string} name function name
- * @param {string} option option name
- * @returns {string} warning message
+ * @param name - function name
+ * @param option - option name
+ * @returns warning message
  */
 export function defaultMsgHandler(name: string, option: string): string {
   return `${name} option [${option}] is deprecated and will be removed in a later version.`;
@@ -566,8 +570,8 @@ export interface DeprecateOptionsConfig {
 }
 
 /**
- * @internal
  * Deprecates a given function's options.
+ * @internal
  *
  * @param this - the bound class if this is a method
  * @param config - configuration for deprecation
@@ -625,14 +629,15 @@ export function deprecateOptions(
   return deprecated;
 }
 
+/** @public */
 export class MongoDBNamespace {
   db: string;
   collection?: string;
   /**
    * Create a namespace object
    *
-   * @param {string} db The database name
-   * @param {string} [collection] An optional collection name
+   * @param db - database name
+   * @param collection - collection name
    */
   constructor(db: string, collection?: string) {
     this.db = db;
@@ -668,8 +673,8 @@ export function* makeCounter(seed = 0): Generator<number> {
 }
 
 /**
- * @internal
  * Helper function for either accepting a callback, or returning a promise
+ * @internal
  *
  * @param callback - The last function argument in exposed method, controls if a Promise is returned
  * @param wrapper - A function that wraps the callback
@@ -724,8 +729,8 @@ export function uuidV4(): Buffer {
 }
 
 /**
- * @internal
  * Relays events for a given listener and emitter
+ * @internal
  *
  * @param listener - the EventEmitter to listen to the events from
  * @param emitter - the EventEmitter to relay the events to
@@ -736,8 +741,8 @@ export function relayEvents(listener: EventEmitter, emitter: EventEmitter, event
 }
 
 /**
- * @internal
  * A helper function for determining `maxWireVersion` between legacy and new topology instances
+ * @internal
  */
 export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
@@ -765,8 +770,8 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
 }
 
 /**
- * @internal
  * Checks that collation is supported by server.
+ * @internal
  *
  * @param server - to check against
  * @param cmd - object where collation may be specified
@@ -776,8 +781,8 @@ export function collationNotSupported(server: Server, cmd: Document): boolean {
 }
 
 /**
- * @internal
  * Applies the function `eachFn` to each item in `arr`, in parallel.
+ * @internal
  *
  * @param arr - An array of items to asynchronously iterate over
  * @param eachFn - A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
@@ -909,6 +914,7 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
+/** @public */
 export interface ClientMetadata {
   driver: {
     name: string;
@@ -927,6 +933,7 @@ export interface ClientMetadata {
   };
 }
 
+/** @public */
 export interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;
@@ -984,8 +991,8 @@ export function makeClientMetadata(options: ClientMetadataOptions): ClientMetada
 }
 
 /**
- * @internal
  * Loops over deprecated keys, will emit warning if key matched in options.
+ * @internal
  *
  * @param options - an object of options
  * @param list - deprecated option keys
@@ -1027,17 +1034,18 @@ export interface InterruptableAsyncIntervalOptions {
   immediate: boolean;
 }
 
+/** @internal */
 export interface InterruptableAsyncInterval {
   wake(): void;
   stop(): void;
 }
 
 /**
- * @internal
  * Creates an interval timer which is able to be woken up sooner than
  * the interval. The timer will also debounce multiple calls to wake
  * ensuring that the function is only ever called once within a minimum
  * interval window.
+ * @internal
  *
  * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
  */

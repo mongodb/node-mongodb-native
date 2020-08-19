@@ -5,11 +5,14 @@ import type { bufferCallback } from 'snappy';
 
 import { Snappy } from '../../deps';
 
+/** @public */
 export enum Compressor {
   none = 0,
   snappy = 1,
   zlib = 2
 }
+
+/** @public */
 export type CompressorName = keyof typeof Compressor;
 
 export const uncompressibleCommands = new Set([

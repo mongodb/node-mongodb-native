@@ -24,41 +24,8 @@ import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
 
-/**
- * @file The **Cursor** class is an internal class that embodies a cursor on MongoDB
- * allowing for iteration over the results returned from the underlying query. It supports
- * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
- * or higher stream
- *
- * **CURSORS Cannot directly be instantiated**
- * @example
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('createIndexExample1');
- *   // Insert a bunch of documents
- *   col.insert([{a:1, b:1}
- *     , {a:2, b:2}, {a:3, b:3}
- *     , {a:4, b:4}], {w:1}, function(err, result) {
- *     expect(err).to.not.exist;
- *     // Show that duplicate records got dropped
- *     col.find({}).toArray(function(err, items) {
- *       expect(err).to.not.exist;
- *       test.equal(4, items.length);
- *       client.close();
- *     });
- *   });
- * });
- */
-
-// Flags allowed for cursor
-const FLAGS = [
+/** @public Flags allowed for cursor */
+export const FLAGS = [
   'tailable',
   'oplogReplay',
   'noCursorTimeout',
@@ -67,12 +34,16 @@ const FLAGS = [
   'partial'
 ] as const;
 
+/** @public */
 export type CursorFlag = typeof FLAGS[number];
 
-const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
+/** @public */
+export const FIELDS = ['numberOfRetries', 'tailableRetryInterval'] as const;
 
+/** @internal */
 export type CursorPrivate = CoreCursorPrivate;
 
+/** @public */
 export interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
@@ -85,46 +56,70 @@ export interface CursorOptions extends CoreCursorOptions {
 }
 
 /**
- * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
+ * **CURSORS Cannot directly be instantiated**
+ * The `Cursor` class is an internal class that embodies a cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
+ * or higher stream
+ * @public
  *
- * @property {string} sortValue Cursor query sort setting.
- * @property {boolean} timeout Is Cursor able to time out.
- * @property {ReadPreference} readPreference Get cursor ReadPreference.
- * @fires Cursor#data
- * @fires Cursor#end
- * @fires Cursor#close
- * @fires Cursor#readable
  * @example
- * Cursor cursor options.
- *
- * collection.find({}).project({a:1})                             // Create a projection of field a
- * collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
- * collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
- * collection.find({}).filter({a:1})                              // Set query on the cursor
- * collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
- * collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
- * collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
- * collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
- * collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
- * collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
- * collection.find({}).max(10)                                    // Set the cursor max
- * collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
- * collection.find({}).min(100)                                   // Set the cursor min
- * collection.find({}).returnKey(true)                            // Set the cursor returnKey
- * collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
- * collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
- * collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
- * collection.find({}).hint('a_1')                                // Set the cursor hint
+ * ```js
+ * // Create a projection of field a
+ * collection.find({}).project({a:1})
+ * // Skip 1 and limit 10
+ * collection.find({}).skip(1).limit(10)
+ * // Set batchSize on cursor to 5
+ * collection.find({}).batchSize(5)
+ * // Set query on the cursor
+ * collection.find({}).filter({a:1})
+ * // Add a comment to the query, allowing to correlate queries
+ * collection.find({}).comment('add a comment')
+ * // Set cursor as tailable
+ * collection.find({}).addCursorFlag('tailable', true)
+ * // Set cursor as noCursorTimeout
+ * collection.find({}).addCursorFlag('noCursorTimeout', true)
+ * // Set cursor as awaitData
+ * collection.find({}).addCursorFlag('awaitData', true)
+ * // Set cursor as partial
+ * collection.find({}).addCursorFlag('partial', true)
+ * // Set $orderby {a:1}
+ * collection.find({}).addQueryModifier('$orderby', {a:1})
+ * // Set the cursor max
+ * collection.find({}).max(10)
+ * // Set the cursor maxTimeMS
+ * collection.find({}).maxTimeMS(1000)
+ * // Set the cursor min
+ * collection.find({}).min(100)
+ * // Set the cursor returnKey
+ * collection.find({}).returnKey(true)
+ * // Set the cursor readPreference
+ * collection.find({}).setReadPreference(ReadPreference.PRIMARY)
+ * // Set the cursor showRecordId
+ * collection.find({}).showRecordId(true)
+ * // Sets the sort order of the cursor query
+ * collection.find({}).sort([['a', 1]])
+ * // Set the cursor hint
+ * collection.find({}).hint('a_1')
+ * ```
  *
  * All options are chainable, so one can do the following.
  *
- * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+ * ```js
+ * const docs = await collection.find({})
+ *   .maxTimeMS(1000)
+ *   .maxScan(100)
+ *   .skip(1)
+ *   .toArray()
+ * ```
  */
 export class Cursor<
   O extends OperationBase = OperationBase,
   T extends CursorOptions = CursorOptions
 > extends CoreCursor<O, T> {
+  /** @internal */
   s: CursorPrivate;
+  /** @internal */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
     super(topology, operation, options);
 
@@ -184,6 +179,7 @@ export class Cursor<
     return this.cmd.sort;
   }
 
+  /** @internal */
   _initializeCursor(callback: Callback): void {
     if (this.operation && this.operation.session != null) {
       this.cursorState.session = this.operation.session;
@@ -268,9 +264,9 @@ export class Cursor<
   }
 
   /**
-   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * Set the cursor maxScan
    *
+   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
    * @param maxScan - Constrains the query to only scan the specified number of documents when fulfilling the query
    */
   maxScan(maxScan: number): this {
@@ -313,7 +309,7 @@ export class Cursor<
   /**
    * Set the cursor max
    *
-   * @param max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
+   * @param max - Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    */
   max(max: number): this {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
@@ -394,8 +390,7 @@ export class Cursor<
   /**
    * Add a cursor flag to the cursor
    *
-   * @param flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial' -.
-   *
+   * @param flag - The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial' -.
    * @param value - The flag boolean value.
    */
   addCursorFlag(flag: CursorFlag, value: boolean): this {
@@ -492,7 +487,7 @@ export class Cursor<
   /**
    * Sets a field projection for the query.
    *
-   * @param value The field projection object.
+   * @param value - The field projection object.
    */
   project(value: Document): this {
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
@@ -511,11 +506,11 @@ export class Cursor<
    */
   sort(sort: Sort | string, direction?: SortDirection): this {
     if (this.options.tailable) {
-      throw MongoError.create({ message: "Tailable cursor doesn't support sorting", driver: true });
+      throw new MongoError('Tailable cursor does not support sorting');
     }
 
     if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
-      throw MongoError.create({ message: 'Cursor is closed', driver: true });
+      throw new MongoError('Cursor is closed');
     }
 
     let order = sort;
@@ -634,13 +629,14 @@ export class Cursor<
   }
 
   /**
-   * @deprecated
-   * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+   * Iterates over all the documents for this cursor. As with `cursor.toArray`,
    * not all of the elements will be iterated if this cursor had been previously accessed.
-   * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
-   * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+   * In that case, `cursor.rewind` can be used to reset the cursor. However, unlike
+   * `cursor.toArray`, the cursor will only hold a maximum of batch size elements
    * at any given time if batch size is specified. Otherwise, the caller is responsible
    * for making sure that the entire result can fit the memory.
+   *
+   * @deprecated Please use {@link Cursor.forEach} instead
    */
   each(callback: EachCallback): void {
     // Rewind cursor state
@@ -833,7 +829,7 @@ export class Cursor<
       }
 
       this._endSession(() => {
-        this.emit('close');
+        this.emit(Cursor.CLOSE);
         cb(undefined, this);
       });
     });
@@ -862,7 +858,7 @@ export class Cursor<
   }
 
   destroy(err?: AnyError): void {
-    if (err) this.emit('error', err);
+    if (err) this.emit(Cursor.ERROR, err);
     this.pause();
     this.close();
   }

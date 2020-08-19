@@ -6,6 +6,7 @@ import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
 import type { Document } from './bson';
 
+/** @internal */
 export enum TxnState {
   NO_TRANSACTION = 'NO_TRANSACTION',
   STARTING_TRANSACTION = 'STARTING_TRANSACTION',
@@ -41,9 +42,9 @@ const stateMachine = {
   ]
 };
 
-/** Configuration options for a transaction. */
+/** @public Configuration options for a transaction. */
 export interface TransactionOptions extends CommandOperationOptions {
-  /** @property {ReadConcern} [readConcern] A default read concern for commands in this transaction */
+  /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
   writeConcern?: WriteConcern;
@@ -54,6 +55,7 @@ export interface TransactionOptions extends CommandOperationOptions {
 }
 
 /**
+ * @public
  * A class maintaining state related to a server transaction. Internal Only
  */
 export class Transaction {
@@ -119,7 +121,7 @@ export class Transaction {
   /**
    * Transition the transaction in the state machine
    *
-   * @param nextState The new state to transition to
+   * @param nextState - The new state to transition to
    */
   transition(nextState: TxnState): void {
     const nextStates = stateMachine[this.state];

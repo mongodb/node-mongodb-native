@@ -36,6 +36,7 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
+/** @public */
 export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
@@ -61,10 +62,13 @@ export interface ConnectionOptions
   captureRejections?: boolean;
 }
 
+/** @public */
 export interface DestroyOptions {
+  /** Force the destruction. */
   force?: boolean;
 }
 
+/** @public */
 export class Connection extends EventEmitter {
   id: number;
   address: string;
@@ -82,6 +86,15 @@ export class Connection extends EventEmitter {
   [kStream]: Stream;
   [kIsMaster]: Document;
   [kClusterTime]: Document;
+
+  /** @event */
+  static readonly COMMAND_STARTED = 'commandStarted' as const;
+  /** @event */
+  static readonly COMMAND_SUCCEEDED = 'commandSucceeded' as const;
+  /** @event */
+  static readonly COMMAND_FAILED = 'commandFailed' as const;
+  /** @event */
+  static readonly CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super(options);
@@ -324,7 +337,7 @@ function messageHandler(conn: Connection) {
 
       if (document.$clusterTime) {
         conn[kClusterTime] = document.$clusterTime;
-        conn.emit('clusterTimeReceived', document.$clusterTime);
+        conn.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
       }
 
       if (operationDescription.command) {
@@ -406,24 +419,24 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (this.monitorCommands) {
-    this.emit('commandStarted', new CommandStartedEvent(this, command));
+    this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
         this.emit(
-          'commandFailed',
+          Connection.COMMAND_FAILED,
           new CommandFailedEvent(this, command, err, operationDescription.started)
         );
       } else {
         if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
           this.emit(
-            'commandFailed',
+            Connection.COMMAND_FAILED,
             new CommandFailedEvent(this, command, reply.result, operationDescription.started)
           );
         } else {
           this.emit(
-            'commandSucceeded',
+            Connection.COMMAND_SUCCEEDED,
             new CommandSucceededEvent(this, command, reply, operationDescription.started)
           );
         }

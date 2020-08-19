@@ -4,6 +4,8 @@ import * as dns from 'dns';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
 import type { Callback } from './utils';
+import type { ConnectionOptions } from './cmap/connection';
+import type { Document } from './bson';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -15,9 +17,9 @@ const HOSTS_RX = /(mongodb(?:\+srv|)):\/\/(?: (?:[^:]*) (?: : ([^@]*) )? @ )?([^
  * Determines whether a provided address matches the provided parent domain in order
  * to avoid certain attack vectors.
  *
- * @param {string} srvAddress The address to check against a domain
- * @param {string} parentDomain The domain to check the provided address against
- * @returns {boolean} Whether the provided address matches the parent domain
+ * @param srvAddress - The address to check against a domain
+ * @param parentDomain - The domain to check the provided address against
+ * @returns Whether the provided address matches the parent domain
  */
 function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
   const regex = /^.*?\./;
@@ -30,9 +32,8 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * Lookup a `mongodb+srv` connection string, combine the parts and reparse it as a normal
  * connection string.
  *
- * @param {string} uri The connection string to parse
- * @param {object} options Optional user provided connection string options
- * @param {Function} callback
+ * @param uri - The connection string to parse
+ * @param options - Optional user provided connection string options
  */
 function parseSrvConnectionString(uri: string, options: any, callback: Callback) {
   const result: any = url.parse(uri, true);
@@ -126,11 +127,10 @@ function parseSrvConnectionString(uri: string, options: any, callback: Callback)
 /**
  * Parses a query string item according to the connection string spec
  *
- * @param {string} key The key for the parsed value
- * @param {any[]|string} value The value to parse
- * @returns {any[]|object|string} The parsed value
+ * @param key - The key for the parsed value
+ * @param value - The value to parse
  */
-function parseQueryStringItemValue(key: string, value: any): any[] | object | string {
+function parseQueryStringItemValue(key: string, value: any) {
   if (Array.isArray(value)) {
     // deduplicate and simplify arrays
     value = value.filter((v: any, idx: any) => value.indexOf(v) === idx);
@@ -228,10 +228,10 @@ const CASE_TRANSLATION: any = {
 /**
  * Sets the value for `key`, allowing for any required translation
  *
- * @param {any} obj The object to set the key on
- * @param {string} key The key to set the value for
- * @param {any} value The value to set
- * @param {any} options The options used for option parsing
+ * @param obj - The object to set the key on
+ * @param key - The key to set the value for
+ * @param value - The value to set
+ * @param options - The options used for option parsing
  */
 function applyConnectionStringOption(obj: any, key: string, value: any, options: any) {
   // simple key translation
@@ -334,7 +334,7 @@ function splitArrayOfMultipleReadPreferenceTags(value: any) {
  * Modifies the parsed connection string object taking into account expectations we
  * have for authentication-related options.
  *
- * @param {any} parsed The parsed connection string result
+ * @param parsed - The parsed connection string result
  * @returns The parsed connection string result possibly modified for auth expectations
  */
 function applyAuthExpectations(parsed: any) {
@@ -409,11 +409,11 @@ function applyAuthExpectations(parsed: any) {
 /**
  * Parses a query string according the connection string spec.
  *
- * @param {string} query The query string to parse
- * @param {object} [options] The options used for options parsing
- * @returns {object|Error} The parsed query string as an object, or an error if one was encountered
+ * @param query - The query string to parse
+ * @param options - The options used for options parsing
+ * @returns The parsed query string as an object
  */
-function parseQueryString(query: string, options?: object): object | Error {
+function parseQueryString(query: string, options?: object): Document {
   const result = {} as any;
   const parsedQueryString = qs.parse(query);
 
@@ -482,8 +482,8 @@ function translateTLSOptions(queryString: any) {
 /**
  * Checks a query string for invalid tls options according to the URI options spec.
  *
- * @param {any} queryString The parsed query string
- * @throws {MongoParseError}
+ * @param queryString - The parsed query string
+ * @throws MongoParseError if tls and ssl options contain conflicts
  */
 function checkTLSQueryString(queryString: any) {
   const queryStringKeys = Object.keys(queryString);
@@ -501,10 +501,10 @@ function checkTLSQueryString(queryString: any) {
 /**
  * Checks options object if both options are present (any value) will throw an error.
  *
- * @param {object} options The options used for options parsing
- * @param {string} optionKeyA A options key
- * @param {string} optionKeyB B options key
- * @throws {MongoParseError}
+ * @param options - The options used for options parsing
+ * @param optionKeyA - A options key
+ * @param optionKeyB - B options key
+ * @throws MongoParseError if two provided options are mutually exclusive.
  */
 function assertRepelOptions(options: object, optionKeyA: string, optionKeyB: string) {
   if (
@@ -518,8 +518,8 @@ function assertRepelOptions(options: object, optionKeyA: string, optionKeyB: str
 /**
  * Checks if TLS options are valid
  *
- * @param {object} options The options used for options parsing
- * @throws {MongoParseError}
+ * @param options - The options used for options parsing
+ * @throws MongoParseError if TLS options are invalid
  */
 function checkTLSOptions(options: object) {
   if (!options) return null;
@@ -536,10 +536,10 @@ function checkTLSOptions(options: object) {
 /**
  * Checks a query string to ensure all tls/ssl options are the same.
  *
- * @param {string} optionName The key (tls or ssl) to check
- * @param {any} queryString The parsed query string
- * @param {any} queryStringKeys
- * @throws {MongoParseError}
+ * @param optionName - The key (tls or ssl) to check
+ * @param queryString - The parsed query string
+ * @param queryStringKeys - list of keys in the query string
+ * @throws MongoParseError
  * @returns The value of the tls/ssl option
  */
 function assertTlsOptionsAreEqual(optionName: string, queryString: any, queryStringKeys: any) {
@@ -570,15 +570,17 @@ const PROTOCOL_MONGODB = 'mongodb';
 const PROTOCOL_MONGODB_SRV = 'mongodb+srv';
 const SUPPORTED_PROTOCOLS = [PROTOCOL_MONGODB, PROTOCOL_MONGODB_SRV];
 
-/**
- * Parses a MongoDB connection string
- *
- * @param {string} uri the MongoDB connection string to parse
- * @param {object} [options] Optional settings.
- * @param {boolean} [options.caseTranslate] Whether the parser should translate options back into camelCase after normalization
- * @param {parseCallback} callback
- */
-function parseConnectionString(uri: string, options?: any, callback?: Callback) {
+interface ParseConnectionStringOptions extends Partial<ConnectionOptions> {
+  /** Whether the parser should translate options back into camelCase after normalization */
+  caseTranslate?: boolean;
+}
+
+/** Parses a MongoDB connection string */
+function parseConnectionString(
+  uri: string,
+  options?: ParseConnectionStringOptions,
+  callback?: Callback
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = Object.assign({}, { caseTranslate: true }, options);
 

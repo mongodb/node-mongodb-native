@@ -13,6 +13,7 @@ import type { WriteConcernOptions } from '../write_concern';
 
 const ERROR_NAMESPACE_NOT_FOUND = 26;
 
+/** @public */
 export type TFileId = string | number | object | ObjectId;
 
 export interface ChunkDoc {
@@ -22,6 +23,7 @@ export interface ChunkDoc {
   data: Buffer;
 }
 
+/** @public */
 export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
@@ -41,14 +43,7 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
  * A writable stream that enables you to write buffers to GridFS.
  *
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
- *
- * @class
- * @extends external:Writable
- * @param {GridFSBucket} bucket Handle for this stream's corresponding bucket
- * @param {string} filename The value of the 'filename' key in the files doc
- * @param {object} [options] Optional settings.
- * @fires GridFSBucketWriteStream#error
- * @fires GridFSBucketWriteStream#finish
+ * @public
  */
 export class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;
@@ -72,6 +67,19 @@ export class GridFSBucketWriteStream extends Writable {
   };
   writeConcern?: WriteConcern;
 
+  /** @event */
+  static readonly ERROR = 'error';
+  /**
+   * `end()` was called and the write stream successfully wrote the file metadata and all the chunks to MongoDB.
+   * @event
+   */
+  static readonly FINISH = 'finish';
+
+  /** @internal
+   * @param bucket - Handle for this stream's corresponding bucket
+   * @param filename - The value of the 'filename' key in the files doc
+   * @param options - Optional settings.
+   */
   constructor(bucket: GridFSBucket, filename: string, options?: GridFSBucketWriteStreamOptions) {
     super();
 
@@ -111,24 +119,8 @@ export class GridFSBucketWriteStream extends Writable {
   }
 
   /**
-   * An error occurred
-   *
-   * @event GridFSBucketWriteStream#error
-   * @type {Error}
-   */
-
-  /**
-   * `end()` was called and the write stream successfully wrote the file
-   * metadata and all the chunks to MongoDB.
-   *
-   * @event GridFSBucketWriteStream#finish
-   * @type {object}
-   */
-
-  /**
    * Write a buffer to the stream.
    *
-   * @function
    * @param chunk - Buffer to write
    * @param encodingOrCallback - Optional encoding for the buffer
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
@@ -152,11 +144,8 @@ export class GridFSBucketWriteStream extends Writable {
    * Places this write stream into an aborted state (all future writes fail)
    * and deletes all chunks that have already been written.
    *
-   * @function
-   * @param {GridFSBucket~errorCallback} callback called when chunks are successfully removed or error occurred
-   * @returns {Promise<void>} if no callback specified
+   * @param callback - called when chunks are successfully removed or error occurred
    */
-
   abort(): Promise<void>;
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
@@ -186,12 +175,10 @@ export class GridFSBucketWriteStream extends Writable {
    * persist the remaining data to MongoDB, write the files document, and
    * then emit a 'finish' event.
    *
-   * @function
-   * @param {Buffer} chunk Buffer to write
-   * @param {string} encoding Optional encoding for the buffer
-   * @param {GridFSBucket~errorCallback} callback Function to call when all files and chunks have been persisted to MongoDB
+   * @param chunk - Buffer to write
+   * @param encoding - Optional encoding for the buffer
+   * @param callback - Function to call when all files and chunks have been persisted to MongoDB
    */
-
   end(): void;
   end(chunk: Buffer): void;
   end(callback: Callback<GridFSFile | void>): void;
@@ -221,7 +208,7 @@ export class GridFSBucketWriteStream extends Writable {
     this.state.streamEnd = true;
 
     if (callback) {
-      this.once('finish', (result: GridFSFile) => {
+      this.once(GridFSBucketWriteStream.FINISH, (result: GridFSFile) => {
         callback!(undefined, result);
       });
     }
@@ -249,7 +236,7 @@ function __handleError(
   if (callback) {
     return callback(error);
   }
-  stream.emit('error', error);
+  stream.emit(GridFSBucketWriteStream.ERROR, error);
 }
 
 function createChunkDoc(filesId: TFileId, n: number, data: Buffer): ChunkDoc {
@@ -335,7 +322,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       if (error) {
         return __handleError(stream, error, callback);
       }
-      stream.emit('finish', filesDoc);
+      stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
     });
 
     return true;

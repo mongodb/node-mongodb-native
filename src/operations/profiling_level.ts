@@ -3,7 +3,10 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
+
+/** @internal */
 export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOptions, string> {
   constructor(db: Db, options: ProfilingLevelOptions) {
     super(db, options);

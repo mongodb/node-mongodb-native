@@ -49,7 +49,7 @@ class Batch {
 }
 
 /**
- * @classdesc
+ * @public
  * The result of a bulk write.
  */
 export class BulkWriteResult {
@@ -76,7 +76,7 @@ export class BulkWriteResult {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} bulkResult
+   * @param bulkResult
    */
   constructor(bulkResult: any) {
     this.result = bulkResult;
@@ -181,7 +181,7 @@ export class BulkWriteResult {
   /**
    * Returns the upserted id at the given index
    *
-   * @param {number} index the number of the upserted id to return, returns undefined if no result for passed in index
+   * @param index the number of the upserted id to return, returns undefined if no result for passed in index
    * @returns {object}
    */
   getUpsertedIdAt(index: number): object {
@@ -218,7 +218,7 @@ export class BulkWriteResult {
   /**
    * Returns a specific write error object
    *
-   * @param {number} index of the write error to return, returns null if there is no result for passed in index
+   * @param index of the write error to return, returns null if there is no result for passed in index
    * @returns {WriteError|undefined}
    */
   getWriteErrorAt(index: number): WriteError | undefined {
@@ -294,9 +294,11 @@ export class BulkWriteResult {
 }
 
 /**
- * @classdesc An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * An error representing a failure by the server to apply the requested write concern to the bulk operation.
+ * @public
+ * @category Error
  */
-class WriteConcernError {
+export class WriteConcernError {
   err: any;
 
   /**
@@ -304,7 +306,7 @@ class WriteConcernError {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} err
+   * @param err
    */
   constructor(err: any) {
     this.err = err;
@@ -344,9 +346,11 @@ class WriteConcernError {
 }
 
 /**
- * @classdesc An error that occurred during a BulkWrite on the server.
+ * An error that occurred during a BulkWrite on the server.
+ * @public
+ * @category Error
  */
-class WriteError {
+export class WriteError {
   err: any;
 
   /**
@@ -354,7 +358,7 @@ class WriteError {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} err
+   * @param err
    */
   constructor(err: any) {
     this.err = err;
@@ -414,10 +418,10 @@ class WriteError {
 /**
  * Merges results into shared data structure
  *
- * @param {any} batch
- * @param {any} bulkResult
- * @param {any} err
- * @param {any} result
+ * @param batch
+ * @param bulkResult
+ * @param err
+ * @param result
  */
 function mergeBatchResults(batch: any, bulkResult: any, err: any, result: any) {
   // If we have an error set the result to be the err object
@@ -589,10 +593,10 @@ function executeCommands(bulkOperation: any, options: any, callback: Callback<Bu
 /**
  * handles write concern error
  *
- * @param {object} batch
- * @param {object} bulkResult
- * @param {MongoWriteConcernError} err
- * @param {Function} callback
+ * @param batch
+ * @param bulkResult
+ * @param err
+ * @param callback
  */
 function handleMongoWriteConcernError(
   batch: object,
@@ -613,8 +617,9 @@ function handleMongoWriteConcernError(
 }
 
 /**
- * @classdesc An error indicating an unsuccessful Bulk Write
- * @extends {MongoError}
+ * An error indicating an unsuccessful Bulk Write
+ * @public
+ * @category Error
  */
 class BulkWriteError extends MongoError {
   result: any;
@@ -622,8 +627,8 @@ class BulkWriteError extends MongoError {
   /**
    * Creates a new BulkWriteError
    *
-   * @param {Error|string|object} error The error message
-   * @param {BulkWriteResult} result The result of the bulk write operation
+   * @param error The error message
+   * @param result The result of the bulk write operation
    */
   constructor(error?: any, result?: BulkWriteResult) {
     const message = error.err || error.errmsg || error.errMessage || error;
@@ -648,7 +653,7 @@ class FindOperators {
    *
    * **NOTE:** Internal Type, do not instantiate directly
    *
-   * @param {any} bulkOperation
+   * @param bulkOperation
    */
   constructor(bulkOperation: any) {
     this.s = bulkOperation.s;
@@ -658,9 +663,9 @@ class FindOperators {
    * Add a multiple update operation to the bulk operation
    *
    * @function
-   * @param {object} updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
-   * @param {object} [updateDocument.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
-   * @throws {MongoError} If operation cannot be added to bulk write
+   * @param updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
+   * @param reference for more information.
+   * @throws MongoError If operation cannot be added to bulk write
    * @returns {any} A reference to the parent BulkOperation
    */
   update(updateDocument: any): any {
@@ -688,8 +693,8 @@ class FindOperators {
    * Add a single update operation to the bulk operation
    *
    * @function
-   * @param {object} updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
-   * @param {object} [updateDocument.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+   * @param updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
+   * @param reference for more information.
    * @throws {MongoError} If operation cannot be added to bulk write
    * @returns {any} A reference to the parent BulkOperation
    */
@@ -721,7 +726,7 @@ class FindOperators {
   /**
    * Add a replace one operation to the bulk operation
    *
-   * @param {object} replacement the new document to replace the existing one with
+   * @param replacement the new document to replace the existing one with
    * @throws {MongoError} If operation cannot be added to bulk write
    * @returns {void} A reference to the parent BulkOperation
    */
@@ -829,10 +834,10 @@ class BulkOperationBase {
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
    *
    * @property {number} length Get the number of operations in the bulk.
-   * @param {any} topology
-   * @param {any} collection
-   * @param {any} options
-   * @param {any} isOrdered
+   * @param topology
+   * @param collection
+   * @param options
+   * @param isOrdered
    */
   constructor(topology: any, collection: any, options: any, isOrdered: any) {
     // determine whether bulkOperation is ordered or unordered
@@ -936,7 +941,7 @@ class BulkOperationBase {
   /**
    * Add a single insert document to the bulk operation
    *
-   * @param {any} document the document to insert
+   * @param document the document to insert
    * @throws {MongoError}
    * @returns {BulkOperationBase} A reference to self
    *
@@ -960,7 +965,7 @@ class BulkOperationBase {
    * Returns a builder object used to complete the definition of the operation.
    *
    * @function
-   * @param {object} selector The selector for the bulk operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-q q documentation}
+   * @param selector The selector for the bulk operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-q q documentation}
    * @throws {MongoError} if a selector is not specified
    * @returns {FindOperators} A helper object with which the write operation can be defined.
    *
@@ -1010,8 +1015,8 @@ class BulkOperationBase {
    * Specifies a raw operation to perform in the bulk write.
    *
    * @function
-   * @param {object} op The raw operation to perform.
-   * @param {boolean} [op.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+   * @param op The raw operation to perform.
+   * @param reference for more information.
    * @returns {BulkOperationBase} A reference to self
    */
   raw(op: any): BulkOperationBase {
@@ -1124,8 +1129,8 @@ class BulkOperationBase {
   /**
    * helper function to assist with promiseOrCallback behavior
    *
-   * @param {any} err
-   * @param {any} callback
+   * @param err
+   * @param callback
    */
   _handleEarlyError(err?: any, callback?: any): Promise<void> | void {
     const Promise = PromiseProvider.get();
@@ -1142,9 +1147,9 @@ class BulkOperationBase {
    * An internal helper method. Do not invoke directly. Will be going away in the future
    *
    * @function
-   * @param {object} _writeConcern
-   * @param {object} options
-   * @param {Function} callback
+   * @param _writeConcern
+   * @param options
+   * @param callback
    */
   bulkExecute(
     _writeConcern?: WriteConcern,
@@ -1185,21 +1190,21 @@ class BulkOperationBase {
    * The callback format for results
    *
    * @callback BulkOperationBase~resultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {BulkWriteResult} result The bulk write result.
+   * @param error An error instance representing the error during the execution.
+   * @param result The bulk write result.
    */
 
   /**
    * Execute the bulk operation
    *
    * @function
-   * @param {WriteConcern} [_writeConcern] Optional write concern. Can also be specified through options.
-   * @param {object} [options] Optional settings.
-   * @param {(number|string)} [options.w] The write concern.
-   * @param {number} [options.wtimeout] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern.
-   * @param {BulkOperationBase~resultCallback} [callback] A callback that will be invoked when bulkWrite finishes/errors
+   * @param [_writeConcern] Optional write concern. Can also be specified through options.
+   * @param [options] Optional settings.
+   * @param [options.w] The write concern.
+   * @param [options.wtimeout] The write concern timeout.
+   * @param [options.j=false] Specify a journal write concern.
+   * @param [options.fsync=false] Specify a file sync write concern.
+   * @param [callback] A callback that will be invoked when bulkWrite finishes/errors
    * @throws {MongoError} Throws error if the bulk object has already been executed
    * @throws {MongoError} Throws error if the bulk object does not have any operations
    * @returns {Promise<void>|void} returns Promise if no callback passed
@@ -1221,11 +1226,11 @@ class BulkOperationBase {
    *
    * An internal method. Do not invoke. Will not be accessible in the future
    *
-   * @param {object} config
-   * @param {object} config.options
-   * @param {number} config.batch
-   * @param {Function} config.resultHandler
-   * @param {Function} callback
+   * @param config
+   * @param config.options
+   * @param config.batch
+   * @param config.resultHandler
+   * @param callback
    */
   finalOptionsHandler(config: any, callback: Callback) {
     const finalOptions = Object.assign({ ordered: this.isOrdered }, config.options);
@@ -1307,8 +1312,8 @@ class BulkOperationBase {
    *
    * An internal helper method. Do not invoke directly. Will be going away in the future
    *
-   * @param {Function} callback
-   * @param {any} writeResult
+   * @param callback
+   * @param writeResult
    * @returns {boolean|undefined}
    */
   handleWriteError(callback: Callback, writeResult: any): boolean | undefined {

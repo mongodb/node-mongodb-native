@@ -9,6 +9,7 @@ import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
 import type { Connection } from '../cmap/connection';
 
+/** @public */
 export interface InsertOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
@@ -20,6 +21,7 @@ export interface InsertOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/** @internal */
 export class InsertOperation extends OperationBase<InsertOptions, Document> {
   namespace: string;
   operations: Document[];
@@ -40,6 +42,7 @@ export class InsertOperation extends OperationBase<InsertOptions, Document> {
   }
 }
 
+/** @public */
 export interface InsertOneResult {
   /** The total amount of documents inserted */
   insertedCount: number;

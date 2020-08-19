@@ -18,6 +18,7 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 
+/** @public */
 export enum LogLevel {
   'error' = 'error',
   'warn' = 'warn',
@@ -25,12 +26,14 @@ export enum LogLevel {
   'debug' = 'debug'
 }
 
+/** @public */
 export interface DriverInfo {
   name?: string;
   version?: string;
   platform?: string;
 }
 
+/** @public */
 export interface Auth {
   /** The username for auth */
   user?: string;
@@ -38,21 +41,25 @@ export interface Auth {
   pass?: string;
 }
 
+/** @public */
 export abstract class PkFactoryAbstract {
   abstract createPk(): any;
 }
 
+/** @public */
 export interface PkFactoryLiteral {
   createPk(): any;
 }
 
+/** @public */
 export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
 
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
 /**
  * Describes all possible URI query options for the mongo client
- * https://docs.mongodb.com/manual/reference/connection-string
+ * @public
+ * @see https://docs.mongodb.com/manual/reference/connection-string
  */
 export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
@@ -129,6 +136,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   directConnection?: boolean;
 }
 
+/** @public */
 export interface MongoClientOptions
   extends WriteConcernOptions,
     MongoURIOptions,
@@ -209,13 +217,11 @@ export interface MongoClientOptions
   dbName?: string;
 }
 
-export interface MongoClient {
-  logout(options: any, callback: Callback): void;
-}
-
+/** @public */
 export type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
 
-interface MongoClientPrivate {
+/** @internal */
+export interface MongoClientPrivate {
   url: string;
   options?: MongoClientOptions;
   dbCache: Map<string, Db>;
@@ -228,8 +234,10 @@ interface MongoClientPrivate {
 
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
+ * @public
  *
  * @example
+ * ```js
  * // Connect using a MongoClient instance
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
@@ -243,8 +251,10 @@ interface MongoClientPrivate {
  *   const db = client.db(dbName);
  *   client.close();
  * });
+ * ```
  *
  * @example
+ * ```js
  * // Connect using the MongoClient.connect static method
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
@@ -257,8 +267,10 @@ interface MongoClientPrivate {
  *   const db = client.db(dbName);
  *   client.close();
  * });
+ * ```
  */
 export class MongoClient extends EventEmitter implements OperationParent {
+  /** @internal */
   s: MongoClientPrivate;
   topology?: Topology;
 
@@ -453,7 +465,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * Runs a given operation with an implicitly created session. The lifetime of the session
    * will be handled without the need for user interaction.
    *
-   * NOTE: presently the operation MUST return a Promise (either explicit or implicity as an async function)
+   * NOTE: presently the operation MUST return a Promise (either explicit or implicitly as an async function)
    *
    * @param options - Optional settings for the command
    * @param callback - An callback to execute with an implicitly created session
@@ -530,9 +542,12 @@ export class MongoClient extends EventEmitter implements OperationParent {
   getLogger(): Logger {
     return this.s.logger;
   }
-}
 
-MongoClient.prototype.logout = deprecate((options: any, callback: Callback): void => {
-  if (typeof options === 'function') (callback = options), (options = {});
-  if (typeof callback === 'function') callback(undefined, true);
-}, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
+  /**
+   * @deprecated You cannot logout a MongoClient, you can create a new instance.
+   */
+  logout = deprecate((options: any, callback: Callback): void => {
+    if (typeof options === 'function') (callback = options), (options = {});
+    if (typeof callback === 'function') callback(undefined, true);
+  }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
+}

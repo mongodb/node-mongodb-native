@@ -4,9 +4,9 @@ import { BulkOperationBase, Batch, INSERT } from './common';
 /**
  * Add to internal list of Operations
  *
- * @param {OrderedBulkOperation} bulkOperation
- * @param {number} docType number indicating the document type
- * @param {any} document
+ * @param bulkOperation
+ * @param docType number indicating the document type
+ * @param document
  * @returns {OrderedBulkOperation}
  */
 function addToOperationsList(
@@ -99,9 +99,9 @@ export class OrderedBulkOperation extends BulkOperationBase {
 /**
  * Returns an unordered batch object
  *
- * @param {any} topology
- * @param {any} collection
- * @param {any} options
+ * @param topology
+ * @param collection
+ * @param options
  */
 export function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
   return new OrderedBulkOperation(topology, collection, options);

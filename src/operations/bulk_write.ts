@@ -8,6 +8,7 @@ import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';
 import type { Server } from '../sdam/server';
 
+/** @internal */
 export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
   collection: Collection;
   operations: Document[];

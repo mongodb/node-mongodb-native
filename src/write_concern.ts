@@ -1,5 +1,7 @@
+/** @public */
 export type W = number | 'majority';
 
+/** @public */
 export interface WriteConcernOptions {
   /** The write concern */
   w?: W;
@@ -22,6 +24,7 @@ export const writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
 /**
  * A MongoDB WriteConcern, which describes the level of acknowledgement
  * requested from MongoDB for write operations.
+ * @public
  *
  * @see https://docs.mongodb.com/manual/reference/write-concern/
  */

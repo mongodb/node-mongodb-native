@@ -6,10 +6,12 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export interface EvalOptions extends CommandOperationOptions {
   nolock?: boolean;
 }
 
+/** @internal */
 export class EvalOperation extends CommandOperation<EvalOptions, Document> {
   code: Code;
   parameters?: Document | Document[];

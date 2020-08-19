@@ -16,6 +16,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from './find';
 
+/** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
@@ -40,6 +41,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   new?: boolean;
 }
 
+/** @internal */
 export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
@@ -154,6 +156,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
   }
 }
 
+/** @internal */
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
     // Final options
@@ -170,6 +173,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   }
 }
 
+/** @internal */
 export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   constructor(
     collection: Collection,
@@ -200,6 +204,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   }
 }
 
+/** @internal */
 export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   constructor(
     collection: Collection,

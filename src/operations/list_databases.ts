@@ -5,7 +5,10 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 
+/** @public */
 export type ListDatabasesResult = string[] | Document[];
+
+/** @public */
 export interface ListDatabasesOptions extends CommandOperationOptions {
   /** A query predicate that determines which databases are listed */
   filter?: Document;
@@ -15,6 +18,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
   authorizedDatabases?: boolean;
 }
 
+/** @internal */
 export class ListDatabasesOperation extends CommandOperation<
   ListDatabasesOptions,
   ListDatabasesResult

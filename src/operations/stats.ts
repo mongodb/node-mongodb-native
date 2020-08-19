@@ -5,26 +5,21 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
+/** @public */
 export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
 
-/**
- * Get all the collection statistics.
- *
- * @class
- * @property {Collection} collection Collection instance.
- * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
- */
+/** @internal Get all the collection statistics. */
 export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 
   /**
    * Construct a Stats operation.
    *
-   * @param {Collection} collection Collection instance
-   * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
+   * @param collection - Collection instance
+   * @param options - Optional settings. See Collection.prototype.stats for a list of options.
    */
   constructor(collection: Collection, options?: CollStatsOptions) {
     super(collection, options);
@@ -41,11 +36,13 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions, Docum
   }
 }
 
+/** @public */
 export interface DbStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }
 
+/** @internal */
 export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
   execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };

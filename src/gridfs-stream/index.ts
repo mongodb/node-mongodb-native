@@ -24,7 +24,8 @@ const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   chunkSizeBytes: 255 * 1024
 };
 
-interface GridFSBucketOptions extends WriteConcernOptions {
+/** @public */
+export interface GridFSBucketOptions extends WriteConcernOptions {
   /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
   bucketName?: string;
   /** Number of bytes stored in each chunk. Defaults to 255KB */
@@ -33,7 +34,8 @@ interface GridFSBucketOptions extends WriteConcernOptions {
   readPreference?: ReadPreference;
 }
 
-interface GridFSBucketPrivate {
+/** @internal */
+export interface GridFSBucketPrivate {
   db: Db;
   options: {
     bucketName: string;
@@ -47,9 +49,23 @@ interface GridFSBucketPrivate {
   calledOpenUploadStream: boolean;
 }
 
-/** Constructor for a streaming GridFS interface */
+/**
+ * Constructor for a streaming GridFS interface
+ * @public
+ */
 export class GridFSBucket extends EventEmitter {
+  /** @internal */
   s: GridFSBucketPrivate;
+
+  /**
+   * When the first call to openUploadStream is made, the upload stream will
+   * check to see if it needs to create the proper indexes on the chunks and
+   * files collections. This event is fired either when 1) it determines that
+   * no index creation is necessary, 2) when it successfully creates the
+   * necessary indexes.
+   * @event
+   */
+  static readonly INDEX = 'index' as const;
 
   constructor(db: Db, options?: GridFSBucketOptions) {
     super();
@@ -68,17 +84,6 @@ export class GridFSBucket extends EventEmitter {
       calledOpenUploadStream: false
     };
   }
-
-  /**
-   * When the first call to openUploadStream is made, the upload stream will
-   * check to see if it needs to create the proper indexes on the chunks and
-   * files collections. This event is fired either when 1) it determines that
-   * no index creation is necessary, 2) when it successfully creates the
-   * necessary indexes.
-   *
-   * @event GridFSBucket#index
-   * @type {Error}
-   */
 
   /**
    * Returns a writable stream (GridFSBucketWriteStream) for writing
@@ -123,9 +128,7 @@ export class GridFSBucket extends EventEmitter {
   /**
    * Deletes a file with the given id
    *
-   * @function
-   * @param {ObjectId} id The id of the file doc
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - The id of the file doc
    */
   delete(id: TFileId): Promise<undefined>;
   delete(id: TFileId, callback: Callback<void>): void;
@@ -175,10 +178,8 @@ export class GridFSBucket extends EventEmitter {
   /**
    * Renames the file with the given _id to the given string
    *
-   * @function
-   * @param {ObjectId} id the id of the file to rename
-   * @param {string} filename new name for the file
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - the id of the file to rename
+   * @param filename - new name for the file
    */
   rename(id: TFileId, filename: string): Promise<void>;
   rename(id: TFileId, filename: string, callback: Callback<void>): void;
@@ -188,12 +189,7 @@ export class GridFSBucket extends EventEmitter {
     });
   }
 
-  /**
-   * Removes this bucket's files collection, followed by its chunks collection.
-   *
-   * @function
-   * @param {GridFSBucket~errorCallback} [callback]
-   */
+  /** Removes this bucket's files collection, followed by its chunks collection. */
   drop(): Promise<void>;
   drop(callback: Callback<void>): void;
   drop(callback?: Callback<void>): Promise<void> | void {
@@ -202,12 +198,7 @@ export class GridFSBucket extends EventEmitter {
     });
   }
 
-  /**
-   * Return the db logger
-   *
-   * @function
-   * @returns {Logger} return the db logger
-   */
+  /** Get the Db scoped logger. */
   getLogger(): Logger {
     return this.s.db.s.logger;
   }

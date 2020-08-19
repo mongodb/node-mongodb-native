@@ -57,6 +57,7 @@ try {
   aws4 = require('aws4');
 } catch {} // eslint-disable-line
 
+/** @public */
 export const enum AutoEncryptionLoggerLevels {
   FatalError = 0,
   Error = 1,
@@ -65,6 +66,7 @@ export const enum AutoEncryptionLoggerLevels {
   Trace = 4
 }
 
+/** @public */
 export interface AutoEncryptionOptions {
   /** A `MongoClient` used to fetch keys from a key vault */
   keyVaultClient?: MongoClient;
@@ -115,6 +117,7 @@ export interface AutoEncryptionOptions {
   };
 }
 
+/** @public */
 export interface AutoEncrypter {
   init(cb: Callback): void;
   teardown(force: boolean, callback: Callback): void;

@@ -4,14 +4,17 @@ import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
+/** @public */
 export enum ProfilingLevel {
   off = 'off',
   slowOnly = 'slow_only',
   all = 'all'
 }
 
+/** @public */
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
+/** @internal */
 export class SetProfilingLevelOperation extends CommandOperation<
   SetProfilingLevelOptions,
   ProfilingLevel

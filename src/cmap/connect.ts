@@ -17,6 +17,7 @@ import type { EventEmitter } from 'events';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 
+/** @public */
 export type Stream = Socket | TLSSocket;
 
 const AUTH_PROVIDERS = defaultAuthProviders();
@@ -351,7 +352,7 @@ function makeConnection(
   socket.once(connectEvent, connectHandler);
 }
 
-function connectionFailureError(type: string, err?: Error) {
+function connectionFailureError(type: string, err: Error) {
   switch (type) {
     case 'error':
       return new MongoNetworkError(err);

@@ -7,6 +7,7 @@ import type { Collection } from '../collection';
 
 export type GroupOptions = CommandOperationOptions;
 
+/** @internal */
 export class GroupOperation extends CommandOperation<GroupOptions, Document> {
   collectionName: string;
   keys: any;

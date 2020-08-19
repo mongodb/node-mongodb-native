@@ -7,6 +7,7 @@ import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
 
+/** @public */
 export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
   arrayFilters?: Document[];
@@ -24,6 +25,7 @@ export interface UpdateOptions extends CommandOperationOptions {
   multi?: boolean;
 }
 
+/** @public */
 export interface UpdateResult {
   /** The number of documents that matched the filter */
   matchedCount: number;
@@ -38,6 +40,7 @@ export interface UpdateResult {
   result: Document;
 }
 
+/** @internal */
 export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   namespace: MongoDBNamespace;
   operations: Document[];
@@ -62,6 +65,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   }
 }
 
+/** @internal */
 export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
@@ -111,6 +115,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
   }
 }
 
+/** @internal */
 export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;

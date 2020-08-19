@@ -6,9 +6,9 @@ import { EventEmitter } from 'events';
  * Determines whether a provided address matches the provided parent domain in order
  * to avoid certain attack vectors.
  *
- * @param {string} srvAddress The address to check against a domain
- * @param {string} parentDomain The domain to check the provided address against
- * @returns {boolean} Whether the provided address matches the parent domain
+ * @param srvAddress - The address to check against a domain
+ * @param parentDomain - The domain to check the provided address against
+ * @returns Whether the provided address matches the parent domain
  */
 function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
   const regex = /^.*?\./;
@@ -17,7 +17,11 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
   return srv.endsWith(parent);
 }
 
-class SrvPollingEvent {
+/**
+ * @public
+ * @category Event
+ */
+export class SrvPollingEvent {
   srvRecords: dns.SrvRecord[];
   constructor(srvRecords: dns.SrvRecord[]) {
     this.srvRecords = srvRecords;
@@ -28,12 +32,14 @@ class SrvPollingEvent {
   }
 }
 
-interface SrvPollerOptions extends LoggerOptions {
+/** @internal */
+export interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
 
-class SrvPoller extends EventEmitter {
+/** @internal */
+export class SrvPoller extends EventEmitter {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;
@@ -139,5 +145,3 @@ class SrvPoller extends EventEmitter {
     });
   }
 }
-
-export { SrvPollingEvent, SrvPoller };

@@ -4,21 +4,22 @@ import type { Cursor } from '../cursor';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 
+/** @public */
 export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
 /**
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
+ * @internal
  *
- * @function
- * @deprecated
- * @param {Cursor} cursor The Cursor instance on which to run.
- * @param {Cursor~resultCallback} callback The result callback.
+ * @deprecated Please use forEach instead
+ * @param cursor - The Cursor instance on which to run.
+ * @param callback - The result callback.
  */
 export function each(cursor: Cursor, callback: EachCallback): void {
-  if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
+  if (!callback) throw new MongoError('callback is mandatory');
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
-    callback(MongoError.create({ message: 'Cursor is closed', driver: true }));
+    callback(new MongoError('Cursor is closed'));
     return;
   }
 
@@ -45,7 +46,7 @@ export function each(cursor: Cursor, callback: EachCallback): void {
   }
 }
 
-/** Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
 function loop(cursor: Cursor, callback: Callback) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;
@@ -57,10 +58,9 @@ function loop(cursor: Cursor, callback: Callback) {
 
 /**
  * Returns an array of documents. See Cursor.prototype.toArray for more information.
+ * @internal
  *
- * @function
- * @param {Cursor} cursor The Cursor instance from which to get the next document.
- * @param {Cursor~toArrayResultCallback} [callback] The result callback.
+ * @param cursor - The Cursor instance from which to get the next document.
  */
 export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
   const items: Document[] = [];

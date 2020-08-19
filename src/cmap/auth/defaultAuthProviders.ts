@@ -6,6 +6,7 @@ import { ScramSHA1, ScramSHA256 } from './scram';
 import { MongoDBAWS } from './mongodb_aws';
 import type { AuthProvider } from './auth_provider';
 
+/** @public */
 export enum AuthMechanism {
   MONGODB_AWS = 'MONGODB-AWS',
   MONGODB_CR = 'MONGODB-CR',

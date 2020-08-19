@@ -9,6 +9,7 @@ import type { ObjectId, Document } from '../bson';
 import type { BulkWriteResult } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
+/** @public */
 export interface InsertManyResult {
   /** The total amount of documents inserted. */
   insertedCount: number;
@@ -20,6 +21,7 @@ export interface InsertManyResult {
   result: Document;
 }
 
+/** @internal */
 export class InsertManyOperation extends OperationBase<InsertOptions, InsertManyResult> {
   collection: Collection;
   docs: Document[];

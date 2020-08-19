@@ -16,7 +16,8 @@ import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
 
-interface AdminPrivate {
+/** @internal */
+export interface AdminPrivate {
   db: Db;
 }
 
@@ -25,8 +26,10 @@ interface AdminPrivate {
  * the admin functionality and commands for MongoDB.
  *
  * **ADMIN Cannot directly be instantiated**
+ * @public
  *
  * @example
+ * ```js
  * const MongoClient = require('mongodb').MongoClient;
  * const test = require('assert');
  * // Connection url
@@ -46,12 +49,13 @@ interface AdminPrivate {
  *     client.close();
  *   });
  * });
+ * ```
  */
-
 export class Admin {
+  /** @internal */
   s: AdminPrivate;
 
-  /** Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
+  /** @internal Create a new Admin instance (INTERNAL TYPE, do not instantiate directly) */
   constructor(db: Db) {
     this.s = { db };
   }
