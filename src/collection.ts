@@ -16,7 +16,7 @@ import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
-import type { Operations, BulkOptions } from './bulk/common';
+import type { BulkOptions, AnyOperation } from './bulk/common';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
@@ -370,16 +370,16 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    * @throws MongoError if operations is not an array
    */
-  bulkWrite(operations: Operations): Promise<BulkWriteResult>;
-  bulkWrite(operations: Operations, callback: Callback<BulkWriteResult>): void;
-  bulkWrite(operations: Operations, options: InsertOptions): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyOperation[]): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyOperation[], callback: Callback<BulkWriteResult>): void;
+  bulkWrite(operations: AnyOperation[], options: InsertOptions): Promise<BulkWriteResult>;
   bulkWrite(
-    operations: Operations,
+    operations: AnyOperation[],
     options: InsertOptions,
     callback: Callback<BulkWriteResult>
   ): void;
   bulkWrite(
-    operations: Operations,
+    operations: AnyOperation[],
     options?: InsertOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {

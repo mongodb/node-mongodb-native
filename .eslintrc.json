@@ -57,7 +57,7 @@
     // "prefer-const": 2
   },
   "settings": {
-    "jsdoc": {
+    "tsdoc": {
       "check-types": false,
       "mode": "typescript",
       "tagNamePreference": {

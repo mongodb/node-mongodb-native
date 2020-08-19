@@ -1,14 +1,21 @@
-import { BulkOptions, INSERT, BulkOperationBase, Batch, BatchTypes, AnyModel } from './common';
+import {
+  BulkOptions,
+  BulkOperationBase,
+  Batch,
+  BatchType,
+  AnyModel,
+  FindOperators
+} from './common';
 import * as BSON from '../bson';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 
 /** Add to internal list of Operations */
-export function addToOperationsList(
-  bulkOperation: OrderedBulkOperation,
-  batchType: BatchTypes,
+export function addToOperationsList<T extends OrderedBulkOperation | FindOperators>(
+  bulkOperation: T,
+  batchType: BatchType,
   document: Partial<AnyModel>
-): OrderedBulkOperation {
+): T {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
     checkKeys: false,
@@ -53,7 +60,7 @@ export function addToOperationsList(
     bulkOperation.s.currentBatchSizeBytes = 0;
   }
 
-  if (batchType === INSERT && document._id) {
+  if (batchType === BatchType.INSERT && document._id) {
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.currentIndex,
       _id: document._id

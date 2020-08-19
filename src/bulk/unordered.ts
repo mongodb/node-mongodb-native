@@ -1,13 +1,11 @@
 import {
   BulkOperationBase,
   Batch,
-  INSERT,
-  UPDATE,
-  REMOVE,
-  BatchTypes,
+  BatchType,
   AnyModel,
   BulkOptions,
-  BulkWriteResult
+  BulkWriteResult,
+  FindOperators
 } from './common';
 import * as BSON from '../bson';
 import type { Topology } from '../sdam/topology';
@@ -15,11 +13,11 @@ import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 
 /** Add to internal list of Operations */
-export function addToOperationsList(
-  bulkOperation: UnorderedBulkOperation,
-  batchType: BatchTypes,
+export function addToOperationsList<T extends UnorderedBulkOperation | FindOperators>(
+  bulkOperation: T,
+  batchType: BatchType,
   document: Partial<AnyModel>
-): UnorderedBulkOperation {
+): T {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {
     checkKeys: false,
@@ -37,13 +35,13 @@ export function addToOperationsList(
   }
 
   // Holds the current batch
-  bulkOperation.s.currentBatch = null;
+  bulkOperation.s.currentBatch = undefined;
   // Get the right type of batch
-  if (batchType === INSERT) {
+  if (batchType === BatchType.INSERT) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentInsertBatch;
-  } else if (batchType === UPDATE) {
+  } else if (batchType === BatchType.UPDATE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentUpdateBatch;
-  } else if (batchType === REMOVE) {
+  } else if (batchType === BatchType.REMOVE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentRemoveBatch;
   }
 
@@ -82,15 +80,15 @@ export function addToOperationsList(
   bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
 
   // Save back the current Batch to the right type
-  if (batchType === INSERT && document._id) {
+  if (batchType === BatchType.INSERT && document._id) {
     bulkOperation.s.currentInsertBatch = bulkOperation.s.currentBatch;
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.bulkResult.insertedIds.length,
       _id: document._id
     });
-  } else if (batchType === UPDATE) {
+  } else if (batchType === BatchType.UPDATE) {
     bulkOperation.s.currentUpdateBatch = bulkOperation.s.currentBatch;
-  } else if (batchType === REMOVE) {
+  } else if (batchType === BatchType.REMOVE) {
     bulkOperation.s.currentRemoveBatch = bulkOperation.s.currentBatch;
   }
 

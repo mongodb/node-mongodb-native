@@ -58,7 +58,6 @@ export {
   BulkIdDocument,
   BulkOp,
   AnyOperation,
-  Operations,
   BatchOperations,
   InsertOneModel,
   InsertManyModel,

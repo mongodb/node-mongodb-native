@@ -1,3 +1,4 @@
+import type { AnyError } from './../error';
 import {
   applyWriteConcern,
   applyRetryableWrites,
@@ -33,27 +34,25 @@ interface FinalOptionsConfigOptions {
   retryWrites?: boolean;
 }
 interface ResultHandler {
-  (err?: any, result?: any): void;
+  (err?: AnyError, result?: any): void;
   operationId?: number;
 }
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
 
-// Insert types
-export const INSERT = 1;
-export const UPDATE = 2;
-export const REMOVE = 3;
-
-/** Number indicating the document type */
-export type BatchTypes = typeof INSERT | typeof UPDATE | typeof REMOVE;
+export enum BatchType {
+  INSERT = 1,
+  UPDATE = 2,
+  REMOVE = 3
+}
 
 /** @public */
 export interface Operation {
-  selector: Document;
-  multi: boolean;
-  upsert: boolean;
-  limit: number;
+  selector?: Document;
+  multi?: boolean;
+  upsert?: boolean;
+  limit?: number;
 }
 
 /** @public */
@@ -106,15 +105,16 @@ export interface DeleteManyModel extends RemoveOptions {
 
 /** @public */
 export interface BatchOperations {
-  insertOne: InsertOneModel;
-  insertMany: InsertManyModel;
-  replaceOne: ReplaceOneModel;
-  updateOne: UpdateOneModel;
-  updateMany: UpdateManyModel;
-  removeOne: RemoveOneModel;
-  removeMany: RemoveManyModel;
-  deleteOne: DeleteOneModel;
-  deleteMany: DeleteManyModel;
+  insertOne?: InsertOneModel;
+  insertMany?: InsertManyModel;
+  replaceOne?: ReplaceOneModel;
+  updateOne?: UpdateOneModel;
+  updateMany?: UpdateManyModel;
+  removeOne?: RemoveOneModel;
+  removeMany?: RemoveManyModel;
+  deleteOne?: DeleteOneModel;
+  deleteMany?: DeleteManyModel;
+  collation?: CollationOptions;
 }
 
 /** @public */
@@ -141,9 +141,6 @@ export type AnyOperation =
   | { deleteMany: DeleteManyModel };
 
 /** @public */
-export type Operations = AnyOperation[];
-
-/** @public */
 export interface BulkOp {
   _bsontype: string;
   ts: Long | number;
@@ -162,7 +159,7 @@ export interface BulkIdDocument {
 export interface BulkResult {
   nInserted: number;
   nMatched: number;
-  nModified: number | null;
+  nModified?: number;
   nRemoved: number;
   nUpserted: number;
   upserted: Document[];
@@ -187,12 +184,12 @@ export class Batch {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
-  batchType: BatchTypes;
+  batchType: BatchType;
   operations: Partial<AnyModel>[];
   size: number;
   sizeBytes: number;
 
-  constructor(batchType: BatchTypes, originalZeroIndex: number) {
+  constructor(batchType: BatchType, originalZeroIndex: number) {
     this.originalZeroIndex = originalZeroIndex;
     this.currentIndex = 0;
     this.originalIndexes = [];
@@ -276,7 +273,7 @@ export class BulkWriteResult {
   }
 
   /** Number of documents updated physically on disk */
-  get nModified(): number | null {
+  get nModified(): number | undefined {
     return this.result.nModified;
   }
 
@@ -448,12 +445,7 @@ export class WriteError {
 }
 
 /** Merges results into shared data structure */
-function mergeBatchResults(
-  batch: Batch,
-  bulkResult: BulkResult,
-  err: any,
-  result?: BulkResult | null
-) {
+function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, result?: BulkResult) {
   // If we have an error set the result to be the err object
   if (err) {
     result = err;
@@ -524,12 +516,12 @@ function mergeBatchResults(
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === INSERT && result?.n) {
+  if (batch.batchType === BatchType.INSERT && result?.n) {
     bulkResult.nInserted = bulkResult.nInserted + result.n;
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === REMOVE && result?.n) {
+  if (batch.batchType === BatchType.REMOVE && result?.n) {
     bulkResult.nRemoved = bulkResult.nRemoved + result.n;
   }
 
@@ -555,7 +547,7 @@ function mergeBatchResults(
   }
 
   // If we have an update Batch type
-  if (batch.batchType === UPDATE && result?.n) {
+  if (batch.batchType === BatchType.UPDATE && result?.n) {
     const nModified = result.nModified;
     bulkResult.nUpserted = bulkResult.nUpserted + nUpserted;
     bulkResult.nMatched = bulkResult.nMatched + (result.n - nUpserted);
@@ -563,7 +555,7 @@ function mergeBatchResults(
     if (typeof bulkResult.nModified === 'number' && typeof nModified === 'number') {
       bulkResult.nModified = bulkResult.nModified + nModified;
     } else {
-      bulkResult.nModified = null;
+      bulkResult.nModified = undefined;
     }
   }
 
@@ -596,7 +588,7 @@ function executeCommands(
 
   const batch = bulkOperation.s.batches.shift() as Batch;
 
-  function resultHandler(err?: any, result?: any) {
+  function resultHandler(err?: any, result?: BulkResult) {
     // Error is a driver related error not a bulk op error, terminate
     if (((err && err.driver) || (err && err.message)) && !(err instanceof MongoWriteConcernError)) {
       return callback(err);
@@ -628,14 +620,14 @@ function executeCommands(
 function handleMongoWriteConcernError(
   batch: Batch,
   bulkResult: BulkResult,
-  err: any,
+  err: MongoWriteConcernError,
   callback: Callback
 ) {
-  mergeBatchResults(batch, bulkResult, null, err.result);
+  mergeBatchResults(batch, bulkResult, null, err.result as BulkResult);
 
   const wrappedWriteConcernError = new WriteConcernError({
-    errmsg: err.result.writeConcernError.errmsg,
-    code: err.result.writeConcernError.result
+    errmsg: err.result?.writeConcernError.errmsg,
+    code: err.result?.writeConcernError.result
   });
 
   callback(
@@ -649,7 +641,7 @@ function handleMongoWriteConcernError(
  * @category Error
  */
 export class BulkWriteError extends MongoError {
-  result: any;
+  result?: BulkWriteResult;
 
   /** Creates a new BulkWriteError */
   constructor(error?: any, result?: BulkWriteResult) {
@@ -674,19 +666,14 @@ interface DocumentWithHint extends Document {
  * A builder object that is returned from {@link BulkOperationBase#find}.
  * Is used to build a write operation that involves a query filter.
  */
-class FindOperators {
-  s: {
-    currentOp?: Partial<Operation>;
-    options: {
-      addToOperationsList: (self: FindOperators, batchType: BatchTypes, document: Document) => any;
-    };
-  };
+export class FindOperators {
+  s: BulkOperationPrivate;
 
   /**
    * @internal
    * Creates a new FindOperators object.
    */
-  constructor(bulkOperation: any) {
+  constructor(bulkOperation: BulkOperationBase) {
     this.s = bulkOperation.s;
   }
 
@@ -704,12 +691,8 @@ class FindOperators {
       ...(updateDocument.hint ? { hint: updateDocument.hint } : {})
     };
 
-    this.clearOutCurrentOp();
-    return this.s.options.addToOperationsList(this, UPDATE, document);
-  }
-
-  clearOutCurrentOp() {
     this.s.currentOp = undefined;
+    return this.s.options.addToOperationsList!(this, BatchType.UPDATE, document);
   }
 
   /** Add a single update operation to the bulk operation */
@@ -730,12 +713,12 @@ class FindOperators {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    this.clearOutCurrentOp();
-    return this.s.options.addToOperationsList(this, UPDATE, document);
+    this.s.currentOp = undefined;
+    return this.s.options.addToOperationsList!(this, BatchType.UPDATE, document);
   }
 
   /** Add a replace one operation to the bulk operation */
-  replaceOne(replacement: DocumentWithHint): void {
+  replaceOne(replacement: DocumentWithHint): FindOperators {
     // Perform upsert
     const upsert = typeof this.s.currentOp?.upsert === 'boolean' ? this.s.currentOp.upsert : false;
 
@@ -752,13 +735,13 @@ class FindOperators {
       throw new TypeError('Replacement document must not use atomic operators');
     }
 
-    this.clearOutCurrentOp();
-    return this.s.options.addToOperationsList(this, UPDATE, document);
+    this.s.currentOp = undefined;
+    return this.s.options.addToOperationsList!(this, BatchType.UPDATE, document);
   }
 
   /** Upsert modifier for update bulk operation, noting that this operation is an upsert. */
   upsert(): FindOperators {
-    this.s.currentOp = { ...this.s.currentOp, upsert: true };
+    this.s.currentOp = { ...(this.s.currentOp || {}), upsert: true };
     return this;
   }
 
@@ -770,8 +753,8 @@ class FindOperators {
       limit: 1
     };
 
-    this.clearOutCurrentOp();
-    return this.s.options.addToOperationsList(this, REMOVE, document);
+    this.s.currentOp = undefined;
+    return this.s.options.addToOperationsList!(this, BatchType.REMOVE, document);
   }
 
   /** Add a delete many operation to the bulk operation */
@@ -782,8 +765,8 @@ class FindOperators {
       limit: 0
     };
 
-    this.clearOutCurrentOp();
-    return this.s.options.addToOperationsList(this, REMOVE, document);
+    this.s.currentOp = undefined;
+    return this.s.options.addToOperationsList!(this, BatchType.REMOVE, document);
   }
 
   /** backwards compatibility for deleteOne */
@@ -799,15 +782,15 @@ class FindOperators {
 
 interface BulkOperationPrivate {
   bulkResult: BulkResult;
-  currentBatch: Batch | null;
+  currentBatch?: Batch;
   currentIndex: number;
   // ordered specific
   currentBatchSize: number;
   currentBatchSizeBytes: number;
   // unordered specific
-  currentInsertBatch: Batch | null;
-  currentUpdateBatch: Batch | null;
-  currentRemoveBatch: Batch | null;
+  currentInsertBatch?: Batch;
+  currentUpdateBatch?: Batch;
+  currentRemoveBatch?: Batch;
   batches: Batch[];
   // Write concern
   writeConcern?: WriteConcern;
@@ -823,13 +806,13 @@ interface BulkOperationPrivate {
   // Options
   options: BulkOptions;
   // Current operation
-  currentOp: { selector: Document } | null;
+  currentOp?: Operation;
   // Executed
   executed: boolean;
   // Collection
   collection: Collection;
   // Fundamental error
-  err: null;
+  err?: AnyError;
   // check keys
   checkKeys: boolean;
   bypassDocumentValidation?: boolean;
@@ -868,9 +851,6 @@ export class BulkOperationBase {
     const namespace = collection.s.namespace;
     // Used to mark operation as executed
     const executed = false;
-
-    // Current item
-    const currentOp = null;
 
     // Set max byte size
     const isMaster = topology.lastIsMaster();
@@ -915,16 +895,11 @@ export class BulkOperationBase {
     this.s = {
       // Final result
       bulkResult,
-      // Current batch state
-      currentBatch: null,
       currentIndex: 0,
       // ordered specific
       currentBatchSize: 0,
       currentBatchSizeBytes: 0,
       // unordered specific
-      currentInsertBatch: null,
-      currentUpdateBatch: null,
-      currentRemoveBatch: null,
       batches: [],
       // Write concern
       writeConcern: writeConcern,
@@ -939,14 +914,10 @@ export class BulkOperationBase {
       topology: topology,
       // Options
       options: finalOptions,
-      // Current operation
-      currentOp: currentOp,
       // Executed
       executed: executed,
       // Collection
       collection: collection,
-      // Fundamental error
-      err: null,
       // check keys
       checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : true
     };
@@ -969,7 +940,7 @@ export class BulkOperationBase {
    * Add a single insert document to the bulk operation
    *
    * @example
-   * ```ts
+   * ```js
    * const bulkOp = collection.initializeOrderedBulkOp();
    * // Adds three inserts to the bulkOp.
    * bulkOp
@@ -981,7 +952,7 @@ export class BulkOperationBase {
    */
   insert(document: Document): BulkOperationBase {
     if (this.forceServerObjectId !== true && document._id == null) document._id = new ObjectId();
-    return this.s.options.addToOperationsList!(this, INSERT, document);
+    return this.s.options.addToOperationsList!(this, BatchType.INSERT, document);
   }
 
   /**
@@ -989,7 +960,7 @@ export class BulkOperationBase {
    * Returns a builder object used to complete the definition of the operation.
    *
    * @example
-   * ```ts
+   * ```js
    * const bulkOp = collection.initializeOrderedBulkOp();
    *
    * // Add an updateOne to the bulkOp
@@ -1032,7 +1003,7 @@ export class BulkOperationBase {
     return new FindOperators(this);
   }
 
-  raw(op: Partial<BatchOperations> & { collation?: CollationOptions }): BulkOperationBase {
+  raw(op: BatchOperations): BulkOperationBase {
     const key = Object.keys(op)[0] as keyof BatchOperations;
     const opOptions = op[key] as AnyModel;
     // Set up the force server object id
@@ -1045,7 +1016,7 @@ export class BulkOperationBase {
       (op.replaceOne && op.replaceOne.q)
     ) {
       opOptions.multi = op.updateOne || op.replaceOne ? false : true;
-      return this.s.options.addToOperationsList!(this, UPDATE, opOptions);
+      return this.s.options.addToOperationsList!(this, BatchType.UPDATE, opOptions);
     }
 
     // Crud spec update format
@@ -1082,7 +1053,7 @@ export class BulkOperationBase {
         operation.arrayFilters = opOptions.arrayFilters;
       }
 
-      return this.s.options.addToOperationsList!(this, UPDATE, operation);
+      return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     }
 
     // Remove operations
@@ -1093,7 +1064,7 @@ export class BulkOperationBase {
       (op.deleteMany && op.deleteMany.q)
     ) {
       opOptions.limit = op.removeOne ? 1 : 0;
-      return this.s.options.addToOperationsList!(this, REMOVE, opOptions);
+      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, opOptions);
     }
 
     // Crud spec delete operations, less efficient
@@ -1106,25 +1077,25 @@ export class BulkOperationBase {
       if (this.isOrdered) {
         if (op.collation) operation.collation = op.collation;
       }
-      return this.s.options.addToOperationsList!(this, REMOVE, operation);
+      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
     }
 
     // Insert operations
     if (op.insertOne && op.insertOne.document == null) {
       if (forceServerObjectId !== true && op.insertOne._id == null)
         op.insertOne._id = new ObjectId();
-      return this.s.options.addToOperationsList!(this, INSERT, op.insertOne);
+      return this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertOne);
     } else if (op.insertOne && op.insertOne.document) {
       if (forceServerObjectId !== true && op.insertOne.document._id == null)
         op.insertOne.document._id = new ObjectId();
-      return this.s.options.addToOperationsList!(this, INSERT, op.insertOne.document);
+      return this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertOne.document);
     }
 
     if (op.insertMany) {
       for (let i = 0; i < op.insertMany.length; i++) {
         if (forceServerObjectId !== true && op.insertMany[i]._id == null)
           op.insertMany[i]._id = new ObjectId();
-        this.s.options.addToOperationsList!(this, INSERT, op.insertMany[i]);
+        this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertMany[i]);
       }
 
       return this;
@@ -1151,9 +1122,9 @@ export class BulkOperationBase {
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
   bulkExecute(
     _writeConcern?: WriteConcern,
-    options?: object,
+    options?: BulkOptions,
     callback?: Callback
-  ): Promise<void> | { options: any; callback?: Callback } | void {
+  ): Promise<void> | { options: BulkOptions; callback?: Callback } | void {
     if (typeof options === 'function') (callback = options as Callback), (options = {});
     options = options || {};
 
@@ -1191,13 +1162,12 @@ export class BulkOperationBase {
     callback?: Callback<BulkWriteResult>
   ): Promise<void> | void {
     const ret = this.bulkExecute(_writeConcern, options, callback!);
-    if (!ret || isPromiseLike(ret as any)) {
-      return ret as Promise<void>;
+    if (!ret) return;
+    if (ret && isPromiseLike(ret)) {
+      return ret;
     }
-
-    options = (ret as any).options;
-    callback = (ret as any).callback;
-
+    options = ret.options;
+    callback = ret.callback;
     return executeLegacyOperation(this.s.topology, executeCommands, [this, options, callback]);
   }
 
@@ -1244,31 +1214,31 @@ export class BulkOperationBase {
     }
 
     if (finalOptions.retryWrites) {
-      if (config.batch.batchType === UPDATE) {
+      if (config.batch.batchType === BatchType.UPDATE) {
         finalOptions.retryWrites =
           finalOptions.retryWrites && !config.batch.operations.some((op: any) => op.multi);
       }
 
-      if (config.batch.batchType === REMOVE) {
+      if (config.batch.batchType === BatchType.REMOVE) {
         finalOptions.retryWrites =
           finalOptions.retryWrites && !config.batch.operations.some((op: any) => op.limit === 0);
       }
     }
 
     try {
-      if (config.batch.batchType === INSERT) {
+      if (config.batch.batchType === BatchType.INSERT) {
         executeOperation(
           this.s.topology,
           new InsertOperation(this.s.namespace, config.batch.operations, finalOptions),
           config.resultHandler
         );
-      } else if (config.batch.batchType === UPDATE) {
+      } else if (config.batch.batchType === BatchType.UPDATE) {
         executeOperation(
           this.s.topology,
           new UpdateOperation(this.s.namespace, config.batch.operations, finalOptions),
           config.resultHandler
         );
-      } else if (config.batch.batchType === REMOVE) {
+      } else if (config.batch.batchType === BatchType.REMOVE) {
         executeOperation(
           this.s.topology,
           new DeleteOperation(this.s.namespace, config.batch.operations, finalOptions),
@@ -1279,7 +1249,7 @@ export class BulkOperationBase {
       // Force top level error
       err.ok = 0;
       // Merge top level error and return
-      callback(undefined, mergeBatchResults(config.batch, this.s.bulkResult, err, null));
+      callback(undefined, mergeBatchResults(config.batch, this.s.bulkResult, err, undefined));
     }
   }
 
@@ -1287,7 +1257,7 @@ export class BulkOperationBase {
    * @internal
    * Handles the write error before executing commands
    */
-  handleWriteError(callback: Callback<any>, writeResult: BulkWriteResult): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg
