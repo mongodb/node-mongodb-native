@@ -5,7 +5,7 @@ import {
   UPDATE,
   REMOVE,
   BatchTypes,
-  AnyOperationOptions,
+  AnyModel,
   BulkOptions,
   BulkWriteResult
 } from './common';
@@ -18,7 +18,7 @@ import type { Collection } from '../collection';
 export function addToOperationsList(
   bulkOperation: UnorderedBulkOperation,
   batchType: BatchTypes,
-  document: Partial<AnyOperationOptions>
+  document: Partial<AnyModel>
 ): UnorderedBulkOperation {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {

@@ -41,64 +41,110 @@ interface ResultHandler {
 const WRITE_CONCERN_ERROR = 64;
 
 // Insert types
-const INSERT = 1;
-const UPDATE = 2;
-const REMOVE = 3;
+export const INSERT = 1;
+export const UPDATE = 2;
+export const REMOVE = 3;
 
 /** Number indicating the document type */
 export type BatchTypes = typeof INSERT | typeof UPDATE | typeof REMOVE;
 
-interface Operation {
+/** @public */
+export interface Operation {
   selector: Document;
   multi: boolean;
   upsert: boolean;
   limit: number;
 }
 
-const INSERT_ONE = 'insertOne';
-const INSERT_MANY = 'insertMany';
-const REPLACE_ONE = 'replaceOne';
-const UPDATE_ONE = 'updateOne';
-const UPDATE_MANY = 'updateMany';
-const REMOVE_ONE = 'removeOne';
-const REMOVE_MANY = 'removeMany';
-const DELETE_ONE = 'deleteOne';
-const DELETE_MANY = 'deleteMany';
-
-type BatchInsert = Document & InsertOptions & { document?: Document; _id?: ObjectId };
-interface BatchOperations {
-  [INSERT_ONE]: BatchInsert;
-  [INSERT_MANY]: BatchInsert[];
-  [REPLACE_ONE]: ReplaceOptions & { q?: Document; replacement: Document; filter?: Document };
-  [UPDATE_ONE]: UpdateOptions & { q?: Document; update: Document; filter?: Document };
-  [UPDATE_MANY]: UpdateOptions & { q?: Document; update: Document; filter?: Document };
-  [REMOVE_ONE]: RemoveOptions;
-  [REMOVE_MANY]: RemoveOptions & { limit?: number };
-  [DELETE_ONE]: RemoveOptions & { q: Document };
-  [DELETE_MANY]: RemoveOptions & { q: Document };
+/** @public */
+export interface InsertOneModel extends Document, InsertOptions {
+  document?: Document;
+  _id?: ObjectId;
 }
 
-export type AnyOperationOptions = BatchOperations[typeof INSERT_ONE] &
-  BatchOperations[typeof REPLACE_ONE] &
-  BatchOperations[typeof UPDATE_ONE] &
-  BatchOperations[typeof UPDATE_MANY] &
-  BatchOperations[typeof REPLACE_ONE] &
-  BatchOperations[typeof REMOVE_MANY];
+/** @public */
+export type InsertManyModel = InsertOneModel[];
 
-type BatchOpNested<T extends keyof BatchOperations> = Record<T, BatchOperations[T]>;
+/** @public */
+export interface ReplaceOneModel extends ReplaceOptions {
+  q?: Document;
+  replacement: Document;
+  filter?: Document;
+}
 
+/** @public */
+export interface UpdateOneModel extends UpdateOptions {
+  q?: Document;
+  update: Document;
+  filter?: Document;
+}
+
+/** @public */
+export interface UpdateManyModel extends UpdateOptions {
+  q?: Document;
+  update: Document;
+  filter?: Document;
+}
+
+/** @public */
+export type RemoveOneModel = RemoveOptions;
+
+/** @public */
+export interface RemoveManyModel extends RemoveOptions {
+  limit?: number;
+}
+
+/** @public */
+export interface DeleteOneModel extends RemoveOptions {
+  q?: Document;
+}
+
+/** @public */
+export interface DeleteManyModel extends RemoveOptions {
+  q?: Document;
+}
+
+/** @public */
+export interface BatchOperations {
+  insertOne: InsertOneModel;
+  insertMany: InsertManyModel;
+  replaceOne: ReplaceOneModel;
+  updateOne: UpdateOneModel;
+  updateMany: UpdateManyModel;
+  removeOne: RemoveOneModel;
+  removeMany: RemoveManyModel;
+  deleteOne: DeleteOneModel;
+  deleteMany: DeleteManyModel;
+}
+
+/** @public */
+export type AnyModel = InsertOneModel &
+  InsertManyModel &
+  ReplaceOneModel &
+  UpdateOneModel &
+  UpdateManyModel &
+  RemoveOneModel &
+  RemoveManyModel &
+  DeleteOneModel &
+  DeleteManyModel;
+
+/** @public */
 export type AnyOperation =
-  | BatchOpNested<typeof INSERT_ONE>
-  | BatchOpNested<typeof INSERT_MANY>
-  | BatchOpNested<typeof REPLACE_ONE>
-  | BatchOpNested<typeof UPDATE_ONE>
-  | BatchOpNested<typeof UPDATE_MANY>
-  | BatchOpNested<typeof REPLACE_ONE>
-  | BatchOpNested<typeof REMOVE_MANY>;
+  | { insertOne: InsertOneModel }
+  | { insertMany: InsertManyModel }
+  | { replaceOne: ReplaceOneModel }
+  | { updateOne: UpdateOneModel }
+  | { updateMany: UpdateManyModel }
+  | { removeOne: RemoveOneModel }
+  | { removeMany: RemoveManyModel }
+  | { deleteOne: DeleteOneModel }
+  | { deleteMany: DeleteManyModel };
 
+/** @public */
 export type Operations = AnyOperation[];
 
-interface BulkOp {
+/** @public */
+export interface BulkOp {
   _bsontype: string;
   ts: Long | number;
   t: Long | number;
@@ -106,12 +152,14 @@ interface BulkOp {
   equals: (arg: BulkOp) => BulkOp;
 }
 
-interface BulkIdDocument {
+/** @public */
+export interface BulkIdDocument {
   index: number;
   _id: ObjectId;
 }
 
-interface BulkResult {
+/** @public */
+export interface BulkResult {
   nInserted: number;
   nMatched: number;
   nModified: number | null;
@@ -135,12 +183,12 @@ interface BulkResult {
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
  */
-class Batch {
+export class Batch {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
   batchType: BatchTypes;
-  operations: Partial<AnyOperationOptions>[];
+  operations: Partial<AnyModel>[];
   size: number;
   sizeBytes: number;
 
@@ -335,13 +383,6 @@ export class BulkWriteResult {
 export class WriteConcernError {
   err: any;
 
-  /**
-   * Create a new WriteConcernError instance
-   *
-   * **NOTE:** Internal Type, do not instantiate directly
-   *
-   * @param err
-   */
   constructor(err: any) {
     this.err = err;
   }
@@ -373,13 +414,6 @@ export class WriteConcernError {
 export class WriteError {
   err: any;
 
-  /**
-   * Create a new WriteError instance
-   *
-   * **NOTE:** Internal Type, do not instantiate directly
-   *
-   * @param err
-   */
   constructor(err: any) {
     this.err = err;
   }
@@ -400,11 +434,11 @@ export class WriteError {
   }
 
   /** Returns the underlying operation that caused the error */
-  getOperation(): Partial<AnyOperationOptions> {
+  getOperation(): Partial<AnyModel> {
     return this.err.op;
   }
 
-  toJSON(): { code: number; index: number; errmsg?: string; op: Partial<AnyOperationOptions> } {
+  toJSON(): { code: number; index: number; errmsg?: string; op: Partial<AnyModel> } {
     return { code: this.err.code, index: this.err.index, errmsg: this.err.errmsg, op: this.err.op };
   }
 
@@ -614,15 +648,10 @@ function handleMongoWriteConcernError(
  * @public
  * @category Error
  */
-class BulkWriteError extends MongoError {
+export class BulkWriteError extends MongoError {
   result: any;
 
-  /**
-   * Creates a new BulkWriteError
-   *
-   * @param error The error message
-   * @param result The result of the bulk write operation
-   */
+  /** Creates a new BulkWriteError */
   constructor(error?: any, result?: BulkWriteResult) {
     const message = error.err || error.errmsg || error.errMessage || error;
     super(message);
@@ -818,7 +847,7 @@ export interface BulkOptions extends BSONSerializeOptions, WriteConcernOptions, 
  * @internal
  * Parent class to OrderedBulkOperation and UnorderedBulkOperation
  */
-class BulkOperationBase {
+export class BulkOperationBase {
   isOrdered: boolean;
   s: BulkOperationPrivate;
   operationId?: number;
@@ -1005,7 +1034,7 @@ class BulkOperationBase {
 
   raw(op: Partial<BatchOperations> & { collation?: CollationOptions }): BulkOperationBase {
     const key = Object.keys(op)[0] as keyof BatchOperations;
-    const opOptions = op[key] as AnyOperationOptions;
+    const opOptions = op[key] as AnyModel;
     // Set up the force server object id
     const forceServerObjectId = this.forceServerObjectId;
 
@@ -1277,9 +1306,9 @@ class BulkOperationBase {
 
       return true;
     }
-
-    if (writeResult.getWriteConcernError()) {
-      callback(new BulkWriteError(new MongoError(writeResult.getWriteConcernError()), writeResult));
+    const possibleError = writeResult.getWriteConcernError();
+    if (possibleError) {
+      callback(new BulkWriteError(new MongoError(possibleError), writeResult));
       return true;
     }
   }
@@ -1291,5 +1320,3 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
     return this.s.currentIndex;
   }
 });
-
-export { Batch, BulkOperationBase, INSERT, UPDATE, REMOVE, BulkWriteError };
