@@ -40,7 +40,7 @@ describe('GridFS Stream', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.dropDatabase(function (error) {
-          test.equal(error, null);
+          expect(error).to.not.exist;
 
           var bucket = new GridFSBucket(db);
           var readStream = fs.createReadStream('./LICENSE.md');
@@ -57,14 +57,14 @@ describe('GridFS Stream', function () {
 
             // Get all the chunks
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
               var filesColl = db.collection('fs.files');
               var filesQuery = filesColl.find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 1);
 
                 var hash = crypto.createHash('md5');
@@ -73,12 +73,12 @@ describe('GridFS Stream', function () {
 
                 // make sure we created indexes
                 filesColl.listIndexes().toArray(function (error, indexes) {
-                  test.equal(error, null);
+                  expect(error).to.not.exist;
                   test.equal(indexes.length, 2);
                   test.equal(indexes[1].name, 'filename_1_uploadDate_1');
 
                   chunksColl.listIndexes().toArray(function (error, indexes) {
-                    test.equal(error, null);
+                    expect(error).to.not.exist;
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
                     client.close(done);
@@ -119,7 +119,7 @@ describe('GridFS Stream', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.dropDatabase(function (error) {
-          test.equal(error, null);
+          expect(error).to.not.exist;
 
           var bucket = new GridFSBucket(db);
           var readStream = fs.createReadStream('./LICENSE.md');
@@ -137,7 +137,7 @@ describe('GridFS Stream', function () {
 
             // Get all the chunks
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
@@ -145,7 +145,7 @@ describe('GridFS Stream', function () {
               var filesQuery = filesColl.find({ _id: id });
 
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 1);
 
                 var hash = crypto.createHash('md5');
@@ -154,12 +154,12 @@ describe('GridFS Stream', function () {
 
                 // make sure we created indexes
                 filesColl.listIndexes().toArray(function (error, indexes) {
-                  test.equal(error, null);
+                  expect(error).to.not.exist;
                   test.equal(indexes.length, 2);
                   test.equal(indexes[1].name, 'filename_1_uploadDate_1');
 
                   chunksColl.listIndexes().toArray(function (error, indexes) {
-                    test.equal(error, null);
+                    expect(error).to.not.exist;
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
                     client.close(done);
@@ -217,13 +217,13 @@ describe('GridFS Stream', function () {
           downloadStream.pipe(uploadStream).once('finish', function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 1);
               test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 1);
 
                 var hash = crypto.createHash('md5');
@@ -361,7 +361,7 @@ describe('GridFS Stream', function () {
             .end(6);
 
           downloadStream.on('error', function (error) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
           });
 
           var gotData = 0;
@@ -457,12 +457,12 @@ describe('GridFS Stream', function () {
             expect(err).to.not.exist;
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 0);
 
                 client.close(done);
@@ -510,12 +510,12 @@ describe('GridFS Stream', function () {
           expect(error).to.not.exist;
 
           db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
             test.equal(c, 1);
             uploadStream.abort(function (error) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(c, 0);
                 uploadStream.write('b', 'utf8', function (error) {
                   test.equal(error.toString(), 'Error: this stream has been aborted');
@@ -567,12 +567,12 @@ describe('GridFS Stream', function () {
           expect(error).to.not.exist;
 
           db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
             test.equal(c, 1);
             uploadStream.abort(function (error) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(c, 0);
                 uploadStream.write('b', 'utf8', function (error) {
                   test.equal(error.toString(), 'Error: this stream has been aborted');
@@ -635,7 +635,7 @@ describe('GridFS Stream', function () {
           });
 
           downloadStream.on('end', function () {
-            test.equal(downloadStream.s.cursor, null);
+            expect(downloadStream.s.cursor).to.not.exist;
             if (finished.close) {
               client.close(done);
               return;
@@ -652,7 +652,7 @@ describe('GridFS Stream', function () {
           });
 
           downloadStream.abort(function (error) {
-            test.equal(error, undefined);
+            expect(error).to.not.exist;
           });
         });
 
@@ -697,12 +697,12 @@ describe('GridFS Stream', function () {
           bucket.delete(id).then(function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 0);
 
                 client.close(done);
@@ -789,12 +789,12 @@ describe('GridFS Stream', function () {
 
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 0);
 
                 client.close(done);
@@ -844,12 +844,12 @@ describe('GridFS Stream', function () {
           bucket.drop().then(function () {
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function (error, docs) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
               test.equal(docs.length, 0);
 
               var filesQuery = db.collection(FILES_COLL).find({ _id: id });
               filesQuery.toArray(function (error, docs) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(docs.length, 0);
 
                 client.close(done);
@@ -894,7 +894,7 @@ describe('GridFS Stream', function () {
 
         uploadStream.once('finish', function () {
           bucket.find({}, { batchSize: 1 }).toArray(function (err, files) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, files.length);
             client.close(done);
           });
@@ -960,13 +960,13 @@ describe('GridFS Stream', function () {
         var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
         db.collection('fs.files').insert({ length: 0 }, function (error, result) {
-          test.equal(error, null);
+          expect(error).to.not.exist;
           test.equal(Object.keys(result.insertedIds).length, 1);
           var id = result.insertedIds[0];
 
           var stream = bucket.openDownloadStream(id);
           stream.on('error', function (error) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
           });
 
           stream.on('data', function () {
@@ -976,7 +976,7 @@ describe('GridFS Stream', function () {
           stream.on('end', function () {
             // As per spec, make sure we didn't actually fire a query
             // because the document length is 0
-            test.equal(stream.s.cursor, null);
+            expect(stream.s.cursor).to.not.exist;
             client.close(done);
           });
         });
@@ -1000,7 +1000,7 @@ describe('GridFS Stream', function () {
 
         const uploadStream = bucket.openUploadStream('test');
         uploadStream.end(Buffer.alloc(40 * 1024 * 1024), err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
           const range = {
             start: 35191617,
             end: 35192831
@@ -1011,7 +1011,7 @@ describe('GridFS Stream', function () {
             expect(err).to.not.exist;
             client.close(() => {
               fs.stat('output', (err, stats) => {
-                expect(err).to.be.null;
+                expect(err).to.not.exist;
                 expect(range.end - range.start).to.equal(stats.size);
                 done();
               });
@@ -1034,7 +1034,7 @@ describe('GridFS Stream', function () {
           client.connect(function (err, client) {
             var db = client.db(configuration.db);
             db.dropDatabase(function (error) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
 
               var bucket = new GridFSBucket(db, { bucketName: 'expected' });
               var res = bucket.openUploadStream(
@@ -1044,7 +1044,7 @@ describe('GridFS Stream', function () {
               var buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
 
               res.on('error', function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
               });
 
               res.on('finish', function () {
@@ -1089,7 +1089,7 @@ describe('GridFS Stream', function () {
           client.connect(function (err, client) {
             var db = client.db(configuration.db);
             db.dropDatabase(function (err) {
-              test.equal(err, null);
+              expect(err).to.not.exist;
               var BUCKET_NAME = 'fs';
 
               var _runTest = function () {
@@ -1159,14 +1159,14 @@ describe('GridFS Stream', function () {
                 });
 
                 db.collection(BUCKET_NAME + '.' + collection).insertMany(data, function (error) {
-                  test.equal(error, null);
+                  expect(error).to.not.exist;
 
                   if (--numCollections === 0) {
                     if (testSpec.arrange) {
                       // only support 1 arrange op for now
                       test.equal(testSpec.arrange.data.length, 1);
                       applyArrange(db, deflateTestDoc(testSpec.arrange.data[0]), function (error) {
-                        test.equal(error, null);
+                        expect(error).to.not.exist;
                         _runTest();
                       });
                     } else {
@@ -1284,17 +1284,17 @@ describe('GridFS Stream', function () {
         var id = uploadStream.id;
         var query = { files_id: id };
         uploadStream.write('a', 'utf8', function (error) {
-          test.equal(undefined, error);
+          expect(error).to.not.exist;
 
           db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
             test.equal(c, 1);
 
             uploadStream.abort(function (error) {
-              test.equal(error, null);
+              expect(error).to.not.exist;
 
               db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                test.equal(error, null);
+                expect(error).to.not.exist;
                 test.equal(c, 0);
 
                 uploadStream.write('b', 'utf8', function (error) {
@@ -1355,7 +1355,7 @@ describe('GridFS Stream', function () {
             .end(6);
 
           downloadStream.on('error', function (error) {
-            test.equal(error, null);
+            expect(error).to.not.exist;
           });
 
           var gotData = 0;

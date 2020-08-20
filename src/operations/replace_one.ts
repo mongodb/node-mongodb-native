@@ -1,14 +1,40 @@
 import { defineAspects, Aspect } from './operation';
 import { updateDocuments } from './common_functions';
-import { hasAtomicOperators } from '../utils';
-import CommandOperation = require('./command');
+import { hasAtomicOperators, Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { UpdateResult } from './update';
 
-class ReplaceOneOperation extends CommandOperation {
-  collection: any;
-  filter: any;
-  replacement: any;
+/** @public */
+export interface ReplaceOptions extends CommandOperationOptions {
+  /** If true, allows the write to opt-out of document level validation */
+  bypassDocumentValidation?: boolean;
+  /** Specifies a collation */
+  collation?: CollationOptions;
+  /** Specify that the update query should only consider plans using the hinted index */
+  hint?: string | Document;
+  /** When true, creates a new document if no document matches the query */
+  upsert?: boolean;
 
-  constructor(collection: any, filter: any, replacement: any, options: any) {
+  // FIXME:
+  multi?: boolean;
+}
+
+/** @internal */
+export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
+  collection: Collection;
+  filter: Document;
+  replacement: Document;
+
+  constructor(
+    collection: Collection,
+    filter: Document,
+    replacement: Document,
+    options: ReplaceOptions
+  ) {
     super(collection, options);
 
     if (hasAtomicOperators(replacement)) {
@@ -20,7 +46,7 @@ class ReplaceOneOperation extends CommandOperation {
     this.replacement = replacement;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
@@ -30,34 +56,27 @@ class ReplaceOneOperation extends CommandOperation {
     options.multi = false;
 
     // Execute update
-    updateDocuments(server, coll, filter, replacement, options, (err: Error, r: any) =>
-      replaceCallback(err, r, replacement, callback)
-    );
+    updateDocuments(server, coll, filter, replacement, options, (err, r) => {
+      if (err || !r) return callback(err);
+
+      const result: UpdateResult = {
+        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        upsertedId:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
+            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+            : null,
+        upsertedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length
+            ? r.result.upserted.length
+            : 0,
+        matchedCount:
+          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
+        result: r.result
+      };
+
+      callback(undefined, result);
+    });
   }
 }
 
-function replaceCallback(err: any, r: any, doc: any, callback: Function) {
-  if (callback == null) return;
-  if (err && callback) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
-
-  r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
-  r.upsertedId =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-      ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
-      : null;
-  r.upsertedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length ? r.result.upserted.length : 0;
-  r.matchedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
-  r.ops = [doc]; // TODO: Should we still have this?
-  if (callback) callback(null, r);
-}
-
-defineAspects(ReplaceOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export = ReplaceOneOperation;
+defineAspects(ReplaceOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

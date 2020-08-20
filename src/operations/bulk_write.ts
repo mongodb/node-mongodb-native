@@ -1,30 +1,38 @@
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase } from './operation';
-class BulkWriteOperation extends OperationBase {
-  collection: any;
-  operations: any;
+import { OperationBase, OperationOptions } from './operation';
+import { WriteConcern } from '../write_concern';
+import type { Document } from '../bson';
+import type { Collection } from '../collection';
+import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
+import type { InsertOptions } from './insert';
+import type { Server } from '../sdam/server';
 
-  constructor(collection: any, operations: any, options: any) {
+/** @internal */
+export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
+  collection: Collection;
+  operations: Document[];
+
+  constructor(collection: Collection, operations: Document[], options: InsertOptions) {
     super(options);
 
     this.collection = collection;
     this.operations = operations;
   }
 
-  execute(callback: Function) {
+  execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
+    let options = this.options as InsertOptions;
 
-    // Add ignoreUndfined
+    // Add ignoreUndefined
     if (coll.s.options.ignoreUndefined) {
       options = Object.assign({}, options);
       options.ignoreUndefined = coll.s.options.ignoreUndefined;
     }
 
     // Create the bulk operation
-    const bulk =
+    const bulk: BulkOperationBase =
       options.ordered === true || options.ordered == null
         ? coll.initializeOrderedBulkOp(options)
         : coll.initializeUnorderedBulkOp(options);
@@ -46,7 +54,7 @@ class BulkWriteOperation extends OperationBase {
         bulk.raw(operations[i]);
       }
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
     // Final options for retryable writes and write concern
@@ -54,7 +62,7 @@ class BulkWriteOperation extends OperationBase {
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
     finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
-    const writeCon = finalOptions.writeConcern ? finalOptions.writeConcern : {};
+    const writeCon = WriteConcern.fromOptions(finalOptions);
     const capabilities = coll.s.topology.capabilities();
 
     // Did the user pass in a collation, check if our write server supports it
@@ -63,41 +71,14 @@ class BulkWriteOperation extends OperationBase {
     }
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err?: any, r?: any) => {
+    bulk.execute(writeCon, finalOptions, (err, r) => {
       // We have connection level error
       if (!r && err) {
-        return callback(err, null);
-      }
-
-      r.insertedCount = r.nInserted;
-      r.matchedCount = r.nMatched;
-      r.modifiedCount = r.nModified || 0;
-      r.deletedCount = r.nRemoved;
-      r.upsertedCount = r.getUpsertedIds().length;
-      r.upsertedIds = {};
-      r.insertedIds = {};
-
-      // Update the n
-      r.n = r.insertedCount;
-
-      // Inserted documents
-      const inserted = r.getInsertedIds();
-      // Map inserted ids
-      for (let i = 0; i < inserted.length; i++) {
-        r.insertedIds[inserted[i].index] = inserted[i]._id;
-      }
-
-      // Upserted documents
-      const upserted = r.getUpsertedIds();
-      // Map upserted ids
-      for (let i = 0; i < upserted.length; i++) {
-        r.upsertedIds[upserted[i].index] = upserted[i]._id;
+        return callback(err);
       }
 
       // Return the results
-      callback(null, r);
+      callback(undefined, r);
     });
   }
 }
-
-export = BulkWriteOperation;

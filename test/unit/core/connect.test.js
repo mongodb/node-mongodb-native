@@ -21,7 +21,7 @@ describe('Connect Tests', function () {
           username: 'testUser',
           password: 'pencil',
           source: 'admin',
-          mechanism: 'plain'
+          mechanism: 'PLAIN'
         })
       };
     });

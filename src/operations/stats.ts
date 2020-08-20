@@ -1,29 +1,33 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
-/**
- * Get all the collection statistics.
- *
- * @class
- * @property {Collection} collection Collection instance.
- * @property {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
- */
-class CollStatsOperation extends CommandOperation {
+/** @public */
+export interface CollStatsOptions extends CommandOperationOptions {
+  /** Divide the returned sizes by scale value. */
+  scale?: number;
+}
+
+/** @internal Get all the collection statistics. */
+export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 
   /**
    * Construct a Stats operation.
    *
-   * @param {Collection} collection Collection instance
-   * @param {object} [options] Optional settings. See Collection.prototype.stats for a list of options.
+   * @param collection - Collection instance
+   * @param options - Optional settings. See Collection.prototype.stats for a list of options.
    */
-  constructor(collection: any, options?: object) {
+  constructor(collection: Collection, options?: CollStatsOptions) {
     super(collection, options);
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: any, callback: Function) {
-    const command: any = { collStats: this.collectionName };
+  execute(server: Server, callback: Callback<Document>): void {
+    const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
@@ -32,9 +36,16 @@ class CollStatsOperation extends CommandOperation {
   }
 }
 
-class DbStatsOperation extends CommandOperation {
-  execute(server: any, callback: Function) {
-    const command: any = { dbStats: true };
+/** @public */
+export interface DbStatsOptions extends CommandOperationOptions {
+  /** Divide the returned sizes by scale value. */
+  scale?: number;
+}
+
+/** @internal */
+export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
+  execute(server: Server, callback: Callback<Document>): void {
+    const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
@@ -43,6 +54,5 @@ class DbStatsOperation extends CommandOperation {
   }
 }
 
-defineAspects(CollStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DbStatsOperation, [Aspect.READ_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DbStatsOperation, CollStatsOperation };
+defineAspects(CollStatsOperation, [Aspect.READ_OPERATION]);
+defineAspects(DbStatsOperation, [Aspect.READ_OPERATION]);

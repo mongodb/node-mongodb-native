@@ -1,7 +1,7 @@
 import { Binary } from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback } from '../../types';
 import { MongoError } from '../../error';
+import type { Callback } from '../../utils';
 
 export class Plain extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {

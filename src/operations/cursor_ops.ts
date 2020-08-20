@@ -1,24 +1,26 @@
-import { handleCallback } from '../utils';
-import { MongoError } from '../error';
+import { MongoError, AnyError } from '../error';
 import { CursorState } from '../cursor/core_cursor';
-const push = Array.prototype.push;
+import type { Cursor } from '../cursor';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+
+/** @public */
+export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
 
 /**
  * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
+ * @internal
  *
- * @function
- * @deprecated
- * @param {Cursor} cursor The Cursor instance on which to run.
- * @param {Cursor~resultCallback} callback The result callback.
+ * @deprecated Please use forEach instead
+ * @param cursor - The Cursor instance on which to run.
+ * @param callback - The result callback.
  */
-function each(cursor: any, callback: Function) {
-  if (!callback) throw MongoError.create({ message: 'callback is mandatory', driver: true });
+export function each(cursor: Cursor, callback: EachCallback): void {
+  if (!callback) throw new MongoError('callback is mandatory');
   if (cursor.isNotified()) return;
   if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
-    return handleCallback(
-      callback,
-      MongoError.create({ message: 'Cursor is closed', driver: true })
-    );
+    callback(new MongoError('Cursor is closed'));
+    return;
   }
 
   if (cursor.s.state === CursorState.INIT) {
@@ -32,21 +34,20 @@ function each(cursor: any, callback: Function) {
     while ((fn = loop(cursor, callback))) fn(cursor, callback);
     each(cursor, callback);
   } else {
-    cursor.next((err?: any, item?: any) => {
-      if (err) return handleCallback(callback, err);
+    cursor.next((err, item) => {
+      if (err) return callback(err);
       if (item == null) {
-        return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, null));
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, null));
       }
 
-      if (handleCallback(callback, null, item) === false) return;
+      if (callback(undefined, item) === false) return;
       each(cursor, callback);
     });
   }
 }
 
-// Trampoline emptying the number of retrieved items
-// without incurring a nextTick operation
-function loop(cursor: any, callback: Function) {
+/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+function loop(cursor: Cursor, callback: Callback) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;
   // Get the next document
@@ -57,13 +58,12 @@ function loop(cursor: any, callback: Function) {
 
 /**
  * Returns an array of documents. See Cursor.prototype.toArray for more information.
+ * @internal
  *
- * @function
- * @param {Cursor} cursor The Cursor instance from which to get the next document.
- * @param {Cursor~toArrayResultCallback} [callback] The result callback.
+ * @param cursor - The Cursor instance from which to get the next document.
  */
-function toArray(cursor: any, callback: Function) {
-  const items: any = [];
+export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
+  const items: Document[] = [];
 
   // Reset cursor
   cursor.rewind();
@@ -71,13 +71,13 @@ function toArray(cursor: any, callback: Function) {
 
   // Fetch all the documents
   const fetchDocs = () => {
-    cursor._next((err?: any, doc?: any) => {
+    cursor._next((err, doc) => {
       if (err) {
-        return handleCallback(callback, err);
+        return callback(err);
       }
 
       if (doc == null) {
-        return cursor.close({ skipKillCursors: true }, () => handleCallback(callback, null, items));
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, items));
       }
 
       // Add doc to items
@@ -92,7 +92,7 @@ function toArray(cursor: any, callback: Function) {
           docs = docs.map(cursor.s.transforms.doc);
         }
 
-        push.apply(items, docs);
+        items.push(...docs);
       }
 
       // Attempt a fetch
@@ -102,5 +102,3 @@ function toArray(cursor: any, callback: Function) {
 
   fetchDocs();
 }
-
-export { each, toArray };

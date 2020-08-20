@@ -1,14 +1,15 @@
-import http = require('http');
-import crypto = require('crypto');
-import url = require('url');
+import * as http from 'http';
+import * as crypto from 'crypto';
+import * as url from 'url';
 import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
-import { maxWireVersion } from '../../utils';
-import type { Callback, BSONSerializeOptions } from '../../types';
+import { maxWireVersion, Callback } from '../../utils';
+import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
+import { AuthMechanism } from './defaultAuthProviders';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
@@ -155,7 +156,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
         username: creds.AccessKeyId,
         password: creds.SecretAccessKey,
         source: credentials.source,
-        mechanism: 'MONGODB-AWS',
+        mechanism: AuthMechanism.MONGODB_AWS,
         mechanismProperties: {
           AWS_SESSION_TOKEN: creds.Token
         }
@@ -221,11 +222,7 @@ interface RequestOptions {
   json?: boolean;
   method?: string;
   timeout?: number;
-  headers?: {
-    'X-aws-ec2-metadata-token-ttl-seconds'?: number;
-    'X-aws-ec2-metadata-token'?: string;
-    [key: string]: any;
-  };
+  headers?: http.OutgoingHttpHeaders;
 }
 
 function request(uri: string, callback: Callback): void;

@@ -1,5 +1,5 @@
 import { parseServerType } from '../sdam/server_description';
-import type { Document } from '../types';
+import type { Document } from '../bson';
 import type { CompressorName } from './wire_protocol/compression';
 import { ServerType } from '../sdam/common';
 
@@ -12,12 +12,14 @@ const RESPONSE_FIELDS = [
   'logicalSessionTimeoutMinutes'
 ] as const;
 
+/** @public */
 export interface StreamDescriptionOptions {
   compression: {
     compressors: CompressorName[];
   };
 }
 
+/** @public */
 export class StreamDescription {
   address: string;
   type: string;

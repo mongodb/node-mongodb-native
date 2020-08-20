@@ -10,7 +10,7 @@ describe('Client Side Encryption', function () {
   const skipTests =
     process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
   if (skipTests) {
-    console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
+    // console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
     return;
   }
 

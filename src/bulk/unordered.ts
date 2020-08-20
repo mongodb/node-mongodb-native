@@ -1,13 +1,13 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT, UPDATE, REMOVE } from './common';
-import { toError } from '../utils';
+import type { Callback } from '../utils';
 
 /**
  * Add to internal list of Operations
  *
- * @param {UnorderedBulkOperation} bulkOperation
- * @param {number} docType number indicating the document type
- * @param {any} document
+ * @param bulkOperation
+ * @param docType number indicating the document type
+ * @param document
  * @returns {UnorderedBulkOperation}
  */
 function addToOperationsList(
@@ -24,8 +24,12 @@ function addToOperationsList(
     ignoreUndefined: false
   } as any);
   // Throw error if the doc is bigger than the max BSON size
-  if (bsonSize >= bulkOperation.s.maxBsonObjectSize)
-    throw toError('document is larger than the maximum size ' + bulkOperation.s.maxBsonObjectSize);
+  if (bsonSize >= bulkOperation.s.maxBsonObjectSize) {
+    throw new TypeError(
+      `Document is larger than the maximum size ${bulkOperation.s.maxBsonObjectSize}`
+    );
+  }
+
   // Holds the current batch
   bulkOperation.s.currentBatch = null;
   // Get the right type of batch
@@ -64,7 +68,7 @@ function addToOperationsList(
 
   // We have an array of documents
   if (Array.isArray(document)) {
-    throw toError('operation passed in cannot be an Array');
+    throw new TypeError('Operation passed in cannot be an Array');
   }
 
   bulkOperation.s.currentBatch.operations.push(document);
@@ -100,7 +104,7 @@ function addToOperationsList(
  * @property {number} length Get the number of operations in the bulk.
  * @returns {UnorderedBulkOperation} a UnorderedBulkOperation instance.
  */
-class UnorderedBulkOperation extends BulkOperationBase {
+export class UnorderedBulkOperation extends BulkOperationBase {
   s: any;
 
   constructor(topology: any, collection: any, options: any) {
@@ -111,11 +115,11 @@ class UnorderedBulkOperation extends BulkOperationBase {
   }
 
   /**
-   * @param {Function} callback
-   * @param {any} writeResult
+   * @param callback
+   * @param writeResult
    * @returns {boolean|undefined}
    */
-  handleWriteError(callback: Function, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
     if (this.s.batches.length) {
       return false;
     }
@@ -127,12 +131,10 @@ class UnorderedBulkOperation extends BulkOperationBase {
 /**
  * Returns an unordered batch object
  *
- * @param {any} topology
- * @param {any} collection
- * @param {any} options
+ * @param topology
+ * @param collection
+ * @param options
  */
-function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
+export function initializeUnorderedBulkOp(topology: any, collection: any, options: any) {
   return new UnorderedBulkOperation(topology, collection, options);
 }
-
-export = initializeUnorderedBulkOp;

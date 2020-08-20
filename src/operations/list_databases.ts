@@ -1,15 +1,35 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
-class ListDatabasesOperation extends CommandOperation {
-  constructor(db: any, options: any) {
+/** @public */
+export type ListDatabasesResult = string[] | Document[];
+
+/** @public */
+export interface ListDatabasesOptions extends CommandOperationOptions {
+  /** A query predicate that determines which databases are listed */
+  filter?: Document;
+  /** A flag to indicate whether the command should return just the database names, or return both database names and size information */
+  nameOnly?: boolean;
+  /** A flag that determines which databases are returned based on the user privileges when access control is enabled */
+  authorizedDatabases?: boolean;
+}
+
+/** @internal */
+export class ListDatabasesOperation extends CommandOperation<
+  ListDatabasesOptions,
+  ListDatabasesResult
+> {
+  constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server: any, callback: Function) {
-    const cmd = { listDatabases: 1 } as any;
+  execute(server: Server, callback: Callback<ListDatabasesResult>): void {
+    const cmd: Document = { listDatabases: 1 };
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);
     }
@@ -26,10 +46,4 @@ class ListDatabasesOperation extends CommandOperation {
   }
 }
 
-defineAspects(ListDatabasesOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export = ListDatabasesOperation;
+defineAspects(ListDatabasesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

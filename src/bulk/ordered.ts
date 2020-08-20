@@ -1,13 +1,12 @@
 import * as BSON from '../bson';
 import { BulkOperationBase, Batch, INSERT } from './common';
-import { toError } from '../utils';
 
 /**
  * Add to internal list of Operations
  *
- * @param {OrderedBulkOperation} bulkOperation
- * @param {number} docType number indicating the document type
- * @param {any} document
+ * @param bulkOperation
+ * @param docType number indicating the document type
+ * @param document
  * @returns {OrderedBulkOperation}
  */
 function addToOperationsList(
@@ -25,7 +24,9 @@ function addToOperationsList(
 
   // Throw error if the doc is bigger than the max BSON size
   if (bsonSize >= bulkOperation.s.maxBsonObjectSize)
-    throw toError('document is larger than the maximum size ' + bulkOperation.s.maxBsonObjectSize);
+    throw new TypeError(
+      `Document is larger than the maximum size ${bulkOperation.s.maxBsonObjectSize}`
+    );
 
   // Create a new batch object if we don't have a current one
   if (bulkOperation.s.currentBatch == null)
@@ -65,7 +66,7 @@ function addToOperationsList(
 
   // We have an array of documents
   if (Array.isArray(document)) {
-    throw toError('operation passed in cannot be an Array');
+    throw new TypeError('Operation passed in cannot be an Array');
   }
 
   bulkOperation.s.currentBatch.originalIndexes.push(bulkOperation.s.currentIndex);
@@ -86,7 +87,7 @@ function addToOperationsList(
  * @property {number} length Get the number of operations in the bulk.
  * @returns {OrderedBulkOperation} a OrderedBulkOperation instance.
  */
-class OrderedBulkOperation extends BulkOperationBase {
+export class OrderedBulkOperation extends BulkOperationBase {
   constructor(topology: any, collection: any, options: any) {
     options = options || {};
     options = Object.assign(options, { addToOperationsList });
@@ -98,12 +99,10 @@ class OrderedBulkOperation extends BulkOperationBase {
 /**
  * Returns an unordered batch object
  *
- * @param {any} topology
- * @param {any} collection
- * @param {any} options
+ * @param topology
+ * @param collection
+ * @param options
  */
-function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
+export function initializeOrderedBulkOp(topology: any, collection: any, options: any) {
   return new OrderedBulkOperation(topology, collection, options);
 }
-
-export = initializeOrderedBulkOp;

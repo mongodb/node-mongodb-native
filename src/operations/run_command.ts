@@ -1,36 +1,39 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { defineAspects, Aspect } from './operation';
-import Db = require('../db');
-import Collection = require('../collection');
-import MongoClient = require('../mongo_client');
-import { MongoDBNamespace } from '../utils';
+import { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
+import type { Document } from '../bson';
 
-class RunCommandOperation extends CommandOperation {
-  command: any;
+/** @public */
+export type RunCommandOptions = CommandOperationOptions;
 
-  constructor(
-    parent: MongoClient | Db | Collection | { s: { namespace: MongoDBNamespace } },
-    command: any,
-    options: any
-  ) {
+/** @internal */
+export class RunCommandOperation<
+  T extends RunCommandOptions = RunCommandOptions,
+  TResult = Document
+> extends CommandOperation<T, TResult> {
+  command: Document;
+
+  constructor(parent: OperationParent, command: Document, options?: T) {
     super(parent, options);
     this.command = command;
   }
 
-  execute(server: Server, callback: any) {
+  execute(server: Server, callback: Callback): void {
     const command = this.command;
     this.executeCommand(server, command, callback);
   }
 }
 
-class RunAdminCommandOperation extends RunCommandOperation {
-  constructor(parent: MongoClient | Db | Collection, command: any, options: any) {
+export class RunAdminCommandOperation<
+  T extends RunCommandOptions = RunCommandOptions,
+  TResult = Document
+> extends RunCommandOperation<T, TResult> {
+  constructor(parent: OperationParent, command: Document, options?: T) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }
 }
 
-defineAspects(RunCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
-defineAspects(RunAdminCommandOperation, [Aspect.EXECUTE_WITH_SELECTION, Aspect.NO_INHERIT_OPTIONS]);
-export { RunCommandOperation, RunAdminCommandOperation };
+defineAspects(RunCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);
+defineAspects(RunAdminCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);

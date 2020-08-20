@@ -1,37 +1,73 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
-import CommandOperation = require('./command');
-import { applyRetryableWrites, applyWriteConcern, handleCallback, toError } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { prepareDocs } from './common_functions';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { ObjectId, Document } from '../bson';
+import type { Connection } from '../cmap/connection';
 
-class InsertOperation extends OperationBase {
-  namespace: any;
-  operations: any;
-  options: any;
+/** @public */
+export interface InsertOptions extends CommandOperationOptions {
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
+  ordered?: boolean;
+  /** @deprecated use `ordered` instead */
+  keepGoing?: boolean;
+  /** Force server to assign _id values instead of driver. */
+  forceServerObjectId?: boolean;
+}
 
-  constructor(ns: any, ops: any, options: any) {
+/** @internal */
+export class InsertOperation extends OperationBase<InsertOptions, Document> {
+  namespace: string;
+  operations: Document[];
+
+  constructor(ns: string, ops: Document[], options: InsertOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
   }
 
-  execute(server: any, callback: Function) {
-    server.insert(this.namespace.toString(), this.operations, this.options, callback);
+  execute(server: Server, callback: Callback<Document>): void {
+    server.insert(
+      this.namespace.toString(),
+      this.operations,
+      this.options as WriteCommandOptions,
+      callback
+    );
   }
 }
 
-class InsertOneOperation extends CommandOperation {
-  collection: any;
-  doc: any;
+/** @public */
+export interface InsertOneResult {
+  /** The total amount of documents inserted */
+  insertedCount: number;
+  /** The driver generated ObjectId for the insert operation */
+  insertedId?: ObjectId;
+  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
+  ops?: Document[];
+  /** The connection object used for the operation */
+  connection?: Connection;
+  /** The raw command result object returned from MongoDB (content might vary by server version) */
+  result: Document;
+}
 
-  constructor(collection: any, doc: any, options: any) {
+export class InsertOneOperation extends CommandOperation<InsertOptions, InsertOneResult> {
+  collection: Collection;
+  doc: Document;
+
+  constructor(collection: Collection, doc: Document, options: InsertOptions) {
     super(collection, options);
 
     this.collection = collection;
     this.doc = doc;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
     const options = this.options;
@@ -42,20 +78,26 @@ class InsertOneOperation extends CommandOperation {
       );
     }
 
-    insertDocuments(server, coll, [doc], options, (err?: any, r?: any) => {
+    insertDocuments(server, coll, [doc], options, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers
-      if (r == null) return callback(null, { result: { ok: 1 } });
+      if (r == null) return callback(undefined, { insertedCount: 0, result: { ok: 1 } });
       // Add values to top level to ensure crud spec compatibility
       r.insertedCount = r.result.n;
       r.insertedId = doc._id;
-      if (callback) callback(null, r);
+      if (callback) callback(undefined, r as InsertOneResult);
     });
   }
 }
 
-function insertDocuments(server: any, coll: any, docs: any, options: any, callback: Function) {
+function insertDocuments(
+  server: Server,
+  coll: Collection,
+  docs: Document[],
+  options: InsertOptions,
+  callback: Callback<Document>
+) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
   // Ensure we are operating on an array op docs
@@ -73,30 +115,23 @@ function insertDocuments(server: any, coll: any, docs: any, options: any, callba
   docs = prepareDocs(coll, docs, options);
 
   // File inserts
-  server.insert(coll.s.namespace.toString(), docs, finalOptions, (err?: any, result?: any) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors)
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Add docs to the list
-    result.ops = docs;
-    // Return the results
-    handleCallback(callback, null, result);
-  });
+  server.insert(
+    coll.s.namespace.toString(),
+    docs,
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return callback(err);
+      if (result == null) return callback();
+      if (result.result.code) return callback(new MongoError(result.result));
+      if (result.result.writeErrors) return callback(new MongoError(result.result.writeErrors[0]));
+      // Add docs to the list
+      result.ops = docs;
+      // Return the results
+      callback(undefined, result);
+    }
+  );
 }
 
-defineAspects(InsertOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(InsertOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export { InsertOperation, InsertOneOperation };
+defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(InsertOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

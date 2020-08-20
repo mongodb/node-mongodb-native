@@ -1,54 +1,61 @@
+import { MongoError } from '../error';
 import { EventEmitter } from 'events';
-import GridFSBucketReadStream = require('./download');
-import GridFSBucketWriteStream = require('./upload');
-import { toError, executeLegacyOperation } from '../utils';
-const DEFAULT_GRIDFS_BUCKET_OPTIONS: any = {
+import {
+  GridFSBucketReadStream,
+  GridFSBucketReadStreamOptions,
+  GridFSBucketReadStreamOptionsWithRevision
+} from './download';
+import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
+import { executeLegacyOperation, Callback } from '../utils';
+import { WriteConcernOptions, WriteConcern } from '../write_concern';
+import type { Document } from '../bson';
+import type { Db } from '../db';
+import type { ReadPreference } from '../read_preference';
+import type { Collection } from '../collection';
+import type { Cursor } from './../cursor/cursor';
+import type { FindOptions, Sort } from './../operations/find';
+import type { Logger } from '../logger';
+
+const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
+  bucketName: string;
+  chunkSizeBytes: number;
+} = {
   bucketName: 'fs',
   chunkSizeBytes: 255 * 1024
 };
 
+/** @public */
+export interface GridFSBucketOptions extends WriteConcernOptions {
+  /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
+  bucketName?: string;
+  /** Number of bytes stored in each chunk. Defaults to 255KB */
+  chunkSizeBytes?: number;
+  /** Read preference to be passed to read operations */
+  readPreference?: ReadPreference;
+}
+
+/** @internal */
+export interface GridFSBucketPrivate {
+  db: Db;
+  options: {
+    bucketName: string;
+    chunkSizeBytes: number;
+    readPreference?: ReadPreference;
+    writeConcern: WriteConcern | undefined;
+  };
+  _chunksCollection: Collection;
+  _filesCollection: Collection;
+  checkedIndexes: boolean;
+  calledOpenUploadStream: boolean;
+}
+
 /**
  * Constructor for a streaming GridFS interface
- *
- * @class
- * @extends external:EventEmitter
- * @param {Db} db A db handle
- * @param {object} [options] Optional settings.
- * @param {string} [options.bucketName="fs"] The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot.
- * @param {number} [options.chunkSizeBytes=255 * 1024] Number of bytes stored in each chunk. Defaults to 255KB
- * @param {object} [options.writeConcern] Optional write concern to be passed to write operations, for instance `{ w: 1 }`
- * @param {object} [options.readPreference] Optional read preference to be passed to read operations
- * @fires GridFSBucketWriteStream#index
+ * @public
  */
-
-class GridFSBucket extends EventEmitter {
-  s: any;
-
-  constructor(db: any, options: any) {
-    super();
-    this.setMaxListeners(0);
-
-    if (options && typeof options === 'object') {
-      options = Object.assign({}, options);
-      var keys = Object.keys(DEFAULT_GRIDFS_BUCKET_OPTIONS);
-      for (var i = 0; i < keys.length; ++i) {
-        if (!options[keys[i]]) {
-          options[keys[i]] = DEFAULT_GRIDFS_BUCKET_OPTIONS[keys[i]];
-        }
-      }
-    } else {
-      options = DEFAULT_GRIDFS_BUCKET_OPTIONS;
-    }
-
-    this.s = {
-      db,
-      options,
-      _chunksCollection: db.collection(options.bucketName + '.chunks'),
-      _filesCollection: db.collection(options.bucketName + '.files'),
-      checkedIndexes: false,
-      calledOpenUploadStream: false
-    };
-  }
+export class GridFSBucket extends EventEmitter {
+  /** @internal */
+  s: GridFSBucketPrivate;
 
   /**
    * When the first call to openUploadStream is made, the upload stream will
@@ -56,36 +63,41 @@ class GridFSBucket extends EventEmitter {
    * files collections. This event is fired either when 1) it determines that
    * no index creation is necessary, 2) when it successfully creates the
    * necessary indexes.
-   *
-   * @event GridFSBucket#index
-   * @type {Error}
+   * @event
    */
+  static readonly INDEX = 'index' as const;
+
+  constructor(db: Db, options?: GridFSBucketOptions) {
+    super();
+    this.setMaxListeners(0);
+    const privateOptions = {
+      ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
+      ...options,
+      writeConcern: WriteConcern.fromOptions(options)
+    };
+    this.s = {
+      db,
+      options: privateOptions,
+      _chunksCollection: db.collection(privateOptions.bucketName + '.chunks'),
+      _filesCollection: db.collection(privateOptions.bucketName + '.files'),
+      checkedIndexes: false,
+      calledOpenUploadStream: false
+    };
+  }
 
   /**
    * Returns a writable stream (GridFSBucketWriteStream) for writing
    * buffers to GridFS. The stream's 'id' property contains the resulting
    * file's id.
    *
-   * @function
-   * @param {string} filename The value of the 'filename' key in the files doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.chunkSizeBytes] Optional overwrite this bucket's chunkSizeBytes for this file
-   * @param {object} [options.metadata] Optional object to store in the file document's `metadata` field
-   * @param {string} [options.contentType] Optional string to store in the file document's `contentType` field
-   * @param {Array} [options.aliases] Optional array of strings to store in the file document's `aliases` field
-   * @param {boolean} [options.disableMD5=false] If true, disables adding an md5 field to file data
-   * @returns {GridFSBucketWriteStream}
+   * @param filename - The value of the 'filename' key in the files doc
+   * @param options - Optional settings.
    */
 
-  openUploadStream(filename: any, options: any) {
-    if (options) {
-      options = Object.assign({}, options);
-    } else {
-      options = {};
-    }
-    if (!options.chunkSizeBytes) {
-      options.chunkSizeBytes = this.s.options.chunkSizeBytes;
-    }
+  openUploadStream(
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream {
     return new GridFSBucketWriteStream(this, filename, options);
   }
 
@@ -93,59 +105,22 @@ class GridFSBucket extends EventEmitter {
    * Returns a writable stream (GridFSBucketWriteStream) for writing
    * buffers to GridFS for a custom file id. The stream's 'id' property contains the resulting
    * file's id.
-   *
-   * @function
-   * @param {string|number|object} id A custom id used to identify the file
-   * @param {string} filename The value of the 'filename' key in the files doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.chunkSizeBytes] Optional overwrite this bucket's chunkSizeBytes for this file
-   * @param {object} [options.metadata] Optional object to store in the file document's `metadata` field
-   * @param {string} [options.contentType] Optional string to store in the file document's `contentType` field
-   * @param {Array} [options.aliases] Optional array of strings to store in the file document's `aliases` field
-   * @param {boolean} [options.disableMD5=false] If true, disables adding an md5 field to file data
-   * @returns {GridFSBucketWriteStream}
    */
-
-  openUploadStreamWithId(id: any, filename: any, options: any) {
-    if (options) {
-      options = Object.assign({}, options);
-    } else {
-      options = {};
-    }
-
-    if (!options.chunkSizeBytes) {
-      options.chunkSizeBytes = this.s.options.chunkSizeBytes;
-    }
-
-    options.id = id;
-
-    return new GridFSBucketWriteStream(this, filename, options);
+  openUploadStreamWithId(
+    id: TFileId,
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream {
+    return new GridFSBucketWriteStream(this, filename, { ...options, id });
   }
 
-  /**
-   * Returns a readable stream (GridFSBucketReadStream) for streaming file
-   * data from GridFS.
-   *
-   * @function
-   * @param {ObjectId} id The id of the file doc
-   * @param {object} [options] Optional settings.
-   * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
-   * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
-   * @returns {GridFSBucketReadStream}
-   */
-
-  openDownloadStream(id: any, options: any) {
-    var filter = { _id: id };
-    options = {
-      start: options && options.start,
-      end: options && options.end
-    };
-
+  /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
+  openDownloadStream(id: TFileId, options?: GridFSBucketReadStreamOptions): GridFSBucketReadStream {
     return new GridFSBucketReadStream(
       this.s._chunksCollection,
       this.s._filesCollection,
       this.s.options.readPreference,
-      filter,
+      { _id: id },
       options
     );
   }
@@ -153,58 +128,21 @@ class GridFSBucket extends EventEmitter {
   /**
    * Deletes a file with the given id
    *
-   * @function
-   * @param {ObjectId} id The id of the file doc
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - The id of the file doc
    */
-
-  delete(id: any, callback: Function) {
+  delete(id: TFileId): Promise<undefined>;
+  delete(id: TFileId, callback: Callback<void>): void;
+  delete(id: TFileId, callback?: Callback<void>): Promise<undefined> | void {
     return executeLegacyOperation(this.s.db.s.topology, _delete, [this, id, callback], {
       skipSessions: true
     });
   }
 
-  /**
-   * Convenience wrapper around find on the files collection
-   *
-   * @function
-   * @param {object} filter
-   * @param {object} [options] Optional settings for cursor
-   * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find|find command documentation}.
-   * @param {number} [options.limit] Optional limit for cursor
-   * @param {number} [options.maxTimeMS] Optional maxTimeMS for cursor
-   * @param {boolean} [options.noCursorTimeout] Optionally set cursor's `noCursorTimeout` flag
-   * @param {number} [options.skip] Optional skip for cursor
-   * @param {object} [options.sort] Optional sort for cursor
-   * @returns {Cursor}
-   */
-
-  find(filter: any, options: any) {
+  /** Convenience wrapper around find on the files collection */
+  find(filter: Document, options?: FindOptions): Cursor {
     filter = filter || {};
     options = options || {};
-
-    var cursor = this.s._filesCollection.find(filter);
-
-    if (options.batchSize != null) {
-      cursor.batchSize(options.batchSize);
-    }
-    if (options.limit != null) {
-      cursor.limit(options.limit);
-    }
-    if (options.maxTimeMS != null) {
-      cursor.maxTimeMS(options.maxTimeMS);
-    }
-    if (options.noCursorTimeout != null) {
-      cursor.addCursorFlag('noCursorTimeout', options.noCursorTimeout);
-    }
-    if (options.skip != null) {
-      cursor.skip(options.skip);
-    }
-    if (options.sort != null) {
-      cursor.sort(options.sort);
-    }
-
-    return cursor;
+    return this.s._filesCollection.find(filter, options);
   }
 
   /**
@@ -213,19 +151,13 @@ class GridFSBucket extends EventEmitter {
    * the same name, this will stream the most recent file with the given name
    * (as determined by the `uploadDate` field). You can set the `revision`
    * option to change this behavior.
-   *
-   * @function
-   * @param {string} filename The name of the file to stream
-   * @param {object} [options] Optional settings
-   * @param {number} [options.revision=-1] The revision number relative to the oldest file with the given filename. 0 gets you the oldest file, 1 gets you the 2nd oldest, -1 gets you the newest.
-   * @param {number} [options.start] Optional 0-based offset in bytes to start streaming from
-   * @param {number} [options.end] Optional 0-based offset in bytes to stop streaming before
-   * @returns {GridFSBucketReadStream}
    */
-
-  openDownloadStreamByName(filename: any, options: any) {
-    var sort = { uploadDate: -1 };
-    var skip = null;
+  openDownloadStreamByName(
+    filename: string,
+    options?: GridFSBucketReadStreamOptionsWithRevision
+  ): GridFSBucketReadStream {
+    var sort: Sort = { uploadDate: -1 };
+    var skip = undefined;
     if (options && options.revision != null) {
       if (options.revision >= 0) {
         sort = { uploadDate: 1 };
@@ -234,104 +166,91 @@ class GridFSBucket extends EventEmitter {
         skip = -options.revision - 1;
       }
     }
-
-    var filter = { filename };
-    options = {
-      sort,
-      skip,
-      start: options && options.start,
-      end: options && options.end
-    };
     return new GridFSBucketReadStream(
       this.s._chunksCollection,
       this.s._filesCollection,
       this.s.options.readPreference,
-      filter,
-      options
+      { filename },
+      { ...options, sort, skip }
     );
   }
 
   /**
    * Renames the file with the given _id to the given string
    *
-   * @function
-   * @param {ObjectId} id the id of the file to rename
-   * @param {string} filename new name for the file
-   * @param {GridFSBucket~errorCallback} [callback]
+   * @param id - the id of the file to rename
+   * @param filename - new name for the file
    */
-
-  rename(id: any, filename: any, callback: Function) {
+  rename(id: TFileId, filename: string): Promise<void>;
+  rename(id: TFileId, filename: string, callback: Callback<void>): void;
+  rename(id: TFileId, filename: string, callback?: Callback<void>): Promise<void> | void {
     return executeLegacyOperation(this.s.db.s.topology, _rename, [this, id, filename, callback], {
       skipSessions: true
     });
   }
 
-  /**
-   * Removes this bucket's files collection, followed by its chunks collection.
-   *
-   * @function
-   * @param {GridFSBucket~errorCallback} [callback]
-   */
-
-  drop(callback: Function) {
+  /** Removes this bucket's files collection, followed by its chunks collection. */
+  drop(): Promise<void>;
+  drop(callback: Callback<void>): void;
+  drop(callback?: Callback<void>): Promise<void> | void {
     return executeLegacyOperation(this.s.db.s.topology, _drop, [this, callback], {
       skipSessions: true
     });
   }
 
-  /**
-   * Return the db logger
-   *
-   * @function
-   * @returns {Logger} return the db logger
-   */
-  getLogger(): any {
+  /** Get the Db scoped logger. */
+  getLogger(): Logger {
     return this.s.db.s.logger;
   }
 }
 
-function _delete(_this: any, id: any, callback: Function) {
-  _this.s._filesCollection.deleteOne({ _id: id }, (error?: any, res?: any) => {
+function _delete(bucket: GridFSBucket, id: TFileId, callback: Callback<void>): void {
+  return bucket.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
     if (error) {
       return callback(error);
     }
 
-    _this.s._chunksCollection.deleteMany({ files_id: id }, (error: any) => {
+    return bucket.s._chunksCollection.deleteMany({ files_id: id }, error => {
       if (error) {
         return callback(error);
       }
 
       // Delete orphaned chunks before returning FileNotFound
-      if (!res.result.n) {
+      if (!res?.result.n) {
         var errmsg = 'FileNotFound: no file with id ' + id + ' found';
         return callback(new Error(errmsg));
       }
 
-      callback();
+      return callback();
     });
   });
 }
 
-function _rename(_this: any, id: any, filename: any, callback: Function) {
-  var filter = { _id: id };
-  var update = { $set: { filename } };
-  _this.s._filesCollection.updateOne(filter, update, (error?: any, res?: any) => {
+function _rename(
+  bucket: GridFSBucket,
+  id: TFileId,
+  filename: string,
+  callback: Callback<void>
+): void {
+  const filter = { _id: id };
+  const update = { $set: { filename } };
+  return bucket.s._filesCollection.updateOne(filter, update, (error?, res?) => {
     if (error) {
       return callback(error);
     }
-    if (!res.result.n) {
-      return callback(toError('File with id ' + id + ' not found'));
+    if (!res?.result.n) {
+      return callback(new MongoError(`File with id ${id} not found`));
     }
-    callback();
+    return callback();
   });
 }
 
-function _drop(_this: any, callback: Function) {
-  _this.s._filesCollection.drop((error: any) => {
+function _drop(bucket: GridFSBucket, callback: Callback<void>): void {
+  return bucket.s._filesCollection.drop((error?: Error) => {
     if (error) {
       return callback(error);
     }
-    _this.s._chunksCollection.drop((error: any) => {
+    return bucket.s._chunksCollection.drop((error?: Error) => {
       if (error) {
         return callback(error);
       }
@@ -340,5 +259,3 @@ function _drop(_this: any, callback: Function) {
     });
   });
 }
-
-export = GridFSBucket;

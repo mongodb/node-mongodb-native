@@ -1,10 +1,14 @@
-import CommandOperation = require('./command');
-import EvalOperation = require('./eval');
-import { Code } from '../bson';
-import { handleCallback } from '../utils';
-import { defineAspects, Aspect } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { EvalOperation } from './eval';
+import { Code, Document } from '../bson';
+import type { Callback } from '../utils';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
-class GroupOperation extends CommandOperation {
+export type GroupOptions = CommandOperationOptions;
+
+/** @internal */
+export class GroupOperation extends CommandOperation<GroupOptions, Document> {
   collectionName: string;
   keys: any;
   condition: any;
@@ -13,13 +17,13 @@ class GroupOperation extends CommandOperation {
   finalize: any;
 
   constructor(
-    collection: any,
+    collection: Collection,
     keys: any,
     condition: any,
     initial: any,
     reduce: any,
     finalize: any,
-    options: any
+    options: GroupOptions
   ) {
     super(collection, options);
     this.collectionName = collection.collectionName;
@@ -30,8 +34,8 @@ class GroupOperation extends CommandOperation {
     this.reduceFunction = reduce && reduce._bsontype === 'Code' ? reduce : new Code(reduce);
   }
 
-  execute(server: any, callback: Function) {
-    const selector = {
+  execute(server: Server, callback: Callback<Document>) {
+    const cmd: Document = {
       group: {
         ns: this.collectionName,
         $reduce: this.reduceFunction,
@@ -39,16 +43,16 @@ class GroupOperation extends CommandOperation {
         initial: this.initial,
         out: 'inline'
       }
-    } as any;
+    };
 
     // if finalize is defined
     if (this.finalize != null) {
-      selector.group.finalize = this.finalize;
+      cmd.group.finalize = this.finalize;
     }
 
     // Set up group selector
     if ('function' === typeof this.keys || (this.keys && this.keys._bsontype === 'Code')) {
-      selector.group.$keyf =
+      cmd.group.$keyf =
         this.keys && this.keys._bsontype === 'Code' ? this.keys : new Code(this.keys);
     } else {
       const hash: any = {};
@@ -56,13 +60,13 @@ class GroupOperation extends CommandOperation {
         hash[key] = 1;
       });
 
-      selector.group.key = hash;
+      cmd.group.key = hash;
     }
 
     // Execute command
-    super.executeCommand(server, selector, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback!, err, null);
-      handleCallback(callback!, null, result.retval);
+    super.executeCommand(server, cmd, (err, result) => {
+      if (err) return callback(err);
+      callback(undefined, result.retval);
     });
   }
 }
@@ -70,7 +74,7 @@ class GroupOperation extends CommandOperation {
 const groupFunction =
   'function () {\nvar c = db[ns].find(condition);\nvar map = new Map();\nvar reduce_function = reduce;\n\nwhile (c.hasNext()) {\nvar obj = c.next();\nvar key = {};\n\nfor (var i = 0, len = keys.length; i < len; ++i) {\nvar k = keys[i];\nkey[k] = obj[k];\n}\n\nvar aggObj = map.get(key);\n\nif (aggObj == null) {\nvar newObj = Object.extend({}, key);\naggObj = Object.extend(newObj, initial);\nmap.put(key, aggObj);\n}\n\nreduce_function(obj, aggObj);\n}\n\nreturn { "result": map.values() };\n}';
 
-class EvalGroupOperation extends EvalOperation {
+export class EvalGroupOperation extends EvalOperation {
   constructor(
     collection: any,
     keys: any,
@@ -91,16 +95,13 @@ class EvalGroupOperation extends EvalOperation {
     // Pass in the function text to execute within mongodb.
     const groupfn = groupFunction.replace(/ reduce;/, reduce.toString() + ';');
 
-    super(collection, new Code(groupfn, scope), null, options);
+    super(collection, new Code(groupfn, scope), undefined, options);
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Document>) {
     super.execute(server, (err?: any, results?: any) => {
-      if (err) return handleCallback(callback!, err, null);
-      handleCallback(callback!, null, results.result || results);
+      if (err) return callback(err);
+      callback(undefined, results.result || results);
     });
   }
 }
-
-defineAspects(GroupOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export { GroupOperation, EvalGroupOperation };

@@ -2,21 +2,24 @@ import { Query, Msg, CommandResult } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';
 import { applySession, ClientSession } from '../../sessions';
-import { maxWireVersion, databaseNamespace } from '../../utils';
+import { maxWireVersion, databaseNamespace, Callback } from '../../utils';
 import { MongoError, MongoNetworkError } from '../../error';
-import type { Callback, Document, BSONSerializeOptions } from '../../types';
+import type { Document, BSONSerializeOptions } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
-import type { ReadPreference } from '../..';
+import type { ReadPreferenceLike } from '../../read_preference';
 
+/** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: Document;
   slaveOk?: boolean;
-  readPreference?: ReadPreference;
+  /** Specify read preference if command supports it */
+  readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;
   socketTimeout?: number;
+  /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;
@@ -117,7 +120,7 @@ function _command(
     };
   }
 
-  const commandOptions = Object.assign(
+  const commandOptions: Document = Object.assign(
     {
       command: true,
       numberToSkip: 0,

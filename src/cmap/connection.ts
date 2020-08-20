@@ -5,16 +5,15 @@ import { StreamDescription, StreamDescriptionOptions } from './stream_descriptio
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
 import { updateSessionFromResponse } from '../sessions';
-import { uuidV4, ClientMetadata } from '../utils';
+import { uuidV4, ClientMetadata, now, calculateDurationInMs, Callback } from '../utils';
 import {
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoWriteConcernError
 } from '../error';
-import { now, calculateDurationInMs } from '../utils';
-
-import type { Callback, Document, AutoEncrypter } from '../types';
+import type { Document } from '../bson';
+import type { AutoEncrypter } from '../deps';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
@@ -25,6 +24,7 @@ import type { InternalCursorState } from '../cursor/core_cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
+import type { LoggerOptions } from '../logger';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -36,11 +36,13 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
+/** @public */
 export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
     Partial<IpcNetConnectOpts>,
     Partial<TLSConnectionOptions>,
-    StreamDescriptionOptions {
+    StreamDescriptionOptions,
+    LoggerOptions {
   id: number;
   monitorCommands: boolean;
   generation: number;
@@ -60,10 +62,13 @@ export interface ConnectionOptions
   captureRejections?: boolean;
 }
 
+/** @public */
 export interface DestroyOptions {
+  /** Force the destruction. */
   force?: boolean;
 }
 
+/** @public */
 export class Connection extends EventEmitter {
   id: number;
   address: string;
@@ -81,6 +86,15 @@ export class Connection extends EventEmitter {
   [kStream]: Stream;
   [kIsMaster]: Document;
   [kClusterTime]: Document;
+
+  /** @event */
+  static readonly COMMAND_STARTED = 'commandStarted' as const;
+  /** @event */
+  static readonly COMMAND_SUCCEEDED = 'commandSucceeded' as const;
+  /** @event */
+  static readonly COMMAND_FAILED = 'commandFailed' as const;
+  /** @event */
+  static readonly CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super(options);
@@ -323,7 +337,7 @@ function messageHandler(conn: Connection) {
 
       if (document.$clusterTime) {
         conn[kClusterTime] = document.$clusterTime;
-        conn.emit('clusterTimeReceived', document.$clusterTime);
+        conn.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
       }
 
       if (operationDescription.command) {
@@ -340,7 +354,7 @@ function messageHandler(conn: Connection) {
     }
 
     // NODE-2382: re-enable in our glorious non-leaky abstraction future
-    // callback(null, operationDescription.fullResult ? message : message.documents[0]);
+    // callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
 
     callback(
       undefined,
@@ -368,7 +382,6 @@ function write(
   options: CommandOptions,
   callback: Callback
 ) {
-  const connection = this;
   if (typeof options === 'function') {
     callback = options;
   }
@@ -391,40 +404,40 @@ function write(
     started: 0
   };
 
-  if (connection[kDescription] && connection[kDescription].compressor) {
-    operationDescription.agreedCompressor = connection[kDescription].compressor;
+  if (this[kDescription] && this[kDescription].compressor) {
+    operationDescription.agreedCompressor = this[kDescription].compressor;
 
-    if (connection[kDescription].zlibCompressionLevel) {
-      operationDescription.zlibCompressionLevel = connection[kDescription].zlibCompressionLevel;
+    if (this[kDescription].zlibCompressionLevel) {
+      operationDescription.zlibCompressionLevel = this[kDescription].zlibCompressionLevel;
     }
   }
 
   if (typeof options.socketTimeout === 'number') {
     operationDescription.socketTimeoutOverride = true;
-    connection[kStream].setTimeout(options.socketTimeout);
+    this[kStream].setTimeout(options.socketTimeout);
   }
 
   // if command monitoring is enabled we need to modify the callback here
-  if (connection.monitorCommands) {
-    connection.emit('commandStarted', new CommandStartedEvent(connection, command));
+  if (this.monitorCommands) {
+    this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
-        connection.emit(
-          'commandFailed',
-          new CommandFailedEvent(connection, command, err, operationDescription.started)
+        this.emit(
+          Connection.COMMAND_FAILED,
+          new CommandFailedEvent(this, command, err, operationDescription.started)
         );
       } else {
         if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
-          connection.emit(
-            'commandFailed',
-            new CommandFailedEvent(connection, command, reply.result, operationDescription.started)
+          this.emit(
+            Connection.COMMAND_FAILED,
+            new CommandFailedEvent(this, command, reply.result, operationDescription.started)
           );
         } else {
-          connection.emit(
-            'commandSucceeded',
-            new CommandSucceededEvent(connection, command, reply, operationDescription.started)
+          this.emit(
+            Connection.COMMAND_SUCCEEDED,
+            new CommandSucceededEvent(this, command, reply, operationDescription.started)
           );
         }
       }
@@ -436,14 +449,14 @@ function write(
   }
 
   if (!operationDescription.noResponse) {
-    connection[kQueue].set(operationDescription.requestId, operationDescription);
+    this[kQueue].set(operationDescription.requestId, operationDescription);
   }
 
   try {
-    connection[kMessageStream].writeCommand(command, operationDescription);
+    this[kMessageStream].writeCommand(command, operationDescription);
   } catch (e) {
     if (!operationDescription.noResponse) {
-      connection[kQueue].delete(operationDescription.requestId);
+      this[kQueue].delete(operationDescription.requestId);
       operationDescription.cb(e);
       return;
     }

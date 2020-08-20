@@ -28,7 +28,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -175,7 +175,7 @@ describe('Bulk', function () {
 
         // Add unique index on field `a` causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -322,7 +322,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
 
@@ -378,7 +378,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
             batch.insert({ a: 1 });
@@ -520,7 +520,7 @@ describe('Bulk', function () {
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
@@ -549,7 +549,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -743,7 +743,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ b: 1 }, writeConcern, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -849,7 +849,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
@@ -955,6 +955,8 @@ describe('Bulk', function () {
       });
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_9');
 
@@ -965,14 +967,14 @@ describe('Bulk', function () {
           unorderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         try {
           orderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         client.close(done);
@@ -1024,7 +1026,7 @@ describe('Bulk', function () {
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
@@ -1096,10 +1098,10 @@ describe('Bulk', function () {
         }
 
         db.collection('bigdocs_ordered').insertMany(docs, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('bigdocs_ordered').count(function (err, c) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(5, c);
 
             client.close(done);
@@ -1198,7 +1200,7 @@ describe('Bulk', function () {
         }
 
         operation.execute(function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           operation = collection.initializeUnorderedBulkOp();
 
@@ -1213,7 +1215,7 @@ describe('Bulk', function () {
           }
 
           operation.execute(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -1258,7 +1260,7 @@ describe('Bulk', function () {
         }
 
         operation.execute(function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           operation = collection.initializeOrderedBulkOp();
 
@@ -1273,7 +1275,7 @@ describe('Bulk', function () {
           }
 
           operation.execute(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -1320,10 +1322,10 @@ describe('Bulk', function () {
         }
 
         db.collection('bigdocs_unordered').insertMany(docs, { ordered: false }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('bigdocs_unordered').count(function (err, c) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(5, c);
 
             client.close(done);
@@ -1458,10 +1460,7 @@ describe('Bulk', function () {
         expect(err).to.be.an.instanceOf(MongoError);
       },
       err => {
-        expect(err).to.be.an.instanceOf(MongoError);
-        expect(err).to.not.be.an.instanceOf(TypeError);
-        expect(err.driver).to.equal(true);
-        expect(err.name).to.equal('MongoError');
+        expect(err).to.be.an.instanceOf(TypeError);
       }
     );
   }

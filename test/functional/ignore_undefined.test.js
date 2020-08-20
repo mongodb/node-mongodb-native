@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
@@ -24,7 +25,7 @@ describe('Ignore Undefined', function () {
 
         // Ignore the undefined field
         collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Locate the doument
           collection.findOne(function (err, item) {
@@ -57,21 +58,21 @@ describe('Ignore Undefined', function () {
           var db = client.db(configuration.db);
           var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
           collection.insert({ a: 1, b: undefined }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection.findOne(function (err, item) {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
 
               collection.insertOne({ a: 2, b: undefined }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 collection.findOne({ a: 2 }, function (err, item) {
                   test.equal(2, item.a);
                   test.ok(item.b === undefined);
 
                   collection.insertMany([{ a: 3, b: undefined }], function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     collection.findOne({ a: 3 }, function (err, item) {
                       test.equal(3, item.a);
@@ -108,7 +109,7 @@ describe('Ignore Undefined', function () {
           { $set: { a: 1, b: undefined } },
           { upsert: true },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             collection.findOne({ _id: id }, function (err, item) {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
@@ -119,7 +120,7 @@ describe('Ignore Undefined', function () {
                 { $set: { a: 1, b: undefined } },
                 { upsert: true },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   collection.findOne({ _id: id }, function (err, item) {
                     test.equal(1, item.a);
                     test.ok(item.b === undefined);
@@ -130,7 +131,7 @@ describe('Ignore Undefined', function () {
                       { $set: { a: 1, b: undefined } },
                       { upsert: true },
                       function (err) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         collection.findOne({ _id: id }, function (err, item) {
                           test.equal(1, item.a);
                           test.ok(item.b === undefined);

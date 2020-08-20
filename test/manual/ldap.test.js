@@ -1,6 +1,6 @@
 'use strict';
 const { MongoClient } = require('../../src');
-var test = require('../functional/shared').assert;
+const { expect } = require('chai');
 
 describe('LDAP', function () {
   if (process.env.MONGODB_URI == null) {
@@ -10,14 +10,14 @@ describe('LDAP', function () {
   it('Should correctly authenticate against ldap', function (done) {
     const client = new MongoClient(process.env.MONGODB_URI);
     client.connect(function (err, client) {
-      test.equal(null, err);
+      expect(err).to.not.exist;
 
       client
         .db('ldap')
         .collection('test')
         .findOne(function (err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.ldap);
+          expect(err).to.not.exist;
+          expect(doc).property('ldap').to.equal(true);
 
           client.close(done);
         });

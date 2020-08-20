@@ -287,7 +287,7 @@ describe('APM', function () {
         //     }
         //   },
         //   function(err) {
-        //     expect(err).to.be.null;
+        //     expect(err).to.not.exist;
         //     callbackTriggered = true;
         //   }
         // );

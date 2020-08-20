@@ -3,7 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const Db = require('../../src/db');
+const { Db } = require('../../src/db');
 const expect = require('chai').expect;
 
 describe('MongoClient', function () {
@@ -124,7 +124,7 @@ describe('MongoClient', function () {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
       client.connect(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         client.close(done);
       });
     }
@@ -168,7 +168,7 @@ describe('MongoClient', function () {
 
       const client = configuration.newClient(url);
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
@@ -189,7 +189,7 @@ describe('MongoClient', function () {
 
       const client = configuration.newClient(url, { appname: 'hello world' });
       client.connect(err => {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
@@ -215,7 +215,7 @@ describe('MongoClient', function () {
       );
 
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         expect(db).nested.property('s.topology.s.options.connectTimeoutMS').to.equal(0);
         expect(db).nested.property('s.topology.s.options.socketTimeoutMS').to.equal(0);
@@ -241,13 +241,13 @@ describe('MongoClient', function () {
       var configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(function (err, mongoclient) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         mongoclient
           .db('integration_tests')
           .collection('new_mongo_client_collection')
           .insertOne({ a: 1 }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             mongoclient.close(done);

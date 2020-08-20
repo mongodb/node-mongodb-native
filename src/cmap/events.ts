@@ -2,9 +2,13 @@ import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } fro
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document, AnyError } from '../types';
+import type { Document } from '../bson';
+import type { AnyError } from '../error';
 
-/** The base export class for all monitoring events published from the connection pool */
+/**
+ * The base export class for all monitoring events published from the connection pool
+ * @category Event
+ */
 export class ConnectionPoolMonitoringEvent {
   /** A timestamp when the event was created  */
   time: Date;
@@ -17,7 +21,10 @@ export class ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is created */
+/**
+ * An event published when a connection pool is created
+ * @category Event
+ */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
   options?: ConnectionPoolOptions;
@@ -28,14 +35,20 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is closed */
+/**
+ * An event published when a connection pool is closed
+ * @category Event
+ */
 export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/** An event published when a connection pool creates a new connection */
+/**
+ * An event published when a connection pool creates a new connection
+ * @category Event
+ */
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** A monotonically increasing, per-pool id for the newly created connection */
   connectionId: number;
@@ -46,7 +59,10 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is ready for use */
+/**
+ * An event published when a connection is ready for use
+ * @category Event
+ */
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -57,7 +73,10 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is closed */
+/**
+ * An event published when a connection is closed
+ * @category Event
+ */
 export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -71,14 +90,17 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a request to check a connection out begins */
+/** An event published when a request to check a connection out begins @category Event */
 export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
   }
 }
 
-/** An event published when a request to check a connection out fails */
+/**
+ * An event published when a request to check a connection out fails
+ * @category Event
+ */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
   reason: AnyError | string;
@@ -89,7 +111,10 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
   }
 }
 
-/** An event published when a connection is checked out of the connection pool */
+/**
+ * An event published when a connection is checked out of the connection pool
+ * @category Event
+ */
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -100,7 +125,10 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection is checked into the connection pool */
+/**
+ * An event published when a connection is checked into the connection pool
+ * @category Event
+ */
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number;
@@ -111,7 +139,10 @@ export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a connection pool is cleared */
+/**
+ * An event published when a connection pool is cleared
+ * @category Event
+ */
 export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
@@ -131,7 +162,10 @@ export const CMAP_EVENT_NAMES = [
   'connectionPoolCleared'
 ];
 
-/** An event indicating the start of a given command */
+/**
+ * An event indicating the start of a given
+ * @category Event
+ */
 export class CommandStartedEvent {
   commandObj?: Document;
   requestId: number;
@@ -144,8 +178,8 @@ export class CommandStartedEvent {
   /**
    * Create a started event
    *
-   * @param {Pool} pool the pool that originated the command
-   * @param {object} command the command
+   * @param pool - the pool that originated the command
+   * @param command - the command
    */
   constructor(pool: Connection | ConnectionPool, command: WriteProtocolMessageType) {
     const cmd = extractCommand(command);
@@ -167,7 +201,10 @@ export class CommandStartedEvent {
   }
 }
 
-/** An event indicating the success of a given command */
+/**
+ * An event indicating the success of a given command
+ * @category Event
+ */
 export class CommandSucceededEvent {
   address: string;
   connectionId?: string | number;
@@ -179,10 +216,10 @@ export class CommandSucceededEvent {
   /**
    * Create a succeeded event
    *
-   * @param {Pool} pool the pool that originated the command
-   * @param {object} command the command
-   * @param {object} reply the reply for this command from the server
-   * @param {number} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
+   * @param pool - the pool that originated the command
+   * @param command - the command
+   * @param reply - the reply for this command from the server
+   * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
     pool: Connection | ConnectionPool,
@@ -203,7 +240,10 @@ export class CommandSucceededEvent {
   }
 }
 
-/** An event indicating the failure of a given command */
+/**
+ * An event indicating the failure of a given command
+ * @category Event
+ */
 export class CommandFailedEvent {
   address: string;
   connectionId?: string | number;
@@ -214,10 +254,10 @@ export class CommandFailedEvent {
   /**
    * Create a failure event
    *
-   * @param {Connection | ConnectionPool} pool the pool that originated the command
-   * @param {object} command the command
-   * @param {MongoError | object} error the generated error or a server error response
-   * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
+   * @param pool - the pool that originated the command
+   * @param command - the command
+   * @param error - the generated error or a server error response
+   * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
     pool: Connection | ConnectionPool,
@@ -326,14 +366,14 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      let legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
+      const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] !== 'undefined') {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
     OP_QUERY_KEYS.forEach(key => {
-      let opKey = key as typeof OP_QUERY_KEYS[number];
+      const opKey = key as typeof OP_QUERY_KEYS[number];
       if (command[opKey]) {
         result[opKey] = command[opKey];
       }

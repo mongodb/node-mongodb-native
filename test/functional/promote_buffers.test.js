@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 
 describe('Promote Buffers', function () {
@@ -28,10 +29,10 @@ describe('Promote Buffers', function () {
             doc: Buffer.alloc(256)
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(doc.doc instanceof Buffer);
 
               client.close(done);
@@ -61,10 +62,10 @@ describe('Promote Buffers', function () {
             doc: Buffer.alloc(256)
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(doc.doc instanceof Buffer);
 
               client.close(done);
@@ -94,12 +95,12 @@ describe('Promote Buffers', function () {
             doc: Buffer.alloc(256)
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteBuffer3')
               .find()
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
 
                 client.close(done);
@@ -128,12 +129,12 @@ describe('Promote Buffers', function () {
             doc: Buffer.alloc(256)
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteBuffer4')
               .find({}, { promoteBuffers: true })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
 
                 client.close(done);
@@ -165,12 +166,12 @@ describe('Promote Buffers', function () {
             doc: Buffer.alloc(256)
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteBuffer5')
               .aggregate([{ $match: {} }], { promoteBuffers: true })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
 
                 client.close(done);

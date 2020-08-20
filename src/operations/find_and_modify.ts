@@ -5,20 +5,56 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   formattedOrderClause,
-  handleCallback,
-  hasAtomicOperators
+  hasAtomicOperators,
+  Callback
 } from '../utils';
 import { MongoError } from '../error';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { Sort } from './find';
 
-class FindAndModifyOperation extends CommandOperation {
-  collection: any;
-  query: any;
-  sort: any;
-  doc: any;
+/** @public */
+export interface FindAndModifyOptions extends CommandOperationOptions {
+  /** When false, returns the updated document rather than the original. The default is true. */
+  returnOriginal?: boolean;
+  /** Upsert the document if it does not exist. */
+  upsert?: boolean;
+  /** Limits the fields to return for all matching documents. */
+  projection?: Document;
+  /** @deprecated use `projection` instead */
+  fields?: Document;
+  /** Determines which document the operation modifies if the query selects multiple documents. */
+  sort?: Sort;
+  /** Optional list of array filters referenced in filtered positional operators */
+  arrayFilters?: Document[];
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  hint?: Document;
 
-  constructor(collection: any, query: any, sort: any, doc: any, options: any) {
+  // NOTE: These types are a misuse of options, can we think of a way to remove them?
+  update?: boolean;
+  remove?: boolean;
+  new?: boolean;
+}
+
+/** @internal */
+export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
+  collection: Collection;
+  query: Document;
+  sort?: Sort;
+  doc?: Document;
+
+  constructor(
+    collection: Collection,
+    query: Document,
+    sort: Sort | undefined,
+    doc: Document | undefined,
+    options?: FindAndModifyOptions
+  ) {
     super(collection, options);
 
     // force primary read preference
@@ -30,7 +66,7 @@ class FindAndModifyOperation extends CommandOperation {
     this.doc = doc;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
@@ -38,34 +74,36 @@ class FindAndModifyOperation extends CommandOperation {
     let options = this.options;
 
     // Create findAndModify command object
-    const queryObject = {
+    const cmd: Document = {
       findAndModify: coll.collectionName,
       query: query
-    } as any;
+    };
 
     if (sort) {
-      queryObject.sort = sort;
+      cmd.sort = sort;
     }
 
-    queryObject.new = options.new ? true : false;
-    queryObject.remove = options.remove ? true : false;
-    queryObject.upsert = options.upsert ? true : false;
+    cmd.new = options.new ? true : false;
+    cmd.remove = options.remove ? true : false;
+    cmd.upsert = options.upsert ? true : false;
 
     const projection = options.projection || options.fields;
 
     if (projection) {
-      queryObject.fields = projection;
+      cmd.fields = projection;
     }
 
     if (options.arrayFilters) {
-      queryObject.arrayFilters = options.arrayFilters;
+      cmd.arrayFilters = options.arrayFilters;
     }
 
     if (doc && !options.remove) {
-      queryObject.update = doc;
+      cmd.update = doc;
     }
 
-    if (options.maxTimeMS) queryObject.maxTimeMS = options.maxTimeMS;
+    if (options.maxTimeMS) {
+      cmd.maxTimeMS = options.maxTimeMS;
+    }
 
     // Either use override on the function, or go back to default on either the collection
     // level or db
@@ -80,25 +118,25 @@ class FindAndModifyOperation extends CommandOperation {
 
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {
-      queryObject.writeConcern = options.writeConcern;
+      cmd.writeConcern = options.writeConcern;
     }
 
     // Have we specified bypassDocumentValidation
     if (options.bypassDocumentValidation === true) {
-      queryObject.bypassDocumentValidation = options.bypassDocumentValidation;
+      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
     // Have we specified collation
     try {
-      decorateWithCollation(queryObject, coll, options);
+      decorateWithCollation(cmd, coll, options);
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
     if (options.hint) {
       // TODO: once this method becomes a CommandOperation we will have the server
       // in place to check.
-      const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
+      const unacknowledgedWrite = this.writeConcern?.w === 0;
       if (unacknowledgedWrite || maxWireVersion(server) < 8) {
         callback(
           new MongoError('The current topology does not support a hint on findAndModify commands')
@@ -107,20 +145,20 @@ class FindAndModifyOperation extends CommandOperation {
         return;
       }
 
-      queryObject.hint = options.hint;
+      cmd.hint = options.hint;
     }
 
     // Execute the command
-    super.executeCommand(server, queryObject, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback, err, null);
-
-      return handleCallback(callback, null, result);
+    super.executeCommand(server, cmd, (err, result) => {
+      if (err) return callback(err);
+      return callback(undefined, result);
     });
   }
 }
 
-class FindOneAndDeleteOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, options: any) {
+/** @internal */
+export class FindOneAndDeleteOperation extends FindAndModifyOperation {
+  constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -131,12 +169,18 @@ class FindOneAndDeleteOperation extends FindAndModifyOperation {
       throw new TypeError('Filter parameter must be an object');
     }
 
-    super(collection, filter, finalOptions.sort, null, finalOptions);
+    super(collection, filter, finalOptions.sort, undefined, finalOptions);
   }
 }
 
-class FindOneAndReplaceOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, replacement: any, options: any) {
+/** @internal */
+export class FindOneAndReplaceOperation extends FindAndModifyOperation {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    replacement: Document,
+    options: FindAndModifyOptions
+  ) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -160,8 +204,14 @@ class FindOneAndReplaceOperation extends FindAndModifyOperation {
   }
 }
 
-class FindOneAndUpdateOperation extends FindAndModifyOperation {
-  constructor(collection: any, filter: any, update: any, options: any) {
+/** @internal */
+export class FindOneAndUpdateOperation extends FindAndModifyOperation {
+  constructor(
+    collection: Collection,
+    filter: Document,
+    update: Document,
+    options: FindAndModifyOptions
+  ) {
     // Final options
     const finalOptions = Object.assign({}, options);
     finalOptions.fields = options.projection;
@@ -186,15 +236,4 @@ class FindOneAndUpdateOperation extends FindAndModifyOperation {
   }
 }
 
-defineAspects(FindAndModifyOperation, [
-  Aspect.WRITE_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export {
-  FindAndModifyOperation,
-  FindOneAndDeleteOperation,
-  FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation
-};
+defineAspects(FindAndModifyOperation, [Aspect.WRITE_OPERATION, Aspect.RETRYABLE]);
