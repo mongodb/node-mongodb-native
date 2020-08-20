@@ -1090,8 +1090,23 @@ export class BulkOperationBase {
     return arrayFilters;
   }
 
+  getUpsert(options: { upsert?: boolean }): { upsert?: boolean } {
+    const { upsert } = options;
+    if (!this.isOrdered) return { upsert: true };
+    if (typeof upsert === 'boolean') return { upsert };
+    return {};
+  }
+
+  checkAtomic(options: { replacement?: Document; update?: Document }) {
+    if (options.replacement && hasAtomicOperators(options.replacement)) {
+      throw new TypeError('Replacement document must not use atomic operators');
+    }
+    if (options.update && !hasAtomicOperators(options.update)) {
+      throw new TypeError('Update document requires atomic operators');
+    }
+  }
+
   raw(op: AnyModel): BulkOperationBase {
-    const { isOrdered: upsert } = this;
     const forceServerObjectId = this.forceServerObjectId;
     const shouldCreateId = forceServerObjectId !== true;
     if (this.isUpdateOneOp(op)) {
@@ -1103,9 +1118,11 @@ export class BulkOperationBase {
         return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
       const { filter: q, update: u, hint } = options;
+      this.checkAtomic(options);
       const arrayFilters = this.getArrayFilters(options);
       const collation = this.getCollation(options);
-      const operation = { multi, q, u, hint, upsert, arrayFilters, ...collation };
+      const upsert = this.getUpsert(options);
+      const operation = { multi, q, u, hint, arrayFilters, ...upsert, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isUpdateManyOp(op)) {
       // UPDATE MANY
@@ -1116,9 +1133,11 @@ export class BulkOperationBase {
         return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
       const { filter: q, update: u, hint } = options;
+      this.checkAtomic(options);
       const arrayFilters = this.getArrayFilters(options);
       const collation = this.getCollation(options);
-      const operation = { multi, q, u, hint, upsert, arrayFilters, ...collation };
+      const upsert = this.getUpsert(options);
+      const operation = { multi, q, u, hint, ...upsert, arrayFilters, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isReplaceOneOp(op)) {
       // REPLACE ONE
@@ -1128,8 +1147,10 @@ export class BulkOperationBase {
         const operation = { ...options, multi: false };
         return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
+      this.checkAtomic(options);
+      const upsert = this.getUpsert(options);
       const { filter: q, replacement: u, hint } = options;
-      const operation = { multi, q, u, hint, upsert };
+      const operation = { multi, q, u, hint, ...upsert };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isDeleteOneOp(op)) {
       // DELETE ONE
@@ -1145,14 +1166,18 @@ export class BulkOperationBase {
       return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
     } else if (this.isDeleteManyOp(op)) {
       // DELETE MANY
+      const limit = 0;
       const options = op.deleteMany;
       if (options.q) {
-        const operation = { ...options };
+        const operation = { ...options, limit };
         return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
+      }
+      if (Object.prototype.hasOwnProperty.call(options, 'hint')) {
+        throw new Error('Bulk deleteMany operation does not support hint');
       }
       const { filter: q } = options;
       const collation = this.getCollation(options);
-      const operation = { q, ...collation };
+      const operation = { q, limit, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
     } else if (this.isRemoveOneOp(op)) {
       // REMOVE ONE
@@ -1193,6 +1218,7 @@ export class BulkOperationBase {
         const operation = { ...options.document, ..._id };
         return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
       });
+      return this;
     }
     throw new Error(`Operation not recognized: ${Object.keys(op)[0]}`);
   }
