@@ -1,20 +1,14 @@
-import {
-  BulkOptions,
-  BulkOperationBase,
-  Batch,
-  BatchType,
-  AnyModel,
-  FindOperators
-} from './common';
+import { BulkOptions, BulkOperationBase, Batch, BatchType, FindOperators } from './common';
 import * as BSON from '../bson';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
+import type { Document } from './../bson';
 
 /** Add to internal list of Operations */
 export function addToOperationsList<T extends OrderedBulkOperation | FindOperators>(
   bulkOperation: T,
   batchType: BatchType,
-  document: Partial<AnyModel>
+  document: Document
 ): T {
   // Get the bsonSize
   const bsonSize = BSON.calculateObjectSize(document, {

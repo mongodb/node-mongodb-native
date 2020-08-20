@@ -56,89 +56,124 @@ export interface Operation {
 }
 
 /** @public */
-export interface InsertOneModel extends Document, InsertOptions {
+export interface InsertOneOptions extends Document, InsertOptions {
   document?: Document;
   _id?: ObjectId;
 }
 
 /** @public */
-export type InsertManyModel = InsertOneModel[];
+export type InsertManyOptions = InsertOneOptions[];
 
 /** @public */
-export interface ReplaceOneModel extends ReplaceOptions {
+export interface ReplaceOneOptions extends ReplaceOptions {
   q?: Document;
   replacement: Document;
   filter?: Document;
 }
 
 /** @public */
-export interface UpdateOneModel extends UpdateOptions {
+export interface UpdateOneOptions extends UpdateOptions {
   q?: Document;
   update: Document;
   filter?: Document;
 }
 
 /** @public */
-export interface UpdateManyModel extends UpdateOptions {
+export interface UpdateManyOptions extends UpdateOptions {
   q?: Document;
   update: Document;
   filter?: Document;
 }
 
 /** @public */
-export type RemoveOneModel = RemoveOptions;
+export type RemoveOneOptions = RemoveOptions;
 
 /** @public */
-export interface RemoveManyModel extends RemoveOptions {
+export interface RemoveManyOptions extends RemoveOptions {
   limit?: number;
 }
 
 /** @public */
-export interface DeleteOneModel extends RemoveOptions {
+export interface DeleteOneOptions extends RemoveOptions {
+  hint?: Hint;
+  filter?: Document;
   q?: Document;
 }
 
 /** @public */
-export interface DeleteManyModel extends RemoveOptions {
+export interface DeleteManyOptions extends RemoveOptions {
+  filter?: Document;
   q?: Document;
 }
 
 /** @public */
-export interface BatchOperations {
-  insertOne?: InsertOneModel;
-  insertMany?: InsertManyModel;
-  replaceOne?: ReplaceOneModel;
-  updateOne?: UpdateOneModel;
-  updateMany?: UpdateManyModel;
-  removeOne?: RemoveOneModel;
-  removeMany?: RemoveManyModel;
-  deleteOne?: DeleteOneModel;
-  deleteMany?: DeleteManyModel;
-  collation?: CollationOptions;
+export interface InsertOneModel {
+  insertOne: InsertOneOptions;
 }
 
 /** @public */
-export type AnyModel = InsertOneModel &
-  InsertManyModel &
-  ReplaceOneModel &
-  UpdateOneModel &
-  UpdateManyModel &
-  RemoveOneModel &
-  RemoveManyModel &
-  DeleteOneModel &
-  DeleteManyModel;
+export interface InsertManyModel {
+  insertMany: InsertManyOptions;
+}
 
 /** @public */
-export type AnyOperation =
-  | { insertOne: InsertOneModel }
-  | { insertMany: InsertManyModel }
-  | { replaceOne: ReplaceOneModel }
-  | { updateOne: UpdateOneModel }
-  | { updateMany: UpdateManyModel }
-  | { removeOne: RemoveOneModel }
-  | { removeMany: RemoveManyModel }
-  | { deleteOne: DeleteOneModel }
-  | { deleteMany: DeleteManyModel };
+export interface ReplaceOneModel {
+  replaceOne: ReplaceOneOptions;
+}
+
+/** @public */
+export interface UpdateOneModel {
+  updateOne: UpdateOneOptions;
+}
+
+/** @public */
+export interface UpdateManyModel {
+  updateMany: UpdateManyOptions;
+}
+
+/** @public */
+export interface RemoveOneModel {
+  removeOne: RemoveOneOptions;
+}
+
+/** @public */
+export interface RemoveManyModel {
+  removeMany: RemoveManyOptions;
+}
+
+/** @public */
+export interface DeleteOneModel {
+  deleteOne: DeleteOneOptions;
+}
+
+/** @public */
+export interface DeleteManyModel {
+  deleteMany: DeleteManyOptions;
+}
+
+/** @public */
+export type AnyModelOption =
+  | InsertOneOptions
+  | InsertManyOptions
+  | ReplaceOneOptions
+  | UpdateOneOptions
+  | UpdateManyOptions
+  | RemoveOneOptions
+  | RemoveManyOptions
+  | DeleteOneOptions
+  | DeleteManyOptions;
+
+/** @public */
+export type AnyModel =
+  | InsertOneModel
+  | InsertManyModel
+  | ReplaceOneModel
+  | UpdateOneModel
+  | UpdateManyModel
+  | RemoveOneModel
+  | RemoveManyModel
+  | DeleteOneModel
+  | DeleteManyModel;
 
 /** @public */
 export interface BulkOp {
@@ -185,7 +220,7 @@ export class Batch {
   currentIndex: number;
   originalIndexes: number[];
   batchType: BatchType;
-  operations: Partial<AnyModel>[];
+  operations: Partial<AnyModelOption>[];
   size: number;
   sizeBytes: number;
 
@@ -1005,108 +1040,161 @@ export class BulkOperationBase {
     return new FindOperators(this);
   }
 
-  raw(op: BatchOperations): BulkOperationBase {
-    const key = Object.keys(op)[0] as keyof BatchOperations;
-    const opOptions = op[key] as AnyModel;
-    // Set up the force server object id
+  isUpdateOneOp(op: AnyModel): op is UpdateOneModel {
+    return Object.keys(op)[0] === 'updateOne';
+  }
+
+  isUpdateManyOp(op: AnyModel): op is UpdateManyModel {
+    return Object.keys(op)[0] === 'updateMany';
+  }
+
+  isReplaceOneOp(op: AnyModel): op is ReplaceOneModel {
+    return Object.keys(op)[0] === 'replaceOne';
+  }
+
+  isDeleteOneOp(op: AnyModel): op is DeleteOneModel {
+    return Object.keys(op)[0] === 'deleteOne';
+  }
+
+  isDeleteManyOp(op: AnyModel): op is DeleteManyModel {
+    return Object.keys(op)[0] === 'deleteMany';
+  }
+
+  isRemoveOneOp(op: AnyModel): op is RemoveOneModel {
+    return Object.keys(op)[0] === 'removeOne';
+  }
+
+  isRemoveManyOp(op: AnyModel): op is RemoveManyModel {
+    return Object.keys(op)[0] === 'removeMany';
+  }
+
+  isInsertOneOp(op: AnyModel): op is InsertOneModel {
+    return Object.keys(op)[0] === 'insertOne';
+  }
+
+  isInsertManyOp(op: AnyModel): op is InsertManyModel {
+    return Object.keys(op)[0] === 'insertMany';
+  }
+
+  getCollation(options: { collation?: CollationOptions }): { collation?: CollationOptions } {
+    const collation = options.collation;
+    if (this.isOrdered && collation) return { collation };
+    return {};
+  }
+
+  getArrayFilters(options: { arrayFilters?: Document[] }): Document[] | undefined {
+    const { arrayFilters } = options;
+    if (arrayFilters && maxWireVersion(this.s.topology) < 6) {
+      throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
+    }
+    return arrayFilters;
+  }
+
+  raw(op: AnyModel): BulkOperationBase {
+    const { isOrdered: upsert } = this;
     const forceServerObjectId = this.forceServerObjectId;
-
-    // Update operations
-    if (
-      (op.updateOne && op.updateOne.q) ||
-      (op.updateMany && op.updateMany.q) ||
-      (op.replaceOne && op.replaceOne.q)
-    ) {
-      opOptions.multi = op.updateOne || op.replaceOne ? false : true;
-      return this.s.options.addToOperationsList!(this, BatchType.UPDATE, opOptions);
-    }
-
-    // Crud spec update format
-    if (op.updateOne || op.updateMany || op.replaceOne) {
-      if (op.replaceOne && hasAtomicOperators(opOptions.replacement)) {
-        throw new TypeError('Replacement document must not use atomic operators');
-      } else if ((op.updateOne || op.updateMany) && !hasAtomicOperators(opOptions.update)) {
-        throw new TypeError('Update document requires atomic operators');
+    const shouldCreateId = forceServerObjectId !== true;
+    if (this.isUpdateOneOp(op)) {
+      // UPDATE ONE
+      const multi = false;
+      const options = op.updateOne;
+      if (options.q) {
+        const operation = { ...options, multi };
+        return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
-
-      const multi = op.updateOne || op.replaceOne ? false : true;
-      const operation = {
-        q: opOptions.filter,
-        u: opOptions.update || opOptions.replacement,
-        multi: multi
-      } as any;
-
-      if (opOptions.hint) {
-        operation.hint = opOptions.hint;
-      }
-
-      if (this.isOrdered) {
-        operation.upsert = opOptions.upsert ? true : false;
-        if (op.collation) operation.collation = op.collation;
-      } else {
-        if (opOptions.upsert) operation.upsert = true;
-      }
-      if (opOptions.arrayFilters) {
-        // TODO: this check should be done at command construction against a connection, not a topology
-        if (maxWireVersion(this.s.topology) < 6) {
-          throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
-        }
-
-        operation.arrayFilters = opOptions.arrayFilters;
-      }
-
+      const { filter: q, update: u, hint } = options;
+      const arrayFilters = this.getArrayFilters(options);
+      const collation = this.getCollation(options);
+      const operation = { multi, q, u, hint, upsert, arrayFilters, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
-    }
-
-    // Remove operations
-    if (
-      op.removeOne ||
-      op.removeMany ||
-      (op.deleteOne && op.deleteOne.q) ||
-      (op.deleteMany && op.deleteMany.q)
-    ) {
-      opOptions.limit = op.removeOne ? 1 : 0;
-      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, opOptions);
-    }
-
-    // Crud spec delete operations, less efficient
-    if (op.deleteOne || op.deleteMany) {
-      const limit = op.deleteOne ? 1 : 0;
-      const operation = { q: opOptions.filter, limit: limit } as any;
-      if (opOptions.hint) {
-        operation.hint = opOptions.hint;
+    } else if (this.isUpdateManyOp(op)) {
+      // UPDATE MANY
+      const multi = true;
+      const options = op.updateMany;
+      if (options.q) {
+        const operation = { ...options, multi };
+        return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
-      if (this.isOrdered) {
-        if (op.collation) operation.collation = op.collation;
+      const { filter: q, update: u, hint } = options;
+      const arrayFilters = this.getArrayFilters(options);
+      const collation = this.getCollation(options);
+      const operation = { multi, q, u, hint, upsert, arrayFilters, ...collation };
+      return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
+    } else if (this.isReplaceOneOp(op)) {
+      // REPLACE ONE
+      const multi = false;
+      const options = op.replaceOne;
+      if (options.q) {
+        const operation = { ...options, multi: false };
+        return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
+      const { filter: q, replacement: u, hint } = options;
+      const operation = { multi, q, u, hint, upsert };
+      return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
+    } else if (this.isDeleteOneOp(op)) {
+      // DELETE ONE
+      const limit = 1;
+      const options = op.deleteOne;
+      if (options.q) {
+        const operation = { ...options, limit };
+        return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
+      }
+      const { filter: q, hint } = options;
+      const collation = this.getCollation(options);
+      const operation = { q, limit, hint, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
-    }
-
-    // Insert operations
-    if (op.insertOne && op.insertOne.document == null) {
-      if (forceServerObjectId !== true && op.insertOne._id == null)
-        op.insertOne._id = new ObjectId();
-      return this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertOne);
-    } else if (op.insertOne && op.insertOne.document) {
-      if (forceServerObjectId !== true && op.insertOne.document._id == null)
-        op.insertOne.document._id = new ObjectId();
-      return this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertOne.document);
-    }
-
-    if (op.insertMany) {
-      for (let i = 0; i < op.insertMany.length; i++) {
-        if (forceServerObjectId !== true && op.insertMany[i]._id == null)
-          op.insertMany[i]._id = new ObjectId();
-        this.s.options.addToOperationsList!(this, BatchType.INSERT, op.insertMany[i]);
+    } else if (this.isDeleteManyOp(op)) {
+      // DELETE MANY
+      const options = op.deleteMany;
+      if (options.q) {
+        const operation = { ...options };
+        return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
       }
-
-      return this;
+      const { filter: q } = options;
+      const collation = this.getCollation(options);
+      const operation = { q, ...collation };
+      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
+    } else if (this.isRemoveOneOp(op)) {
+      // REMOVE ONE
+      const limit = 1;
+      const options = op.removeOne;
+      const operation = { ...options, limit };
+      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
+    } else if (this.isRemoveManyOp(op)) {
+      // REMOVE MANY
+      const options = op.removeMany;
+      const operation = options;
+      return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
+    } else if (this.isInsertOneOp(op)) {
+      // INSERT ONE
+      const options = op.insertOne;
+      if (options.document == null) {
+        const missingId = options._id == null;
+        const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
+        const operation = { ...options, ..._id };
+        return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+      }
+      const missingId = options.document._id == null;
+      const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
+      const operation = { ...options.document, ..._id };
+      return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+    } else if (this.isInsertManyOp(op)) {
+      // INSERT MANY
+      op.insertMany.forEach(options => {
+        // same as above, can be reused, OG code didn't check document
+        if (options.document == null) {
+          const missingId = options._id == null;
+          const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
+          const operation = { ...options, ..._id };
+          return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+        }
+        const missingId = options.document._id == null;
+        const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
+        const operation = { ...options.document, ..._id };
+        return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+      });
     }
-
-    // No valid type of operation
-    throw TypeError(
-      'bulkWrite only supports insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, deleteOne, deleteMany'
-    );
+    throw new Error(`Operation not recognized: ${Object.keys(op)[0]}`);
   }
 
   /** helper function to assist with promiseOrCallback behavior */
