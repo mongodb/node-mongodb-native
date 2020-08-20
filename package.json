@@ -25,7 +25,8 @@
   "dependencies": {
     "bl": "^2.2.0",
     "bson": "^4.0.4",
-    "denque": "^1.4.1"
+    "denque": "^1.4.1",
+    "eslint-plugin-jsdoc": "^30.2.4"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
@@ -93,7 +94,7 @@
     "build:docs": "gulp doc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run check:test",
-    "check:lint": "eslint -v && eslint --max-warnings=2527 --ext '.js,.ts' src test",
+    "check:lint": "eslint -v && eslint --max-warnings=258 --ext '.js,.ts' src test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc --noEmit",
     "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
