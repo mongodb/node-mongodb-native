@@ -56,10 +56,8 @@ export interface Operation {
 }
 
 /** @public */
-export interface InsertOneOptions extends Document, InsertOptions {
-  document?: Document;
-  _id?: ObjectId;
-}
+export type InsertOneOptionsStructured = InsertOptions & { document: Document };
+export type InsertOneOptions = Document | InsertOneOptionsStructured;
 
 /** @public */
 export type InsertManyOptions = InsertOneOptions[];
@@ -489,9 +487,9 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
   } else if (result == null) {
     return;
   }
-
+  // console.log({ result, bulkResult });
   // Do we have a top level error stop processing and return
-  if (result && result.ok === 0 && bulkResult.ok === 1) {
+  if (result?.ok === 0 && bulkResult.ok === 1) {
     bulkResult.ok = 0;
 
     const writeError = {
@@ -1106,9 +1104,29 @@ export class BulkOperationBase {
     }
   }
 
+  isInsertOneStructured(options: InsertOneOptions): options is InsertOneOptionsStructured {
+    return Boolean(options.document);
+  }
+
+  get shouldCreateId() {
+    return this.forceServerObjectId !== true;
+  }
+
+  rawInsertOne(options: InsertOneOptions): BulkOperationBase {
+    if (this.isInsertOneStructured(options)) {
+      // within this block, ts believes options is not just a Document
+      const missingId = options.document._id == null;
+      const _id = missingId && this.shouldCreateId ? { _id: new ObjectId() } : {};
+      const operation = { ...options.document, ..._id };
+      return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+    }
+    const missingId = options._id == null;
+    const _id = missingId && this.shouldCreateId ? { _id: new ObjectId() } : {};
+    const operation = { ...options, ..._id };
+    return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+  }
+
   raw(op: AnyModel): BulkOperationBase {
-    const forceServerObjectId = this.forceServerObjectId;
-    const shouldCreateId = forceServerObjectId !== true;
     if (this.isUpdateOneOp(op)) {
       // UPDATE ONE
       const multi = false;
@@ -1193,30 +1211,11 @@ export class BulkOperationBase {
     } else if (this.isInsertOneOp(op)) {
       // INSERT ONE
       const options = op.insertOne;
-      if (options.document == null) {
-        const missingId = options._id == null;
-        const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
-        const operation = { ...options, ..._id };
-        return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
-      }
-      const missingId = options.document._id == null;
-      const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
-      const operation = { ...options.document, ..._id };
-      return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+      return this.rawInsertOne(options);
     } else if (this.isInsertManyOp(op)) {
       // INSERT MANY
       op.insertMany.forEach(options => {
-        // same as above, can be reused, OG code didn't check document
-        if (options.document == null) {
-          const missingId = options._id == null;
-          const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
-          const operation = { ...options, ..._id };
-          return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
-        }
-        const missingId = options.document._id == null;
-        const _id = missingId && shouldCreateId ? { _id: new ObjectId() } : {};
-        const operation = { ...options.document, ..._id };
-        return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
+        return this.rawInsertOne(options);
       });
       return this;
     }
