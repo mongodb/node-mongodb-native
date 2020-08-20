@@ -481,10 +481,7 @@ export function applyWriteConcern<T extends HasWriteConcern>(
  * @param maybePromise - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-// prettier-ignore
-export function isPromiseLike<T>(
-  maybePromise?: any
-): maybePromise is Promise<T> {
+export function isPromiseLike(maybePromise: any): maybePromise is Promise<any> {
   return !!maybePromise && typeof maybePromise.then === 'function';
 }
 
