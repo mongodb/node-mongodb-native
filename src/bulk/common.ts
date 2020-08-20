@@ -1094,7 +1094,7 @@ export class BulkOperationBase {
     const { upsert } = options;
     if (!this.isOrdered) return { upsert: true };
     if (typeof upsert === 'boolean') return { upsert };
-    return {};
+    return { upsert: false };
   }
 
   checkAtomic(options: { replacement?: Document; update?: Document }) {
