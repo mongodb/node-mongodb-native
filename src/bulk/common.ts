@@ -1080,19 +1080,22 @@ export class BulkOperationBase {
     return {};
   }
 
-  getArrayFilters(options: { arrayFilters?: Document[] }): Document[] | undefined {
+  getArrayFilters(options: { arrayFilters?: Document[] }): { arrayFilters?: Document[] } {
     const { arrayFilters } = options;
-    if (arrayFilters && maxWireVersion(this.s.topology) < 6) {
+    if (!Object.prototype.hasOwnProperty.call(options, 'arrayFilters')) return {};
+    if (maxWireVersion(this.s.topology) < 6) {
       throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
     }
-    return arrayFilters;
+    return { arrayFilters };
   }
 
   getUpsert(options: { upsert?: boolean }): { upsert?: boolean } {
-    const { upsert } = options;
-    if (!this.isOrdered) return { upsert: true };
-    if (typeof upsert === 'boolean') return { upsert };
-    return { upsert: false };
+    const upsert = Boolean(options.upsert);
+    if (this.isOrdered) {
+      return { upsert };
+    }
+    if (upsert) return { upsert };
+    return {};
   }
 
   checkAtomic(options: { replacement?: Document; update?: Document }) {
@@ -1126,6 +1129,13 @@ export class BulkOperationBase {
     return this.s.options.addToOperationsList!(this, BatchType.INSERT, operation);
   }
 
+  getHint(options: { hint?: Hint }): { hint?: Hint } {
+    if (Object.prototype.hasOwnProperty.call(options, 'hint')) {
+      return { hint: options.hint };
+    }
+    return {};
+  }
+
   raw(op: AnyModel): BulkOperationBase {
     if (this.isUpdateOneOp(op)) {
       // UPDATE ONE
@@ -1135,12 +1145,13 @@ export class BulkOperationBase {
         const operation = { ...options, multi };
         return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
-      const { filter: q, update: u, hint } = options;
+      const { filter: q, update: u } = options;
       this.checkAtomic(options);
+      const hint = this.getHint(options);
       const arrayFilters = this.getArrayFilters(options);
       const collation = this.getCollation(options);
       const upsert = this.getUpsert(options);
-      const operation = { multi, q, u, hint, arrayFilters, ...upsert, ...collation };
+      const operation = { multi, q, u, ...hint, ...arrayFilters, ...upsert, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isUpdateManyOp(op)) {
       // UPDATE MANY
@@ -1150,12 +1161,13 @@ export class BulkOperationBase {
         const operation = { ...options, multi };
         return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
       }
-      const { filter: q, update: u, hint } = options;
+      const { filter: q, update: u } = options;
       this.checkAtomic(options);
+      const hint = this.getHint(options);
       const arrayFilters = this.getArrayFilters(options);
       const collation = this.getCollation(options);
       const upsert = this.getUpsert(options);
-      const operation = { multi, q, u, hint, ...upsert, arrayFilters, ...collation };
+      const operation = { multi, q, u, ...hint, ...upsert, ...arrayFilters, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isReplaceOneOp(op)) {
       // REPLACE ONE
@@ -1178,9 +1190,10 @@ export class BulkOperationBase {
         const operation = { ...options, limit };
         return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
       }
-      const { filter: q, hint } = options;
+      const { filter: q } = options;
+      const hint = this.getHint(options);
       const collation = this.getCollation(options);
-      const operation = { q, limit, hint, ...collation };
+      const operation = { q, limit, ...hint, ...collation };
       return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
     } else if (this.isDeleteManyOp(op)) {
       // DELETE MANY
