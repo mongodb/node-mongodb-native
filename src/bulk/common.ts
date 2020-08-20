@@ -65,21 +65,21 @@ export type InsertManyOptions = InsertOneOptions[];
 /** @public */
 export interface ReplaceOneOptions extends ReplaceOptions {
   q?: Document;
-  replacement: Document;
+  replacement?: Document;
   filter?: Document;
 }
 
 /** @public */
 export interface UpdateOneOptions extends UpdateOptions {
   q?: Document;
-  update: Document;
+  update?: Document;
   filter?: Document;
 }
 
 /** @public */
 export interface UpdateManyOptions extends UpdateOptions {
   q?: Document;
-  update: Document;
+  update?: Document;
   filter?: Document;
 }
 
