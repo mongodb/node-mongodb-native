@@ -409,7 +409,7 @@ export function executeLegacyOperation<T extends OperationBase>(
   });
 }
 
-interface HasRetryableWrites {
+export interface HasRetryableWrites {
   retryWrites?: boolean;
 }
 /**
