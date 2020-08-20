@@ -17,7 +17,7 @@ gulp.task('typedoc', async () => {
     const docOptions = {
       entryPoint: 'types/mongodb.d.ts',
       mode: 'file',
-      out: 'docs/gen',
+      out: 'docs/public',
       theme: 'pages-plugin',
       excludeNotExported: true,
       stripInternal: true,

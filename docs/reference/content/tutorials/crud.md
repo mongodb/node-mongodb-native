@@ -73,7 +73,7 @@ The ``insertOne`` and ``insertMany`` methods exist on the ``Collection`` class a
 
 The first ``insert`` inserts a single document into the *inserts* collection. Notice that there's no need to
 explicitly create a new *inserts* collection, as the server will create it implicitly when the first document
-is inserted. The method `db.createIndex` is only necessary when creating non-standard collections,
+is inserted. The method `db.createCollection` is only necessary when creating non-standard collections,
 such as [capped collections](https://docs.mongodb.org/manual/core/capped-collections/) or where parameters other
 than the defaults are necessary.
 

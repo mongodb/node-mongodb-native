@@ -1,6 +1,8 @@
 'use strict';
+
 const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
+const withMonitoredClient = require('./shared').withMonitoredClient;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
@@ -43,7 +45,7 @@ describe('Sessions', function () {
 
     it('should send endSessions for multiple sessions', {
       metadata: {
-        requires: { topology: ['single'], mongodb: '>3.6.0' },
+        requires: { topology: ['single'], mongodb: '>=3.6.0' },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
@@ -65,7 +67,7 @@ describe('Sessions', function () {
   });
 
   describe('withSession', {
-    metadata: { requires: { mongodb: '>3.6.0' } },
+    metadata: { requires: { mongodb: '>=3.6.0' } },
     test: function () {
       beforeEach(function () {
         return test.setup(this.configuration);
@@ -193,5 +195,45 @@ describe('Sessions', function () {
     }
 
     generateTopologyTests(testSuites, testContext, testFilter);
+  });
+
+  context('unacknowledged writes', () => {
+    it('should not include session for unacknowledged writes', {
+      metadata: { requires: { topology: 'single', mongodb: '>=3.6.0' } },
+      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+        client,
+        events,
+        done
+      ) {
+        client
+          .db('test')
+          .collection('foo')
+          .insertOne({ foo: 'bar' }, err => {
+            expect(err).to.not.exist;
+            const event = events[0];
+            expect(event).nested.property('command.writeConcern.w').to.equal(0);
+            expect(event).to.not.have.nested.property('command.lsid');
+            done();
+          });
+      })
+    });
+    it('should throw error with explicit session', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
+      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+        client,
+        events,
+        done
+      ) {
+        const session = client.startSession({ causalConsistency: true });
+        client
+          .db('test')
+          .collection('foo')
+          .insertOne({ foo: 'bar' }, { session }, err => {
+            expect(err).to.exist;
+            expect(err.message).to.equal('Cannot have explicit session with unacknowledged writes');
+            client.close(done);
+          });
+      })
+    });
   });
 });

@@ -409,10 +409,9 @@ export function executeLegacyOperation<T extends OperationBase>(
   });
 }
 
-export interface HasRetryableWrites {
+interface HasRetryableWrites {
   retryWrites?: boolean;
 }
-
 /**
  * Applies retryWrites: true to a command if retryWrites is set on the command's database.
  * @internal
