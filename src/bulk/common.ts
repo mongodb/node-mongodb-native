@@ -470,10 +470,12 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
     return;
   } else if (result && result.ok === 0 && bulkResult.ok === 0) {
     return;
+  } else if (!result) {
+    return;
   }
 
   // Deal with opTime if available
-  if (result && (result.opTime || result.lastOp)) {
+  if (result.opTime || result.lastOp) {
     const opTime = result.lastOp || result.opTime;
     let lastOpTS = null;
     let lastOpT = null;
@@ -516,28 +518,28 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === BatchType.INSERT && result?.n) {
+  if (batch.batchType === BatchType.INSERT && result.n) {
     bulkResult.nInserted = bulkResult.nInserted + result.n;
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === BatchType.REMOVE && result?.n) {
+  if (batch.batchType === BatchType.REMOVE && result.n) {
     bulkResult.nRemoved = bulkResult.nRemoved + result.n;
   }
 
   let nUpserted = 0;
 
   // We have an array of upserted values, we need to rewrite the indexes
-  if (result && Array.isArray(result?.upserted)) {
+  if (Array.isArray(result.upserted)) {
     nUpserted = result.upserted.length;
 
-    for (let i = 0; i < result?.upserted.length; i++) {
+    for (let i = 0; i < result.upserted.length; i++) {
       bulkResult.upserted.push({
         index: result.upserted[i].index + batch.originalZeroIndex,
         _id: result.upserted[i]._id
       });
     }
-  } else if (result?.upserted) {
+  } else if (result.upserted) {
     nUpserted = 1;
 
     bulkResult.upserted.push({
@@ -547,7 +549,7 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
   }
 
   // If we have an update Batch type
-  if (batch.batchType === BatchType.UPDATE && result?.n) {
+  if (batch.batchType === BatchType.UPDATE && result.n) {
     const nModified = result.nModified;
     bulkResult.nUpserted = bulkResult.nUpserted + nUpserted;
     bulkResult.nMatched = bulkResult.nMatched + (result.n - nUpserted);
@@ -559,7 +561,7 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
     }
   }
 
-  if (result && Array.isArray(result.writeErrors)) {
+  if (Array.isArray(result.writeErrors)) {
     for (let i = 0; i < result.writeErrors.length; i++) {
       const writeError = {
         index: batch.originalIndexes[result.writeErrors[i].index],
@@ -572,7 +574,7 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
     }
   }
 
-  if (result?.writeConcernError) {
+  if (result.writeConcernError) {
     bulkResult.writeConcernErrors.push(new WriteConcernError(result.writeConcernError));
   }
 }
