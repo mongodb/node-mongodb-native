@@ -2,18 +2,18 @@ import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase, OperationOptions } from './operation';
 import { WriteConcern } from '../write_concern';
-import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
 import type { InsertOptions } from './insert';
 import type { Server } from '../sdam/server';
+import type { AnyModel } from './../bulk/common';
 
 /** @internal */
 export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
   collection: Collection;
-  operations: Document[];
+  operations: AnyModel[];
 
-  constructor(collection: Collection, operations: Document[], options: InsertOptions) {
+  constructor(collection: Collection, operations: AnyModel[], options: InsertOptions) {
     super(options);
 
     this.collection = collection;
@@ -46,7 +46,7 @@ export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWrit
         // Get the operation type
         const key = Object.keys(operations[i])[0];
         // Check if we have a collation
-        if (operations[i][key].collation) {
+        if (((operations[i] as any)[key] as any).collation) {
           collation = true;
         }
 
