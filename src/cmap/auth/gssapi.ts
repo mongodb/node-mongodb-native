@@ -2,6 +2,9 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
 import { Kerberos } from '../../deps';
 import type { Callback } from '../../utils';
+import type { HandshakeDocument } from '../connect';
+
+const kGssapiClient = Symbol('GSSAPI_CLIENT');
 
 import * as dns from 'dns';
 
@@ -26,9 +29,14 @@ interface GSSAPIContext {
 }
 
 export class GSSAPI extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback): void {
+  [kGssapiClient]: KerberosClient;
+  prepare(
+    handshakeDoc: HandshakeDocument,
+    authContext: AuthContext,
+    callback: Callback<HandshakeDocument>
+  ): void {
     const { host, port } = authContext.options;
-    const { connection, credentials } = authContext;
+    const { credentials } = authContext;
     if (!host || !port || !credentials) {
       return callback(
         new MongoError(
@@ -43,14 +51,46 @@ export class GSSAPI extends AuthProvider {
       return callback(Kerberos['kModuleError']);
     }
 
-    const username = credentials.username;
-    const password = credentials.password;
-    const mechanismProperties = credentials.mechanismProperties;
-    const gssapiServiceName =
+    const { username, password, mechanismProperties } = credentials;
+    const serviceName =
       mechanismProperties['gssapiservicename'] ||
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
+    const canonicalizeHostName =
+      typeof mechanismProperties.gssapiCanonicalizeHostName === 'boolean'
+        ? mechanismProperties.gssapiCanonicalizeHostName
+        : false;
 
+    performGssapiCanonicalizeHostName(
+      canonicalizeHostName,
+      host,
+      (err?: Error | MongoError, host?: string) => {
+        if (err) return callback(err);
+
+        const initOptions = {};
+        if (password != null) {
+          Object.assign(initOptions, { user: username, password: password });
+        }
+
+        Kerberos.initializeClient(
+          `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
+          initOptions,
+          (err: string, client: KerberosClient): void => {
+            if (err) return callback(new Error(err));
+            if (client == null) return callback(new Error('null gssapi client'));
+            this[kGssapiClient] = client;
+            callback(undefined, handshakeDoc);
+          }
+        );
+      }
+    );
+  }
+
+  auth(authContext: AuthContext, callback: Callback): void {
+    const client = this[kGssapiClient];
+    const { connection, credentials } = authContext;
+    if (credentials == null) return callback(new Error('credentials required'));
+    const { username } = credentials;
     function externalCommand(
       command: object,
       cb: (
@@ -60,134 +100,73 @@ export class GSSAPI extends AuthProvider {
     ) {
       return connection.command('$external.$cmd', command, cb);
     }
-
-    initialize(
-      {
-        retries: 10,
-        host,
-        port,
-        username,
-        password,
-        serviceName: gssapiServiceName,
-        canonicalizeHostName:
-          typeof mechanismProperties.gssapiCanonicalizeHostName === 'boolean'
-            ? mechanismProperties.gssapiCanonicalizeHostName
-            : false
-      },
-      (err, context) => {
-        if (err) return callback(err);
-
-        context!.client.step('', (err, payload) => {
-          if (err) return callback(err);
-
-          externalCommand(
-            {
-              saslStart: 1,
-              mechanism: 'GSSAPI',
-              payload,
-              autoAuthorize: 1
-            },
-            (err, result) => {
-              if (err) return callback(err);
-
-              const doc = result.result;
-              negotiate(context!, doc.payload, (err, payload) => {
-                if (err) return callback(err);
-
-                externalCommand(
-                  {
-                    saslContinue: 1,
-                    conversationId: doc.conversationId,
-                    payload
-                  },
-                  (err, result) => {
-                    if (err) return callback(err);
-
-                    const doc = result.result;
-                    finalize(context!, doc.payload, (err, payload) => {
-                      if (err) return callback(err);
-
-                      externalCommand(
-                        {
-                          saslContinue: 1,
-                          conversationId: doc.conversationId,
-                          payload
-                        },
-                        (err, result) => {
-                          if (err) return callback(err);
-
-                          callback(undefined, result.result);
-                        }
-                      );
-                    });
-                  }
-                );
-              });
-            }
-          );
-        });
-      }
-    );
-  }
-}
-
-function initialize(
-  context: Omit<GSSAPIContext, 'client'>,
-  callback: (err?: Error, context?: GSSAPIContext) => void
-): void {
-  // Canonicialize host name if needed
-  function performGssapiCanonicalizeHostName(
-    canonicalizeHostName: boolean,
-    host: string,
-    callback: Function
-  ) {
-    if (!canonicalizeHostName) return callback();
-
-    // Attempt to resolve the host name
-    dns.resolveCname(host, (err: Error | null, r: string[]) => {
+    client.step('', (err, payload) => {
       if (err) return callback(err);
 
-      // Get the first resolve host id
-      if (Array.isArray(r) && r.length > 0) {
-        context.host = r[0];
-      }
+      externalCommand(saslStart(payload), (err, result) => {
+        if (err) return callback(err);
 
-      callback();
+        const doc = result.result;
+        negotiate(client, 10, doc.payload, (err, payload) => {
+          if (err) return callback(err);
+
+          externalCommand(saslContinue(payload, doc.conversationId), (err, result) => {
+            if (err) return callback(err);
+
+            const doc = result.result;
+            finalize(client, username, doc.payload, (err, payload) => {
+              if (err) return callback(err);
+
+              externalCommand(
+                {
+                  saslContinue: 1,
+                  conversationId: doc.conversationId,
+                  payload
+                },
+                (err, result) => {
+                  if (err) return callback(err);
+
+                  callback(undefined, result.result);
+                }
+              );
+            });
+          });
+        });
+      });
     });
   }
-
-  // Canonicialize host name if needed
-  performGssapiCanonicalizeHostName(context.canonicalizeHostName, context.host, (err: Error) => {
-    if (err) return callback(err);
-
-    const initOptions = {};
-    if (context.password != null) {
-      Object.assign(initOptions, { user: context.username, password: context.password });
-    }
-
-    Kerberos.initializeClient(
-      `${context.serviceName}${process.platform === 'win32' ? '/' : '@'}${context.host}`,
-      initOptions,
-      (err: string, client: KerberosClient): void => {
-        if (err) return callback(new Error(err));
-        const c: GSSAPIContext = Object.assign({ client }, context);
-        callback(undefined, c);
-      }
-    );
-  });
+}
+function saslStart(payload?: string): object {
+  return {
+    saslStart: 1,
+    mechanism: 'GSSAPI',
+    payload,
+    autoAuthorize: 1
+  };
 }
 
-function negotiate(context: GSSAPIContext, payload: string, callback: Callback<string>) {
-  context.client.step(payload, (err, response) => {
-    if (err && context.retries === 0) return callback(err);
+function saslContinue(payload?: string, conversationId?: number): object {
+  return {
+    saslContinue: 1,
+    conversationId,
+    payload
+  };
+}
+
+function negotiate(
+  client: KerberosClient,
+  retries: number,
+  payload: string,
+  callback: Callback<string>
+) {
+  client.step(payload, (err, response) => {
+    if (err && retries === 0) return callback(err);
 
     // Attempt to re-establish a context
     if (err) {
       // Adjust the number of retries
-      context.retries = context.retries - 1;
-
       // Call same step again
-      return negotiate(context, payload, callback);
+      return negotiate(client, retries - 1, payload, callback);
     }
 
     // Return the payload
@@ -195,17 +174,42 @@ function negotiate(context: GSSAPIContext, payload: string, callback: Callback<s
   });
 }
 
-function finalize(context: GSSAPIContext, payload: string, callback: Callback<string>) {
+function finalize(
+  client: KerberosClient,
+  user: string,
+  payload: string,
+  callback: Callback<string>
+) {
   // GSS Client Unwrap
-  context.client.unwrap(payload, (err, response) => {
+  client.unwrap(payload, (err, response) => {
     if (err) return callback(err);
 
     // Wrap the response
-    context.client.wrap(response || '', { user: context.username }, (err, wrapped) => {
+    client.wrap(response || '', { user }, (err, wrapped) => {
       if (err) return callback(err);
 
       // Return the payload
       callback(undefined, wrapped);
     });
+  });
+}
+
+function performGssapiCanonicalizeHostName(
+  canonicalizeHostName: boolean,
+  host: string,
+  callback: Callback<string>
+) {
+  if (!canonicalizeHostName) return callback(undefined, host);
+
+  // Attempt to resolve the host name
+  dns.resolveCname(host, (err: Error | null, r: string[]) => {
+    if (err) return callback(err);
+
+    // Get the first resolve host id
+    if (Array.isArray(r) && r.length > 0) {
+      return callback(undefined, r[0]);
+    }
+
+    callback(undefined, host);
   });
 }

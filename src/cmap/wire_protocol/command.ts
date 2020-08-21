@@ -28,6 +28,8 @@ export interface CommandOptions extends BSONSerializeOptions {
   willRetryWrite?: boolean;
   retryWrites?: boolean;
   retrying?: boolean;
+
+  writeConcern?: any;
 }
 
 function isClientEncryptionEnabled(server: Server) {
