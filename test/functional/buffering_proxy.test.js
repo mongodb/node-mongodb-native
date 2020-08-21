@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
 const { ReadPreference, ObjectId } = require('../../src');
+const { expect } = require('chai');
 
 var extend = function (template, fields) {
   var object = {};
@@ -185,7 +186,7 @@ describe.skip('Buffering Proxy', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
           var results = [];
 
@@ -195,7 +196,7 @@ describe.skip('Buffering Proxy', function () {
 
             setTimeout(function () {
               db.collection('test').insertOne({ a: 1 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 results.push('insertOne');
               });
 
@@ -203,7 +204,7 @@ describe.skip('Buffering Proxy', function () {
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('count');
                 }
               );
@@ -211,7 +212,7 @@ describe.skip('Buffering Proxy', function () {
               db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('aggregate');
                 });
 
@@ -219,7 +220,7 @@ describe.skip('Buffering Proxy', function () {
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('find');
                 });
 
@@ -407,7 +408,7 @@ describe.skip('Buffering Proxy', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           setTimeout(function () {
@@ -418,7 +419,7 @@ describe.skip('Buffering Proxy', function () {
               var results = [];
 
               db.collection('test').insertOne({ a: 1 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 results.push('insertOne');
               });
 
@@ -426,7 +427,7 @@ describe.skip('Buffering Proxy', function () {
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('count');
                 }
               );
@@ -434,7 +435,7 @@ describe.skip('Buffering Proxy', function () {
               db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('aggregate');
                 });
 
@@ -442,7 +443,7 @@ describe.skip('Buffering Proxy', function () {
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('find');
                 });
 

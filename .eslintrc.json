@@ -8,15 +8,14 @@
     "@typescript-eslint",
     "prettier",
     "promise",
-    "jsdoc"
+    "eslint-plugin-tsdoc"
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
-    "plugin:prettier/recommended",
-    "plugin:jsdoc/recommended"
+    "plugin:prettier/recommended"
   ],
   "env": {
     "node": true,
@@ -26,21 +25,7 @@
   "rules": {
     "prettier/prettier": "error",
 
-    "jsdoc/check-tag-names": [
-      "warn",
-      {
-        "definedTags": ["example-class", "example-method"]
-      }
-    ],
-    "jsdoc/require-jsdoc": "off",
-    "jsdoc/no-undefined-types": "off",
-    "jsdoc/require-param": "off",
-    "jsdoc/require-param-type": "off",
-    "jsdoc/require-param-description": "off",
-    "jsdoc/require-returns": "off",
-    "jsdoc/require-returns-description": "off",
-    "jsdoc/require-returns-type": "off",
-    "jsdoc/valid-types": "off",
+    "tsdoc/syntax": "warn",
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],

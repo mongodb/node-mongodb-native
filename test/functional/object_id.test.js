@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
@@ -116,7 +117,7 @@ describe('ObjectId', function () {
         date.setUTCSeconds(30);
 
         collection.insert({ _id: date }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.find({ _id: date }).toArray(function (err, items) {
             test.equal('' + date, '' + items[0]._id);
 
@@ -175,21 +176,21 @@ describe('ObjectId', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertWithObjectId');
         collection.insert({}, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           const firstCompareDate = new Date();
 
           setTimeout(function () {
             collection.insert({}, { w: 1 }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               const secondCompareDate = new Date();
 
               collection.find().toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Date 1
                 var date1 = new Date();

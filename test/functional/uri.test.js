@@ -31,7 +31,7 @@ describe('URI', function () {
           if (result) {
             expect(result.result.ok).to.equal(1);
           } else {
-            expect(result).to.be.null;
+            expect(result).to.not.exist;
           }
 
           client.close(done);
@@ -122,7 +122,6 @@ describe('URI', function () {
 
       const client = this.configuration.newClient(uri, { useNewUrlParser: true });
       client.connect((err, client) => {
-        if (err) console.dir(err);
         expect(err).to.not.exist;
         expect(client).to.exist;
         expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
@@ -136,7 +135,7 @@ describe('URI', function () {
     test: function (done) {
       function validateConnect(options /*, callback */) {
         expect(options).to.have.property('credentials');
-        expect(options.credentials.mechanism).to.eql('x509');
+        expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
         connectStub.restore();
         done();

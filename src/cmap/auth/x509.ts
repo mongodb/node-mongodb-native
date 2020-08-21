@@ -1,8 +1,9 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import type { Callback, Document } from '../../types';
+import { MongoError } from '../../error';
+import type { Document } from '../../bson';
+import type { Callback } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
-import { MongoError } from '../../error';
 
 export class X509 extends AuthProvider {
   prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback): void {

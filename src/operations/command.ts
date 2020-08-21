@@ -1,23 +1,54 @@
-import { Aspect, OperationBase } from './operation';
-import ReadConcern = require('../read_concern');
-import { WriteConcern } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { ReadPreference } from '../read_preference';
-import { commandSupportsReadConcern } from '../sessions';
+import { Aspect, OperationBase, OperationOptions } from './operation';
+import { ReadConcern } from '../read_concern';
+import { WriteConcern, WriteConcernOptions } from '../write_concern';
+import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { commandSupportsReadConcern, ClientSession } from '../sessions';
 import { MongoError } from '../error';
-import Logger = require('../logger');
-
+import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
+import type { Document } from '../bson';
+import type { CommandOptions } from '../cmap/wire_protocol/command';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
-interface CommandOperationOptions {
+/** @public */
+export interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
+  fullResponse?: boolean;
+  /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcern;
+  /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
+  readPreference?: ReadPreferenceLike;
+  /** Specify ClientSession for this command */
+  session?: ClientSession;
+  /** Collation */
+  collation?: CollationOptions;
+  maxTimeMS?: number;
+  /** A user-provided comment to attach to this command */
+  comment?: string | Document;
+  /** Should retry failed writes */
+  retryWrites?: boolean;
+
+  // Admin command overrides.
   dbName?: string;
   authdb?: string;
-  fullResponse?: boolean;
 }
 
-class CommandOperation extends OperationBase {
+/** @internal */
+export interface OperationParent {
+  s: { namespace: MongoDBNamespace };
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
+  readPreference?: ReadPreference;
+  logger?: Logger;
+}
+
+/** @internal */
+export abstract class CommandOperation<
+  T extends CommandOperationOptions = CommandOperationOptions,
+  TResult = Document
+> extends OperationBase<T> {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
@@ -25,14 +56,8 @@ class CommandOperation extends OperationBase {
   explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
-  server?: Server;
 
-  /**
-   * @param {any} parent
-   * @param {any} [options]
-   * @param {any} [operationOptions]
-   */
-  constructor(parent: any, options?: any, operationOptions?: CommandOperationOptions) {
+  constructor(parent: OperationParent, options?: T) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -55,23 +80,19 @@ class CommandOperation extends OperationBase {
       this.fullResponse = options.fullResponse;
     }
 
-    if (operationOptions && typeof operationOptions.fullResponse === 'boolean') {
-      this.fullResponse = operationOptions.fullResponse;
-    }
-
     // TODO: A lot of our code depends on having the read preference in the options. This should
     //       go away, but also requires massive test rewrites.
     this.options.readPreference = this.readPreference;
 
     // TODO(NODE-2056): make logger another "inheritable" property
-    if (parent.s.logger) {
-      this.logger = parent.s.logger;
-    } else if (parent.s.db && parent.s.db.logger) {
-      this.logger = parent.s.db.logger;
+    if (parent.logger) {
+      this.logger = parent.logger;
     }
   }
 
-  executeCommand(server: any, cmd: any, callback: Function) {
+  abstract execute(server: Server, callback: Callback<TResult>): void;
+
+  executeCommand(server: Server, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -114,28 +135,26 @@ class CommandOperation extends OperationBase {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options, (err?: any, result?: any) => {
+    server.command(this.ns.toString(), cmd, this.options as CommandOptions, (err, result) => {
       if (err) {
         callback(err, null);
         return;
       }
 
       if (this.fullResponse) {
-        callback(null, result);
+        callback(undefined, result);
         return;
       }
 
-      callback(null, result.result);
+      callback(undefined, result?.result);
     });
   }
 }
 
-function resolveWriteConcern(parent: any, options: any) {
-  return WriteConcern.fromOptions(options) || (parent && parent.writeConcern);
+function resolveWriteConcern(parent: OperationParent | undefined, options: any) {
+  return WriteConcern.fromOptions(options) || parent?.writeConcern;
 }
 
-function resolveReadConcern(parent: any, options: any) {
-  return ReadConcern.fromOptions(options) || (parent && parent.readConcern);
+function resolveReadConcern(parent: OperationParent | undefined, options: any) {
+  return ReadConcern.fromOptions(options) || parent?.readConcern;
 }
-
-export = CommandOperation;

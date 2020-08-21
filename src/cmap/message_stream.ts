@@ -18,7 +18,8 @@ import {
   Compressor,
   CompressorName
 } from './wire_protocol/compression';
-import type { Callback, Document, BSONSerializeOptions } from '../types';
+import type { Document, BSONSerializeOptions } from '../bson';
+import type { Callback } from '../utils';
 import type { ClientSession } from '../sessions';
 
 const MESSAGE_HEADER_SIZE = 16;
@@ -27,10 +28,12 @@ const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compre
 const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
 const kBuffer = Symbol('buffer');
 
-interface MessageStreamOptions extends DuplexOptions {
+/** @internal */
+export interface MessageStreamOptions extends DuplexOptions {
   maxBsonMessageSize?: number;
 }
 
+/** @internal */
 export interface OperationDescription extends BSONSerializeOptions {
   started: number;
   cb: Callback<CommandResult>;
@@ -50,6 +53,7 @@ export interface OperationDescription extends BSONSerializeOptions {
 /**
  * A duplex stream that is capable of reading and writing raw wire protocol messages, with
  * support for optional compression
+ * @internal
  */
 export class MessageStream extends Duplex {
   maxBsonMessageSize: number;

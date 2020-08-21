@@ -2,7 +2,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
+const { expect } = require('chai');
 
 describe('Find and Modify', function () {
   before(function () {
@@ -21,7 +21,7 @@ describe('Find and Modify', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -36,12 +36,12 @@ describe('Find and Modify', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, { fsync: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
           // Cleanup
@@ -50,7 +50,7 @@ describe('Find and Modify', function () {
 
           // Execute findOneAndReplace
           collection.findOneAndReplace({}, { b: 1 }, { fsync: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
             // Cleanup
@@ -59,7 +59,7 @@ describe('Find and Modify', function () {
 
             // Execute findOneAndReplace
             collection.findOneAndDelete({}, { fsync: 1 }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
               listener.uninstrument();
@@ -83,7 +83,7 @@ describe('Find and Modify', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -98,12 +98,12 @@ describe('Find and Modify', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('findAndModifyTEST', { fsync: 1 });
         // Execute findOneAndUpdate
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
           // Cleanup
@@ -112,7 +112,7 @@ describe('Find and Modify', function () {
 
           // Execute findOneAndReplace
           collection.findOneAndReplace({}, { b: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
             // Cleanup
@@ -121,7 +121,7 @@ describe('Find and Modify', function () {
 
             // Execute findOneAndReplace
             collection.findOneAndDelete({}, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
               listener.uninstrument();
@@ -146,7 +146,7 @@ describe('Find and Modify', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -163,12 +163,12 @@ describe('Find and Modify', function () {
       // Establish connection to db
       const client = configuration.newClient(url, { sslValidate: false });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         var collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
           // Cleanup
@@ -177,7 +177,7 @@ describe('Find and Modify', function () {
 
           // Execute findOneAndReplace
           collection.findOneAndReplace({}, { b: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
             // Cleanup
@@ -186,7 +186,7 @@ describe('Find and Modify', function () {
 
             // Execute findOneAndReplace
             collection.findOneAndDelete({}, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
               listener.uninstrument();
@@ -210,12 +210,12 @@ describe('Find and Modify', function () {
       const client = configuration.newClient({ readPreference: 'secondary' }, { poolSize: 1 });
       client.connect((err, client) => {
         const db = client.db(configuration.db);
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         const collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           client.close(true, done);
         });

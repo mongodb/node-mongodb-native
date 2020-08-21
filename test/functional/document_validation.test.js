@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 
 describe('Document Validation', function () {
@@ -22,7 +23,7 @@ describe('Document Validation', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Get collection
         var col = db.collection('createValidationCollection');
@@ -34,7 +35,7 @@ describe('Document Validation', function () {
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Ensure validation was correctly applied
               col.insert({ b: 1 }, function (err) {
@@ -42,15 +43,15 @@ describe('Document Validation', function () {
 
                 // Ensure validation was correctly applied
                 col.insert({ b: 1 }, { bypassDocumentValidation: true }, function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Bypass valiation on insert
                   col.insertOne({ b: 1 }, { bypassDocumentValidation: true }, function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // Bypass valiation on insert
                     col.insertMany([{ b: 1 }], { bypassDocumentValidation: true }, function (err) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       client.close(done);
                     });
@@ -79,7 +80,7 @@ describe('Document Validation', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Get collection
         var col = db.collection('createValidationCollection');
@@ -91,7 +92,7 @@ describe('Document Validation', function () {
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Should fail
               col.update({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function (err) {
@@ -103,7 +104,7 @@ describe('Document Validation', function () {
                   { $set: { b: 1 } },
                   { upsert: true, bypassDocumentValidation: true },
                   function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // updateOne
                     col.updateOne(
@@ -111,7 +112,7 @@ describe('Document Validation', function () {
                       { $set: { c: 1 } },
                       { upsert: true, bypassDocumentValidation: true },
                       function (err) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
 
                         // updateMany
                         col.updateMany(
@@ -119,7 +120,7 @@ describe('Document Validation', function () {
                           { $set: { d: 1 } },
                           { upsert: true, bypassDocumentValidation: true },
                           function (err) {
-                            test.equal(null, err);
+                            expect(err).to.not.exist;
 
                             // updateMany
                             col.replaceOne(
@@ -127,7 +128,7 @@ describe('Document Validation', function () {
                               { e: 1 },
                               { upsert: true, bypassDocumentValidation: true },
                               function (err) {
-                                test.equal(null, err);
+                                expect(err).to.not.exist;
 
                                 client.close(done);
                               }
@@ -161,7 +162,7 @@ describe('Document Validation', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Get collection
         var col = db.collection('createValidationCollection');
@@ -173,7 +174,7 @@ describe('Document Validation', function () {
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Should fail
               col.bulkWrite([{ insertOne: { b: 1 } }], function (err) {
@@ -183,7 +184,7 @@ describe('Document Validation', function () {
                   [{ insertOne: { b: 1 } }],
                   { bypassDocumentValidation: true },
                   function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     client.close(done);
                   }
@@ -211,7 +212,7 @@ describe('Document Validation', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Get collection
         var col = db.collection('createValidationCollection');
@@ -223,7 +224,7 @@ describe('Document Validation', function () {
             'createValidationCollection',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Should fail
               col.findOneAndUpdate({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function (err) {
@@ -235,7 +236,7 @@ describe('Document Validation', function () {
                   { $set: { b: 1 } },
                   { upsert: true, bypassDocumentValidation: true },
                   function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // Should pass
                     col.findOneAndReplace(
@@ -243,7 +244,7 @@ describe('Document Validation', function () {
                       { c: 1 },
                       { upsert: true, bypassDocumentValidation: true },
                       function (err) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
 
                         client.close(done);
                       }
@@ -299,11 +300,11 @@ describe('Document Validation', function () {
             'createValidationCollectionOut',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Insert the docs
               col.insertMany(docs, { w: 1, bypassDocumentValidation: true }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Execute aggregate, notice the pipeline is expressed as an Array
                 const cursor = col.aggregate(
@@ -327,7 +328,7 @@ describe('Document Validation', function () {
                 );
 
                 cursor.toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   client.close(done);
                 });
@@ -365,7 +366,7 @@ describe('Document Validation', function () {
             'createValidationCollectionOut',
             { validator: { a: { $exists: true } } },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Get write concern
               var writeConcern = configuration.writeConcernMax();
@@ -376,7 +377,7 @@ describe('Document Validation', function () {
                 [{ user_id: 1 }, { user_id: 2 }],
                 { bypassDocumentValidation: true },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // String functions
                   var map = 'function() { emit(this.user_id, 1); }';
@@ -390,7 +391,7 @@ describe('Document Validation', function () {
                       bypassDocumentValidation: true
                     },
                     function (err) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       client.close(done);
                     }

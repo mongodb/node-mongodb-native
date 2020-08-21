@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { MongoClient } = require('../../src');
+const { expect } = require('chai');
 
 describe('SCRAM', function () {
   before(function () {
@@ -21,39 +22,39 @@ describe('SCRAM', function () {
 
       // Connect to the server
       MongoClient.connect('mongodb://localhost:27017/test', function (err, db) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Create an admin user
         db.admin().addUser(user, password, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           db.close();
 
           // Attempt to reconnect authenticating against the admin database
           MongoClient.connect(
             'mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5',
             function (err, client) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               db.collection('test').insert({ a: 1 }, function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(r != null);
 
                 // Wait for a reconnect to happen
                 client.topology.once('reconnect', function () {
                   // Perform an insert after reconnect
                   db.collection('test').insert({ a: 1 }, function (err, r) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(r != null);
 
                     // Attempt to reconnect authenticating against the admin database
                     MongoClient.connect(
                       'mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5',
                       function (err) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
 
                         // Remove the user
                         db.admin().removeUser(user, function (err) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
 
                           db.close();
                           done();

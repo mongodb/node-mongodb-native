@@ -8,7 +8,7 @@ export const STATE_CLOSED = 'closed';
 export const STATE_CONNECTING = 'connecting';
 export const STATE_CONNECTED = 'connected';
 
-// An enumeration of topology types we know about
+/** @public An enumeration of topology types we know about */
 export enum TopologyType {
   Single = 'Single',
   ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
@@ -17,7 +17,7 @@ export enum TopologyType {
   Unknown = 'Unknown'
 }
 
-// An enumeration of server types we know about
+/** @public An enumeration of server types we know about */
 export enum ServerType {
   Standalone = 'Standalone',
   Mongos = 'Mongos',
@@ -34,20 +34,28 @@ export const TOPOLOGY_DEFAULTS = {
   localThresholdMS: 15,
   serverSelectionTimeoutMS: 30000,
   heartbeatFrequencyMS: 10000,
-  minHeartbeatFrequencyMS: 500
+  minHeartbeatFrequencyMS: 500,
+
+  // TODO: remove in v4
+  useRecoveryToken: true
 };
 
+/** @internal */
 export type TimerQueue = Set<NodeJS.Timeout>;
+
+/** @internal */
 export function drainTimerQueue(queue: TimerQueue): void {
   queue.forEach(clearTimeout);
   queue.clear();
 }
 
+/** @internal */
 export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue): boolean {
   clearTimeout(timer);
   return timers.delete(timer);
 }
 
+/** @public */
 export interface ClusterTime {
   clusterTime: Timestamp;
   signature: {

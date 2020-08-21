@@ -1,5 +1,5 @@
 'use strict';
-var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
@@ -38,9 +38,9 @@ describe('Custom PK', function () {
         var collection = db.collection('test_custom_key');
 
         collection.insert({ a: 1 }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.find({ _id: new ObjectId('aaaaaaaaaaaa') }).toArray(function (err, items) {
-            test.equal(1, items.length);
+            expect(items.length).to.equal(1);
 
             client.close(done);
           });

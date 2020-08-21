@@ -77,7 +77,7 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyPerformSingleInsert');
         collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.findOne(function (err, item) {
             test.equal(1, item.a);
@@ -172,7 +172,7 @@ describe('Insert', function () {
         };
         // Insert the collection
         collection.insert(doc, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           // Fetch and check the collection
           collection.findOne({ a: 0 }, function (err, result) {
             test.deepEqual(doc.a, result.a);
@@ -223,7 +223,7 @@ describe('Insert', function () {
         };
 
         collection.insert(motherOfAllDocuments, configuration.writeConcernMax(), function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           collection.findOne(function (err, doc) {
             // Assert correct deserialization of the values
             test.equal(motherOfAllDocuments.string, doc.string);
@@ -270,7 +270,6 @@ describe('Insert', function () {
         //convience curried handler for functions of type 'a -> (err, result)
         function getResult(callback) {
           return function (error, result) {
-            if (error) console.dir(error);
             test.ok(error == null);
             return callback(result);
           };
@@ -280,7 +279,7 @@ describe('Insert', function () {
           'users',
           getResult(function (user_collection) {
             user_collection.remove({}, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               //first, create a user object
               var newUser = { name: 'Test Account', settings: {} };
@@ -485,12 +484,12 @@ describe('Insert', function () {
 
         // Insert the update
         collection.insert({ i: undefined }, configuration.writeConcernMax(), function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(r);
 
           // Locate document
           collection.findOne({}, function (err, item) {
-            test.equal(null, item.i);
+            expect(item.i).to.not.exist;
 
             client.close(done);
           });
@@ -534,7 +533,7 @@ describe('Insert', function () {
           err,
           result
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
             test.equal(normalizedFunctionString(func), object.z.code);
@@ -567,7 +566,7 @@ describe('Insert', function () {
           { i: 1, z: func },
           { w: 1, serializeFunctions: true, ordered: false },
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
               test.equal(normalizedFunctionString(func), object.z.code);
@@ -598,13 +597,13 @@ describe('Insert', function () {
           { _id: '12345678123456781234567812345678', field: '1' },
           configuration.writeConcernMax(),
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             collection
               .find({ _id: '12345678123456781234567812345678' })
               .toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(items[0]._id, '12345678123456781234567812345678');
                 test.equal(items[0].field, '1');
 
@@ -618,11 +617,11 @@ describe('Insert', function () {
                   { _id: binaryUUID, field: '2' },
                   configuration.writeConcernMax(),
                   function (err, result) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(result);
 
                     collection.find({ _id: binaryUUID }).toArray(function (err, items) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(items[0].field, '2');
                       client.close(done);
                     });
@@ -653,7 +652,7 @@ describe('Insert', function () {
           { _id: '12345678123456781234567812345678', field: '1' },
           configuration.writeConcernMax(),
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             collection.update(
@@ -661,7 +660,7 @@ describe('Insert', function () {
               { $set: { field: 0 } },
               configuration.writeConcernMax(),
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.result.n);
                 client.close(done);
               }
@@ -691,7 +690,7 @@ describe('Insert', function () {
         var doc3 = { _id: new ObjectId() };
 
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Create object with dbref
@@ -703,7 +702,7 @@ describe('Insert', function () {
           );
 
           collection.insert([doc2, doc3], configuration.writeConcernMax(), function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             // Get all items
@@ -739,7 +738,7 @@ describe('Insert', function () {
         var collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
 
         collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.update(
@@ -747,11 +746,11 @@ describe('Insert', function () {
             { $set: { a: 2 } },
             configuration.writeConcernMax(),
             function (err, result) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(result);
 
               collection.remove({ a: 2 }, configuration.writeConcernMax(), function (err, result) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(result);
 
                 collection.count(function (err, count) {
@@ -786,12 +785,12 @@ describe('Insert', function () {
           { addresses: { localPart: 'ralph' } },
           configuration.writeConcernMax(),
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             // Let's find our user
             collection.findOne({ 'addresses.localPart': to }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(to, doc.addresses.localPart);
               client.close(done);
             });
@@ -928,7 +927,7 @@ describe('Insert', function () {
         var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
           test.ok(err != null);
-          test.equal(null, result);
+          expect(result).to.not.exist;
 
           client.close(done);
         });
@@ -958,7 +957,7 @@ describe('Insert', function () {
           'Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level'
         );
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.update(
@@ -969,7 +968,7 @@ describe('Insert', function () {
               test.equal(1, result.result.n);
 
               collection.findOne({ str: 'String' }, function (err, item) {
-                test.equal(undefined, item.d);
+                expect(item.d).to.not.exist;
 
                 // Execute a safe insert with replication to two servers
                 collection.findAndModify(
@@ -1013,7 +1012,7 @@ describe('Insert', function () {
           { serializeFunctions: true }
         );
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ str: 'String' }, function (err, item) {
@@ -1044,7 +1043,7 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ str: 'hello' }, function (err, item) {
@@ -1105,7 +1104,7 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field');
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Update two fields
@@ -1114,11 +1113,11 @@ describe('Insert', function () {
             { $set: { Prop1: 'p1_2', 'More.Sub2': 's2_2' } },
             configuration.writeConcernMax(),
             function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, r.result.n);
 
               collection.findOne({ _id: doc._id }, function (err, item) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal('p1_2', item.Prop1);
                 test.equal('s2_2', item.More.Sub2);
                 client.close(done);
@@ -1147,12 +1146,12 @@ describe('Insert', function () {
         );
 
         collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Update two fields
           collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
-            test.equal(r, null);
+            expect(r).to.not.exist;
             test.ok(err != null);
             test.ok(err.result);
 
@@ -1181,7 +1180,7 @@ describe('Insert', function () {
           err,
           result
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ _id: 0 }, function (err, item) {
@@ -1259,11 +1258,11 @@ describe('Insert', function () {
           err,
           result
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ a: 1 }, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(50000, doc.string.length);
             client.close(done);
           });
@@ -1293,11 +1292,11 @@ describe('Insert', function () {
         };
 
         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ c: 1 }, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual(1, doc.c);
             client.close(done);
           });
@@ -1327,11 +1326,11 @@ describe('Insert', function () {
           ];
 
           collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             collection.findOne({ a: 1 }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual(1, doc.a);
 
               client.close(done);
@@ -1360,7 +1359,7 @@ describe('Insert', function () {
           err,
           result
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Dynamically build query
@@ -1375,7 +1374,7 @@ describe('Insert', function () {
             { $set: { 'a.b.d': 1 } },
             configuration.writeConcernMax(),
             function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, r.result.n);
 
               client.close(done);
@@ -1420,7 +1419,7 @@ describe('Insert', function () {
 
     test: function (done) {
       function cb(err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         client.close(done);
       }
 
@@ -1443,7 +1442,7 @@ describe('Insert', function () {
 
     test: function (done) {
       function cb(err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         client.close(done);
       }
 
@@ -1466,7 +1465,7 @@ describe('Insert', function () {
 
     test: function (done) {
       function cb(err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         client.close(done);
       }
 
@@ -1508,41 +1507,41 @@ describe('Insert', function () {
         };
 
         collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal('abcdefghijkl', doc.symbol.toString());
 
             collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 
               collection.findOne({ double: new Double(1) }, function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, doc.double);
 
                 collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
                   err,
                   doc
                 ) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal('hello world', doc.binary.toString());
 
                   collection.findOne({ minkey: new MinKey() }, function (err, doc) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(doc.minkey._bsontype === 'MinKey');
 
                     collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.ok(doc.maxkey._bsontype === 'MaxKey');
 
                       collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
                         err,
                         doc
                       ) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.ok(doc != null);
                         client.close(done);
                       });
@@ -1585,41 +1584,41 @@ describe('Insert', function () {
         };
 
         collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal('abcdefghijkl', doc.symbol.toString());
 
             collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal('6162636465666768696a6b6c', doc.objid.toString());
 
               collection.findOne({ double: new Double(1) }, function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, doc.double);
 
                 collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
                   err,
                   doc
                 ) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal('hello world', doc.binary.toString());
 
                   collection.findOne({ minkey: new MinKey() }, function (err, doc) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(doc.minkey._bsontype === 'MinKey');
 
                     collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.ok(doc.maxkey._bsontype === 'MaxKey');
 
                       collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
                         err,
                         doc
                       ) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.ok(doc != null);
                         client.close(done);
                       });
@@ -1652,15 +1651,15 @@ describe('Insert', function () {
         var documents = [{ x: new Timestamp(1, 2) }, { x: d }];
 
         collection.insert(documents, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({ x: new Timestamp(1, 2) }, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc != null);
 
             collection.findOne({ x: d }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(doc != null);
               client.close(done);
             });
@@ -1690,11 +1689,11 @@ describe('Insert', function () {
         };
 
         collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           collection.findOne({}, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(Number.POSITIVE_INFINITY, doc.pos);
             test.equal(Number.NEGATIVE_INFINITY, doc.neg);
             client.close(done);
@@ -1720,7 +1719,7 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         db.createCollection('test_regex', function (err, collection) {
           collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(ids);
 
             collection
@@ -1754,14 +1753,14 @@ describe('Insert', function () {
         var collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
         collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(ids);
 
           collection
             .find({})
             .project({ b: 1 })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal('' + regexp, '' + items[0].b);
               // Let's close the db
               client.close(done);
@@ -1823,11 +1822,11 @@ describe('Insert', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLong').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(doc.doc._bsontype === 'Long');
               test.ok(doc.array[0][0]._bsontype === 'Long');
               client.close(done);
@@ -1884,14 +1883,14 @@ describe('Insert', function () {
             { a: Long.fromNumber(10) }
           ],
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
               .find({})
               .batchSize(2)
               .toArray(function (err, docs) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 var doc = docs.pop();
 
                 test.ok(doc.a._bsontype === 'Long');
@@ -1921,15 +1920,15 @@ describe('Insert', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function (
               err,
               doc
             ) {
-              test.equal(null, err);
-              test.equal(null, err);
+              expect(err).to.not.exist;
+              expect(err).to.not.exist;
               test.ok('number', typeof doc.doc);
               test.ok('number', typeof doc.array[0][0]);
               client.close(done);
@@ -1961,15 +1960,15 @@ describe('Insert', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function (
               err,
               doc
             ) {
-              test.equal(null, err);
-              test.equal(null, err);
+              expect(err).to.not.exist;
+              expect(err).to.not.exist;
               test.ok(doc.doc._bsontype === 'Long');
               test.ok(doc.array[0][0]._bsontype === 'Long');
               client.close(done);
@@ -1998,12 +1997,12 @@ describe('Insert', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function (err, doc) {
-              test.equal(null, err);
-              test.equal(null, err);
+              expect(err).to.not.exist;
+              expect(err).to.not.exist;
               test.ok('number', typeof doc.doc);
               test.ok('number', typeof doc.array[0][0]);
               client.close(done);
@@ -2034,7 +2033,7 @@ describe('Insert', function () {
           { $set: { b: 1 } },
           { checkKeys: false },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             client.close(done);
@@ -2059,15 +2058,15 @@ describe('Insert', function () {
         var col = db.collection('shouldCorrectlyApplyBitOperator');
 
         col.insert({ a: 1, b: 1 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           col.update({ a: 1 }, { $bit: { b: { and: 0 } } }, function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(result);
 
             col.findOne({ a: 1 }, function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, doc.a);
               test.equal(0, doc.b);
 
@@ -2107,7 +2106,7 @@ describe('Insert', function () {
             }
           },
           function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc);
 
             col.update(
@@ -2120,11 +2119,11 @@ describe('Insert', function () {
                 }
               },
               function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(doc);
 
                 col.findOne({ a: 1 }, function (err, doc) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(trim('function (y){return y;}'), trim(doc.f.code));
                   client.close(done);
                 });
@@ -2158,7 +2157,7 @@ describe('Insert', function () {
         }
 
         col.insert(docs, function (err, doc) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(2000, doc.result.n);
           docs = [];
 
@@ -2167,7 +2166,7 @@ describe('Insert', function () {
           }
 
           col.insertMany(docs, function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2000, doc.result.n);
 
             client.close(done);
@@ -2196,7 +2195,7 @@ describe('Insert', function () {
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             col.insertMany(
@@ -2236,7 +2235,7 @@ describe('Insert', function () {
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             col.insert(
@@ -2277,14 +2276,14 @@ describe('Insert', function () {
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             col.insertMany(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function (err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 
@@ -2317,14 +2316,14 @@ describe('Insert', function () {
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             col.insert(
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function (err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 
@@ -2345,7 +2344,7 @@ describe('Insert', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -2360,12 +2359,12 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('apm_test')
           .insertOne({ a: 1 }, { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
             listener.uninstrument();
 
             client.close(done);
@@ -2382,7 +2381,7 @@ describe('Insert', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -2397,12 +2396,12 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
 
             listener.uninstrument();
             client.close(done);
@@ -2419,7 +2418,7 @@ describe('Insert', function () {
       var succeeded = [];
 
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       listener.on('started', function (event) {
@@ -2434,12 +2433,12 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('apm_test')
           .insertMany([{ a: 1 }], { forceServerObjectId: true })
           .then(function () {
-            test.equal(undefined, started[0].command.documents[0]._id);
+            expect(started[0].command.documents[0]._id).to.not.exist;
 
             listener.uninstrument();
             client.close(done);
@@ -2455,7 +2454,7 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: true })
           .then(function (r) {
@@ -2473,11 +2472,11 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: false })
           .then(function (r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(3, Object.keys(r.insertedIds).length);
             client.close(done);
           });
@@ -2493,7 +2492,7 @@ describe('Insert', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var shipment = {
           shipment1: 'a'
@@ -2513,13 +2512,13 @@ describe('Insert', function () {
         };
 
         db.collection('sub_documents').insertOne(doc, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(r);
 
           db.collection('sub_documents')
             .find({})
             .next(function (err, v) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
 
               client.close(done);

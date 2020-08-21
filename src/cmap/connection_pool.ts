@@ -1,9 +1,9 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import Logger = require('../logger');
+import { Logger } from '../logger';
 import { Connection, ConnectionOptions } from './connection';
 import { connect } from './connect';
-import { eachAsync, relayEvents, makeCounter } from '../utils';
+import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
@@ -18,8 +18,8 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { Callback } from '../types';
 import type { CommandResult } from './commands';
+import type { CommandOptions } from './wire_protocol/command';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -96,13 +96,14 @@ function resolveOptions(
   const newOptions = {};
   for (const key of VALID_POOL_OPTIONS) {
     if (key in options) {
-      (newOptions as { [key: string]: any })[key] = options[key];
+      (newOptions as { [key: string]: unknown })[key] = options[key];
     }
   }
 
   return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
 }
 
+/** @public */
 export interface ConnectionPoolOptions extends ConnectionOptions {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
@@ -114,62 +115,94 @@ export interface ConnectionPoolOptions extends ConnectionOptions {
   waitQueueTimeoutMS: number;
 }
 
-interface WaitQueueMember {
+/** @internal */
+export interface WaitQueueMember {
   callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
 }
 
+/** @public */
 export interface CloseOptions {
   force?: boolean;
 }
 
-// NOTE: to be removed as part of NODE-2745
+/** @public NOTE: to be removed as part of NODE-2745 */
 export interface ConnectionPool {
   isConnected(): boolean;
   write(
     message: any,
-    commandOptions: any,
+    commandOptions: CommandOptions,
     callback: (err: MongoError, ...args: CommandResult[]) => void
   ): void;
 }
 
-/**
- * A pool of connections which dynamically resizes, and emit events related to pool activity
- *
- * @property {number} generation An integer representing the SDAM generation of the pool
- * @property {number} totalConnectionCount An integer expressing how many total connections (active + in use) the pool currently has
- * @property {number} availableConnectionCount An integer expressing how many connections are currently available in the pool.
- * @property {string} address The address of the endpoint the pool is connected to
- *
- * @fires ConnectionPool#connectionPoolCreated
- * @fires ConnectionPool#connectionPoolClosed
- * @fires ConnectionPool#connectionCreated
- * @fires ConnectionPool#connectionReady
- * @fires ConnectionPool#connectionClosed
- * @fires ConnectionPool#connectionCheckOutStarted
- * @fires ConnectionPool#connectionCheckOutFailed
- * @fires ConnectionPool#connectionCheckedOut
- * @fires ConnectionPool#connectionCheckedIn
- * @fires ConnectionPool#connectionPoolCleared
- */
+/** @public A pool of connections which dynamically resizes, and emit events related to pool activity */
 export class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   [kLogger]: Logger;
   [kConnections]: Denque<Connection>;
+  /** An integer expressing how many total connections are permitted */
   [kPermits]: number;
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
+  /** An integer representing the SDAM generation of the pool */
   [kGeneration]: number;
   [kConnectionCounter]: Generator<number>;
   [kCancellationToken]: EventEmitter;
   [kWaitQueue]: Denque<WaitQueueMember>;
 
   /**
-   * Create a new Connection Pool
-   *
-   * @param {ConnectionPoolOptions} options
+   * Emitted when the connection pool is created.
+   * @event
    */
+  static readonly CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
+  /**
+   * Emitted once when the connection pool is closed
+   * @event
+   */
+  static readonly CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
+  /**
+   * Emitted when a connection is created.
+   * @event
+   */
+  static readonly CONNECTION_CREATED = 'connectionCreated' as const;
+  /**
+   * Emitted when a connection becomes established, and is ready to use
+   * @event
+   */
+  static readonly CONNECTION_READY = 'connectionReady' as const;
+  /**
+   * Emitted when a connection is closed
+   * @event
+   */
+  static readonly CONNECTION_CLOSED = 'connectionClosed' as const;
+  /**
+   * Emitted when an attempt to check out a connection begins
+   * @event
+   */
+  static readonly CONNECTION_CHECK_OUT_STARTED = 'connectionCheckOutStarted' as const;
+  /**
+   * Emitted when an attempt to check out a connection fails
+   * @event
+   */
+  static readonly CONNECTION_CHECK_OUT_FAILED = 'connectionCheckOutFailed' as const;
+  /**
+   * Emitted each time a connection is successfully checked out of the connection pool
+   * @event
+   */
+  static readonly CONNECTION_CHECKED_OUT = 'connectionCheckedOut' as const;
+  /**
+   * Emitted each time a connection is successfully checked into the connection pool
+   * @event
+   */
+  static readonly CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
+  /**
+   * Emitted each time the connection pool is cleared and it's generation incremented
+   * @event
+   */
+  static readonly CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
+
   constructor(options: Partial<ConnectionPoolOptions>) {
     super();
 
@@ -201,23 +234,27 @@ export class ConnectionPool extends EventEmitter {
     this[kWaitQueue] = new Denque();
 
     process.nextTick(() => {
-      this.emit('connectionPoolCreated', new ConnectionPoolCreatedEvent(this));
+      this.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
       ensureMinPoolSize(this);
     });
   }
 
+  /** The address of the endpoint the pool is connected to */
   get address(): string {
     return `${this.options.host}:${this.options.port}`;
   }
 
+  /** An integer representing the SDAM generation of the pool */
   get generation(): number {
     return this[kGeneration];
   }
 
+  /** An integer expressing how many total connections (active + in use) the pool currently has */
   get totalConnectionCount(): number {
     return this[kConnections].length + (this.options.maxPoolSize - this[kPermits]);
   }
 
+  /** An integer expressing how many connections are currently available in the pool. */
   get availableConnectionCount(): number {
     return this[kConnections].length;
   }
@@ -230,29 +267,35 @@ export class ConnectionPool extends EventEmitter {
    * Check a connection out of this pool. The connection will continue to be tracked, but no reference to it
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
-   *
-   * @param {ConnectionPool~checkOutCallback} callback
    */
   checkOut(callback: Callback<Connection>): void {
-    this.emit('connectionCheckOutStarted', new ConnectionCheckOutStartedEvent(this));
+    this.emit(
+      ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
+      new ConnectionCheckOutStartedEvent(this)
+    );
 
     if (this.closed) {
-      this.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(this, 'poolClosed'));
+      this.emit(
+        ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+        new ConnectionCheckOutFailedEvent(this, 'poolClosed')
+      );
       callback(new PoolClosedError(this));
       return;
     }
 
     // add this request to the wait queue
     const waitQueueMember: WaitQueueMember = { callback };
-    const pool = this;
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
       waitQueueMember.timer = setTimeout(() => {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timer = undefined;
 
-        pool.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(pool, 'timeout'));
-        waitQueueMember.callback(new WaitQueueTimeoutError(pool));
+        this.emit(
+          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+          new ConnectionCheckOutFailedEvent(this, 'timeout')
+        );
+        waitQueueMember.callback(new WaitQueueTimeoutError(this));
       }, waitQueueTimeoutMS);
     }
 
@@ -266,7 +309,7 @@ export class ConnectionPool extends EventEmitter {
   /**
    * Check a connection into the pool.
    *
-   * @param {Connection} connection The connection to check in
+   * @param connection - The connection to check in
    */
   checkIn(connection: Connection): void {
     const poolClosed = this.closed;
@@ -279,7 +322,7 @@ export class ConnectionPool extends EventEmitter {
       this[kConnections].push(connection);
     }
 
-    this.emit('connectionCheckedIn', new ConnectionCheckedInEvent(this, connection));
+    this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
     if (willDestroy) {
       const reason = connection.closed ? 'error' : poolClosed ? 'poolClosed' : 'stale';
@@ -300,13 +343,7 @@ export class ConnectionPool extends EventEmitter {
     this.emit('connectionPoolCleared', new ConnectionPoolClearedEvent(this));
   }
 
-  /**
-   * Close the pool
-   *
-   * @param {object} [options] Optional settings
-   * @param {boolean} [options.force] Force close connections
-   * @param {Function} callback
-   */
+  /** Close the pool */
   close(callback: Callback<void>): void;
   close(options: CloseOptions, callback: Callback<void>): void;
   close(_options?: CloseOptions | Callback<void>, _cb?: Callback<void>): void {
@@ -351,15 +388,18 @@ export class ConnectionPool extends EventEmitter {
     // mark the pool as closed immediately
     this.closed = true;
 
-    eachAsync<Connection, MongoError>(
+    eachAsync<Connection>(
       this[kConnections].toArray(),
       (conn, cb) => {
-        this.emit('connectionClosed', new ConnectionClosedEvent(this, conn, 'poolClosed'));
+        this.emit(
+          ConnectionPool.CONNECTION_CLOSED,
+          new ConnectionClosedEvent(this, conn, 'poolClosed')
+        );
         conn.destroy(options, cb);
       },
       err => {
         this[kConnections].clear();
-        this.emit('connectionPoolClosed', new ConnectionPoolClosedEvent(this));
+        this.emit(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
         callback(err);
       }
     );
@@ -371,14 +411,13 @@ export class ConnectionPool extends EventEmitter {
    *
    * NOTE: please note the required signature of `fn`
    *
-   * @param {ConnectionPool~withConnectionCallback} fn A function which operates on a managed connection
-   * @param {Function} callback The original callback
-   * @returns {void}
+   * @param fn - A function which operates on a managed connection
+   * @param callback - The original callback
    */
-  withConnection(fn: WithConnectionCallback, callback: Callback<Connection>): void {
+  withConnection(fn: WithConnectionCallback, callback?: Callback<Connection>): void {
     this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
-      fn(err as any, conn, (fnErr, result) => {
+      fn(err as MongoError, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
             callback(fnErr);
@@ -445,16 +484,16 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
     // forward all events from the connection to the pool
     relayEvents(connection, pool, [
-      'commandStarted',
-      'commandFailed',
-      'commandSucceeded',
-      'clusterTimeReceived'
+      Connection.COMMAND_STARTED,
+      Connection.COMMAND_FAILED,
+      Connection.COMMAND_SUCCEEDED,
+      Connection.CLUSTER_TIME_RECEIVED
     ]);
 
-    pool.emit('connectionCreated', new ConnectionCreatedEvent(pool, connection));
+    pool.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     connection.markAvailable();
-    pool.emit('connectionReady', new ConnectionReadyEvent(pool, connection));
+    pool.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(pool, connection));
 
     // if a callback has been provided, check out the connection immediately
     if (typeof callback === 'function') {
@@ -469,7 +508,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 }
 
 function destroyConnection(pool: ConnectionPool, connection: Connection, reason: string) {
-  pool.emit('connectionClosed', new ConnectionClosedEvent(pool, connection, reason));
+  pool.emit(ConnectionPool.CONNECTION_CLOSED, new ConnectionClosedEvent(pool, connection, reason));
 
   // allow more connections to be created
   pool[kPermits]++;
@@ -507,7 +546,10 @@ function processWaitQueue(pool: ConnectionPool) {
     const isStale = connectionIsStale(pool, connection);
     const isIdle = connectionIsIdle(pool, connection);
     if (!isStale && !isIdle && !connection.closed) {
-      pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
+      pool.emit(
+        ConnectionPool.CONNECTION_CHECKED_OUT,
+        new ConnectionCheckedOutEvent(pool, connection)
+      );
       if (waitQueueMember.timer) {
         clearTimeout(waitQueueMember.timer);
       }
@@ -537,9 +579,15 @@ function processWaitQueue(pool: ConnectionPool) {
       }
 
       if (err) {
-        pool.emit('connectionCheckOutFailed', new ConnectionCheckOutFailedEvent(pool, err));
+        pool.emit(
+          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+          new ConnectionCheckOutFailedEvent(pool, err)
+        );
       } else if (connection) {
-        pool.emit('connectionCheckedOut', new ConnectionCheckedOutEvent(pool, connection));
+        pool.emit(
+          ConnectionPool.CONNECTION_CHECKED_OUT,
+          new ConnectionCheckedOutEvent(pool, connection)
+        );
       }
 
       if (waitQueueMember.timer) {
@@ -554,92 +602,14 @@ function processWaitQueue(pool: ConnectionPool) {
 
 /**
  * A callback provided to `withConnection`
+ * @public
  *
- * @callback ConnectionPool~withConnectionCallback
- * @param {MongoError} error An error instance representing the error during the execution.
- * @param {Connection} connection The managed connection which was checked out of the pool.
- * @param {Function} callback A function to call back after connection management is complete
+ * @param error - An error instance representing the error during the execution.
+ * @param connection - The managed connection which was checked out of the pool.
+ * @param callback - A function to call back after connection management is complete
  */
-type WithConnectionCallback = (
+export type WithConnectionCallback = (
   error: MongoError,
   connection: Connection | undefined,
   callback: Callback<Connection>
 ) => void;
-
-/**
- * A callback provided to `checkOut`
- *
- * @callback ConnectionPool~checkOutCallback
- * @param {MongoError} error An error instance representing the error during checkout
- * @param {Connection} connection A connection from the pool
- */
-
-/**
- * Emitted once when the connection pool is created
- *
- * @event ConnectionPool#connectionPoolCreated
- * @type {PoolCreatedEvent}
- */
-
-/**
- * Emitted once when the connection pool is closed
- *
- * @event ConnectionPool#connectionPoolClosed
- * @type {PoolClosedEvent}
- */
-
-/**
- * Emitted each time a connection is created
- *
- * @event ConnectionPool#connectionCreated
- * @type {ConnectionCreatedEvent}
- */
-
-/**
- * Emitted when a connection becomes established, and is ready to use
- *
- * @event ConnectionPool#connectionReady
- * @type {ConnectionReadyEvent}
- */
-
-/**
- * Emitted when a connection is closed
- *
- * @event ConnectionPool#connectionClosed
- * @type {ConnectionClosedEvent}
- */
-
-/**
- * Emitted when an attempt to check out a connection begins
- *
- * @event ConnectionPool#connectionCheckOutStarted
- * @type {ConnectionCheckOutStartedEvent}
- */
-
-/**
- * Emitted when an attempt to check out a connection fails
- *
- * @event ConnectionPool#connectionCheckOutFailed
- * @type {ConnectionCheckOutFailedEvent}
- */
-
-/**
- * Emitted each time a connection is successfully checked out of the connection pool
- *
- * @event ConnectionPool#connectionCheckedOut
- * @type {ConnectionCheckedOutEvent}
- */
-
-/**
- * Emitted each time a connection is successfully checked into the connection pool
- *
- * @event ConnectionPool#connectionCheckedIn
- * @type {ConnectionCheckedInEvent}
- */
-
-/**
- * Emitted each time the connection pool is cleared and it's generation incremented
- *
- * @event ConnectionPool#connectionPoolCleared
- * @type {PoolClearedEvent}
- */

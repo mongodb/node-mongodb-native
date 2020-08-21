@@ -6,10 +6,12 @@ export { query } from './query';
 export { command } from './command';
 
 import { writeCommand, WriteCommandOptions } from './write_command';
-import type { Callback, Document } from '../../types';
+import type { Document } from '../../bson';
+import type { Callback } from '../../utils';
 
 export { writeCommand };
 
+/** @internal */
 export type InsertOptions = WriteCommandOptions;
 
 export function insert(
@@ -22,6 +24,7 @@ export function insert(
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 }
 
+/** @internal */
 export type UpdateOptions = WriteCommandOptions;
 
 export function update(
@@ -34,6 +37,7 @@ export function update(
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
 }
 
+/** @internal */
 export type RemoveOptions = WriteCommandOptions;
 
 export function remove(

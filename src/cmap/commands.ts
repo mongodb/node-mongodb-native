@@ -2,9 +2,8 @@ import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
-import type { Long } from 'bson';
 import type { Connection } from './connection';
-import type { Document, BSONSerializeOptions } from '../types';
+import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 
 // Incrementing request id
@@ -25,8 +24,10 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
+/** @internal */
 export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
+/** @internal */
 export interface OpQueryOptions {
   socketTimeout?: number;
   session?: ClientSession;
@@ -50,6 +51,7 @@ export interface OpQueryOptions {
 /**************************************************************
  * QUERY
  **************************************************************/
+/** @internal */
 export class Query {
   ns: string;
   query: Document;
@@ -264,6 +266,7 @@ export class Query {
   }
 }
 
+/** @internal */
 export interface OpGetMoreOptions {
   numberToReturn?: number;
 }
@@ -271,6 +274,7 @@ export interface OpGetMoreOptions {
 /**************************************************************
  * GETMORE
  **************************************************************/
+/** @internal */
 export class GetMore {
   numberToReturn: number;
   requestId: number;
@@ -363,6 +367,7 @@ export class GetMore {
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
+/** @internal */
 export class KillCursor {
   ns: string;
   requestId: number;
@@ -462,6 +467,7 @@ export interface OpResponseOptions extends BSONSerializeOptions {
   documentsReturnedIn?: string | null;
 }
 
+/** @internal */
 export class Response {
   parsed: boolean;
   raw: Buffer;
@@ -632,6 +638,7 @@ export interface OpMsgOptions {
   readPreference: ReadPreference;
 }
 
+/** @internal */
 export class Msg {
   ns: string;
   command: Document;
@@ -739,6 +746,7 @@ export class Msg {
   }
 }
 
+/** @internal */
 export class BinMsg {
   parsed: boolean;
   raw: Buffer;
@@ -843,10 +851,10 @@ export class BinMsg {
 
 /**
  * Creates a new CommandResult instance
+ * @internal
  *
- * @param {object} result CommandResult object
- * @param {Connection} connection A connection instance associated with this result
- * @returns {CommandResult} A cursor instance
+ * @param result - CommandResult object
+ * @param connection - A connection instance associated with this result
  */
 export class CommandResult {
   ok?: number;
@@ -860,24 +868,14 @@ export class CommandResult {
     this.message = message;
   }
 
-  /**
-   * Convert CommandResult to JSON
-   *
-   * @function
-   * @returns {object}
-   */
+  /** Convert CommandResult to JSON */
   toJSON(): Document {
     const result = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }
 
-  /**
-   * Convert CommandResult to String representation
-   *
-   * @function
-   * @returns {string}
-   */
+  /** Convert CommandResult to String representation */
   toString(): string {
     return JSON.stringify(this.toJSON());
   }

@@ -1,7 +1,7 @@
 'use strict';
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
 const { Code, ObjectId, Long, Binary } = require('../../src');
 
@@ -70,7 +70,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_simple_chained', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           db.collection('test_find_simple_chained', function (err, collection) {
             var doc1 = null;
 
@@ -216,7 +216,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_sorting', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('test_find_sorting', function (err, collection) {
             // Insert some test documents
@@ -229,7 +229,7 @@ describe('Find', function () {
               ],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Test sorting (ascending)
                 collection
@@ -346,7 +346,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_limits', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('test_find_limits', function (err, collection) {
             // Insert some test documents
@@ -354,7 +354,7 @@ describe('Find', function () {
               [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Test limits
                 collection.find({}, { limit: 1 }).toArray(function (err, documents) {
@@ -404,7 +404,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_non_quoted_values', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('test_find_non_quoted_values', function (err, collection) {
             // insert test document
@@ -415,7 +415,7 @@ describe('Find', function () {
               ],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 collection.find({ a: 19 }).toArray(function (err, documents) {
                   test.equal(1, documents.length);
                   client.close(done);
@@ -442,7 +442,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_embedded_document', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('test_find_embedded_document', function (err, collection) {
             // insert test document
@@ -453,7 +453,7 @@ describe('Find', function () {
               ],
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // test using integer value
                 collection.find({ 'a.id': 10 }).toArray(function (err, documents) {
@@ -491,9 +491,9 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_find_one_no_records', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           db.collection('test_find_one_no_records', function (err, collection) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             collection.find({ a: 1 }, {}).toArray(function (err, documents) {
               test.equal(0, documents.length);
               // Let's close the db
@@ -523,20 +523,20 @@ describe('Find', function () {
             [{ a: 1 }, { a: 2 }, { a: 3 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection.count(function (err, count) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(3, count);
 
                 // Let's test usage of the $where statement
                 collection.find({ $where: new Code('this.a > 2') }).count(function (err, count) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1, count);
 
                   collection
                     .find({ $where: new Code('this.a > i', { i: 1 }) })
                     .count(function (err, count) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(2, count);
 
                       // Let's close the db
@@ -563,13 +563,13 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('test_hint', function (err, collection) {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             db.createIndex(
               collection.collectionName,
               'a',
               configuration.writeConcernMax(),
               function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 collection.find({ a: 1 }, { hint: 'a' }).toArray(function (err) {
                   test.ok(err != null);
 
@@ -671,7 +671,7 @@ describe('Find', function () {
           };
 
           collection.insert(doc, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             collection.findOne({ _id: doc._id }, { w: 1, fields: undefined }, function (err, doc) {
               expect(err).to.not.exist;
               test.equal(2, doc.comments.length);
@@ -706,13 +706,13 @@ describe('Find', function () {
           collection
         ) {
           collection.insert({ a: 0 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             db.collection('test_should_correctly_retrieve_one_record', function (
               err,
               usercollection
             ) {
               usercollection.findOne({ a: 0 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 p_client.close(done);
               });
             });
@@ -762,7 +762,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_field_select_with_options', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           db.collection('test_field_select_with_options', function (err, collection) {
             var docCount = 25,
               docs = [];
@@ -778,7 +778,7 @@ describe('Find', function () {
                   test.equal(3, documents.length);
 
                   documents.forEach(function (doc, idx) {
-                    test.equal(undefined, doc.b); // making sure field select works
+                    expect(doc.b).to.not.exist; // making sure field select works
                     test.equal(24 - idx, doc.a); // checking limit sort object with field select
                   });
 
@@ -807,7 +807,7 @@ describe('Find', function () {
         db.createCollection('test_find_and_modify_a_document_1', function (err, collection) {
           // Test return new document on change
           collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's modify the document in place
             collection.findAndModify(
@@ -821,7 +821,7 @@ describe('Find', function () {
 
                 // Test return old document on change
                 collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Let's modify the document in place
                   collection.findAndModify(
@@ -837,7 +837,7 @@ describe('Find', function () {
                       collection.insert({ a: 3, b: 2 }, configuration.writeConcernMax(), function (
                         err
                       ) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         // Let's modify the document in place
                         collection.findAndModify(
                           { a: 3 },
@@ -863,7 +863,7 @@ describe('Find', function () {
                                   { a: 100, b: 101 },
                                   configuration.writeConcernMax(),
                                   function (err, r) {
-                                    test.equal(null, err);
+                                    expect(err).to.not.exist;
 
                                     collection.findAndModify(
                                       { a: 100 },
@@ -915,7 +915,7 @@ describe('Find', function () {
         db.createCollection('test_find_and_modify_a_document_2', function (err, collection) {
           // Test return new document on change
           collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's modify the document in place
             collection.findAndModify(
@@ -968,7 +968,7 @@ describe('Find', function () {
                 configuration.writeConcernMax(),
                 function (err, r) {
                   test.equal(1, r.result.n);
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   collection.findOne({ _id: id }, function (err, item) {
                     test.equal(1, item.meta.visitors);
@@ -1048,7 +1048,7 @@ describe('Find', function () {
             { $set: { name: 'test2' } },
             {},
             function (err, updated_doc) {
-              test.equal(null, updated_doc.value);
+              expect(updated_doc.value).to.not.exist;
               test.ok(err == null || err.errmsg.match('No matching object found'));
               client.close(done);
             }
@@ -1073,13 +1073,13 @@ describe('Find', function () {
             [{ a: 1 }, { b: 2 }, { c: 3 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection
                 .find()
                 .skip(1)
                 .limit(-1)
                 .toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1, items.length);
                   test.equal(2, items[0].b);
                   client.close(done);
@@ -1106,13 +1106,13 @@ describe('Find', function () {
             [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection
                 .find()
                 .skip(1)
                 .limit(-3)
                 .toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(3, items.length);
                   test.equal(2, items[0].b);
                   test.equal(3, items[1].c);
@@ -1209,7 +1209,7 @@ describe('Find', function () {
         ) {
           // Test return old document on change
           collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's modify the document in place
             collection.findAndModify(
@@ -1299,7 +1299,7 @@ describe('Find', function () {
           var doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
 
           collection.insert(doc, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Find and modify returning the new object
             collection.findAndModify(
@@ -1346,7 +1346,7 @@ describe('Find', function () {
             { $set: { 'plays.$.active': true } },
             { new: true, fields: { plays: 0, results: 0 }, safe: true },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               client.close(done);
             }
           );
@@ -1378,7 +1378,7 @@ describe('Find', function () {
           var higherDoc = { _id: _higherId, id: higherId };
 
           collection.insert([lowerDoc, higherDoc], configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Select record with id of 133118461172916225 using $gt directive
             collection.find({ id: { $gt: lowerId } }, {}).toArray(function (err, arr) {
@@ -1421,17 +1421,17 @@ describe('Find', function () {
             var doc = { _id: new ObjectId(), a: 1, c: 2 };
             // insert doc
             collection.insert(doc, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Get one document, excluding the _id field
               collection.findOne({ a: 1 }, { fields: { _id: 0 } }, function (err, item) {
-                test.equal(undefined, item._id);
+                expect(item._id).to.not.exist;
                 test.equal(1, item.a);
                 test.equal(2, item.c);
 
                 collection.find({ a: 1 }, { fields: { _id: 0 } }).toArray(function (err, items) {
                   var item = items[0];
-                  test.equal(undefined, item._id);
+                  expect(item._id).to.not.exist;
                   test.equal(1, item.a);
                   test.equal(2, item.c);
                   p_client.close(done);
@@ -1460,7 +1460,7 @@ describe('Find', function () {
             var doc = { _id: new ObjectId(), a: 1, c: 2, comments: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] };
             // insert doc
             collection.insert(doc, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection
                 .find({ _id: doc._id })
                 .project({ comments: { $slice: -5 } })
@@ -1492,8 +1492,8 @@ describe('Find', function () {
               err,
               updated_doc
             ) {
-              test.equal(null, err);
-              test.equal(null, updated_doc.value);
+              expect(err).to.not.exist;
+              expect(updated_doc.value).to.not.exist;
               client.close(done);
             });
           }
@@ -1531,10 +1531,10 @@ describe('Find', function () {
         };
 
         db.createCollection('find_and_modify_generate_correct_bson', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert(wrapingObject, configuration.writeConcernMax(), function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             collection.findOne(
               {
@@ -1555,7 +1555,7 @@ describe('Find', function () {
                   { $push: { transactions: transaction } },
                   { new: true, safe: true },
                   function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     client.close(done);
                   }
                 );
@@ -1586,7 +1586,7 @@ describe('Find', function () {
 
           // Test return old document on change
           collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             collection
               .find(
                 {
@@ -1597,7 +1597,7 @@ describe('Find', function () {
                 { skip: 0, limit: 10, sort: { updated: -1 } }
               )
               .count(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 numberOfOperations = numberOfOperations + 1;
                 if (numberOfOperations === 2) {
                   p_client.close(done);
@@ -1614,7 +1614,7 @@ describe('Find', function () {
                 { skip: 0, limit: 10, sort: { updated: -1 } }
               )
               .count(function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 numberOfOperations = numberOfOperations + 1;
                 if (numberOfOperations === 2) {
                   p_client.close(done);
@@ -1647,7 +1647,7 @@ describe('Find', function () {
 
             // Insert original doc
             collection.insert(doc, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               collection.findAndModify(q, [], set, opts, function (/* err */) {
                 client.close(done);
               });
@@ -1680,7 +1680,7 @@ describe('Find', function () {
             var id = new ObjectId();
 
             collection.insert({ _id: id, a: 1 }, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection.insert({ _id: id, a: 1 }, configuration.writeConcernMax(), function (err) {
                 test.ok(err !== null);
@@ -1739,7 +1739,7 @@ describe('Find', function () {
         insertF(500, function () {
           var cursor = collection.find({}, {});
           cursor.count(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             cursor.each(function (err, obj) {
               if (obj == null) {
                 test.equal(500, numberOfSteps);
@@ -1767,24 +1767,24 @@ describe('Find', function () {
       });
       p_client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(err, null);
+        expect(err).to.not.exist;
 
         db.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function (
           err,
           collection
         ) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Test return old document on change
           collection.insert(
             [{ login: 'user1' }, { login: 'user2' }],
             configuration.writeConcernMax(),
             function (err, r) {
-              test.equal(err, null);
+              expect(err).to.not.exist;
               var id = r.ops[1]._id;
               // Set an index
               collection.ensureIndex('login', { unique: true, w: 1 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Attemp to modify document
                 collection.findAndModify(
@@ -1821,21 +1821,21 @@ describe('Find', function () {
 
         // Create a collection we want to drop later
         db.createCollection('simple_find_in_array', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           for (var i = 0; i < 100; i++) docs.push({ a: i });
 
           // Insert some test documentations
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Find all the variables in a specific array
             for (var i = 0; i < 100; i++) docs.push(i);
 
             // Fin all in
             collection.find({ a: { $in: docs } }).toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(100, items.length);
 
               client.close(done);
@@ -1856,7 +1856,7 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var col = db.collection('bad_field_selection');
         col.insert(
@@ -1867,7 +1867,7 @@ describe('Find', function () {
           ],
           configuration.writeConcernMax(),
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             col.find({}, { skip: 1, limit: 1, fields: { a: 1, b: 0 } }).toArray(function (err) {
               test.ok(err instanceof Error);
@@ -1895,7 +1895,7 @@ describe('Find', function () {
 
         // Create a collection we want to drop later
         db.createCollection('simple_find_with_fields', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert a bunch of documents for the testing
           collection.insert(
@@ -1906,16 +1906,16 @@ describe('Find', function () {
             ],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Perform a simple find and return all the documents
               collection
                 .find({ a: 2 })
                 .project({ b: 1 })
                 .toArray(function (err, docs) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1, docs.length);
-                  test.equal(undefined, docs[0].a);
+                  expect(docs[0].a).to.not.exist;
                   test.equal(2, docs[0].b);
 
                   // Perform a simple find and return all the documents
@@ -1923,9 +1923,9 @@ describe('Find', function () {
                     .find({ a: 2 })
                     .project({ b: 1 })
                     .toArray(function (err, docs) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(1, docs.length);
-                      test.equal(undefined, docs[0].a);
+                      expect(docs[0].a).to.not.exist;
                       test.equal(2, docs[0].b);
 
                       client.close(done);
@@ -1954,7 +1954,7 @@ describe('Find', function () {
 
         // Create a collection we want to drop later
         db.createCollection('simple_find_with_fields_2', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert a bunch of documents for the testing
           collection.insert(
@@ -1965,16 +1965,16 @@ describe('Find', function () {
             ],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Perform a simple find and return all the documents
               collection
                 .find({ a: 2 })
                 .project({ b: 1 })
                 .toArray(function (err, docs) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(1, docs.length);
-                  test.equal(undefined, docs[0].a);
+                  expect(docs[0].a).to.not.exist;
                   test.equal(2, docs[0].b);
 
                   client.close(done);
@@ -2005,7 +2005,7 @@ describe('Find', function () {
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs = [];
           for (var i = 0; i < 1000; i++) {
@@ -2014,11 +2014,11 @@ describe('Find', function () {
 
           // Insert a bunch of documents for the testing
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
             collection.find({}, { batchSize: 1000 }).toArray(function (err, docs) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1000, docs.length);
 
               client.close(done);
@@ -2056,14 +2056,14 @@ describe('Find', function () {
 
           // Insert a bunch of documents
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
             collection
               .find({})
               .limit(-10)
               .toArray(function (err, docs) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(10, docs.length);
 
                 client.close(done);
@@ -2088,7 +2088,7 @@ describe('Find', function () {
 
         // Create a collection we want to drop later
         db.collection('shouldCorrectlyExecuteExhaustQuery', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var docs1 = [];
           for (var i = 0; i < 1000; i++) {
@@ -2102,7 +2102,7 @@ describe('Find', function () {
 
           // Insert a bunch of documents
           collection.insert(docs1, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             for (var i = 0; i < 1000; i++) {
               var docs2 = [];
@@ -2115,11 +2115,11 @@ describe('Find', function () {
             }
 
             collection.insert(docs2, configuration.writeConcernMax(), function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Perform a simple find and return all the documents
               collection.find({}, { exhaust: true }).toArray(function (err, docs3) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(docs1.length + docs2.length, docs3.length);
 
                 client.close(done);
@@ -2142,7 +2142,7 @@ describe('Find', function () {
 
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var docs = [];
         for (var i = 0; i < 1; i++) {
@@ -2157,10 +2157,10 @@ describe('Find', function () {
         db.collection('Readpreferencesshouldworkfine', function (err, collection) {
           // Insert a bunch of documents
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             // Perform a simple find and return all the documents
             collection.find({}, { exhaust: true }).toArray(function (err, docs2) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(docs.length, docs2.length);
 
               client.close(done);
@@ -2181,12 +2181,12 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         // Create a collection we want to drop later
         db.collection('noresultAvailableForEachToIterate', function (err, collection) {
           // Perform a simple find and return all the documents
           collection.find({}).each(function (err, item) {
-            test.equal(null, item);
+            expect(item).to.not.exist;
 
             client.close(done);
           });
@@ -2210,7 +2210,7 @@ describe('Find', function () {
             { keywords: ['test', 'segmentation', 'fault', 'regex', 'serialization', 'native'] },
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               var count = 20,
                 run = function (i) {
                   // search by regex
@@ -2253,19 +2253,19 @@ describe('Find', function () {
             { _id: 123, name: 'some name', min: 1, max: 10 },
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection
                 .find({ _id: { $in: ['some', 'value', 123] } })
                 .project({ _id: 1, max: 1 })
                 .toArray(function (err, docs) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(10, docs[0].max);
 
                   collection
                     .find({ _id: { $in: ['some', 'value', 123] } }, { fields: { _id: 1, max: 1 } })
                     .toArray(function (err, docs) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.equal(10, docs[0].max);
 
                       client.close(done);
@@ -2297,12 +2297,12 @@ describe('Find', function () {
         // Get the collection
         var collection = db.collection('textSearchWithSort');
         collection.ensureIndex({ s: 'text' }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           collection.insert(
             [{ s: 'spam' }, { s: 'spam eggs and spam' }, { s: 'sausage and eggs' }],
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection
                 .find(
@@ -2311,7 +2311,7 @@ describe('Find', function () {
                 )
                 .sort({ score: { $meta: 'textScore' } })
                 .toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal('spam eggs and spam', items[0].s);
                   client.close(done);
                 });
@@ -2335,8 +2335,8 @@ describe('Find', function () {
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
         collection.find({}, options);
-        test.equal(undefined, options.skip);
-        test.equal(undefined, options.limit);
+        expect(options.skip).to.not.exist;
+        expect(options.limit).to.not.exist;
         test.equal('TEST', options.raw);
         client.close(done);
       });
@@ -2364,13 +2364,13 @@ describe('Find', function () {
         var collection = db.collection('simulate_closed_cursor');
         // Insert 1000 documents in a batch
         collection.insert(docs, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Get the cursor
           var cursor = collection.find({}).batchSize(2);
           // Get next document
           cursor.next(function (err, doc) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(doc != null);
 
             // Mess with state forcing a call to isDead on the cursor
@@ -2406,7 +2406,7 @@ describe('Find', function () {
         db.createCollection('test_find_and_modify_a_document_3', function (err, collection) {
           // Test return new document on change
           collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's modify the document in place
             collection.findAndModify(
@@ -2446,13 +2446,13 @@ describe('Find', function () {
             [{ a: 2 }, { b: 3 }, { b: 4 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // Ensure correct insertion testing via the cursor and the count function
               collection
                 .find()
                 .batchSize(-5)
                 .toArray(function (err, documents) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(3, documents.length);
                   // Let's close the db
                   client.close(done);
@@ -2478,20 +2478,20 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('test_find_simple_limit_0', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert some test documents
           collection.insert(
             [{ a: 2 }, { b: 3 }, { b: 4 }],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               // Ensure correct insertion testing via the cursor and the count function
               collection
                 .find()
                 .limit(-5)
                 .toArray(function (err, documents) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(3, documents.length);
 
                   // Let's close the db
@@ -2518,7 +2518,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('elem_match_test', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert some test documents
           collection.insert(
@@ -2528,13 +2528,13 @@ describe('Find', function () {
             ],
             configuration.writeConcernMax(),
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Ensure correct insertion testing via the cursor and the count function
               collection
                 .find({ results: { $elemMatch: { $gte: 80, $lt: 85 } } })
                 .toArray(function (err, documents) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.deepEqual([{ _id: 1, results: [82, 85, 88] }], documents);
 
                   // Let's close the db
@@ -2561,7 +2561,7 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('test_find_simple_limit_101', function (err, collection) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           function clone(obj) {
             var o = {};
@@ -2590,7 +2590,7 @@ describe('Find', function () {
 
           // Insert some test documents
           collection.insertMany(docs, configuration.writeConcernMax(), function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             // Ensure correct insertion testing via the cursor and the count function
@@ -2598,7 +2598,7 @@ describe('Find', function () {
               .find()
               .limit(200)
               .toArray(function (err, documents) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(200, documents.length);
                 // Let's close the db
                 client.close(done);
@@ -2617,7 +2617,7 @@ describe('Find', function () {
 
     test: function (done) {
       var listener = require('../../src').instrument(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
       });
 
       var configuration = this.configuration;
@@ -2628,7 +2628,7 @@ describe('Find', function () {
 
         // Insert some test documents
         collection.insert([{ a: 2 }, { b: 3, c: undefined }], function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           // Ensure correct insertion testing via the cursor and the count function
           var cursor = collection.find({ c: undefined });
           test.equal(true, cursor.options.ignoreUndefined);

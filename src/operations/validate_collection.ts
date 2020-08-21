@@ -1,17 +1,30 @@
-import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Admin } from '../admin';
 
-class ValidateCollectionOperation extends CommandOperation {
+/** @public */
+export interface ValidateCollectionOptions extends CommandOperationOptions {
+  /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
+  background?: boolean;
+}
+
+/** @internal */
+export class ValidateCollectionOperation extends CommandOperation<
+  ValidateCollectionOptions,
+  Document
+> {
   collectionName: string;
-  command: any;
+  command: Document;
 
-  constructor(admin: any, collectionName: any, options: any) {
+  constructor(admin: Admin, collectionName: string, options: ValidateCollectionOptions) {
     // Decorate command with extra options
-    let command: any = { validate: collectionName };
+    const command: Document = { validate: collectionName };
     const keys = Object.keys(options);
     for (let i = 0; i < keys.length; i++) {
       if (Object.prototype.hasOwnProperty.call(options, keys[i]) && keys[i] !== 'session') {
-        command[keys[i]] = options[keys[i]];
+        command[keys[i]] = (options as Document)[keys[i]];
       }
     }
 
@@ -20,24 +33,21 @@ class ValidateCollectionOperation extends CommandOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Document>): void {
     const collectionName = this.collectionName;
 
-    super.executeCommand(server, this.command, (err?: any, doc?: any) => {
-      if (err != null) return callback(err, null);
+    super.executeCommand(server, this.command, (err, doc) => {
+      if (err != null) return callback(err);
 
-      if (doc.ok === 0) return callback(new Error('Error with validate command'), null);
+      if (doc.ok === 0) return callback(new Error('Error with validate command'));
       if (doc.result != null && doc.result.constructor !== String)
-        return callback(new Error('Error with validation data'), null);
+        return callback(new Error('Error with validation data'));
       if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-        return callback(new Error('Error: invalid collection ' + collectionName), null);
+        return callback(new Error('Error: invalid collection ' + collectionName));
       if (doc.valid != null && !doc.valid)
-        return callback(new Error('Error: invalid collection ' + collectionName), null);
+        return callback(new Error('Error: invalid collection ' + collectionName));
 
-      return callback(null, doc);
+      return callback(undefined, doc);
     });
   }
 }
-
-defineAspects(ValidateCollectionOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = ValidateCollectionOperation;

@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { Decimal128 } = require('../../src');
 
@@ -29,14 +30,14 @@ describe('Decimal128', function () {
         };
 
         db.collection('decimal128').insertOne(object, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('decimal128').findOne(
             {
               id: 1
             },
             function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(doc.value instanceof Decimal128);
               test.equal('1', doc.value.toString());
 

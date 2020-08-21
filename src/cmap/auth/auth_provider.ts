@@ -1,8 +1,8 @@
-import type { Callback, Document } from '../../types';
+import type { Document } from '../../bson';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
-import type { ClientMetadataOptions } from '../../utils';
+import type { ClientMetadataOptions, Callback } from '../../utils';
 
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
@@ -35,9 +35,8 @@ export class AuthProvider {
   /**
    * Prepare the handshake document before the initial handshake.
    *
-   * @param {object} handshakeDoc The document used for the initial handshake on a connection
-   * @param {AuthContext} authContext Context for authentication flow
-   * @param {Function} callback
+   * @param handshakeDoc - The document used for the initial handshake on a connection
+   * @param authContext - Context for authentication flow
    */
   prepare(
     handshakeDoc: HandshakeDocument,
@@ -50,8 +49,8 @@ export class AuthProvider {
   /**
    * Authenticate
    *
-   * @param {AuthContext} context A shared context for authentication flow
-   * @param {Callback<Document>} callback The callback to return the result from the authentication
+   * @param context - A shared context for authentication flow
+   * @param callback - The callback to return the result from the authentication
    */
   auth(context: AuthContext, callback: Callback): void {
     callback(new TypeError('`auth` method must be overridden by subclass'));

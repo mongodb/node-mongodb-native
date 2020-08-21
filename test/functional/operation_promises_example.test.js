@@ -3,6 +3,7 @@ var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { Code } = require('../../src');
+const { expect } = require('chai');
 
 var delay = function (ms) {
   return new Promise(function (resolve) {
@@ -577,7 +578,7 @@ describe('Operation (Promises)', function () {
           })
           .then(function (indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
-            test.equal(undefined, indexInformation.a_1_b_1);
+            expect(indexInformation.a_1_b_1).to.not.exist;
             return client.close();
           });
       });
@@ -862,7 +863,7 @@ describe('Operation (Promises)', function () {
           })
           .then(function (docs) {
             test.equal(1, docs.length);
-            test.equal(undefined, docs[0].a);
+            expect(docs[0].a).to.not.exist;
             test.equal(2, docs[0].b);
             return client.close();
           });
@@ -938,7 +939,7 @@ describe('Operation (Promises)', function () {
             return collection.findOne({ b: 1 });
           })
           .then(function (item) {
-            test.equal(null, item);
+            expect(item).to.not.exist;
 
             // Simple findAndModify command performing an upsert and returning the new document
             // executing the command safely
@@ -1007,7 +1008,7 @@ describe('Operation (Promises)', function () {
             return collection.findOne({ b: 1 });
           })
           .then(function (item) {
-            test.equal(null, item);
+            expect(item).to.not.exist;
             return client.close();
           });
       });
@@ -1062,7 +1063,7 @@ describe('Operation (Promises)', function () {
             return collection.findOne({ a: 2 }, { fields: { b: 1 } });
           })
           .then(function (doc) {
-            test.equal(undefined, doc.a);
+            expect(doc.a).to.not.exist;
             test.equal(2, doc.b);
             return client.close();
           });
@@ -2440,8 +2441,8 @@ describe('Operation (Promises)', function () {
           })
           .then(function (indexInformation) {
             test.deepEqual([['_id', 1]], indexInformation._id_);
-            test.equal(undefined, indexInformation.a_1_b_1);
-            test.equal(undefined, indexInformation.c_1);
+            expect(indexInformation.a_1_b_1).to.not.exist;
+            expect(indexInformation.c_1).to.not.exist;
             return client.close();
           });
       });
@@ -2613,7 +2614,7 @@ describe('Operation (Promises)', function () {
         // BEGIN
         // Grab a collection with a callback but no safe operation
         db.collection('test_correctly_access_collections_with_promise', function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
           db.collection(
@@ -2630,7 +2631,7 @@ describe('Operation (Promises)', function () {
                     'test_correctly_access_collections_with_promise',
                     { strict: true },
                     function (err) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       client.close(done);
                     }
                   );

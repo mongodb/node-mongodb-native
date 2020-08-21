@@ -1,22 +1,43 @@
+import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
-import crypto = require('crypto');
-import { handleCallback, toError } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { MongoError } from '../error';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
-class AddUserOperation extends CommandOperation {
-  db: any;
-  username: any;
-  password: any;
+/** @public */
+export interface AddUserOptions extends CommandOperationOptions {
+  /** @deprecated Please use db.command('createUser', ...) instead for this option */
+  digestPassword?: null;
+  /** Roles associated with the created user (only Mongodb 2.6 or higher) */
+  roles?: string | string[];
+  /** Custom data associated with the user (only Mongodb 2.6 or higher) */
+  customData?: Document;
+}
 
-  constructor(db: any, username: any, password: any, options: any) {
+/** @internal */
+export class AddUserOperation extends CommandOperation<AddUserOptions, Document> {
+  db: Db;
+  username: string;
+  password?: string;
+
+  constructor(db: Db, username: string, password: string | undefined, options?: AddUserOptions) {
     super(db, options);
+
+    // Special case where there is no password ($external users)
+    if (typeof username === 'string' && password != null && typeof password === 'object') {
+      options = password;
+      password = undefined;
+    }
 
     this.db = db;
     this.username = username;
     this.password = password;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Document>): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;
@@ -25,8 +46,9 @@ class AddUserOperation extends CommandOperation {
     // Error out if digestPassword set
     if (options.digestPassword != null) {
       return callback(
-        toError(
-          "The digestPassword option is not supported via add_user. Please use db.command('createUser', ...) instead for this option."
+        new MongoError(
+          'The digestPassword option is not supported via add_user. ' +
+            "Please use db.command('createUser', ...) instead for this option."
         )
       );
     }
@@ -37,7 +59,7 @@ class AddUserOperation extends CommandOperation {
     // If not roles defined print deprecated message
     // TODO: handle deprecation properly
     if (roles.length === 0) {
-      console.log('Creating a user without roles is deprecated in MongoDB >= 2.6');
+      console.warn('Creating a user without roles is deprecated in MongoDB >= 2.6');
     }
 
     // Check the db name and add roles if needed
@@ -63,27 +85,20 @@ class AddUserOperation extends CommandOperation {
     }
 
     // Build the command to execute
-    const command = {
+    const command: Document = {
       createUser: username,
       customData: options.customData || {},
       roles: roles,
       digestPassword
-    } as any;
+    };
 
     // No password
     if (typeof password === 'string') {
       command.pwd = userPassword;
     }
 
-    super.executeCommand(server, command, (err?: any, r?: any) => {
-      if (!err) {
-        return handleCallback(callback, err, r);
-      }
-
-      return handleCallback(callback, err, null);
-    });
+    super.executeCommand(server, command, callback);
   }
 }
 
-defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = AddUserOperation;
+defineAspects(AddUserOperation, [Aspect.WRITE_OPERATION]);

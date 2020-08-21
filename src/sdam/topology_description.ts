@@ -1,22 +1,22 @@
 import { ServerDescription } from './server_description';
-import WIRE_CONSTANTS = require('../cmap/wire_protocol/constants');
+import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
-import type { ObjectId } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import type { Document } from '../types';
 
-// contstants related to compatability checks
+// constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
 const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION;
 const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
 const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
 
-interface TopologyDescriptionOptions {
+/** @public */
+export interface TopologyDescriptionOptions {
   heartbeatFrequencyMS?: number;
   localThresholdMS?: number;
 }
 
-// Representation of a deployment of servers
+/** @public Representation of a deployment of servers */
 export class TopologyDescription {
   type: TopologyType;
   setName?: string;

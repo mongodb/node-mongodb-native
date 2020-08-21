@@ -1,58 +1,91 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { deleteCallback, removeDocuments } from './common_functions';
-import CommandOperation = require('./command');
+import { removeDocuments } from './common_functions';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { Connection } from '../cmap/connection';
 
-class DeleteOperation extends OperationBase {
-  namespace: any;
-  operations: any;
-  options: any;
+/** @public */
+export interface DeleteOptions extends CommandOperationOptions {
+  single?: boolean;
+}
 
-  constructor(ns: any, ops: any, options: any) {
+/** @public */
+export interface DeleteResult {
+  /** Indicates whether this write result was acknowledged */
+  acknowledged: boolean;
+  /** The number of documents that were deleted */
+  deletedCount: number;
+  /** The raw result returned from MongoDB. Will vary depending on server version */
+  result: Document;
+  /** The connection object used for the operation */
+  connection?: Connection;
+}
+
+/** @internal */
+export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
+  namespace: string;
+  operations: Document[];
+
+  constructor(ns: string, ops: Document[], options: DeleteOptions) {
     super(options);
     this.namespace = ns;
     this.operations = ops;
   }
 
-  get canRetryWrite() {
-    return this.operations.every((op: any) =>
-      typeof op.limit !== 'undefined' ? op.limit > 0 : true
-    );
+  get canRetryWrite(): boolean {
+    return this.operations.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
   }
 
-  execute(server: any, callback: Function) {
-    server.remove(this.namespace.toString(), this.operations, this.options, callback);
+  execute(server: Server, callback: Callback): void {
+    server.remove(
+      this.namespace.toString(),
+      this.operations,
+      this.options as WriteCommandOptions,
+      callback
+    );
   }
 }
 
-class DeleteOneOperation extends CommandOperation {
-  collection: any;
-  filter: any;
+export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+  collection: Collection;
+  filter: Document;
 
-  constructor(collection: any, filter: any, options: any) {
+  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
 
     this.collection = collection;
     this.filter = filter;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;
 
     options.single = true;
-    removeDocuments(server, coll, filter, options, (err?: any, r?: any) =>
-      deleteCallback(err, r, callback)
-    );
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
-class DeleteManyOperation extends CommandOperation {
-  collection: any;
-  filter: any;
+export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+  collection: Collection;
+  filter: Document;
 
-  constructor(collection: any, filter: any, options: any) {
+  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
 
     if (!isObject(filter)) {
@@ -63,7 +96,7 @@ class DeleteManyOperation extends CommandOperation {
     this.filter = filter;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const options = this.options;
@@ -73,23 +106,19 @@ class DeleteManyOperation extends CommandOperation {
       options.single = false;
     }
 
-    removeDocuments(server, coll, filter, options, (err?: any, r?: any) =>
-      deleteCallback(err, r, callback)
-    );
+    removeDocuments(server, coll, filter, options, (err, r) => {
+      if (callback == null) return;
+      if (err && callback) return callback(err);
+      if (r == null) {
+        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
+      }
+
+      r.deletedCount = r.result.n;
+      if (callback) callback(undefined, r);
+    });
   }
 }
 
-defineAspects(DeleteOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(DeleteOneOperation, [
-  Aspect.RETRYABLE,
-  Aspect.WRITE_OPERATION,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DeleteOperation, DeleteOneOperation, DeleteManyOperation };
+defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION]);

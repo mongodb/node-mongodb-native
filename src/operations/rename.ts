@@ -1,13 +1,26 @@
-import { checkCollectionName, handleCallback, toError } from '../utils';
+import { checkCollectionName, Callback } from '../utils';
 import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { CommandOperationOptions } from './command';
+import { MongoError } from '../error';
 
-class RenameOperation extends RunAdminCommandOperation {
-  collection: any;
-  newName: any;
+/** @public */
+export interface RenameOptions extends CommandOperationOptions {
+  /** Drop the target name collection if it previously exists. */
+  dropTarget?: boolean;
+  /** Unclear */
+  new_collection?: boolean;
+}
 
-  constructor(collection: any, newName: any, options: any) {
+/** @internal */
+export class RenameOperation extends RunAdminCommandOperation {
+  collection: Collection;
+  newName: string;
+
+  constructor(collection: Collection, newName: string, options: RenameOptions) {
     // Check the collection name
     checkCollectionName(newName);
 
@@ -22,33 +35,24 @@ class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Collection>): void {
     const Collection = loadCollection();
     const coll = this.collection;
 
-    super.execute(server, (err?: any, doc?: any) => {
-      if (err) return handleCallback(callback, err, null);
+    super.execute(server, (err, doc) => {
+      if (err) return callback(err);
       // We have an error
-      if (doc.errmsg) return handleCallback(callback, toError(doc), null);
+      if (doc.errmsg) {
+        return callback(new MongoError(doc));
+      }
+
       try {
-        return handleCallback(
-          callback,
-          null,
-          new Collection(
-            coll.s.db,
-            coll.s.topology,
-            coll.s.namespace.db,
-            this.newName,
-            coll.s.pkFactory,
-            coll.s.options
-          )
-        );
+        return callback(undefined, new Collection(coll.s.db, this.newName, coll.s.options));
       } catch (err) {
-        return handleCallback(callback, toError(err), null);
+        return callback(new MongoError(err));
       }
     });
   }
 }
 
-defineAspects(RenameOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = RenameOperation;
+defineAspects(RenameOperation, [Aspect.WRITE_OPERATION]);

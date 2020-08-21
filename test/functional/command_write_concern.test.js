@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
 const { ObjectId, Long, Code } = require('../../src');
+const { expect } = require('chai');
 
 // Extend the object
 var extend = function (template, fields) {
@@ -115,7 +116,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.collection('test')
@@ -124,7 +125,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             })
             .toArray(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -240,11 +241,11 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
             client.close(done);
@@ -351,7 +352,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.collection('indexOptionDefault').createIndex(
@@ -362,7 +363,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -469,7 +470,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.collection('indexOptionDefault').drop(
@@ -478,7 +479,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -585,7 +586,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.dropDatabase(
@@ -594,7 +595,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -701,7 +702,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.collection('test').dropIndexes(
@@ -710,7 +711,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -817,7 +818,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           // String functions
@@ -834,7 +835,7 @@ describe('Command Write Concern', function () {
               wtimeout: 1000
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
@@ -941,11 +942,11 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
             client.close(done);
@@ -1051,11 +1052,11 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
             client.close(done);
@@ -1161,7 +1162,7 @@ describe('Command Write Concern', function () {
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           // Simple findAndModify command returning the new document
@@ -1171,7 +1172,7 @@ describe('Command Write Concern', function () {
             { $set: { b1: 1 } },
             { new: true, w: 2, wtimeout: 1000 },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
               client.close(done);
