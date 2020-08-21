@@ -12,6 +12,8 @@ import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { Document } from './../bson';
 
+const { INSERT, UPDATE, REMOVE } = BatchType;
+
 /** Add to internal list of Operations */
 export function addToOperationsList<T extends UnorderedBulkOperation | FindOperators>(
   bulkOperation: T,
@@ -25,7 +27,6 @@ export function addToOperationsList<T extends UnorderedBulkOperation | FindOpera
     // Since we don't know what the user selected for BSON options here,
     // err on the safe side, and check the size with ignoreUndefined: false.
     ignoreUndefined: false
-    // TODO: remove BSON any types when BSON is typed
   } as any);
   // Throw error if the doc is bigger than the max BSON size
   if (bsonSize >= bulkOperation.s.maxBsonObjectSize) {
@@ -37,11 +38,11 @@ export function addToOperationsList<T extends UnorderedBulkOperation | FindOpera
   // Holds the current batch
   bulkOperation.s.currentBatch = undefined;
   // Get the right type of batch
-  if (batchType === BatchType.INSERT) {
+  if (batchType === INSERT) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentInsertBatch;
-  } else if (batchType === BatchType.UPDATE) {
+  } else if (batchType === UPDATE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentUpdateBatch;
-  } else if (batchType === BatchType.REMOVE) {
+  } else if (batchType === REMOVE) {
     bulkOperation.s.currentBatch = bulkOperation.s.currentRemoveBatch;
   }
 
@@ -80,15 +81,15 @@ export function addToOperationsList<T extends UnorderedBulkOperation | FindOpera
   bulkOperation.s.currentIndex = bulkOperation.s.currentIndex + 1;
 
   // Save back the current Batch to the right type
-  if (batchType === BatchType.INSERT && document._id) {
+  if (batchType === INSERT) {
     bulkOperation.s.currentInsertBatch = bulkOperation.s.currentBatch;
     bulkOperation.s.bulkResult.insertedIds.push({
       index: bulkOperation.s.bulkResult.insertedIds.length,
       _id: document._id
     });
-  } else if (batchType === BatchType.UPDATE) {
+  } else if (batchType === UPDATE) {
     bulkOperation.s.currentUpdateBatch = bulkOperation.s.currentBatch;
-  } else if (batchType === BatchType.REMOVE) {
+  } else if (batchType === REMOVE) {
     bulkOperation.s.currentRemoveBatch = bulkOperation.s.currentBatch;
   }
 
