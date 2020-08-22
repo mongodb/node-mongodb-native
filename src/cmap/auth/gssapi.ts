@@ -87,10 +87,11 @@ export class GSSAPI extends AuthProvider {
   }
 
   auth(authContext: AuthContext, callback: Callback): void {
-    const client = this[kGssapiClient];
     const { connection, credentials } = authContext;
     if (credentials == null) return callback(new Error('credentials required'));
     const { username } = credentials;
+    const client = this[kGssapiClient];
+    if (client == null) return callback(new Error('gssapi client missing'));
     function externalCommand(
       command: object,
       cb: (
