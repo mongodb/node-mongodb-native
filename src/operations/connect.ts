@@ -260,7 +260,7 @@ export function connect(
       'seed list contains no mongos proxies, replicaset connections requires ' +
       'the parameter replicaSet to be supplied in the URI or options object, ' +
       'mongodb://server:port/db?replicaSet=name';
-    if ((err && err.message === 'no mongos proxies found in seed list') || !topology) {
+    if (err && err.message === 'no mongos proxies found in seed list') {
       if (logger.isWarn()) {
         logger.warn(warningMessage);
       }
