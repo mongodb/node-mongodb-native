@@ -487,7 +487,7 @@ function mergeBatchResults(batch: Batch, bulkResult: BulkResult, err: any, resul
   } else if (result == null) {
     return;
   }
-  // console.log({ result, bulkResult });
+
   // Do we have a top level error stop processing and return
   if (result?.ok === 0 && bulkResult.ok === 1) {
     bulkResult.ok = 0;
