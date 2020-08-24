@@ -25,6 +25,7 @@ import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
+import type { WriteCommandOptions } from './wire_protocol/write_command';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -237,14 +238,16 @@ export class Connection extends EventEmitter {
 
   // Wire protocol methods
   command(ns: string, cmd: Document, callback: Callback): void;
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
+  command(ns: string, cmd: Document, options: WriteCommandOptions, callback: Callback): void;
   command(
     ns: string,
     cmd: Document,
-    options: CommandOptions | Callback,
+    optionsOrCallback: WriteCommandOptions | Callback,
     callback?: Callback
   ): void {
-    wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
+    const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
+    callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
+    wp.command(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
   query(

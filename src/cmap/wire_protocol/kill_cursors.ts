@@ -1,10 +1,11 @@
 import { KillCursor } from '../commands';
 import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
-import { command, CommandOptions } from './command';
+import { command } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 import type { ClientSession } from '../../sessions';
+import type { WriteCommandOptions } from './write_command';
 
 interface KillCursorOptions {
   session?: ClientSession;
@@ -59,7 +60,7 @@ export function killCursors(
     cursors: cursorIds
   };
 
-  const options: CommandOptions = {};
+  const options: WriteCommandOptions = {};
   if (typeof cursorState.session === 'object') {
     options.session = cursorState.session;
   }

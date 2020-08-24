@@ -3,12 +3,13 @@ import { Long, Document } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
-import { command, CommandOptions } from './command';
+import { command } from './command';
+import type { WriteCommandOptions } from './write_command';
 import type { Server } from '../../sdam/server';
 import type { InternalCursorState } from '../../cursor/core_cursor';
 
 /** @internal */
-export type GetMoreOptions = CommandOptions;
+export type GetMoreOptions = WriteCommandOptions;
 
 export function getMore(
   server: Server,

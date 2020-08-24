@@ -54,10 +54,10 @@ import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { LoggerOptions } from '../logger';
 import { DestroyOptions, Connection } from '../cmap/connection';
-import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
 import type { CursorOptions } from '../cursor/cursor';
 import type { MongoClientOptions } from '../mongo_client';
+import type { WriteCommandOptions } from './../cmap/wire_protocol/write_command';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -675,7 +675,7 @@ export class Topology extends EventEmitter {
    * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param cmd - The command
    */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
+  command(ns: string, cmd: Document, options: WriteCommandOptions, callback: Callback): void {
     if (typeof options === 'function') {
       (callback = options), (options = {}), (options = options || {});
     }

@@ -42,9 +42,9 @@ import type { CommandOptions } from '../cmap/wire_protocol/command';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document } from '../bson';
 import type { AutoEncrypter } from '../deps';
+import type { WriteCommandOptions } from './../cmap/wire_protocol/write_command';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -251,16 +251,20 @@ export class Server extends EventEmitter {
    * @param callback - A callback function
    */
   command(ns: string, cmd: Document, callback: Callback): void;
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   command(
     ns: string,
     cmd: Document,
-    options?: CommandOptions | Callback<Document>,
+    options: WriteCommandOptions,
+    callback: Callback<Document>
+  ): void;
+  command(
+    ns: string,
+    cmd: Document,
+    optionsOrCallback?: WriteCommandOptions | Callback<Document>,
     callback?: Callback<Document>
   ): void {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
-    }
+    const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
+    callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
 
     if (!callback) return;
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {

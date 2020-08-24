@@ -135,7 +135,7 @@ export abstract class CommandOperation<
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options as CommandOptions, (err, result) => {
+    server.command(this.ns.toString(), cmd, this.options, (err, result) => {
       if (err) {
         callback(err, null);
         return;

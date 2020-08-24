@@ -7,9 +7,10 @@ import type { Document } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { WriteCommandOptions } from './write_command';
 
 /** @internal */
-export interface QueryOptions extends CommandOptions {
+export interface QueryOptions extends WriteCommandOptions {
   readPreference?: ReadPreferenceLike;
 }
 

@@ -893,8 +893,8 @@ export class Db implements OperationParent {
   ): Promise<Document[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    const cursor = this.collection('system.profile').find({}, options);
+    const writeConcern = WriteConcern.fromOptions(options);
+    const cursor = this.collection('system.profile').find({}, { ...options, writeConcern });
     return callback ? cursor.toArray(callback) : cursor.toArray();
   }
 }

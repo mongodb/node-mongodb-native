@@ -1,3 +1,4 @@
+import { WriteConcern } from './../write_concern';
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoDBNamespace, Callback } from '../utils';
@@ -110,7 +111,7 @@ export class CoreCursor<
   ns: string;
   namespace: MongoDBNamespace;
   cmd: Document;
-  options: T;
+  options: T & { writeConcern?: WriteConcern };
   topology: Topology;
   cursorState: InternalCursorState;
   logger: Logger;
@@ -152,7 +153,10 @@ export class CoreCursor<
     this.ns = this.operation.ns.toString();
     this.namespace = MongoDBNamespace.fromString(this.ns);
     this.cmd = cmd;
-    this.options = this.operation.options as T;
+    const writeConcern = WriteConcern.fromOptions(this.operation.options);
+    this.options = { ...this.operation.options, writeConcern } as T & {
+      writeConcern?: WriteConcern;
+    };
     this.topology = topology;
 
     const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);

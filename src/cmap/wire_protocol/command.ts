@@ -4,6 +4,7 @@ import { isTransactionCommand } from '../../transactions';
 import { applySession, ClientSession } from '../../sessions';
 import { maxWireVersion, databaseNamespace, Callback } from '../../utils';
 import { MongoError, MongoNetworkError } from '../../error';
+import type { WriteCommandOptions } from './write_command';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
@@ -49,45 +50,42 @@ export function command(
   server: Server,
   ns: string,
   cmd: Document,
-  options: CommandOptions,
+  options: WriteCommandOptions,
   callback?: Callback<CommandResult>
 ): void;
 export function command(
   server: Server,
   ns: string,
   cmd: Document,
-  _options: Callback | CommandOptions,
-  _callback?: Callback<CommandResult>
+  optionsOrCallback: Callback<CommandResult> | WriteCommandOptions,
+  callback?: Callback<CommandResult>
 ): void {
-  let options = _options as CommandOptions;
-  const callback = (_callback ?? _options) as Callback<CommandResult>;
-  if ('function' === typeof options) {
-    options = {};
-  }
+  const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
+  callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
 
   if (cmd == null) {
-    return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
+    return callback!(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
   }
 
   if (!isClientEncryptionEnabled(server)) {
-    _command(server, ns, cmd, options, callback);
+    _command(server, ns, cmd, options, callback!);
     return;
   }
 
   const wireVersion = maxWireVersion(server);
   if (typeof wireVersion !== 'number' || wireVersion < 8) {
-    callback(new MongoError('Auto-encryption requires a minimum MongoDB version of 4.2'));
+    callback!(new MongoError('Auto-encryption requires a minimum MongoDB version of 4.2'));
     return;
   }
 
-  _cryptCommand(server, ns, cmd, options, callback);
+  _cryptCommand(server, ns, cmd, options, callback!);
 }
 
 function _command(
   server: Server,
   ns: string,
   cmd: Document,
-  options: CommandOptions,
+  options: WriteCommandOptions,
   callback: Callback<CommandResult>
 ) {
   const pool = server.s.pool;
@@ -195,7 +193,7 @@ function _cryptCommand(
   server: Server,
   ns: string,
   cmd: Document,
-  options: CommandOptions,
+  options: WriteCommandOptions,
   callback: Callback
 ) {
   const autoEncrypter = server.autoEncrypter;

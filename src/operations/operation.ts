@@ -4,6 +4,7 @@ import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { Server } from '../sdam/server';
+import { WriteConcernOptions, WriteConcern } from './../write_concern';
 
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
@@ -20,7 +21,7 @@ export interface OperationConstructor extends Function {
 }
 
 /** @internal */
-export interface OperationOptions extends BSONSerializeOptions {
+export interface OperationOptions extends WriteConcernOptions, BSONSerializeOptions {
   explain?: boolean;
   session?: ClientSession;
 }
@@ -36,7 +37,7 @@ export abstract class OperationBase<
   T extends OperationOptions = OperationOptions,
   TResult = Document
 > {
-  options: T;
+  options: T & { writeConcern?: WriteConcern };
   ns!: MongoDBNamespace;
   cmd!: Document;
 
@@ -48,7 +49,8 @@ export abstract class OperationBase<
   fullResponse?: boolean;
 
   constructor(options: T = {} as T) {
-    this.options = Object.assign({}, options);
+    const writeConcern = WriteConcern.fromOptions(options);
+    this.options = { ...options, writeConcern };
     this.readPreference = ReadPreference.primary;
   }
 
