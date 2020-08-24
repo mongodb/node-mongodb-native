@@ -3,25 +3,32 @@
     "allowJs": false,
     "checkJs": false,
     "strict": true,
-    "declaration": true,
-    "importHelpers": false,
     "alwaysStrict": true,
     "target": "ES2018",
     "module": "commonJS",
     "moduleResolution": "node",
     "lib": ["ES2018"],
+    // We don't make use of tslib helpers, all syntax used is supported by target engine
+    "importHelpers": false,
     "noEmitHelpers": true,
+    // Never emit error filled code
     "noEmitOnError": true,
     "outDir": "lib",
     "importsNotUsedAsValues": "error",
-    "inlineSourceMap": true,
+    // We want the sourcemaps in a separate file
+    "inlineSourceMap": false,
+    "sourceMap": true,
+    // API-Extractor uses declaration maps to report problems in source, no need to distribute
+    "declaration": true,
     "declarationMap": true,
+    // inline the source so the original content can be debugged
     "inlineSources": true,
-    "types": ["node"]
+    // Prevents web types from being suggested by vscode.
+    "types": ["node"],
+    "rootDir": "src"
   },
   "ts-node": {
     "transpileOnly": true,
     "compiler": "typescript-cached-transpile"
-  },
-  "include": ["src/**/*"]
+  }
 }
