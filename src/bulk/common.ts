@@ -1130,7 +1130,7 @@ export class BulkOperationBase {
   }
 
   getHint(options: { hint?: Hint }): { hint?: Hint } {
-    if (Object.prototype.hasOwnProperty.call(options, 'hint')) {
+    if (Object.prototype.hasOwnProperty.call(options, 'hint') && options.hint) {
       return { hint: options.hint };
     }
     return {};
@@ -1179,8 +1179,9 @@ export class BulkOperationBase {
       }
       this.checkAtomic(options);
       const upsert = this.getUpsert(options);
-      const { filter: q, replacement: u, hint } = options;
-      const operation = { multi, q, u, hint, ...upsert };
+      const { filter: q, replacement: u } = options;
+      const hint = this.getHint(options);
+      const operation = { multi, q, u, ...hint, ...upsert };
       return this.s.options.addToOperationsList!(this, BatchType.UPDATE, operation);
     } else if (this.isDeleteOneOp(op)) {
       // DELETE ONE
@@ -1198,17 +1199,21 @@ export class BulkOperationBase {
     } else if (this.isDeleteManyOp(op)) {
       // DELETE MANY
       const limit = 0;
-      const options = op.deleteMany;
+      /**
+       * NOTE: Internally hint is still validated against, even thought it's
+       * typed not to be an option, it can still be passed in the spec warrants
+       * an error is thrown / collected downstream from here, so we need
+       * to pass hint along if there is one.
+       */
+      const options: DeleteManyOptions & { hint?: Hint } = op.deleteMany;
       if (options.q) {
         const operation = { ...options, limit };
         return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
       }
-      if (Object.prototype.hasOwnProperty.call(options, 'hint')) {
-        throw new Error('Bulk deleteMany operation does not support hint');
-      }
+      const hint = this.getHint(options);
       const { filter: q } = options;
       const collation = this.getCollation(options);
-      const operation = { q, limit, ...collation };
+      const operation = { q, limit, ...collation, ...hint };
       return this.s.options.addToOperationsList!(this, BatchType.REMOVE, operation);
     } else if (this.isRemoveOneOp(op)) {
       // REMOVE ONE
