@@ -1246,8 +1246,8 @@ buildvariants:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
-  - name: lint
-    display_name: lint
+  - name: checks
+    display_name: checks
     run_on: rhel70
     tasks:
       - run-checks
