@@ -25,10 +25,10 @@
     "inlineSources": true,
     // Prevents web types from being suggested by vscode.
     "types": ["node"],
-    "rootDir": "src"
   },
   "ts-node": {
     "transpileOnly": true,
     "compiler": "typescript-cached-transpile"
-  }
+  },
+  "include": ["src/**/*"]
 }
