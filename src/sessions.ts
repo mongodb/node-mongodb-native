@@ -16,11 +16,12 @@ import {
   maybePromise
 } from './utils';
 import type { Topology } from './sdam/topology';
-import type { CommandOptions } from './cmap/wire_protocol/command';
 import type { MongoClientOptions } from './mongo_client';
 import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 import type { WriteConcern } from './write_concern';
+import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
+
 const minWireVersionForShardedTransactions = 8;
 
 function assertAlive(session: ClientSession, callback?: Callback): boolean {
@@ -712,7 +713,7 @@ function commandSupportsReadConcern(command: Document, options?: Document): bool
 function applySession(
   session: ClientSession,
   command: Document,
-  options?: CommandOptions
+  options?: WriteCommandOptions
 ): MongoError | undefined {
   const serverSession = session.serverSession;
   if (serverSession == null) {
