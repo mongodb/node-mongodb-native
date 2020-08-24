@@ -623,14 +623,14 @@ function executeCommands(
 
   const batch = bulkOperation.s.batches.shift() as Batch;
 
-  function resultHandler(err?: any, result?: BulkResult) {
+  function resultHandler(err?: AnyError, result?: BulkResult) {
     // Error is a driver related error not a bulk op error, terminate
-    if (((err && err.driver) || (err && err.message)) && !(err instanceof MongoWriteConcernError)) {
+    if (err?.message && !(err instanceof MongoWriteConcernError)) {
       return callback(err);
     }
 
     // If we have and error
-    if (err) err.ok = 0;
+    if (err) (err as any).ok = 0;
     if (err instanceof MongoWriteConcernError) {
       return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, err, callback);
     }
