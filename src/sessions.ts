@@ -21,7 +21,6 @@ import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
 import type { WriteConcern } from './write_concern';
-import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
 
 const minWireVersionForShardedTransactions = 8;
 
