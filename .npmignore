@@ -30,12 +30,20 @@ performance/
 public/
 .coverage_data/
 .coveralls.yml
-.eslintrc
+.eslintrc.json
 docs/public
 .nyc_output/
-typings/
 jsconfig.json
 manual_tests/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
+
+src/
+.mocharc.json
+.nycrc.json
+api-extractor.json
+conf.json
+tsdoc.json
+typedoc.json
+Makefile

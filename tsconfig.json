@@ -14,7 +14,9 @@
     "noEmitOnError": true,
     "outDir": "lib",
     "importsNotUsedAsValues": "error",
-    "sourceMap": true,
+    "inlineSourceMap": true,
+    "declarationMap": true,
+    "inlineSources": true,
     "types": ["node"]
   },
   "ts-node": {

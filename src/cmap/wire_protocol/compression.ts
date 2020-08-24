@@ -1,7 +1,6 @@
 import * as zlib from 'zlib';
 import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
-import type { bufferCallback } from 'snappy';
 
 import { Snappy } from '../../deps';
 
@@ -40,7 +39,7 @@ export function compress(
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.compress(dataToBeCompressed, callback as bufferCallback);
+      Snappy.compress(dataToBeCompressed, callback);
       break;
     case 'zlib':
       // Determine zlibCompressionLevel
@@ -76,7 +75,7 @@ export function decompress(
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.uncompress(compressedData, callback as bufferCallback);
+      Snappy.uncompress(compressedData, { asBuffer: true }, callback as Callback);
       break;
     case Compressor.zlib:
       zlib.inflate(compressedData, callback as zlib.CompressCallback);

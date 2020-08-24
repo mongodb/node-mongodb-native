@@ -870,7 +870,7 @@ export class CommandResult {
 
   /** Convert CommandResult to JSON */
   toJSON(): Document {
-    const result = Object.assign({}, this, this.result);
+    const result: Partial<CommandResult> = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }

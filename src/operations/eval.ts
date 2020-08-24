@@ -16,16 +16,12 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
   code: Code;
   parameters?: Document | Document[];
 
-  get readPreference(): ReadPreference {
-    // force primary read preference
-    return ReadPreference.primary;
-  }
-
   constructor(db: Db, code: Code, parameters?: Document | Document[], options?: EvalOptions) {
     super(db, options);
 
     this.code = code;
     this.parameters = parameters;
+    this.readPreference = ReadPreference.primary;
   }
 
   execute(server: Server, callback: Callback<Document>): void {
