@@ -172,10 +172,10 @@ export class Query {
     // Allocate write protocol header buffer
     const header = Buffer.alloc(
       4 * 4 + // Header
-      4 + // Flags
-      Buffer.byteLength(this.ns) +
-      1 + // namespace
-      4 + // numberToSkip
+        4 + // Flags
+        Buffer.byteLength(this.ns) +
+        1 + // namespace
+        4 + // numberToSkip
         4 // numberToReturn
     );
 
@@ -870,7 +870,7 @@ export class CommandResult {
 
   /** Convert CommandResult to JSON */
   toJSON(): Document {
-    const result = Object.assign({}, this, this.result);
+    const result: Partial<CommandResult> = Object.assign({}, this, this.result);
     delete result.message;
     return result;
   }
