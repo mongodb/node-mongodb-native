@@ -616,6 +616,8 @@ describe('Collation', function () {
           request.reply(primary[0]);
         } else if (doc.update) {
           request.reply({ ok: 1 });
+        } else if (doc.delete) {
+          request.reply({ ok: 1 });
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });
         }
@@ -640,10 +642,12 @@ describe('Collation', function () {
             ],
             { ordered: true }
           )
-          .then(() => Promise.reject('should not succeed'))
+          .then(() => {
+            throw new Error('should not succeed');
+          })
           .catch(err => {
             expect(err).to.exist;
-            expect(err.message).to.equal('server/primary/mongos does not support collation');
+            expect(err.message).to.match(/does not support collation/);
           })
           .then(() => client.close());
       });

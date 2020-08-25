@@ -14,8 +14,8 @@ import {
 } from './utils';
 import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
-import { initializeUnorderedBulkOp as unordered } from './bulk/unordered';
-import { initializeOrderedBulkOp as ordered } from './bulk/ordered';
+import { UnorderedBulkOperation } from './bulk/unordered';
+import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
@@ -85,7 +85,7 @@ import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
-import type { BulkWriteResult, BulkWriteOptions } from './bulk/common';
+import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
@@ -373,16 +373,19 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    * @throws MongoError if operations is not an array
    */
-  bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
-  bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
-  bulkWrite(operations: Document[], options: BulkWriteOptions): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyBulkWriteOperation[]): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyBulkWriteOperation[], callback: Callback<BulkWriteResult>): void;
   bulkWrite(
-    operations: Document[],
+    operations: AnyBulkWriteOperation[],
+    options: BulkWriteOptions
+  ): Promise<BulkWriteResult>;
+  bulkWrite(
+    operations: AnyBulkWriteOperation[],
     options: BulkWriteOptions,
     callback: Callback<BulkWriteResult>
   ): void;
   bulkWrite(
-    operations: Document[],
+    operations: AnyBulkWriteOperation[],
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
@@ -1476,7 +1479,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    return unordered(this, options);
+    return new UnorderedBulkOperation(this, options);
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
@@ -1487,7 +1490,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    return ordered(this, options);
+    return new OrderedBulkOperation(this, options);
   }
 
   /** Get the db scoped logger */
