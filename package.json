@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "files": [
     "lib",
-    "types"
+    "mongodb.d.ts"
   ],
-  "types": "types",
+  "types": "mongodb.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:mongodb/node-mongodb-native.git"
@@ -64,7 +64,7 @@
     "semver": "^5.5.0",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
-    "snappy": "^6.2.0",
+    "snappy": "^6.3.0",
     "source-map-support": "^0.5.19",
     "standard-version": "^7.1.0",
     "through2": "^3.0.1",
@@ -87,7 +87,7 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "rimraf lib && tsc",
-    "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && find lib -name '*.d.ts*' -exec sh -c 'rimraf \"$0\"' {} \\;",
+    "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*'",
     "build:docs": "npm run build:dts && typedoc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run check:test",

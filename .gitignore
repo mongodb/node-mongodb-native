@@ -50,3 +50,4 @@ node_modules
 yarn.lock
 lib/
 *.tgz
+*.d.ts

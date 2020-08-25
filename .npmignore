@@ -40,10 +40,5 @@ external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
 
 src/
-.mocharc.json
-.nycrc.json
-api-extractor.json
-conf.json
-tsdoc.json
-typedoc.json
+*.json
 Makefile

@@ -21,7 +21,12 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
 
     this.code = code;
     this.parameters = parameters;
-    this.readPreference = ReadPreference.primary;
+    // force primary read preference
+    Object.defineProperty(this, 'readPreference', {
+      value: ReadPreference.primary,
+      configurable: false,
+      writable: false
+    });
   }
 
   execute(server: Server, callback: Callback<Document>): void {
