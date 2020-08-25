@@ -1,19 +1,18 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
-import { OperationBase, OperationOptions } from './operation';
+import { OperationBase } from './operation';
 import { WriteConcern } from '../write_concern';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { BulkOperationBase, BulkWriteResult } from '../bulk/common';
-import type { InsertOptions } from './insert';
+import type { BulkOperationBase, BulkWriteResult, BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
 /** @internal */
-export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWriteResult> {
+export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
   collection: Collection;
   operations: Document[];
 
-  constructor(collection: Collection, operations: Document[], options: InsertOptions) {
+  constructor(collection: Collection, operations: Document[], options: BulkWriteOptions) {
     super(options);
 
     this.collection = collection;
@@ -23,7 +22,7 @@ export class BulkWriteOperation extends OperationBase<OperationOptions, BulkWrit
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options as InsertOptions;
+    let options = this.options;
 
     // Add ignoreUndefined
     if (coll.s.options.ignoreUndefined) {

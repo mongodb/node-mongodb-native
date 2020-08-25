@@ -94,7 +94,7 @@
     "build:docs": "gulp doc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run check:test",
-    "check:lint": "eslint -v && eslint --max-warnings=258 --ext '.js,.ts' src test",
+    "check:lint": "eslint -v && eslint --max-warnings=0 --ext '.js,.ts' src test",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc --noEmit",
     "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
