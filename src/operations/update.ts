@@ -42,12 +42,11 @@ export interface UpdateResult {
 
 /** @internal */
 export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
-  namespace: MongoDBNamespace;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
     super(options);
-    this.namespace = ns;
+    this.ns = ns;
     this.operations = ops;
   }
 
@@ -57,7 +56,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
 
   execute(server: Server, callback: Callback<Document>): void {
     server.update(
-      this.namespace.toString(),
+      this.ns.toString(),
       this.operations,
       this.options as WriteCommandOptions,
       callback

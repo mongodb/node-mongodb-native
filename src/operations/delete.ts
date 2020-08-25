@@ -2,7 +2,7 @@ import { defineAspects, Aspect, OperationBase } from './operation';
 import { removeDocuments } from './common_functions';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
-import type { Callback } from '../utils';
+import type { Callback, MongoDBNamespace } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -28,12 +28,11 @@ export interface DeleteResult {
 
 /** @internal */
 export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
-  namespace: string;
   operations: Document[];
 
-  constructor(ns: string, ops: Document[], options: DeleteOptions) {
+  constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
     super(options);
-    this.namespace = ns;
+    this.ns = ns;
     this.operations = ops;
   }
 
@@ -43,7 +42,7 @@ export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
 
   execute(server: Server, callback: Callback): void {
     server.remove(
-      this.namespace.toString(),
+      this.ns.toString(),
       this.operations,
       this.options as WriteCommandOptions,
       callback

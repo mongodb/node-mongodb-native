@@ -201,7 +201,7 @@ export type {
   ListIndexesOptions,
   IndexDirection
 } from './operations/indexes';
-export type { InsertOneResult, InsertOptions } from './operations/insert';
+export type { InsertOneResult, InsertOneOptions } from './operations/insert';
 export type { InsertManyResult } from './operations/insert_many';
 export type { ListCollectionsOptions } from './operations/list_collections';
 export type { ListDatabasesResult, ListDatabasesOptions } from './operations/list_databases';
