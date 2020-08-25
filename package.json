@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "files": [
     "lib",
+    "etc/prepare.js",
     "mongodb.d.ts"
   ],
   "types": "mongodb.d.ts",
