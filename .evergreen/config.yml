@@ -375,7 +375,7 @@ functions:
           UNIFIED=${UNIFIED} \
           CA_FILE="$DRIVERS_TOOLS/.evergreen/ocsp/rsa/ca.pem" \
           OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
-          sh ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
   run-valid-ocsp-server:
     - command: shell.exec
       params:
