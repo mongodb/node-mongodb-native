@@ -548,7 +548,6 @@ function executeCommands(
   const batch = bulkOperation.s.batches.shift() as Batch;
 
   function resultHandler(err?: AnyError, result?: Document) {
-    console.log({ err, result });
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
       return callback(err);
