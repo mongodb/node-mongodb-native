@@ -573,7 +573,11 @@ function makeOperationHandler(
           session.serverSession.isDirty = true;
         }
 
-        if (supportsRetryableWrites(server) && !inActiveTransaction(session, cmd)) {
+        if (
+          server.s.topology.s.options.retryWrites !== false &&
+          supportsRetryableWrites(server) &&
+          !inActiveTransaction(session, cmd)
+        ) {
           err.addErrorLabel('RetryableWriteError');
         }
 

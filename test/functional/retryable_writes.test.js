@@ -6,7 +6,6 @@ const parseRunOn = require('../functional/spec-runner').parseRunOn;
 
 describe('Retryable Writes', function () {
   let ctx = {};
-
   loadSpecTests('retryable-writes').forEach(suite => {
     const environmentRequirementList = parseRunOn(suite.runOn);
     environmentRequirementList.forEach(requires => {
@@ -94,6 +93,12 @@ function executeScenarioTest(test, ctx) {
             expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
               /expected false to be true/
             );
+            const errorLabelsContain =
+              test.outcome && test.outcome.result && test.outcome.result.errorLabelsContain;
+            const errorLabelsOmit =
+              test.outcome && test.outcome.result && test.outcome.result.errorLabelsOmit;
+            if (errorLabelsContain) expect(err.errorLabels).to.have.members(errorLabelsContain);
+            if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
           });
       } else if (test.outcome.result) {
         const expected = transformToFixUpsertedId(test.outcome.result);
