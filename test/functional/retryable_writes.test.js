@@ -85,6 +85,10 @@ function executeScenarioTest(test, ctx) {
       const args = generateArguments(test);
 
       let result = ctx.collection[test.operation.name].apply(ctx.collection, args);
+      const hasResult =
+        test.outcome.result &&
+        !test.outcome.result.errorLabelsContain &&
+        !test.outcome.result.errorLabelsOmit;
       if (test.outcome.error) {
         result = result
           .then(() => expect(false).to.be.true)
@@ -93,6 +97,9 @@ function executeScenarioTest(test, ctx) {
             expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
               /expected false to be true/
             );
+            if (hasResult) {
+              expect(err.result).to.equal(test.outcome.result);
+            }
             const errorLabelsContain =
               test.outcome && test.outcome.result && test.outcome.result.errorLabelsContain;
             const errorLabelsOmit =
