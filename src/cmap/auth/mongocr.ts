@@ -12,13 +12,12 @@ export class MongoCR extends AuthProvider {
     const username = credentials.username;
     const password = credentials.password;
     const source = credentials.source;
-    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err, result) => {
+    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err, r) => {
       let nonce = null;
       let key = null;
 
       // Get nonce
       if (err == null) {
-        const r = result.result;
         nonce = r.nonce;
 
         // Use node md5 generator

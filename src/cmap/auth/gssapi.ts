@@ -45,10 +45,9 @@ export class GSSAPI extends AuthProvider {
           autoAuthorize: 1
         };
 
-        connection.command('$external.$cmd', command, (err, result) => {
+        connection.command('$external.$cmd', command, (err, doc) => {
           if (err) return callback(err, false);
 
-          const doc = result.result;
           authProcess.transition(doc.payload, (err, payload) => {
             if (err) return callback(err, false);
             const command = {
@@ -57,10 +56,9 @@ export class GSSAPI extends AuthProvider {
               payload
             };
 
-            connection.command('$external.$cmd', command, (err, result) => {
+            connection.command('$external.$cmd', command, (err, doc) => {
               if (err) return callback(err, false);
 
-              const doc = result.result;
               authProcess.transition(doc.payload, (err, payload) => {
                 if (err) return callback(err, false);
                 const command = {
@@ -69,10 +67,9 @@ export class GSSAPI extends AuthProvider {
                   payload
                 };
 
-                connection.command('$external.$cmd', command, (err, result) => {
+                connection.command('$external.$cmd', command, (err, response) => {
                   if (err) return callback(err, false);
 
-                  const response = result.result;
                   authProcess.transition(null, err => {
                     if (err) return callback(err);
                     callback(undefined, response);

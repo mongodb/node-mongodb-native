@@ -79,7 +79,7 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
       // Workaround for pre 2.6 servers
       if (r == null) return callback(undefined, { insertedCount: 0, result: { ok: 1 } });
       // Add values to top level to ensure crud spec compatibility
-      r.insertedCount = r.result.n;
+      r.insertedCount = r.n;
       r.insertedId = doc._id;
       if (callback) callback(undefined, r as InsertOneResult);
     });
@@ -118,8 +118,8 @@ function insertDocuments(
       if (callback == null) return;
       if (err) return callback(err);
       if (result == null) return callback();
-      if (result.result.code) return callback(new MongoError(result.result));
-      if (result.result.writeErrors) return callback(new MongoError(result.result.writeErrors[0]));
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
       // Add docs to the list
       result.ops = docs;
       // Return the results

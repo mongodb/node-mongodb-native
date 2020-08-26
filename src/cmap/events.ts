@@ -1,4 +1,4 @@
-import { GetMore, KillCursor, Msg, CommandResult, WriteProtocolMessageType } from './commands';
+import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
@@ -224,7 +224,7 @@ export class CommandSucceededEvent {
   constructor(
     pool: Connection | ConnectionPool,
     command: WriteProtocolMessageType,
-    reply: CommandResult | undefined,
+    reply: Document | undefined,
     started: number
   ) {
     const cmd = extractCommand(command);
@@ -297,7 +297,7 @@ const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: WriteProtocolMessageType) => command.ns;
 const databaseName = (command: WriteProtocolMessageType) => command.ns.split('.')[0];
 const collectionName = (command: WriteProtocolMessageType) => command.ns.split('.')[1];
-const maybeRedact = (commandName: string, result?: CommandResult | Error | Document) =>
+const maybeRedact = (commandName: string, result?: Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
@@ -393,7 +393,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   return command.query ? command.query : command;
 }
 
-function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) {
+function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   if (command instanceof KillCursor) {
     return {
       ok: 1,
@@ -409,9 +409,9 @@ function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) 
     return {
       ok: 1,
       cursor: {
-        id: reply.message.cursorId,
+        id: reply.cursorId,
         ns: namespace(command),
-        nextBatch: reply.message.documents
+        nextBatch: reply.documents
       }
     };
   }
@@ -425,9 +425,9 @@ function extractReply(command: WriteProtocolMessageType, reply?: CommandResult) 
     return {
       ok: 1,
       cursor: {
-        id: reply.message.cursorId,
+        id: reply.cursorId,
         ns: namespace(command),
-        firstBatch: reply.message.documents
+        firstBatch: reply.documents
       }
     };
   }

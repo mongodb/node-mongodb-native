@@ -8,7 +8,6 @@ import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
-import type { CommandOptions } from '../cmap/wire_protocol/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
@@ -75,10 +74,8 @@ export abstract class CommandOperation<
     this.readConcern = resolveReadConcern(propertyProvider, this.options);
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
     this.explain = false;
-
-    if (options && typeof options.fullResponse === 'boolean') {
-      this.fullResponse = options.fullResponse;
-    }
+    this.fullResponse =
+      options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
 
     // TODO: A lot of our code depends on having the read preference in the options. This should
     //       go away, but also requires massive test rewrites.
@@ -135,19 +132,12 @@ export abstract class CommandOperation<
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(this.ns.toString(), cmd, this.options as CommandOptions, (err, result) => {
-      if (err) {
-        callback(err, null);
-        return;
-      }
-
-      if (this.fullResponse) {
-        callback(undefined, result);
-        return;
-      }
-
-      callback(undefined, result?.result);
-    });
+    server.command(
+      this.ns.toString(),
+      cmd,
+      { fullResult: !!this.fullResponse, ...this.options },
+      callback
+    );
   }
 }
 

@@ -116,7 +116,7 @@ function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, call
       return callback(err);
     }
 
-    continueScramConversation(cryptoMethod, result.result, authContext, callback);
+    continueScramConversation(cryptoMethod, result, authContext, callback);
   });
 }
 
@@ -198,13 +198,12 @@ function continueScramConversation(
     payload: new Binary(Buffer.from(clientFinal))
   };
 
-  connection.command(`${db}.$cmd`, saslContinueCmd, (_err, result) => {
-    const err = resolveError(_err, result);
+  connection.command(`${db}.$cmd`, saslContinueCmd, (_err, r) => {
+    const err = resolveError(_err, r);
     if (err) {
       return callback(err);
     }
 
-    const r = result.result;
     const parsedResponse = parsePayload(r.payload.value());
     if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
       callback(new MongoError('Server returned an invalid signature'));
@@ -343,10 +342,8 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
 
 function resolveError(err?: AnyError, result?: Document) {
   if (err) return err;
-
   if (result) {
-    const r = result.result;
-    if (r.$err || r.errmsg) return new MongoError(r);
+    if (result.$err || result.errmsg) return new MongoError(result);
   }
 }
 

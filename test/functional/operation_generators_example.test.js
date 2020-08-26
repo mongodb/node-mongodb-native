@@ -2000,7 +2000,7 @@ describe('Operation (Generators)', function () {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
         // Remove all the document
         var r = yield collection.removeOne({ a: 1 }, { w: 1 });
-        test.equal(1, r.result.n);
+        expect(r).property('deletedCount').to.equal(1);
         yield client.close();
       });
       // END

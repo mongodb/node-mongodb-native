@@ -70,10 +70,9 @@ export class MongoDBAWS extends AuthProvider {
         payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
       };
 
-      connection.command(`${db}.$cmd`, saslStart, (err, result) => {
+      connection.command(`${db}.$cmd`, saslStart, (err, res) => {
         if (err) return callback(err);
 
-        const res = result.result;
         const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions);
         const host = serverResponse.h;
         const serverNonce = serverResponse.s.buffer;

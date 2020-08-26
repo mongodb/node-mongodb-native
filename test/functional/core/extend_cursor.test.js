@@ -64,7 +64,7 @@ describe('Extend cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results).property('n').to.equal(3);
 
               // Execute find
               const cursor = topology.cursor(ns, { find: 'inserts_extend_cursors', filter: {} });

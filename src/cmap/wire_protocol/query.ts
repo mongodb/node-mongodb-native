@@ -33,6 +33,8 @@ export function query(
   if (maxWireVersion(server) < 4) {
     const query = prepareLegacyFindQuery(server, ns, cmd, cursorState, options);
     const queryOptions = applyCommonQueryOptions({}, cursorState);
+    queryOptions.fullResult = true;
+
     if (typeof query.documentsReturnedIn === 'string') {
       queryOptions.documentsReturnedIn = query.documentsReturnedIn;
     }
