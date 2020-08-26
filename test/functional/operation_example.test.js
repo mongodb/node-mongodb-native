@@ -2715,7 +2715,7 @@ describe('Operation Examples', function () {
           // Remove all the document
           collection.removeOne({ a: 1 }, { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(1, r.result.n);
+            expect(r).property('deletedCount').to.equal(1);
             client.close(done);
           });
         });

@@ -1,14 +1,24 @@
 import * as BSON from '../bson';
-import { BulkOperationBase, Batch, BatchType, BulkWriteOptions } from './common';
+import {
+  BulkOperationBase,
+  Batch,
+  BatchType,
+  BulkWriteOptions,
+  UpdateStatement,
+  DeleteStatement
+} from './common';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 
-class OrderedBulkOperation extends BulkOperationBase {
+export class OrderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, true);
   }
 
-  addToOperationsList(batchType: BatchType, document: Document): OrderedBulkOperation {
+  addToOperationsList(
+    batchType: BatchType,
+    document: Document | UpdateStatement | DeleteStatement
+  ): this {
     // Get the bsonSize
     const bsonSize = BSON.calculateObjectSize(document, {
       checkKeys: false,
@@ -51,7 +61,10 @@ class OrderedBulkOperation extends BulkOperationBase {
     }
 
     if (batchType === BatchType.INSERT) {
-      this.s.bulkResult.insertedIds.push({ index: this.s.currentIndex, _id: document._id });
+      this.s.bulkResult.insertedIds.push({
+        index: this.s.currentIndex,
+        _id: (document as Document)._id
+      });
     }
 
     // We have an array of documents
@@ -66,8 +79,4 @@ class OrderedBulkOperation extends BulkOperationBase {
     this.s.currentIndex += 1;
     return this;
   }
-}
-
-export function initializeOrderedBulkOp(collection: Collection, options: BulkWriteOptions) {
-  return new OrderedBulkOperation(collection, options);
 }

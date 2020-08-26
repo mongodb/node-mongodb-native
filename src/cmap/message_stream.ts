@@ -1,14 +1,6 @@
 import BufferList = require('bl');
 import { Duplex, DuplexOptions } from 'stream';
-import {
-  Response,
-  Msg,
-  BinMsg,
-  Query,
-  WriteProtocolMessageType,
-  MessageHeader,
-  CommandResult
-} from './commands';
+import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
 import { MongoError, MongoParseError } from '../error';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
@@ -36,7 +28,7 @@ export interface MessageStreamOptions extends DuplexOptions {
 /** @internal */
 export interface OperationDescription extends BSONSerializeOptions {
   started: number;
-  cb: Callback<CommandResult>;
+  cb: Callback<Document>;
   command: boolean;
   documentsReturnedIn?: string;
   fullResult: boolean;

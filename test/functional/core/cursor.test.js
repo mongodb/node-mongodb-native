@@ -34,7 +34,7 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
               var cursor = topology.cursor(ns, {
@@ -91,7 +91,7 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(5);
+              expect(results.n).to.equal(5);
 
               // Execute find
               const cursor = topology.cursor(ns, {
@@ -151,7 +151,7 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(1);
+              expect(results.n).to.equal(1);
 
               // Execute find
               const cursor = topology.cursor(ns, { find: 'cursor3', filter: {}, batchSize: 5 });
@@ -207,7 +207,7 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
               const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
@@ -263,7 +263,7 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
               const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
@@ -320,7 +320,7 @@ describe('Cursor tests', function () {
           },
           function (err, results) {
             expect(err).to.not.exist;
-            expect(results.result.n).to.equal(3);
+            expect(results.n).to.equal(3);
 
             // Execute find
             var cursor = _server.cursor(ns, { find: 'cursor5', filter: {}, batchSize: 2 });
@@ -385,7 +385,7 @@ describe('Cursor tests', function () {
   //         },
   //         function(err, results) {
   //           expect(err).to.not.exist;
-  //           expect(results.result.n).to.equal(1);
+  //           expect(results.n).to.equal(1);
 
   //           // Execute slow find
   //           var cursor = server.cursor(ns, {

@@ -1,15 +1,23 @@
 import * as BSON from '../bson';
-import { BulkOperationBase, Batch, BatchType, BulkWriteOptions } from './common';
+import {
+  BulkOperationBase,
+  Batch,
+  BatchType,
+  BulkWriteOptions,
+  UpdateStatement,
+  DeleteStatement,
+  BulkWriteResult
+} from './common';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 
-class UnorderedBulkOperation extends BulkOperationBase {
+export class UnorderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, false);
   }
 
-  handleWriteError(callback: Callback, writeResult: any): boolean | undefined {
+  handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean | undefined {
     if (this.s.batches.length) {
       return false;
     }
@@ -17,7 +25,10 @@ class UnorderedBulkOperation extends BulkOperationBase {
     return super.handleWriteError(callback, writeResult);
   }
 
-  addToOperationsList(batchType: BatchType, document: Document): UnorderedBulkOperation {
+  addToOperationsList(
+    batchType: BatchType,
+    document: Document | UpdateStatement | DeleteStatement
+  ): this {
     // Get the bsonSize
     const bsonSize = BSON.calculateObjectSize(document, {
       checkKeys: false,
@@ -26,6 +37,7 @@ class UnorderedBulkOperation extends BulkOperationBase {
       // err on the safe side, and check the size with ignoreUndefined: false.
       ignoreUndefined: false
     } as any);
+
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize) {
       throw new TypeError(`Document is larger than the maximum size ${this.s.maxBsonObjectSize}`);
@@ -81,7 +93,7 @@ class UnorderedBulkOperation extends BulkOperationBase {
       this.s.currentInsertBatch = this.s.currentBatch;
       this.s.bulkResult.insertedIds.push({
         index: this.s.bulkResult.insertedIds.length,
-        _id: document._id
+        _id: (document as Document)._id
       });
     } else if (batchType === BatchType.UPDATE) {
       this.s.currentUpdateBatch = this.s.currentBatch;
@@ -95,8 +107,4 @@ class UnorderedBulkOperation extends BulkOperationBase {
 
     return this;
   }
-}
-
-export function initializeUnorderedBulkOp(collection: Collection, options: BulkWriteOptions) {
-  return new UnorderedBulkOperation(collection, options);
 }

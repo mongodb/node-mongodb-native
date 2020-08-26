@@ -2,17 +2,25 @@ import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import { WriteConcern } from '../write_concern';
-import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { BulkOperationBase, BulkWriteResult, BulkWriteOptions } from '../bulk/common';
+import type {
+  BulkOperationBase,
+  BulkWriteResult,
+  BulkWriteOptions,
+  AnyBulkWriteOperation
+} from '../bulk/common';
 import type { Server } from '../sdam/server';
 
 /** @internal */
 export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
   collection: Collection;
-  operations: Document[];
+  operations: AnyBulkWriteOperation[];
 
-  constructor(collection: Collection, operations: Document[], options: BulkWriteOptions) {
+  constructor(
+    collection: Collection,
+    operations: AnyBulkWriteOperation[],
+    options: BulkWriteOptions
+  ) {
     super(options);
 
     this.collection = collection;
@@ -42,14 +50,6 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     // for each op go through and add to the bulk
     try {
       for (let i = 0; i < operations.length; i++) {
-        // Get the operation type
-        const key = Object.keys(operations[i])[0];
-        // Check if we have a collation
-        if (operations[i][key].collation) {
-          collation = true;
-        }
-
-        // Pass to the raw bulk
         bulk.raw(operations[i]);
       }
     } catch (err) {

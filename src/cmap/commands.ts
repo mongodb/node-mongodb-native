@@ -2,9 +2,9 @@ import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
-import type { Connection } from './connection';
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
+import type { CommandOptions } from './wire_protocol/command';
 
 // Incrementing request id
 let _requestId = 0;
@@ -28,7 +28,7 @@ const AWAIT_CAPABLE = 8;
 export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
 /** @internal */
-export interface OpQueryOptions {
+export interface OpQueryOptions extends CommandOptions {
   socketTimeout?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
@@ -846,37 +846,5 @@ export class BinMsg {
     }
 
     this.parsed = true;
-  }
-}
-
-/**
- * Creates a new CommandResult instance
- * @internal
- *
- * @param result - CommandResult object
- * @param connection - A connection instance associated with this result
- */
-export class CommandResult {
-  ok?: number;
-  result: Document;
-  connection: Connection;
-  message: Document;
-
-  constructor(result: Document, connection: Connection, message: Document) {
-    this.result = result;
-    this.connection = connection;
-    this.message = message;
-  }
-
-  /** Convert CommandResult to JSON */
-  toJSON(): Document {
-    const result: Partial<CommandResult> = Object.assign({}, this, this.result);
-    delete result.message;
-    return result;
-  }
-
-  /** Convert CommandResult to String representation */
-  toString(): string {
-    return JSON.stringify(this.toJSON());
   }
 }

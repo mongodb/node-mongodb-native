@@ -510,15 +510,13 @@ export class CoreCursor<
       callback(err, result);
     };
 
-    const queryCallback: Callback = (err, r) => {
+    const queryCallback: Callback = (err, result) => {
       if (err) {
         return done(err);
       }
 
-      const result = r.message;
-
-      if (Array.isArray(result.documents) && result.documents.length === 1) {
-        const document = result.documents[0];
+      if (result.cursor) {
+        const document = result;
 
         if (result.queryFailure) {
           return done(new MongoError(document), null);
@@ -557,7 +555,7 @@ export class CoreCursor<
       // Otherwise fall back to regular find path
       const cursorId = result.cursorId || 0;
       this.cursorState.cursorId = cursorId instanceof Long ? cursorId : Long.fromNumber(cursorId);
-      this.cursorState.documents = result.documents;
+      this.cursorState.documents = result.documents || [result];
       this.cursorState.lastCursorId = result.cursorId;
 
       // Transform the results with passed in transformation method if provided

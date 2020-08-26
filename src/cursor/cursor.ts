@@ -905,7 +905,6 @@ export class Cursor<
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {
       this.operation.options.explain = true;
-      this.operation.fullResponse = false;
       return executeOperation(this.topology, this.operation as any, callback);
     }
 

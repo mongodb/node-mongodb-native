@@ -459,13 +459,11 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   }
 
   _initializeCursor(callback: Callback) {
-    super._initializeCursor((err, result) => {
-      if (err || result == null) {
-        callback(err, result);
+    super._initializeCursor((err, response) => {
+      if (err || response == null) {
+        callback(err, response);
         return;
       }
-
-      const response = result.documents[0];
 
       if (
         this.startAtOperationTime == null &&
@@ -478,9 +476,9 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
 
       this._processBatch('firstBatch', response);
 
-      this.emit('init', result);
+      this.emit('init', response);
       this.emit('response');
-      callback(err, result);
+      callback(err, response);
     });
   }
 

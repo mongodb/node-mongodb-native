@@ -49,12 +49,7 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
     docs = prepareDocs(coll, docs, options);
 
     // Generate the bulk write operations
-    const operations = [
-      {
-        insertMany: docs
-      }
-    ];
-
+    const operations = [{ insertMany: docs }];
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
     bulkWriteOperation.execute(server, (err, result) => {

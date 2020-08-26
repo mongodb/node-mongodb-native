@@ -2039,7 +2039,7 @@ describe('Operation (Promises)', function () {
             return collection.removeOne({ a: 1 }, { w: 1 });
           })
           .then(function (r) {
-            test.equal(1, r.result.n);
+            expect(r).property('deletedCount').to.equal(1);
             return client.close();
           });
       });

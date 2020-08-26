@@ -36,7 +36,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(1);
+                expect(results.n).to.eql(1);
 
                 // Execute find
                 var cursor = topology.cursor(ns, {
@@ -96,7 +96,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(1);
+                expect(results.n).to.eql(1);
 
                 // Execute find
                 const cursor = topology.cursor(ns, {
@@ -153,7 +153,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(2);
+                expect(results.n).to.eql(2);
 
                 // Execute the write
                 server.remove(
@@ -171,7 +171,7 @@ describe('A server', function () {
                   },
                   (removeErr, removeResults) => {
                     expect(removeErr).to.not.exist;
-                    expect(removeResults.result.n).to.eql(2);
+                    expect(removeResults.n).to.eql(2);
 
                     // Destroy the connection
                     server.destroy(done);
@@ -217,7 +217,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(2);
+                expect(results.n).to.eql(2);
 
                 // Execute the write
                 server.remove(
@@ -234,7 +234,7 @@ describe('A server', function () {
                   },
                   (removeErr, removeResults) => {
                     expect(removeErr).to.not.exist;
-                    expect(removeResults.result.n).to.eql(1);
+                    expect(removeResults.n).to.eql(1);
 
                     // Destroy the connection
                     server.destroy();

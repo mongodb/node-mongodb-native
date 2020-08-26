@@ -53,7 +53,11 @@ export {
   MongoParseError,
   MongoWriteConcernError
 } from './error';
-export { BulkWriteError as MongoBulkWriteError } from './bulk/common';
+export {
+  BulkWriteError as MongoBulkWriteError,
+  BulkWriteOptions,
+  AnyBulkWriteOperation
+} from './bulk/common';
 export {
   // Utils
   instrument,
@@ -74,7 +78,21 @@ export {
 export type { AdminPrivate } from './admin';
 export type { Instrumentation } from './apm';
 export type { Document, BSONSerializeOptions } from './bson';
-export type { BulkWriteResult, WriteError, WriteConcernError } from './bulk/common';
+export type {
+  InsertOneModel,
+  ReplaceOneModel,
+  UpdateOneModel,
+  UpdateManyModel,
+  DeleteOneModel,
+  DeleteManyModel,
+  BulkResult,
+  BulkWriteResult,
+  WriteError,
+  WriteConcernError,
+  BulkWriteOperationError,
+  UpdateStatement,
+  DeleteStatement
+} from './bulk/common';
 export type {
   ChangeStream,
   ChangeStreamOptions,
@@ -87,7 +105,6 @@ export type {
 export type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
-  CommandResult,
   WriteProtocolMessageType,
   Query,
   GetMore,

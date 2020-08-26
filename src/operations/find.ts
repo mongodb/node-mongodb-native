@@ -100,7 +100,13 @@ export class FindOperation extends OperationBase<FindOptions, Document> {
 
     // TODO: use `MongoDBNamespace` through and through
     const cursorState = this.cursorState || {};
-    server.query(this.ns.toString(), this.cmd, cursorState, this.options, callback);
+    server.query(
+      this.ns.toString(),
+      this.cmd,
+      cursorState,
+      { fullResult: !!this.fullResponse, ...this.options },
+      callback
+    );
   }
 }
 

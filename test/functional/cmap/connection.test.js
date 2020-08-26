@@ -20,10 +20,7 @@ describe('Connection', function () {
       expect(err).to.not.exist;
       this.defer(_done => conn.destroy(_done));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, result) => {
-        // NODE-2382: remove `result.result` when command returns just a raw response
-        const ismaster = result.result;
-
+      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
@@ -47,10 +44,7 @@ describe('Connection', function () {
       conn.on('commandSucceeded', event => events.push(event));
       conn.on('commandFailed', event => events.push(event));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, result) => {
-        // NODE-2382: remove `result.result` when command returns just a raw response
-        const ismaster = result.result;
-
+      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
@@ -93,13 +87,13 @@ describe('Connection', function () {
 
         conn.command(ns, { insert: 'test', documents }, (err, res) => {
           expect(err).to.not.exist;
-          expect(res).nested.property('result.n').to.equal(documents.length);
+          expect(res).nested.property('n').to.equal(documents.length);
 
           let totalDocumentsRead = 0;
           conn.command(ns, { find: 'test', batchSize: 100 }, (err, result) => {
             expect(err).to.not.exist;
-            expect(result).nested.property('result.cursor').to.exist;
-            const cursor = result.result.cursor;
+            expect(result).nested.property('cursor').to.exist;
+            const cursor = result.cursor;
             totalDocumentsRead += cursor.firstBatch.length;
 
             conn.command(
@@ -108,8 +102,8 @@ describe('Connection', function () {
               { exhaustAllowed: true },
               (err, result) => {
                 expect(err).to.not.exist;
-                expect(result).nested.property('result.cursor').to.exist;
-                const cursor = result.result.cursor;
+                expect(result).nested.property('cursor').to.exist;
+                const cursor = result.cursor;
                 totalDocumentsRead += cursor.nextBatch.length;
 
                 if (cursor.id === 0 || cursor.id.isZero()) {

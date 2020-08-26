@@ -111,14 +111,13 @@ function performInitialHandshake(
     }
 
     const start = new Date().getTime();
-    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err, result) => {
+    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err, response) => {
       if (err) {
         callback(err);
         return;
       }
 
-      const response = result.result;
-      if (response.ok === 0) {
+      if (response?.ok === 0) {
         callback(new MongoError(response));
         return;
       }
