@@ -522,7 +522,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
 
   // send the command
   session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
-    if (err && isRetryableError(err)) {
+    if (err && isRetryableError(err as MongoError)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
         // per txns spec, must unpin session in this case

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import type { Admin } from './admin';
 import type { Collection } from './collection';
 import type { Db } from './db';

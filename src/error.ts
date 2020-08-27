@@ -61,7 +61,7 @@ export class MongoError extends Error {
           this[kErrorLabels] = new Set(message.errorLabels);
         }
 
-        for (let name in message) {
+        for (const name in message) {
           if (name === 'errorLabels' || name === 'errmsg') {
             continue;
           }
@@ -77,7 +77,7 @@ export class MongoError extends Error {
   }
 
   /** Legacy name for server error responses */
-  get errmsg() {
+  get errmsg(): string {
     return this.message;
   }
 
@@ -87,7 +87,7 @@ export class MongoError extends Error {
    * @param options - The options used to create the error.
    * @deprecated Use `new MongoError()` instead.
    */
-  static create(options: any): MongoError {
+  static create(options: string | Error | ErrorDescription): MongoError {
     return new MongoError(options);
   }
 
@@ -105,7 +105,7 @@ export class MongoError extends Error {
     return this[kErrorLabels].has(label);
   }
 
-  addErrorLabel(label: any) {
+  addErrorLabel(label: string): void {
     if (this[kErrorLabels] == null) {
       this[kErrorLabels] = new Set();
     }
@@ -113,13 +113,13 @@ export class MongoError extends Error {
     this[kErrorLabels].add(label);
   }
 
-  get errorLabels() {
+  get errorLabels(): string[] {
     return this[kErrorLabels] ? Array.from(this[kErrorLabels]) : [];
   }
 }
 
 const kBeforeHandshake = Symbol('beforeHandshake');
-export function isNetworkErrorBeforeHandshake(err: any) {
+export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
   return err[kBeforeHandshake] === true;
 }
 
@@ -131,7 +131,7 @@ export function isNetworkErrorBeforeHandshake(err: any) {
 export class MongoNetworkError extends MongoError {
   [kBeforeHandshake]?: boolean;
 
-  constructor(message: string | Error, options?: any) {
+  constructor(message: string | Error, options?: { beforeHandshake?: boolean }) {
     super(message);
     this.name = 'MongoNetworkError';
 
@@ -177,8 +177,9 @@ export class MongoParseError extends MongoError {
  */
 export class MongoTimeoutError extends MongoError {
   /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
-  reason?: string;
+  reason?: unknown;
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(message: string, reason: any) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
@@ -199,7 +200,7 @@ export class MongoTimeoutError extends MongoError {
  * @category Error
  */
 export class MongoServerSelectionError extends MongoTimeoutError {
-  constructor(message: string, reason: any) {
+  constructor(message: string, reason: unknown) {
     super(message, reason);
     this.name = 'MongoServerSelectionError';
   }
@@ -271,7 +272,7 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
   262 // ExceededTimeLimit
 ]);
 
-export function isRetryableWriteError(error: MongoError) {
+export function isRetryableWriteError(error: MongoError): boolean {
   if (error instanceof MongoWriteConcernError) {
     return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code);
   }
@@ -280,12 +281,13 @@ export function isRetryableWriteError(error: MongoError) {
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
-export function isRetryableError(error: any) {
+export function isRetryableError(error: MongoError): boolean {
   return (
-    RETRYABLE_ERROR_CODES.has(error.code) ||
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    RETRYABLE_ERROR_CODES.has(error.code!) ||
     error instanceof MongoNetworkError ||
-    error.message.match(/not master/) ||
-    error.message.match(/node is recovering/)
+    !!error.message.match(/not master/) ||
+    !!error.message.match(/node is recovering/)
   );
 }
 
@@ -307,7 +309,7 @@ const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set([
   91 // ShutdownInProgress
 ]);
 
-function isRecoveringError(err: any) {
+function isRecoveringError(err: MongoError) {
   if (err.code && SDAM_RECOVERING_CODES.has(err.code)) {
     return true;
   }
@@ -315,7 +317,7 @@ function isRecoveringError(err: any) {
   return err.message.match(/not master or secondary/) || err.message.match(/node is recovering/);
 }
 
-function isNotMasterError(err: any) {
+function isNotMasterError(err: MongoError) {
   if (err.code && SDAM_NOTMASTER_CODES.has(err.code)) {
     return true;
   }
@@ -327,8 +329,8 @@ function isNotMasterError(err: any) {
   return err.message.match(/not master/);
 }
 
-export function isNodeShuttingDownError(err: any) {
-  return err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code);
+export function isNodeShuttingDownError(err: MongoError): boolean {
+  return !!(err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code));
 }
 
 /**
@@ -338,7 +340,7 @@ export function isNodeShuttingDownError(err: any) {
  *
  * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering
  */
-export function isSDAMUnrecoverableError(error: any) {
+export function isSDAMUnrecoverableError(error: MongoError): boolean {
   // NOTE: null check is here for a strictly pre-CMAP world, a timeout or
   //       close event are considered unrecoverable
   if (error instanceof MongoParseError || error == null) {
@@ -352,8 +354,8 @@ export function isSDAMUnrecoverableError(error: any) {
   return false;
 }
 
-export function isNetworkTimeoutError(err: any) {
-  return err instanceof MongoNetworkError && err.message.match(/timed out/);
+export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError {
+  return !!(err instanceof MongoNetworkError && err.message.match(/timed out/));
 }
 
 // From spec@https://github.com/mongodb/specifications/blob/7a2e93d85935ee4b1046a8d2ad3514c657dc74fa/source/change-streams/change-streams.rst#resumable-error:
@@ -368,18 +370,21 @@ export function isNetworkTimeoutError(err: any) {
 //
 // An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable errors.
 
-export function isResumableError(error?: any, wireVersion?: any) {
+export function isResumableError(error?: MongoError, wireVersion?: number): boolean {
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
-  if (wireVersion >= 9) {
+  if (typeof wireVersion !== 'undefined' && wireVersion >= 9) {
     // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
-    if (error.code === 43) {
+    if (error && error instanceof MongoError && error.code === 43) {
       return true;
     }
-    return error.hasErrorLabel('ResumableChangeStreamError');
+    return error instanceof MongoError && error.hasErrorLabel('ResumableChangeStreamError');
   }
 
-  return GET_MORE_RESUMABLE_CODES.has(error.code);
+  if (error && typeof error.code === 'number') {
+    return GET_MORE_RESUMABLE_CODES.has(error.code);
+  }
+  return false;
 }

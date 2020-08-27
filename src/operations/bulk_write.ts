@@ -45,7 +45,7 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
         : coll.initializeUnorderedBulkOp(options);
 
     // Do we have a collation
-    let collation = false;
+    const collation = false;
 
     // for each op go through and add to the bulk
     try {

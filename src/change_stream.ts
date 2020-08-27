@@ -209,6 +209,7 @@ export class ChangeStream extends EventEmitter {
       this.topology = parent.s.topology;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.topology = parent.topology!;
     } else {
       throw new TypeError(
@@ -406,16 +407,16 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     }
   }
 
-  set resumeToken(token) {
+  set resumeToken(token: ResumeToken) {
     this._resumeToken = token;
     this.emit(ChangeStream.RESUME_TOKEN_CHANGED, token);
   }
 
-  get resumeToken() {
+  get resumeToken(): ResumeToken {
     return this._resumeToken;
   }
 
-  get resumeOptions() {
+  get resumeOptions(): Document {
     const result: Document = {};
     for (const optionName of CURSOR_OPTIONS) {
       if (Reflect.has(this.options, optionName)) {
@@ -438,7 +439,7 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     return result;
   }
 
-  cacheResumeToken(resumeToken: ResumeToken) {
+  cacheResumeToken(resumeToken: ResumeToken): void {
     if (this.bufferedCount() === 0 && this.cursorState.postBatchResumeToken) {
       this.resumeToken = this.cursorState.postBatchResumeToken;
     } else {
@@ -447,7 +448,7 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     this.hasReceived = true;
   }
 
-  _processBatch(batchName: string, response?: Document) {
+  _processBatch(batchName: string, response?: Document): void {
     const cursor = response?.cursor || {};
     if (cursor.postBatchResumeToken) {
       this.cursorState.postBatchResumeToken = cursor.postBatchResumeToken;
@@ -458,7 +459,7 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     }
   }
 
-  _initializeCursor(callback: Callback) {
+  _initializeCursor(callback: Callback): void {
     super._initializeCursor((err, response) => {
       if (err || response == null) {
         callback(err, response);
@@ -482,7 +483,7 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     });
   }
 
-  _getMore(callback: Callback) {
+  _getMore(callback: Callback): void {
     super._getMore((err, response) => {
       if (err) {
         callback(err);
@@ -644,7 +645,7 @@ function processError(changeStream: ChangeStream, error?: AnyError, callback?: C
     changeStream.closed = true;
   }
 
-  if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
+  if (cursor && isResumableError(error as MongoError, maxWireVersion(cursor.server))) {
     changeStream.cursor = undefined;
 
     // stop listening to all events from old cursor

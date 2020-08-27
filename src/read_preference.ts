@@ -1,5 +1,7 @@
 import type { TagSet } from './sdam/server_description';
 import type { OperationParent } from './operations/command';
+import type { Document } from './bson';
+import type { ClientSession } from './sessions';
 
 /** @public */
 export type ReadPreferenceLike =
@@ -31,7 +33,9 @@ export interface ReadPreferenceOptions {
 }
 
 /** @public */
-export interface ReadPreferenceLikeOptions {
+export interface ReadPreferenceLikeOptions extends ReadPreferenceOptions {
+  readPreferenceTags?: TagSet[];
+  session?: ClientSession;
   readPreference?:
     | ReadPreferenceLike
     | {
@@ -130,7 +134,8 @@ export class ReadPreference {
    *
    * @param options - The options object from which to extract the read preference.
    */
-  static fromOptions(options: any): ReadPreference | undefined {
+  static fromOptions(options?: ReadPreferenceLikeOptions): ReadPreference | undefined {
+    if (!options) return;
     const readPreference = options.readPreference;
     const readPreferenceTags = options.readPreferenceTags;
 
@@ -150,7 +155,7 @@ export class ReadPreference {
       }
     }
 
-    return readPreference;
+    return readPreference as ReadPreference;
   }
 
   /**
@@ -161,22 +166,21 @@ export class ReadPreference {
    * @param parent - The parent of the operation on which to determine the read preference, used for determining the inherited read preference.
    * @param options - The options passed into the method, potentially containing a read preference
    */
-  static resolve(parent?: OperationParent, options?: any): ReadPreference {
+  static resolve(parent?: OperationParent, options?: ReadPreferenceLikeOptions): ReadPreference {
     options = options || {};
     const session = options.session;
 
     const inheritedReadPreference = parent?.readPreference;
 
-    let readPreference;
+    let readPreference: ReadPreference = ReadPreference.primary;
     if (options.readPreference) {
-      readPreference = ReadPreference.fromOptions(options);
+      const readPrefFromOptions = ReadPreference.fromOptions(options);
+      readPreference = readPrefFromOptions ? readPrefFromOptions : readPreference;
     } else if (session && session.inTransaction() && session.transaction.options.readPreference) {
       // The transaction’s read preference MUST override all other user configurable read preferences.
       readPreference = session.transaction.options.readPreference;
     } else if (inheritedReadPreference != null) {
       readPreference = inheritedReadPreference;
-    } else {
-      readPreference = ReadPreference.primary;
     }
 
     return typeof readPreference === 'string'
@@ -260,8 +264,8 @@ export class ReadPreference {
   }
 
   /** Return JSON representation */
-  toJSON(): object {
-    const readPreference = { mode: this.mode } as any;
+  toJSON(): Document {
+    const readPreference = { mode: this.mode } as Document;
     if (Array.isArray(this.tags)) readPreference.tags = this.tags;
     if (this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
     if (this.hedge) readPreference.hedge = this.hedge;

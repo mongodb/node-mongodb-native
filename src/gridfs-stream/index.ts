@@ -156,8 +156,8 @@ export class GridFSBucket extends EventEmitter {
     filename: string,
     options?: GridFSBucketReadStreamOptionsWithRevision
   ): GridFSBucketReadStream {
-    var sort: Sort = { uploadDate: -1 };
-    var skip = undefined;
+    let sort: Sort = { uploadDate: -1 };
+    let skip = undefined;
     if (options && options.revision != null) {
       if (options.revision >= 0) {
         sort = { uploadDate: 1 };
@@ -217,7 +217,7 @@ function _delete(bucket: GridFSBucket, id: TFileId, callback: Callback<void>): v
 
       // Delete orphaned chunks before returning FileNotFound
       if (!res?.deletedCount) {
-        var errmsg = 'FileNotFound: no file with id ' + id + ' found';
+        const errmsg = 'FileNotFound: no file with id ' + id + ' found';
         return callback(new Error(errmsg));
       }
 

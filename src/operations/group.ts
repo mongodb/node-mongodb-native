@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { CommandOperation, CommandOperationOptions } from './command';
 import { EvalOperation } from './eval';
 import { Code, Document } from '../bson';
@@ -11,19 +12,19 @@ export type GroupOptions = CommandOperationOptions;
 export class GroupOperation extends CommandOperation<GroupOptions, Document> {
   collectionName: string;
   keys: any;
-  condition: any;
+  condition: Document;
   initial: any;
   reduceFunction: Code;
-  finalize: any;
+  finalize: string;
 
   constructor(
     collection: Collection,
     keys: any,
-    condition: any,
-    initial: any,
+    condition: Document,
+    initial: Document,
     reduce: any,
-    finalize: any,
-    options: GroupOptions
+    finalize: string,
+    options?: GroupOptions
   ) {
     super(collection, options);
     this.collectionName = collection.collectionName;
@@ -34,7 +35,7 @@ export class GroupOperation extends CommandOperation<GroupOptions, Document> {
     this.reduceFunction = reduce && reduce._bsontype === 'Code' ? reduce : new Code(reduce);
   }
 
-  execute(server: Server, callback: Callback<Document>) {
+  execute(server: Server, callback: Callback<Document>): void {
     const cmd: Document = {
       group: {
         ns: this.collectionName,
@@ -55,8 +56,8 @@ export class GroupOperation extends CommandOperation<GroupOptions, Document> {
       cmd.group.$keyf =
         this.keys && this.keys._bsontype === 'Code' ? this.keys : new Code(this.keys);
     } else {
-      const hash: any = {};
-      this.keys.forEach((key: any) => {
+      const hash: { [key: string]: 1 } = {};
+      this.keys.forEach((key: string) => {
         hash[key] = 1;
       });
 
@@ -76,13 +77,13 @@ const groupFunction =
 
 export class EvalGroupOperation extends EvalOperation {
   constructor(
-    collection: any,
-    keys: any,
-    condition: any,
-    initial: any,
+    collection: Collection,
+    keys: string[],
+    condition: Document,
+    initial: Document,
     reduce: any,
-    finalize: any,
-    options: any
+    finalize: string,
+    options?: GroupOptions
   ) {
     // Create execution scope
     const scope = reduce != null && reduce._bsontype === 'Code' ? reduce.scope : {};

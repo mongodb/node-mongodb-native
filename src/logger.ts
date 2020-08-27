@@ -71,7 +71,7 @@ export class Logger {
    * @param message - The message to log
    * @param object - Additional meta data to log
    */
-  debug(message: string, object?: any): void {
+  debug(message: string, object?: unknown): void {
     if (
       this.isDebug() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
@@ -98,7 +98,7 @@ export class Logger {
    * @param message - The message to log
    * @param object - Additional meta data to log
    */
-  warn(message: string, object?: any): void {
+  warn(message: string, object?: unknown): void {
     if (
       this.isWarn() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
@@ -125,7 +125,7 @@ export class Logger {
    * @param message - The message to log
    * @param object - Additional meta data to log
    */
-  info(message: string, object?: any): void {
+  info(message: string, object?: unknown): void {
     if (
       this.isInfo() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
@@ -152,7 +152,7 @@ export class Logger {
    * @param message - The message to log
    * @param object - Additional meta data to log
    */
-  error(message: string, object?: any): void {
+  error(message: string, object?: unknown): void {
     if (
       this.isError() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
@@ -223,7 +223,7 @@ export class Logger {
   }
 
   /**
-   * Filter log messages for a particular classs
+   * Filter log messages for a particular class
    *
    * @param type - The type of filter (currently only class)
    * @param values - The filters to apply

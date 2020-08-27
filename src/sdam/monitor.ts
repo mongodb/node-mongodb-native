@@ -371,11 +371,11 @@ export class RTTPinger {
     this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
   }
 
-  get roundTripTime() {
+  get roundTripTime(): number {
     return this[kRoundTripTime];
   }
 
-  close() {
+  close(): void {
     this.closed = true;
     clearTimeout(this[kMonitorId]);
 

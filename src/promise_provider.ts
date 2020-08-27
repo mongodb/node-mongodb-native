@@ -14,6 +14,7 @@ const store: PromiseStore = {
  */
 export class PromiseProvider {
   /** Validates the passed in promise library */
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   static validate(lib: any): lib is PromiseConstructor {
     if (typeof lib !== 'function') throw new Error(`Promise must be a function, got ${lib}`);
     return lib;

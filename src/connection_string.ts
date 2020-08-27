@@ -36,7 +36,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param options - Optional user provided connection string options
  */
 function parseSrvConnectionString(uri: string, options: any, callback: Callback) {
-  const result: any = url.parse(uri, true);
+  const result: Document = url.parse(uri, true);
 
   if (options.directConnection) {
     return callback(new MongoParseError('directConnection not supported with SRV URI'));
@@ -57,7 +57,7 @@ function parseSrvConnectionString(uri: string, options: any, callback: Callback)
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = result.host;
-  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err?: any, addresses?: any) => {
+  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err, addresses) => {
     if (err) return callback(err);
 
     if (addresses.length === 0) {
@@ -413,7 +413,7 @@ function applyAuthExpectations(parsed: any) {
  * @param options - The options used for options parsing
  * @returns The parsed query string as an object
  */
-function parseQueryString(query: string, options?: object): Document {
+function parseQueryString(query: string, options?: unknown): Document {
   const result = {} as any;
   const parsedQueryString = qs.parse(query);
 
@@ -506,7 +506,7 @@ function checkTLSQueryString(queryString: any) {
  * @param optionKeyB - B options key
  * @throws MongoParseError if two provided options are mutually exclusive.
  */
-function assertRepelOptions(options: object, optionKeyA: string, optionKeyB: string) {
+function assertRepelOptions(options: unknown, optionKeyA: string, optionKeyB: string) {
   if (
     Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
     Object.prototype.hasOwnProperty.call(options, optionKeyB)
@@ -521,7 +521,7 @@ function assertRepelOptions(options: object, optionKeyA: string, optionKeyB: str
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-function checkTLSOptions(options: object) {
+function checkTLSOptions(options: unknown) {
   if (!options) return null;
   const check = (a: any, b: any) => assertRepelOptions(options, a, b);
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
@@ -576,50 +576,60 @@ interface ParseConnectionStringOptions extends Partial<ConnectionOptions> {
 }
 
 /** Parses a MongoDB connection string */
-function parseConnectionString(
+export function parseConnectionString(uri: string, callback: Callback): void;
+export function parseConnectionString(
   uri: string,
-  options?: ParseConnectionStringOptions,
-  callback?: Callback
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
+  options: ParseConnectionStringOptions,
+  callback: Callback
+): void;
+export function parseConnectionString(
+  uri: string,
+  // TODO: Use labeled tuples when api-extractor supports TS 4.0
+  ...args:
+    | [/*options:*/ ParseConnectionStringOptions, /*callback:*/ Callback]
+    | [/*callback:*/ Callback]
+): void {
+  const callback = args.pop() as Callback;
+  let options = args.pop() as ParseConnectionStringOptions;
+  if (typeof options === 'function') options = {};
   options = Object.assign({}, { caseTranslate: true }, options);
 
   // Check for bad uris before we parse
   try {
     url.parse(uri);
   } catch (e) {
-    return callback!(new MongoParseError('URI malformed, cannot be parsed'));
+    return callback(new MongoParseError('URI malformed, cannot be parsed'));
   }
 
   const cap = uri.match(HOSTS_RX);
   if (!cap) {
-    return callback!(new MongoParseError('Invalid connection string'));
+    return callback(new MongoParseError('Invalid connection string'));
   }
 
   const protocol = cap[1];
   if (SUPPORTED_PROTOCOLS.indexOf(protocol) === -1) {
-    return callback!(new MongoParseError('Invalid protocol provided'));
+    return callback(new MongoParseError('Invalid protocol provided'));
   }
 
   const dbAndQuery = cap[4].split('?');
   const db = dbAndQuery.length > 0 ? dbAndQuery[0] : null;
-  const query = dbAndQuery.length > 1 ? dbAndQuery[1] : null;
+  const query = dbAndQuery.length > 1 ? dbAndQuery[1] : '';
 
   let parsedOptions;
   try {
     // this just parses the query string NOT the connection options object
-    parsedOptions = parseQueryString(query!, options);
+    parsedOptions = parseQueryString(query, options);
     // this merges the options object with the query string object above
     parsedOptions = Object.assign({}, parsedOptions, options);
     checkTLSOptions(parsedOptions);
   } catch (parseError) {
-    return callback!(parseError);
+    return callback(parseError);
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
 
   if (protocol === PROTOCOL_MONGODB_SRV) {
-    return parseSrvConnectionString(uri, parsedOptions, callback!);
+    return parseSrvConnectionString(uri, parsedOptions, callback);
   }
 
   const auth: any = {
@@ -639,26 +649,26 @@ function parseConnectionString(
   }
 
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
-    return callback!(new MongoParseError('Unescaped slash in userinfo section'));
+    return callback(new MongoParseError('Unescaped slash in userinfo section'));
   }
 
   const authorityParts: any = cap[3].split('@');
   if (authorityParts.length > 2) {
-    return callback!(new MongoParseError('Unescaped at-sign in authority section'));
+    return callback(new MongoParseError('Unescaped at-sign in authority section'));
   }
 
   if (authorityParts[0] == null || authorityParts[0] === '') {
-    return callback!(new MongoParseError('No username provided in authority section'));
+    return callback(new MongoParseError('No username provided in authority section'));
   }
 
   if (authorityParts.length > 1) {
     const authParts = authorityParts.shift().split(':');
     if (authParts.length > 2) {
-      return callback!(new MongoParseError('Unescaped colon in authority section'));
+      return callback(new MongoParseError('Unescaped colon in authority section'));
     }
 
     if (authParts[0] === '') {
-      return callback!(new MongoParseError('Invalid empty username provided'));
+      return callback(new MongoParseError('Invalid empty username provided'));
     }
 
     if (!auth.username) auth.username = qs.unescape(authParts[0]);
@@ -712,18 +722,18 @@ function parseConnectionString(
     .filter((host: any) => !!host);
 
   if (hostParsingError) {
-    return callback!(hostParsingError);
+    return callback(hostParsingError);
   }
 
   if (hosts.length === 0 || hosts[0].host === '' || hosts[0].host === null) {
-    return callback!(new MongoParseError('No hostname or hostnames provided in connection string'));
+    return callback(new MongoParseError('No hostname or hostnames provided in connection string'));
   }
 
   const directConnection = !!parsedOptions.directConnection;
   if (directConnection && hosts.length !== 1) {
     // If the option is set to true, the driver MUST validate that there is exactly one host given
     // in the host list in the URI, and fail client creation otherwise.
-    return callback!(new MongoParseError('directConnection option requires exactly one host'));
+    return callback(new MongoParseError('directConnection option requires exactly one host'));
   }
 
   const result = {
@@ -744,10 +754,8 @@ function parseConnectionString(
   try {
     applyAuthExpectations(result);
   } catch (authError) {
-    return callback!(authError);
+    return callback(authError);
   }
 
-  callback!(undefined, result);
+  callback(undefined, result);
 }
-
-export { parseConnectionString };

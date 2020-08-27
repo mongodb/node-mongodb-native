@@ -221,6 +221,7 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
  * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
  * @internal
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function isObject(arg: unknown): arg is object {
   return '[object Object]' === Object.prototype.toString.call(arg);
 }
@@ -385,7 +386,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     args.push(handler);
 
     try {
-      return operation.apply(undefined, args);
+      return operation(...args);
     } catch (e) {
       handler(e);
       throw e;
@@ -402,7 +403,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     args[args.length - 1] = handler;
 
     try {
-      return operation.apply(undefined, args);
+      return operation(...args);
     } catch (e) {
       handler(e);
     }
@@ -697,6 +698,7 @@ export function maybePromise<T>(
   wrapper((err, res) => {
     if (err != null) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         callback!(err);
       } catch (error) {
         return process.nextTick(() => {
@@ -705,6 +707,7 @@ export function maybePromise<T>(
       }
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     callback!(err, res);
   });
   return result;
@@ -788,7 +791,7 @@ export function collationNotSupported(server: Server, cmd: Document): boolean {
  * @param eachFn - A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
  * @param callback - The callback called after every item has been iterated
  */
-export function eachAsync<T = any>(
+export function eachAsync<T = Document>(
   arr: T[],
   eachFn: (item: T, callback: (err?: AnyError) => void) => void,
   callback: Callback
@@ -855,7 +858,7 @@ export function eachAsyncSeries<T = any>(
 }
 
 /** @internal */
-export function arrayStrictEqual(arr: any[], arr2: any[]): boolean {
+export function arrayStrictEqual(arr: unknown[], arr2: unknown[]): boolean {
   if (!Array.isArray(arr) || !Array.isArray(arr2)) {
     return false;
   }
