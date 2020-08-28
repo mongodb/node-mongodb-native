@@ -209,9 +209,8 @@ export class GridFSBucketWriteStream extends Writable {
     this.state.streamEnd = true;
 
     if (callback) {
-      const cb = callback;
       this.once(GridFSBucketWriteStream.FINISH, (result: GridFSFile) => {
-        cb(undefined, result);
+        if (callback) callback(undefined, result);
       });
     }
 
