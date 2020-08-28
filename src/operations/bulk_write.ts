@@ -1,5 +1,4 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
-import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
