@@ -1650,36 +1650,40 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findAndRemove(query: Document, callback: Callback): void;
+  findAndRemove(query: Document): Promise<Document>;
   findAndRemove(query: Document, sort: Sort, callback: Callback): void;
-  findAndRemove(query: Document, options: FindAndModifyOptions, callback: Callback): void;
+  findAndRemove(query: Document, sort: Sort): Promise<Document>;
   findAndRemove(
     query: Document,
     sort: Sort,
     options: FindAndModifyOptions,
     callback: Callback
   ): void;
-  findAndRemove(query: Document): Promise<Document>;
-  findAndRemove(query: Document, sort: Sort): Promise<Document>;
   findAndRemove(query: Document, sort: Sort, options: FindAndModifyOptions): Promise<Document>;
   findAndRemove(
     query: Document,
-    ...args: any[]
-  ): // TODO: Use labeled tuples when api-extractor supports TS 4.0
-  /*sort?: Sort | FindAndModifyOptions | Callback<Document>, */
-  /*options?: FindAndModifyOptions | Callback<Document>, */
-  /*callback?: Callback<Document>*/
-  Promise<Document> | void {
-    const callback =
-      typeof args[args.length - 1] === 'function' ? (args.pop() as Callback) : undefined;
-    const sort = (args.length ? args.shift() || [] : []) as Sort;
-    const options = (args.length ? args.shift() || {} : {}) as FindAndModifyOptions;
+    sortOrOptionsOrCallback?: Sort | FindAndModifyOptions | Callback,
+    optionsOrCallback?: FindAndModifyOptions | Callback,
+    _callback?: Callback
+  ): Promise<Document> | void {
+    let sort = sortOrOptionsOrCallback ?? {};
+    let options = optionsOrCallback ?? {};
+    let callback = _callback;
+    if (typeof sort === 'function') {
+      callback = sort;
+      sort = {};
+    }
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
     // Add the remove option
     options.remove = true;
 
     return executeOperation(
       this.s.topology,
-      new FindAndModifyOperation(this, query, sort, undefined, options),
+      new FindAndModifyOperation(this, query, sort as Sort, undefined, options),
       callback
     );
   }

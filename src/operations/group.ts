@@ -15,7 +15,7 @@ export class GroupOperation extends CommandOperation<GroupOptions, Document> {
   condition: Document;
   initial: any;
   reduceFunction: Code;
-  finalize: string;
+  finalize: Code;
 
   constructor(
     collection: Collection,
@@ -23,7 +23,7 @@ export class GroupOperation extends CommandOperation<GroupOptions, Document> {
     condition: Document,
     initial: Document,
     reduce: any,
-    finalize: string,
+    finalize: Code,
     options?: GroupOptions
   ) {
     super(collection, options);
@@ -82,7 +82,7 @@ export class EvalGroupOperation extends EvalOperation {
     condition: Document,
     initial: Document,
     reduce: any,
-    finalize: string,
+    finalize: Code,
     options?: GroupOptions
   ) {
     // Create execution scope

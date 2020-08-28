@@ -1,5 +1,6 @@
 import type { TopologyVersion } from './sdam/server_description';
 import type { Document } from './bson';
+import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */
 export type AnyError = MongoError | Error;
@@ -177,10 +178,10 @@ export class MongoParseError extends MongoError {
  */
 export class MongoTimeoutError extends MongoError {
   /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
-  reason?: unknown;
+  reason?: TopologyDescription;
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  constructor(message: string, reason: any) {
+  constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
     } else {
@@ -200,7 +201,7 @@ export class MongoTimeoutError extends MongoError {
  * @category Error
  */
 export class MongoServerSelectionError extends MongoTimeoutError {
-  constructor(message: string, reason: unknown) {
+  constructor(message: string, reason: TopologyDescription) {
     super(message, reason);
     this.name = 'MongoServerSelectionError';
   }

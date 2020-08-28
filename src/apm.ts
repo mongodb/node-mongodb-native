@@ -8,7 +8,7 @@ import type { MongoClient } from './mongo_client';
 /** @public */
 export class Instrumentation extends EventEmitter {
   $MongoClient?: typeof MongoClient;
-  $prototypeConnect?: typeof MongoClient['connect'];
+  $prototypeConnect?: typeof MongoClient.prototype['connect'];
 
   /** @event */
   static readonly STARTED = 'started' as const;
@@ -49,8 +49,8 @@ export class Instrumentation extends EventEmitter {
   }
 
   uninstrument(): void {
-    if (this.$MongoClient) {
-      this.$MongoClient.prototype.connect = this.$prototypeConnect as any;
+    if (this.$MongoClient && this.$prototypeConnect) {
+      this.$MongoClient.prototype.connect = this.$prototypeConnect;
     }
   }
 }

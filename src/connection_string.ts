@@ -3,7 +3,7 @@ import * as qs from 'querystring';
 import * as dns from 'dns';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
-import type { Callback } from './utils';
+import type { ArbitraryOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 
@@ -413,7 +413,7 @@ function applyAuthExpectations(parsed: any) {
  * @param options - The options used for options parsing
  * @returns The parsed query string as an object
  */
-function parseQueryString(query: string, options?: unknown): Document {
+function parseQueryString(query: string, options?: ArbitraryOptions): Document {
   const result = {} as any;
   const parsedQueryString = qs.parse(query);
 
@@ -506,7 +506,7 @@ function checkTLSQueryString(queryString: any) {
  * @param optionKeyB - B options key
  * @throws MongoParseError if two provided options are mutually exclusive.
  */
-function assertRepelOptions(options: unknown, optionKeyA: string, optionKeyB: string) {
+function assertRepelOptions(options: ArbitraryOptions, optionKeyA: string, optionKeyB: string) {
   if (
     Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
     Object.prototype.hasOwnProperty.call(options, optionKeyB)
@@ -521,7 +521,7 @@ function assertRepelOptions(options: unknown, optionKeyA: string, optionKeyB: st
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-function checkTLSOptions(options: unknown) {
+function checkTLSOptions(options: ArbitraryOptions) {
   if (!options) return null;
   const check = (a: any, b: any) => assertRepelOptions(options, a, b);
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
@@ -584,15 +584,14 @@ export function parseConnectionString(
 ): void;
 export function parseConnectionString(
   uri: string,
-  // TODO: Use labeled tuples when api-extractor supports TS 4.0
-  ...args:
-    | [/*options:*/ ParseConnectionStringOptions, /*callback:*/ Callback]
-    | [/*callback:*/ Callback]
+  options?: ParseConnectionStringOptions | Callback,
+  _callback?: Callback
 ): void {
-  const callback = args.pop() as Callback;
-  let options = args.pop() as ParseConnectionStringOptions;
-  if (typeof options === 'function') options = {};
-  options = Object.assign({}, { caseTranslate: true }, options);
+  let callback = _callback as Callback;
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
 
   // Check for bad uris before we parse
   try {

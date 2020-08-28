@@ -308,7 +308,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<MongoClient>;
-  connect(callback: Callback<MongoClient>): void;
+  connect(callback: Callback<MongoClient> | undefined): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');
@@ -419,9 +419,13 @@ export class MongoClient extends EventEmitter implements OperationParent {
   static connect(url: string, callback: Callback<MongoClient>): void;
   static connect(url: string, options: MongoClientOptions): Promise<MongoClient>;
   static connect(url: string, options: MongoClientOptions, callback: Callback<MongoClient>): void;
-  static connect(url: string, ...args: any[]): Promise<MongoClient> | void {
-    const callback = args.pop() as Callback<MongoClient>;
-    const options = typeof args[0] === 'function' ? {} : args[0];
+  static connect(
+    url: string,
+    options?: MongoClientOptions | Callback<MongoClient>,
+    callback?: Callback<MongoClient>
+  ): Promise<MongoClient> | void {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
 
     if (options && options.promiseLibrary) {
       PromiseProvider.set(options.promiseLibrary);

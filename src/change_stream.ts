@@ -20,6 +20,7 @@ import type { Topology } from './sdam/topology';
 import type { Writable } from 'stream';
 import type { StreamOptions } from './cursor/core_cursor';
 import type { OperationParent } from './operations/command';
+import type { CollationOptions } from './cmap/wire_protocol/write_command';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -32,6 +33,14 @@ const CHANGE_DOMAIN_TYPES = {
   DATABASE: Symbol('Database'),
   CLUSTER: Symbol('Cluster')
 };
+
+export interface ResumeOptions {
+  startAtOperationTime?: Timestamp;
+  batchSize?: number;
+  maxAwaitTimeMS?: number;
+  collation?: CollationOptions;
+  readPreference?: ReadPreference;
+}
 
 /**
  * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server.
@@ -416,21 +425,23 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     return this._resumeToken;
   }
 
-  get resumeOptions(): Document {
-    const result: Document = {};
+  get resumeOptions(): ResumeOptions {
+    const result = {} as ResumeOptions;
     for (const optionName of CURSOR_OPTIONS) {
       if (Reflect.has(this.options, optionName)) {
-        result[optionName] = Reflect.get(this.options, optionName);
+        Reflect.set(result, optionName, Reflect.get(this.options, optionName));
       }
     }
 
     if (this.resumeToken || this.startAtOperationTime) {
-      ['resumeAfter', 'startAfter', 'startAtOperationTime'].forEach(key => delete result[key]);
+      ['resumeAfter', 'startAfter', 'startAtOperationTime'].forEach(key =>
+        Reflect.deleteProperty(result, key)
+      );
 
       if (this.resumeToken) {
         const resumeKey =
           this.options.startAfter && !this.hasReceived ? 'startAfter' : 'resumeAfter';
-        result[resumeKey] = this.resumeToken;
+        Reflect.set(result, resumeKey, this.resumeToken);
       } else if (this.startAtOperationTime && maxWireVersion(this.server) >= 7) {
         result.startAtOperationTime = this.startAtOperationTime;
       }

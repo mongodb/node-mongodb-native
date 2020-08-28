@@ -25,7 +25,7 @@ export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) 
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
-type ArbitraryOptions = Document;
+export type ArbitraryOptions = Document;
 
 /**
  * Add a readonly enumerable property.
