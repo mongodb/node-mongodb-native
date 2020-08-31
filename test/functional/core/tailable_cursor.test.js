@@ -42,7 +42,7 @@ describe('Tailable cursor tests', function () {
                 },
                 (insertErr, results) => {
                   expect(insertErr).to.not.exist;
-                  expect(results.result.n).to.equal(1);
+                  expect(results.n).to.equal(1);
 
                   // Execute find
                   const cursor = topology.cursor(ns, {

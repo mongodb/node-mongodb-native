@@ -172,9 +172,9 @@ export function removeDocuments(
     if (callback == null) return;
     if (err) return callback(err);
     if (result == null) return callback();
-    if (result.result.code) return callback(new MongoError(result.result));
-    if (result.result.writeErrors) {
-      return callback(new MongoError(result.result.writeErrors[0]));
+    if (result.code) return callback(new MongoError(result));
+    if (result.writeErrors) {
+      return callback(new MongoError(result.writeErrors[0]));
     }
 
     // Return the results
@@ -262,8 +262,8 @@ export function updateDocuments(
       if (callback == null) return;
       if (err) return callback(err);
       if (result == null) return callback();
-      if (result.result.code) return callback(new MongoError(result.result));
-      if (result.result.writeErrors) return callback(new MongoError(result.result.writeErrors[0]));
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
       // Return the results
       callback(undefined, result);
     }

@@ -18,8 +18,8 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { CommandResult } from './commands';
 import type { CommandOptions } from './wire_protocol/command';
+import type { Document } from '../bson';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -133,7 +133,7 @@ export interface ConnectionPool {
   write(
     message: any,
     commandOptions: CommandOptions,
-    callback: (err: MongoError, ...args: CommandResult[]) => void
+    callback: (err: MongoError, ...args: Document[]) => void
   ): void;
 }
 

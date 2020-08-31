@@ -4,9 +4,8 @@ import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import type { InsertOptions } from './insert';
 import type { ObjectId, Document } from '../bson';
-import type { BulkWriteResult } from '../bulk/common';
+import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
 /** @public */
@@ -22,11 +21,11 @@ export interface InsertManyResult {
 }
 
 /** @internal */
-export class InsertManyOperation extends OperationBase<InsertOptions, InsertManyResult> {
+export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertManyResult> {
   collection: Collection;
   docs: Document[];
 
-  constructor(collection: Collection, docs: Document[], options: InsertOptions) {
+  constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
     super(options);
 
     this.collection = collection;
@@ -50,12 +49,7 @@ export class InsertManyOperation extends OperationBase<InsertOptions, InsertMany
     docs = prepareDocs(coll, docs, options);
 
     // Generate the bulk write operations
-    const operations = [
-      {
-        insertMany: docs
-      }
-    ];
-
+    const operations = [{ insertMany: docs }];
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
     bulkWriteOperation.execute(server, (err, result) => {

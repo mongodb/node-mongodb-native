@@ -59,17 +59,16 @@ export function killCursors(
     cursors: cursorIds
   };
 
-  const options: CommandOptions = {};
+  const options: CommandOptions = { fullResult: true };
   if (typeof cursorState.session === 'object') {
     options.session = cursorState.session;
   }
 
-  command(server, ns, killCursorCmd, options, (err, result) => {
-    if (err || !result) {
+  command(server, ns, killCursorCmd, options, (err, response) => {
+    if (err || !response) {
       return callback(err);
     }
 
-    const response = result.message;
     if (response.cursorNotFound) {
       return callback(new MongoNetworkError('cursor killed or timed out'), null);
     }

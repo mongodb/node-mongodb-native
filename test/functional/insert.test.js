@@ -2527,28 +2527,4 @@ describe('Insert', function () {
       });
     }
   });
-
-  it('should return result using toJSON', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        db.collection('to_json').insertOne({ _id: 0 }, (err, result) => {
-          const jsonResult = result.toJSON();
-          expect(jsonResult.ok).to.equal(1);
-          expect(jsonResult.n).to.equal(1);
-          expect(jsonResult.insertedCount).to.equal(1);
-          expect(jsonResult.ops).to.deep.equal([{ _id: 0 }]);
-          expect(jsonResult.insertedId).to.equal(0);
-          expect(jsonResult.result).to.deep.equal({ n: 1, ok: 1 });
-
-          client.close(done);
-        });
-      });
-    }
-  });
 });

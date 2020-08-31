@@ -32,7 +32,6 @@ export interface AggregateOptions extends CommandOperationOptions {
   collation?: CollationOptions;
   /** Add an index selection hint to an aggregation command */
   hint?: Hint;
-  full?: boolean;
   out?: string;
 }
 
@@ -43,7 +42,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   hasWriteStage: boolean;
 
   constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
-    super(parent, { fullResponse: true, ...options });
+    super(parent, options);
 
     this.target =
       parent.s.namespace && parent.s.namespace.collection
@@ -115,7 +114,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
     }
 
     if (options.explain) {
-      options.full = false;
       command.explain = options.explain;
     }
 

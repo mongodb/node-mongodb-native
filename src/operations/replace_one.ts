@@ -60,18 +60,14 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, Update
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {
-        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        modifiedCount: r.nModified != null ? r.nModified : r.n,
         upsertedId:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+          Array.isArray(r.upserted) && r.upserted.length > 0
+            ? r.upserted[0] // FIXME(major): should be `r.upserted[0]._id`
             : null,
-        upsertedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length
-            ? r.result.upserted.length
-            : 0,
-        matchedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
-        result: r.result
+        upsertedCount: Array.isArray(r.upserted) && r.upserted.length ? r.upserted.length : 0,
+        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n,
+        result: r
       };
 
       callback(undefined, result);

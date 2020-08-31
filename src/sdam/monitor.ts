@@ -229,13 +229,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
       );
     }
 
-    connection.command('admin.$cmd', cmd, options, (err, result) => {
+    connection.command('admin.$cmd', cmd, options, (err, isMaster) => {
       if (err) {
         failureHandler(err);
         return;
       }
 
-      const isMaster = result.result;
       const rttPinger = monitor[kRTTPinger];
       const duration =
         isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);

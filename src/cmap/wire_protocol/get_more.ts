@@ -21,9 +21,8 @@ export function getMore(
   options = options || {};
 
   const wireVersion = maxWireVersion(server);
-  const queryCallback: Callback<Document> = function (err, result) {
-    if (err || !result) return callback(err);
-    const response = result.message;
+  const queryCallback: Callback<Document> = function (err, response) {
+    if (err || !response) return callback(err);
 
     // If we have a timed out query or a cursor that was killed
     if (response.cursorNotFound) {
@@ -44,20 +43,20 @@ export function getMore(
     }
 
     // We have an error detected
-    if (response.documents[0].ok === 0) {
-      return callback(new MongoError(response.documents[0]));
+    if (response.ok === 0) {
+      return callback(new MongoError(response));
     }
 
     // Ensure we have a Long valid cursor id
     const cursorId =
-      typeof response.documents[0].cursor.id === 'number'
-        ? Long.fromNumber(response.documents[0].cursor.id)
-        : response.documents[0].cursor.id;
+      typeof response.cursor.id === 'number'
+        ? Long.fromNumber(response.cursor.id)
+        : response.cursor.id;
 
-    cursorState.documents = response.documents[0].cursor.nextBatch;
+    cursorState.documents = response.cursor.nextBatch;
     cursorState.cursorId = cursorId;
 
-    callback(undefined, response.documents[0]);
+    callback(undefined, response);
   };
 
   if (!cursorState.cursorId) {
@@ -73,6 +72,8 @@ export function getMore(
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorId, { numberToReturn: batchSize });
     const queryOptions = applyCommonQueryOptions({}, cursorState);
+    queryOptions.fullResult = true;
+    queryOptions.command = true;
     server.s.pool.write(getMoreOp, queryOptions, queryCallback);
     return;
   }

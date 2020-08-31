@@ -97,11 +97,4 @@ export class EvalGroupOperation extends EvalOperation {
 
     super(collection, new Code(groupfn, scope), undefined, options);
   }
-
-  execute(server: Server, callback: Callback<Document>) {
-    super.execute(server, (err?: any, results?: any) => {
-      if (err) return callback(err);
-      callback(undefined, results.result || results);
-    });
-  }
 }

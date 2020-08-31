@@ -216,7 +216,7 @@ function _delete(bucket: GridFSBucket, id: TFileId, callback: Callback<void>): v
       }
 
       // Delete orphaned chunks before returning FileNotFound
-      if (!res?.result.n) {
+      if (!res?.deletedCount) {
         var errmsg = 'FileNotFound: no file with id ' + id + ' found';
         return callback(new Error(errmsg));
       }

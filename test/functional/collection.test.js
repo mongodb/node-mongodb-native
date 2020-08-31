@@ -91,6 +91,8 @@ describe('Collection', function () {
                   expect(err).to.not.exist;
                   // Assert collections
                   db.collections((err, collections) => {
+                    expect(err).to.not.exist;
+
                     let found_spiderman = false;
                     let found_mario = false;
                     let found_does_not_exist = false;
@@ -334,7 +336,7 @@ describe('Collection', function () {
               configuration.writeConcernMax(),
               err => {
                 expect(err).to.not.exist;
-                expect(r.result.n).to.equal(1);
+                expect(r.n).to.equal(1);
 
                 // Remove safely
                 collection.deleteOne({}, configuration.writeConcernMax(), err => {

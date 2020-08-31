@@ -14,8 +14,8 @@ import {
 } from './utils';
 import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
-import { initializeUnorderedBulkOp as unordered } from './bulk/unordered';
-import { initializeOrderedBulkOp as ordered } from './bulk/ordered';
+import { UnorderedBulkOperation } from './bulk/unordered';
+import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
@@ -55,7 +55,7 @@ import {
   FindAndModifyOptions
 } from './operations/find_and_modify';
 import { InsertManyOperation, InsertManyResult } from './operations/insert_many';
-import { InsertOneOperation, InsertOptions, InsertOneResult } from './operations/insert';
+import { InsertOneOperation, InsertOneOptions, InsertOneResult } from './operations/insert';
 import {
   UpdateOneOperation,
   UpdateManyOperation,
@@ -85,7 +85,7 @@ import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
-import type { BulkWriteResult } from './bulk/common';
+import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
@@ -292,11 +292,11 @@ export class Collection implements OperationParent {
    */
   insertOne(doc: Document): Promise<InsertOneResult>;
   insertOne(doc: Document, callback: Callback<InsertOneResult>): void;
-  insertOne(doc: Document, options: InsertOptions): Promise<InsertOneResult>;
-  insertOne(doc: Document, options: InsertOptions, callback: Callback<InsertOneResult>): void;
+  insertOne(doc: Document, options: InsertOneOptions): Promise<InsertOneResult>;
+  insertOne(doc: Document, options: InsertOneOptions, callback: Callback<InsertOneResult>): void;
   insertOne(
     doc: Document,
-    options?: InsertOptions | Callback<InsertOneResult>,
+    options?: InsertOneOptions | Callback<InsertOneResult>,
     callback?: Callback<InsertOneResult>
   ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -322,11 +322,15 @@ export class Collection implements OperationParent {
    */
   insertMany(docs: Document[]): Promise<InsertManyResult>;
   insertMany(docs: Document[], callback: Callback<InsertManyResult>): void;
-  insertMany(docs: Document[], options: InsertOptions): Promise<InsertManyResult>;
-  insertMany(docs: Document[], options: InsertOptions, callback: Callback<InsertManyResult>): void;
+  insertMany(docs: Document[], options: BulkWriteOptions): Promise<InsertManyResult>;
   insertMany(
     docs: Document[],
-    options?: InsertOptions | Callback<InsertManyResult>,
+    options: BulkWriteOptions,
+    callback: Callback<InsertManyResult>
+  ): void;
+  insertMany(
+    docs: Document[],
+    options?: BulkWriteOptions | Callback<InsertManyResult>,
     callback?: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -369,17 +373,20 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    * @throws MongoError if operations is not an array
    */
-  bulkWrite(operations: Document[]): Promise<BulkWriteResult>;
-  bulkWrite(operations: Document[], callback: Callback<BulkWriteResult>): void;
-  bulkWrite(operations: Document[], options: InsertOptions): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyBulkWriteOperation[]): Promise<BulkWriteResult>;
+  bulkWrite(operations: AnyBulkWriteOperation[], callback: Callback<BulkWriteResult>): void;
   bulkWrite(
-    operations: Document[],
-    options: InsertOptions,
+    operations: AnyBulkWriteOperation[],
+    options: BulkWriteOptions
+  ): Promise<BulkWriteResult>;
+  bulkWrite(
+    operations: AnyBulkWriteOperation[],
+    options: BulkWriteOptions,
     callback: Callback<BulkWriteResult>
   ): void;
   bulkWrite(
-    operations: Document[],
-    options?: InsertOptions | Callback<BulkWriteResult>,
+    operations: AnyBulkWriteOperation[],
+    options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1465,25 +1472,25 @@ export class Collection implements OperationParent {
   }
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
-  initializeUnorderedBulkOp(options?: any): any {
+  initializeUnorderedBulkOp(options?: BulkWriteOptions): any {
     options = options || {};
     // Give function's options precedence over session options.
     if (options.ignoreUndefined == null) {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    return unordered(this.s.topology, this, options);
+    return new UnorderedBulkOperation(this, options);
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
-  initializeOrderedBulkOp(options?: any): any {
+  initializeOrderedBulkOp(options?: BulkWriteOptions): any {
     options = options || {};
     // Give function's options precedence over session's options.
     if (options.ignoreUndefined == null) {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
-    return ordered(this.s.topology, this, options);
+    return new OrderedBulkOperation(this, options);
   }
 
   /** Get the db scoped logger */
@@ -1507,7 +1514,7 @@ export class Collection implements OperationParent {
    */
   insert(
     docs: Document[],
-    options: InsertOptions,
+    options: BulkWriteOptions,
     callback: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});

@@ -42,12 +42,11 @@ export interface UpdateResult {
 
 /** @internal */
 export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
-  namespace: MongoDBNamespace;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
     super(options);
-    this.namespace = ns;
+    this.ns = ns;
     this.operations = ops;
   }
 
@@ -57,7 +56,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
 
   execute(server: Server, callback: Callback<Document>): void {
     server.update(
-      this.namespace.toString(),
+      this.ns.toString(),
       this.operations,
       this.options as WriteCommandOptions,
       callback
@@ -96,18 +95,14 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {
-        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        modifiedCount: r.nModified != null ? r.nModified : r.n,
         upsertedId:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+          Array.isArray(r.upserted) && r.upserted.length > 0
+            ? r.upserted[0] // FIXME(major): should be `r.upserted[0]._id`
             : null,
-        upsertedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length
-            ? r.result.upserted.length
-            : 0,
-        matchedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
-        result: r.result
+        upsertedCount: Array.isArray(r.upserted) && r.upserted.length ? r.upserted.length : 0,
+        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n,
+        result: r
       };
 
       callback(undefined, result);
@@ -142,18 +137,14 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {
-        modifiedCount: r.result.nModified != null ? r.result.nModified : r.result.n,
+        modifiedCount: r.nModified != null ? r.nModified : r.n,
         upsertedId:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-            ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
+          Array.isArray(r.upserted) && r.upserted.length > 0
+            ? r.upserted[0] // FIXME(major): should be `r.upserted[0]._id`
             : null,
-        upsertedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length
-            ? r.result.upserted.length
-            : 0,
-        matchedCount:
-          Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n,
-        result: r.result
+        upsertedCount: Array.isArray(r.upserted) && r.upserted.length ? r.upserted.length : 0,
+        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n,
+        result: r
       };
 
       callback(undefined, result);
