@@ -6,6 +6,7 @@ import { MongoParseError } from './error';
 import type { ArbitraryOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
+import type { CompressorName } from './cmap/wire_protocol/compression';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -256,7 +257,7 @@ function applyConnectionStringOption(obj: any, key: string, value: any, options:
   if (key === 'compressors') {
     value = Array.isArray(value) ? value : [value];
 
-    if (!value.every((c: any) => c === 'snappy' || c === 'zlib')) {
+    if (!value.every((c: CompressorName) => c === 'snappy' || c === 'zlib')) {
       throw new MongoParseError(
         'Value for `compressors` must be at least one of: `snappy`, `zlib`'
       );
@@ -592,6 +593,7 @@ export function parseConnectionString(
     callback = options;
     options = {};
   }
+  options = { caseTranslate: true, ...options };
 
   // Check for bad uris before we parse
   try {
@@ -738,7 +740,7 @@ export function parseConnectionString(
   const result = {
     hosts: hosts,
     auth: auth.db || auth.username ? auth : null,
-    options: Object.keys(parsedOptions).length ? parsedOptions : null
+    options: Object.keys(parsedOptions).length ? parsedOptions : {}
   } as any;
 
   if (result.auth && result.auth.db) {
