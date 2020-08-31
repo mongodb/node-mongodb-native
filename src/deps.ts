@@ -36,7 +36,7 @@ export interface KerberosClient {
     callback?: Callback<string>
   ) => Promise<string> | void;
   unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
-};
+}
 
 export let Snappy: typeof import('snappy') = makeErrorModule(
   new MongoError(
@@ -133,22 +133,4 @@ export interface AutoEncrypter {
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
-}
-
-/** Declaration Merging block for MongoDB specific functionality in Kerberos */
-declare module 'kerberos' {
-  export const processes: {
-    MongoAuthProcess: {
-      new (host: string, port: number, serviceName: string, options: unknown): {
-        host: string;
-        port: number;
-        serviceName: string;
-        canonicalizeHostName: boolean;
-        retries: number;
-
-        init: (username: string, password: string, callback: Callback) => void;
-        transition: (payload: unknown, callback: Callback) => void;
-      };
-    };
-  };
 }

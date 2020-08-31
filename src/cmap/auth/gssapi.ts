@@ -76,7 +76,7 @@ export class GSSAPI extends AuthProvider {
       command: object,
       cb: (
         err: Error | MongoError | undefined,
-        result: { result: { payload: string; conversationId: any } }
+        result: { payload: string; conversationId: any }
       ) => void
     ) {
       return connection.command('$external.$cmd', command, cb);
@@ -86,28 +86,24 @@ export class GSSAPI extends AuthProvider {
 
       externalCommand(saslStart(payload), (err, result) => {
         if (err) return callback(err);
-
-        const doc = result.result;
-        negotiate(client, 10, doc.payload, (err, payload) => {
+        negotiate(client, 10, result.payload, (err, payload) => {
           if (err) return callback(err);
 
-          externalCommand(saslContinue(payload, doc.conversationId), (err, result) => {
+          externalCommand(saslContinue(payload, result.conversationId), (err, result) => {
             if (err) return callback(err);
-
-            const doc = result.result;
-            finalize(client, username, doc.payload, (err, payload) => {
+            finalize(client, username, result.payload, (err, payload) => {
               if (err) return callback(err);
 
               externalCommand(
                 {
                   saslContinue: 1,
-                  conversationId: doc.conversationId,
+                  conversationId: result.conversationId,
                   payload
                 },
                 (err, result) => {
                   if (err) return callback(err);
 
-                  callback(undefined, result.result);
+                  callback(undefined, result);
                 }
               );
             });
@@ -141,14 +137,11 @@ function negotiate(
   callback: Callback<string>
 ) {
   client.step(payload, (err, response) => {
+    // Retries exhausted, raise error
     if (err && retries === 0) return callback(err);
 
-    // Attempt to re-establish a context
-    if (err) {
-      // Adjust the number of retries
-      // Call same step again
-      return negotiate(client, retries - 1, payload, callback);
-    }
+    // Adjust number of retries and call step again
+    if (err) return negotiate(client, retries - 1, payload, callback);
 
     // Return the payload
     callback(undefined, response || '');
