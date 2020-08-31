@@ -25,14 +25,14 @@ export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) 
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
-export type ArbitraryOptions = Document;
+export type AnyOptions = Document;
 
 /**
  * Add a readonly enumerable property.
  * @internal
  */
 export function getSingleProperty(
-  obj: ArbitraryOptions,
+  obj: AnyOptions,
   name: string | number | symbol,
   value: unknown
 ): void {
@@ -193,8 +193,8 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
         // [{location:'2d'}, {type:1}]
         keys = Object.keys(f);
         keys.forEach(k => {
-          indexes.push(k + '_' + (f as ArbitraryOptions)[k]);
-          fieldHash[k] = (f as ArbitraryOptions)[k];
+          indexes.push(k + '_' + (f as AnyOptions)[k]);
+          fieldHash[k] = (f as AnyOptions)[k];
         });
       } else {
         // undefined (ignore)
@@ -227,8 +227,8 @@ export function isObject(arg: unknown): arg is object {
 }
 
 /** @internal */
-export function debugOptions(debugFields: string[], options?: ArbitraryOptions): Document {
-  const finalOptions: ArbitraryOptions = {};
+export function debugOptions(debugFields: string[], options?: AnyOptions): Document {
+  const finalOptions: AnyOptions = {};
   if (!options) return finalOptions;
   debugFields.forEach(n => {
     finalOptions[n] = options[n];
@@ -254,8 +254,8 @@ export function mergeOptions<T, S>(target: T, source: S): T & S {
 }
 
 /** @internal */
-export function filterOptions(options: ArbitraryOptions, names: string[]): ArbitraryOptions {
-  const filterOptions: ArbitraryOptions = {};
+export function filterOptions(options: AnyOptions, names: string[]): AnyOptions {
+  const filterOptions: AnyOptions = {};
 
   for (const name in options) {
     if (names.includes(name)) {
@@ -269,11 +269,11 @@ export function filterOptions(options: ArbitraryOptions, names: string[]): Arbit
 
 /** @internal */
 export function mergeOptionsAndWriteConcern(
-  targetOptions: ArbitraryOptions,
-  sourceOptions: ArbitraryOptions,
+  targetOptions: AnyOptions,
+  sourceOptions: AnyOptions,
   keys: string[],
   mergeWriteConcern: boolean
-): ArbitraryOptions {
+): AnyOptions {
   // Mix in any allowed options
   for (let i = 0; i < keys.length; i++) {
     if (!targetOptions[keys[i]] && sourceOptions[keys[i]] !== undefined) {
@@ -325,7 +325,7 @@ export function executeLegacyOperation<T extends OperationBase>(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
-  options?: ArbitraryOptions
+  options?: AnyOptions
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
@@ -498,7 +498,7 @@ export function isPromiseLike<T = any>(
 export function decorateWithCollation(
   command: Document,
   target: { s: { topology: Topology } } | { topology: Topology },
-  options: ArbitraryOptions
+  options: AnyOptions
 ): void {
   const topology =
     ('s' in target && target.s.topology) || ('topology' in target && target.topology);
@@ -592,7 +592,7 @@ export function deprecateOptions(
 
   const optionsWarned = new Set();
   function deprecated(this: any, ...args: any[]) {
-    const options = args[config.optionsIndex] as ArbitraryOptions;
+    const options = args[config.optionsIndex] as AnyOptions;
 
     // ensure options is a valid, non-empty object, otherwise short-circuit
     if (!isObject(options) || Object.keys(options).length === 0) {
@@ -1000,10 +1000,7 @@ export function makeClientMetadata(options: ClientMetadataOptions): ClientMetada
  * @param options - an object of options
  * @param list - deprecated option keys
  */
-export function emitDeprecatedOptionWarning(
-  options: ArbitraryOptions | undefined,
-  list: string[]
-): void {
+export function emitDeprecatedOptionWarning(options: AnyOptions | undefined, list: string[]): void {
   if (!options) return;
   list.forEach(option => {
     if (typeof options[option] !== 'undefined') {

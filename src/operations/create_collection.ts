@@ -53,7 +53,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   viewOn?: string;
   /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
   pipeline?: Document[];
-  /** A primary key factory object for generation of custom _id keys. */
+  /** A primary key factory function for generation of custom _id keys. */
   pkFactory?: PkFactory;
 }
 

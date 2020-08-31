@@ -43,7 +43,7 @@ export interface Auth {
 
 /** @public */
 export interface PkFactory {
-  createPk(): any;
+  (): any; // TODO: when js-bson is typed, function should return some BSON type
 }
 
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
@@ -169,7 +169,7 @@ export interface MongoClientOptions
   forceServerObjectId?: boolean;
   /** Return document results as raw BSON buffers */
   raw?: boolean;
-  /** A primary key factory object for generation of custom `_id` keys */
+  /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
   promiseLibrary?: any;
@@ -308,7 +308,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<MongoClient>;
-  connect(callback: Callback<MongoClient> | undefined): void;
+  connect(callback?: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');

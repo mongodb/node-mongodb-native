@@ -3,7 +3,7 @@ import * as qs from 'querystring';
 import * as dns from 'dns';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
-import type { ArbitraryOptions, Callback } from './utils';
+import type { AnyOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -37,7 +37,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param options - Optional user provided connection string options
  */
 function parseSrvConnectionString(uri: string, options: any, callback: Callback) {
-  const result: Document = url.parse(uri, true);
+  const result: AnyOptions = url.parse(uri, true);
 
   if (options.directConnection) {
     return callback(new MongoParseError('directConnection not supported with SRV URI'));
@@ -414,7 +414,7 @@ function applyAuthExpectations(parsed: any) {
  * @param options - The options used for options parsing
  * @returns The parsed query string as an object
  */
-function parseQueryString(query: string, options?: ArbitraryOptions): Document {
+function parseQueryString(query: string, options?: AnyOptions): Document {
   const result = {} as any;
   const parsedQueryString = qs.parse(query);
 
@@ -507,7 +507,7 @@ function checkTLSQueryString(queryString: any) {
  * @param optionKeyB - B options key
  * @throws MongoParseError if two provided options are mutually exclusive.
  */
-function assertRepelOptions(options: ArbitraryOptions, optionKeyA: string, optionKeyB: string) {
+function assertRepelOptions(options: AnyOptions, optionKeyA: string, optionKeyB: string) {
   if (
     Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
     Object.prototype.hasOwnProperty.call(options, optionKeyB)
@@ -522,7 +522,7 @@ function assertRepelOptions(options: ArbitraryOptions, optionKeyA: string, optio
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-function checkTLSOptions(options: ArbitraryOptions) {
+function checkTLSOptions(options: AnyOptions) {
   if (!options) return null;
   const check = (a: any, b: any) => assertRepelOptions(options, a, b);
   check('tlsInsecure', 'tlsAllowInvalidCertificates');

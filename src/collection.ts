@@ -186,9 +186,7 @@ export class Collection implements OperationParent {
       options,
       topology: db.s.topology,
       namespace: new MongoDBNamespace(db.databaseName, name),
-      pkFactory: db.options?.pkFactory
-        ? db.options.pkFactory
-        : ((ObjectId as unknown) as PkFactory), // TODO: remove when bson is typed
+      pkFactory: db.options?.pkFactory ?? (() => new ObjectId()),
       readPreference: ReadPreference.fromOptions(options),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
