@@ -28,6 +28,16 @@ try {
   Kerberos = require('kerberos');
 } catch {} // eslint-disable-line
 
+export interface KerberosClient {
+  step: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
+  wrap: (
+    challenge: string,
+    options?: { user: string },
+    callback?: Callback<string>
+  ) => Promise<string> | void;
+  unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
+};
+
 export let Snappy: typeof import('snappy') = makeErrorModule(
   new MongoError(
     'Optional module `snappy` not found. Please install it to enable snappy compression'

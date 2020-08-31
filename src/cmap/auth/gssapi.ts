@@ -1,32 +1,12 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
-import { Kerberos } from '../../deps';
+import { Kerberos, KerberosClient } from '../../deps';
 import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 
 const kGssapiClient = Symbol('GSSAPI_CLIENT');
 
 import * as dns from 'dns';
-
-interface KerberosClient {
-  step: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
-  wrap: (
-    challenge: string,
-    options?: { user: string },
-    callback?: Callback<string>
-  ) => Promise<string> | void;
-  unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
-}
-interface GSSAPIContext {
-  host: string;
-  port: string | number;
-  serviceName: string;
-  canonicalizeHostName: boolean;
-  retries: number;
-  username: string;
-  password: string;
-  client: KerberosClient;
-}
 
 export class GSSAPI extends AuthProvider {
   [kGssapiClient]: KerberosClient;
