@@ -573,8 +573,11 @@ function makeOperationHandler(
           session.serverSession.isDirty = true;
         }
 
+        const shouldRetry = server.s.topology.s.options.retryWrites !== false;
+        const inTransaction = session && session.inTransaction();
+
         if (
-          server.s.topology.s.options.retryWrites !== false &&
+          (shouldRetry || inTransaction) &&
           supportsRetryableWrites(server) &&
           !inActiveTransaction(session, cmd)
         ) {

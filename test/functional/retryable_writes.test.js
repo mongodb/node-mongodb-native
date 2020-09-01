@@ -98,7 +98,7 @@ function executeScenarioTest(test, ctx) {
               /expected false to be true/
             );
             if (hasResult) {
-              expect(err.result).to.equal(test.outcome.result);
+              expect(err.result).to.matchMongoSpec(test.outcome.result);
             }
             const errorLabelsContain =
               test.outcome && test.outcome.result && test.outcome.result.errorLabelsContain;
