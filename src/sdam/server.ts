@@ -568,9 +568,6 @@ function makeOperationHandler(
   const session = options?.session;
   return function handleOperationResult(err, result) {
     if (err && !connectionIsStale(server.s.pool, connection)) {
-      if (isRetryableWriteError(err)) {
-        err.addErrorLabel('RetryableWriteError');
-      }
       if (err instanceof MongoNetworkError) {
         if (session && !session.hasEnded && session.serverSession) {
           session.serverSession.isDirty = true;
@@ -591,6 +588,7 @@ function makeOperationHandler(
       } else {
         // if pre-4.4 server, then add error label if its a retryable write error
         if (
+          (server.s.topology.s.options.retryWrites !== false || isTransactionCommand(cmd)) &&
           maxWireVersion(server) < 9 &&
           isRetryableWriteError(err) &&
           !inActiveTransaction(session, cmd)
