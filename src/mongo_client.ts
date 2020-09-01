@@ -43,7 +43,7 @@ export interface Auth {
 
 /** @public */
 export interface PkFactory {
-  (): any; // TODO: when js-bson is typed, function should return some BSON type
+  createPk(): any; // TODO: when js-bson is typed, function should return some BSON type
 }
 
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;

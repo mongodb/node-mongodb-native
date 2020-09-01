@@ -99,7 +99,7 @@ export function prepareDocs(
 
   return docs.map(doc => {
     if (doc._id == null) {
-      doc._id = coll.s.pkFactory();
+      doc._id = coll.s.pkFactory.createPk();
     }
 
     return doc;

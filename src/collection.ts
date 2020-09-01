@@ -186,7 +186,12 @@ export class Collection implements OperationParent {
       options,
       topology: db.s.topology,
       namespace: new MongoDBNamespace(db.databaseName, name),
-      pkFactory: db.options?.pkFactory ?? (() => new ObjectId()),
+      pkFactory: db.options?.pkFactory ?? {
+        createPk() {
+          // We prefer not to rely on ObjectId having a createPk method
+          return new ObjectId();
+        }
+      },
       readPreference: ReadPreference.fromOptions(options),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),

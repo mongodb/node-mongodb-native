@@ -17,8 +17,10 @@ describe('Custom PK', function () {
       var configuration = this.configuration;
 
       // Custom factory (need to provide a 12 byte array);
-      var CustomPKFactory = function () {
-        return new ObjectId('aaaaaaaaaaaa');
+      var CustomPKFactory = {
+        createPk() {
+          return new ObjectId('aaaaaaaaaaaa');
+        }
       };
 
       var client = configuration.newClient(
