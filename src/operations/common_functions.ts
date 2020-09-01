@@ -15,6 +15,7 @@ import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { DeleteOptions } from './delete';
 
 /** @internal */
 export interface IndexInformationOptions {
@@ -81,19 +82,23 @@ export function indexInformation(
     });
 }
 
-export function prepareDocs(coll: any, docs: any, options: any) {
+export function prepareDocs(
+  coll: Collection,
+  docs: Document[],
+  options: { forceServerObjectId?: boolean }
+): Document[] {
   const forceServerObjectId =
     typeof options.forceServerObjectId === 'boolean'
       ? options.forceServerObjectId
-      : coll.s.db.options.forceServerObjectId;
+      : coll.s.db.options?.forceServerObjectId;
 
   // no need to modify the docs if server sets the ObjectId
   if (forceServerObjectId === true) {
     return docs;
   }
 
-  return docs.map((doc: any) => {
-    if (forceServerObjectId !== true && doc._id == null) {
+  return docs.map(doc => {
+    if (doc._id == null) {
       doc._id = coll.s.pkFactory.createPk();
     }
 
@@ -102,7 +107,7 @@ export function prepareDocs(coll: any, docs: any, options: any) {
 }
 
 // Get the next available document from the cursor, returns null if no more documents are available.
-export function nextObject(cursor: Cursor, callback: Callback) {
+export function nextObject(cursor: Cursor, callback: Callback): void {
   if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
     return callback(MongoError.create({ message: 'Cursor is closed', driver: true }));
   }
@@ -123,17 +128,31 @@ export function nextObject(cursor: Cursor, callback: Callback) {
   });
 }
 
+export function removeDocuments(server: Server, coll: Collection, callback?: Callback): void;
 export function removeDocuments(
   server: Server,
   coll: Collection,
-  selector: any,
-  options: any,
-  callback: Callback
+  selector?: Document,
+  callback?: Callback
+): void;
+export function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector?: Document,
+  options?: DeleteOptions,
+  callback?: Callback
+): void;
+export function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector?: Document,
+  options?: DeleteOptions | Document,
+  callback?: Callback
 ): void {
   if (typeof options === 'function') {
-    (callback = options), (options = {});
+    (callback = options as Callback), (options = {});
   } else if (typeof selector === 'function') {
-    callback = selector;
+    callback = selector as Callback;
     options = {};
     selector = {};
   }
@@ -164,22 +183,27 @@ export function removeDocuments(
   try {
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
-    return callback(err, null);
+    return callback ? callback(err, null) : undefined;
   }
 
   // Execute the remove
-  server.remove(coll.s.namespace.toString(), [op], finalOptions, (err, result) => {
-    if (callback == null) return;
-    if (err) return callback(err);
-    if (result == null) return callback();
-    if (result.code) return callback(new MongoError(result));
-    if (result.writeErrors) {
-      return callback(new MongoError(result.writeErrors[0]));
-    }
+  server.remove(
+    coll.s.namespace.toString(),
+    [op],
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return callback(err);
+      if (result == null) return callback();
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) {
+        return callback(new MongoError(result.writeErrors[0]));
+      }
 
-    // Return the results
-    callback(undefined, result);
-  });
+      // Return the results
+      callback(undefined, result);
+    }
+  );
 }
 
 export function updateDocuments(

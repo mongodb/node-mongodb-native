@@ -7,8 +7,8 @@ import type { MongoClient } from './mongo_client';
 
 /** @public */
 export class Instrumentation extends EventEmitter {
-  $MongoClient: any;
-  $prototypeConnect: any;
+  $MongoClient?: typeof MongoClient;
+  $prototypeConnect?: typeof MongoClient.prototype['connect'];
 
   /** @event */
   static readonly STARTED = 'started' as const;
@@ -21,13 +21,14 @@ export class Instrumentation extends EventEmitter {
     super();
   }
 
-  instrument(MongoClient: any, callback: Callback) {
+  instrument(mongoClientClass: typeof MongoClient, callback?: Callback): void {
     // store a reference to the original functions
-    this.$MongoClient = MongoClient;
-    const $prototypeConnect = (this.$prototypeConnect = MongoClient.prototype.connect);
+    this.$MongoClient = mongoClientClass;
+    const $prototypeConnect = (this.$prototypeConnect = mongoClientClass.prototype.connect);
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const instrumentation = this;
-    MongoClient.prototype.connect = function (this: MongoClient, callback: Callback) {
+    mongoClientClass.prototype.connect = function (this: MongoClient, callback: Callback) {
       // override monitorCommands to be switched on
       this.s.options = { ...(this.s.options ?? {}), monitorCommands: true };
 
@@ -42,12 +43,14 @@ export class Instrumentation extends EventEmitter {
       );
 
       return $prototypeConnect.call(this, callback);
-    };
+    } as MongoClient['connect'];
 
     if (typeof callback === 'function') callback(undefined, this);
   }
 
-  uninstrument() {
-    this.$MongoClient.prototype.connect = this.$prototypeConnect;
+  uninstrument(): void {
+    if (this.$MongoClient && this.$prototypeConnect) {
+      this.$MongoClient.prototype.connect = this.$prototypeConnect;
+    }
   }
 }

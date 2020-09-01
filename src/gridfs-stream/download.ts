@@ -229,12 +229,12 @@ function doRead(stream: GridFSBucketReadStream): void {
 
     if (!stream.s.file) return;
 
-    var bytesRemaining = stream.s.file.length - stream.s.bytesRead;
-    var expectedN = stream.s.expected++;
-    var expectedLength = Math.min(stream.s.file.chunkSize, bytesRemaining);
-
+    const bytesRemaining = stream.s.file.length - stream.s.bytesRead;
+    const expectedN = stream.s.expected++;
+    const expectedLength = Math.min(stream.s.file.chunkSize, bytesRemaining);
+    let errmsg: string;
     if (doc.n > expectedN) {
-      var errmsg = 'ChunkIsMissing: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
+      errmsg = 'ChunkIsMissing: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
       return __handleError(stream, new Error(errmsg));
     }
 
@@ -243,7 +243,7 @@ function doRead(stream: GridFSBucketReadStream): void {
       return __handleError(stream, new Error(errmsg));
     }
 
-    var buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
+    let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
 
     if (buf.length !== expectedLength) {
       if (bytesRemaining <= 0) {
@@ -262,8 +262,8 @@ function doRead(stream: GridFSBucketReadStream): void {
       return stream.push(null);
     }
 
-    var sliceStart = null;
-    var sliceEnd = null;
+    let sliceStart = null;
+    let sliceEnd = null;
 
     if (stream.s.bytesToSkip != null) {
       sliceStart = stream.s.bytesToSkip;
@@ -287,7 +287,7 @@ function doRead(stream: GridFSBucketReadStream): void {
 }
 
 function init(stream: GridFSBucketReadStream): void {
-  var findOneOptions: FindOptions = {};
+  const findOneOptions: FindOptions = {};
   if (stream.s.readPreference) {
     findOneOptions.readPreference = stream.s.readPreference;
   }
@@ -304,11 +304,11 @@ function init(stream: GridFSBucketReadStream): void {
     }
 
     if (!doc) {
-      var identifier = stream.s.filter._id
+      const identifier = stream.s.filter._id
         ? stream.s.filter._id.toString()
         : stream.s.filter.filename;
-      var errmsg = 'FileNotFound: file ' + identifier + ' was not found';
-      var err = new Error(errmsg);
+      const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
+      const err = new Error(errmsg);
       (err as any).code = 'ENOENT';
       return __handleError(stream, err);
     }
@@ -334,13 +334,13 @@ function init(stream: GridFSBucketReadStream): void {
       return __handleError(stream, error);
     }
 
-    var filter: Document = { files_id: doc._id };
+    const filter: Document = { files_id: doc._id };
 
     // Currently (MongoDB 3.4.4) skip function does not support the index,
     // it needs to retrieve all the documents first and then skip them. (CS-25811)
     // As work around we use $gte on the "n" field.
     if (stream.s.options && stream.s.options.start != null) {
-      var skip = Math.floor(stream.s.options.start / doc.chunkSize);
+      const skip = Math.floor(stream.s.options.start / doc.chunkSize);
       if (skip > 0) {
         filter['n'] = { $gte: skip };
       }
@@ -438,7 +438,7 @@ function handleEndOption(
       throw new Error('Stream end (' + options.end + ') must not be ' + 'negative');
     }
 
-    var start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;
+    const start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;
 
     cursor.limit(Math.ceil(options.end / doc.chunkSize) - start);
 

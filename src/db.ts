@@ -92,7 +92,7 @@ export interface DbPrivate {
   options?: DbOptions;
   logger: Logger;
   readPreference?: ReadPreference;
-  pkFactory: PkFactory | typeof ObjectId;
+  pkFactory: PkFactory;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   namespace: MongoDBNamespace;
@@ -172,7 +172,12 @@ export class Db implements OperationParent {
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
       // Set up the primary key factory or fallback to ObjectId
-      pkFactory: options?.pkFactory || ObjectId,
+      pkFactory: options?.pkFactory ?? {
+        createPk() {
+          // We prefer not to rely on ObjectId having a createPk method
+          return new ObjectId();
+        }
+      },
       // ReadConcern
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),

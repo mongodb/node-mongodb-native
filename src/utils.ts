@@ -25,14 +25,14 @@ export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) 
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
-type ArbitraryOptions = Document;
+export type AnyOptions = Document;
 
 /**
  * Add a readonly enumerable property.
  * @internal
  */
 export function getSingleProperty(
-  obj: ArbitraryOptions,
+  obj: AnyOptions,
   name: string | number | symbol,
   value: unknown
 ): void {
@@ -193,8 +193,8 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
         // [{location:'2d'}, {type:1}]
         keys = Object.keys(f);
         keys.forEach(k => {
-          indexes.push(k + '_' + (f as ArbitraryOptions)[k]);
-          fieldHash[k] = (f as ArbitraryOptions)[k];
+          indexes.push(k + '_' + (f as AnyOptions)[k]);
+          fieldHash[k] = (f as AnyOptions)[k];
         });
       } else {
         // undefined (ignore)
@@ -221,13 +221,14 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
  * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
  * @internal
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function isObject(arg: unknown): arg is object {
   return '[object Object]' === Object.prototype.toString.call(arg);
 }
 
 /** @internal */
-export function debugOptions(debugFields: string[], options?: ArbitraryOptions): Document {
-  const finalOptions: ArbitraryOptions = {};
+export function debugOptions(debugFields: string[], options?: AnyOptions): Document {
+  const finalOptions: AnyOptions = {};
   if (!options) return finalOptions;
   debugFields.forEach(n => {
     finalOptions[n] = options[n];
@@ -253,8 +254,8 @@ export function mergeOptions<T, S>(target: T, source: S): T & S {
 }
 
 /** @internal */
-export function filterOptions(options: ArbitraryOptions, names: string[]): ArbitraryOptions {
-  const filterOptions: ArbitraryOptions = {};
+export function filterOptions(options: AnyOptions, names: string[]): AnyOptions {
+  const filterOptions: AnyOptions = {};
 
   for (const name in options) {
     if (names.includes(name)) {
@@ -268,11 +269,11 @@ export function filterOptions(options: ArbitraryOptions, names: string[]): Arbit
 
 /** @internal */
 export function mergeOptionsAndWriteConcern(
-  targetOptions: ArbitraryOptions,
-  sourceOptions: ArbitraryOptions,
+  targetOptions: AnyOptions,
+  sourceOptions: AnyOptions,
   keys: string[],
   mergeWriteConcern: boolean
-): ArbitraryOptions {
+): AnyOptions {
   // Mix in any allowed options
   for (let i = 0; i < keys.length; i++) {
     if (!targetOptions[keys[i]] && sourceOptions[keys[i]] !== undefined) {
@@ -324,7 +325,7 @@ export function executeLegacyOperation<T extends OperationBase>(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
-  options?: ArbitraryOptions
+  options?: AnyOptions
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
@@ -385,7 +386,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     args.push(handler);
 
     try {
-      return operation.apply(undefined, args);
+      return operation(...args);
     } catch (e) {
       handler(e);
       throw e;
@@ -402,7 +403,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     args[args.length - 1] = handler;
 
     try {
-      return operation.apply(undefined, args);
+      return operation(...args);
     } catch (e) {
       handler(e);
     }
@@ -497,7 +498,7 @@ export function isPromiseLike<T = any>(
 export function decorateWithCollation(
   command: Document,
   target: { s: { topology: Topology } } | { topology: Topology },
-  options: ArbitraryOptions
+  options: AnyOptions
 ): void {
   const topology =
     ('s' in target && target.s.topology) || ('topology' in target && target.topology);
@@ -591,7 +592,7 @@ export function deprecateOptions(
 
   const optionsWarned = new Set();
   function deprecated(this: any, ...args: any[]) {
-    const options = args[config.optionsIndex] as ArbitraryOptions;
+    const options = args[config.optionsIndex] as AnyOptions;
 
     // ensure options is a valid, non-empty object, otherwise short-circuit
     if (!isObject(options) || Object.keys(options).length === 0) {
@@ -697,6 +698,7 @@ export function maybePromise<T>(
   wrapper((err, res) => {
     if (err != null) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         callback!(err);
       } catch (error) {
         return process.nextTick(() => {
@@ -705,6 +707,7 @@ export function maybePromise<T>(
       }
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     callback!(err, res);
   });
   return result;
@@ -788,7 +791,7 @@ export function collationNotSupported(server: Server, cmd: Document): boolean {
  * @param eachFn - A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
  * @param callback - The callback called after every item has been iterated
  */
-export function eachAsync<T = any>(
+export function eachAsync<T = Document>(
   arr: T[],
   eachFn: (item: T, callback: (err?: AnyError) => void) => void,
   callback: Callback
@@ -855,7 +858,7 @@ export function eachAsyncSeries<T = any>(
 }
 
 /** @internal */
-export function arrayStrictEqual(arr: any[], arr2: any[]): boolean {
+export function arrayStrictEqual(arr: unknown[], arr2: unknown[]): boolean {
   if (!Array.isArray(arr) || !Array.isArray(arr2)) {
     return false;
   }
@@ -997,10 +1000,7 @@ export function makeClientMetadata(options: ClientMetadataOptions): ClientMetada
  * @param options - an object of options
  * @param list - deprecated option keys
  */
-export function emitDeprecatedOptionWarning(
-  options: ArbitraryOptions | undefined,
-  list: string[]
-): void {
+export function emitDeprecatedOptionWarning(options: AnyOptions | undefined, list: string[]): void {
   if (!options) return;
   list.forEach(option => {
     if (typeof options[option] !== 'undefined') {

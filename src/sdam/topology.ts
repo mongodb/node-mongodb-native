@@ -1088,34 +1088,34 @@ export class ServerCapabilities {
     this.maxWireVersion = ismaster.maxWireVersion || 0;
   }
 
-  get hasAggregationCursor() {
+  get hasAggregationCursor(): boolean {
     return this.maxWireVersion >= 1;
   }
 
-  get hasWriteCommands() {
+  get hasWriteCommands(): boolean {
     return this.maxWireVersion >= 2;
   }
-  get hasTextSearch() {
+  get hasTextSearch(): boolean {
     return this.minWireVersion >= 0;
   }
 
-  get hasAuthCommands() {
+  get hasAuthCommands(): boolean {
     return this.maxWireVersion >= 1;
   }
 
-  get hasListCollectionsCommand() {
+  get hasListCollectionsCommand(): boolean {
     return this.maxWireVersion >= 3;
   }
 
-  get hasListIndexesCommand() {
+  get hasListIndexesCommand(): boolean {
     return this.maxWireVersion >= 3;
   }
 
-  get commandsTakeWriteConcern() {
+  get commandsTakeWriteConcern(): boolean {
     return this.maxWireVersion >= 5;
   }
 
-  get commandsTakeCollation() {
+  get commandsTakeCollation(): boolean {
     return this.maxWireVersion >= 5;
   }
 }
