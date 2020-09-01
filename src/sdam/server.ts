@@ -31,7 +31,8 @@ import {
   isSDAMUnrecoverableError,
   isRetryableWriteError,
   isNodeShuttingDownError,
-  isNetworkErrorBeforeHandshake
+  isNetworkErrorBeforeHandshake,
+  MongoWriteConcernError
 } from '../error';
 import { Connection, DestroyOptions } from '../cmap/connection';
 import type { Topology } from './topology';
@@ -568,7 +569,7 @@ function makeOperationHandler(
   const session = options?.session;
   return function handleOperationResult(err, result) {
     if (err && !connectionIsStale(server.s.pool, connection)) {
-      if (err instanceof MongoNetworkError) {
+      if (err instanceof MongoNetworkError || err instanceof MongoWriteConcernError) {
         if (session && !session.hasEnded && session.serverSession) {
           session.serverSession.isDirty = true;
         }
