@@ -79,7 +79,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err) {
       expect(err).to.exist;
-      // expect(err.message).to.match(/Authentication failed/);
+      expect(err.message).to.match(/Authentication failed/);
       done();
     });
   });
