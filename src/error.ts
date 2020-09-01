@@ -227,6 +227,7 @@ function makeWriteConcernResultObject(input: any) {
  */
 export class MongoWriteConcernError extends MongoError {
   /** The result document (provided if ok: 1) */
+  code?: number;
   result?: Document;
 
   constructor(message: string, result: Document) {
@@ -273,12 +274,18 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
   262 // ExceededTimeLimit
 ]);
 
-export function isRetryableWriteError(error: MongoError): boolean {
-  if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code);
+export function isRetryableWriteError(error: MongoError | MongoWriteConcernError): boolean {
+  let code = 0;
+
+  if (error instanceof MongoWriteConcernError && error.result?.code) {
+    code = error.result?.code;
   }
 
-  return RETRYABLE_WRITE_ERROR_CODES.has(error.code ?? 0);
+  if (error.code) {
+    code = error.code;
+  }
+
+  return RETRYABLE_WRITE_ERROR_CODES.has(code);
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
