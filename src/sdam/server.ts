@@ -568,7 +568,10 @@ function makeOperationHandler(
   const session = options?.session;
   return function handleOperationResult(err, result) {
     if (err && !connectionIsStale(server.s.pool, connection)) {
-      if (err instanceof MongoNetworkError || isRetryableWriteError(err)) {
+      if (isRetryableWriteError(err)) {
+        err.addErrorLabel('RetryableWriteError');
+      }
+      if (err instanceof MongoNetworkError) {
         if (session && !session.hasEnded && session.serverSession) {
           session.serverSession.isDirty = true;
         }

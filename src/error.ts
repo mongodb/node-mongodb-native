@@ -274,18 +274,11 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
   262 // ExceededTimeLimit
 ]);
 
-export function isRetryableWriteError(error: MongoError | MongoWriteConcernError): boolean {
-  let code = 0;
-
-  if (error instanceof MongoWriteConcernError && error.result?.code) {
-    code = error.result?.code;
+export function isRetryableWriteError(error: MongoError): boolean {
+  if (error instanceof MongoWriteConcernError) {
+    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
-
-  if (error.code) {
-    code = error.code;
-  }
-
-  return RETRYABLE_WRITE_ERROR_CODES.has(code);
+  return RETRYABLE_WRITE_ERROR_CODES.has(error.code ?? 0);
 }
 
 /** Determines whether an error is something the driver should attempt to retry */

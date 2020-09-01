@@ -85,10 +85,10 @@ function executeScenarioTest(test, ctx) {
       const args = generateArguments(test);
 
       let result = ctx.collection[test.operation.name].apply(ctx.collection, args);
-      const hasResult =
-        test.outcome.result &&
-        !test.outcome.result.errorLabelsContain &&
-        !test.outcome.result.errorLabelsOmit;
+      const outcome = test.outcome && test.outcome.result;
+      const errorLabelsContain = outcome && outcome.errorLabelsContain;
+      const errorLabelsOmit = outcome && outcome.errorLabelsOmit;
+      const hasResult = outcome && !errorLabelsContain && !errorLabelsOmit;
       if (test.outcome.error) {
         result = result
           .then(() => expect(false).to.be.true)
@@ -97,12 +97,7 @@ function executeScenarioTest(test, ctx) {
             expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
               /expected false to be true/
             );
-            if (hasResult) {
-              expect(err.result).to.matchMongoSpec(test.outcome.result);
-            }
-            const outcome = test.outcome && test.outcome.result;
-            const errorLabelsContain = outcome && outcome.errorLabelsContain;
-            const errorLabelsOmit = outcome && outcome.errorLabelsOmit;
+            if (hasResult) expect(err.result).to.matchMongoSpec(test.outcome.result);
             if (errorLabelsContain) expect(err.errorLabels).to.have.members(errorLabelsContain);
             if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
           });
