@@ -100,10 +100,9 @@ function executeScenarioTest(test, ctx) {
             if (hasResult) {
               expect(err.result).to.matchMongoSpec(test.outcome.result);
             }
-            const errorLabelsContain =
-              test.outcome && test.outcome.result && test.outcome.result.errorLabelsContain;
-            const errorLabelsOmit =
-              test.outcome && test.outcome.result && test.outcome.result.errorLabelsOmit;
+            const outcome = test.outcome && test.outcome.result;
+            const errorLabelsContain = outcome && outcome.errorLabelsContain;
+            const errorLabelsOmit = outcome && outcome.errorLabelsOmit;
             if (errorLabelsContain) expect(err.errorLabels).to.have.members(errorLabelsContain);
             if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
           });
