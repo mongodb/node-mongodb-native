@@ -42,17 +42,9 @@ export interface Auth {
 }
 
 /** @public */
-export abstract class PkFactoryAbstract {
-  abstract createPk(): any;
+export interface PkFactory {
+  createPk(): any; // TODO: when js-bson is typed, function should return some BSON type
 }
-
-/** @public */
-export interface PkFactoryLiteral {
-  createPk(): any;
-}
-
-/** @public */
-export type PkFactory = typeof PkFactoryAbstract | PkFactoryLiteral;
 
 type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
@@ -156,7 +148,7 @@ export interface MongoClientOptions
   /** SSL Certificate revocation list binary buffer. */
   sslCRL?: Buffer;
   /** Ensure we check server identify during SSL, set to false to disable checking. */
-  checkServerIdentity?: boolean | Function;
+  checkServerIdentity?: boolean | ((hostname: string, cert: Document) => Error | undefined);
   /** TCP Connection no delay */
   noDelay?: boolean;
   /** TCP Connection keep alive enabled */
@@ -177,7 +169,7 @@ export interface MongoClientOptions
   forceServerObjectId?: boolean;
   /** Return document results as raw BSON buffers */
   raw?: boolean;
-  /** A primary key factory object for generation of custom `_id` keys */
+  /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
   promiseLibrary?: any;
@@ -316,7 +308,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<MongoClient>;
-  connect(callback: Callback<MongoClient>): void;
+  connect(callback?: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');
@@ -353,13 +345,12 @@ export class MongoClient extends EventEmitter implements OperationParent {
 
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
-    const client = this;
     return maybePromise(callback, cb => {
-      if (client.topology == null) {
+      if (this.topology == null) {
         return cb();
       }
 
-      const topology = client.topology;
+      const topology = this.topology;
       topology.close({ force }, err => {
         const autoEncrypter = topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
@@ -394,8 +385,9 @@ export class MongoClient extends EventEmitter implements OperationParent {
     const finalOptions = Object.assign({}, this.s.options, options);
 
     // Do we have the db in the cache already
-    if (this.s.dbCache.has(dbName) && finalOptions.returnNonCachedInstance !== true) {
-      return this.s.dbCache.get(dbName)!;
+    const dbFromCache = this.s.dbCache.get(dbName);
+    if (dbFromCache && finalOptions.returnNonCachedInstance !== true) {
+      return dbFromCache;
     }
 
     // If no topology throw an error message
@@ -442,7 +434,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
     // Create client
     const mongoClient = new MongoClient(url, options);
     // Execute the connect method
-    return mongoClient.connect(callback!);
+    return mongoClient.connect(callback);
   }
 
   /** Starts a new session on the server */

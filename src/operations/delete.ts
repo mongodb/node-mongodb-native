@@ -1,4 +1,4 @@
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { defineAspects, Aspect, OperationBase, Hint } from './operation';
 import { removeDocuments } from './common_functions';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
@@ -12,6 +12,7 @@ import type { Connection } from '../cmap/connection';
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions {
   single?: boolean;
+  hint?: Hint;
 }
 
 /** @public */

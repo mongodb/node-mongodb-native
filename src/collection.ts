@@ -45,7 +45,7 @@ import {
   EstimatedDocumentCountOperation,
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { FindOperation, FindOptions } from './operations/find';
+import { FindOperation, FindOptions, Sort } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
@@ -126,7 +126,7 @@ export interface CollectionOptions
 
 /** @internal */
 export interface CollectionPrivate {
-  pkFactory: PkFactory | typeof ObjectId;
+  pkFactory: PkFactory;
   db: Db;
   topology: Topology;
   options: any;
@@ -186,7 +186,12 @@ export class Collection implements OperationParent {
       options,
       topology: db.s.topology,
       namespace: new MongoDBNamespace(db.databaseName, name),
-      pkFactory: db.options?.pkFactory ? db.options.pkFactory : ObjectId,
+      pkFactory: db.options?.pkFactory ?? {
+        createPk() {
+          // We prefer not to rely on ObjectId having a createPk method
+          return new ObjectId();
+        }
+      },
       readPreference: ReadPreference.fromOptions(options),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
@@ -213,7 +218,6 @@ export class Collection implements OperationParent {
 
   /**
    * The name of the database this collection belongs to
-   * @readonly
    */
   get dbName(): string {
     return this.s.namespace.db;
@@ -221,15 +225,14 @@ export class Collection implements OperationParent {
 
   /**
    * The name of this collection
-   * @readonly
    */
   get collectionName(): string {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.s.namespace.collection!;
   }
 
   /**
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
-   * @readonly
    */
   get namespace(): string {
     return this.s.namespace.toString();
@@ -238,7 +241,6 @@ export class Collection implements OperationParent {
   /**
    * The current readConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   * @readonly
    */
   get readConcern(): ReadConcern | undefined {
     if (this.s.readConcern == null) {
@@ -250,7 +252,6 @@ export class Collection implements OperationParent {
   /**
    * The current readPreference of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   * @readonly
    */
   get readPreference(): ReadPreference | undefined {
     if (this.s.readPreference == null) {
@@ -263,7 +264,6 @@ export class Collection implements OperationParent {
   /**
    * The current writeConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
-   * @readonly
    */
   get writeConcern(): WriteConcern | undefined {
     if (this.s.writeConcern == null) {
@@ -1445,7 +1445,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document | Document[]>
   ): Promise<Document | Document[]> | void {
     if ('function' === typeof options) (callback = options), (options = {});
-    // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
+    // Out must always be defined (make sure we don't break weirdly on pre 1.8+ servers)
     if (options?.out == null) {
       throw new Error(
         'the out option parameter must be defined, see mongodb docs for possible values'
@@ -1652,23 +1652,41 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
+  findAndRemove(query: Document, callback: Callback): void;
+  findAndRemove(query: Document): Promise<Document>;
+  findAndRemove(query: Document, sort: Sort, callback: Callback): void;
+  findAndRemove(query: Document, sort: Sort): Promise<Document>;
   findAndRemove(
     query: Document,
-    sort: Document,
+    sort: Sort,
     options: FindAndModifyOptions,
     callback: Callback
+  ): void;
+  findAndRemove(query: Document, sort: Sort, options: FindAndModifyOptions): Promise<Document>;
+  findAndRemove(
+    query: Document,
+    sortOrOptionsOrCallback?: Sort | FindAndModifyOptions | Callback,
+    optionsOrCallback?: FindAndModifyOptions | Callback,
+    _callback?: Callback
   ): Promise<Document> | void {
-    const args = Array.prototype.slice.call(arguments, 1);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    sort = args.length ? args.shift() || [] : [];
-    options = args.length ? args.shift() || {} : {};
+    let sort = sortOrOptionsOrCallback ?? {};
+    let options = optionsOrCallback ?? {};
+    let callback = _callback;
+    if (typeof sort === 'function') {
+      callback = sort;
+      sort = {};
+    }
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
     // Add the remove option
     options.remove = true;
 
     return executeOperation(
       this.s.topology,
-      new FindAndModifyOperation(this, query, sort, undefined, options),
+      new FindAndModifyOperation(this, query, sort as Sort, undefined, options),
       callback
     );
   }
@@ -1687,26 +1705,23 @@ export class Collection implements OperationParent {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   group(
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     keys: any,
-    condition: any,
-    initial: any,
-    reduce: any,
-    finalize: any,
-    command: any,
-    options: any,
-    callback: Callback
-  ) {
-    const args = Array.prototype.slice.call(arguments, 3);
-    callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    reduce = args.length ? args.shift() : null;
-    finalize = args.length ? args.shift() : null;
-    command = args.length ? args.shift() : null;
-    options = args.length ? args.shift() || {} : {};
+    condition: Document,
+    initial: Document,
+    // TODO: Use labeled tuples when api-extractor supports TS 4.0
+    ...args: [/*reduce?:*/ any, /*finalize?:*/ any, /*command?:*/ any, /*callback?:*/ Callback]
+  ): Promise<Document> | void {
+    const callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+    let reduce = args.length ? args.shift() : undefined;
+    let finalize = args.length ? args.shift() : undefined;
+    let command = args.length ? args.shift() : undefined;
+    const options = args.length ? args.shift() || {} : {};
 
     // Make sure we are backward compatible
     if (!(typeof finalize === 'function')) {
       command = finalize;
-      finalize = null;
+      finalize = undefined;
     }
 
     if (
@@ -1751,7 +1766,7 @@ export class Collection implements OperationParent {
    *
    * @param query - Query object to locate the object to modify.
    * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
-   * @param doc - The fields/vals to be updated.
+   * @param doc - The fields/values to be updated.
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */

@@ -27,7 +27,10 @@ export class ReadConcern {
    *
    * @param options - The options object from which to extract the write concern.
    */
-  static fromOptions(options: any): ReadConcern | undefined {
+  static fromOptions(options?: {
+    readConcern?: ReadConcern | { level: ReadConcernLevel };
+    level?: ReadConcernLevel;
+  }): ReadConcern | undefined {
     if (options == null) {
       return;
     }

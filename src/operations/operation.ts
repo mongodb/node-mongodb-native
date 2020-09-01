@@ -71,6 +71,7 @@ export abstract class OperationBase<
     // NOTE: Using the bang operator here because we know there is always a
     //       session, explicit or implicit. We should disambiguate the session
     //       from the options and set it as an explicit field
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.options.session!;
   }
 

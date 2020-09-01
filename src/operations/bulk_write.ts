@@ -1,5 +1,4 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
-import { MongoError } from '../error';
 import { OperationBase } from './operation';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
@@ -44,9 +43,6 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
         ? coll.initializeOrderedBulkOp(options)
         : coll.initializeUnorderedBulkOp(options);
 
-    // Do we have a collation
-    let collation = false;
-
     // for each op go through and add to the bulk
     try {
       for (let i = 0; i < operations.length; i++) {
@@ -62,12 +58,6 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
     const writeCon = WriteConcern.fromOptions(finalOptions);
-    const capabilities = coll.s.topology.capabilities();
-
-    // Did the user pass in a collation, check if our write server supports it
-    if (collation && capabilities && !capabilities.commandsTakeCollation) {
-      return callback(new MongoError('server/primary/mongos does not support collation'));
-    }
 
     // Execute the bulk
     bulk.execute(writeCon, finalOptions, (err, r) => {

@@ -5,6 +5,7 @@ import { MongoError } from '../error';
 import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { Collection } from '..';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {
@@ -16,7 +17,12 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
   code: Code;
   parameters?: Document | Document[];
 
-  constructor(db: Db, code: Code, parameters?: Document | Document[], options?: EvalOptions) {
+  constructor(
+    db: Db | Collection,
+    code: Code,
+    parameters?: Document | Document[],
+    options?: EvalOptions
+  ) {
     super(db, options);
 
     this.code = code;
