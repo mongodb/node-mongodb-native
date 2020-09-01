@@ -31,8 +31,10 @@ describe('MongoClient', function () {
           readPreferenceTags: { loc: 'ny' },
           native_parser: false,
           forceServerObjectId: true,
-          pkFactory: function () {
-            return 1;
+          pkFactory: {
+            createPk() {
+              return 1;
+            }
           },
           serializeFunctions: true,
           raw: true,
@@ -53,7 +55,7 @@ describe('MongoClient', function () {
         test.deepEqual({ loc: 'ny' }, db.s.readPreference.tags);
 
         test.equal(true, db.s.options.forceServerObjectId);
-        test.equal(1, db.s.pkFactory());
+        test.equal(1, db.s.pkFactory.createPk());
         test.equal(true, db.s.options.serializeFunctions);
         test.equal(true, db.s.options.raw);
         test.equal(10, db.s.options.numberOfRetries);

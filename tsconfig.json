@@ -25,6 +25,7 @@
     "inlineSources": true,
     // Prevents web types from being suggested by vscode.
     "types": ["node"],
+    "forceConsistentCasingInFileNames": true
   },
   "ts-node": {
     "transpileOnly": true,

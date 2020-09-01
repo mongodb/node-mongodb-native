@@ -12,9 +12,10 @@ import type { Callback } from './utils';
 
 // Set up the instrumentation method
 /** @public */
-function instrument(options: any, callback: Callback) {
+function instrument(callback: Callback): Instrumentation;
+function instrument(options?: unknown, callback?: Callback): Instrumentation {
   if (typeof options === 'function') {
-    callback = options;
+    callback = options as Callback;
     options = {};
   }
 
@@ -39,10 +40,13 @@ export {
 
 // NOTE: fix this up after ts-bson lands
 /** @public */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const Map = require('bson').Map;
 /** @public */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const BSONSymbol = require('bson').BSONSymbol;
 /** @public */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const BSONRegExp = require('bson').BSONRegExp;
 
 export {
@@ -183,9 +187,7 @@ export type {
   MongoURIOptions,
   LogLevel,
   Auth,
-  DriverInfo,
-  PkFactoryAbstract,
-  PkFactoryLiteral
+  DriverInfo
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {

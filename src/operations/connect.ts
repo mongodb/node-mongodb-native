@@ -278,8 +278,9 @@ export function connect(
   }
 }
 
-export type ListenerFunction = (v1: any, v2: any) => boolean;
-function createListener(mongoClient: MongoClient, event: string): ListenerFunction {
+export type ListenerFunction<V1 = unknown, V2 = unknown> = (v1: V1, v2: V2) => boolean;
+
+function createListener<V1, V2>(mongoClient: MongoClient, event: string): ListenerFunction<V1, V2> {
   const eventSet = new Set(['all', 'fullsetup', 'open', 'reconnect']);
   return (v1, v2) => {
     if (eventSet.has(event)) {
@@ -334,6 +335,7 @@ function createTopology(mongoClient: MongoClient, options: MongoClientOptions, c
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mongodbClientEncryption = require('mongodb-client-encryption');
       if (typeof mongodbClientEncryption.extension !== 'function') {
         callback(
@@ -343,7 +345,8 @@ function createTopology(mongoClient: MongoClient, options: MongoClientOptions, c
           )
         );
       }
-      AutoEncrypter = mongodbClientEncryption.extension(require('../../src')).AutoEncrypter;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      AutoEncrypter = mongodbClientEncryption.extension(require('../../lib/index')).AutoEncrypter;
     } catch (err) {
       callback(err);
       return;

@@ -1,10 +1,11 @@
 import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError } from '../error';
+import { MongoError, isRetryableError, AnyError } from '../error';
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -78,7 +79,8 @@ export function executeOperation<
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session: any, owner: any;
+  let session: ClientSession;
+  let owner: symbol;
   if (topology.hasSessionSupport()) {
     if (operation.session == null) {
       owner = Symbol();
@@ -90,7 +92,7 @@ export function executeOperation<
   }
 
   return maybePromise(callback, cb => {
-    function executeCallback(err?: any, result?: any) {
+    function executeCallback(err?: AnyError, result?: TResult) {
       if (session && session.owner === owner) {
         session.endSession();
         if (operation.session === session) {

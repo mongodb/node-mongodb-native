@@ -12,12 +12,12 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 ## MongoDB Node.JS Driver
 
-| what          | where                                          |
-|---------------|------------------------------------------------|
-| documentation | http://mongodb.github.io/node-mongodb-native  |
-| api-doc        | http://mongodb.github.io/node-mongodb-native/3.1/api  |
-| source        | https://github.com/mongodb/node-mongodb-native |
-| mongodb       | http://www.mongodb.org                        |
+| what          | where                                                  |
+|---------------|--------------------------------------------------------|
+| documentation | https://docs.mongodb.com/drivers/node                   |
+| api-doc       | https://mongodb.github.io/node-mongodb-native/3.6/api/ |
+| source        | https://github.com/mongodb/node-mongodb-native         |
+| mongodb       | https://www.mongodb.com                                 |
 
 ### Bugs / Feature Requests
 
