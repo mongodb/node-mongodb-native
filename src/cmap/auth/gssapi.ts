@@ -3,8 +3,13 @@ import { MongoError } from '../../error';
 import { Kerberos, KerberosClient } from '../../deps';
 import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
+import type { Document } from '../../bson';
 
 const kGssapiClient = Symbol('GSSAPI_CLIENT');
+
+type MechanismProperties = {
+  gssapiCanonicalizeHostName?: boolean;
+};
 
 import * as dns from 'dns';
 
@@ -36,14 +41,10 @@ export class GSSAPI extends AuthProvider {
       mechanismProperties['gssapiservicename'] ||
       mechanismProperties['gssapiServiceName'] ||
       'mongodb';
-    const canonicalizeHostName =
-      typeof mechanismProperties.gssapiCanonicalizeHostName === 'boolean'
-        ? mechanismProperties.gssapiCanonicalizeHostName
-        : false;
 
     performGssapiCanonicalizeHostName(
-      canonicalizeHostName,
       host,
+      mechanismProperties as MechanismProperties,
       (err?: Error | MongoError, host?: string) => {
         if (err) return callback(err);
 
@@ -56,8 +57,8 @@ export class GSSAPI extends AuthProvider {
           `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
           initOptions,
           (err: string, client: KerberosClient): void => {
-            if (err) return callback(new Error(err));
-            if (client == null) return callback(new Error('null gssapi client'));
+            if (err) return callback(new MongoError(err));
+            if (client == null) return callback();
             this[kGssapiClient] = client;
             callback(undefined, handshakeDoc);
           }
@@ -68,12 +69,12 @@ export class GSSAPI extends AuthProvider {
 
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
-    if (credentials == null) return callback(new Error('credentials required'));
+    if (credentials == null) return callback(new MongoError('credentials required'));
     const { username } = credentials;
     const client = this[kGssapiClient];
-    if (client == null) return callback(new Error('gssapi client missing'));
+    if (client == null) return callback(new MongoError('gssapi client missing'));
     function externalCommand(
-      command: object,
+      command: Document,
       cb: Callback<{ payload: string; conversationId: any }>
     ) {
       return connection.command('$external.$cmd', command, cb);
@@ -83,11 +84,13 @@ export class GSSAPI extends AuthProvider {
 
       externalCommand(saslStart(payload), (err, result) => {
         if (err) return callback(err);
+        if (result == null) return callback();
         negotiate(client, 10, result.payload, (err, payload) => {
           if (err) return callback(err);
 
           externalCommand(saslContinue(payload, result.conversationId), (err, result) => {
             if (err) return callback(err);
+            if (result == null) return callback();
             finalize(client, username, result.payload, (err, payload) => {
               if (err) return callback(err);
 
@@ -110,7 +113,7 @@ export class GSSAPI extends AuthProvider {
     });
   }
 }
-function saslStart(payload?: string): object {
+function saslStart(payload?: string): Document {
   return {
     saslStart: 1,
     mechanism: 'GSSAPI',
@@ -119,7 +122,7 @@ function saslStart(payload?: string): object {
   };
 }
 
-function saslContinue(payload?: string, conversationId?: number): object {
+function saslContinue(payload?: string, conversationId?: number): Document {
   return {
     saslContinue: 1,
     conversationId,
@@ -132,7 +135,7 @@ function negotiate(
   retries: number,
   payload: string,
   callback: Callback<string>
-) {
+): void {
   client.step(payload, (err, response) => {
     // Retries exhausted, raise error
     if (err && retries === 0) return callback(err);
@@ -150,7 +153,7 @@ function finalize(
   user: string,
   payload: string,
   callback: Callback<string>
-) {
+): void {
   // GSS Client Unwrap
   client.unwrap(payload, (err, response) => {
     if (err) return callback(err);
@@ -166,14 +169,14 @@ function finalize(
 }
 
 function performGssapiCanonicalizeHostName(
-  canonicalizeHostName: boolean,
   host: string,
+  mechanismProperties: MechanismProperties,
   callback: Callback<string>
-) {
-  if (!canonicalizeHostName) return callback(undefined, host);
+): void {
+  if (!mechanismProperties.gssapiCanonicalizeHostName) return callback(undefined, host);
 
   // Attempt to resolve the host name
-  dns.resolveCname(host, (err: Error | null, r: string[]) => {
+  dns.resolveCname(host, (err, r) => {
     if (err) return callback(err);
 
     // Get the first resolve host id
