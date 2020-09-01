@@ -74,10 +74,7 @@ export class GSSAPI extends AuthProvider {
     if (client == null) return callback(new Error('gssapi client missing'));
     function externalCommand(
       command: object,
-      cb: (
-        err: Error | MongoError | undefined,
-        result: { payload: string; conversationId: any }
-      ) => void
+      cb: Callback<{ payload: string; conversationId: any }>
     ) {
       return connection.command('$external.$cmd', command, cb);
     }
