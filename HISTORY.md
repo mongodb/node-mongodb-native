@@ -1,93 +1,22 @@
-# Changelog
+# Change Log
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [3.6.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.7...v3.6.0) (2020-07-30)
-
-
-### Features
-
-* add commitQuorum option to createIndexes command ([38bcaf7](https://github.com/mongodb/node-mongodb-native/commit/38bcaf7c80f63885d4c0cf1f7389819efb0664e6))
-* introduce an interruptable async interval timer ([1e4e837](https://github.com/mongodb/node-mongodb-native/commit/1e4e8373308a6d99c4d7eda4ae395f8293de98eb))
-* support streaming ismaster responses ([f6629d9](https://github.com/mongodb/node-mongodb-native/commit/f6629d9946d6d02012a6f1f7848306bc71fb3254))
-* **reIndex:** deprecate and make standalone-only command ([3a53b3d](https://github.com/mongodb/node-mongodb-native/commit/3a53b3deb7b375f6ce1e1a7435706aa4df7b0a0c))
-* add helper to run async collection in series ([f762532](https://github.com/mongodb/node-mongodb-native/commit/f76253242a9b9c3d1fc5be215e8b677af2138772))
-* allow hinting the delete command ([84cf955](https://github.com/mongodb/node-mongodb-native/commit/84cf95519d55e478b6457ba2347daf448388caf2))
-* consider staleness and topologyVersion in error handling ([018e6ed](https://github.com/mongodb/node-mongodb-native/commit/018e6edc923f1bb7aa13bf376edd71172bfc5039))
-* introduce `MongoNetworkTimeoutError` ([c1e4477](https://github.com/mongodb/node-mongodb-native/commit/c1e44777f9ede629290bb776c420018a4acdc487))
-* support checking if network error happened before handshake ([5411786](https://github.com/mongodb/node-mongodb-native/commit/541178690d558a4484d43d2a090d0b4d5416c031))
-* support hedged reads ([37cd5ee](https://github.com/mongodb/node-mongodb-native/commit/37cd5eed9f872429f3d0f683ed92cc75231d4685))
-* support speculative authentication in scram-sha and x509 ([6231164](https://github.com/mongodb/node-mongodb-native/commit/62311645c5e9a44678e4a997b6a5944b64492bd8))
-* **geoHaystackSearch:** deprecate geoHaystackSearch ([3f6786b](https://github.com/mongodb/node-mongodb-native/commit/3f6786b4c00d0650eb9c8009507e9c54b2b11bbc))
-* **sdam:** ignore stale topology updates ([f87d243](https://github.com/mongodb/node-mongodb-native/commit/f87d243587c1712cd95624d036ddb9a643a15a84))
+<a name="3.6.1"></a>
+## [3.6.1](https://github.com/mongodb/node-mongodb-native/compare/v3.6.0...v3.6.1) (2020-09-02)
 
 
 ### Bug Fixes
 
-* `resolveAuthMechanism` should not mutate credentials ([be19a21](https://github.com/mongodb/node-mongodb-native/commit/be19a2160d33d8e7473800fbcf6af1cd7f6eaeef))
-* always clear cancelled wait queue members during processing ([3087d48](https://github.com/mongodb/node-mongodb-native/commit/3087d48c5de17dcd77d48b35af591a8f6780d145))
-* always include `writeErrors` on a `BulkWriteError` instance ([40db47f](https://github.com/mongodb/node-mongodb-native/commit/40db47f5aac1e93a11e8568327e93c4c542e11da))
-* assert update/replace atomic requirements in bulk operations ([31ae3c9](https://github.com/mongodb/node-mongodb-native/commit/31ae3c9978d6ea4f33c3ea4ccac9cd41841e31de))
-* clarify handle wrong set name single topology ([21424eb](https://github.com/mongodb/node-mongodb-native/commit/21424ebb961db339be8fa74babaaeb3ada8e22c8))
-* createCollection only uses listCollections in strict mode ([a8ffec4](https://github.com/mongodb/node-mongodb-native/commit/a8ffec4c0b4e2ef0ce4c3bcdadc0adeccd0a3544))
-* db.command to not inherit options from parent ([c394284](https://github.com/mongodb/node-mongodb-native/commit/c39428421c94b4a1c5f41340e5b1a82724af95bd))
-* don't create multiple rtt pingers if one already exists ([56723aa](https://github.com/mongodb/node-mongodb-native/commit/56723aa1c980894ededd97531ff023a603cf4271))
-* don't immediately schedule monitoring after streaming failure ([188c23e](https://github.com/mongodb/node-mongodb-native/commit/188c23e0bb173a032df6bea4c7d2a916b808d9ad))
-* don't reapply socket timeout when socket has `moreToCome` ([ca0f2b9](https://github.com/mongodb/node-mongodb-native/commit/ca0f2b9d3fc268187d112e3afbe7bc556273e100))
-* don't try to calculate sMax if there are no viable servers ([4cb9b64](https://github.com/mongodb/node-mongodb-native/commit/4cb9b64bc3ff9aed8f26091cfe52acb152146898))
-* ensure implicit sessions are ended consistently ([8c861f3](https://github.com/mongodb/node-mongodb-native/commit/8c861f3e6c743a65ee95c8036ee0c1b1bc8c427a))
-* filter servers before applying reducers ([6f7d9bf](https://github.com/mongodb/node-mongodb-native/commit/6f7d9bf7f03108af3d190965a8b536ec2fb68a0b))
-* hint should raise error on unacknowledged writes ([54aa19e](https://github.com/mongodb/node-mongodb-native/commit/54aa19ea10a18ee6fce93f7c7eb6562c9f4042a5))
-* honor journal=true in connection string ([#2358](https://github.com/mongodb/node-mongodb-native/issues/2358)) ([4df4b7c](https://github.com/mongodb/node-mongodb-native/commit/4df4b7c3133925432954ce249c8bf8ae34674cb9))
-* IPv6 is not supported when using dns service discovery ([19ec62f](https://github.com/mongodb/node-mongodb-native/commit/19ec62fad5912b5e1f615278a4c2fba153da5030))
-* linting issue ([babf845](https://github.com/mongodb/node-mongodb-native/commit/babf84517675240c5ca39631c771e04ba9e248d7))
-* MONGODB-AWS temporary credentials are added to authContext ([769a754](https://github.com/mongodb/node-mongodb-native/commit/769a75491ede69a6af8da8f2d6572c6c85e14a62))
-* ReadPreference maxStalenessSeconds from options ([dfe7afa](https://github.com/mongodb/node-mongodb-native/commit/dfe7afaf646b2cde1751e728b52fa40d672beb55))
-* reduce default keepalive time to align with Azure defaults ([72d8969](https://github.com/mongodb/node-mongodb-native/commit/72d896983ed70fd0f96dea3a37ff05a5d91a93ba))
-* remove destructuring assignments for legacy node support ([d728a13](https://github.com/mongodb/node-mongodb-native/commit/d728a1330a37e847b69937b42e179c58b47038cb))
-* silently ignore session with unacknowledged write ([a053f4e](https://github.com/mongodb/node-mongodb-native/commit/a053f4ea3f5ad1c8c8a581c449cf03dc252aeb06))
-* **ChangeStream:** handle null changes ([14179a2](https://github.com/mongodb/node-mongodb-native/commit/14179a270ce4bfa62884ee53d46f4e35d28b6100))
-* **ChangeStream:** make CursorNotFound error resumable ([9f0b7ab](https://github.com/mongodb/node-mongodb-native/commit/9f0b7ab65a5d443f411a61fa1a3dd6cfe42b8dce))
-* **ChangeStream:** should resume from errors when iterating ([497952c](https://github.com/mongodb/node-mongodb-native/commit/497952cd577dc692dc2e0273028a74c818d31174))
-* **ChangeStream:** whitelist resumable errors ([#2337](https://github.com/mongodb/node-mongodb-native/issues/2337)) ([a9d3965](https://github.com/mongodb/node-mongodb-native/commit/a9d39651e5a3d5e565a85d1eb503f56f07c4a1d3)), closes [#17](https://github.com/mongodb/node-mongodb-native/issues/17) [#18](https://github.com/mongodb/node-mongodb-native/issues/18)
-* **create_indexes:** add missing `bucketSize` option to list of valid options ([66c76c3](https://github.com/mongodb/node-mongodb-native/commit/66c76c32f900499e147656e07b2df7bc5e0bb1b5))
-* **GridFS:** emit error on bad options  ([c71a4df](https://github.com/mongodb/node-mongodb-native/commit/c71a4dfdf1c4904321a2b50967b3379b13d774fb))
-* remove check for NonResumableChangeStreamError label ([f3ac635](https://github.com/mongodb/node-mongodb-native/commit/f3ac635663717dd9eb00bf8d3f938a56c98bcafb))
-* throw an error if `allowDiskUse` is used on MongoDB < 3.2 ([f95f697](https://github.com/mongodb/node-mongodb-native/commit/f95f697dde5ba1ae4c6a698ad29266dfd787a121))
-* typo with setting error labels on error object ([89638bf](https://github.com/mongodb/node-mongodb-native/commit/89638bf925482bb54c3dd956ffd6f2830d088c6a))
-* unordered bulk write should attempt to execute all batches ([d00a644](https://github.com/mongodb/node-mongodb-native/commit/d00a644e129ad9570a5727b7e259261204f259ae))
-* use async interruptable interval for server monitoring ([068ae83](https://github.com/mongodb/node-mongodb-native/commit/068ae83291fc30f76b23ea1120e77ce71053e29d))
-* writes within transactions are not retryable ([c13ec5c](https://github.com/mongodb/node-mongodb-native/commit/c13ec5c66623af164b688c79747eab8fe89b91d6))
-
-## [3.6.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.6.0-beta.0) (2020-04-14)
+* add host/port to cmap connection ([06a2444](https://github.com/mongodb/node-mongodb-native/commit/06a2444))
+* update full list of index options ([0af3191](https://github.com/mongodb/node-mongodb-native/commit/0af3191))
 
 
 ### Features
 
-* add MONGODB-AWS as a supported auth mechanism ([7f3cfba](https://github.com/mongodb/node-mongodb-native/commit/7f3cfbac15f537aa2ca9da145063f10c61390406))
-* bump wire protocol version for 4.4 ([6d3f313](https://github.com/mongodb/node-mongodb-native/commit/6d3f313a9defd12489b621896439b3f9ec8cb1ae))
-* deprecate `oplogReplay` for find commands ([24155e7](https://github.com/mongodb/node-mongodb-native/commit/24155e7905422460afc7e6abb120c596f40712c1))
-* directConnection adds unify behavior for replica set discovery ([c5d60fc](https://github.com/mongodb/node-mongodb-native/commit/c5d60fc4619227697ef2102437fe5c8b111909d2))
-* expand use of error labels for retryable writes ([c775a4a](https://github.com/mongodb/node-mongodb-native/commit/c775a4a1c53b8476eff6c9759b5647c9cbfa4e04))
-* support `allowDiskUse` for find commands ([dbc0b37](https://github.com/mongodb/node-mongodb-native/commit/dbc0b3722516a128c253bf85366a3432756ff92a))
-* support creating collections and indexes in transactions ([17e4c88](https://github.com/mongodb/node-mongodb-native/commit/17e4c88575b734d2d8ff94ca7f68b731a0bad326))
-* support passing a hint to findOneAndReplace/findOneAndUpdate ([faee15b](https://github.com/mongodb/node-mongodb-native/commit/faee15b686b895b84fd0b52c1e69e0caec769732))
-* support shorter SCRAM conversations ([6b9ff05](https://github.com/mongodb/node-mongodb-native/commit/6b9ff0561d14818bf07f4946ade04fc54683d0b9))
-* use error labels for retryable writes in legacy topologies ([fefc165](https://github.com/mongodb/node-mongodb-native/commit/fefc1651a885ec28758271c9e3c36104b05bdb75))
+* **db:** deprecate createCollection strict mode ([4cc6bcc](https://github.com/mongodb/node-mongodb-native/commit/4cc6bcc))
 
 
-### Bug Fixes
-
-* **ChangeStream:** whitelist change stream resumable errors ([8a9c108](https://github.com/mongodb/node-mongodb-native/commit/8a9c1084430de9d6253ca9c61c9258c85835bb94)), closes [#17](https://github.com/mongodb/node-mongodb-native/issues/17) [#18](https://github.com/mongodb/node-mongodb-native/issues/18)
-* always return empty array for selection on unknown topology ([af57b57](https://github.com/mongodb/node-mongodb-native/commit/af57b578dd603faa7b66983232de2bc7e417dae1))
-* correctly use template string for connection string error message ([814e278](https://github.com/mongodb/node-mongodb-native/commit/814e27869d90a1dfa01118bb96ff1273e0cef323))
-* don't depend on private node api for `Timeout` wrapper ([e6dc1f4](https://github.com/mongodb/node-mongodb-native/commit/e6dc1f48d62b68ba56b93359d7aa755c08985867))
-* **sdam:** use ObjectId comparison to track maxElectionId ([db991d6](https://github.com/mongodb/node-mongodb-native/commit/db991d6916306d1fe08508d4c3e8f7a37d7fd21f))
-* only consider MongoError subclasses for retryability ([265fe40](https://github.com/mongodb/node-mongodb-native/commit/265fe40cf29992764d1ab030a1ee4dca97cd7c7c))
-* pass options into `commandSupportsReadConcern` ([e855c83](https://github.com/mongodb/node-mongodb-native/commit/e855c83d8b73f4ce57a11193a1e52461ab2cd4db))
-* store name of collection for more informative error messages ([979d41e](https://github.com/mongodb/node-mongodb-native/commit/979d41e14f5acf69bac094b3863591ee8e01fd9c))
-* support write concern provided as string in `fromOptions` ([637f428](https://github.com/mongodb/node-mongodb-native/commit/637f4288c1edb799267ccbce6d25a49304f6149c))
-* use properly camel cased form of `mapReduce` for command ([c1ed2c1](https://github.com/mongodb/node-mongodb-native/commit/c1ed2c1ce4c6f2d40cd1c7b84ad672a90a09c83b))
 
 <a name="3.6.0-beta.0"></a>
 # [3.6.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.6.0-beta.0) (2020-04-14)
