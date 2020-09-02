@@ -588,6 +588,7 @@ function makeOperationHandler(
       } else {
         if (
           (server.s.topology.s.options.retryWrites !== false || isTransactionCommand(cmd)) &&
+          maxWireVersion(server) < 9 &&
           isRetryableWriteError(err) &&
           !inActiveTransaction(session, cmd)
         ) {
