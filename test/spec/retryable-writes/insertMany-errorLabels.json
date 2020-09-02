@@ -1,9 +1,14 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.3.1",
+      "minServerVersion": "4.0",
       "topology": [
-        "replicaset",
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topology": [
         "sharded"
       ]
     }
@@ -12,11 +17,15 @@
     {
       "_id": 1,
       "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
     }
   ],
   "tests": [
     {
-      "description": "InsertMany succeeds with RetryableWriteError from server",
+      "description": "InsertOne succeeds after connection failure",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -26,36 +35,21 @@
           "failCommands": [
             "insert"
           ],
-          "errorCode": 112,
-          "errorLabels": [
-            "RetryableWriteError"
-          ]
+          "closeConnection": true
         }
       },
       "operation": {
-        "name": "insertMany",
+        "name": "insertOne",
         "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ],
-          "options": {
-            "ordered": true
+          "document": {
+            "_id": 3,
+            "x": 33
           }
         }
       },
       "outcome": {
         "result": {
-          "insertedIds": {
-            "0": 2,
-            "1": 3
-          }
+          "insertedId": 3
         },
         "collection": {
           "data": [
@@ -76,7 +70,10 @@
       }
     },
     {
-      "description": "InsertMany fails if server does not return RetryableWriteError",
+      "description": "InsertOne fails after connection failure when retryWrites option is false",
+      "clientOptions": {
+        "retryWrites": false
+      },
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -86,25 +83,15 @@
           "failCommands": [
             "insert"
           ],
-          "errorCode": 11600,
-          "errorLabels": []
+          "closeConnection": true
         }
       },
       "operation": {
-        "name": "insertMany",
+        "name": "insertOne",
         "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ],
-          "options": {
-            "ordered": true
+          "document": {
+            "_id": 3,
+            "x": 33
           }
         }
       },
@@ -120,6 +107,1051 @@
             {
               "_id": 1,
               "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after NotMaster",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 10107,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after NotMasterOrSecondary",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 13436,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after NotMasterNoSlaveOk",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 13435,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after InterruptedDueToReplStateChange",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 11602,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after InterruptedAtShutdown",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 11600,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after PrimarySteppedDown",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 189,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after ShutdownInProgress",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 91,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after HostNotFound",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 7,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after HostUnreachable",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 6,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after SocketException",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 9001,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after NetworkTimeout",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 89,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after ExceededTimeLimit",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 262,
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after Interrupted",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 11601,
+          "closeConnection": false
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError InterruptedAtShutdown",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11600,
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11602,
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError PrimarySteppedDown",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 189,
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError ShutdownInProgress",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after multiple retryable writeConcernErrors",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down",
+            "errorLabels": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsContain": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after WriteConcernError Interrupted",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11601,
+            "errmsg": "operation was interrupted"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after WriteConcernError WriteConcernFailed",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 64,
+            "codeName": "WriteConcernFailed",
+            "errmsg": "waiting for replication timed out",
+            "errInfo": {
+              "wtimeout": true
+            }
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsOmit": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails with a RetryableWriteError label after two connection failures",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "result": {
+          "errorLabelsContain": [
+            "RetryableWriteError"
+          ]
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
             }
           ]
         }
