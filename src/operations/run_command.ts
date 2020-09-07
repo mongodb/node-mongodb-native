@@ -14,7 +14,7 @@ export class RunCommandOperation<
 > extends CommandOperation<T, TResult> {
   command: Document;
 
-  constructor(parent: OperationParent, command: Document, options?: T) {
+  constructor(parent: OperationParent | undefined, command: Document, options?: T) {
     super(parent, options);
     this.command = command;
   }
@@ -29,7 +29,7 @@ export class RunAdminCommandOperation<
   T extends RunCommandOptions = RunCommandOptions,
   TResult = Document
 > extends RunCommandOperation<T, TResult> {
-  constructor(parent: OperationParent, command: Document, options?: T) {
+  constructor(parent: OperationParent | undefined, command: Document, options?: T) {
     super(parent, command, options);
     this.ns = new MongoDBNamespace('admin');
   }

@@ -14,13 +14,12 @@ const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @public */
 export interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
+  /** Return the full server response for the command */
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcern;
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
   readPreference?: ReadPreferenceLike;
-  /** Specify ClientSession for this command */
-  session?: ClientSession;
   /** Collation */
   collation?: CollationOptions;
   maxTimeMS?: number;
@@ -32,6 +31,7 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
+  noResponse?: boolean;
 }
 
 /** @internal */
@@ -56,7 +56,7 @@ export abstract class CommandOperation<
   fullResponse?: boolean;
   logger?: Logger;
 
-  constructor(parent: OperationParent, options?: T) {
+  constructor(parent?: OperationParent, options?: T) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -65,7 +65,9 @@ export abstract class CommandOperation<
     const dbNameOverride = options?.dbName || options?.authdb;
     this.ns = dbNameOverride
       ? new MongoDBNamespace(dbNameOverride, '$cmd')
-      : parent.s.namespace.withCollection('$cmd');
+      : parent
+      ? parent.s.namespace.withCollection('$cmd')
+      : new MongoDBNamespace('admin', '$cmd');
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
@@ -82,7 +84,7 @@ export abstract class CommandOperation<
     this.options.readPreference = this.readPreference;
 
     // TODO(NODE-2056): make logger another "inheritable" property
-    if (parent.logger) {
+    if (parent && parent.logger) {
       this.logger = parent.logger;
     }
   }

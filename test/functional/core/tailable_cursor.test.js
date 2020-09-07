@@ -1,6 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
-const setupDatabase = require('./shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 
 describe('Tailable cursor tests', function () {
   before(function () {
