@@ -145,11 +145,13 @@ describe('Connection Pool', function() {
         sinon.stub(pool, 'availableConnectionCount').get(() => 0);
         pool.checkIn(conn);
 
-        expect(pool)
-          .property('waitQueueSize')
-          .to.equal(0);
+        process.nextTick(() => {
+          expect(pool)
+            .property('waitQueueSize')
+            .to.equal(0);
 
-        done();
+          done();
+        });
       });
     });
   });
