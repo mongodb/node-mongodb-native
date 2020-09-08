@@ -227,7 +227,6 @@ function makeWriteConcernResultObject(input: any) {
  */
 export class MongoWriteConcernError extends MongoError {
   /** The result document (provided if ok: 1) */
-  code?: number;
   result?: Document;
 
   constructor(message: string, result: Document) {

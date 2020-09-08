@@ -34,7 +34,7 @@ import {
   isNetworkErrorBeforeHandshake
 } from '../error';
 import { Connection, DestroyOptions } from '../cmap/connection';
-import type { Topology } from './topology';
+import { Topology } from './topology';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
@@ -558,6 +558,15 @@ function inActiveTransaction(session: ClientSession | undefined, cmd: Document) 
   return session && session.inTransaction() && !isTransactionCommand(cmd);
 }
 
+/** this checks the retryWrites option passed down from the client options, it
+ * does not check if the server supports retryable writes */
+function isRetryableWritesEnabled(serverOrTopology: Topology | Server) {
+  const check = (topology: Topology) => topology.s.options.retryWrites !== false;
+  if (serverOrTopology instanceof Server) return check(serverOrTopology.s.topology);
+  if (serverOrTopology instanceof Topology) return check(serverOrTopology);
+  return false;
+}
+
 function makeOperationHandler(
   server: Server,
   connection: Connection,
@@ -574,7 +583,7 @@ function makeOperationHandler(
         }
 
         if (
-          (server.s.topology.s.options.retryWrites !== false || isTransactionCommand(cmd)) &&
+          (isRetryableWritesEnabled(server) || isTransactionCommand(cmd)) &&
           supportsRetryableWrites(server) &&
           !inActiveTransaction(session, cmd)
         ) {

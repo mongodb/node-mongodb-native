@@ -199,7 +199,7 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
       operation.canRetryRead;
 
     const willRetryWrite =
-      topology.s.options.retryWrites !== false &&
+      topology.s.options.retryWrites === true &&
       operation.session &&
       !inTransaction &&
       supportsRetryableWrites(server) &&
