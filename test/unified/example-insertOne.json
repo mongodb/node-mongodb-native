@@ -1,0 +1,100 @@
+{
+  "description": "example-insertOne",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "2.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": [
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "insertOne",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectedResult": {
+            "insertedId": {
+              "$$unsetOrMatches": 2
+            }
+          }
+        }
+      ],
+      "expectedEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "test",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
