@@ -94,7 +94,7 @@ We have an example of our workspace file: save this as `mongodbNodeDriver.code-w
     "version": "2.0.0",
     "tasks": [
       {
-        // This will start tsc in watch mode
+        // Here is an optional watcher task (`npm test` will also type check you changes):
         // Since this is the default build task it can be started with cmd+shift+b
         // There will be a wrench and screw icon
         // on the bottom bar where you can quick check build issues
