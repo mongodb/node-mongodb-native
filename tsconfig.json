@@ -21,8 +21,8 @@
     // API-Extractor uses declaration maps to report problems in source, no need to distribute
     "declaration": true,
     "declarationMap": true,
-    // inline the source so the original content can be debugged
-    "inlineSources": true,
+    // we include sources in distribution
+    "inlineSources": false,
     // Prevents web types from being suggested by vscode.
     "types": ["node"],
     "forceConsistentCasingInFileNames": true

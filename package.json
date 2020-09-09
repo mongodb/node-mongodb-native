@@ -6,7 +6,10 @@
   "files": [
     "lib",
     "etc/prepare.js",
-    "mongodb.d.ts"
+    "mongodb.d.ts",
+    "src",
+    "tsconfig.json",
+    "api-extractor.json"
   ],
   "types": "mongodb.d.ts",
   "repository": {
@@ -100,7 +103,7 @@
     "check:kerberos": "mocha --config \"test/manual/mocharc.json\" test/manual/kerberos.test.js",
     "check:tls": "mocha --config \"test/manual/mocharc.json\" test/manual/tls_support.test.js",
     "check:ldap": "mocha --config \"test/manual/mocharc.json\" test/manual/ldap.test.js",
-    "prepare": "node etc/prepare.js",
+    "postinstall": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run check:test"
   },
