@@ -145,7 +145,7 @@ describe('Connection Pool', function() {
         sinon.stub(pool, 'availableConnectionCount').get(() => 0);
         pool.checkIn(conn);
 
-        process.nextTick(() => {
+        setImmediate(() => {
           expect(pool)
             .property('waitQueueSize')
             .to.equal(0);
