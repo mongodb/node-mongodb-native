@@ -126,17 +126,20 @@ We have an example of our workspace file: save this as `mongodbNodeDriver.code-w
 </pre>
 </details>
 
-If you use this file you will get our recommended extensions suggested to you. If not, we recommend picking up `dbaeumer.vscode-eslint` at least to make sure any additional code is following style recommendations.
+If you use this file you will get our recommended extensions suggested to you.
+If not, we recommend picking up `dbaeumer.vscode-eslint` at least to make sure any additional code is following style recommendations. If you don't want to use this workspace file but still don't want to think about formatting you can have VSCode do the checks and formatting work for you by adding just these settings:
 
 ```jsonc
-"editor.codeActionsOnSave": {
-  "source.fixAll.eslint": true
-},
-"[javascript]": {
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-},
-"[typescript]": {
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+"settings":{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  }
 }
 ```
 
