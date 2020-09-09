@@ -11,11 +11,11 @@ please follow it in all your interactions with the project.
 
 ### Runtime
 
-It's recommended you install Node Version Manager for [unix systems](nvm-unix) or [windows](nvm-windows). While it isn't required we have a minimum node version requirement (look in package.json under the "engines" key) and we can't accept code that does not work on the minimum specified version.
+It's recommended you install Node Version Manager for [unix systems][nvm-unix] or [windows][nvm-windows]. While it isn't required we have a minimum node version requirement (look in package.json under the "engines" key) and we can't accept code that does not work on the minimum specified version.
 
 ### MongoDB Helpers
 
-- To get various MongoDB topologies up and running easily you can use the python based tool [mtools](mtools-install).
+- To get various MongoDB topologies up and running easily you can use the python based tool [mtools][mtools-install].
 - To get various versions of MongoDB to test against you can use [m](https://github.com/aheckmann/m) an npm tool best installed globally `npm i -g m`.
 
 ### VSCode Setup
@@ -146,7 +146,7 @@ Running the tests:
 
 - You can use the script: `test/tools/cluster_setup.sh server`
 - If you are running against more than a standalone make sure your ulimit settings are in accordance with mongo's recommendations
-  - Changing the settings on the latest versions of [macos can be tricky read here](macos-ulimt) (unless you know you need it you shouldn't have to do the complicated maxproc steps)
+  - Changing the settings on the latest versions of [macos can be tricky read here][macos-ulimt] (unless you know you need it you shouldn't have to do the complicated maxproc steps)
 - Prefix the cluster_setup.sh script with `env MONGODB_VERSION=X.Y` to test against a specific version of the server
 - `env MONGODB_URI=mongodb://localhost:27017 npm test`
 - When testing different topologies you may need to remove the existing data folder created.
@@ -203,7 +203,7 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 3. Make your code or other changes.
 4. Review guidelines such as [How to write the perfect pull request][github-perfect-pr], thanks!
 
-Take a look at [Github Flow](github-flow) for a more detailed explanation of this process.
+Take a look at [Github Flow][github-flow] for a more detailed explanation of this process.
 
 [angular-commit-style]: https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits
 [changelog]: CHANGELOG.md
