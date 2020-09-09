@@ -52,6 +52,8 @@ export interface ClientSessionOptions {
 /** @public */
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
+const kServerSession = Symbol('serverSession');
+
 /**
  * A class representing a client session on the server
  *
@@ -62,7 +64,6 @@ class ClientSession extends EventEmitter {
   topology: Topology;
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
-  serverSession?: ServerSession;
   clientOptions?: MongoClientOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
@@ -71,6 +72,7 @@ class ClientSession extends EventEmitter {
   owner: symbol | CoreCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
+  [kServerSession]?: ServerSession;
 
   /**
    * Create a client session.
@@ -102,8 +104,8 @@ class ClientSession extends EventEmitter {
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
-    this.serverSession = sessionPool.acquire();
     this.clientOptions = clientOptions;
+    this[kServerSession] = undefined;
 
     this.supports = {
       causalConsistency:
@@ -124,41 +126,61 @@ class ClientSession extends EventEmitter {
     return this.serverSession?.id;
   }
 
+  get serverSession(): ServerSession {
+    if (this[kServerSession] == null) {
+      this[kServerSession] = this.sessionPool.acquire();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this[kServerSession]!;
+  }
+
   /**
    * Ends this session on the server
    *
    * @param options - Optional settings. Currently reserved for future use
    * @param callback - Optional callback for completion of this operation
    */
-  endSession(): void;
+  endSession(): Promise<void>;
   endSession(callback: Callback<void>): void;
+  endSession(options: Record<string, unknown>): Promise<void>;
   endSession(options: Record<string, unknown>, callback: Callback<void>): void;
-  endSession(options?: Record<string, unknown> | Callback<void>, callback?: Callback<void>): void {
-    if (typeof options === 'function') (callback = options as Callback), (options = {});
+  endSession(
+    options?: Record<string, unknown> | Callback<void>,
+    callback?: Callback<void>
+  ): void | Promise<void> {
+    if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (this.hasEnded) {
-      if (typeof callback === 'function') callback();
-      return;
-    }
+    return maybePromise(callback, done => {
+      if (this.hasEnded) {
+        return done();
+      }
 
-    if (this.serverSession && this.inTransaction()) {
-      this.abortTransaction(); // pass in callback?
-    }
+      const completeEndSession = () => {
+        // release the server session back to the pool
+        this.sessionPool.release(this.serverSession);
+        this[kServerSession] = undefined;
 
-    // mark the session as ended, and emit a signal
-    this.hasEnded = true;
-    this.emit('ended', this);
+        // mark the session as ended, and emit a signal
+        this.hasEnded = true;
+        this.emit('ended', this);
 
-    // release the server session back to the pool
-    if (this.serverSession) {
-      this.sessionPool.release(this.serverSession);
-    }
+        // spec indicates that we should ignore all errors for `endSessions`
+        done();
+      };
 
-    this.serverSession = undefined;
+      if (this.serverSession && this.inTransaction()) {
+        this.abortTransaction(err => {
+          if (err) return done(err);
+          completeEndSession();
+        });
 
-    // spec indicates that we should ignore all errors for `endSessions`
-    if (typeof callback === 'function') callback();
+        return;
+      }
+
+      completeEndSession();
+    });
   }
 
   /**

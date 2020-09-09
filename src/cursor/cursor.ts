@@ -1,5 +1,4 @@
 import { emitDeprecatedOptionWarning } from '../utils';
-import { PromiseProvider } from '../promise_provider';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { Transform, PassThrough } from 'stream';
 import { deprecate } from 'util';
@@ -656,46 +655,23 @@ export class Cursor<
   forEach(iterator: (doc: Document) => void): Promise<Document>;
   forEach(iterator: (doc: Document) => void, callback: Callback): void;
   forEach(iterator: (doc: Document) => void, callback?: Callback): Promise<Document> | void {
-    const Promise = PromiseProvider.get();
+    if (typeof iterator !== 'function') {
+      throw new TypeError('Missing required parameter `iterator`');
+    }
+
     // Rewind cursor state
     this.rewind();
 
     // Set current cursor to INIT
     this.s.state = CursorState.INIT;
 
-    if (typeof callback === 'function') {
+    return maybePromise(callback, done => {
       each(this, (err, doc) => {
-        if (err) {
-          callback(err);
-          return false;
-        }
-
-        if (doc != null) {
-          iterator(doc);
-          return true;
-        }
-
-        if (doc == null) {
-          callback(undefined);
-          return false;
-        }
+        if (err) return done(err);
+        if (doc != null) return iterator(doc);
+        done();
       });
-    } else {
-      return new Promise<Document>((fulfill, reject) => {
-        each(this, (err, doc) => {
-          if (err) {
-            reject(err);
-            return false;
-          } else if (doc == null) {
-            fulfill();
-            return false;
-          } else {
-            iterator(doc);
-            return true;
-          }
-        });
-      });
-    }
+    });
   }
 
   /**
