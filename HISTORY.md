@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.6.2"></a>
+## [3.6.2](https://github.com/mongodb/node-mongodb-native/compare/v3.6.1...v3.6.2) (2020-09-10)
+
+
+### Bug Fixes
+
+* allow event loop to process during wait queue processing ([#2537](https://github.com/mongodb/node-mongodb-native/issues/2537)) ([4e03dfa](https://github.com/mongodb/node-mongodb-native/commit/4e03dfa))
+
+
+
 <a name="3.6.1"></a>
 ## [3.6.1](https://github.com/mongodb/node-mongodb-native/compare/v3.6.0...v3.6.1) (2020-09-02)
 
