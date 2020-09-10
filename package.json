@@ -24,7 +24,7 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
-    "bl": "^2.2.0",
+    "bl": "^2.2.1",
     "bson": "^1.1.4",
     "denque": "^1.4.1",
     "require_optional": "^1.0.1",
