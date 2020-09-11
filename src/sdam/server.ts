@@ -39,7 +39,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { InternalCursorState } from '../cursor/core_cursor';
+import type { InternalCursorState } from '../cursor/cursor';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';

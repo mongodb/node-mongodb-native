@@ -6,7 +6,7 @@ import { MongoError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { InternalCursorState } from '../cursor/core_cursor';
+import type { InternalCursorState } from '../cursor/cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 

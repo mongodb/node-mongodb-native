@@ -5,7 +5,7 @@ import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
-import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { InternalCursorState } from '../../cursor/cursor';
 
 /** @internal */
 export type GetMoreOptions = CommandOptions;

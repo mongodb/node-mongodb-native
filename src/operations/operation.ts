@@ -2,7 +2,7 @@ import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
-import type { InternalCursorState } from '../cursor/core_cursor';
+import type { InternalCursorState } from '../cursor/cursor';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {

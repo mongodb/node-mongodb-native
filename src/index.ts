@@ -146,16 +146,13 @@ export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type { CommandCursorOptions } from './cursor/command_cursor';
 export type {
-  CoreCursor,
   CursorCloseOptions,
   DocumentTransforms,
   StreamOptions,
   CoreCursorOptions,
   InternalCursorState,
   CoreCursorPrivate,
-  CursorState
-} from './cursor/core_cursor';
-export type {
+  CursorState,
   CursorOptions,
   CursorPrivate,
   FIELDS as CURSOR_FIELDS,

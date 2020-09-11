@@ -3,7 +3,7 @@ import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
-import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { InternalCursorState } from '../../cursor/cursor';
 import type { ClientSession } from '../../sessions';
 
 interface KillCursorOptions {

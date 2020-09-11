@@ -20,7 +20,7 @@ import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
 import type { QueryOptions } from './wire_protocol/query';
-import type { InternalCursorState } from '../cursor/core_cursor';
+import type { InternalCursorState } from '../cursor/cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';

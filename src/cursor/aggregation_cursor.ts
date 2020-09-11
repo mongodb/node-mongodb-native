@@ -1,6 +1,5 @@
 import { MongoError } from '../error';
-import { Cursor, CursorOptions } from './cursor';
-import { CursorState } from './core_cursor';
+import { Cursor, CursorState, CursorOptions } from './cursor';
 import { deprecate } from 'util';
 import type { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import type { Document } from '../bson';
