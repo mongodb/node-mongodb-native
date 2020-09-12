@@ -78,10 +78,10 @@ export class CursorStream extends Readable {
   constructor(cursor: Cursor) {
     super({ objectMode: true });
     this.cursor = cursor;
+    this.on('end', () => this.cursor.close(() => this.emit(Cursor.CLOSE)));
   }
 
   destroy(err?: AnyError): void {
-    console.log('destroy');
     if (err) this.emit(Cursor.ERROR, err);
     this.pause();
     this.cursor.close(() => this.emit(Cursor.CLOSE));
