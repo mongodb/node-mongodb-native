@@ -3082,6 +3082,7 @@ describe('Operation (Generators)', function () {
         // Reference a different database sharing the same connections
         // for the data transfer
         var secondDb = client.db('integration_tests_2');
+        yield secondDb.dropDatabase();
 
         // Fetch the collections
         var multipleColl1 = db.collection('multiple_db_instances_with_generators');
@@ -4618,8 +4619,9 @@ describe('Operation (Generators)', function () {
             .find({})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true);
+          const stream = cursor.stream();
 
-          cursor.on('data', function () {
+          stream.on('data', function () {
             total = total + 1;
 
             if (total === 1000) {
@@ -4627,7 +4629,7 @@ describe('Operation (Generators)', function () {
             }
           });
 
-          cursor.on('end', function () {
+          stream.on('end', function () {
             // TODO: forced because the cursor is still open/active
             client.close(true, err => {
               if (err) return reject(err);

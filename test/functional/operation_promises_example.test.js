@@ -4995,16 +4995,17 @@ describe('Operation (Promises)', function () {
               .addCursorFlag('tailable', true)
               .addCursorFlag('awaitData', true);
 
-            cursor.on('data', function (d) {
+            const stream = cursor.stream();
+            stream.on('data', function (d) {
               test.ok(d);
               total = total + 1;
 
               if (total === 1000) {
                 cursor.kill();
               }
-            });
 
-            cursor.on('end', function () {
+            });
+            stream.on('end', function () {
               // TODO: forced because the cursor is still open/active
               client.close(true, done);
             });
