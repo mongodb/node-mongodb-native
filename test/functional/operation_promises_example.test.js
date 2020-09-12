@@ -5003,7 +5003,6 @@ describe('Operation (Promises)', function () {
               if (total === 1000) {
                 cursor.kill();
               }
-
             });
             stream.on('end', function () {
               // TODO: forced because the cursor is still open/active
