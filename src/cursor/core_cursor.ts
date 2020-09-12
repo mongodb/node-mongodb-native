@@ -2,7 +2,6 @@ import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoDBNamespace, Callback } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
-import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long, Document, BSONSerializeOptions } from '../bson';
 import type { OperationBase, Hint } from '../operations/operation';
@@ -104,7 +103,7 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 export class CoreCursor<
   O extends OperationBase = OperationBase,
   T extends CoreCursorOptions = CoreCursorOptions
-> extends Readable {
+> {
   operation: O;
   server?: Server;
   ns: string;
@@ -143,8 +142,6 @@ export class CoreCursor<
    * @param options - Optional settings for the cursor
    */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
-    super({ objectMode: true });
-
     const cmd = operation.cmd ? operation.cmd : {};
 
     // Set local values
@@ -358,50 +355,6 @@ export class CoreCursor<
       this.cursorState.cursorId = undefined;
       this.cursorState.cursorIndex = 0;
     }
-  }
-
-  // Internal methods
-  /** @internal */
-  _read(): void {
-    if ((this.s && this.s.state === CursorState.CLOSED) || this.isDead()) {
-      this.push(null);
-      return;
-    }
-
-    // Get the next item
-    this._next((err, result) => {
-      if (err) {
-        if (this.listeners(CoreCursor.ERROR) && this.listeners(CoreCursor.ERROR).length > 0) {
-          this.emit(CoreCursor.ERROR, err);
-        }
-        if (!this.isDead()) this.close();
-
-        // Emit end event
-        this.emit(CoreCursor.END);
-        this.emit(CoreCursor.FINISH);
-        return;
-      }
-
-      // If we provided a transformation method
-      if (
-        this.cursorState.streamOptions &&
-        typeof this.cursorState.streamOptions.transform === 'function' &&
-        result != null
-      ) {
-        this.push(this.cursorState.streamOptions.transform(result));
-        return;
-      }
-
-      // Return the result
-      this.push(result);
-
-      if (result === null && this.isDead()) {
-        this.once(CoreCursor.END, () => {
-          this.close();
-          this.emit(CoreCursor.FINISH);
-        });
-      }
-    });
   }
 
   close(): void;

@@ -623,14 +623,15 @@ describe('Operation Examples', function () {
             ],
             { cursor: { batchSize: 1 } }
           );
+          const stream = cursor.stream();
 
           var count = 0;
           // Get all the aggregation results
-          cursor.on('data', function () {
+          stream.on('data', function () {
             count = count + 1;
           });
 
-          cursor.once('end', function () {
+          stream.once('end', function () {
             test.equal(2, count);
             client.close(done);
           });
@@ -6721,8 +6722,9 @@ describe('Operation Examples', function () {
                 .find({})
                 .addCursorFlag('tailable', true)
                 .addCursorFlag('awaitData', true);
+              const stream = cursor.stream();
 
-              cursor.on('data', function () {
+              stream.on('data', function () {
                 total = total + 1;
 
                 if (total === 1000) {
@@ -6730,7 +6732,7 @@ describe('Operation Examples', function () {
                 }
               });
 
-              cursor.on('end', function () {
+              stream.on('end', function () {
                 // TODO: forced because the cursor is still open/active
                 client.close(true, done);
               });

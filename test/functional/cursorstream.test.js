@@ -288,23 +288,24 @@ describe('Cursor Streams', function () {
         });
 
         var error, streamIsClosed;
+        const stream = cursor.stream();
 
-        cursor.on('error', function (err) {
+        stream.on('error', function (err) {
           error = err;
         });
 
-        cursor.on('close', function () {
+        stream.on('close', function () {
           expect(error).to.exist;
           streamIsClosed = true;
         });
 
-        cursor.on('end', function () {
+        stream.on('end', function () {
           expect(error).to.exist;
           expect(streamIsClosed).to.be.true;
           client.close(done);
         });
 
-        cursor.pipe(process.stdout);
+        stream.pipe(process.stdout);
       });
     }
   });
@@ -337,14 +338,15 @@ describe('Cursor Streams', function () {
             .find({})
             .project({ a: 1 })
             .sort({ a: -1 });
+          const stream = cursor.stream();
 
-          cursor.on('end', function () {
+          stream.on('end', function () {
             expect(received).to.have.length(1000);
 
             client.close(done);
           });
 
-          cursor.on('data', function (d) {
+          stream.on('data', function (d) {
             received.push(d);
           });
         });

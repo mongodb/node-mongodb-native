@@ -113,11 +113,12 @@ describe('CRUD API', function () {
           var streamMethod = function () {
             var count = 0;
             var clonedCursor = cursor.clone();
-            clonedCursor.on('data', function () {
+            const stream = clonedCursor.stream();
+            stream.on('data', function () {
               count = count + 1;
             });
 
-            clonedCursor.once('end', function () {
+            stream.once('end', function () {
               test.equal(2, count);
               explainMethod();
             });
@@ -239,11 +240,12 @@ describe('CRUD API', function () {
             var cursor = db.collection('t1').aggregate();
             var count = 0;
             cursor.match({ a: 1 });
-            cursor.on('data', function () {
+            const stream = cursor.stream();
+            stream.on('data', function () {
               count = count + 1;
             });
 
-            cursor.once('end', function () {
+            stream.once('end', function () {
               test.equal(3, count);
               testExplain();
             });
