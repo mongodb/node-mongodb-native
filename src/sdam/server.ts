@@ -583,7 +583,7 @@ function makeOperationHandler(
         }
 
         if (
-          (isRetryableWritesEnabled(server) || isTransactionCommand(cmd)) &&
+          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
           supportsRetryableWrites(server) &&
           !inActiveTransaction(session, cmd)
         ) {
