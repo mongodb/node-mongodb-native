@@ -701,9 +701,10 @@ function nextFunction(self: CoreCursor, callback: Callback) {
 
   if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
     // Ensure we kill the cursor on the server
-    self.kill();
-    // Set cursor in dead and notified state
-    return setCursorDeadAndNotified(self, callback);
+    return self.kill(() =>
+      // Set cursor in dead and notified state
+      setCursorDeadAndNotified(self, callback)
+    );
   } else if (
     self.cursorState.cursorIndex === self.cursorState.documents.length &&
     !Long.ZERO.equals(cursorId)
@@ -775,9 +776,12 @@ function nextFunction(self: CoreCursor, callback: Callback) {
   } else {
     if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
       // Ensure we kill the cursor on the server
-      self.kill();
-      // Set cursor in dead and notified state
-      return setCursorDeadAndNotified(self, callback);
+      self.kill(() =>
+        // Set cursor in dead and notified state
+        setCursorDeadAndNotified(self, callback)
+      );
+
+      return;
     }
 
     // Increment the current cursor limit
@@ -789,11 +793,12 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     // Doc overflow
     if (!doc || doc.$err) {
       // Ensure we kill the cursor on the server
-      self.kill();
-      // Set cursor in dead and notified state
-      return setCursorDeadAndNotified(self, () =>
-        callback(new MongoError(doc ? doc.$err : undefined))
+      self.kill(() =>
+        // Set cursor in dead and notified state
+        setCursorDeadAndNotified(self, () => callback(new MongoError(doc ? doc.$err : undefined)))
       );
+
+      return;
     }
 
     // Transform the doc with passed in transformation method if provided

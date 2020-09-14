@@ -3987,21 +3987,17 @@ describe('Cursor', function () {
     }
   );
 
-  it('should return a promise when no callback supplied to forEach method', function (done) {
+  it('should return a promise when no callback supplied to forEach method', function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-    client.connect(function (err, client) {
-      expect(err).to.not.exist;
+    return client.connect(() => {
       const db = client.db(configuration.db);
       const collection = db.collection('cursor_session_tests2');
-
       const cursor = collection.find();
-      const promise = cursor.forEach();
+      const promise = cursor.forEach(() => {});
       expect(promise).to.exist.and.to.be.an.instanceof(Promise);
-      promise.catch(() => {});
-
-      cursor.close(() => client.close(() => done()));
+      return promise.then(() => cursor.close()).then(() => client.close());
     });
   });
 
