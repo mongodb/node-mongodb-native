@@ -34,7 +34,7 @@ import {
   isNetworkErrorBeforeHandshake
 } from '../error';
 import { Connection, DestroyOptions } from '../cmap/connection';
-import { Topology } from './topology';
+import type { Topology } from './topology';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
