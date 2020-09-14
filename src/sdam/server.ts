@@ -597,7 +597,7 @@ function makeOperationHandler(
       } else {
         // if pre-4.4 server, then add error label if its a retryable write error
         if (
-          (server.s.topology.s.options.retryWrites !== false || isTransactionCommand(cmd)) &&
+          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
           maxWireVersion(server) < 9 &&
           isRetryableWriteError(err) &&
           !inActiveTransaction(session, cmd)
