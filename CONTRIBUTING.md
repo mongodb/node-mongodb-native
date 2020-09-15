@@ -11,123 +11,29 @@ please follow it in all your interactions with the project.
 
 ### Runtime
 
-It's recommended you install Node Version Manager for [unix systems][nvm-unix] or [windows][nvm-windows]. While it isn't required we have a minimum node version requirement (look in package.json under the "engines" key) and we can't accept code that does not work on the minimum specified version.
+It's recommended you install Node Version Manager for [unix systems][nvm-unix] or [windows][nvm-windows].
+While it isn't required we have a minimum node version requirement (look in [package.json](./package.json) under the "engines" key) and we can't accept code that does not work on the minimum specified version.
 
 ### MongoDB Helpers
 
-- To get various MongoDB topologies up and running easily you can use the python based tool [mtools][mtools-install].
-- To get various versions of MongoDB to test against you can use [m](https://github.com/aheckmann/m) an npm tool best installed globally `npm i -g m`.
+- For setting up a cluster to test against we recommend using [mtools][mtools-install].
+- For managing installed versions of MongoDB, we recommend using [m](https://github.com/aheckmann/m).
 
 ### VSCode Setup
 
-If you are developing in VSCode here's some suggestions:
-We have an example of our workspace file: save this as `mongodbNodeDriver.code-workspace` and replace PATH_TO_DRIVER with the path to the driver repository on your computer.
+- Save the the workspace file [mongodbNodeDriver.code-workspace][workspace-file] next to where you have the driver cloned to and open this in VSCode.
+Double check that the `folders.path` at the top of the file's json is correct.
 
-<details>
-<summary>mongodbNodeDriver.code-workspace</summary>
-<br>
-<pre lang="jsonc">
-{
-  "folders": [
-    {
-      "path": "PATH_TO_DRIVER",
-      "name": "driver"
-    }
-  ],
-  "settings": {
-    "search.exclude": {
-      // I always set 'file to include' in search to:
-      // - src
-      // - test
-      // - {test|src}
-      "**/node_modules": false, // searching node_modules comes in handy
-      "./lib": true, // by default I don't want results from our compiled source
-      "**/bower_components": true,
-      "**/*.code-search": true
-    },
-    // ts gives me the power to not rely on word matching
-    "editor.wordBasedSuggestions": false,
-    "gitlens.hovers.enabled": false,
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    },
-    "[javascript]": {
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "[typescript]": {
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-      "editor.codeActionsOnSave": {
-        "source.organizeImports": false
-      }
-    },
-    "eslint.enable": true,
-    "eslint.format.enable": true,
-    "mochaExplorer.files": "test/{functional,unit}/**/*.test.js",
-    "mochaExplorer.ui": "test/tools/runner/metadata_ui.js",
-    "editor.formatOnSave": false,
-    "editor.rulers": [100],
-    "editor.renderWhitespace": "selection",
-    "files.trimTrailingWhitespace": true,
-    "files.trimFinalNewlines": true,
-    "files.insertFinalNewline": true,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    // I leave the coverage extension disabled when not using it so I leave these commented
-    // but these settings are nice when it is enabled
-    // "coverage-gutters.showGutterCoverage": false,
-    // "coverage-gutters.showLineCoverage": true,
-  },
-  "launch": {
-    "configurations": [
-      {
-        // Sometimes I need to run mocha myself and not via the sidebar
-        // Here I can add custom args or env variables
-        "name": "run mocha",
-        "type": "pwa-node",
-        "request": "launch",
-        "program": "node_modules/.bin/mocha",
-        "args": ["test/unit", "test/functional"]
-      }
-    ],
-    "compounds": []
-  },
-  "tasks": {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        // Here is an optional watcher task (`npm test` will also type check you changes):
-        // Since this is the default build task it can be started with cmd+shift+b
-        // There will be a wrench and screw icon
-        // on the bottom bar where you can quick check build issues
-        "label": "watch TS",
-        "command": "npx",
-        "type": "shell",
-        "args": ["tsc", "-w"],
-        "problemMatcher": "$tsc-watch",
-        "isBackground": true,
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      }
-    ]
-  },
-  "extensions": {
-    "recommendations": [
-      "dbaeumer.vscode-eslint",
-      "hbenl.vscode-test-explorer",
-      "hbenl.vscode-mocha-test-adapter",
-      "ryanluker.vscode-coverage-gutters",
-      "github.vscode-pull-request-github",
-      "mongodb.mongodb-vscode"
-    ],
-    "unwantedRecommendations": ["esbenp.prettier-vscode"]
-  }
-}
-</pre>
-</details>
+- We recommended these extensions:
+  - [eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+  - [test-explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer)
+  - [mocha-test-adapter](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
+  - [coverage-gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
+  - [pull-request-github](https://marketplace.visualstudio.com/items?itemName=github.vscode-pull-request-github)
+  - [mongodb](https://marketplace.visualstudio.com/items?itemName=mongodb.mongodb-vscode)
+  - [gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 
-If you use this file you will get our recommended extensions suggested to you.
-If not, we recommend picking up `dbaeumer.vscode-eslint` at least to make sure any additional code is following style recommendations. If you don't want to use this workspace file but still don't want to think about formatting you can have VSCode do the checks and formatting work for you by adding just these settings:
+If you just want to get formatting and linting working automatically use these settings:
 
 ```jsonc
 "settings":{
@@ -145,17 +51,21 @@ If not, we recommend picking up `dbaeumer.vscode-eslint` at least to make sure a
 
 ### Running the tests
 
-Running the tests:
+- Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script
+  - Usage: `./test/tools/cluster_setup.sh server`
+- Run the tests with `npm test`
 
-- You can use the script: `test/tools/cluster_setup.sh server`
-- If you are running against more than a standalone make sure your ulimit settings are in accordance with mongo's recommendations
+### Tests FAQ
+
+- How can I run the tests against more than a standalone?
+  - You can use the `test/tools/cluster_setup.sh replica_set`
+  - You can prefix the npm test with a MONGODB_URI environment variable to point the tests to the correct deployment
+    - `env MONGODB_URI=mongodb://localhost:27017 npm test`
+  - If you are running against more than a standalone make sure your ulimit settings are in accordance with mongo's recommendations
   - Changing the settings on the latest versions of [macos can be tricky read here][macos-ulimt] (unless you know you need it you shouldn't have to do the complicated maxproc steps)
-- Prefix the cluster_setup.sh script with `env MONGODB_VERSION=X.Y` to test against a specific version of the server
-- `env MONGODB_URI=mongodb://localhost:27017 npm test`
-- When testing different topologies you may need to remove the existing data folder created.
-- To run a single test, use `npm run test -- -g 'test name'`
-  - If it's easier you can also isolate tests by adding .only. Example: `it.only(‘cool test’, {})`
-- To test only the unified topology, use `env MONGODB_UNIFIED_TOPOLOGY=1`
+- How can I run just one test?
+  - To run a single test, use mocha's grep flag: `npm run test -- -g 'test name'`
+  - If it's easier you can also isolate tests by adding `.only` Example: `it.only(‘cool test’, function() {})`
 
 ### Commit messages
 
@@ -188,23 +98,25 @@ These are the commit types we make use of:
 
 Below are some conventions that aren't enforced by any of our tooling but we nonetheless do our best to adhere to:
 
-- **Disallow `async / await` syntax**
-  - There is a measurable overhead to Promise usage vs simple callbacks. To support the broadest of driver usage scenarios we maintain an internal callback api while exposing a surface layer Promise API.
+- **Ensure Promise usage is optional**
+  - There is a measurable overhead to Promise usage vs callbacks.
+  To support the broadest of driver usage scenarios we maintain an internal callback api while exposing a surface layer Promise API.
 - **Disallow `export default` syntax**
   - For our use case it is best if all imports / exports remain named.
 - **As of 4.0 all code in src is in Typescript**
-  - Typescript provides a nice developer experience. As a product of using TS we should be using es6 syntax features whenever possible.
+  - Typescript provides a nice developer experience
+  As a product of using TS we should be using es6 syntax features whenever possible.
 - **Errors**
   - Error messages should be sentence case, and have no periods at the end.
-  - Use built-in error types where possible (not just Error, but TypeError/RangeError), also endeavor to create new Mongo-specific error types (e.g. MongoNetworkError)
+  - Use built-in error types where possible (not just `Error`, but `TypeError`/`RangeError`), also endeavor to create new Mongo-specific error types (e.g. `MongoNetworkError`)
 
 ## Pull Request Process
 
 1. Update the README.md or similar documentation with details of changes you
    wish to make, if applicable.
-2. Add any appropriate tests.
-3. Make your code or other changes.
-4. Review guidelines such as [How to write the perfect pull request][github-perfect-pr], thanks!
+1. Add any appropriate tests.
+1. Make your code or other changes.
+1. Review guidelines such as [How to write the perfect pull request][github-perfect-pr], thanks!
 
 Take a look at [Github Flow][github-flow] for a more detailed explanation of this process.
 
@@ -218,3 +130,4 @@ Take a look at [Github Flow][github-flow] for a more detailed explanation of thi
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
 [macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
 [github-flow]: https://guides.github.com/introduction/flow/
+[workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
