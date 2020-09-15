@@ -407,7 +407,6 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   hasReceived?: boolean;
   resumeAfter: ResumeToken;
   startAfter: ResumeToken;
-  emitter: EventEmitter;
   _stream?: CursorStream;
 
   constructor(
@@ -416,8 +415,6 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     options: ChangeStreamCursorOptions
   ) {
     super(topology, operation, options);
-
-    this.emitter = new EventEmitter();
 
     options = options || {};
     this._resumeToken = null;
@@ -435,29 +432,18 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
   close(
-    optionsOrCallback?: CursorCloseOptions | Callback,
-    callback?: Callback
+    options?: CursorCloseOptions | Callback<void>,
+    callback?: Callback<void>
   ): Promise<void> | void {
-    this.emitter.emit(Cursor.CLOSE);
-    if (callback) return super.close(optionsOrCallback as CursorCloseOptions, callback);
-    return super.close(optionsOrCallback as Callback);
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+    this.emit(Cursor.CLOSE);
+    return super.close(options, callback as Callback);
   }
-
-  // emit(event: string | symbol, ...args: any[]): boolean {
-  //   return this.emitter.emit(event, ...args);
-  // }
-
-  // on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
-  //   return this.emitter.on(event, listener);
-  // }
-
-  // once(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
-  //   return this.emitter.once(event, listener);
-  // }
 
   set resumeToken(token: ResumeToken) {
     this._resumeToken = token;
-    this.emitter.emit(ChangeStream.RESUME_TOKEN_CHANGED, token);
+    this.emit(ChangeStream.RESUME_TOKEN_CHANGED, token);
   }
 
   get resumeToken(): ResumeToken {
@@ -527,8 +513,8 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
 
       this._processBatch('firstBatch', response);
 
-      this.emitter.emit('init', response);
-      this.emitter.emit('response');
+      this.emit('init', response);
+      this.emit('response');
       callback(err, response);
     });
   }
@@ -542,8 +528,8 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
 
       this._processBatch('nextBatch', response);
 
-      this.emitter.emit('more', response);
-      this.emitter.emit('response');
+      this.emit('more', response);
+      this.emit('response');
       callback(err, response);
     });
   }
@@ -569,7 +555,7 @@ function createChangeStreamCursor(
     cursorOptions
   );
 
-  relayEvents(changeStreamCursor.emitter, self, ['resumeTokenChanged', 'end', 'close']);
+  relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
 
   changeStreamCursor._stream = changeStreamCursor.stream(self.streamOptions);
   relayEvents(changeStreamCursor._stream, self, ['end', 'close']);

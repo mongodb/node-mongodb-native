@@ -12,6 +12,7 @@ import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { ReadConcern } from '../read_concern';
+import { EventEmitter } from 'events';
 
 /** @public */
 export interface DocumentTransforms {
@@ -103,7 +104,7 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 export class CoreCursor<
   O extends OperationBase = OperationBase,
   T extends CoreCursorOptions = CoreCursorOptions
-> {
+> extends EventEmitter {
   operation: O;
   server?: Server;
   ns: string;
@@ -142,6 +143,7 @@ export class CoreCursor<
    * @param options - Optional settings for the cursor
    */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
+    super();
     const cmd = operation.cmd ? operation.cmd : {};
 
     // Set local values

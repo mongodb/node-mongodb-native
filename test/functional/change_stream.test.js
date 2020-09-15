@@ -87,7 +87,7 @@ function waitForStarted(changeStream, callback) {
     throw new Error('Change stream never started');
   }, 2000);
 
-  changeStream.cursor.emitter.once('init', () => {
+  changeStream.cursor.once('init', () => {
     clearTimeout(timeout);
     callback();
   });
@@ -126,7 +126,7 @@ function tryNext(changeStream, callback) {
 
   // race the two requests
   changeStream.next(done);
-  changeStream.cursor.emitter.once('more', done);
+  changeStream.cursor.once('more', done);
 }
 
 /**
@@ -2297,7 +2297,7 @@ describe('Change Streams', function () {
             return new Promise(resolve => {
               const changeStream = manager.makeChangeStream({ resumeAfter });
               let counter = 0;
-              changeStream.cursor.emitter.on('response', () => {
+              changeStream.cursor.on('response', () => {
                 if (counter === 1) {
                   token = changeStream.resumeToken;
                   resolve();
@@ -2334,7 +2334,7 @@ describe('Change Streams', function () {
             return new Promise(resolve => {
               const changeStream = manager.makeChangeStream();
               let counter = 0;
-              changeStream.cursor.emitter.on('response', () => {
+              changeStream.cursor.on('response', () => {
                 if (counter === 1) {
                   token = changeStream.resumeToken;
                   resolve();
@@ -2428,7 +2428,7 @@ describe('Change Streams', function () {
           .then(() => {
             return new Promise(resolve => {
               const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
-              changeStream.cursor.emitter.once('response', () => {
+              changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
@@ -2462,7 +2462,7 @@ describe('Change Streams', function () {
           .then(() => {
             return new Promise(resolve => {
               const changeStream = manager.makeChangeStream({ resumeAfter });
-              changeStream.cursor.emitter.once('response', () => {
+              changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
@@ -2495,7 +2495,7 @@ describe('Change Streams', function () {
           .then(() => {
             return new Promise(resolve => {
               const changeStream = manager.makeChangeStream();
-              changeStream.cursor.emitter.once('response', () => {
+              changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
