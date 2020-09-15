@@ -558,6 +558,12 @@ function inActiveTransaction(session: ClientSession | undefined, cmd: Document) 
   return session && session.inTransaction() && !isTransactionCommand(cmd);
 }
 
+/** this checks the retryWrites option passed down from the client options, it
+ * does not check if the server supports retryable writes */
+function isRetryableWritesEnabled(topology: Topology) {
+  return topology.s.options.retryWrites !== false;
+}
+
 function makeOperationHandler(
   server: Server,
   connection: Connection,
@@ -573,7 +579,11 @@ function makeOperationHandler(
           session.serverSession.isDirty = true;
         }
 
-        if (supportsRetryableWrites(server) && !inActiveTransaction(session, cmd)) {
+        if (
+          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
+          supportsRetryableWrites(server) &&
+          !inActiveTransaction(session, cmd)
+        ) {
           err.addErrorLabel('RetryableWriteError');
         }
 
@@ -584,6 +594,7 @@ function makeOperationHandler(
       } else {
         // if pre-4.4 server, then add error label if its a retryable write error
         if (
+          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
           maxWireVersion(server) < 9 &&
           isRetryableWriteError(err) &&
           !inActiveTransaction(session, cmd)
