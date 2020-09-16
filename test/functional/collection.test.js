@@ -4,9 +4,9 @@ const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
-const sinon = require('sinon');
 const mock = require('mongodb-mock-server');
 const ReadPreference = require('../../lib/core/topologies/read_preference');
+const { assert } = require('chai');
 chai.use(sinonChai);
 
 let TopologyStub;
@@ -1313,33 +1313,41 @@ describe('Collection', function() {
     }
   });
 
-  it('should createIndex with serverSelection readPreference primary', {
-    metadata: {
-      requires: { topology: 'replicaset' }
-    },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        useUnifiedTopology: true,
-        readPreference: 'primaryPreferred'
-      });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        const db = client.db(configuration.db);
-        const collection = db.collection('db-two');
-        TopologyStub = sinon.spy(Topology.prototype, 'selectServer');
-        collection.createIndex({ quote: 'text' }, (err, res) => {
-          expect(err).to.not.exist;
-          expect(res).to.equal('quote_text');
-          expect(TopologyStub.called).to.equal(true);
-          expect(TopologyStub.args[0][0].readPreference.mode).to.equal(ReadPreference.PRIMARY);
-          client.close(done);
-        });
-      });
-    }
-  });
+  context.only('DLL methods with serverSelection readPreference primary', () => {
+    const primaryReadPreferenceDLL = {
+      createIndex: [{ quote: 'text' }]
+    };
 
-  afterEach(() => {
-    if (TopologyStub) TopologyStub.restore();
+    Object.keys(primaryReadPreferenceDLL).forEach(operation => {
+      it(`should ${operation} with serverSelection readPreference primary`, {
+        metadata: {
+          requires: { topology: 'replicaset' }
+        },
+        test: function(done) {
+          const opArgs = primaryReadPreferenceDLL[operation];
+          const configuration = this.configuration;
+          const client = configuration.newClient(configuration.writeConcernMax(), {
+            useUnifiedTopology: true,
+            readPreference: 'primaryPreferred'
+          });
+          client.connect((err, client) => {
+            expect(err).to.not.exist;
+            const db = client.db(configuration.db);
+            const collection = db.collection('db-two');
+            TopologyStub = this.sinon.spy(Topology.prototype, 'selectServer');
+            const callback = err => {
+              expect(err).to.not.exist;
+              expect(TopologyStub.called).to.equal(true);
+              expect(TopologyStub)
+                .nested.property('args[0][0].readPreference.mode')
+                .to.equal(ReadPreference.PRIMARY);
+              client.close(done);
+            };
+            opArgs.push(callback);
+            collection[operation].apply(collection, opArgs);
+          });
+        }
+      });
+    });
   });
 });
