@@ -12,7 +12,7 @@ const { expect } = require('chai');
 
 describe('Operation (Generators)', function () {
   before(function () {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['integration_tests_2']);
   });
 
   /**
@@ -3082,7 +3082,6 @@ describe('Operation (Generators)', function () {
         // Reference a different database sharing the same connections
         // for the data transfer
         var secondDb = client.db('integration_tests_2');
-        yield secondDb.dropDatabase();
 
         // Fetch the collections
         var multipleColl1 = db.collection('multiple_db_instances_with_generators');
