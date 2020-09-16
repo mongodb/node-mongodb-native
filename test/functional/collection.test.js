@@ -1,10 +1,15 @@
 'use strict';
+const Topology = require('../../lib/core/sdam/topology').Topology;
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
+const sinon = require('sinon');
 const mock = require('mongodb-mock-server');
+const ReadPreference = require('../../lib/core/topologies/read_preference');
 chai.use(sinonChai);
+
+let TopologyStub;
 
 describe('Collection', function() {
   let configuration;
@@ -1306,5 +1311,35 @@ describe('Collection', function() {
         });
       });
     }
+  });
+
+  it('should createIndex with serverSelection readPreference primary', {
+    metadata: {
+      requires: { topology: 'replicaset' }
+    },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        useUnifiedTopology: true,
+        readPreference: 'primaryPreferred'
+      });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        const collection = db.collection('db-two');
+        TopologyStub = sinon.spy(Topology.prototype, 'selectServer');
+        collection.createIndex({ quote: 'text' }, (err, res) => {
+          expect(err).to.not.exist;
+          expect(res).to.equal('quote_text');
+          expect(TopologyStub.called).to.equal(true);
+          expect(TopologyStub.args[0][0].readPreference.mode).to.equal(ReadPreference.PRIMARY);
+          client.close(done);
+        });
+      });
+    }
+  });
+
+  afterEach(() => {
+    if (TopologyStub) TopologyStub.restore();
   });
 });
