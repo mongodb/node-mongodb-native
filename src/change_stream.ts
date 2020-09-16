@@ -20,7 +20,6 @@ import type { Writable } from 'stream';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
 import type { CursorCloseOptions, StreamOptions } from './cursor/core_cursor';
-import { Readable } from 'stream';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];

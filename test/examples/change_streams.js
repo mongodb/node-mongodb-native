@@ -128,14 +128,14 @@ describe('examples(change-stream):', function () {
 
       // Start Changestream Example 3
       const collection = db.collection('inventory');
-      const changeStream = collection.watch();
+      const changeStream = collection.watch().stream();
 
       let newChangeStream;
       changeStream.once('change', next => {
         const resumeToken = changeStream.resumeToken;
         changeStream.close();
 
-        newChangeStream = collection.watch({ resumeAfter: resumeToken });
+        newChangeStream = collection.watch({ resumeAfter: resumeToken }).stream();
         newChangeStream.on('change', next => {
           processChange(next);
         });
@@ -179,7 +179,7 @@ describe('examples(change-stream):', function () {
       ];
 
       const collection = db.collection('inventory');
-      const changeStream = collection.watch(pipeline);
+      const changeStream = collection.watch(pipeline).stream();
       changeStream.on('change', next => {
         // process next document
       });
