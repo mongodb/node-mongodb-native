@@ -20,6 +20,7 @@ import type { Writable } from 'stream';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
 import type { CursorCloseOptions, StreamOptions } from './cursor/core_cursor';
+import { Readable } from 'stream';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -166,8 +167,7 @@ export class ChangeStream extends EventEmitter {
   topology: Topology;
   cursor?: ChangeStreamCursor;
   closed: boolean;
-  pipeDestinations: Writable[] = [];
-  streamOptions?: StreamOptions;
+  _stream?: ChangeStreamStream;
   [kResumeQueue]: Denque;
 
   /** @event */
@@ -234,23 +234,7 @@ export class ChangeStream extends EventEmitter {
     // Create contained Change Stream cursor
     this.cursor = createChangeStreamCursor(this, options);
 
-    const cursorStream = this.cursor._stream;
-    if (!cursorStream) throw new MongoError('No stream on cursor');
     this.closed = false;
-
-    // Listen for any `change` listeners being added to ChangeStream
-    this.on('newListener', (eventName: string) => {
-      if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
-        cursorStream.on('data', (change: ChangeStreamDocument) => processNewChange(this, change));
-      }
-    });
-
-    // Listen for all `change` listeners being removed from ChangeStream
-    this.on('removeListener', (eventName: string) => {
-      if (eventName === 'change' && this.listenerCount('change') === 0 && this.cursor) {
-        cursorStream.removeAllListeners('data');
-      }
-    });
   }
 
   /** The cached resume token that is used to resume after the most recently returned change. */
@@ -260,6 +244,9 @@ export class ChangeStream extends EventEmitter {
 
   /** Check if there is any document still available in the Change Stream */
   hasNext(callback?: Callback): Promise<void> | void {
+    if (this._stream != null) {
+      throw new TypeError('Cannot iterate while streaming');
+    }
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -270,6 +257,9 @@ export class ChangeStream extends EventEmitter {
 
   /** Get the next available document from the Change Stream. */
   next(callback?: Callback): Promise<void> | void {
+    if (this._stream != null) {
+      throw new TypeError('Cannot iterate while streaming');
+    }
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err) return cb(err); // failed to resume, raise an error
@@ -303,11 +293,9 @@ export class ChangeStream extends EventEmitter {
 
       // Tidy up the existing cursor
       const cursor = this.cursor;
-      const cursorStream = cursor._stream;
-      if (!cursorStream) throw new MongoError('No stream on cursor');
 
       return cursor.close(err => {
-        ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
+        this._stream?.cleanupListeners();
         this.cursor = undefined;
 
         return cb(err);
@@ -315,6 +303,77 @@ export class ChangeStream extends EventEmitter {
     });
   }
 
+  /**
+   * Return a modified Readable stream including a possible transform method.
+   * @throws MongoError if this.cursor is undefined
+   */
+  stream(options?: StreamOptions): ChangeStreamStream {
+    if (this._stream == null) {
+      this._stream = new ChangeStreamStream(this, options);
+    }
+    return this._stream;
+  }
+
+  repipeStreams(changeStreamCursor: ChangeStreamCursor): void {
+    if (!this._stream) return;
+    if (this._stream.pipeDestinations) {
+      const cursorStream = changeStreamCursor.stream(this._stream.streamOptions);
+      for (const pipeDestination of this._stream.pipeDestinations) {
+        cursorStream.pipe(pipeDestination);
+      }
+    }
+  }
+}
+
+class ChangeStreamStream extends EventEmitter {
+  changeStream: ChangeStream;
+  pipeDestinations: Writable[] = [];
+  cursor: ChangeStreamCursor;
+  streamOptions: StreamOptions;
+  cursorStream: CursorStream;
+
+  constructor(changeStream: ChangeStream, options?: StreamOptions) {
+    super();
+    this.changeStream = changeStream;
+    if (!this.changeStream.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to stream');
+    }
+    this.cursor = this.changeStream.cursor;
+    this.streamOptions = options || {};
+    this.cursorStream = this.cursor.stream(options);
+
+    relayEvents(this.cursor, this, ['init']);
+    relayEvents(changeStream, this, ['close', 'error']);
+
+    // Listen for any `change` listeners being added to ChangeStreamStream
+    this.on('newListener', (eventName: string) => {
+      if (eventName === 'change' && this.listenerCount('change') === 0) {
+        this.cursorStream.on('data', change => processNewChange(this.changeStream, change));
+      }
+    });
+
+    // Listen for all `change` listeners being removed from ChangeStreamStream
+    this.on('removeListener', (eventName: string) => {
+      if (eventName === 'change' && this.listenerCount('change') === 0) {
+        this.cursorStream.removeAllListeners('data');
+      }
+    });
+
+    this.cursorStream.on(ChangeStream.ERROR, error => processError(this.changeStream, error));
+  }
+  newCursor(cursor: ChangeStreamCursor): void {
+    this.cursor = cursor;
+    this.cursorStream = this.cursor.stream(this.streamOptions);
+    relayEvents(this.cursor, this, ['init']);
+    this.cursorStream.on('data', change => processNewChange(this.changeStream, change));
+    this.cursorStream.on(ChangeStream.ERROR, error => processError(this.changeStream, error));
+  }
+  get resumeToken(): ResumeToken {
+    return this.cursor?.resumeToken;
+  }
+  cleanupListeners() {
+    ['data', 'close', 'end', 'error'].forEach(event => this.cursorStream.removeAllListeners(event));
+  }
   /**
    * This method pulls all the data out of a readable stream, and writes it to the supplied destination,
    * automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
@@ -328,11 +387,7 @@ export class ChangeStream extends EventEmitter {
       this.pipeDestinations = [];
     }
     this.pipeDestinations.push(destination);
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to pipe');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    return this.cursor._stream.pipe(destination, options);
+    return this.cursorStream.pipe(destination, options);
   }
 
   /**
@@ -346,24 +401,8 @@ export class ChangeStream extends EventEmitter {
     if (this.pipeDestinations && destinationIndex > -1) {
       this.pipeDestinations.splice(destinationIndex, 1);
     }
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to unpipe');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    this.cursor._stream.unpipe(destination);
+    this.cursorStream.unpipe(destination);
     return this.cursor;
-  }
-
-  /**
-   * Return a modified Readable stream including a possible transform method.
-   * @throws MongoError if this.cursor is undefined
-   */
-  stream(options?: StreamOptions): CursorStream {
-    this.streamOptions = options;
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to stream');
-    }
-    return this.cursor.stream(options);
   }
 
   /**
@@ -371,11 +410,7 @@ export class ChangeStream extends EventEmitter {
    * @throws MongoError if this.cursor is undefined
    */
   pause(): ChangeStreamCursor {
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to pause');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    this.cursor._stream.pause();
+    this.cursorStream.pause();
     return this.cursor;
   }
 
@@ -384,12 +419,11 @@ export class ChangeStream extends EventEmitter {
    * @throws MongoError if this.cursor is undefined
    */
   resume(): ChangeStreamCursor {
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to resume');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    this.cursor._stream.resume();
+    this.cursorStream.resume();
     return this.cursor;
+  }
+  close(callback?: Callback<void>): Promise<void> | void {
+    return this.changeStream.close(callback);
   }
 }
 
@@ -555,26 +589,9 @@ function createChangeStreamCursor(
     cursorOptions
   );
 
-  relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
+  relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'close']);
 
-  changeStreamCursor._stream = changeStreamCursor.stream(self.streamOptions);
-  relayEvents(changeStreamCursor._stream, self, ['end', 'close']);
-
-  if (self.listenerCount(ChangeStream.CHANGE) > 0) {
-    changeStreamCursor._stream.on(CursorStream.DATA, function (change) {
-      processNewChange(self, change);
-    });
-  }
-  changeStreamCursor._stream.on(ChangeStream.ERROR, function (error) {
-    processError(self, error);
-  });
-
-  if (self.pipeDestinations) {
-    const cursorStream = changeStreamCursor.stream(self.streamOptions);
-    for (const pipeDestination of self.pipeDestinations) {
-      cursorStream.pipe(pipeDestination);
-    }
-  }
+  self.repipeStreams(changeStreamCursor);
 
   return changeStreamCursor;
 }
@@ -641,7 +658,14 @@ function processNewChange(
       'A change stream document has been received that lacks a resume token (_id).'
     );
 
-    if (!callback) return changeStream.emit(ChangeStream.ERROR, noResumeTokenError);
+    if (!callback) {
+      if (!changeStream._stream) {
+        console.log('No stream and no callback');
+        return;
+      }
+      console.log('emitting error');
+      return changeStream._stream.emit(ChangeStream.ERROR, noResumeTokenError);
+    }
     return callback(noResumeTokenError);
   }
 
@@ -653,7 +677,7 @@ function processNewChange(
   changeStream.options.startAtOperationTime = undefined;
 
   // Return the change
-  if (!callback) return changeStream.emit(ChangeStream.CHANGE, change);
+  if (!callback) return changeStream._stream?.emit(ChangeStream.CHANGE, change);
   return callback(undefined, change);
 }
 
@@ -686,11 +710,6 @@ function processError(changeStream: ChangeStream, error?: AnyError, callback?: C
   if (cursor && isResumableError(error as MongoError, maxWireVersion(cursor.server))) {
     changeStream.cursor = undefined;
 
-    // stop listening to all events from old cursor
-    [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
-      cursor._stream?.removeAllListeners(event)
-    );
-
     // close internal cursor, ignore errors
     cursor.close();
 
@@ -702,7 +721,10 @@ function processError(changeStream: ChangeStream, error?: AnyError, callback?: C
       const newCursor = createChangeStreamCursor(changeStream, cursor.resumeOptions);
 
       // attempt to continue in emitter mode
-      if (!callback) return resumeWithCursor(newCursor);
+      if (!callback) {
+        changeStream._stream?.newCursor(newCursor);
+        return resumeWithCursor(newCursor);
+      }
 
       // attempt to continue in iterator mode
       newCursor.hasNext(err => {
