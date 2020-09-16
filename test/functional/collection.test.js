@@ -6,10 +6,7 @@ const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
 const ReadPreference = require('../../lib/core/topologies/read_preference');
-const { assert } = require('chai');
 chai.use(sinonChai);
-
-let TopologyStub;
 
 describe('Collection', function() {
   let configuration;
@@ -1313,7 +1310,7 @@ describe('Collection', function() {
     }
   });
 
-  context.only('DLL methods with serverSelection readPreference primary', () => {
+  context('DLL methods with serverSelection readPreference primary', () => {
     const primaryReadPreferenceDLL = {
       createIndex: [{ quote: 'text' }]
     };
@@ -1334,7 +1331,7 @@ describe('Collection', function() {
             expect(err).to.not.exist;
             const db = client.db(configuration.db);
             const collection = db.collection('db-two');
-            TopologyStub = this.sinon.spy(Topology.prototype, 'selectServer');
+            const TopologyStub = this.sinon.spy(Topology.prototype, 'selectServer');
             const callback = err => {
               expect(err).to.not.exist;
               expect(TopologyStub.called).to.equal(true);
