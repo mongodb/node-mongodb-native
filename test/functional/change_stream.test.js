@@ -1616,7 +1616,8 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         // Make a stream transforming to JSON and piping to the file
-        const basicStream = changeStream.stream().pipe(
+        const stream = changeStream.stream();
+        const basicStream = stream.pipe(
           new Transform({
             transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
             objectMode: true
@@ -1629,7 +1630,7 @@ describe('Change Streams', function () {
           dataEmitted += data.toString();
 
           // Work around poor compatibility with crypto cipher
-          changeStream._stream.cursorStream.emit('end');
+          stream.cursorStream.emit('end');
         });
 
         pipedStream.on('end', function () {

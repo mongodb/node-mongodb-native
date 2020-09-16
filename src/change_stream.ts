@@ -21,6 +21,7 @@ import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
 import type { CursorCloseOptions, StreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
+const kStream = Symbol('internalStream');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
 const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
@@ -166,7 +167,7 @@ export class ChangeStream extends EventEmitter {
   topology: Topology;
   cursor?: ChangeStreamCursor;
   closed: boolean;
-  _stream?: ChangeStreamStream;
+  [kStream]?: ChangeStreamStream;
   [kResumeQueue]: Denque;
 
   /** @event */
@@ -243,7 +244,7 @@ export class ChangeStream extends EventEmitter {
 
   /** Check if there is any document still available in the Change Stream */
   hasNext(callback?: Callback): Promise<void> | void {
-    if (this._stream != null) {
+    if (this[kStream] != null) {
       throw new TypeError('Cannot iterate while streaming');
     }
     return maybePromise(callback, cb => {
@@ -256,7 +257,7 @@ export class ChangeStream extends EventEmitter {
 
   /** Get the next available document from the Change Stream. */
   next(callback?: Callback): Promise<void> | void {
-    if (this._stream != null) {
+    if (this[kStream] != null) {
       throw new TypeError('Cannot iterate while streaming');
     }
     return maybePromise(callback, cb => {
@@ -294,7 +295,7 @@ export class ChangeStream extends EventEmitter {
       const cursor = this.cursor;
 
       return cursor.close(err => {
-        this._stream?.cleanupListeners();
+        this[kStream]?.cleanupListeners();
         this.cursor = undefined;
 
         return cb(err);
@@ -307,17 +308,18 @@ export class ChangeStream extends EventEmitter {
    * @throws MongoError if this.cursor is undefined
    */
   stream(options?: StreamOptions): ChangeStreamStream {
-    if (this._stream == null) {
-      this._stream = new ChangeStreamStream(this, options);
+    if (this[kStream] == null) {
+      this[kStream] = new ChangeStreamStream(this, options);
     }
-    return this._stream;
+    return this[kStream] as ChangeStreamStream;
   }
 
   repipeStreams(changeStreamCursor: ChangeStreamCursor): void {
-    if (!this._stream) return;
-    if (this._stream.pipeDestinations) {
-      const cursorStream = changeStreamCursor.stream(this._stream.streamOptions);
-      for (const pipeDestination of this._stream.pipeDestinations) {
+    const stream = this[kStream];
+    if (stream == null) return;
+    if (stream.pipeDestinations) {
+      const cursorStream = changeStreamCursor.stream(stream.streamOptions);
+      for (const pipeDestination of stream.pipeDestinations) {
         cursorStream.pipe(pipeDestination);
       }
     }
@@ -657,14 +659,7 @@ function processNewChange(
       'A change stream document has been received that lacks a resume token (_id).'
     );
 
-    if (!callback) {
-      if (!changeStream._stream) {
-        console.log('No stream and no callback');
-        return;
-      }
-      console.log('emitting error');
-      return changeStream._stream.emit(ChangeStream.ERROR, noResumeTokenError);
-    }
+    if (!callback) return changeStream[kStream]?.emit(ChangeStream.ERROR, noResumeTokenError);
     return callback(noResumeTokenError);
   }
 
@@ -676,7 +671,7 @@ function processNewChange(
   changeStream.options.startAtOperationTime = undefined;
 
   // Return the change
-  if (!callback) return changeStream._stream?.emit(ChangeStream.CHANGE, change);
+  if (!callback) return changeStream[kStream]?.emit(ChangeStream.CHANGE, change);
   return callback(undefined, change);
 }
 
@@ -721,7 +716,7 @@ function processError(changeStream: ChangeStream, error?: AnyError, callback?: C
 
       // attempt to continue in emitter mode
       if (!callback) {
-        changeStream._stream?.newCursor(newCursor);
+        changeStream[kStream]?.newCursor(newCursor);
         return resumeWithCursor(newCursor);
       }
 

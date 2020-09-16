@@ -24,6 +24,8 @@ import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
 
+const kCursor = Symbol('internalCursor');
+
 /** @public Flags allowed for cursor */
 export const FLAGS = [
   'tailable',
@@ -56,7 +58,7 @@ export interface CursorOptions extends CoreCursorOptions {
 }
 
 export class CursorStream extends Readable {
-  cursor: Cursor;
+  [kCursor]: Cursor;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -77,30 +79,31 @@ export class CursorStream extends Readable {
 
   constructor(cursor: Cursor) {
     super({ objectMode: true });
-    this.cursor = cursor;
-    this.on('end', () => this.cursor.close(() => this.emit(Cursor.CLOSE)));
+    this[kCursor] = cursor;
+    this.on('end', () => this[kCursor].close(() => this.emit(Cursor.CLOSE)));
   }
 
   destroy(err?: AnyError): void {
     if (err) this.emit(Cursor.ERROR, err);
     this.pause();
-    this.cursor.close(() => this.emit(Cursor.CLOSE));
+    this[kCursor].close(() => this.emit(Cursor.CLOSE));
   }
 
   /** @internal */
   _read(): void {
-    if ((this.cursor.s && this.cursor.s.state === CursorState.CLOSED) || this.cursor.isDead()) {
+    const cursor = this[kCursor];
+    if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
       this.push(null);
       return;
     }
 
     // Get the next item
-    this.cursor._next((err, result) => {
+    cursor._next((err, result) => {
       if (err) {
         if (this.listeners(CursorStream.ERROR) && this.listeners(CursorStream.ERROR).length > 0) {
           this.emit(CursorStream.ERROR, err);
         }
-        if (!this.cursor.isDead()) this.cursor.close();
+        if (!cursor.isDead()) cursor.close();
 
         // Emit end event
         this.emit(CursorStream.END);
@@ -110,20 +113,20 @@ export class CursorStream extends Readable {
 
       // If we provided a transformation method
       if (
-        this.cursor.cursorState.streamOptions &&
-        typeof this.cursor.cursorState.streamOptions.transform === 'function' &&
+        cursor.cursorState.streamOptions &&
+        typeof cursor.cursorState.streamOptions.transform === 'function' &&
         result != null
       ) {
-        this.push(this.cursor.cursorState.streamOptions.transform(result));
+        this.push(cursor.cursorState.streamOptions.transform(result));
         return;
       }
 
       // Return the result
       this.push(result);
 
-      if (result === null && this.cursor.isDead()) {
+      if (result === null && cursor.isDead()) {
         this.once(CursorStream.END, () => {
-          this.cursor.close();
+          cursor.close();
           this.emit(CursorStream.FINISH);
         });
       }
