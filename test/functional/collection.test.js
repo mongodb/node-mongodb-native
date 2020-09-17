@@ -1311,17 +1311,17 @@ describe('Collection', function() {
   });
 
   context('DDL methods with serverSelection readPreference primary', () => {
-    const primaryReadPreferenceDLL = {
+    const collectionMethodSet = {
       createIndex: [{ quote: 'text' }]
     };
 
-    Object.keys(primaryReadPreferenceDLL).forEach(operation => {
+    Object.keys(collectionMethodSet).forEach(operation => {
       it(`should ${operation} with serverSelection readPreference primary`, {
         metadata: {
           requires: { topology: 'replicaset' }
         },
         test: function(done) {
-          const opArgs = primaryReadPreferenceDLL[operation];
+          const opArgs = collectionMethodSet[operation];
           const configuration = this.configuration;
           const client = configuration.newClient(configuration.writeConcernMax(), {
             useUnifiedTopology: true,
