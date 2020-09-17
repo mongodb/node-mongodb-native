@@ -1310,7 +1310,7 @@ describe('Collection', function() {
     }
   });
 
-  context('DLL methods with serverSelection readPreference primary', () => {
+  context('DDL methods with serverSelection readPreference primary', () => {
     const primaryReadPreferenceDLL = {
       createIndex: [{ quote: 'text' }]
     };
