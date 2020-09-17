@@ -575,15 +575,15 @@ export type ServerSessionId = { id: Binary };
 class ServerSession {
   id: ServerSessionId;
   lastUse: number;
-  isDirty: boolean;
   txnNumber: number;
+  isDirty: boolean;
 
   /** @internal */
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
-    this.isDirty = false;
     this.txnNumber = 0;
+    this.isDirty = false;
   }
 
   /**

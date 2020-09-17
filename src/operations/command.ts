@@ -3,7 +3,7 @@ import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { commandSupportsReadConcern, ClientSession } from '../sessions';
+import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
@@ -63,11 +63,13 @@ export abstract class CommandOperation<
     //       something we'd want to reconsider. Perhaps those commands can use `Admin`
     //       as a parent?
     const dbNameOverride = options?.dbName || options?.authdb;
-    this.ns = dbNameOverride
-      ? new MongoDBNamespace(dbNameOverride, '$cmd')
-      : parent
-      ? parent.s.namespace.withCollection('$cmd')
-      : new MongoDBNamespace('admin', '$cmd');
+    if (dbNameOverride) {
+      this.ns = new MongoDBNamespace(dbNameOverride, '$cmd');
+    } else {
+      this.ns = parent
+        ? parent.s.namespace.withCollection('$cmd')
+        : new MongoDBNamespace('admin', '$cmd');
+    }
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
