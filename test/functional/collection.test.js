@@ -1331,11 +1331,11 @@ describe('Collection', function() {
             expect(err).to.not.exist;
             const db = client.db(configuration.db);
             const collection = db.collection('db-two');
-            const TopologyStub = this.sinon.spy(Topology.prototype, 'selectServer');
+            const TopologySpy = this.sinon.spy(Topology.prototype, 'selectServer');
             const callback = err => {
               expect(err).to.not.exist;
-              expect(TopologyStub.called).to.equal(true);
-              expect(TopologyStub)
+              expect(TopologySpy.called).to.equal(true);
+              expect(TopologySpy)
                 .nested.property('args[0][0].readPreference.mode')
                 .to.equal(ReadPreference.PRIMARY);
               client.close(done);
