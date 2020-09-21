@@ -1312,11 +1312,26 @@ describe('Collection', function() {
 
   context('DDL methods with serverSelection readPreference primary', () => {
     const collectionMethodSet = {
-      createIndex: [{ quote: 'text' }]
+      createIndex: [{ quote: 'text' }],
+      findOneAndUpdate: [
+        { _id: 4 },
+        {
+          $inc: {
+            x: 1
+          }
+        },
+        {
+          projection: {
+            x: 1,
+            _id: 0
+          },
+          upsert: true
+        }
+      ]
     };
 
     Object.keys(collectionMethodSet).forEach(operation => {
-      it(`should ${operation} with serverSelection readPreference primary`, {
+      it(`should run "collection.${operation}" with serverSelection readPreference primary`, {
         metadata: {
           requires: { topology: 'replicaset' }
         },
@@ -1335,9 +1350,16 @@ describe('Collection', function() {
             const callback = err => {
               expect(err).to.not.exist;
               expect(TopologySpy.called).to.equal(true);
-              expect(TopologySpy)
-                .nested.property('args[0][0].readPreference.mode')
-                .to.equal(ReadPreference.PRIMARY);
+              expect(TopologySpy).to.have.nested.property('args[0][0]');
+              if (typeof TopologySpy.args[0][0] === 'function') {
+                expect(TopologySpy)
+                  .nested.property('args[0][1].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              } else {
+                expect(TopologySpy)
+                  .nested.property('args[0][0].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              }
               client.close(done);
             };
             opArgs.push(callback);
