@@ -38,6 +38,7 @@ export class HideIndexOperation extends CommandOperation<HideIndexOptions, Docum
         hidden
       }
     };
+
     console.log(cmd);
     server.command(
       this.ns.toString(),
