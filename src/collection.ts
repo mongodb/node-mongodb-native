@@ -1,3 +1,4 @@
+import { HideIndexOperation } from './operations/hide_index';
 import { emitDeprecatedOptionWarning } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
@@ -1806,6 +1807,32 @@ export class Collection implements OperationParent {
     return executeOperation(
       this.s.topology,
       new FindAndModifyOperation(this, query, sort, doc, options),
+      callback
+    );
+  }
+
+  hideIndex(keyPattern: IndexSpecification): Promise<Document>;
+  hideIndex(keyPattern: IndexSpecification, callback: Callback<Document>): void;
+  hideIndex(
+    keyPattern: IndexSpecification,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    return executeOperation(
+      this.s.topology,
+      new HideIndexOperation(this, { keyPattern, hidden: true }),
+      callback
+    );
+  }
+
+  unhideIndex(keyPattern: IndexSpecification): Promise<Document>;
+  unhideIndex(keyPattern: IndexSpecification, callback: Callback<Document>): void;
+  unhideIndex(
+    keyPattern: IndexSpecification,
+    callback?: Callback<Document>
+  ): Promise<Document> | void {
+    return executeOperation(
+      this.s.topology,
+      new HideIndexOperation(this, { keyPattern, hidden: false }),
       callback
     );
   }

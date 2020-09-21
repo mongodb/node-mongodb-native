@@ -1289,4 +1289,44 @@ describe('Indexes', function () {
       )
     );
   });
+
+  it.only('should hide / unhide index', {
+    metadata: { requires: { mongodb: '>=4.4', topology: 'single' } },
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function (err, client) {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        db.createCollection('test_index_information', (err, collection) => {
+          collection.createIndex('a', (err, index) => {
+            expect(err).to.not.exist;
+            expect(index).to.equal('a_1');
+            collection.hideIndex({ a: 1 }, err => {
+              expect(err).to.not.exist;
+              collection.listIndexes().toArray((err, indexes) => {
+                expect(err).to.not.exist;
+                expect(indexes).to.deep.equal([
+                  { v: 2, key: { _id: 1 }, name: '_id_' },
+                  { v: 2, key: { a: 1 }, name: 'a_1', hidden: true }
+                ]);
+                collection.unhideIndex({ a: 1 }, err => {
+                  expect(err).to.not.exist;
+                  collection.listIndexes().toArray((err, indexes) => {
+                    expect(err).to.not.exist;
+                    console.log(indexes);
+                    expect(indexes).to.deep.equal([
+                      { v: 2, key: { _id: 1 }, name: '_id_' },
+                      { v: 2, key: { a: 1 }, name: 'a_1' }
+                    ]);
+                    client.close(done);
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    }
+  });
 });
