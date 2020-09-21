@@ -3,7 +3,6 @@ const EventEmitter = require('events');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { format: f } = require('util');
 const { Query } = require('../../../src/cmap/commands');
-const { ReadPreference } = require('../../../src/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -133,47 +132,9 @@ class ConnectionSpy extends EventEmitter {
   }
 }
 
-/**
- * Prepares a database for testing, dropping all databases
- *
- * @param {Configuration} configuration The test configuration
- * @param {string[]} [dbsToClean] The databases to clean
- */
-function setupDatabase(configuration, dbsToClean) {
-  return new Promise((resolve, reject) => {
-    dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
-    const configDbName = configuration.db;
-
-    const topology = configuration.newTopology();
-    dbsToClean.push(configDbName);
-    topology.on('connect', function () {
-      let cleanedCount = 0;
-      const dropHandler = err => {
-        if (err) return reject(err);
-        cleanedCount++;
-        if (cleanedCount === dbsToClean.length) {
-          topology.destroy(resolve);
-        }
-      };
-
-      dbsToClean.forEach(dbName => {
-        topology.command(
-          `${dbName}.$cmd`,
-          { dropDatabase: 1 },
-          { readPreference: ReadPreference.primary },
-          dropHandler
-        );
-      });
-    });
-
-    topology.connect();
-  });
-}
-
 module.exports = {
   executeCommand,
   locateAuthMethod,
   delay,
-  ConnectionSpy,
-  setupDatabase
+  ConnectionSpy
 };

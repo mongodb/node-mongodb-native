@@ -21,8 +21,11 @@ export interface OperationConstructor extends Function {
 
 /** @internal */
 export interface OperationOptions extends BSONSerializeOptions {
-  explain?: boolean;
+  /** Specify ClientSession for this command */
   session?: ClientSession;
+
+  explain?: boolean;
+  willRetryWrites?: boolean;
 }
 
 /**

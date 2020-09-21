@@ -159,12 +159,16 @@ describe('Topology (unit)', function () {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.command('admin.$cmd', { ping: 1 }, { socketTimeout: 250 }, (err, result) => {
-          expect(result).to.not.exist;
-          expect(err).to.exist;
-          expect(err).to.match(/timed out/);
+        topology.selectServer('primary', (err, server) => {
+          expect(err).to.not.exist;
 
-          topology.close(done);
+          server.command('admin.$cmd', { ping: 1 }, { socketTimeout: 250 }, (err, result) => {
+            expect(result).to.not.exist;
+            expect(err).to.exist;
+            expect(err).to.match(/timed out/);
+
+            topology.close(done);
+          });
         });
       });
     });
