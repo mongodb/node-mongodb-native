@@ -70,6 +70,10 @@ export interface InternalCursorState extends BSONSerializeOptions {
   streamOptions?: StreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
+  tailable: boolean;
+  awaitData: boolean;
+
+  bsonOptions?: BSONSerializeOptions;
 }
 
 /** @public Possible states for a cursor */
@@ -84,6 +88,9 @@ export enum CursorState {
 export interface CoreCursorOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   tailable?: boolean;
+  awaitData?: boolean;
+  /** @deprecated Use `awaitData` instead */
+  awaitdata?: boolean;
   raw?: boolean;
   hint?: Hint;
   limit?: number;
@@ -185,7 +192,14 @@ export class CoreCursor<
       currentLimit: 0,
       // Result field name if not a cursor (contains the array of results)
       transforms: options.transforms,
-      raw: options.raw || (cmd && 'raw' in cmd && cmd.raw)
+      raw: typeof options.raw === 'boolean' ? options.raw : cmd && 'raw' in cmd && cmd.raw,
+      tailable: typeof options.tailable === 'boolean' ? options.tailable : false,
+      awaitData:
+        typeof options.awaitData === 'boolean'
+          ? options.awaitData
+          : typeof options.awaitdata === 'boolean'
+          ? options.awaitdata
+          : false
     };
 
     if (typeof options.session === 'object') {
@@ -357,6 +371,8 @@ export class CoreCursor<
       this.cursorState.documents = [];
       this.cursorState.cursorId = undefined;
       this.cursorState.cursorIndex = 0;
+      this.cursorState.tailable = false;
+      this.cursorState.awaitData = false;
     }
   }
 
@@ -466,13 +482,20 @@ export class CoreCursor<
     }
 
     const cursorState = this.cursorState;
-    this.server.getMore(this.ns, cursorState, batchSize, this.options, (err, result) => {
-      // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
-      if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
-        this._endSession();
+    this.server.getMore(
+      this.ns,
+      cursorState,
+      batchSize,
+      { ...this.cursorState.bsonOptions },
+      (err, result) => {
+        // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
+        if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
+          this._endSession();
+        }
+
+        callback(err, result);
       }
-      callback(err, result);
-    });
+    );
   }
 
   /** @internal */
@@ -501,8 +524,8 @@ export class CoreCursor<
         cursorState.documents.length === 0 &&
         cursorState.cursorId &&
         cursorState.cursorId.isZero() &&
-        !this.cmd.tailable &&
-        !this.cmd.awaitData
+        !this.cursorState.tailable &&
+        !this.cursorState.awaitData
       ) {
         return setCursorNotified(this, callback);
       }
@@ -519,36 +542,34 @@ export class CoreCursor<
         const document = result;
 
         if (result.queryFailure) {
-          return done(new MongoError(document), null);
+          return done(new MongoError(document));
         }
 
-        // Check if we have a command cursor
-        if (!this.cmd.find || (this.cmd.find && this.cmd.virtual === false)) {
-          // We have an error document, return the error
-          if (document.$err || document.errmsg) {
-            return done(new MongoError(document), null);
+        // We have an error document, return the error
+        if (document.$err || document.errmsg) {
+          return done(new MongoError(document));
+        }
+
+        // We have a cursor document
+        if (document.cursor != null && typeof document.cursor !== 'string') {
+          const id = document.cursor.id;
+          // If we have a namespace change set the new namespace for getmores
+          if (document.cursor.ns) {
+            this.ns = document.cursor.ns;
           }
 
-          // We have a cursor document
-          if (document.cursor != null && typeof document.cursor !== 'string') {
-            const id = document.cursor.id;
-            // If we have a namespace change set the new namespace for getmores
-            if (document.cursor.ns) {
-              this.ns = document.cursor.ns;
-            }
-            // Promote id to long if needed
-            this.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
-            this.cursorState.lastCursorId = this.cursorState.cursorId;
-            this.cursorState.operationTime = document.operationTime;
+          // Promote id to long if needed
+          this.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
+          this.cursorState.lastCursorId = this.cursorState.cursorId;
+          this.cursorState.operationTime = document.operationTime;
 
-            // If we have a firstBatch set it
-            if (Array.isArray(document.cursor.firstBatch)) {
-              this.cursorState.documents = document.cursor.firstBatch;
-            }
-
-            // Return after processing command cursor
-            return done(undefined, result);
+          // If we have a firstBatch set it
+          if (Array.isArray(document.cursor.firstBatch)) {
+            this.cursorState.documents = document.cursor.firstBatch;
           }
+
+          // Return after processing command cursor
+          return done(undefined, result);
         }
       }
 
@@ -585,6 +606,9 @@ export class CoreCursor<
 
       this.server = this.operation.server;
       this.cursorState.init = true;
+
+      // set these after execution because the builder might change them before now
+      this.cursorState.bsonOptions = this.operation.bsonOptions;
 
       // NOTE: this is a special internal method for cloning a cursor, consider removing
       if (this.cursorState.cursorId != null) {
@@ -731,20 +755,14 @@ function nextFunction(self: CoreCursor, callback: Callback) {
       // core module to handle to keep core simple
       if (
         self.cursorState.documents.length === 0 &&
-        self.cmd.tailable &&
+        self.cursorState.tailable &&
         Long.ZERO.equals(cursorId)
       ) {
         // No more documents in the tailed cursor
-        return callback(
-          new MongoError({
-            message: 'No more documents in tailed cursor',
-            tailable: self.cmd.tailable,
-            awaitData: self.cmd.awaitData
-          })
-        );
+        return callback(new MongoError('No more documents in tailed cursor'));
       } else if (
         self.cursorState.documents.length === 0 &&
-        self.cmd.tailable &&
+        self.cursorState.tailable &&
         !Long.ZERO.equals(cursorId)
       ) {
         return nextFunction(self, callback);
@@ -758,16 +776,10 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     });
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
-    self.cmd.tailable &&
+    self.cursorState.tailable &&
     Long.ZERO.equals(cursorId)
   ) {
-    return callback(
-      new MongoError({
-        message: 'No more documents in tailed cursor',
-        tailable: self.cmd.tailable,
-        awaitData: self.cmd.awaitData
-      })
-    );
+    return callback(new MongoError('No more documents in tailed cursor'));
   } else if (
     self.cursorState.documents.length === self.cursorState.cursorIndex &&
     Long.ZERO.equals(cursorId)

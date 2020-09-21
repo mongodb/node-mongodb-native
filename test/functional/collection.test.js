@@ -296,17 +296,6 @@ describe('Collection', function () {
       });
     });
 
-    it('should return invalid collection name error by callback for createCollection', function (done) {
-      db.dropDatabase(err => {
-        expect(err).to.not.exist;
-
-        db.createCollection('test/../', err => {
-          expect(err).to.be.instanceof(Error);
-          expect(err.message).to.equal('collection names cannot be empty');
-          done();
-        });
-      });
-    });
     it('should correctly count on non-existent collection', function (done) {
       db.collection('test_multiple_insert_2', (err, collection) => {
         collection.countDocuments((err, count) => {
@@ -441,7 +430,7 @@ describe('Collection', function () {
       },
       {
         title: 'should correctly update with pipeline',
-        collectionName: 'test_should_correctly_do_update_with_pipeline',
+        collectionName: 'test_should_correctly_do_update_with_atomic_modifier',
         filterObject: {},
         updateObject: { $set: { a: 1, b: 1, d: 1 } }
       }

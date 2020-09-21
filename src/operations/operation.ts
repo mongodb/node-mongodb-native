@@ -50,6 +50,9 @@ export abstract class OperationBase<
   cursorState?: InternalCursorState;
   fullResponse?: boolean;
 
+  // BSON serialization options
+  bsonOptions?: BSONSerializeOptions;
+
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
     this.readPreference = ReadPreference.primary;

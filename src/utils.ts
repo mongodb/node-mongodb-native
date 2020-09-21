@@ -695,21 +695,25 @@ export function maybePromise<T>(
       };
     });
   }
+
   wrapper((err, res) => {
     if (err != null) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         callback!(err);
       } catch (error) {
-        return process.nextTick(() => {
+        process.nextTick(() => {
           throw error;
         });
       }
+
       return;
     }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     callback!(err, res);
   });
+
   return result;
 }
 

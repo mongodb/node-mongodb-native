@@ -1,6 +1,6 @@
 'use strict';
 const test = require('./shared').assert;
-const setupDatabase = require('./shared').setupDatabase;
+const { setupDatabase, withMonitoredClient } = require('./shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { Code, ObjectId, Long, Binary } = require('../../src');
@@ -574,6 +574,7 @@ describe('Find', function () {
                   test.ok(err != null);
 
                   collection.find({ a: 1 }, { hint: ['a'] }).toArray(function (err, items) {
+                    expect(err).to.not.exist;
                     test.equal(1, items.length);
 
                     collection.find({ a: 1 }, { hint: { a: 1 } }).toArray(function (err, items) {
@@ -1145,45 +1146,21 @@ describe('Find', function () {
     }
   });
 
-  it('Should correctly pass timeout options to cursor is false', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('cursor_timeout_false_0', function (err, collection) {
+  it(
+    'should support a timeout option for find operations',
+    withMonitoredClient(['find'], function (client, events, done) {
+      const db = client.db(this.configuration.db);
+      db.createCollection('cursor_timeout_false_0', (err, collection) => {
+        expect(err).to.not.exist;
+        const cursor = collection.find({}, { timeout: true });
+        cursor.toArray(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}, { timeout: false });
-          test.equal(false, cursor.cmd.noCursorTimeout);
-          client.close(done);
+          expect(events[0]).nested.property('command.noCursorTimeout').to.equal(true);
+          done();
         });
       });
-    }
-  });
-
-  it('Should correctly pass timeout options to cursor is true', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('cursor_timeout_false_1', function (err, collection) {
-          expect(err).to.not.exist;
-          const cursor = collection.find({}, { timeout: true });
-          test.equal(true, cursor.cmd.noCursorTimeout);
-          client.close(done);
-        });
-      });
-    }
-  });
+    })
+  );
 
   /**
    * Test findAndModify a document with strict mode enabled
@@ -2211,23 +2188,20 @@ describe('Find', function () {
             configuration.writeConcernMax(),
             function (err) {
               expect(err).to.not.exist;
-              var count = 20,
-                run = function (i) {
-                  // search by regex
-                  collection.findOne(
-                    { keywords: { $all: [/ser/, /test/, /seg/, /fault/, /nat/] } },
-                    function (err, item) {
-                      test.equal(6, item.keywords.length);
 
-                      if (i === 0) {
-                        client.close(done);
-                      }
+              let count = 0;
+              for (let i = 0; i <= 20; ++i) {
+                // search by regex
+                collection.findOne(
+                  { keywords: { $all: [/ser/, /test/, /seg/, /fault/, /nat/] } },
+                  function (err, item) {
+                    expect(err).to.not.exist;
+                    expect(item).property('keywords').to.have.length(6);
+                    if (count++ === 20) {
+                      client.close(done);
                     }
-                  );
-                };
-              // loop a few times to catch the / in trailing chars case
-              while (count--) {
-                run(count);
+                  }
+                );
               }
             }
           );
@@ -2631,7 +2605,6 @@ describe('Find', function () {
           expect(err).to.not.exist;
           // Ensure correct insertion testing via the cursor and the count function
           var cursor = collection.find({ c: undefined });
-          test.equal(true, cursor.options.ignoreUndefined);
 
           cursor.toArray(function (err, documents) {
             test.equal(2, documents.length);

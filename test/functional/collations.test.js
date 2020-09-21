@@ -506,7 +506,7 @@ describe('Collation', function () {
           .then(() => Promise.reject('this test should fail'))
           .catch(err => {
             expect(err).to.exist;
-            expect(err.message).to.match(/topology does not support collation/);
+            expect(err.message).to.match(/does not support collation/);
             return client.close();
           });
       });
