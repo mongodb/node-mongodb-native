@@ -1298,7 +1298,7 @@ describe('Indexes', function () {
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
-        db.createCollection('test_index_information', (err, collection) => {
+        db.createCollection('hidden_index_collection', (err, collection) => {
           expect(err).to.not.exist;
           collection.createIndex('a', { hidden: true }, (err, index) => {
             expect(err).to.not.exist;
