@@ -55,7 +55,6 @@ export abstract class CommandOperation<
   explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
-  collectionName?: string;
 
   constructor(parent?: OperationParent, options?: T) {
     super(options);
@@ -71,7 +70,7 @@ export abstract class CommandOperation<
         ? parent.s.namespace.withCollection('$cmd')
         : new MongoDBNamespace('admin', '$cmd');
     }
-    this.collectionName = parent?.s.namespace.collection;
+
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
