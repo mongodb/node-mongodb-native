@@ -65,7 +65,7 @@ function triggerResumableError(changeStream, delay, onClose) {
   });
 
   function triggerError() {
-    changeStream.cursorStream.emit('error', new MongoNetworkError('fake error'));
+    changeStream.cursor._stream.emit('error', new MongoNetworkError('fake error'));
   }
 
   if (delay != null) {
@@ -200,13 +200,13 @@ describe('Change Streams', function () {
         this.defer(() => client.close());
 
         const coll = client.db('integration_tests').collection('listenertest');
-        const changeStream = coll.watch().stream();
+        const changeStream = coll.watch();
         this.defer(() => changeStream.close());
 
         changeStream.on('change', () => {
-          expect(changeStream.cursorStream.listenerCount('data')).to.equal(1);
+          // expect(changeStream.cursor._stream.listenerCount('data')).to.equal(1);
           changeStream.close(err => {
-            expect(changeStream.cursorStream.listenerCount('data')).to.equal(0);
+            // expect(changeStream.cursor._stream.listenerCount('data')).to.equal(0);
             expect(err).to.not.exist;
             close(err);
           });
@@ -280,7 +280,7 @@ describe('Change Streams', function () {
         this.defer(() => client.close());
 
         const collection = client.db('integration_tests').collection('docsDataEvent');
-        const changeStream = collection.watch(pipeline).stream();
+        const changeStream = collection.watch(pipeline);
         this.defer(() => changeStream.close());
 
         const collector = new EventCollector(changeStream, ['init', 'change']);
@@ -592,7 +592,7 @@ describe('Change Streams', function () {
         this.defer(() => client.close());
 
         const db = client.db('integration_tests');
-        const changeStream = db.collection('cacheResumeTokenListener').watch(pipeline).stream();
+        const changeStream = db.collection('cacheResumeTokenListener').watch(pipeline);
         this.defer(() => changeStream.close());
 
         const collector = new EventCollector(changeStream, ['change']);
@@ -661,7 +661,7 @@ describe('Change Streams', function () {
 
         const db = client.db('integration_tests');
         const collection = db.collection('resumetokenProjectedOutListener');
-        const changeStream = collection.watch([{ $project: { _id: false } }]).stream();
+        const changeStream = collection.watch([{ $project: { _id: false } }]);
         this.defer(() => changeStream.close());
 
         const collector = new EventCollector(changeStream, ['change', 'error']);
@@ -694,8 +694,7 @@ describe('Change Streams', function () {
         const database = client.db('integration_tests');
         const changeStream = database
           .collection('invalidateListeners')
-          .watch(pipeline, { batchSize: 1 })
-          .stream();
+          .watch(pipeline, { batchSize: 1 });
         this.defer(() => changeStream.close());
 
         // Attach first event listener
@@ -1616,7 +1615,7 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         // Make a stream transforming to JSON and piping to the file
-        const basicStream = changeStream.stream().pipe(
+        const basicStream = changeStream.pipe(
           new Transform({
             transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
             objectMode: true
@@ -1629,7 +1628,7 @@ describe('Change Streams', function () {
           dataEmitted += data.toString();
 
           // Work around poor compatibility with crypto cipher
-          changeStream._stream.cursorStream.emit('end');
+          changeStream.cursor._stream.emit('end');
         });
 
         pipedStream.on('end', function () {
@@ -1854,11 +1853,15 @@ describe('Change Streams', function () {
 
         // This will cause an error because the _id will be projected out, which causes the following error:
         // "A change stream document has been received that lacks a resume token (_id)."
-        const changeStream = coll.watch([{ $project: { _id: false } }]).stream();
+        const changeStream = coll.watch([{ $project: { _id: false } }]);
         changeStream.on('close', closeSpy);
-        changeStream.on('change', changeDoc => expect(changeDoc).to.be.null);
+        changeStream.on('change', changeDoc => {
+          expect(changeDoc).to.be.null;
+        });
+
         changeStream.on('error', err => {
           expect(err).to.exist;
+
           changeStream.close(() => {
             expect(closeSpy).property('calledOnce').to.be.true;
             done();
@@ -1975,19 +1978,18 @@ describe('Change Streams', function () {
         };
 
         let counter = 0;
-        const stream = changeStream.stream();
-        stream.on('change', () => {
+        changeStream.on('change', () => {
           counter += 1;
           if (counter === 2) {
-            stream.close();
+            changeStream.close();
             setTimeout(() => close());
           } else if (counter >= 3) {
             close(new Error('should not have received more than 2 events'));
           }
         });
-        stream.on('error', err => close(err));
+        changeStream.on('error', err => close(err));
 
-        waitForStarted(stream, () =>
+        waitForStarted(changeStream, () =>
           write()
             .then(() => lastWrite())
             .catch(() => {})
@@ -2574,7 +2576,7 @@ describe('Change Streams', function () {
       client.connect(err => {
         expect(err).to.not.exist;
         coll = client.db('integration_tests').collection('setupAfterTest');
-        const changeStream = coll.watch().stream();
+        const changeStream = coll.watch();
         waitForStarted(changeStream, () => {
           coll.insertOne({ x: 1 }, { w: 'majority', j: true }, err => {
             expect(err).to.not.exist;
@@ -2601,8 +2603,9 @@ describe('Change Streams', function () {
     it('should work with events', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function (done) {
-        const changeStream = coll.watch([], { startAfter }).stream();
+        const changeStream = coll.watch([], { startAfter });
         this.defer(() => changeStream.close());
+
         coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
           expect(err).to.not.exist;
           changeStream.once('change', change => {
@@ -2610,6 +2613,7 @@ describe('Change Streams', function () {
               operationType: 'insert',
               fullDocument: { x: 2 }
             });
+
             done();
           });
         });
@@ -2648,7 +2652,7 @@ describe('Change Streams', function () {
       test: function (done) {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
-        const changeStream = coll.watch([], { startAfter }).stream();
+        const changeStream = coll.watch([], { startAfter });
         this.defer(() => changeStream.close());
 
         changeStream.once('change', change => {
@@ -2680,7 +2684,7 @@ describe('Change Streams', function () {
       test: function (done) {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
-        const changeStream = coll.watch([], { startAfter }).stream();
+        const changeStream = coll.watch([], { startAfter });
         this.defer(() => changeStream.close());
 
         changeStream.on('change', change => {
