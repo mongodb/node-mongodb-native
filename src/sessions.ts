@@ -753,10 +753,14 @@ function applySession(
   command: Document,
   options?: WriteCommandOptions
 ): MongoError | undefined {
+  // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
+  if (session.hasEnded) {
+    return new MongoError('Attemped to use a session that has ended');
+  }
+
   const serverSession = session.serverSession;
   if (serverSession == null) {
-    // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
-    return new MongoError('Cannot use a session that has ended');
+    return new MongoError('Unable to acquire server session');
   }
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility

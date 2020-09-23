@@ -11,7 +11,6 @@ import { MongoError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { InternalCursorState } from '../cursor/core_cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import { CommandOperation } from './command';
@@ -94,7 +93,6 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   cmd: Document;
   filter: Document;
   readPreference: ReadPreference;
-  cursorState?: InternalCursorState;
 
   hint?: Hint;
 
@@ -273,11 +271,9 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     }
 
     // TODO: use `MongoDBNamespace` through and through
-    const cursorState = this.cursorState || {};
     server.query(
       this.ns.toString(),
       findCommand,
-      cursorState,
       { fullResult: !!this.fullResponse, ...this.options, ...this.bsonOptions },
       callback
     );

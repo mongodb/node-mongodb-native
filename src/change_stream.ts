@@ -451,8 +451,8 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   }
 
   cacheResumeToken(resumeToken: ResumeToken): void {
-    if (this.bufferedCount() === 0 && this.cursorState.postBatchResumeToken) {
-      this.resumeToken = this.cursorState.postBatchResumeToken;
+    if (this.bufferedCount() === 0 && this.postBatchResumeToken) {
+      this.resumeToken = this.postBatchResumeToken;
     } else {
       this.resumeToken = resumeToken;
     }
@@ -462,7 +462,7 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   _processBatch(batchName: string, response?: Document): void {
     const cursor = response?.cursor || {};
     if (cursor.postBatchResumeToken) {
-      this.cursorState.postBatchResumeToken = cursor.postBatchResumeToken;
+      this.postBatchResumeToken = cursor.postBatchResumeToken;
 
       if (cursor[batchName].length === 0) {
         this.resumeToken = cursor.postBatchResumeToken;

@@ -2325,38 +2325,37 @@ describe('Find', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var docs = [];
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        // Insert some documents
-        for (var i = 0; i < 1000; i++) {
+        const db = client.db(configuration.db);
+        const docs = [];
+        for (let i = 0; i < 1000; i++) {
           docs.push({ a: i });
         }
 
         // Get the collection
-        var collection = db.collection('simulate_closed_cursor');
+        const collection = db.collection('simulate_closed_cursor');
         // Insert 1000 documents in a batch
-        collection.insert(docs, function (err) {
+        collection.insert(docs, err => {
           expect(err).to.not.exist;
 
           // Get the cursor
           var cursor = collection.find({}).batchSize(2);
+          this.defer(() => cursor.close());
+
           // Get next document
-          cursor.next(function (err, doc) {
+          cursor.next((err, doc) => {
             expect(err).to.not.exist;
             test.ok(doc != null);
 
             // Mess with state forcing a call to isDead on the cursor
             cursor.s.state = 2;
 
-            cursor.next(function (err) {
+            cursor.next(err => {
               test.ok(err !== null);
-
-              // We need to close the cursor since it is not exhausted,
-              // and we need to end the implicit session
-              cursor.close();
-              client.close(done);
+              done();
             });
           });
         });

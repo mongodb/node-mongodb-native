@@ -6,7 +6,7 @@ import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared'
 import { Document, pluckBSONSerializeOptions } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
-import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { FindOptions } from '../../operations/find';
 
 /** @internal */
 export interface QueryOptions extends CommandOptions {
@@ -17,24 +17,20 @@ export function query(
   server: Server,
   ns: string,
   cmd: Document,
-  cursorState: InternalCursorState,
-  options: QueryOptions,
+  options: FindOptions,
   callback: Callback
 ): void {
   options = options || {};
-  if (cursorState.cursorId != null) {
-    return callback();
-  }
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
   }
 
   if (maxWireVersion(server) < 4) {
-    const query = prepareLegacyFindQuery(server, ns, cmd, cursorState, options);
+    const query = prepareLegacyFindQuery(server, ns, cmd, options);
     const queryOptions = applyCommonQueryOptions(
       {},
-      Object.assign({ bsonOptions: pluckBSONSerializeOptions(options) }, cursorState)
+      Object.assign(options, { ...pluckBSONSerializeOptions(options) })
     );
 
     queryOptions.fullResult = true;
@@ -47,7 +43,7 @@ export function query(
   }
 
   const readPreference = getReadPreference(cmd, options);
-  const findCmd = prepareFindCommand(server, ns, cmd, cursorState);
+  const findCmd = prepareFindCommand(server, ns, cmd);
 
   // NOTE: This actually modifies the passed in cmd, and our code _depends_ on this
   //       side-effect. Change this ASAP
@@ -62,24 +58,10 @@ export function query(
     options
   );
 
-  if (cmd.readPreference) {
-    commandOptions.readPreference = readPreference;
-  }
-
-  if (cursorState.session) {
-    commandOptions.session = cursorState.session;
-  }
-
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(
-  server: Server,
-  ns: string,
-  cmd: Document,
-  cursorState: InternalCursorState
-) {
-  cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
+function prepareFindCommand(server: Server, ns: string, cmd: Document) {
   let findCmd: Document = {
     find: collectionNamespace(ns)
   };
@@ -179,25 +161,24 @@ function prepareLegacyFindQuery(
   server: Server,
   ns: string,
   cmd: Document,
-  cursorState: InternalCursorState,
-  options: CommandOptions
+  options: FindOptions
 ): Query {
   options = options || {};
+
   const readPreference = getReadPreference(cmd, options);
-  cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
+  const batchSize = cmd.batchSize || options.batchSize;
+  const limit = cmd.limit || options.limit;
+  const numberToSkip = cmd.skip || options.skip || 0;
 
   let numberToReturn = 0;
   if (
-    cursorState.limit < 0 ||
-    (cursorState.limit !== 0 && cursorState.limit < cursorState.batchSize) ||
-    (cursorState.limit > 0 && cursorState.batchSize === 0)
+    limit &&
+    (limit < 0 || (limit !== 0 && limit < batchSize) || (limit > 0 && batchSize === 0))
   ) {
-    numberToReturn = cursorState.limit;
+    numberToReturn = limit;
   } else {
-    numberToReturn = cursorState.batchSize;
+    numberToReturn = batchSize;
   }
-
-  const numberToSkip = cursorState.skip || 0;
 
   const findCmd: Document = {};
   if (isSharded(server) && readPreference) {
@@ -239,13 +220,13 @@ function prepareLegacyFindQuery(
     typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   const query = new Query(ns, findCmd, {
-    numberToSkip: numberToSkip,
-    numberToReturn: numberToReturn,
-    pre32Limit: typeof cmd.limit !== 'undefined' ? cmd.limit : undefined,
+    numberToSkip,
+    numberToReturn,
+    pre32Limit: typeof limit === 'number' ? limit : undefined,
     checkKeys: false,
     returnFieldSelector: cmd.fields,
-    serializeFunctions: serializeFunctions,
-    ignoreUndefined: ignoreUndefined
+    serializeFunctions,
+    ignoreUndefined
   });
 
   if (typeof cmd.tailable === 'boolean') query.tailable = cmd.tailable;

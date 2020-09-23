@@ -39,12 +39,12 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { InternalCursorState } from '../cursor/core_cursor';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { Document } from '../bson';
+import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
+import type { FindOptions } from '../operations/find';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -242,14 +242,7 @@ export class Server extends EventEmitter {
     this[kMonitor].requestCheck();
   }
 
-  /**
-   * Execute a command
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd - The command hash
-   * @param options - Optional settings
-   * @param callback - A callback function
-   */
+  /** Execute a command */
   command(ns: string, cmd: Document, callback: Callback): void;
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   command(
@@ -308,20 +301,8 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /**
-   * Execute a query against the server
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd - The command document for the query
-   * @param cursorState - Internal state of the cursor
-   */
-  query(
-    ns: string,
-    cmd: Document,
-    cursorState: Partial<InternalCursorState>,
-    options: QueryOptions,
-    callback: Callback
-  ): void {
+  /** Execute a query against the server */
+  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
@@ -333,29 +314,12 @@ export class Server extends EventEmitter {
         return cb(err);
       }
 
-      conn.query(
-        ns,
-        cmd,
-        cursorState as InternalCursorState,
-        options,
-        makeOperationHandler(this, conn, cmd, options, cb) as Callback
-      );
+      conn.query(ns, cmd, options, makeOperationHandler(this, conn, cmd, options, cb) as Callback);
     }, callback);
   }
 
-  /**
-   * Execute a `getMore` against the server
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState - State data associated with the cursor calling this method
-   */
-  getMore(
-    ns: string,
-    cursorState: InternalCursorState,
-    batchSize: number,
-    options: GetMoreOptions,
-    callback: Callback<Document>
-  ): void {
+  /** Execute a `getMore` against the server */
+  getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
@@ -369,21 +333,15 @@ export class Server extends EventEmitter {
 
       conn.getMore(
         ns,
-        cursorState,
-        batchSize,
+        cursorId,
         options,
         makeOperationHandler(this, conn, {}, options, cb) as Callback
       );
     }, callback);
   }
 
-  /**
-   * Execute a `killCursors` command against the server
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cursorState - State data associated with the cursor calling this method
-   */
-  killCursors(ns: string, cursorState: InternalCursorState, callback?: Callback): void {
+  /** Execute a `killCursors` command against the server */
+  killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback?: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
         callback(new MongoError('server is closed'));
@@ -400,7 +358,8 @@ export class Server extends EventEmitter {
 
       conn.killCursors(
         ns,
-        cursorState,
+        cursorIds,
+        options,
         makeOperationHandler(this, conn, {}, undefined, cb) as Callback
       );
     }, callback);

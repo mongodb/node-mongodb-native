@@ -35,7 +35,7 @@ describe('Generators', function () {
           test.equal(data.a, 1);
 
           // ensure batch size is as specified
-          test.equal(cursor.cursorState.documents.length, 2);
+          test.equal(cursor.documents.length, 2);
           count++;
         }
 

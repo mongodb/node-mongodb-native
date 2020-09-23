@@ -83,7 +83,6 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
         `${databaseName}.${CONSTANTS.SYSTEM_NAMESPACE_COLLECTION}`,
         { query: filter },
         { batchSize: this.batchSize || 1000 },
-        {},
         (err, result) => {
           if (result && result.documents && Array.isArray(result.documents)) {
             result.documents = result.documents.map(transforms.doc);
