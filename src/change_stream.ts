@@ -16,7 +16,6 @@ import {
 import type { ReadPreference } from './read_preference';
 import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
-import type { Writable } from 'stream';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
 import type { CursorCloseOptions, CursorStreamOptions } from './cursor/core_cursor';
@@ -324,7 +323,7 @@ export class ChangeStream extends EventEmitter {
    * Return a modified Readable stream including a possible transform method.
    * @throws MongoError if this.cursor is undefined
    */
-  stream(options?: StreamOptions): ChangeStreamStream {
+  stream(options?: CursorStreamOptions): ChangeStreamStream {
     this.streamOptions = options;
     if (!this.cursor) {
       throw new MongoError('ChangeStream has no cursor, unable to stream');
