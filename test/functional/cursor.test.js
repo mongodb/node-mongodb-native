@@ -1854,7 +1854,7 @@ describe('Cursor', function () {
                 i++;
               });
 
-              stream.once('close', testDone('close'));
+              cursor.once('close', testDone('close'));
               stream.once('error', testDone('error'));
 
               stream.destroy();
@@ -1916,7 +1916,7 @@ describe('Cursor', function () {
               }
             });
 
-            stream.once('close', testDone);
+            cursor.once('close', testDone);
             stream.once('error', testDone);
             stream.once('end', testDone);
 
@@ -2099,7 +2099,8 @@ describe('Cursor', function () {
               count = count - 1;
 
               if (count === 0) {
-                var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
+                const cursor = collection.find({}, { tailable: true, awaitData: true });
+                const stream = cursor.stream();
                 // let index = 0;
                 stream.resume();
 
@@ -2117,7 +2118,7 @@ describe('Cursor', function () {
                 };
 
                 stream.on('end', validator);
-                stream.on('close', validator);
+                cursor.on('close', validator);
 
                 // Just hammer the server
                 for (var i = 0; i < 100; i++) {
@@ -3537,7 +3538,7 @@ describe('Cursor', function () {
             stream.destroy();
           });
 
-          stream.on('close', function () {
+          cursor.on('close', function () {
             client.close(done);
           });
         });

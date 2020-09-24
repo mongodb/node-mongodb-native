@@ -43,7 +43,7 @@ export interface CursorCloseOptions {
 }
 
 /** @public */
-export interface StreamOptions {
+export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
@@ -67,7 +67,7 @@ export interface InternalCursorState extends BSONSerializeOptions {
   reconnect?: boolean;
   session?: ClientSession;
   skip: number;
-  streamOptions?: StreamOptions;
+  streamOptions?: CursorStreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
 }

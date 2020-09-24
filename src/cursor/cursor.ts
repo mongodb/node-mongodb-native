@@ -9,7 +9,7 @@ import {
   CursorState,
   CoreCursorOptions,
   CoreCursorPrivate,
-  StreamOptions,
+  CursorStreamOptions,
   CursorCloseOptions,
   DocumentTransforms
 } from './core_cursor';
@@ -55,8 +55,10 @@ export interface CursorOptions extends CoreCursorOptions {
   numberOfRetries?: number;
 }
 
+const kCursor = Symbol('cursor');
+
 export class CursorStream extends Readable {
-  cursor: Cursor;
+  [kCursor]: Cursor;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -77,53 +79,50 @@ export class CursorStream extends Readable {
 
   constructor(cursor: Cursor) {
     super({ objectMode: true });
-    this.cursor = cursor;
-    this.on('end', () => this.cursor.close(() => this.emit(Cursor.CLOSE)));
+    this[kCursor] = cursor;
   }
 
   destroy(err?: AnyError): void {
     if (err) this.emit(Cursor.ERROR, err);
     this.pause();
-    this.cursor.close(() => this.emit(Cursor.CLOSE));
+    this[kCursor].close();
   }
 
   /** @internal */
   _read(): void {
-    if ((this.cursor.s && this.cursor.s.state === CursorState.CLOSED) || this.cursor.isDead()) {
+    const cursor = this[kCursor];
+    if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
       this.push(null);
       return;
     }
 
     // Get the next item
-    this.cursor._next((err, result) => {
+    cursor._next((err, result) => {
       if (err) {
         if (this.listeners(CursorStream.ERROR) && this.listeners(CursorStream.ERROR).length > 0) {
           this.emit(CursorStream.ERROR, err);
         }
-        if (!this.cursor.isDead()) this.cursor.close();
-
-        // Emit end event
-        this.emit(CursorStream.END);
-        this.emit(CursorStream.FINISH);
+        const done = () => this.emit(CursorStream.END);
+        cursor.isDead() ? done() : cursor.close(done);
         return;
       }
 
       // If we provided a transformation method
       if (
-        this.cursor.cursorState.streamOptions &&
-        typeof this.cursor.cursorState.streamOptions.transform === 'function' &&
+        cursor.cursorState.streamOptions &&
+        typeof cursor.cursorState.streamOptions.transform === 'function' &&
         result != null
       ) {
-        this.push(this.cursor.cursorState.streamOptions.transform(result));
+        this.push(cursor.cursorState.streamOptions.transform(result));
         return;
       }
 
       // Return the result
       this.push(result);
 
-      if (result === null && this.cursor.isDead()) {
+      if (result === null && cursor.isDead()) {
         this.once(CursorStream.END, () => {
-          this.cursor.close();
+          cursor.close();
           this.emit(CursorStream.FINISH);
         });
       }
@@ -904,7 +903,10 @@ export class Cursor<
         this.kill();
       }
 
-      this._endSession(() => cb(undefined, this));
+      this._endSession(() => {
+        this.emit(Cursor.CLOSE);
+        cb(undefined, this);
+      });
     });
   }
 
@@ -931,7 +933,7 @@ export class Cursor<
   }
 
   /** Return a modified Readable stream including a possible transform method. */
-  stream(options?: StreamOptions): CursorStream {
+  stream(options?: CursorStreamOptions): CursorStream {
     // TODO: replace this method with transformStream in next major release
     this.cursorState.streamOptions = options || {};
     return new CursorStream(this);
@@ -941,7 +943,7 @@ export class Cursor<
    * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
    * returns a stream of unmodified docs.
    */
-  transformStream(options?: StreamOptions): Transform {
+  transformStream(options?: CursorStreamOptions): Transform {
     const streamOptions: typeof options = options || {};
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({

@@ -1615,7 +1615,8 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         // Make a stream transforming to JSON and piping to the file
-        const basicStream = changeStream.pipe(
+        const stream = changeStream.stream();
+        const basicStream = stream.pipe(
           new Transform({
             transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
             objectMode: true
@@ -1628,7 +1629,7 @@ describe('Change Streams', function () {
           dataEmitted += data.toString();
 
           // Work around poor compatibility with crypto cipher
-          changeStream.cursor._stream.emit('end');
+          stream.emit('end');
         });
 
         pipedStream.on('end', function () {
@@ -1842,7 +1843,6 @@ describe('Change Streams', function () {
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      const closeSpy = sinon.spy();
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
@@ -1854,18 +1854,19 @@ describe('Change Streams', function () {
         // This will cause an error because the _id will be projected out, which causes the following error:
         // "A change stream document has been received that lacks a resume token (_id)."
         const changeStream = coll.watch([{ $project: { _id: false } }]);
-        changeStream.on('close', closeSpy);
         changeStream.on('change', changeDoc => {
           expect(changeDoc).to.be.null;
         });
 
+        let errored = false;
         changeStream.on('error', err => {
           expect(err).to.exist;
+          errored = true;
+        });
 
-          changeStream.close(() => {
-            expect(closeSpy).property('calledOnce').to.be.true;
-            done();
-          });
+        changeStream.once('close', () => {
+          expect(errored).to.be.true;
+          done();
         });
 
         // Trigger the first database event

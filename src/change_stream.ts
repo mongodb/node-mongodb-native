@@ -19,7 +19,7 @@ import type { Topology } from './sdam/topology';
 import type { Writable } from 'stream';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import type { CursorCloseOptions, StreamOptions } from './cursor/core_cursor';
+import type { CursorCloseOptions, CursorStreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -153,6 +153,12 @@ interface UpdateDescription {
   removedFields: string[];
 }
 
+export class ChangeStreamStream extends CursorStream {
+  constructor(cursor: ChangeStreamCursor) {
+    super(cursor);
+  }
+}
+
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
@@ -166,8 +172,7 @@ export class ChangeStream extends EventEmitter {
   topology: Topology;
   cursor?: ChangeStreamCursor;
   closed: boolean;
-  pipeDestinations: Writable[] = [];
-  streamOptions?: StreamOptions;
+  streamOptions?: CursorStreamOptions;
   [kResumeQueue]: Denque;
 
   /** @event */
@@ -316,54 +321,16 @@ export class ChangeStream extends EventEmitter {
   }
 
   /**
-   * This method pulls all the data out of a readable stream, and writes it to the supplied destination,
-   * automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
-   *
-   * @param destination - The destination for writing data
-   * @param options - {@link https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options| NodeJS Pipe options}
-   * @throws MongoError if this.cursor is undefined
-   */
-  pipe(destination: Writable, options?: PipeOptions): Writable {
-    if (!this.pipeDestinations) {
-      this.pipeDestinations = [];
-    }
-    this.pipeDestinations.push(destination);
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to pipe');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    return this.cursor._stream.pipe(destination, options);
-  }
-
-  /**
-   * This method will remove the hooks set up for a previous pipe() call.
-   *
-   * @param destination - The destination for writing data
-   * @throws MongoError if this.cursor is undefined
-   */
-  unpipe(destination?: Writable): ChangeStreamCursor {
-    const destinationIndex = destination ? this.pipeDestinations.indexOf(destination) : -1;
-    if (this.pipeDestinations && destinationIndex > -1) {
-      this.pipeDestinations.splice(destinationIndex, 1);
-    }
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to unpipe');
-    }
-    if (!this.cursor._stream) throw new MongoError('No stream on cursor');
-    this.cursor._stream.unpipe(destination);
-    return this.cursor;
-  }
-
-  /**
    * Return a modified Readable stream including a possible transform method.
    * @throws MongoError if this.cursor is undefined
    */
-  stream(options?: StreamOptions): CursorStream {
+  stream(options?: StreamOptions): ChangeStreamStream {
     this.streamOptions = options;
     if (!this.cursor) {
       throw new MongoError('ChangeStream has no cursor, unable to stream');
     }
-    return this.cursor.stream(options);
+    this.cursor.cursorState.streamOptions = options;
+    return new ChangeStreamStream(this.cursor);
   }
 
   /**
@@ -568,13 +535,6 @@ function createChangeStreamCursor(
   changeStreamCursor._stream.on(ChangeStream.ERROR, function (error) {
     processError(self, error);
   });
-
-  if (self.pipeDestinations) {
-    const cursorStream = changeStreamCursor.stream(self.streamOptions);
-    for (const pipeDestination of self.pipeDestinations) {
-      cursorStream.pipe(pipeDestination);
-    }
-  }
 
   return changeStreamCursor;
 }
