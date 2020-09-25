@@ -1,11 +1,9 @@
 'use strict';
-const Topology = require('../../lib/core/sdam/topology').Topology;
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
-const ReadPreference = require('../../lib/core/topologies/read_preference');
 chai.use(sinonChai);
 
 describe('Collection', function() {
