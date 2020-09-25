@@ -1,5 +1,6 @@
 'use strict';
 
+const Topology = require('../../lib/core/sdam/topology').Topology;
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
@@ -652,6 +653,80 @@ describe('ReadPreference', function() {
             done();
           });
       })
+    });
+  });
+});
+
+describe.only('ReadPreference - operations', () => {
+  const COLLECTION = 'ddl_collection';
+  beforeEach(function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      useUnifiedTopology: true,
+      readPreference: 'primaryPreferred'
+    });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      db.addUser('default', 'pass', { roles: 'readWrite' }, () => {
+        db.createCollection('before_collection', () => {
+          db.createIndex(COLLECTION, { aloha: 1 }, () => {
+            client.close(done);
+          });
+        });
+      });
+    });
+  });
+
+  context('DDL methods with serverSelection readPreference primary', () => {
+    const methods = {
+      'Collection#createIndex': [{ quote: 'text' }],
+      'Db#createIndex': [COLLECTION, { quote: 'text' }],
+      'Db#addUser': ['thomas', 'pass', { roles: 'readWrite' }],
+      'Db#removeUser': ['default'],
+      'Db#createCollection': ['created_collection'],
+      'Db#dropCollection': ['before_collection'],
+      'Collection#dropIndex': ['aloha_1'],
+      'Collection#rename': ['new_name'],
+      'Db#dropDatabase': []
+    };
+    Object.keys(methods).forEach(operation => {
+      it(`should run ${operation} with serverSelection readPreference primary`, {
+        metadata: {
+          requires: { topology: 'replicaset' }
+        },
+        test: function(done) {
+          const configuration = this.configuration;
+          const client = configuration.newClient(configuration.writeConcernMax(), {
+            useUnifiedTopology: true,
+            readPreference: 'primaryPreferred'
+          });
+          client.connect((err, client) => {
+            const args = methods[operation];
+            const [parentId, method] = operation.split('#');
+            expect(err).to.not.exist;
+            const db = client.db(configuration.db);
+            const collection = db.collection(COLLECTION);
+            const parent = parentId === 'Collection' ? collection : parentId === 'Db' ? db : null;
+            const TopologySpy = this.sinon.spy(Topology.prototype, 'selectServer');
+            const callback = err => {
+              expect(err).to.not.exist;
+              expect(TopologySpy.called).to.equal(true);
+              if (typeof TopologySpy.args[0][0] === 'function') {
+                expect(TopologySpy)
+                  .nested.property('args[0][1].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              } else {
+                expect(TopologySpy)
+                  .nested.property('args[0][0].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              }
+              client.close(done);
+            };
+            parent[method].apply(parent, [...args, callback]);
+          });
+        }
+      });
     });
   });
 });
