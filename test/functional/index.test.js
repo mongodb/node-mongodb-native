@@ -1289,4 +1289,31 @@ describe('Indexes', function () {
       )
     );
   });
+
+  it('should create index hidden', {
+    metadata: { requires: { mongodb: '>=4.4', topology: 'single' } },
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function (err, client) {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+        db.createCollection('hidden_index_collection', (err, collection) => {
+          expect(err).to.not.exist;
+          collection.createIndex('a', { hidden: true }, (err, index) => {
+            expect(err).to.not.exist;
+            expect(index).to.equal('a_1');
+            collection.listIndexes().toArray((err, indexes) => {
+              expect(err).to.not.exist;
+              expect(indexes).to.deep.equal([
+                { v: 2, key: { _id: 1 }, name: '_id_' },
+                { v: 2, key: { a: 1 }, name: 'a_1', hidden: true }
+              ]);
+              client.close(done);
+            });
+          });
+        });
+      });
+    }
+  });
 });

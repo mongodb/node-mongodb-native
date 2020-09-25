@@ -18,6 +18,7 @@ const VALID_INDEX_OPTIONS = new Set([
   'name',
   'partialFilterExpression',
   'sparse',
+  'hidden',
   'expireAfterSeconds',
   'storageEngine',
   'collation',
