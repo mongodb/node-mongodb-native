@@ -7,6 +7,15 @@ export enum ReadConcernLevel {
   snapshot = 'snapshot'
 }
 
+export type ReadConcernLevelLike =
+  | ReadConcernLevel
+  | keyof typeof ReadConcernLevel;
+
+export type ReadConcernLike =
+  | ReadConcern
+  | { level: ReadConcernLevelLike}
+  | ReadConcernLevelLike;
+
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
@@ -18,8 +27,8 @@ export class ReadConcern {
   level: ReadConcernLevel;
 
   /** Constructs a ReadConcern from the read concern level.*/
-  constructor(level: ReadConcernLevel) {
-    this.level = level;
+  constructor(level: ReadConcernLevelLike) {
+    this.level = ReadConcernLevel[level];
   }
 
   /**
@@ -28,19 +37,22 @@ export class ReadConcern {
    * @param options - The options object from which to extract the write concern.
    */
   static fromOptions(options?: {
-    readConcern?: ReadConcern | { level: ReadConcernLevel };
-    level?: ReadConcernLevel;
+    readConcern?: ReadConcernLike;
+    level?: ReadConcernLevelLike;
   }): ReadConcern | undefined {
     if (options == null) {
       return;
     }
 
     if (options.readConcern) {
-      if (options.readConcern instanceof ReadConcern) {
-        return options.readConcern;
+      const {readConcern} = options
+      if (readConcern instanceof ReadConcern) {
+        return readConcern;
+      } else if (typeof readConcern === 'string') {
+        return new ReadConcern(readConcern);
+      } else if ('level' in readConcern) {
+        return new ReadConcern(readConcern.level);
       }
-
-      return new ReadConcern(options.readConcern.level);
     }
 
     if (options.level) {

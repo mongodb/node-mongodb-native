@@ -14,7 +14,7 @@ import type { Collection } from '../collection';
 import type { InternalCursorState } from '../cursor/core_cursor';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
 export type SortDirection = 1 | -1 | 'asc' | 'desc' | { $meta: string };
@@ -25,7 +25,7 @@ export type Sort =
   | [string, SortDirection];
 
 /** @public */
-export interface FindOptions extends QueryOptions {
+export interface FindOptions extends QueryOptions, CommandOperationOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */

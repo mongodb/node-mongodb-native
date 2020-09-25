@@ -9,7 +9,7 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import { ReadConcernLevel, ReadConcern } from './read_concern';
+import { ReadConcern, ReadConcernLevelLike, ReadConcernLike } from './read_concern';
 import type { BSONSerializeOptions, Document } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -91,7 +91,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevel;
+  readConcernLevel?: ReadConcernLevelLike;
   /** Specifies the read preferences for this connection */
   readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
@@ -174,7 +174,7 @@ export interface MongoClientOptions
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
   promiseLibrary?: any;
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
-  readConcern?: ReadConcern;
+  readConcern?: ReadConcernLike;
   /** The logging level */
   loggerLevel?: LogLevel;
   /** Custom logger object */
