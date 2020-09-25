@@ -3,7 +3,7 @@ import { Query } from '../commands';
 import { MongoError } from '../../error';
 import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
-import type { Document } from '../../bson';
+import { Document, pluckBSONSerializeOptions } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { InternalCursorState } from '../../cursor/core_cursor';
@@ -32,9 +32,12 @@ export function query(
 
   if (maxWireVersion(server) < 4) {
     const query = prepareLegacyFindQuery(server, ns, cmd, cursorState, options);
-    const queryOptions = applyCommonQueryOptions({}, cursorState);
-    queryOptions.fullResult = true;
+    const queryOptions = applyCommonQueryOptions(
+      {},
+      Object.assign({ bsonOptions: pluckBSONSerializeOptions(options) }, cursorState)
+    );
 
+    queryOptions.fullResult = true;
     if (typeof query.documentsReturnedIn === 'string') {
       queryOptions.documentsReturnedIn = query.documentsReturnedIn;
     }

@@ -1,5 +1,5 @@
 import { GetMore } from '../commands';
-import { Long, Document } from '../../bson';
+import { Long, Document, pluckBSONSerializeOptions } from '../../bson';
 import { MongoError, MongoNetworkError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
 import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
@@ -71,7 +71,11 @@ export function getMore(
 
   if (wireVersion < 4) {
     const getMoreOp = new GetMore(ns, cursorId, { numberToReturn: batchSize });
-    const queryOptions = applyCommonQueryOptions({}, cursorState);
+    const queryOptions = applyCommonQueryOptions(
+      {},
+      Object.assign({ bsonOptions: pluckBSONSerializeOptions(options) }, cursorState)
+    );
+
     queryOptions.fullResult = true;
     queryOptions.command = true;
     server.s.pool.write(getMoreOp, queryOptions, queryCallback);

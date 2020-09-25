@@ -82,11 +82,7 @@ export class CreateCollectionOperation extends CommandOperation<
         return callback(err);
       }
 
-      try {
-        callback(undefined, new Collection(db, name, options));
-      } catch (err) {
-        callback(err);
-      }
+      callback(undefined, new Collection(db, name, options));
     };
 
     const cmd: Document = { create: name };

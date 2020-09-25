@@ -405,6 +405,14 @@ export class Cursor<
       throw new MongoError(`flag ${flag} must be a boolean value`);
     }
 
+    if (flag === 'tailable') {
+      this.cursorState.tailable = value;
+    }
+
+    if (flag === 'awaitData') {
+      this.cursorState.awaitData = value;
+    }
+
     this.cmd[flag] = value;
     return this;
   }
