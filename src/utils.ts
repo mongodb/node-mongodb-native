@@ -1036,6 +1036,9 @@ export interface InterruptableAsyncIntervalOptions {
   minInterval: number;
   /** Whether the method should be called immediately when the interval is started  */
   immediate: boolean;
+
+  /* @internal only used for testing unreliable timer environments */
+  clock: () => number;
 }
 
 /** @internal */
@@ -1066,12 +1069,13 @@ export function makeInterruptableAsyncInterval(
   const interval = options.interval || 1000;
   const minInterval = options.minInterval || 500;
   const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
+  const clock = typeof options.clock === 'function' ? options.clock : now;
 
   function wake() {
-    const currentTime = now();
+    const currentTime = clock();
     const timeSinceLastWake = currentTime - lastWakeTime;
     const timeSinceLastCall = currentTime - lastCallTime;
-    const timeUntilNextCall = Math.max(interval - timeSinceLastCall, 0);
+    const timeUntilNextCall = interval - timeSinceLastCall;
     lastWakeTime = currentTime;
 
     // For the streaming protocol: there is nothing obviously stopping this
@@ -1089,6 +1093,14 @@ export function makeInterruptableAsyncInterval(
     // faster than the `minInterval`
     if (timeUntilNextCall > minInterval) {
       reschedule(minInterval);
+    }
+
+    // This is possible in virtualized environments like AWS Lambda where our
+    // clock is unreliable. In these cases the timer is "running" but never
+    // actually completes, so we want to execute immediately and then attempt
+    // to reschedule.
+    if (timeUntilNextCall < 0) {
+      executeAndReschedule();
     }
   }
 
@@ -1114,7 +1126,7 @@ export function makeInterruptableAsyncInterval(
 
   function executeAndReschedule() {
     lastWakeTime = 0;
-    lastCallTime = now();
+    lastCallTime = clock();
 
     fn(err => {
       if (err) throw err;
@@ -1125,7 +1137,7 @@ export function makeInterruptableAsyncInterval(
   if (immediate) {
     executeAndReschedule();
   } else {
-    lastCallTime = now();
+    lastCallTime = clock();
     reschedule(undefined);
   }
 
