@@ -42,7 +42,7 @@ export class ReadConcern {
     }
 
     if (options.readConcern) {
-      const { readConcern } = options
+      const { readConcern } = options;
       if (readConcern instanceof ReadConcern) {
         return readConcern;
       } else if (typeof readConcern === 'string') {
