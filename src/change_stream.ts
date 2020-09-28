@@ -600,7 +600,11 @@ function processNewChange(
       'A change stream document has been received that lacks a resume token (_id).'
     );
 
-    if (!callback) return changeStream.emit(ChangeStream.ERROR, noResumeTokenError);
+    if (!callback) {
+      changeStream.emit(ChangeStream.ERROR, noResumeTokenError);
+      changeStream.close();
+      return;
+    }
     return callback(noResumeTokenError);
   }
 
@@ -616,7 +620,7 @@ function processNewChange(
   return callback(undefined, change);
 }
 
-function processError(changeStream: ChangeStream, error?: AnyError, callback?: Callback) {
+function processError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
   const topology = changeStream.topology;
   const cursor = changeStream.cursor;
 
