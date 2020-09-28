@@ -9,7 +9,7 @@ import { Collection, CollectionOptions } from './collection';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern, ReadConcernLike } from './read_concern';
+import { ReadConcern } from './read_concern';
 import { Logger, LoggerOptions } from './logger';
 import {
   filterOptions,

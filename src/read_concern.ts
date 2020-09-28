@@ -8,15 +8,10 @@ export enum ReadConcernLevel {
 }
 
 /** @public */
-export type ReadConcernLevelLike =
-  | ReadConcernLevel
-  | keyof typeof ReadConcernLevel;
+export type ReadConcernLevelLike = ReadConcernLevel | keyof typeof ReadConcernLevel;
 
 /** @public */
-export type ReadConcernLike =
-  | ReadConcern
-  | { level: ReadConcernLevelLike}
-  | ReadConcernLevelLike;
+export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelLike } | ReadConcernLevelLike;
 
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
@@ -47,7 +42,7 @@ export class ReadConcern {
     }
 
     if (options.readConcern) {
-      const {readConcern} = options
+      const { readConcern } = options
       if (readConcern instanceof ReadConcern) {
         return readConcern;
       } else if (typeof readConcern === 'string') {

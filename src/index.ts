@@ -302,5 +302,3 @@ export type {
   ClientMetadataOptions
 } from './utils';
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
-
-
