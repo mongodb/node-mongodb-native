@@ -9,6 +9,7 @@ import type { PkFactory } from '../mongo_client';
 
 // eslint-disable-next-line
 import type { Collection } from '../collection';
+import { ReadConcern } from '../read_concern';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -81,7 +82,6 @@ export class CreateCollectionOperation extends CommandOperation<
       if (err) {
         return callback(err);
       }
-
       callback(undefined, new Collection(db, name, options));
     };
 

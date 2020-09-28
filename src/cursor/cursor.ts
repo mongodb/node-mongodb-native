@@ -1,4 +1,4 @@
-import { ReadConcern, ReadConcernLevel, ReadConcernLevels } from './../read_concern';
+import { ReadConcern, ReadConcernLevel } from './../read_concern';
 import { emitDeprecatedOptionWarning } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { Transform, PassThrough } from 'stream';

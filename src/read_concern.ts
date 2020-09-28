@@ -7,10 +7,12 @@ export enum ReadConcernLevel {
   snapshot = 'snapshot'
 }
 
+/** @public */
 export type ReadConcernLevelLike =
   | ReadConcernLevel
   | keyof typeof ReadConcernLevel;
 
+/** @public */
 export type ReadConcernLike =
   | ReadConcern
   | { level: ReadConcernLevelLike}
