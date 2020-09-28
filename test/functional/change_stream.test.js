@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { Transform } = require('stream');
+const { Transform, PassThrough } = require('stream');
 const { MongoNetworkError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
@@ -30,6 +30,7 @@ function withChangeStream(dbName, collectionName, callback) {
   return withClient((client, done) => {
     const db = client.db(dbName);
     db.dropCollection(collectionName)
+      .catch(() => {})
       .then(() =>
         db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
           if (err) return done(err);
@@ -40,7 +41,7 @@ function withChangeStream(dbName, collectionName, callback) {
           );
         })
       )
-      .catch(() => done());
+      .catch(done);
   });
 }
 
@@ -2784,6 +2785,37 @@ describe('Change Stream Resume Error Tests', function () {
           expect(change).to.containSubset({
             operationType: 'insert',
             fullDocument: { a: 42 }
+          });
+        });
+      });
+    })
+  });
+
+  it('should continue piping changes after a resumable error', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    test: withChangeStream((collection, changeStream, done) => {
+      const d = new PassThrough({ objectMode: true });
+      const bucket = [];
+      d.on('data', data => {
+        bucket.push(data.fullDocument.x);
+        console.log({ bucket });
+        if (bucket.length === 2) {
+          expect(bucket[0]).to.be(1);
+          expect(bucket[0]).to.be(2);
+          done();
+        }
+      });
+      changeStream.stream().pipe(d);
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ x: 1 }, (err, result) => {
+          expect(err).to.not.exist;
+          expect(result).to.exist;
+          triggerResumableError(changeStream, 250, () => {
+            console.log('triggered error');
+            collection.insertOne({ x: 2 }, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+            });
           });
         });
       });

@@ -153,8 +153,13 @@ interface UpdateDescription {
 }
 
 export class ChangeStreamStream extends CursorStream {
-  constructor(cursor: ChangeStreamCursor) {
+  changeStream: ChangeStream;
+  constructor(cursor: ChangeStreamCursor, changeStream: ChangeStream) {
     super(cursor);
+    this.changeStream = changeStream;
+  }
+  _getCursor(callback: Callback<Cursor>): void {
+    getCursor(this.changeStream, callback);
   }
 }
 
@@ -329,7 +334,7 @@ export class ChangeStream extends EventEmitter {
       throw new MongoError('ChangeStream has no cursor, unable to stream');
     }
     this.cursor.cursorState.streamOptions = options;
-    return new ChangeStreamStream(this.cursor);
+    return new ChangeStreamStream(this.cursor, this);
   }
 
   /**
@@ -690,11 +695,13 @@ function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCu
 
   // if a cursor exists and it is open, return it
   if (changeStream.cursor) {
+    console.log('cursor exists');
     callback(undefined, changeStream.cursor);
     return;
   }
 
   // no cursor, queue callback until topology reconnects
+  console.log('waiting for cursor');
   changeStream[kResumeQueue].push(callback);
 }
 
