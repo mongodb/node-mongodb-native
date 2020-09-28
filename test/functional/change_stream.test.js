@@ -66,7 +66,7 @@ function triggerResumableError(changeStream, delay, onClose) {
   });
 
   function triggerError() {
-    changeStream.cursor._stream.emit('error', new MongoNetworkError('fake error'));
+    changeStream.emit('streamError', new MongoNetworkError('fake error'));
   }
 
   if (delay != null) {
