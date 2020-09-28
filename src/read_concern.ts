@@ -21,11 +21,17 @@ export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelLike } | Re
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level: ReadConcernLevel;
+  level: ReadConcernLevel | string;
 
   /** Constructs a ReadConcern from the read concern level.*/
   constructor(level: ReadConcernLevelLike) {
-    this.level = ReadConcernLevel[level];
+    /**
+     * A spec test exists that allows level to be any string.
+     * "invalid readConcern with out stage"
+     * @see ./test/spec/crud/v2/aggregate-out-readConcern.json
+     * @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#unknown-levels-and-additional-options-for-string-based-readconcerns
+     */
+    this.level = ReadConcernLevel[level] || level;
   }
 
   /**
@@ -47,7 +53,7 @@ export class ReadConcern {
         return readConcern;
       } else if (typeof readConcern === 'string') {
         return new ReadConcern(readConcern);
-      } else if ('level' in readConcern) {
+      } else if ('level' in readConcern && readConcern.level) {
         return new ReadConcern(readConcern.level);
       }
     }
