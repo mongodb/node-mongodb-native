@@ -32,6 +32,11 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
+const NO_RESUME_TOKEN_ERROR = new MongoError(
+  'A change stream document has been received that lacks a resume token (_id).'
+);
+const CHANGESTREAM_CLOSED_ERROR = new MongoError('ChangeStream is closed');
+
 export interface ResumeOptions {
   startAtOperationTime?: Timestamp;
   batchSize?: number;
@@ -580,33 +585,27 @@ function waitForTopologyConnected(
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
+function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
+  if (!callback) changeStream.emit(ChangeStream.ERROR, error);
+  changeStream.close(() => callback && callback(error));
+}
+
 function processNewChange(
   changeStream: ChangeStream,
   change: ChangeStreamDocument,
   callback?: Callback
 ) {
-  // a null change means the cursor has been notified, implicitly closing the change stream
-  if (change == null) {
-    changeStream.closed = true;
-  }
-
   if (changeStream.closed) {
-    if (callback) callback(new MongoError('ChangeStream is closed'));
+    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
     return;
   }
 
-  if (change && !change._id) {
-    const noResumeTokenError = new Error(
-      'A change stream document has been received that lacks a resume token (_id).'
-    );
-
-    if (!callback) {
-      changeStream.emit(ChangeStream.ERROR, noResumeTokenError);
-      changeStream.close();
-      return;
-    }
-    return callback(noResumeTokenError);
+  // a null change means the cursor has been notified, implicitly closing the change stream
+  if (change == null) {
+    return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
   }
+
+  if (change && !change._id) return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
 
   // cache the resume token
   changeStream.cursor?.cacheResumeToken(change._id);
@@ -640,10 +639,8 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
   function unresumableError(err: AnyError) {
     if (!callback) {
       changeStream.emit(ChangeStream.ERROR, err);
-      changeStream.emit(ChangeStream.CLOSE);
     }
-    processResumeQueue(changeStream, err);
-    changeStream.closed = true;
+    changeStream.close(() => processResumeQueue(changeStream, err));
   }
 
   if (cursor && isResumableError(error as MongoError, maxWireVersion(cursor.server))) {
@@ -677,8 +674,8 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
     return;
   }
 
-  if (!callback) return changeStream.emit(ChangeStream.ERROR, error);
-  return callback(error);
+  // if initial error wasn't resumable, raise an error and close the change stream
+  return closeWithError(changeStream, error, callback);
 }
 
 /**
