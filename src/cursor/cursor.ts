@@ -89,62 +89,43 @@ export class CursorStream extends Readable {
   }
 
   /** @internal */
-  _getCursor(callback: Callback<Cursor>): void {
-    callback(undefined, this[kCursor]);
-  }
-
-  /** @internal */
   _read(): void {
-    this._getCursor((_err, cursor?: Cursor) => {
-      if (cursor == null) {
-        throw new Error('Missing cursor');
-      }
-      if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
-        console.log('ending stream');
-        this.push(null);
+    const cursor = this[kCursor];
+    if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
+      this.push(null);
+      return;
+    }
+
+    // Get the next item
+    cursor._next((err, result) => {
+      if (err) {
+        if (this.listeners(CursorStream.ERROR) && this.listeners(CursorStream.ERROR).length > 0) {
+          this.emit(CursorStream.ERROR, err);
+        }
+        const done = () => this.emit(CursorStream.END);
+        cursor.isDead() ? done() : cursor.close(done);
         return;
       }
 
-      // Get the next item
-      cursor._next((err, result) => {
-        this._getCursor((_err, cursor?: Cursor) => {
-          if (cursor == null) {
-            throw new Error('Missing cursor');
-          }
-          console.log('got second cursor');
-          if (err) {
-            if (
-              this.listeners(CursorStream.ERROR) &&
-              this.listeners(CursorStream.ERROR).length > 0
-            ) {
-              this.emit(CursorStream.ERROR, err);
-            }
-            const done = () => this.emit(CursorStream.END);
-            cursor.isDead() ? done() : cursor.close(done);
-            return;
-          }
+      // If we provided a transformation method
+      if (
+        cursor.cursorState.streamOptions &&
+        typeof cursor.cursorState.streamOptions.transform === 'function' &&
+        result != null
+      ) {
+        this.push(cursor.cursorState.streamOptions.transform(result));
+        return;
+      }
 
-          // If we provided a transformation method
-          if (
-            cursor.cursorState.streamOptions &&
-            typeof cursor.cursorState.streamOptions.transform === 'function' &&
-            result != null
-          ) {
-            this.push(cursor.cursorState.streamOptions.transform(result));
-            return;
-          }
+      // Return the result
+      this.push(result);
 
-          // Return the result
-          this.push(result);
-
-          if (result === null && cursor.isDead()) {
-            this.once(CursorStream.END, () => {
-              cursor.close();
-              this.emit(CursorStream.FINISH);
-            });
-          }
+      if (result === null && cursor.isDead()) {
+        this.once(CursorStream.END, () => {
+          cursor.close();
+          this.emit(CursorStream.FINISH);
         });
-      });
+      }
     });
   }
 }

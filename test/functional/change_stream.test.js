@@ -2791,7 +2791,7 @@ describe('Change Stream Resume Error Tests', function () {
     })
   });
 
-  it('should continue piping changes after a resumable error', {
+  it.skip('should continue piping changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
       const d = new PassThrough({ objectMode: true });
