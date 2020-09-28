@@ -5688,7 +5688,8 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Perform a find to get a cursor
-          var stream = collection.find().stream();
+          const cursor = collection.find();
+          const stream = cursor.stream();
 
           // For each data item
           stream.on('data', function () {
@@ -5697,7 +5698,7 @@ describe('Operation Examples', function () {
           });
 
           // When the stream is done
-          stream.on('close', function () {
+          cursor.on('close', function () {
             client.close(done);
           });
         });

@@ -294,7 +294,7 @@ describe('Cursor Streams', function () {
           error = err;
         });
 
-        stream.on('close', function () {
+        cursor.on('close', function () {
           expect(error).to.exist;
           streamIsClosed = true;
         });
