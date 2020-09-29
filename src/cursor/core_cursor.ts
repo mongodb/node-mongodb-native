@@ -48,34 +48,6 @@ export interface StreamOptions {
   transform?(doc: Document): Document;
 }
 
-/** @internal */
-export interface InternalCursorState extends BSONSerializeOptions {
-  postBatchResumeToken?: ResumeToken;
-  batchSize: number;
-  cmd: Document;
-  currentLimit: number;
-  cursorId?: Long;
-  lastCursorId?: Long;
-  cursorIndex: number;
-  dead: boolean;
-  killed: boolean;
-  init: boolean;
-  notified: boolean;
-  documents: Document[];
-  limit: number;
-  operationTime?: OperationTime;
-  reconnect?: boolean;
-  session?: ClientSession;
-  skip: number;
-  streamOptions?: StreamOptions;
-  transforms?: DocumentTransforms;
-  raw?: boolean;
-  tailable: boolean;
-  awaitData: boolean;
-
-  bsonOptions?: BSONSerializeOptions;
-}
-
 /** @public Possible states for a cursor */
 export enum CursorState {
   INIT = 0,
@@ -119,10 +91,35 @@ export class CoreCursor<
   cmd: Document;
   options: T;
   topology: Topology;
-  cursorState: InternalCursorState;
   logger: Logger;
   query?: Document;
   s!: CoreCursorPrivate;
+
+  // INTERNAL CURSOR STATE
+  postBatchResumeToken?: ResumeToken;
+  currentLimit: number;
+  cursorId?: Long;
+  lastCursorId?: Long;
+  cursorIndex: number;
+  dead: boolean;
+  killed: boolean;
+  init: boolean;
+  notified: boolean;
+  documents: Document[];
+  operationTime?: OperationTime;
+  reconnect?: boolean;
+  session?: ClientSession;
+  streamOptions?: StreamOptions;
+  transforms?: DocumentTransforms;
+  raw?: boolean;
+  tailable: boolean;
+  awaitData: boolean;
+  bsonOptions?: BSONSerializeOptions;
+
+  // DEPRECATED?
+  _batchSize: number;
+  _skip: number;
+  _limit: number;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -176,93 +173,65 @@ export class CoreCursor<
     }
 
     // All internal state
-    this.cursorState = {
-      cursorId,
-      cmd: this.cmd,
-      lastCursorId,
-      documents: options.documents || [],
-      cursorIndex: 0,
-      dead: false,
-      killed: false,
-      init: false,
-      notified: false,
-      limit,
-      skip,
-      batchSize,
-      currentLimit: 0,
-      // Result field name if not a cursor (contains the array of results)
-      transforms: options.transforms,
-      raw: typeof options.raw === 'boolean' ? options.raw : cmd && 'raw' in cmd && cmd.raw,
-      tailable: typeof options.tailable === 'boolean' ? options.tailable : false,
-      awaitData:
-        typeof options.awaitData === 'boolean'
-          ? options.awaitData
-          : typeof options.awaitdata === 'boolean'
-          ? options.awaitdata
-          : false
-    };
+    this.cursorId = cursorId;
+    this.lastCursorId = lastCursorId;
+    this.documents = options.documents || [];
+    this.cursorIndex = 0;
+    this.dead = false;
+    this.killed = false;
+    this.init = false;
+    this.notified = false;
+    this.currentLimit = 0;
+    // Result field name if not a cursor (contains the array of results)
+    this.transforms = options.transforms;
+    this.raw = typeof options.raw === 'boolean' ? options.raw : cmd && 'raw' in cmd && cmd.raw;
+    this.tailable = typeof options.tailable === 'boolean' ? options.tailable : false;
+    this.awaitData =
+      typeof options.awaitData === 'boolean'
+        ? options.awaitData
+        : typeof options.awaitdata === 'boolean'
+        ? options.awaitdata
+        : false;
+
+    // get rid of these?
+    this._limit = limit;
+    this._skip = skip;
+    this._batchSize = batchSize;
 
     if (typeof options.session === 'object') {
-      this.cursorState.session = options.session;
-    }
-
-    // Add promoteLong to cursor state
-    const topologyOptions = topology.s.options;
-    if (typeof topologyOptions.promoteLongs === 'boolean') {
-      this.cursorState.promoteLongs = topologyOptions.promoteLongs;
-    } else if (typeof options.promoteLongs === 'boolean') {
-      this.cursorState.promoteLongs = options.promoteLongs;
-    }
-
-    // Add promoteValues to cursor state
-    if (typeof topologyOptions.promoteValues === 'boolean') {
-      this.cursorState.promoteValues = topologyOptions.promoteValues;
-    } else if (typeof options.promoteValues === 'boolean') {
-      this.cursorState.promoteValues = options.promoteValues;
-    }
-
-    // Add promoteBuffers to cursor state
-    if (typeof topologyOptions.promoteBuffers === 'boolean') {
-      this.cursorState.promoteBuffers = topologyOptions.promoteBuffers;
-    } else if (typeof options.promoteBuffers === 'boolean') {
-      this.cursorState.promoteBuffers = options.promoteBuffers;
-    }
-
-    if (topologyOptions.reconnect) {
-      this.cursorState.reconnect = topologyOptions.reconnect;
+      this.session = options.session;
     }
 
     // Logger
-    this.logger = new Logger('Cursor', topologyOptions);
+    this.logger = new Logger('Cursor', topology.s.options);
+  }
 
-    // TODO: remove as part of NODE-2104, except this is closed?
-    if (this.operation) {
-      this.operation.cursorState = this.cursorState;
-    }
+  get id(): Long | undefined {
+    return this.cursorId;
   }
 
   set cursorBatchSize(value: number) {
-    this.cursorState.batchSize = value;
+    this._batchSize = value;
   }
 
   get cursorBatchSize(): number {
-    return this.cursorState.batchSize;
+    return this._batchSize;
   }
 
   set cursorLimit(value: number) {
-    this.cursorState.limit = value;
+    this._limit = value;
   }
 
   get cursorLimit(): number {
-    return this.cursorState.limit ?? 0;
+    return this._limit ?? 0;
   }
 
   set cursorSkip(value: number) {
-    this.cursorState.skip = value;
+    this._skip = value;
   }
 
   get cursorSkip(): number {
-    return this.cursorState.skip;
+    return this._skip;
   }
 
   /** @internal Retrieve the next document from the cursor */
@@ -277,54 +246,48 @@ export class CoreCursor<
 
   /** Checks if the cursor is dead */
   isDead(): boolean {
-    return this.cursorState.dead === true;
+    return this.dead === true;
   }
 
   /** Checks if the cursor was killed by the application */
   isKilled(): boolean {
-    return this.cursorState.killed === true;
+    return this.killed === true;
   }
 
   /** Checks if the cursor notified it's caller about it's death */
   isNotified(): boolean {
-    return this.cursorState.notified === true;
+    return this.notified === true;
   }
 
   /** Returns current buffered documents length */
   bufferedCount(): number {
-    return this.cursorState.documents.length - this.cursorState.cursorIndex;
+    return this.documents.length - this.cursorIndex;
   }
 
   /** Returns current buffered documents */
   readBufferedDocuments(number: number): Document[] {
-    const unreadDocumentsLength = this.cursorState.documents.length - this.cursorState.cursorIndex;
+    const unreadDocumentsLength = this.documents.length - this.cursorIndex;
     const length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
-    let elements = this.cursorState.documents.slice(
-      this.cursorState.cursorIndex,
-      this.cursorState.cursorIndex + length
-    );
+    let elements = this.documents.slice(this.cursorIndex, this.cursorIndex + length);
 
     // Transform the doc with passed in transformation method if provided
-    if (this.cursorState.transforms && typeof this.cursorState.transforms.doc === 'function') {
+    if (this.transforms && typeof this.transforms.doc === 'function') {
       // Transform all the elements
       for (let i = 0; i < elements.length; i++) {
-        elements[i] = this.cursorState.transforms.doc(elements[i]);
+        elements[i] = this.transforms.doc(elements[i]);
       }
     }
 
     // Ensure we do not return any more documents than the limit imposed
     // Just return the number of elements up to the limit
-    if (
-      this.cursorState.limit > 0 &&
-      this.cursorState.currentLimit + elements.length > this.cursorState.limit
-    ) {
-      elements = elements.slice(0, this.cursorState.limit - this.cursorState.currentLimit);
+    if (this._limit > 0 && this.currentLimit + elements.length > this._limit) {
+      elements = elements.slice(0, this._limit - this.currentLimit);
       this.kill();
     }
 
     // Adjust current limit
-    this.cursorState.currentLimit = this.cursorState.currentLimit + elements.length;
-    this.cursorState.cursorIndex = this.cursorState.cursorIndex + elements.length;
+    this.currentLimit = this.currentLimit + elements.length;
+    this.cursorIndex = this.cursorIndex + elements.length;
 
     // Return elements
     return elements;
@@ -333,17 +296,18 @@ export class CoreCursor<
   /** Resets local state for this cursor instance, and issues a `killCursors` command to the server */
   kill(callback?: Callback): void {
     // Set cursor to dead
-    this.cursorState.dead = true;
-    this.cursorState.killed = true;
+    this.dead = true;
+    this.killed = true;
     // Remove documents
-    this.cursorState.documents = [];
+    this.documents = [];
 
     // If no cursor id just return
-    if (
-      this.cursorState.cursorId == null ||
-      this.cursorState.cursorId.isZero() ||
-      this.cursorState.init === false
-    ) {
+    if (this.cursorId == null) {
+      if (callback) callback(undefined, null);
+      return;
+    }
+
+    if (this.cursorId == null || this.cursorId.isZero() || this.init === false) {
       if (callback) callback(undefined, null);
       return;
     }
@@ -353,26 +317,32 @@ export class CoreCursor<
       return;
     }
 
-    this.server.killCursors(this.ns, this.cursorState, callback);
+    this.server.killCursors(
+      this.ns,
+      [this.cursorId],
+      // TODO: need to pass session here, but its leading to session leaks
+      { session: this.session, ...this.bsonOptions },
+      callback
+    );
   }
 
   /** Resets the cursor */
   rewind(): void {
-    if (this.cursorState.init) {
-      if (!this.cursorState.dead) {
+    if (this.init) {
+      if (!this.dead) {
         this.kill();
       }
 
-      this.cursorState.currentLimit = 0;
-      this.cursorState.init = false;
-      this.cursorState.dead = false;
-      this.cursorState.killed = false;
-      this.cursorState.notified = false;
-      this.cursorState.documents = [];
-      this.cursorState.cursorId = undefined;
-      this.cursorState.cursorIndex = 0;
-      this.cursorState.tailable = false;
-      this.cursorState.awaitData = false;
+      this.currentLimit = 0;
+      this.init = false;
+      this.dead = false;
+      this.killed = false;
+      this.notified = false;
+      this.documents = [];
+      this.cursorId = undefined;
+      this.cursorIndex = 0;
+      this.tailable = false;
+      this.awaitData = false;
     }
   }
 
@@ -400,11 +370,11 @@ export class CoreCursor<
 
       // If we provided a transformation method
       if (
-        this.cursorState.streamOptions &&
-        typeof this.cursorState.streamOptions.transform === 'function' &&
+        this.streamOptions &&
+        typeof this.streamOptions.transform === 'function' &&
         result != null
       ) {
-        this.push(this.cursorState.streamOptions.transform(result));
+        this.push(this.streamOptions.transform(result));
         return;
       }
 
@@ -442,10 +412,10 @@ export class CoreCursor<
     }
     options = options || {};
 
-    const session = this.cursorState.session;
+    const session = this.session;
 
     if (session && (options.force || session.owner === this)) {
-      this.cursorState.session = undefined;
+      this.session = undefined;
 
       if (this.operation) {
         this.operation.clearSession();
@@ -468,32 +438,42 @@ export class CoreCursor<
       this.logger.debug(`schedule getMore call for query [${JSON.stringify(this.query)}]`);
     }
 
+    if (this.cursorId == null) {
+      if (callback) callback(new MongoError('getMore attempted on invalid cursor id'));
+      return;
+    }
+
     // Set the current batchSize
-    let batchSize = this.cursorState.batchSize;
-    if (
-      this.cursorState.limit > 0 &&
-      this.cursorState.currentLimit + batchSize > this.cursorState.limit
-    ) {
-      batchSize = this.cursorState.limit - this.cursorState.currentLimit;
+    let batchSize = this._batchSize;
+    if (this._limit > 0 && this.currentLimit + batchSize > this._limit) {
+      batchSize = this._limit - this.currentLimit;
     }
 
     if (!this.server) {
       return callback(new MongoError('Cursor is uninitialized.'));
     }
 
-    const cursorState = this.cursorState;
     this.server.getMore(
       this.ns,
-      cursorState,
-      batchSize,
-      { ...this.cursorState.bsonOptions },
-      (err, result) => {
-        // NOTE: `getMore` modifies `cursorState`, would be very ideal not to do so in the future
-        if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
-          this._endSession();
+      this.cursorId,
+      { batchSize, session: this.session, ...this.bsonOptions },
+      (err, response) => {
+        if (response) {
+          const cursorId =
+            typeof response.cursor.id === 'number'
+              ? Long.fromNumber(response.cursor.id)
+              : response.cursor.id;
+
+          this.documents = response.cursor.nextBatch;
+          this.cursorId = cursorId;
         }
 
-        callback(err, result);
+        if (err || (this.cursorId && this.cursorId.isZero())) {
+          this._endSession(() => callback(err, response));
+          return;
+        }
+
+        callback(err, response);
       }
     );
   }
@@ -515,17 +495,16 @@ export class CoreCursor<
     }
 
     const done: Callback = (err, result) => {
-      const cursorState = this.cursorState;
-      if (err || (cursorState.cursorId && cursorState.cursorId.isZero())) {
+      if (err || (this.cursorId && this.cursorId.isZero())) {
         this._endSession();
       }
 
       if (
-        cursorState.documents.length === 0 &&
-        cursorState.cursorId &&
-        cursorState.cursorId.isZero() &&
-        !this.cursorState.tailable &&
-        !this.cursorState.awaitData
+        this.documents.length === 0 &&
+        this.cursorId &&
+        this.cursorId.isZero() &&
+        !this.tailable &&
+        !this.awaitData
       ) {
         return setCursorNotified(this, callback);
       }
@@ -559,13 +538,13 @@ export class CoreCursor<
           }
 
           // Promote id to long if needed
-          this.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
-          this.cursorState.lastCursorId = this.cursorState.cursorId;
-          this.cursorState.operationTime = document.operationTime;
+          this.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
+          this.lastCursorId = this.cursorId;
+          this.operationTime = document.operationTime;
 
           // If we have a firstBatch set it
           if (Array.isArray(document.cursor.firstBatch)) {
-            this.cursorState.documents = document.cursor.firstBatch;
+            this.documents = document.cursor.firstBatch;
           }
 
           // Return after processing command cursor
@@ -575,16 +554,14 @@ export class CoreCursor<
 
       // Otherwise fall back to regular find path
       const cursorId = result.cursorId || 0;
-      this.cursorState.cursorId = cursorId instanceof Long ? cursorId : Long.fromNumber(cursorId);
-      this.cursorState.documents = result.documents || [result];
-      this.cursorState.lastCursorId = result.cursorId;
+      this.cursorId = cursorId instanceof Long ? cursorId : Long.fromNumber(cursorId);
+      this.documents = result.documents || [result];
+      this.lastCursorId = result.cursorId;
 
       // Transform the results with passed in transformation method if provided
-      if (this.cursorState.transforms && typeof this.cursorState.transforms.query === 'function') {
-        const transformedQuery = this.cursorState.transforms.query(result);
-        this.cursorState.documents = Array.isArray(transformedQuery)
-          ? transformedQuery
-          : [transformedQuery];
+      if (this.transforms && typeof this.transforms.query === 'function') {
+        const transformedQuery = this.transforms.query(result);
+        this.documents = Array.isArray(transformedQuery) ? transformedQuery : [transformedQuery];
       }
 
       done(undefined, result);
@@ -605,13 +582,13 @@ export class CoreCursor<
       }
 
       this.server = this.operation.server;
-      this.cursorState.init = true;
+      this.init = true;
 
       // set these after execution because the builder might change them before now
-      this.cursorState.bsonOptions = this.operation.bsonOptions;
+      this.bsonOptions = this.operation.bsonOptions;
 
       // NOTE: this is a special internal method for cloning a cursor, consider removing
-      if (this.cursorState.cursorId != null) {
+      if (this.cursorId != null) {
         return done();
       }
 
@@ -623,8 +600,8 @@ export class CoreCursor<
 /** Validate if the cursor is dead but was not explicitly killed by user */
 function isCursorDeadButNotkilled(self: CoreCursor, callback: Callback) {
   // Cursor is dead but not marked killed, return null
-  if (self.cursorState.dead && !self.cursorState.killed) {
-    self.cursorState.killed = true;
+  if (self.dead && !self.killed) {
+    self.killed = true;
     setCursorNotified(self, callback);
     return true;
   }
@@ -634,7 +611,7 @@ function isCursorDeadButNotkilled(self: CoreCursor, callback: Callback) {
 
 /** Validate if the cursor is dead and was killed by user */
 function isCursorDeadAndKilled(self: CoreCursor, callback: Callback) {
-  if (self.cursorState.dead && self.cursorState.killed) {
+  if (self.dead && self.killed) {
     callback(new MongoError('cursor is dead'));
     return true;
   }
@@ -644,7 +621,7 @@ function isCursorDeadAndKilled(self: CoreCursor, callback: Callback) {
 
 /** Validate if the cursor was killed by the user */
 function isCursorKilled(self: CoreCursor, callback: Callback) {
-  if (self.cursorState.killed) {
+  if (self.killed) {
     setCursorNotified(self, callback);
     return true;
   }
@@ -654,7 +631,7 @@ function isCursorKilled(self: CoreCursor, callback: Callback) {
 
 /** Mark cursor as being dead and notified */
 function setCursorDeadAndNotified(self: CoreCursor, callback: Callback) {
-  self.cursorState.dead = true;
+  self.dead = true;
   setCursorNotified(self, callback);
 }
 
@@ -665,11 +642,11 @@ function setCursorNotified(self: CoreCursor, callback: Callback) {
 
 /** @internal */
 function _setCursorNotifiedImpl(self: CoreCursor, callback: Callback) {
-  self.cursorState.notified = true;
-  self.cursorState.documents = [];
-  self.cursorState.cursorIndex = 0;
+  self.notified = true;
+  self.documents = [];
+  self.cursorIndex = 0;
 
-  if (self.cursorState.session) {
+  if (self.session) {
     self._endSession(callback);
     return;
   }
@@ -680,7 +657,7 @@ function _setCursorNotifiedImpl(self: CoreCursor, callback: Callback) {
 /** @internal */
 function nextFunction(self: CoreCursor, callback: Callback) {
   // We have notified about it
-  if (self.cursorState.notified) {
+  if (self.notified) {
     return callback(new Error('cursor is exhausted'));
   }
 
@@ -694,7 +671,7 @@ function nextFunction(self: CoreCursor, callback: Callback) {
   if (isCursorDeadAndKilled(self, callback)) return;
 
   // We have just started the cursor
-  if (!self.cursorState.init) {
+  if (!self.init) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if (!self.topology.isConnected()) {
@@ -718,24 +695,21 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     return;
   }
 
-  const cursorId = self.cursorState.cursorId;
+  const cursorId = self.cursorId;
   if (!cursorId) {
     return callback(new MongoError('Undefined cursor ID'));
   }
 
-  if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
+  if (self._limit > 0 && self.currentLimit >= self._limit) {
     // Ensure we kill the cursor on the server
     return self.kill(() =>
       // Set cursor in dead and notified state
       setCursorDeadAndNotified(self, callback)
     );
-  } else if (
-    self.cursorState.cursorIndex === self.cursorState.documents.length &&
-    !Long.ZERO.equals(cursorId)
-  ) {
+  } else if (self.cursorIndex === self.documents.length && !Long.ZERO.equals(cursorId)) {
     // Ensure an empty cursor state
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
+    self.documents = [];
+    self.cursorIndex = 0;
 
     // Check if topology is destroyed
     if (self.topology.isDestroyed()) {
@@ -753,40 +727,29 @@ function nextFunction(self: CoreCursor, callback: Callback) {
       // Tailable cursor getMore result, notify owner about it
       // No attempt is made here to retry, this is left to the user of the
       // core module to handle to keep core simple
-      if (
-        self.cursorState.documents.length === 0 &&
-        self.cursorState.tailable &&
-        Long.ZERO.equals(cursorId)
-      ) {
+      if (self.documents.length === 0 && self.tailable && Long.ZERO.equals(cursorId)) {
         // No more documents in the tailed cursor
         return callback(new MongoError('No more documents in tailed cursor'));
-      } else if (
-        self.cursorState.documents.length === 0 &&
-        self.cursorState.tailable &&
-        !Long.ZERO.equals(cursorId)
-      ) {
+      } else if (self.documents.length === 0 && self.tailable && !Long.ZERO.equals(cursorId)) {
         return nextFunction(self, callback);
       }
 
-      if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
+      if (self._limit > 0 && self.currentLimit >= self._limit) {
         return setCursorDeadAndNotified(self, callback);
       }
 
       nextFunction(self, callback);
     });
   } else if (
-    self.cursorState.documents.length === self.cursorState.cursorIndex &&
-    self.cursorState.tailable &&
+    self.documents.length === self.cursorIndex &&
+    self.tailable &&
     Long.ZERO.equals(cursorId)
   ) {
     return callback(new MongoError('No more documents in tailed cursor'));
-  } else if (
-    self.cursorState.documents.length === self.cursorState.cursorIndex &&
-    Long.ZERO.equals(cursorId)
-  ) {
+  } else if (self.documents.length === self.cursorIndex && Long.ZERO.equals(cursorId)) {
     setCursorDeadAndNotified(self, callback);
   } else {
-    if (self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
+    if (self._limit > 0 && self.currentLimit >= self._limit) {
       // Ensure we kill the cursor on the server
       self.kill(() =>
         // Set cursor in dead and notified state
@@ -797,10 +760,10 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     }
 
     // Increment the current cursor limit
-    self.cursorState.currentLimit += 1;
+    self.currentLimit += 1;
 
     // Get the document
-    let doc = self.cursorState.documents[self.cursorState.cursorIndex++];
+    let doc = self.documents[self.cursorIndex++];
 
     // Doc overflow
     if (!doc || doc.$err) {
@@ -814,8 +777,8 @@ function nextFunction(self: CoreCursor, callback: Callback) {
     }
 
     // Transform the doc with passed in transformation method if provided
-    if (self.cursorState.transforms && typeof self.cursorState.transforms.doc === 'function') {
-      doc = self.cursorState.transforms.doc(doc);
+    if (self.transforms && typeof self.transforms.doc === 'function') {
+      doc = self.transforms.doc(doc);
     }
 
     // Return the document

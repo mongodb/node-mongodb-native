@@ -297,7 +297,9 @@ describe('Operation Examples', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -328,7 +330,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_next_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, (err, result) => {
           test.ok(result);
           expect(err).to.not.exist;
 
@@ -351,16 +353,13 @@ describe('Operation Examples', function () {
             ],
             { cursor: { batchSize: 1 } }
           );
+          this.defer(() => cursor.close());
 
           // Get all the aggregation results
-          cursor.next(function (err, docs) {
+          cursor.next((err, docs) => {
             test.ok(docs);
             expect(err).to.not.exist;
-
-            // Need to close cursor since cursor is not
-            // exhausted, and implicit session is still open
-            cursor.close();
-            client.close(done);
+            done();
           });
         });
       });
@@ -5211,7 +5210,10 @@ describe('Operation Examples', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5222,28 +5224,25 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         // Create a collection
-        var collection = db.collection('simple_batch_size_collection');
+        const collection = db.collection('simple_batch_size_collection');
 
         // Insert some documents we can sort on
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function (err, docs) {
+          (err, docs) => {
             test.ok(docs);
             expect(err).to.not.exist;
 
             // Do normal ascending sort
             const cursor = collection.find().batchSize(1);
-            cursor.next(function (err, item) {
+            this.defer(() => cursor.close());
+            cursor.next((err, item) => {
               expect(err).to.not.exist;
               test.equal(1, item.a);
-
-              // Need to close cursor, since it was not exhausted,
-              // and implicit session is still open
-              cursor.close();
-              client.close(done);
+              done();
             });
           }
         );

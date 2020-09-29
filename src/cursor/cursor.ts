@@ -158,7 +158,7 @@ export class Cursor<
 
     // Optional ClientSession
     if (!options.explicitlyIgnoreSession && options.session) {
-      this.cursorState.session = options.session;
+      this.session = options.session;
     }
 
     // Translate correctly
@@ -181,18 +181,14 @@ export class Cursor<
   /** @internal */
   _initializeCursor(callback: Callback): void {
     if (this.operation && this.operation.session != null) {
-      this.cursorState.session = this.operation.session;
+      this.session = this.operation.session;
     } else {
       // implicitly create a session if one has not been provided
-      if (
-        !this.s.explicitlyIgnoreSession &&
-        !this.cursorState.session &&
-        this.topology.hasSessionSupport()
-      ) {
-        this.cursorState.session = this.topology.startSession({ owner: this });
+      if (!this.s.explicitlyIgnoreSession && !this.session && this.topology.hasSessionSupport()) {
+        this.session = this.topology.startSession({ owner: this });
 
         if (this.operation) {
-          this.operation.session = this.cursorState.session;
+          this.operation.session = this.session;
         }
       }
     }
@@ -220,7 +216,7 @@ export class Cursor<
         }
 
         this.s.state = CursorState.OPEN;
-        this.cursorState.cursorIndex--;
+        this.cursorIndex--;
         cb(undefined, true);
       });
     });
@@ -406,11 +402,11 @@ export class Cursor<
     }
 
     if (flag === 'tailable') {
-      this.cursorState.tailable = value;
+      this.tailable = value;
     }
 
     if (flag === 'awaitData') {
-      this.cursorState.awaitData = value;
+      this.awaitData = value;
     }
 
     this.cmd[flag] = value;
@@ -782,8 +778,8 @@ export class Cursor<
       applySkipLimit = true;
     }
 
-    if (this.cursorState.session) {
-      options = Object.assign({}, options, { session: this.cursorState.session });
+    if (this.session) {
+      options = Object.assign({}, options, { session: this.session });
     }
 
     const countOperation = new CountOperation(this, !!applySkipLimit, options);
@@ -807,9 +803,17 @@ export class Cursor<
 
     return maybePromise(callback, cb => {
       this.s.state = CursorState.CLOSED;
+
       if (!options.skipKillCursors) {
         // Kill the cursor
-        this.kill();
+        this.kill(() => {
+          this._endSession(() => {
+            this.emit(Cursor.CLOSE);
+            cb(undefined, this);
+          });
+        });
+
+        return;
       }
 
       this._endSession(() => {
@@ -825,13 +829,13 @@ export class Cursor<
    * @param transform - The mapping transformation method.
    */
   map(transform: DocumentTransforms['doc']): this {
-    if (this.cursorState.transforms && this.cursorState.transforms.doc) {
-      const oldTransform = this.cursorState.transforms.doc;
-      this.cursorState.transforms.doc = doc => {
+    if (this.transforms && this.transforms.doc) {
+      const oldTransform = this.transforms.doc;
+      this.transforms.doc = doc => {
         return transform(oldTransform(doc));
       };
     } else {
-      this.cursorState.transforms = { doc: transform };
+      this.transforms = { doc: transform };
     }
 
     return this;
@@ -850,7 +854,7 @@ export class Cursor<
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: StreamOptions): this {
     // TODO: replace this method with transformStream in next major release
-    this.cursorState.streamOptions = options || {};
+    this.streamOptions = options || {};
     return this;
   }
 

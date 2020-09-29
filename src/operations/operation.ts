@@ -2,7 +2,6 @@ import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
-import type { InternalCursorState } from '../cursor/core_cursor';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {
@@ -42,12 +41,8 @@ export abstract class OperationBase<
   options: T;
   ns!: MongoDBNamespace;
   cmd!: Document;
-
   readPreference: ReadPreference;
-
   server!: Server;
-  // TODO: remove as part of NODE-2104, except this is closed?
-  cursorState?: InternalCursorState;
   fullResponse?: boolean;
 
   // BSON serialization options

@@ -8,7 +8,7 @@ import type { Topology } from '../../sdam/topology';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 import type { ReadPreferenceLike } from '../../read_preference';
-import type { InternalCursorState } from '../../cursor/core_cursor';
+import type { CommandOptions } from './command';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
@@ -35,28 +35,17 @@ export function getReadPreference(cmd: Document, options: ReadPreferenceOption):
 
 export function applyCommonQueryOptions(
   queryOptions: OpQueryOptions,
-  cursorState: InternalCursorState
-): OpQueryOptions {
-  if (cursorState.bsonOptions) {
-    Object.assign(queryOptions, {
-      raw: typeof cursorState.bsonOptions.raw === 'boolean' ? cursorState.bsonOptions.raw : false,
-      promoteLongs:
-        typeof cursorState.bsonOptions.promoteLongs === 'boolean'
-          ? cursorState.bsonOptions.promoteLongs
-          : true,
-      promoteValues:
-        typeof cursorState.bsonOptions.promoteValues === 'boolean'
-          ? cursorState.bsonOptions.promoteValues
-          : true,
-      promoteBuffers:
-        typeof cursorState.bsonOptions.promoteBuffers === 'boolean'
-          ? cursorState.bsonOptions.promoteBuffers
-          : false
-    });
-  }
+  options: CommandOptions
+): CommandOptions {
+  Object.assign(queryOptions, {
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false
+  });
 
-  if (cursorState.session) {
-    queryOptions.session = cursorState.session;
+  if (options.session) {
+    queryOptions.session = options.session;
   }
 
   return queryOptions;

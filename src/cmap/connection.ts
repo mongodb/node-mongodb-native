@@ -12,19 +12,18 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { BinMsg, WriteProtocolMessageType, Response } from './commands';
-import type { Document } from '../bson';
+import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
 import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
-import type { QueryOptions } from './wire_protocol/query';
-import type { InternalCursorState } from '../cursor/core_cursor';
 import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
+import type { FindOptions } from '../operations/find';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -247,28 +246,16 @@ export class Connection extends EventEmitter {
     wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
   }
 
-  query(
-    ns: string,
-    cmd: Document,
-    cursorState: InternalCursorState,
-    options: QueryOptions,
-    callback: Callback
-  ): void {
-    wp.query(makeServerTrampoline(this), ns, cmd, cursorState, options, callback);
+  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
+    wp.query(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
-  getMore(
-    ns: string,
-    cursorState: InternalCursorState,
-    batchSize: number,
-    options: GetMoreOptions,
-    callback: Callback
-  ): void {
-    wp.getMore(makeServerTrampoline(this), ns, cursorState, batchSize, options, callback);
+  getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
+    wp.getMore(makeServerTrampoline(this), ns, cursorId, options, callback);
   }
 
-  killCursors(ns: string, cursorState: InternalCursorState, callback: Callback): void {
-    wp.killCursors(makeServerTrampoline(this), ns, cursorState, callback);
+  killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback: Callback): void {
+    wp.killCursors(makeServerTrampoline(this), ns, cursorIds, options, callback);
   }
 
   insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void {

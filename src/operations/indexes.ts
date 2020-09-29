@@ -9,7 +9,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
+import type { FindOptions } from './find';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -334,8 +334,7 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
       server.query(
         systemIndexesNS,
         { query: { ns: collectionNS } },
-        {},
-        this.options as QueryOptions,
+        this.options as FindOptions,
         callback
       );
       return;
