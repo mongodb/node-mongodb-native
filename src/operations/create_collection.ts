@@ -81,6 +81,7 @@ export class CreateCollectionOperation extends CommandOperation<
       if (err) {
         return callback(err);
       }
+
       callback(undefined, new Collection(db, name, options));
     };
 
