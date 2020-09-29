@@ -51,3 +51,6 @@ yarn.lock
 lib/
 *.tgz
 *.d.ts
+
+.vscode
+output
