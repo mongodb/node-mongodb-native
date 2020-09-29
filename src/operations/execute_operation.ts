@@ -123,8 +123,9 @@ function supportsRetryableReads(server: Server) {
 }
 
 function executeWithServerSelection(topology: Topology, operation: any, callback: Callback) {
+  const session = operation.session;
   const readPreference = operation.readPreference || ReadPreference.primary;
-  const inTransaction = operation.session && operation.session.inTransaction();
+  const inTransaction = session && session.inTransaction();
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     callback(
@@ -136,10 +137,7 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
     return;
   }
 
-  const serverSelectionOptions = {
-    session: operation.session
-  };
-
+  const serverSelectionOptions = { session };
   function callbackWithRetry(err?: any, result?: any) {
     if (err == null) {
       return callback(undefined, result);
@@ -176,7 +174,7 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
         (operation.hasAspect(Aspect.WRITE_OPERATION) && !supportsRetryableWrites(server))
       ) {
-        callback(err, null);
+        callback(err);
         return;
       }
 
@@ -187,20 +185,20 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
   // select a server, and execute the operation against it
   topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
     if (err) {
-      callback(err, null);
+      callback(err);
       return;
     }
 
     const willRetryRead =
       topology.s.options.retryReads !== false &&
-      operation.session &&
+      session &&
       !inTransaction &&
       supportsRetryableReads(server) &&
       operation.canRetryRead;
 
     const willRetryWrite =
       topology.s.options.retryWrites === true &&
-      operation.session &&
+      session &&
       !inTransaction &&
       supportsRetryableWrites(server) &&
       operation.canRetryWrite;
@@ -212,7 +210,7 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
     ) {
       if (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite) {
         operation.options.willRetryWrite = true;
-        operation.session.incrementTransactionNumber();
+        session.incrementTransactionNumber();
       }
 
       operation.execute(server, callbackWithRetry);

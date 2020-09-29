@@ -3,10 +3,6 @@ import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
   normalizeHintField,
-  decorateCommand,
-  decorateWithCollation,
-  decorateWithReadConcern,
-  formattedOrderClause,
   checkCollectionName,
   deprecateOptions,
   MongoDBNamespace,
@@ -91,8 +87,6 @@ import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 
-const mergeKeys = ['ignoreUndefined'];
-
 /** @public */
 export interface Collection {
   /** @deprecated Use {@link Collection.dropIndexes#Class} instead */
@@ -138,6 +132,7 @@ export interface CollectionPrivate {
   promoteLongs?: boolean;
   promoteValues?: boolean;
   promoteBuffers?: boolean;
+  ignoreUndefined?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -212,7 +207,11 @@ export class Collection implements OperationParent {
       promoteBuffers:
         options == null || options.promoteBuffers == null
           ? db.s.options?.promoteBuffers
-          : options.promoteBuffers
+          : options.promoteBuffers,
+      ignoreUndefined:
+        options == null || options.ignoreUndefined == null
+          ? db.s.options?.ignoreUndefined
+          : options.ignoreUndefined
     };
   }
 
@@ -680,155 +679,24 @@ export class Collection implements OperationParent {
   /**
    * Creates a cursor for a query that can be used to iterate over results from MongoDB
    *
-   * @param query - The cursor query object.
-   * @param options - Optional settings for the command
+   * @param filter - The query predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): Cursor;
-  find(query: Document): Cursor;
-  find(query: Document, options: FindOptions): Cursor;
-  find(query?: Document, options?: FindOptions): Cursor {
+  find(filter: Document): Cursor;
+  find(filter: Document, options: FindOptions): Cursor;
+  find(filter?: Document, options?: FindOptions): Cursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
-    }
-    if (typeof query === 'function') {
-      throw new TypeError('`query` parameter must not be function');
     }
     if (typeof options === 'function') {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    let selector =
-      query !== null && typeof query === 'object' && Array.isArray(query) === false ? query : {};
-
-    // Validate correctness off the selector
-    const object = selector;
-    if (Buffer.isBuffer(object)) {
-      const object_size = object[0] | (object[1] << 8) | (object[2] << 16) | (object[3] << 24);
-      if (object_size !== object.length) {
-        const error = new Error(
-          'query selector raw message size does not match message header size [' +
-            object.length +
-            '] != [' +
-            object_size +
-            ']'
-        );
-        error.name = 'MongoError';
-        throw error;
-      }
-    }
-
-    // Check special case where we are using an objectId
-    if (selector != null && selector._bsontype === 'ObjectID') {
-      selector = { _id: selector };
-    }
-
-    if (!options) {
-      options = {};
-    }
-
-    let projection = options.projection || options.fields;
-
-    if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
-      projection = projection.length
-        ? projection.reduce((result, field) => {
-            result[field] = 1;
-            return result;
-          }, {})
-        : { _id: 1 };
-    }
-
-    // Make a shallow copy of options
-    const newOptions: Document = Object.assign({}, options);
-
-    // Make a shallow copy of the collection options
-    for (const key in this.s.options) {
-      if (mergeKeys.indexOf(key) !== -1) {
-        newOptions[key] = this.s.options[key];
-      }
-    }
-
-    // Unpack options
-    newOptions.skip = options.skip ? options.skip : 0;
-    newOptions.limit = options.limit ? options.limit : 0;
-    newOptions.raw = typeof options.raw === 'boolean' ? options.raw : this.s.raw;
-    newOptions.hint =
-      options.hint != null ? normalizeHintField(options.hint) : this.s.collectionHint;
-    newOptions.timeout = typeof options.timeout === 'undefined' ? undefined : options.timeout;
-    // // If we have overridden slaveOk otherwise use the default db setting
-    newOptions.slaveOk = options.slaveOk != null ? options.slaveOk : this.s.db.slaveOk;
-
-    // Add read preference if needed
-    newOptions.readPreference = ReadPreference.resolve(this, newOptions);
-
-    // Set slave ok to true if read preference different from primary
-    if (
-      newOptions.readPreference != null &&
-      (newOptions.readPreference !== 'primary' || newOptions.readPreference.mode !== 'primary')
-    ) {
-      newOptions.slaveOk = true;
-    }
-
-    // Ensure the query is an object
-    if (selector != null && typeof selector !== 'object') {
-      throw new MongoError('query selector must be an object');
-    }
-
-    // Build the find command
-    const findCommand: Document = {
-      find: this.s.namespace.toString(),
-      limit: newOptions.limit,
-      skip: newOptions.skip,
-      query: selector
-    };
-
-    if (typeof options.allowDiskUse === 'boolean') {
-      findCommand.allowDiskUse = options.allowDiskUse;
-    }
-
-    // Ensure we use the right await data option
-    if (typeof newOptions.awaitdata === 'boolean') {
-      newOptions.awaitData = newOptions.awaitdata;
-    }
-
-    // Translate to new command option noCursorTimeout
-    if (typeof newOptions.timeout === 'boolean') newOptions.noCursorTimeout = newOptions.timeout;
-
-    decorateCommand(findCommand, newOptions, ['session', 'collation']);
-
-    if (projection) findCommand.fields = projection;
-
-    // Add db object to the new options
-    newOptions.db = this.s.db;
-
-    // Set raw if available at collection level
-    if (newOptions.raw == null && typeof this.s.raw === 'boolean') newOptions.raw = this.s.raw;
-    // Set promoteLongs if available at collection level
-    if (newOptions.promoteLongs == null && typeof this.s.promoteLongs === 'boolean')
-      newOptions.promoteLongs = this.s.promoteLongs;
-    if (newOptions.promoteValues == null && typeof this.s.promoteValues === 'boolean')
-      newOptions.promoteValues = this.s.promoteValues;
-    if (newOptions.promoteBuffers == null && typeof this.s.promoteBuffers === 'boolean')
-      newOptions.promoteBuffers = this.s.promoteBuffers;
-
-    // Sort options
-    if (findCommand.sort) {
-      findCommand.sort = formattedOrderClause(findCommand.sort);
-    }
-
-    // Set the readConcern
-    decorateWithReadConcern(findCommand, this, options);
-
-    // Decorate find command with collation options
-
-    decorateWithCollation(findCommand, this, options);
-
-    const cursor = new Cursor(
+    return new Cursor(
       this.s.topology,
-      new FindOperation(this, this.s.namespace, findCommand, newOptions),
-      newOptions
+      new FindOperation(this, this.s.namespace, filter, options),
+      options
     );
-
-    return cursor;
   }
 
   /**

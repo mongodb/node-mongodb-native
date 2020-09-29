@@ -81,7 +81,7 @@ describe('Cursor Async Iterator Tests', function () {
       for await (const doc of cursor) {
         expect(doc).to.exist;
         count++;
-        cursor.close();
+        await cursor.close();
       }
       expect(count).to.equal(1);
     }

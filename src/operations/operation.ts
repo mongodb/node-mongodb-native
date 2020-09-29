@@ -2,7 +2,6 @@ import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
-import type { InternalCursorState } from '../cursor/cursor';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {
@@ -21,8 +20,11 @@ export interface OperationConstructor extends Function {
 
 /** @internal */
 export interface OperationOptions extends BSONSerializeOptions {
-  explain?: boolean;
+  /** Specify ClientSession for this command */
   session?: ClientSession;
+
+  explain?: boolean;
+  willRetryWrites?: boolean;
 }
 
 /**
@@ -39,13 +41,12 @@ export abstract class OperationBase<
   options: T;
   ns!: MongoDBNamespace;
   cmd!: Document;
-
   readPreference: ReadPreference;
-
   server!: Server;
-  // TODO: remove as part of NODE-2104, except this is closed?
-  cursorState?: InternalCursorState;
   fullResponse?: boolean;
+
+  // BSON serialization options
+  bsonOptions?: BSONSerializeOptions;
 
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);

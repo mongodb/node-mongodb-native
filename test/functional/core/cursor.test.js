@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const f = require('util').format;
-const setupDatabase = require('./shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 
 describe('Cursor tests', function () {
   before(function () {

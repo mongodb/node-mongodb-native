@@ -344,11 +344,12 @@ function runTestSuiteTest(configuration, spec, context) {
         throw err;
       })
       .then(() => {
-        if (session0) session0.endSession();
-        if (session1) session1.endSession();
-
-        return validateExpectations(context.commandEvents, spec, savedSessionData);
-      });
+        const promises = [];
+        if (session0) promises.push(session0.endSession());
+        if (session1) promises.push(session1.endSession());
+        return Promise.all(promises);
+      })
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
   });
 }
 

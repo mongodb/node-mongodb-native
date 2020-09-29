@@ -150,7 +150,6 @@ export type {
   DocumentTransforms,
   StreamOptions,
   CoreCursorOptions,
-  InternalCursorState,
   CoreCursorPrivate,
   CursorState,
   CursorOptions,

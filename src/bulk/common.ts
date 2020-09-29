@@ -550,7 +550,7 @@ function executeCommands(
   function resultHandler(err?: AnyError, result?: Document) {
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
-      return callback(err);
+      return callback(new BulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult)));
     }
 
     if (err instanceof MongoWriteConcernError) {

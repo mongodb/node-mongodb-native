@@ -283,7 +283,6 @@ export class ConnectionPool extends EventEmitter {
       return;
     }
 
-    // add this request to the wait queue
     const waitQueueMember: WaitQueueMember = { callback };
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
@@ -299,11 +298,8 @@ export class ConnectionPool extends EventEmitter {
       }, waitQueueTimeoutMS);
     }
 
-    // place the member at the end of the wait queue
     this[kWaitQueue].push(waitQueueMember);
-
-    // process the wait queue
-    processWaitQueue(this);
+    setImmediate(() => processWaitQueue(this));
   }
 
   /**
@@ -316,7 +312,6 @@ export class ConnectionPool extends EventEmitter {
     const stale = connectionIsStale(this, connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
 
-    // Properly adjust state of connection
     if (!willDestroy) {
       connection.markAvailable();
       this[kConnections].push(connection);
@@ -329,7 +324,7 @@ export class ConnectionPool extends EventEmitter {
       destroyConnection(this, connection, reason);
     }
 
-    processWaitQueue(this);
+    setImmediate(() => processWaitQueue(this));
   }
 
   /**
@@ -503,7 +498,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
     // otherwise add it to the pool for later acquisition, and try to process the wait queue
     pool[kConnections].push(connection);
-    processWaitQueue(pool);
+    setImmediate(() => processWaitQueue(pool));
   });
 }
 
