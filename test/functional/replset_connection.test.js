@@ -864,7 +864,8 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  var waitForPrimary = function(count, config, options, callback) {
+  var waitForPrimary;
+  waitForPrimary = function(count, config, options, callback) {
     var ReplSet = require('../../lib/core').ReplSet;
     if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect

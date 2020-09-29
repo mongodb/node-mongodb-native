@@ -22,8 +22,8 @@ describe('URI Options (spec)', function() {
           test: function(done) {
             const query = Object.assign({}, qs.parse(url.parse(test.uri).query));
             if (
-              query.hasOwnProperty('tlsDisableOCSPEndpointCheck') ||
-              query.hasOwnProperty('tlsDisableCertificateRevocationCheck')
+              Object.prototype.hasOwnProperty.call(query, 'tlsDisableOCSPEndpointCheck') ||
+              Object.prototype.hasOwnProperty.call(query, 'tlsDisableCertificateRevocationCheck')
             ) {
               return this.skip();
             }

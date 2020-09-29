@@ -117,12 +117,12 @@ describe('utils', function() {
       this.clock.tick(250);
     });
 
-    it("should immediately schedule if the clock is unreliable", function (done) {
+    it('should immediately schedule if the clock is unreliable', function(done) {
       let clockCalled = 0;
       let lastTime = now();
       const marks = [];
       const executor = makeInterruptableAsyncInterval(
-        (callback) => {
+        callback => {
           marks.push(now() - lastTime);
           lastTime = now();
           callback();
@@ -141,7 +141,7 @@ describe('utils', function() {
             }
 
             return now();
-          },
+          }
         }
       );
 
