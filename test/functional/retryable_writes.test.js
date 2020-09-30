@@ -6,7 +6,6 @@ const parseRunOn = require('../functional/spec-runner').parseRunOn;
 
 describe('Retryable Writes', function () {
   let ctx = {};
-
   loadSpecTests('retryable-writes').forEach(suite => {
     const environmentRequirementList = parseRunOn(suite.runOn);
     environmentRequirementList.forEach(requires => {
@@ -86,6 +85,10 @@ function executeScenarioTest(test, ctx) {
       const args = generateArguments(test);
 
       let result = ctx.collection[test.operation.name].apply(ctx.collection, args);
+      const outcome = test.outcome && test.outcome.result;
+      const errorLabelsContain = outcome && outcome.errorLabelsContain;
+      const errorLabelsOmit = outcome && outcome.errorLabelsOmit;
+      const hasResult = outcome && !errorLabelsContain && !errorLabelsOmit;
       if (test.outcome.error) {
         result = result
           .then(() => expect(false).to.be.true)
@@ -94,6 +97,9 @@ function executeScenarioTest(test, ctx) {
             expect(err.message, 'expected operations to fail, but they succeeded').to.not.match(
               /expected false to be true/
             );
+            if (hasResult) expect(err.result).to.matchMongoSpec(test.outcome.result);
+            if (errorLabelsContain) expect(err.errorLabels).to.have.members(errorLabelsContain);
+            if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
           });
       } else if (test.outcome.result) {
         const expected = transformToFixUpsertedId(test.outcome.result);

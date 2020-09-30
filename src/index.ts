@@ -151,7 +151,6 @@ export type {
   DocumentTransforms,
   CursorStreamOptions,
   CoreCursorOptions,
-  InternalCursorState,
   CoreCursorPrivate,
   CursorState
 } from './cursor/core_cursor';

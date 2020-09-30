@@ -1,5 +1,4 @@
 import { emitDeprecatedOptionWarning } from '../utils';
-import { PromiseProvider } from '../promise_provider';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { Transform, PassThrough, Readable } from 'stream';
 import { deprecate } from 'util';
@@ -109,11 +108,11 @@ export class CursorStream extends Readable {
 
       // If we provided a transformation method
       if (
-        cursor.cursorState.streamOptions &&
-        typeof cursor.cursorState.streamOptions.transform === 'function' &&
+        cursor.streamOptions &&
+        typeof cursor.streamOptions.transform === 'function' &&
         result != null
       ) {
-        this.push(cursor.cursorState.streamOptions.transform(result));
+        this.push(cursor.streamOptions.transform(result));
         return;
       }
 
@@ -234,7 +233,7 @@ export class Cursor<
 
     // Optional ClientSession
     if (!options.explicitlyIgnoreSession && options.session) {
-      this.cursorState.session = options.session;
+      this.session = options.session;
     }
 
     // Translate correctly
@@ -257,18 +256,14 @@ export class Cursor<
   /** @internal */
   _initializeCursor(callback: Callback): void {
     if (this.operation && this.operation.session != null) {
-      this.cursorState.session = this.operation.session;
+      this.session = this.operation.session;
     } else {
       // implicitly create a session if one has not been provided
-      if (
-        !this.s.explicitlyIgnoreSession &&
-        !this.cursorState.session &&
-        this.topology.hasSessionSupport()
-      ) {
-        this.cursorState.session = this.topology.startSession({ owner: this });
+      if (!this.s.explicitlyIgnoreSession && !this.session && this.topology.hasSessionSupport()) {
+        this.session = this.topology.startSession({ owner: this });
 
         if (this.operation) {
-          this.operation.session = this.cursorState.session;
+          this.operation.session = this.session;
         }
       }
     }
@@ -296,7 +291,7 @@ export class Cursor<
         }
 
         this.s.state = CursorState.OPEN;
-        this.cursorState.cursorIndex--;
+        this.cursorIndex--;
         cb(undefined, true);
       });
     });
@@ -479,6 +474,14 @@ export class Cursor<
 
     if (typeof value !== 'boolean') {
       throw new MongoError(`flag ${flag} must be a boolean value`);
+    }
+
+    if (flag === 'tailable') {
+      this.tailable = value;
+    }
+
+    if (flag === 'awaitData') {
+      this.awaitData = value;
     }
 
     this.cmd[flag] = value;
@@ -731,46 +734,23 @@ export class Cursor<
   forEach(iterator: (doc: Document) => void): Promise<Document>;
   forEach(iterator: (doc: Document) => void, callback: Callback): void;
   forEach(iterator: (doc: Document) => void, callback?: Callback): Promise<Document> | void {
-    const Promise = PromiseProvider.get();
+    if (typeof iterator !== 'function') {
+      throw new TypeError('Missing required parameter `iterator`');
+    }
+
     // Rewind cursor state
     this.rewind();
 
     // Set current cursor to INIT
     this.s.state = CursorState.INIT;
 
-    if (typeof callback === 'function') {
+    return maybePromise(callback, done => {
       each(this, (err, doc) => {
-        if (err) {
-          callback(err);
-          return false;
-        }
-
-        if (doc != null) {
-          iterator(doc);
-          return true;
-        }
-
-        if (doc == null) {
-          callback(undefined);
-          return false;
-        }
+        if (err) return done(err);
+        if (doc != null) return iterator(doc);
+        done();
       });
-    } else {
-      return new Promise<Document>((fulfill, reject) => {
-        each(this, (err, doc) => {
-          if (err) {
-            reject(err);
-            return false;
-          } else if (doc == null) {
-            fulfill();
-            return false;
-          } else {
-            iterator(doc);
-            return true;
-          }
-        });
-      });
-    }
+    });
   }
 
   /**
@@ -873,8 +853,8 @@ export class Cursor<
       applySkipLimit = true;
     }
 
-    if (this.cursorState.session) {
-      options = Object.assign({}, options, { session: this.cursorState.session });
+    if (this.session) {
+      options = Object.assign({}, options, { session: this.session });
     }
 
     const countOperation = new CountOperation(this, !!applySkipLimit, options);
@@ -898,9 +878,17 @@ export class Cursor<
 
     return maybePromise(callback, cb => {
       this.s.state = CursorState.CLOSED;
+
       if (!options.skipKillCursors) {
         // Kill the cursor
-        this.kill();
+        this.kill(() => {
+          this._endSession(() => {
+            this.emit(Cursor.CLOSE);
+            cb(undefined, this);
+          });
+        });
+
+        return;
       }
 
       this._endSession(() => {
@@ -916,13 +904,13 @@ export class Cursor<
    * @param transform - The mapping transformation method.
    */
   map(transform: DocumentTransforms['doc']): this {
-    if (this.cursorState.transforms && this.cursorState.transforms.doc) {
-      const oldTransform = this.cursorState.transforms.doc;
-      this.cursorState.transforms.doc = doc => {
+    if (this.transforms && this.transforms.doc) {
+      const oldTransform = this.transforms.doc;
+      this.transforms.doc = doc => {
         return transform(oldTransform(doc));
       };
     } else {
-      this.cursorState.transforms = { doc: transform };
+      this.transforms = { doc: transform };
     }
 
     return this;
@@ -935,7 +923,7 @@ export class Cursor<
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: CursorStreamOptions): CursorStream {
     // TODO: replace this method with transformStream in next major release
-    this.cursorState.streamOptions = options || {};
+    this.streamOptions = options || {};
     return new CursorStream(this);
   }
 

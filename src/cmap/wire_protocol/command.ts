@@ -26,10 +26,8 @@ export interface CommandOptions extends BSONSerializeOptions {
   documentsReturnedIn?: string;
   noResponse?: boolean;
 
-  // NOTE: these are for retryable writes and will be removed soon
+  // FIXME: NODE-2802
   willRetryWrite?: boolean;
-  retryWrites?: boolean;
-  retrying?: boolean;
 
   // FIXME: NODE-2781
   writeConcern?: WriteConcernOptions | WriteConcern | W;
@@ -137,7 +135,6 @@ function _command(
 
   // This value is not overridable
   commandOptions.slaveOk = readPreference.slaveOk();
-
   const cmdNs = `${databaseNamespace(ns)}.$cmd`;
   const message = shouldUseOpMsg
     ? new Msg(cmdNs, finalCmd, commandOptions)

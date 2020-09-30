@@ -3,12 +3,12 @@ import { TopologyDescription } from '../../sdam/topology_description';
 import { MongoError } from '../../error';
 import { ReadPreference } from '../../read_preference';
 import type { Document } from '../../bson';
-import type { CommandOptions } from './command';
 import type { OpQueryOptions } from '../commands';
 import type { Topology } from '../../sdam/topology';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 import type { ReadPreferenceLike } from '../../read_preference';
+import type { CommandOptions } from './command';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
@@ -36,26 +36,16 @@ export function getReadPreference(cmd: Document, options: ReadPreferenceOption):
 export function applyCommonQueryOptions(
   queryOptions: OpQueryOptions,
   options: CommandOptions
-): OpQueryOptions {
+): CommandOptions {
   Object.assign(queryOptions, {
     raw: typeof options.raw === 'boolean' ? options.raw : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false
   });
-
-  if (typeof options.socketTimeout === 'number') {
-    queryOptions.socketTimeout = options.socketTimeout;
-  }
 
   if (options.session) {
     queryOptions.session = options.session;
-  }
-
-  if (typeof options.documentsReturnedIn === 'string') {
-    queryOptions.documentsReturnedIn = options.documentsReturnedIn;
   }
 
   return queryOptions;

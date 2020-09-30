@@ -184,9 +184,9 @@ describe('Operation (Promises)', function () {
 
             // Need to close cursor to close implicit session,
             // since cursor is not exhausted
-            cursor.close();
-            return client.close();
-          });
+            return cursor.close();
+          })
+          .then(() => client.close());
       });
       // END
     }
@@ -1087,7 +1087,7 @@ describe('Operation (Promises)', function () {
 
       /* eslint-disable */
 
-      return client.connect().then(function(client) {
+      return client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1104,31 +1104,31 @@ describe('Operation (Promises)', function () {
         // Insert some documents to perform map reduce over
         return collection
           .insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 })
-          .then(function() {
+          .then(function () {
             // Map function
-            var map = function() {
+            var map = function () {
               emit(this.user_id, 1);
             };
 
             // Reduce function
-            var reduce = function(k, vals) {
+            var reduce = function (k, vals) {
               return 1;
             };
 
             // Perform the map reduce
             return collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } });
           })
-          .then(function(reducedCollection) {
+          .then(function (reducedCollection) {
             // Mapreduce returns the temporary collection with the results
-            return reducedCollection.findOne({ _id: 1 }).then(function(result) {
+            return reducedCollection.findOne({ _id: 1 }).then(function (result) {
               test.equal(1, result.value);
               return reducedCollection;
             });
           })
-          .then(function(reducedCollection) {
+          .then(function (reducedCollection) {
             return reducedCollection.findOne({ _id: 2 });
           })
-          .then(function(result) {
+          .then(function (result) {
             test.equal(1, result.value);
             return client.close();
           });
@@ -1170,12 +1170,12 @@ describe('Operation (Promises)', function () {
 
         /* eslint-disable */
         // Map function
-        var map = function() {
+        var map = function () {
           emit(this.user_id, 1);
         };
 
         // Reduce function
-        var reduce = function(k, vals) {
+        var reduce = function (k, vals) {
           return 1;
         };
         /* eslint-enable */
@@ -1235,12 +1235,12 @@ describe('Operation (Promises)', function () {
 
         /* eslint-disable */
         // Map function
-        var map = function() {
+        var map = function () {
           emit(fn(this.timestamp.getYear()), 1);
         };
 
         // Reduce function
-        var reduce = function(k, v) {
+        var reduce = function (k, v) {
           var count = 0;
           for (var i = 0; i < v.length; i++) {
             count += v[i];
@@ -1249,7 +1249,7 @@ describe('Operation (Promises)', function () {
         };
 
         // Javascript function available in the map reduce scope
-        var t = function(val) {
+        var t = function (val) {
           return val + 1;
         };
 
@@ -1328,12 +1328,12 @@ describe('Operation (Promises)', function () {
 
         /* eslint-disable */
         // Map function
-        var map = function() {
+        var map = function () {
           emit(obj.fn(this.timestamp.getYear()), 1);
         };
 
         // Reduce function
-        var reduce = function(k, v) {
+        var reduce = function (k, v) {
           var count = 0;
           for (var i = 0; i < v.length; i++) {
             count += v[i];
@@ -1342,7 +1342,7 @@ describe('Operation (Promises)', function () {
         };
 
         // Javascript function available in the map reduce scope
-        var t = function(val) {
+        var t = function (val) {
           return val + 1;
         };
 
@@ -2067,7 +2067,7 @@ describe('Operation (Promises)', function () {
 
       /* eslint-disable */
 
-      return client.connect().then(function(client) {
+      return client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2085,7 +2085,7 @@ describe('Operation (Promises)', function () {
           db.createCollection('test_rename_collection_with_promise'),
           db.createCollection('test_rename_collection2_with_promise')
         ])
-          .then(function(collections) {
+          .then(function (collections) {
             collection1 = collections[0];
             collection2 = collections[1];
 
@@ -2093,7 +2093,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to a number
             try {
-              collection1.rename(5, function(err, collection) {});
+              collection1.rename(5, function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection name must be a String', err.message);
@@ -2101,7 +2101,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to an empty string
             try {
-              collection1.rename('', function(err, collection) {});
+              collection1.rename('', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection names cannot be empty', err.message);
@@ -2109,7 +2109,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to an illegal name including the character $
             try {
-              collection1.rename('te$t', function(err, collection) {});
+              collection1.rename('te$t', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not contain '$'", err.message);
@@ -2117,7 +2117,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to an illegal name starting with the character .
             try {
-              collection1.rename('.test', function(err, collection) {});
+              collection1.rename('.test', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2125,7 +2125,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to an illegal name ending with the character .
             try {
-              collection1.rename('test.', function(err, collection) {});
+              collection1.rename('test.', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2133,7 +2133,7 @@ describe('Operation (Promises)', function () {
 
             // Attemp to rename a collection to an illegal name with an empty middle name
             try {
-              collection1.rename('tes..t', function(err, collection) {});
+              collection1.rename('tes..t', function (err, collection) {});
             } catch (err) {
               test.equal('collection names cannot be empty', err.message);
             }
@@ -2141,13 +2141,13 @@ describe('Operation (Promises)', function () {
             // Insert a couple of documents
             return collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax());
           })
-          .then(function(docs) {
+          .then(function (docs) {
             test.ok(docs);
 
             // Attemp to rename the first collection to the second one, this will fail
             return collection1.rename('test_rename_collection2_with_promise');
           })
-          .catch(function(err) {
+          .catch(function (err) {
             test.ok(err instanceof Error);
             test.ok(err.message.length > 0);
 
@@ -2155,13 +2155,13 @@ describe('Operation (Promises)', function () {
             // this will be successful
             return collection1.rename('test_rename_collection3_with_promise');
           })
-          .then(function(collection2) {
+          .then(function (collection2) {
             test.equal('test_rename_collection3_with_promise', collection2.collectionName);
 
             // Ensure that the collection is pointing to the new one
             return collection2.count();
           })
-          .then(function(count) {
+          .then(function (count) {
             test.equal(2, count);
           })
           .then(

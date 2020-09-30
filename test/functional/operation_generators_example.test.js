@@ -177,7 +177,7 @@ describe('Operation (Generators)', function () {
 
         // Closing cursor to close implicit session,
         // since the cursor is not exhausted
-        cursor.close();
+        yield cursor.close();
         yield client.close();
       });
       // END

@@ -54,7 +54,6 @@ import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { LoggerOptions } from '../logger';
 import { DestroyOptions, Connection } from '../cmap/connection';
-import type { CommandOptions } from '../cmap/wire_protocol/command';
 import { RunCommandOperation } from '../operations/run_command';
 import type { CursorOptions } from '../cursor/cursor';
 import type { MongoClientOptions } from '../mongo_client';
@@ -356,15 +355,28 @@ export class Topology extends EventEmitter {
 
     ReadPreference.translate(options);
     const readPreference = options.readPreference || ReadPreference.primary;
-    const connectHandler = (err: Error | MongoError | undefined) => {
+    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
         this.close();
 
-        if (typeof callback === 'function') {
-          callback(err);
-        } else {
-          this.emit(Topology.ERROR, err);
-        }
+        typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
+        return;
+      }
+
+      // TODO: NODE-2471
+      if (server && this.s.credentials) {
+        server.command('admin.$cmd', { ping: 1 }, err => {
+          if (err) {
+            typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
+            return;
+          }
+
+          stateTransition(this, STATE_CONNECTED);
+          this.emit(Topology.OPEN, err, this);
+          this.emit(Topology.CONNECT, this);
+
+          if (typeof callback === 'function') callback(undefined, this);
+        });
 
         return;
       }
@@ -373,16 +385,8 @@ export class Topology extends EventEmitter {
       this.emit(Topology.OPEN, err, this);
       this.emit(Topology.CONNECT, this);
 
-      if (typeof callback === 'function') callback(err, this);
-    };
-
-    // TODO: NODE-2471
-    if (this.s.credentials) {
-      this.command('admin.$cmd', { ping: 1 }, { readPreference }, connectHandler);
-      return;
-    }
-
-    this.selectServer(readPreferenceServerSelector(readPreference), options, connectHandler);
+      if (typeof callback === 'function') callback(undefined, this);
+    });
   }
 
   /** Close this topology */
@@ -567,18 +571,27 @@ export class Topology extends EventEmitter {
   }
 
   /** Send endSessions command(s) with the given session ids */
-  endSessions(sessions: ServerSessionId[], callback?: Callback): void {
+  endSessions(sessions: ServerSessionId[], callback?: Callback<Document>): void {
     if (!Array.isArray(sessions)) {
       sessions = [sessions];
     }
 
-    this.command(
-      'admin.$cmd',
-      { endSessions: sessions },
-      { readPreference: ReadPreference.primaryPreferred, noResponse: true },
-      () => {
-        // intentionally ignored, per spec
-        if (typeof callback === 'function') callback();
+    this.selectServer(
+      readPreferenceServerSelector(ReadPreference.primaryPreferred),
+      (err, server) => {
+        if (err || !server) {
+          if (typeof callback === 'function') callback(err);
+          return;
+        }
+
+        server.command(
+          'admin.$cmd',
+          { endSessions: sessions },
+          { noResponse: true },
+          (err, result) => {
+            if (typeof callback === 'function') callback(err, result);
+          }
+        );
       }
     );
   }
@@ -670,56 +683,6 @@ export class Topology extends EventEmitter {
   }
 
   /**
-   * Execute a command
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param cmd - The command
-   */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
-    }
-
-    ReadPreference.translate(options);
-    const readPreference = (options.readPreference as ReadPreference) || ReadPreference.primary;
-
-    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
-      if (err || !server) {
-        callback(err);
-        return;
-      }
-
-      const willRetryWrite =
-        !options.retrying &&
-        !!options.retryWrites &&
-        options.session &&
-        isRetryableWritesSupported(this) &&
-        !options.session.inTransaction() &&
-        isWriteCommand(cmd);
-
-      // increment and assign txnNumber
-      if (willRetryWrite) {
-        options.session?.incrementTransactionNumber();
-        options.willRetryWrite = willRetryWrite;
-      }
-
-      server.command(ns, cmd, options, (err, result) => {
-        if (!err) return callback(undefined, result);
-        if (!shouldRetryOperation(err)) {
-          return callback(err);
-        }
-
-        if (willRetryWrite) {
-          const newOptions = Object.assign({}, options, { retrying: true });
-          return this.command(ns, cmd, newOptions, callback);
-        }
-
-        return callback(err);
-      });
-    });
-  }
-
-  /**
    * Create a new cursor
    *
    * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
@@ -786,11 +749,6 @@ export class Topology extends EventEmitter {
     Topology.prototype.close,
     'destroy() is deprecated, please use close() instead'
   );
-}
-
-const RETRYABLE_WRITE_OPERATIONS = ['findAndModify', 'insert', 'update', 'delete'];
-function isWriteCommand(command: Document) {
-  return RETRYABLE_WRITE_OPERATIONS.some((op: string) => command[op]);
 }
 
 /** Destroys a server, and removes all event listeners from the instance */
@@ -941,10 +899,6 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function shouldRetryOperation(err: AnyError) {
-  return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
-}
-
 function srvPollingHandler(topology: Topology) {
   return function handleSrvPolling(ev: SrvPollingEvent) {
     const previousTopologyDescription = topology.s.description;
@@ -1056,26 +1010,6 @@ function makeCompressionInfo(options: TopologyOptions) {
   });
 
   return options.compression.compressors;
-}
-
-const RETRYABLE_WIRE_VERSION = 6;
-
-/** Determines whether the provided topology supports retryable writes */
-function isRetryableWritesSupported(topology: Topology) {
-  const maxWireVersion = topology.lastIsMaster().maxWireVersion;
-  if (maxWireVersion < RETRYABLE_WIRE_VERSION) {
-    return false;
-  }
-
-  if (!topology.logicalSessionTimeoutMinutes) {
-    return false;
-  }
-
-  if (topology.description.type === TopologyType.Single) {
-    return false;
-  }
-
-  return true;
 }
 
 /** @public */

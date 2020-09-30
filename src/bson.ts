@@ -48,3 +48,24 @@ export interface BSONSerializeOptions extends SerializeOptions {
 
   raw?: boolean;
 }
+
+export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {
+  const {
+    fieldsAsRaw,
+    promoteValues,
+    promoteBuffers,
+    promoteLongs,
+    serializeFunctions,
+    ignoreUndefined,
+    raw
+  } = options;
+  return {
+    fieldsAsRaw,
+    promoteValues,
+    promoteBuffers,
+    promoteLongs,
+    serializeFunctions,
+    ignoreUndefined,
+    raw
+  };
+}

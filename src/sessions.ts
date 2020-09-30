@@ -20,6 +20,8 @@ import type { MongoClientOptions } from './mongo_client';
 import type { Cursor } from './cursor/cursor';
 import type { CoreCursor } from './cursor/core_cursor';
 import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
+import { executeOperation } from './operations/execute_operation';
+import { RunAdminCommandOperation } from './operations/run_command';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -52,6 +54,8 @@ export interface ClientSessionOptions {
 /** @public */
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
+const kServerSession = Symbol('serverSession');
+
 /**
  * A class representing a client session on the server
  *
@@ -62,7 +66,6 @@ class ClientSession extends EventEmitter {
   topology: Topology;
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
-  serverSession?: ServerSession;
   clientOptions?: MongoClientOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
@@ -71,6 +74,7 @@ class ClientSession extends EventEmitter {
   owner: symbol | CoreCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
+  [kServerSession]?: ServerSession;
 
   /**
    * Create a client session.
@@ -102,8 +106,8 @@ class ClientSession extends EventEmitter {
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
-    this.serverSession = sessionPool.acquire();
     this.clientOptions = clientOptions;
+    this[kServerSession] = undefined;
 
     this.supports = {
       causalConsistency:
@@ -124,41 +128,61 @@ class ClientSession extends EventEmitter {
     return this.serverSession?.id;
   }
 
+  get serverSession(): ServerSession {
+    if (this[kServerSession] == null) {
+      this[kServerSession] = this.sessionPool.acquire();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this[kServerSession]!;
+  }
+
   /**
    * Ends this session on the server
    *
    * @param options - Optional settings. Currently reserved for future use
    * @param callback - Optional callback for completion of this operation
    */
-  endSession(): void;
+  endSession(): Promise<void>;
   endSession(callback: Callback<void>): void;
+  endSession(options: Record<string, unknown>): Promise<void>;
   endSession(options: Record<string, unknown>, callback: Callback<void>): void;
-  endSession(options?: Record<string, unknown> | Callback<void>, callback?: Callback<void>): void {
-    if (typeof options === 'function') (callback = options as Callback), (options = {});
+  endSession(
+    options?: Record<string, unknown> | Callback<void>,
+    callback?: Callback<void>
+  ): void | Promise<void> {
+    if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (this.hasEnded) {
-      if (typeof callback === 'function') callback();
-      return;
-    }
+    return maybePromise(callback, done => {
+      if (this.hasEnded) {
+        return done();
+      }
 
-    if (this.serverSession && this.inTransaction()) {
-      this.abortTransaction(); // pass in callback?
-    }
+      const completeEndSession = () => {
+        // release the server session back to the pool
+        this.sessionPool.release(this.serverSession);
+        this[kServerSession] = undefined;
 
-    // mark the session as ended, and emit a signal
-    this.hasEnded = true;
-    this.emit('ended', this);
+        // mark the session as ended, and emit a signal
+        this.hasEnded = true;
+        this.emit('ended', this);
 
-    // release the server session back to the pool
-    if (this.serverSession) {
-      this.sessionPool.release(this.serverSession);
-    }
+        // spec indicates that we should ignore all errors for `endSessions`
+        done();
+      };
 
-    this.serverSession = undefined;
+      if (this.serverSession && this.inTransaction()) {
+        this.abortTransaction(err => {
+          if (err) return done(err);
+          completeEndSession();
+        });
 
-    // spec indicates that we should ignore all errors for `endSessions`
-    if (typeof callback === 'function') callback();
+        return;
+      }
+
+      completeEndSession();
+    });
   }
 
   /**
@@ -197,7 +221,8 @@ class ClientSession extends EventEmitter {
   /** Increment the transaction number on the internal ServerSession */
   incrementTransactionNumber(): void {
     if (this.serverSession) {
-      this.serverSession.txnNumber++;
+      this.serverSession.txnNumber =
+        typeof this.serverSession.txnNumber === 'number' ? this.serverSession.txnNumber + 1 : 0;
     }
   }
 
@@ -521,25 +546,39 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   }
 
   // send the command
-  session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
-    if (err && isRetryableError(err as MongoError)) {
-      // SPEC-1185: apply majority write concern when retrying commitTransaction
-      if (command.commitTransaction) {
-        // per txns spec, must unpin session in this case
-        session.transaction.unpinServer();
+  executeOperation(
+    session.topology,
+    new RunAdminCommandOperation(undefined, command, {
+      session,
+      readPreference: ReadPreference.primary
+    }),
+    (err, reply) => {
+      if (err && isRetryableError(err as MongoError)) {
+        // SPEC-1185: apply majority write concern when retrying commitTransaction
+        if (command.commitTransaction) {
+          // per txns spec, must unpin session in this case
+          session.transaction.unpinServer();
 
-        command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
-          w: 'majority'
-        });
+          command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+            w: 'majority'
+          });
+        }
+
+        executeOperation(
+          session.topology,
+          new RunAdminCommandOperation(undefined, command, {
+            session,
+            readPreference: ReadPreference.primary
+          }),
+          (_err, _reply) => commandHandler(_err as MongoError, _reply)
+        );
+
+        return;
       }
 
-      return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
-        commandHandler(_err as MongoError, _reply)
-      );
+      commandHandler(err as MongoError, reply);
     }
-
-    commandHandler(err as MongoError, reply);
-  });
+  );
 }
 
 function supportsRecoveryToken(session: ClientSession) {
@@ -714,10 +753,14 @@ function applySession(
   command: Document,
   options?: WriteCommandOptions
 ): MongoError | undefined {
+  // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
+  if (session.hasEnded) {
+    return new MongoError('Attemped to use a session that has ended');
+  }
+
   const serverSession = session.serverSession;
   if (serverSession == null) {
-    // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
-    return new MongoError('Cannot use a session that has ended');
+    return new MongoError('Unable to acquire server session');
   }
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility

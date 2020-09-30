@@ -3,52 +3,28 @@ import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
-import type { InternalCursorState } from '../../cursor/core_cursor';
-import type { ClientSession } from '../../sessions';
-
-interface KillCursorOptions {
-  session?: ClientSession;
-  immediateRelease: boolean;
-  noResponse: boolean;
-}
+import type { Long } from '../../bson';
 
 export function killCursors(
   server: Server,
   ns: string,
-  cursorState: InternalCursorState,
+  cursorIds: Long[],
+  options: CommandOptions,
   callback: Callback
 ): void {
   callback = typeof callback === 'function' ? callback : () => undefined;
-
-  if (!cursorState.cursorId) {
-    callback(new MongoError('Invalid internal cursor state, no known cursor id'));
-    return;
+  if (!cursorIds || !Array.isArray(cursorIds)) {
+    throw new TypeError('Invalid list of cursor ids provided: ' + cursorIds);
   }
-
-  const cursorIds = [cursorState.cursorId];
 
   if (maxWireVersion(server) < 4) {
     const pool = server.s.pool;
     const killCursor = new KillCursor(ns, cursorIds);
-    const options: KillCursorOptions = {
-      immediateRelease: true,
-      noResponse: true
-    };
 
-    if (typeof cursorState.session === 'object') {
-      options.session = cursorState.session;
-    }
-
-    if (pool && pool.isConnected()) {
-      try {
-        pool.write(killCursor, options, callback);
-      } catch (err) {
-        if (typeof callback === 'function') {
-          callback(err, null);
-        } else {
-          console.warn(err);
-        }
-      }
+    try {
+      pool.write(killCursor, { noResponse: true, ...options }, callback);
+    } catch (err) {
+      callback(err);
     }
 
     return;
@@ -59,12 +35,7 @@ export function killCursors(
     cursors: cursorIds
   };
 
-  const options: CommandOptions = { fullResult: true };
-  if (typeof cursorState.session === 'object') {
-    options.session = cursorState.session;
-  }
-
-  command(server, ns, killCursorCmd, options, (err, response) => {
+  command(server, ns, killCursorCmd, { fullResult: true, ...options }, (err, response) => {
     if (err || !response) {
       return callback(err);
     }

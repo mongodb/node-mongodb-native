@@ -493,12 +493,13 @@ describe('Aggregation', function () {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function (err, client) {
+      client.connect((err, client) => {
         expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        var db = client.db(databaseName);
+        const db = client.db(databaseName);
         // Some docs for insertion
-        var docs = [
+        const docs = [
           {
             title: 'this is my title',
             author: 'bob',
@@ -514,14 +515,14 @@ describe('Aggregation', function () {
         ];
 
         // Create a collection
-        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+        const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insert(docs, { w: 1 }, (err, result) => {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          var cursor = collection.aggregate(
+          const cursor = collection.aggregate(
             [
               {
                 $project: {
@@ -542,17 +543,14 @@ describe('Aggregation', function () {
               cursor: { batchSize: 1 }
             }
           );
+          this.defer(() => cursor.close());
 
           // Iterate over all the items in the cursor
-          cursor.next(function (err, result) {
+          cursor.next((err, result) => {
             expect(err).to.not.exist;
             expect(result._id.tags).to.equal('good');
             expect(result.authors).to.eql(['bob']);
-
-            // Since cursor will not be "exhausted", since batchSize is 1,
-            // we need to manually call close on the cursor
-            cursor.close();
-            client.close(done);
+            done();
           });
         });
       });
@@ -1004,16 +1002,17 @@ describe('Aggregation', function () {
       },
 
       test: function (done) {
-        var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+        const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
           databaseName = this.configuration.db;
 
         // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
         // DOC_START
-        client.connect(function (err, client) {
-          var db = client.db(databaseName);
+        client.connect((err, client) => {
+          expect(err).to.not.exist;
+          this.defer(() => client.close());
 
-          // Some docs for insertion
-          var docs = [
+          const db = client.db(databaseName);
+          const docs = [
             {
               title: 'this is my title',
               author: 'bob',
@@ -1029,14 +1028,14 @@ describe('Aggregation', function () {
           ];
 
           // Create a collection
-          var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
+          const collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
-          collection.insert(docs, { w: 1 }, function (err, result) {
+          collection.insert(docs, { w: 1 }, (err, result) => {
             expect(result).to.exist;
             expect(err).to.not.exist;
 
             // Execute aggregate, notice the pipeline is expressed as an Array
-            var cursor = collection.aggregate(
+            const cursor = collection.aggregate(
               [
                 {
                   $project: {
@@ -1058,10 +1057,11 @@ describe('Aggregation', function () {
                 maxTimeMS: 1000
               }
             );
+            this.defer(() => cursor.close());
 
             // Override the db.command to validate the correct command
             // is executed
-            var cmd = db.command;
+            const cmd = db.command;
             // Validate the command
             db.command = function (c) {
               expect(err).to.not.exist;
@@ -1072,7 +1072,7 @@ describe('Aggregation', function () {
             };
 
             // Iterate over all the items in the cursor
-            cursor.next(function (err, result) {
+            cursor.next((err, result) => {
               expect(err).to.not.exist;
               expect(result._id.tags).to.equal('good');
               expect(result.authors).to.eql(['bob']);
@@ -1107,13 +1107,12 @@ describe('Aggregation', function () {
                   maxTimeMS: 1000
                 }
               );
-
+              this.defer(() => secondCursor.close());
               expect(secondCursor).to.exist;
 
               // Return the command
               db.command = cmd;
-              cursor.close();
-              client.close(done);
+              done();
             });
           });
         });

@@ -275,9 +275,8 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
 
 export function isRetryableWriteError(error: MongoError): boolean {
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code);
+    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
-
   return RETRYABLE_WRITE_ERROR_CODES.has(error.code ?? 0);
 }
 
