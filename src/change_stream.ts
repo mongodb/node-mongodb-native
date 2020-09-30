@@ -179,6 +179,7 @@ export class ChangeStream extends EventEmitter {
   closed: boolean;
   streamOptions?: CursorStreamOptions;
   [kResumeQueue]: Denque;
+  [kCursorStream]?: CursorStream;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -244,23 +245,33 @@ export class ChangeStream extends EventEmitter {
     // Create contained Change Stream cursor
     this.cursor = createChangeStreamCursor(this, options);
 
-    const cursorStream = this.cursor[kCursorStream];
-    if (!cursorStream) throw new MongoError('No stream on cursor');
     this.closed = false;
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', (eventName: string) => {
       if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
-        cursorStream.on('data', change => processNewChange(this, change));
+        this.streamEvents(this.cursor);
       }
     });
 
-    // Listen for all `change` listeners being removed from ChangeStream
     this.on('removeListener', (eventName: string) => {
       if (eventName === 'change' && this.listenerCount('change') === 0 && this.cursor) {
-        cursorStream.removeAllListeners('data');
+        this[kCursorStream]?.removeAllListeners('data');
       }
     });
+  }
+
+  /** @internal */
+  streamEvents(cursor: ChangeStreamCursor): void {
+    const stream = this[kCursorStream] || cursor.stream();
+    this[kCursorStream] = stream;
+    stream.on(CursorStream.DATA, change => processNewChange(this, change));
+    stream.on(CursorStream.ERROR, error => processError(this, error));
+  }
+
+  /** @internal */
+  triggerError(error: AnyError): void {
+    processError(this, error, () => 1);
   }
 
   /** The cached resume token that is used to resume after the most recently returned change. */
@@ -313,11 +324,12 @@ export class ChangeStream extends EventEmitter {
 
       // Tidy up the existing cursor
       const cursor = this.cursor;
-      const cursorStream = cursor[kCursorStream];
-      if (!cursorStream) throw new MongoError('No stream on cursor');
 
       return cursor.close(err => {
-        ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
+        ['data', 'close', 'end', 'error'].forEach(event =>
+          this[kCursorStream]?.removeAllListeners(event)
+        );
+        this[kCursorStream] = undefined;
         this.cursor = undefined;
 
         return cb(err);
@@ -352,7 +364,6 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   hasReceived?: boolean;
   resumeAfter: ResumeToken;
   startAfter: ResumeToken;
-  [kCursorStream]?: CursorStream;
 
   constructor(
     topology: Topology,
@@ -488,16 +499,7 @@ function createChangeStreamCursor(
 
   relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
 
-  const stream = changeStreamCursor.stream(self.streamOptions);
-  changeStreamCursor[kCursorStream] = stream;
-  relayEvents(stream, self, ['end', 'close']);
-
-  if (self.listenerCount(ChangeStream.CHANGE) > 0) {
-    stream.on(CursorStream.DATA, change => processNewChange(self, change));
-  }
-  stream.on(ChangeStream.ERROR, error => processError(self, error));
-  // for internal use only, allows for triggering of mock errors on the internal stream
-  self.on('streamError', event => stream.emit('error', event));
+  if (self.listenerCount(ChangeStream.CHANGE) > 0) self.streamEvents(changeStreamCursor);
 
   return changeStreamCursor;
 }
@@ -600,8 +602,9 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
 
     // stop listening to all events from old cursor
     [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
-      cursor[kCursorStream]?.removeAllListeners(event)
+      changeStream[kCursorStream]?.removeAllListeners(event)
     );
+    changeStream[kCursorStream] = undefined;
 
     // close internal cursor, ignore errors
     cursor.close();
