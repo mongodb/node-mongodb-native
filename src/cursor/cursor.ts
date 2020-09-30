@@ -944,10 +944,10 @@ export class Cursor<
         }
       });
 
-      return this.stream().pipe(stream);
+      return this.stream(options).pipe(stream);
     }
 
-    return this.stream().pipe(new PassThrough({ objectMode: true }));
+    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**
