@@ -1,0 +1,7 @@
+{
+  "extension": ["js"],
+  "file": "test/tools/runner",
+  "ui": "test/tools/runner/metadata_ui.js",
+  "recursive": true,
+  "timeout": 60000
+}
