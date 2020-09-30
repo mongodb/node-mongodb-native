@@ -505,7 +505,7 @@ describe('ReadPreference', function () {
           .db(this.configuration.db)
           .collection('test')
           .find({}, { readPreference: rp })
-          .toArray((err) => {
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
             expect(events[0]).nested.property('command.$readPreference').to.deep.equal(expected);
@@ -523,7 +523,7 @@ describe('ReadPreference', function () {
           .collection('test')
           .find({})
           .setReadPreference(rp)
-          .toArray((err) => {
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
             expect(events[0]).nested.property('command.$readPreference').to.deep.equal(expected);
@@ -541,7 +541,7 @@ describe('ReadPreference', function () {
           .collection('test')
           .find({})
           .setReadPreference(rp)
-          .toArray((err) => {
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
             expect(events[0]).nested.property('command.$readPreference').to.deep.equal(expected);
@@ -561,7 +561,7 @@ describe('ReadPreference', function () {
           .collection('test')
           .find({})
           .setReadPreference(rp)
-          .toArray((err) => {
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
             expect(events[0]).nested.property('command.$readPreference').to.deep.equal(expected);
@@ -579,7 +579,7 @@ describe('ReadPreference', function () {
           .collection('test')
           .find({})
           .setReadPreference(rp)
-          .toArray((err) => {
+          .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY };
             expect(events[0]).nested.property('command.$readPreference').to.deep.equal(expected);
@@ -620,7 +620,7 @@ describe('ReadPreference', function () {
       'Db#dropDatabase': []
     };
 
-    Object.keys(methods).forEach((operation) => {
+    Object.keys(methods).forEach(operation => {
       it(`${operation}`, {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'] }
@@ -638,7 +638,7 @@ describe('ReadPreference', function () {
             const collection = db.collection(collectionName);
             const parent = parentId === 'Collection' ? collection : parentId === 'Db' ? db : null;
             const selectServerSpy = this.sinon.spy(Topology.prototype, 'selectServer');
-            const callback = (err) => {
+            const callback = err => {
               expect(err).to.not.exist;
               expect(selectServerSpy.called).to.equal(true);
               if (typeof selectServerSpy.args[0][0] === 'function') {
@@ -690,7 +690,7 @@ describe('ReadPreference', function () {
       'Db#dropDatabase': []
     };
 
-    Object.keys(methods).forEach((operation) => {
+    Object.keys(methods).forEach(operation => {
       it(`${operation}`, {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'] }
@@ -708,7 +708,7 @@ describe('ReadPreference', function () {
             const collection = db.collection(collectionName);
             const parent = parentId === 'Collection' ? collection : parentId === 'Db' ? db : null;
             const selectServerSpy = this.sinon.spy(Topology.prototype, 'selectServer');
-            const callback = (err) => {
+            const callback = err => {
               expect(err).to.not.exist;
               expect(selectServerSpy.called).to.equal(true);
               if (typeof selectServerSpy.args[0][0] === 'function') {
