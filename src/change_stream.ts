@@ -34,6 +34,7 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
+/** @public */
 export interface ResumeOptions {
   startAtOperationTime?: Timestamp;
   batchSize?: number;
