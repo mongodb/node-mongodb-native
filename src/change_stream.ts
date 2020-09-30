@@ -334,7 +334,7 @@ export class ChangeStream extends EventEmitter {
     if (!this.cursor) {
       throw new MongoError('ChangeStream has no cursor, unable to stream');
     }
-    this.cursor.cursorState.streamOptions = options;
+    this.cursor.streamOptions = options;
     return new ChangeStreamStream(this.cursor);
   }
 
