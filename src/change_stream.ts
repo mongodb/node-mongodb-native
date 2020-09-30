@@ -251,7 +251,7 @@ export class ChangeStream extends EventEmitter {
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', (eventName: string) => {
       if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
-        cursorStream.on('data', (change: ChangeStreamDocument) => processNewChange(this, change));
+        cursorStream.on('data', change => processNewChange(this, change));
       }
     });
 
@@ -335,34 +335,6 @@ export class ChangeStream extends EventEmitter {
       throw new MongoError('ChangeStream has no cursor, unable to stream');
     }
     return this.cursor.stream(options);
-  }
-
-  /**
-   * This method will cause a stream in flowing mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
-   * @throws MongoError if this.cursor is undefined
-   */
-  pause(): ChangeStreamCursor {
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to pause');
-    }
-    const stream = this.cursor[kCursorStream];
-    if (!stream) throw new MongoError('No stream on cursor');
-    stream.pause();
-    return this.cursor;
-  }
-
-  /**
-   * This method will cause the readable stream to resume emitting data events.
-   * @throws MongoError if this.cursor is undefined
-   */
-  resume(): ChangeStreamCursor {
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to resume');
-    }
-    const stream = this.cursor[kCursorStream];
-    if (!stream) throw new MongoError('No stream on cursor');
-    stream.resume();
-    return this.cursor;
   }
 }
 

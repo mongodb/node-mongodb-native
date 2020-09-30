@@ -58,6 +58,7 @@ const kCursor = Symbol('cursor');
 
 export class CursorStream extends Readable {
   [kCursor]: Cursor;
+  options: CursorStreamOptions;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -76,9 +77,10 @@ export class CursorStream extends Readable {
   /** @event */
   static readonly RESUME = 'resume' as const;
 
-  constructor(cursor: Cursor) {
+  constructor(cursor: Cursor, options?: CursorStreamOptions) {
     super({ objectMode: true });
     this[kCursor] = cursor;
+    this.options = options || {};
   }
 
   destroy(err?: AnyError): void {
@@ -98,21 +100,14 @@ export class CursorStream extends Readable {
     // Get the next item
     cursor._next((err, result) => {
       if (err) {
-        if (this.listeners(CursorStream.ERROR) && this.listeners(CursorStream.ERROR).length > 0) {
-          this.emit(CursorStream.ERROR, err);
-        }
-        const done = () => this.emit(CursorStream.END);
-        cursor.isDead() ? done() : cursor.close(done);
+        this.emit(CursorStream.ERROR, err);
+        cursor.close(() => this.emit(CursorStream.END));
         return;
       }
 
       // If we provided a transformation method
-      if (
-        cursor.streamOptions &&
-        typeof cursor.streamOptions.transform === 'function' &&
-        result != null
-      ) {
-        this.push(cursor.streamOptions.transform(result));
+      if (typeof this.options.transform === 'function' && result != null) {
+        this.push(this.options.transform(result));
         return;
       }
 
@@ -923,8 +918,7 @@ export class Cursor<
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: CursorStreamOptions): CursorStream {
     // TODO: replace this method with transformStream in next major release
-    this.streamOptions = options || {};
-    return new CursorStream(this);
+    return new CursorStream(this, options);
   }
 
   /**
@@ -943,8 +937,7 @@ export class Cursor<
           callback();
         }
       });
-
-      return this.stream(options).pipe(stream);
+      return this.stream().pipe(stream);
     }
 
     return this.stream(options).pipe(new PassThrough({ objectMode: true }));

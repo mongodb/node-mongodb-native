@@ -109,7 +109,6 @@ export class CoreCursor<
   operationTime?: OperationTime;
   reconnect?: boolean;
   session?: ClientSession;
-  streamOptions?: CursorStreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
   tailable: boolean;
