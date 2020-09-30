@@ -18,7 +18,7 @@ import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import type { CursorCloseOptions, CursorStreamOptions } from './cursor/core_cursor';
+import type { CursorStreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 
@@ -370,20 +370,6 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
     } else if (options.resumeAfter) {
       this.resumeToken = options.resumeAfter;
     }
-  }
-
-  close(): void;
-  close(callback: Callback): void;
-  close(options: CursorCloseOptions): Promise<void>;
-  close(options: CursorCloseOptions, callback: Callback): void;
-  close(
-    options?: CursorCloseOptions | Callback<void>,
-    callback?: Callback<void>
-  ): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
-    this.emit(Cursor.CLOSE);
-    return super.close(options, callback as Callback);
   }
 
   set resumeToken(token: ResumeToken) {
