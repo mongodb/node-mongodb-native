@@ -3,7 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { ReadPreference } = require('../../read_preference');
+const { ReadPreference } = require('../../lib/core/topologies/read_preference');
 const Db = require('../../lib/db');
 const expect = require('chai').expect;
 
