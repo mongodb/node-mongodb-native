@@ -14,7 +14,7 @@ import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern } from './read_concern';
+import { ReadConcern, ReadConcernLike } from './read_concern';
 import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
@@ -113,7 +113,7 @@ export interface CollectionOptions
   /** Returns an error if the collection does not exist */
   strict?: boolean;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
-  readConcern?: ReadConcern;
+  readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
 }

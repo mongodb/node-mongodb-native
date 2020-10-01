@@ -250,9 +250,7 @@ export class Db implements OperationParent {
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    options.readConcern = options.readConcern
-      ? new ReadConcern(options.readConcern.level)
-      : this.readConcern;
+    options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
 
     return executeOperation(
       this.s.topology,
@@ -340,9 +338,7 @@ export class Db implements OperationParent {
     options = Object.assign({}, options);
 
     // If we have not set a collection level readConcern set the db level one
-    options.readConcern = options.readConcern
-      ? new ReadConcern(options.readConcern.level)
-      : this.readConcern;
+    options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
 
     // Do we have ignoreUndefined set
     if (this.s.options?.ignoreUndefined) {

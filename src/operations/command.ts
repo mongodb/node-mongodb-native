@@ -9,6 +9,7 @@ import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { ReadConcernLike } from './../read_concern';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -17,7 +18,7 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
   /** Return the full server response for the command */
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
-  readConcern?: ReadConcern;
+  readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
   readPreference?: ReadPreferenceLike;
   /** Collation */

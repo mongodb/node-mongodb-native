@@ -7,6 +7,12 @@ export enum ReadConcernLevel {
   snapshot = 'snapshot'
 }
 
+/** @public */
+export type ReadConcernLevelLike = ReadConcernLevel | keyof typeof ReadConcernLevel;
+
+/** @public */
+export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelLike } | ReadConcernLevelLike;
+
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
  * of the data read from replica sets and replica set shards.
@@ -15,11 +21,17 @@ export enum ReadConcernLevel {
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level: ReadConcernLevel;
+  level: ReadConcernLevel | string;
 
   /** Constructs a ReadConcern from the read concern level.*/
-  constructor(level: ReadConcernLevel) {
-    this.level = level;
+  constructor(level: ReadConcernLevelLike) {
+    /**
+     * A spec test exists that allows level to be any string.
+     * "invalid readConcern with out stage"
+     * @see ./test/spec/crud/v2/aggregate-out-readConcern.json
+     * @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#unknown-levels-and-additional-options-for-string-based-readconcerns
+     */
+    this.level = ReadConcernLevel[level] || level;
   }
 
   /**
@@ -28,19 +40,22 @@ export class ReadConcern {
    * @param options - The options object from which to extract the write concern.
    */
   static fromOptions(options?: {
-    readConcern?: ReadConcern | { level: ReadConcernLevel };
-    level?: ReadConcernLevel;
+    readConcern?: ReadConcernLike;
+    level?: ReadConcernLevelLike;
   }): ReadConcern | undefined {
     if (options == null) {
       return;
     }
 
     if (options.readConcern) {
-      if (options.readConcern instanceof ReadConcern) {
-        return options.readConcern;
+      const { readConcern } = options;
+      if (readConcern instanceof ReadConcern) {
+        return readConcern;
+      } else if (typeof readConcern === 'string') {
+        return new ReadConcern(readConcern);
+      } else if ('level' in readConcern && readConcern.level) {
+        return new ReadConcern(readConcern.level);
       }
-
-      return new ReadConcern(options.readConcern.level);
     }
 
     if (options.level) {

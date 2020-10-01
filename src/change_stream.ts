@@ -38,6 +38,7 @@ const NO_RESUME_TOKEN_ERROR = new MongoError(
 );
 const CHANGESTREAM_CLOSED_ERROR = new MongoError('ChangeStream is closed');
 
+/** @public */
 export interface ResumeOptions {
   startAtOperationTime?: Timestamp;
   batchSize?: number;
