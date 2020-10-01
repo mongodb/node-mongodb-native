@@ -251,7 +251,7 @@ export class ChangeStream extends EventEmitter {
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', (eventName: string) => {
       if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
-        this.streamEvents(this.cursor);
+        streamEvents(this, this.cursor);
       }
     });
 
@@ -263,16 +263,13 @@ export class ChangeStream extends EventEmitter {
   }
 
   /** @internal */
-  streamEvents(cursor: ChangeStreamCursor): void {
-    const stream = this[kCursorStream] || cursor.stream();
-    this[kCursorStream] = stream;
-    stream.on(CursorStream.DATA, change => processNewChange(this, change));
-    stream.on(CursorStream.ERROR, error => processError(this, error));
+  triggerError(error: AnyError): void {
+    processError(this, error, () => 1);
   }
 
   /** @internal */
-  triggerError(error: AnyError): void {
-    processError(this, error, () => 1);
+  get cursorStream(): CursorStream | undefined {
+    return this[kCursorStream];
   }
 
   /** The cached resume token that is used to resume after the most recently returned change. */
@@ -327,10 +324,7 @@ export class ChangeStream extends EventEmitter {
       const cursor = this.cursor;
 
       return cursor.close(err => {
-        ['data', 'close', 'end', 'error'].forEach(event =>
-          this[kCursorStream]?.removeAllListeners(event)
-        );
-        this[kCursorStream] = undefined;
+        endStream(this);
         this.cursor = undefined;
 
         return cb(err);
@@ -500,7 +494,7 @@ function createChangeStreamCursor(
 
   relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
 
-  if (self.listenerCount(ChangeStream.CHANGE) > 0) self.streamEvents(changeStreamCursor);
+  if (self.listenerCount(ChangeStream.CHANGE) > 0) streamEvents(self, changeStreamCursor);
 
   return changeStreamCursor;
 }
@@ -550,6 +544,22 @@ function waitForTopologyConnected(
 function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
   if (!callback) changeStream.emit(ChangeStream.ERROR, error);
   changeStream.close(() => callback && callback(error));
+}
+
+function streamEvents(changeStream: ChangeStream, cursor: ChangeStreamCursor): void {
+  const stream = changeStream[kCursorStream] || cursor.stream();
+  changeStream[kCursorStream] = stream;
+  stream.on(CursorStream.DATA, change => processNewChange(changeStream, change));
+  stream.on(CursorStream.ERROR, error => processError(changeStream, error));
+}
+
+function endStream(changeStream: ChangeStream) {
+  if (changeStream[kCursorStream]) {
+    [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
+      changeStream[kCursorStream]?.removeAllListeners(event)
+    );
+  }
+  changeStream[kCursorStream] = undefined;
 }
 
 function processNewChange(
@@ -602,10 +612,7 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
     changeStream.cursor = undefined;
 
     // stop listening to all events from old cursor
-    [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
-      changeStream[kCursorStream]?.removeAllListeners(event)
-    );
-    changeStream[kCursorStream] = undefined;
+    endStream(changeStream);
 
     // close internal cursor, ignore errors
     cursor.close();

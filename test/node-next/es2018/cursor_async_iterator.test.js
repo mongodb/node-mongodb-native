@@ -1,6 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
+const { Transform } = require('stream');
 
 describe('Cursor Async Iterator Tests', function () {
   let client, collection;
@@ -72,17 +73,23 @@ describe('Cursor Async Iterator Tests', function () {
     }
   });
 
-  // TODO - figure out how to get this test working again
-  it.skip('should properly stop when cursor is closed', {
+  it('should properly stop when cursor is closed', {
     metadata: { requires: { node: '>=10.5.0' } },
     test: async function () {
       const cursor = collection.find();
+      const cursorStream = cursor.stream().pipe(
+        new Transform({
+          transform: (data, encoding, callback) => {
+            cursor.close(() => callback(null, data));
+          },
+          objectMode: true
+        })
+      );
 
       let count = 0;
-      for await (const doc of cursor.stream()) {
+      for await (const doc of cursorStream) {
         expect(doc).to.exist;
         count++;
-        await cursor.close();
       }
       expect(count).to.equal(1);
     }

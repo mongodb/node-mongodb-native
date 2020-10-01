@@ -205,9 +205,9 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         changeStream.on('change', () => {
-          // expect(changeStream.cursor._stream.listenerCount('data')).to.equal(1);
+          expect(changeStream.cursorStream.listenerCount('data')).to.equal(1);
           changeStream.close(err => {
-            // expect(changeStream.cursor._stream.listenerCount('data')).to.equal(0);
+            expect(changeStream.cursorStream).to.not.exist;
             expect(err).to.not.exist;
             close(err);
           });

@@ -125,9 +125,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
       describe(suiteName, {
         metadata: { requires },
         test: function () {
-          // beforeEach(() => );
-          // afterEach();
-
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
               if (
