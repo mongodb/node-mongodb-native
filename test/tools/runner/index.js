@@ -15,8 +15,7 @@ const filters = [];
 function initializeFilters(client, callback) {
   const filterFiles = fs
     .readdirSync(path.join(__dirname, 'filters'))
-    .filter(x => x.indexOf('js') !== -1)
-    .sort();
+    .filter(x => x.indexOf('js') !== -1);
 
   // context object that can be appended to as part of filter initialization
   const context = {};

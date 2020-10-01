@@ -42,24 +42,13 @@ class ClientSideEncryptionFilter {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
-    // CSFLE is only supported on LTS versions of node
-    // the node filter will need to run after this one
-    if (clientSideEncryption) {
-      if (!test.metadata) {
-        test.metadata = {};
-      }
-      if (!test.metadata.requires) {
-        test.metadata.requires = {};
-      }
-      if (!test.metadata.requires.node) {
-        test.metadata.requires.node = '>4';
-      } else if (!semver.satisfies(process.version, '>4')) {
-        test.metadata.requires.node = '>4';
-      }
+    if (typeof clientSideEncryption === 'undefined') {
+      // If the test doesn't relate to CSFLE do not filter on it
+      return true;
     }
 
-    const ret = typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
-    return ret;
+    // CSFLE is only supported on LTS versions of node
+    return semver.satisfies(process.version, '>4') && clientSideEncryption === this.enabled;
   }
 }
 
