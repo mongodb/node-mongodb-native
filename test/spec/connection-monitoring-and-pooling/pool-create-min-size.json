@@ -12,6 +12,11 @@
       "count": 3
     },
     {
+      "name": "waitForEvent",
+      "event": "ConnectionReady",
+      "count": 3
+    },
+    {
       "name": "checkOut"
     }
   ],
