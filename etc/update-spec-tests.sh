@@ -22,5 +22,5 @@ tmpdir=$(mktemp -d -t spec_testsXXXX)
 curl -sL "https://github.com/mongodb/specifications/archive/master.zip" -o "$tmpdir/specs.zip"
 unzip -d "$tmpdir" "$tmpdir/specs.zip" > /dev/null
 mkdir -p "$spec_root/$1"
-rsync -ah "$tmpdir/specifications-master/source/$1/tests/" "$spec_root/$1" --delete
+rsync -ah --exclude '*.rst' "$tmpdir/specifications-master/source/$1/tests/" "$spec_root/$1" --delete
 rm -rf "$tmpdir"
