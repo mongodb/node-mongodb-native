@@ -249,15 +249,15 @@ export class ChangeStream extends EventEmitter {
     this.closed = false;
 
     // Listen for any `change` listeners being added to ChangeStream
-    this.on('newListener', (eventName: string) => {
+    this.on('newListener', eventName => {
       if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
         streamEvents(this, this.cursor);
       }
     });
 
-    this.on('removeListener', (eventName: string) => {
+    this.on('removeListener', eventName => {
       if (eventName === 'change' && this.listenerCount('change') === 0 && this.cursor) {
-        this[kCursorStream]?.removeAllListeners('data');
+        this[kCursorStream]?.removeAllListeners(CursorStream.DATA);
       }
     });
   }

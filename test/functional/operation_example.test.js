@@ -6726,15 +6726,18 @@ describe('Operation Examples', function () {
 
               stream.on('data', function () {
                 total = total + 1;
-
                 if (total === 1000) {
                   cursor.kill();
                 }
               });
 
+              stream.on('error', error => {
+                expect(error).to.exist;
+                expect(error).to.have.property('message', 'operation was interrupted');
+              });
+
               stream.on('end', function () {
-                // TODO: forced because the cursor is still open/active
-                client.close(true, done);
+                client.close(done);
               });
             });
           }
