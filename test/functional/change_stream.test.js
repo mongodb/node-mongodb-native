@@ -2662,6 +2662,7 @@ describe('Change Streams', function () {
             operationType: 'insert',
             fullDocument: { x: 2 }
           });
+
           expect(events).to.be.an('array').with.lengthOf(3);
           expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
           expect(events[1]).to.equal('error');
@@ -2670,8 +2671,10 @@ describe('Change Streams', function () {
         });
 
         waitForStarted(changeStream, () => {
-          triggerResumableError(changeStream, () => events.push('error'));
-          this.defer(coll.insertOne({ x: 2 }, { w: 'majority', j: true }));
+          triggerResumableError(changeStream, () => {
+            events.push('error');
+            coll.insertOne({ x: 2 }, { w: 'majority', j: true });
+          });
         });
       }
     });

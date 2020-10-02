@@ -264,7 +264,7 @@ export class ChangeStream extends EventEmitter {
 
   /** @internal */
   triggerError(error: AnyError): void {
-    processError(this, error, () => 1);
+    processError(this, error);
   }
 
   /** @internal */
@@ -326,7 +326,6 @@ export class ChangeStream extends EventEmitter {
       return cursor.close(err => {
         endStream(this);
         this.cursor = undefined;
-
         return cb(err);
       });
     });
@@ -485,7 +484,6 @@ function createChangeStreamCursor(
 
   const pipeline = [{ $changeStream: changeStreamStageOptions } as Document].concat(self.pipeline);
   const cursorOptions = applyKnownOptions({}, options, CURSOR_OPTIONS);
-
   const changeStreamCursor = new ChangeStreamCursor(
     self.topology,
     new AggregateOperation(self.parent, pipeline, options),
@@ -495,7 +493,6 @@ function createChangeStreamCursor(
   relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
 
   if (self.listenerCount(ChangeStream.CHANGE) > 0) streamEvents(self, changeStreamCursor);
-
   return changeStreamCursor;
 }
 
@@ -554,11 +551,15 @@ function streamEvents(changeStream: ChangeStream, cursor: ChangeStreamCursor): v
 }
 
 function endStream(changeStream: ChangeStream) {
-  if (changeStream[kCursorStream]) {
+  const cursorStream = changeStream[kCursorStream];
+  if (cursorStream) {
     [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
-      changeStream[kCursorStream]?.removeAllListeners(event)
+      cursorStream.removeAllListeners(event)
     );
+
+    cursorStream.destroy();
   }
+
   changeStream[kCursorStream] = undefined;
 }
 
