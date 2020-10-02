@@ -151,7 +151,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
               }
-
               return testPromise.then(() => validateOutcome(spec, testContext));
             });
           });
@@ -167,27 +166,30 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
-  const setupPromise = db
-    .admin()
-    .command({ killAllSessions: [] })
-    .catch(err => {
-      if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
-        return;
-      }
+  let setupPromise = Promise.resolve();
+  if (!context.dataLake) {
+    setupPromise = db
+      .admin()
+      .command({ killAllSessions: [] })
+      .catch(err => {
+        if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
+          return;
+        }
 
-      throw err;
-    });
+        throw err;
+      })
+      .then(() => coll.drop({ writeConcern: 'majority' }))
+      .catch(err => {
+        if (!err.message.match(/ns not found/)) throw err;
+      });
 
-  if (context.collectionName == null || context.dbName === 'admin') {
-    return setupPromise;
+    if (context.collectionName == null || context.dbName === 'admin') {
+      return setupPromise;
+    }
   }
 
   const coll = db.collection(context.collectionName);
   return setupPromise
-    .then(() => coll.drop({ writeConcern: 'majority' }))
-    .catch(err => {
-      if (!err.message.match(/ns not found/)) throw err;
-    })
     .then(() => {
       if (suite.key_vault_data) {
         const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');

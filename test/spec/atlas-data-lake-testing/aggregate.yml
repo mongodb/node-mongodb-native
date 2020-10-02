@@ -1,0 +1,23 @@
+collection_name: &collection_name "driverdata"
+database_name: &database_name "test"
+
+tests:
+  -
+    description: "Aggregate with pipeline (project, sort, limit)"
+    operations:
+      -
+        object: collection
+        name: aggregate
+        arguments:
+          pipeline:
+            - $project: { _id: 0 }
+            - $sort: { a: 1 }
+            - $limit: 2
+        result:
+          - { a: 1, b: 2, c: 3 }
+          - { a: 2, b: 3, c: 4 }
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
