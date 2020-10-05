@@ -1,11 +1,9 @@
 'use strict';
-const Topology = require('../../lib/core/sdam/topology').Topology;
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
-const ReadPreference = require('../../lib/core/topologies/read_preference');
 chai.use(sinonChai);
 
 describe('Collection', function() {
@@ -1308,43 +1306,5 @@ describe('Collection', function() {
         });
       });
     }
-  });
-
-  context('DDL methods with serverSelection readPreference primary', () => {
-    const collectionMethodSet = {
-      createIndex: [{ quote: 'text' }]
-    };
-
-    Object.keys(collectionMethodSet).forEach(operation => {
-      it(`should ${operation} with serverSelection readPreference primary`, {
-        metadata: {
-          requires: { topology: 'replicaset' }
-        },
-        test: function(done) {
-          const opArgs = collectionMethodSet[operation];
-          const configuration = this.configuration;
-          const client = configuration.newClient(configuration.writeConcernMax(), {
-            useUnifiedTopology: true,
-            readPreference: 'primaryPreferred'
-          });
-          client.connect((err, client) => {
-            expect(err).to.not.exist;
-            const db = client.db(configuration.db);
-            const collection = db.collection('db-two');
-            const TopologySpy = this.sinon.spy(Topology.prototype, 'selectServer');
-            const callback = err => {
-              expect(err).to.not.exist;
-              expect(TopologySpy.called).to.equal(true);
-              expect(TopologySpy)
-                .nested.property('args[0][0].readPreference.mode')
-                .to.equal(ReadPreference.PRIMARY);
-              client.close(done);
-            };
-            opArgs.push(callback);
-            collection[operation].apply(collection, opArgs);
-          });
-        }
-      });
-    });
   });
 });
