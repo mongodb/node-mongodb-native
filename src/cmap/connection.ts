@@ -99,7 +99,7 @@ export class Connection extends EventEmitter {
     super(options);
     this.id = options.id;
     this.address = streamIdentifier(stream);
-    this.socketTimeout = options.socketTimeout ?? 360000;
+    this.socketTimeout = options.socketTimeout ?? 0;
     this.monitorCommands = options.monitorCommands ?? options.monitorCommands;
     this.closed = false;
     this.destroyed = false;
