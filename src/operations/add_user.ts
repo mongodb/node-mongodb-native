@@ -54,7 +54,9 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
     }
 
     // Get additional values
-    let roles = Array.isArray(options.roles) ? options.roles : [];
+    let roles: string[] = [];
+    if (Array.isArray(options.roles)) roles = options.roles;
+    if (typeof options.roles === 'string') roles = [options.roles];
 
     // If not roles defined print deprecated message
     // TODO: handle deprecation properly
