@@ -73,24 +73,20 @@ describe('Cursor Async Iterator Tests', function () {
     }
   });
 
-  it('should properly stop when cursor is closed', {
+  // TODO: unskip as part of NODE-2590
+  it.skip('should properly stop when cursor is closed', {
     metadata: { requires: { node: '>=10.5.0' } },
     test: async function () {
       const cursor = collection.find();
-      const cursorStream = cursor.stream().pipe(
-        new Transform({
-          transform: (data, encoding, callback) => {
-            cursor.close(() => callback(null, data));
-          },
-          objectMode: true
-        })
-      );
+      const cursorStream = cursor.stream();
 
       let count = 0;
       for await (const doc of cursorStream) {
         expect(doc).to.exist;
         count++;
+        await cursor.close();
       }
+
       expect(count).to.equal(1);
     }
   });

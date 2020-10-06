@@ -538,7 +538,7 @@ function waitForTopologyConnected(
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
-function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
+function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: Callback): void {
   if (!callback) changeStream.emit(ChangeStream.ERROR, error);
   changeStream.close(() => callback && callback(error));
 }
@@ -550,7 +550,7 @@ function streamEvents(changeStream: ChangeStream, cursor: ChangeStreamCursor): v
   stream.on(CursorStream.ERROR, error => processError(changeStream, error));
 }
 
-function endStream(changeStream: ChangeStream) {
+function endStream(changeStream: ChangeStream): void {
   const cursorStream = changeStream[kCursorStream];
   if (cursorStream) {
     [CursorStream.DATA, CursorStream.CLOSE, CursorStream.END, CursorStream.ERROR].forEach(event =>
