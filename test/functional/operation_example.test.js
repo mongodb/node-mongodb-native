@@ -6727,7 +6727,7 @@ describe('Operation Examples', function () {
               stream.on('data', function () {
                 total = total + 1;
                 if (total === 1000) {
-                  cursor.kill();
+                  cursor.close();
                 }
               });
 
@@ -6736,7 +6736,7 @@ describe('Operation Examples', function () {
                 expect(error).to.have.property('message', 'operation was interrupted');
               });
 
-              stream.on('end', function () {
+              cursor.on('close', function () {
                 client.close(done);
               });
             });
