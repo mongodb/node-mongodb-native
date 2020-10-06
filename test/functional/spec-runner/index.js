@@ -167,29 +167,28 @@ function prepareDatabaseForSuite(suite, context) {
 
   const db = context.sharedClient.db(context.dbName);
   let setupPromise = Promise.resolve();
-  if (!context.dataLake) {
-    setupPromise = db
-      .admin()
-      .command({ killAllSessions: [] })
-      .catch(err => {
-        if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
-          return;
-        }
+  const coll = db.collection(context.collectionName);
 
-        throw err;
-      })
-      .then(() => coll.drop({ writeConcern: 'majority' }))
-      .catch(err => {
-        if (!err.message.match(/ns not found/)) throw err;
-      });
-
-    if (context.collectionName == null || context.dbName === 'admin') {
-      return setupPromise;
-    }
+  if (context.collectionName == null || context.dbName === 'admin') {
+    return setupPromise;
   }
 
-  const coll = db.collection(context.collectionName);
-  return setupPromise
+  if (context.dataLake) return setupPromise;
+
+  setupPromise = db
+    .admin()
+    .command({ killAllSessions: [] })
+    .catch(err => {
+      if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
+        return;
+      }
+
+      throw err;
+    })
+    .then(() => coll.drop({ writeConcern: 'majority' }))
+    .catch(err => {
+      if (!err.message.match(/ns not found/)) throw err;
+    })
     .then(() => {
       if (suite.key_vault_data) {
         const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
@@ -309,20 +308,22 @@ function runTestSuiteTest(configuration, spec, context) {
 
     let session0, session1;
     let savedSessionData;
-    try {
-      session0 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-      );
-      session1 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-      );
+    if (!context.dataLake) {
+      try {
+        session0 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+        );
+        session1 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+        );
 
-      savedSessionData = {
-        session0: JSON.parse(EJSON.stringify(session0.id)),
-        session1: JSON.parse(EJSON.stringify(session1.id))
-      };
-    } catch (err) {
-      // ignore
+        savedSessionData = {
+          session0: JSON.parse(EJSON.stringify(session0.id)),
+          session1: JSON.parse(EJSON.stringify(session1.id))
+        };
+      } catch (err) {
+        // ignore
+      }
     }
 
     // enable to see useful APM debug information at the time of actual test run
@@ -347,8 +348,10 @@ function runTestSuiteTest(configuration, spec, context) {
       })
       .then(() => {
         const promises = [];
-        if (session0) promises.push(session0.endSession());
-        if (session1) promises.push(session1.endSession());
+        if (!context.dataLake) {
+          if (session0) promises.push(session0.endSession());
+          if (session1) promises.push(session1.endSession());
+        }
         return Promise.all(promises);
       })
       .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));

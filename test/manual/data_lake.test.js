@@ -19,6 +19,8 @@ describe('Data Lake', function () {
 
   after(() => testContext.teardown());
   before(function () {
+    this.configuration.user = 'mhuser';
+    this.configuration.password = 'pencil';
     return testContext.setup(this.configuration);
   });
 

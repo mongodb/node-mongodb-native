@@ -6,7 +6,7 @@ function resolveConnectionString(configuration, spec) {
 
   return isShardedEnvironment && !useMultipleMongoses
     ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}?directConnection=false`
-    : configuration.url();
+    : configuration.url(configuration.user, configuration.password);
 }
 
 module.exports = { resolveConnectionString };
