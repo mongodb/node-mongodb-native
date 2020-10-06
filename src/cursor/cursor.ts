@@ -100,7 +100,7 @@ export class CursorStream extends Readable {
     // Get the next item
     cursor._next((err, result) => {
       if (err) {
-        if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) return;
+        if (cursor.s && cursor.s.state === CursorState.CLOSED) return;
         this.emit(CursorStream.ERROR, err);
         cursor.close(() => this.emit(CursorStream.END));
         return;

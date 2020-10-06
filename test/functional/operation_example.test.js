@@ -6727,16 +6727,17 @@ describe('Operation Examples', function () {
               stream.on('data', function () {
                 total = total + 1;
                 if (total === 1000) {
-                  cursor.close();
+                  cursor.kill();
                 }
               });
+
 
               stream.on('error', error => {
                 expect(error).to.exist;
                 expect(error).to.have.property('message', 'operation was interrupted');
               });
 
-              cursor.on('close', function () {
+              stream.on('end', function () {
                 client.close(done);
               });
             });
