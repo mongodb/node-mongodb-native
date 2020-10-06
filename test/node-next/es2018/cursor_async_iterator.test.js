@@ -1,9 +1,9 @@
 'use strict';
 
 const { expect } = require('chai');
-const { Transform } = require('stream');
 
-describe('Cursor Async Iterator Tests', function () {
+// TODO: unskip as part of NODE-2590
+describe.skip('Cursor Async Iterator Tests', function () {
   let client, collection;
   before(async function () {
     client = this.configuration.newClient();
@@ -32,7 +32,7 @@ describe('Cursor Async Iterator Tests', function () {
       const cursor = collection.find({ bar: 1 });
 
       let counter = 0;
-      for await (const doc of cursor.stream()) {
+      for await (const doc of cursor) {
         expect(doc).to.have.property('bar', 1);
         counter += 1;
       }
@@ -47,7 +47,7 @@ describe('Cursor Async Iterator Tests', function () {
       const cursor = collection.aggregate([{ $match: { bar: 1 } }]);
 
       let counter = 0;
-      for await (const doc of cursor.stream()) {
+      for await (const doc of cursor) {
         expect(doc).to.have.property('bar', 1);
         counter += 1;
       }
@@ -64,7 +64,7 @@ describe('Cursor Async Iterator Tests', function () {
 
       const indexes = await cursor1.toArray();
       let counter = 0;
-      for await (const doc of cursor2.stream()) {
+      for await (const doc of cursor2) {
         expect(doc).to.exist;
         counter += 1;
       }
@@ -73,15 +73,13 @@ describe('Cursor Async Iterator Tests', function () {
     }
   });
 
-  // TODO: unskip as part of NODE-2590
-  it.skip('should properly stop when cursor is closed', {
+  it('should properly stop when cursor is closed', {
     metadata: { requires: { node: '>=10.5.0' } },
     test: async function () {
       const cursor = collection.find();
-      const cursorStream = cursor.stream();
 
       let count = 0;
-      for await (const doc of cursorStream) {
+      for await (const doc of cursor) {
         expect(doc).to.exist;
         count++;
         await cursor.close();
