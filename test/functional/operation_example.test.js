@@ -6731,11 +6731,6 @@ describe('Operation Examples', function () {
                 }
               });
 
-              stream.on('error', error => {
-                expect(error).to.exist;
-                expect(error).to.have.property('message', 'operation was interrupted');
-              });
-
               stream.on('end', function () {
                 client.close(done);
               });
