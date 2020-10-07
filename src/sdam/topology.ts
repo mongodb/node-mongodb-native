@@ -365,7 +365,7 @@ export class Topology extends EventEmitter {
 
       // TODO: NODE-2471
       if (server && this.s.credentials) {
-        server.command('admin.$cmd', { ping: 1 }, err => {
+        server.command('admin.$cmd', { ping: 1, thisPingShouldBeIgnored: 1 }, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
             return;

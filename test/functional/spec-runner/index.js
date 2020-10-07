@@ -290,6 +290,10 @@ function runTestSuiteTest(configuration, spec, context) {
     if (IGNORED_COMMANDS.has(event.commandName)) {
       return;
     }
+    // TODO: This should be removed if NODE-2471 accomidates it
+    if (event.command.thisPingShouldBeIgnored) {
+      return;
+    }
 
     context.commandEvents.push(event);
 
