@@ -65,6 +65,8 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
+    "tool:spec-update": "sh ./etc/update-spec-tests.sh",
+    "tool:cluster": "sh ./test/tools/cluster.sh",
     "atlas": "mocha --no-config ./test/manual/atlas_connectivity.test.js",
     "check:kerberos": "mocha --no-config -t 60000 test/manual/kerberos.test.js",
     "check:ldap": "mocha --no-config test/manual/ldap.test.js",
