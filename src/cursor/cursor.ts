@@ -1137,7 +1137,6 @@ export class Cursor<
     );
   }
 
-  // TODO - remove
   /** Resets the cursor */
   rewind(): void {
     if (this.init) {
@@ -1154,6 +1153,11 @@ export class Cursor<
       this.cursorId = undefined;
       this.cursorIndex = 0;
     }
+  }
+
+  /** Clone the cursor */
+  clone(): this {
+    return new (this.constructor as any)(this.topology, this.operation, this.options);
   }
 
   /**
