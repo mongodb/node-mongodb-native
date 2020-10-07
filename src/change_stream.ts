@@ -18,7 +18,6 @@ import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import type { CursorStreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 
@@ -163,6 +162,12 @@ export class ChangeStreamStream extends CursorStream {
   constructor(cursor: ChangeStreamCursor) {
     super(cursor);
   }
+}
+
+/** @public */
+export interface CursorStreamOptions {
+  /** A transformation method applied to each document emitted by the stream */
+  transform?(doc: Document): Document;
 }
 
 /**
@@ -358,7 +363,6 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   hasReceived?: boolean;
   resumeAfter: ResumeToken;
   startAfter: ResumeToken;
-  [kCursorStream]?: CursorStream;
 
   constructor(
     topology: Topology,
@@ -492,8 +496,6 @@ function createChangeStreamCursor(
   );
 
   relayEvents(changeStreamCursor, self, ['resumeTokenChanged', 'end', 'close']);
-  const stream = changeStreamCursor.stream();
-  changeStreamCursor[kCursorStream] = stream;
 
   if (self.listenerCount(ChangeStream.CHANGE) > 0) streamEvents(self, changeStreamCursor);
   return changeStreamCursor;

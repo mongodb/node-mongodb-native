@@ -3,13 +3,6 @@ import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
 import type { Server } from '../../sdam/server';
-import type { ClientSession } from '../../sessions';
-
-interface KillCursorOptions {
-  session?: ClientSession;
-  immediateRelease: boolean;
-  noResponse: boolean;
-}
 import type { Long } from '../../bson';
 
 export function killCursors(

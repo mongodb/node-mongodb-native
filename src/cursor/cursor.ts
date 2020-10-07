@@ -474,8 +474,34 @@ export class Cursor<
     return this._skip;
   }
 
+  get readPreference(): ReadPreference {
+    return this.operation.readPreference;
+  }
+
+  get sortValue(): Sort {
+    return this.cmd.sort;
+  }
+
   /** @internal */
   _initializeCursor(callback: Callback): void {
+    if (this.operation && this.operation.session != null) {
+      this.session = this.operation.session;
+    } else {
+      // implicitly create a session if one has not been provided
+      if (!this.s.explicitlyIgnoreSession && !this.session && this.topology.hasSessionSupport()) {
+        this.session = this.topology.startSession({ owner: this });
+
+        if (this.operation) {
+          this.operation.session = this.session;
+        }
+      }
+    }
+
+    this._initializeCoreCursor(callback);
+  }
+
+  /** @internal */
+  _initializeCoreCursor(callback: Callback): void {
     // NOTE: this goes away once cursors use `executeOperation`
     if (this.topology.shouldCheckForSessionSupport()) {
       this.topology.selectServer(ReadPreference.primaryPreferred, err => {
@@ -1400,14 +1426,6 @@ export class Cursor<
   /** Return the cursor logger */
   getLogger(): Logger {
     return this.logger;
-  }
-
-  get readPreference(): ReadPreference {
-    return this.operation.readPreference;
-  }
-
-  get sortValue(): Sort {
-    return this.cmd.sort;
   }
 
   // Internal methods
