@@ -166,16 +166,11 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
-  let setupPromise = Promise.resolve();
   const coll = db.collection(context.collectionName);
 
-  if (context.collectionName == null || context.dbName === 'admin') {
-    return setupPromise;
-  }
+  if (context.dataLake) return Promise.resolve();
 
-  if (context.dataLake) return setupPromise;
-
-  setupPromise = db
+  const setupPromise = db
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
@@ -184,7 +179,13 @@ function prepareDatabaseForSuite(suite, context) {
       }
 
       throw err;
-    })
+    });
+
+  if (context.collectionName == null || context.dbName === 'admin') {
+    return setupPromise;
+  }
+
+  return setupPromise
     .then(() => coll.drop({ writeConcern: 'majority' }))
     .catch(err => {
       if (!err.message.match(/ns not found/)) throw err;
