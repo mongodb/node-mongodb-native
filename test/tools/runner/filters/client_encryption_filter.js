@@ -42,11 +42,13 @@ class ClientSideEncryptionFilter {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
-    // CSFLE is only supported on LTS versions of node
-    const nodeSupportsCSFLE = semver.satisfies(process.version, '>4');
+    if (typeof clientSideEncryption === 'undefined') {
+      // If the test doesn't relate to CSFLE do not filter on it
+      return true;
+    }
 
-    const ret = typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
-    return ret && nodeSupportsCSFLE;
+    // CSFLE is only supported on LTS versions of node
+    return semver.satisfies(process.version, '>4') && clientSideEncryption === this.enabled;
   }
 }
 

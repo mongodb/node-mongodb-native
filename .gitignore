@@ -47,3 +47,5 @@ build/Release
 node_modules
 yarn.lock
 
+.vscode
+output
