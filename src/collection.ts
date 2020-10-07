@@ -35,7 +35,7 @@ import {
   IndexSpecification,
   IndexDescription
 } from './operations/indexes';
-import { DistinctOperation, DistinctOptions } from './operations/distinct';
+import { DistinctOperation } from './operations/distinct';
 import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
 import {
   EstimatedDocumentCountOperation,
@@ -84,8 +84,8 @@ import type { CountOptions } from './operations/count';
 import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
-import type { Logger, LoggerOptions } from './logger';
-import type { OperationParent } from './operations/command';
+import type { Logger } from './logger';
+import type { CommandOperationOptions, OperationParent } from './operations/command';
 
 /** @public */
 export interface Collection {
@@ -105,10 +105,7 @@ export interface Collection {
 }
 
 /** @public */
-export interface CollectionOptions
-  extends BSONSerializeOptions,
-    WriteConcernOptions,
-    LoggerOptions {
+export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
   slaveOk?: boolean;
   /** Returns an error if the collection does not exist */
   strict?: boolean;
@@ -1057,17 +1054,17 @@ export class Collection implements OperationParent {
   distinct(key: string, callback: Callback<Document[]>): void;
   distinct(key: string, query: Document): Promise<Document[]>;
   distinct(key: string, query: Document, callback: Callback<Document[]>): void;
-  distinct(key: string, query: Document, options: DistinctOptions): Promise<Document[]>;
+  distinct(key: string, query: Document, options: CommandOperationOptions): Promise<Document[]>;
   distinct(
     key: string,
     query: Document,
-    options: DistinctOptions,
+    options: CommandOperationOptions,
     callback: Callback<Document[]>
   ): void;
   distinct(
     key: string,
-    query?: Document | DistinctOptions | Callback<Document[]>,
-    options?: DistinctOptions | Callback<Document[]>,
+    query?: Document | CommandOperationOptions | Callback<Document[]>,
+    options?: CommandOperationOptions | Callback<Document[]>,
     callback?: Callback<Document[]>
   ): Promise<Document[]> | void {
     if (typeof query === 'function') {
@@ -1082,7 +1079,7 @@ export class Collection implements OperationParent {
     options = options || {};
     return executeOperation(
       this.s.topology,
-      new DistinctOperation(this, key, query as Document, options as DistinctOptions),
+      new DistinctOperation(this, key, query as Document, options as CommandOperationOptions),
       callback
     );
   }

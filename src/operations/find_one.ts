@@ -7,7 +7,7 @@ import { MongoError } from '../error';
 import type { Server } from '../sdam/server';
 
 /** @internal */
-export class FindOneOperation extends OperationBase<FindOptions, Document> {
+export class FindOneOperation extends OperationBase implements FindOptions {
   collection: Collection;
   query: Document;
 
@@ -21,10 +21,9 @@ export class FindOneOperation extends OperationBase<FindOptions, Document> {
   execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
-    const options = this.options;
 
     try {
-      const cursor = coll.find(query, options).limit(-1).batchSize(1);
+      const cursor = coll.find(query, this).limit(-1).batchSize(1);
 
       // Return the item
       cursor.next((err, item) => {

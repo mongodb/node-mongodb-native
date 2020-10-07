@@ -37,7 +37,7 @@ export class AggregationCursor extends Cursor<AggregateOperation, AggregationCur
       throw new MongoError('batchSize requires an integer');
     }
 
-    this.operation.options.batchSize = batchSize;
+    this.operation.batchSize = batchSize;
     this.cursorBatchSize = batchSize;
     return this;
   }
@@ -62,7 +62,7 @@ export class AggregationCursor extends Cursor<AggregateOperation, AggregationCur
 
   /** Add a maxTimeMS stage to the aggregation pipeline */
   maxTimeMS(maxTimeMS: number): this {
-    this.operation.options.maxTimeMS = maxTimeMS;
+    this.operation.maxTimeMS = maxTimeMS;
     return this;
   }
 

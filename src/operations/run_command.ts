@@ -11,7 +11,7 @@ export type RunCommandOptions = CommandOperationOptions;
 export class RunCommandOperation<
   T extends RunCommandOptions = RunCommandOptions,
   TResult = Document
-> extends CommandOperation<T, TResult> {
+> extends CommandOperation<TResult> {
   command: Document;
 
   constructor(parent: OperationParent | undefined, command: Document, options?: T) {

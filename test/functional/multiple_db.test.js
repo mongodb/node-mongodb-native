@@ -22,6 +22,7 @@ describe('Multiple Databases', function () {
       var second_test_database_client = configuration.newClient({ w: 1 }, { poolSize: 1 });
       // Just create second database
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         second_test_database_client.connect(function (err, second_test_database) {
           var db = client.db(configuration.db);
           // Close second database
@@ -29,6 +30,7 @@ describe('Multiple Databases', function () {
           // Let's grab a connection to the different db resusing our connection pools
           var secondDb = client.db('integration_tests2');
           secondDb.createCollection('same_connection_two_dbs', function (err, collection) {
+            expect(err).to.not.exist;
             // Insert a dummy document
             collection.insert({ a: 20 }, { safe: true }, function (err) {
               expect(err).to.not.exist;

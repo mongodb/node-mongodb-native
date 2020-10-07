@@ -13,12 +13,15 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EstimatedDocumentCountOperation extends CommandOperation<
-  EstimatedDocumentCountOptions,
-  number
-> {
+export class EstimatedDocumentCountOperation
+  extends CommandOperation<number>
+  implements EstimatedDocumentCountOptions {
   collectionName: string;
   query?: Document;
+
+  skip?: number;
+  limit?: number;
+  hint?: Hint;
 
   constructor(collection: Collection, options: EstimatedDocumentCountOptions);
   constructor(collection: Collection, query: Document, options: EstimatedDocumentCountOptions);
@@ -40,23 +43,22 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
   }
 
   execute(server: Server, callback: Callback<number>): void {
-    const options = this.options;
     const cmd: Document = { count: this.collectionName };
 
     if (this.query) {
       cmd.query = this.query;
     }
 
-    if (typeof options.skip === 'number') {
-      cmd.skip = options.skip;
+    if (typeof this.skip === 'number') {
+      cmd.skip = this.skip;
     }
 
-    if (typeof options.limit === 'number') {
-      cmd.limit = options.limit;
+    if (typeof this.limit === 'number') {
+      cmd.limit = this.limit;
     }
 
-    if (options.hint) {
-      cmd.hint = options.hint;
+    if (this.hint) {
+      cmd.hint = this.hint;
     }
 
     super.executeCommand(server, cmd, (err, response) => {

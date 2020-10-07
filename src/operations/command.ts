@@ -1,7 +1,7 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, AnyOptions } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -45,19 +45,19 @@ export interface OperationParent {
 }
 
 /** @internal */
-export abstract class CommandOperation<
-  T extends CommandOperationOptions = CommandOperationOptions,
-  TResult = Document
-> extends OperationBase<T> {
+export abstract class CommandOperation<TResult = Document> extends OperationBase {
   ns: MongoDBNamespace;
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
-  explain: boolean;
   fullResponse?: boolean;
   logger?: Logger;
 
-  constructor(parent?: OperationParent, options?: T) {
+  collation!: CollationOptions;
+  maxTimeMS!: number;
+  comment!: string;
+
+  constructor(parent?: OperationParent, options: AnyOptions = {}) {
     super(options);
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
@@ -75,16 +75,12 @@ export abstract class CommandOperation<
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
-      : ReadPreference.resolve(propertyProvider, this.options);
-    this.readConcern = resolveReadConcern(propertyProvider, this.options);
-    this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
+      : ReadPreference.resolve(propertyProvider, this);
+    this.readConcern = resolveReadConcern(propertyProvider, this);
+    this.writeConcern = resolveWriteConcern(propertyProvider, this);
     this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
-
-    // TODO: A lot of our code depends on having the read preference in the options. This should
-    //       go away, but also requires massive test rewrites.
-    this.options.readPreference = this.readPreference;
 
     // TODO(NODE-2056): make logger another "inheritable" property
     if (parent && parent.logger) {
@@ -98,7 +94,6 @@ export abstract class CommandOperation<
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
-    const options = this.options;
     const serverWireVersion = maxWireVersion(server);
     const inTransaction = this.session && this.session.inTransaction();
 
@@ -106,7 +101,7 @@ export abstract class CommandOperation<
       Object.assign(cmd, { readConcern: this.readConcern });
     }
 
-    if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+    if (this.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
         new MongoError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
@@ -120,29 +115,24 @@ export abstract class CommandOperation<
         Object.assign(cmd, { writeConcern: this.writeConcern });
       }
 
-      if (options.collation && typeof options.collation === 'object') {
-        Object.assign(cmd, { collation: options.collation });
+      if (this.collation && typeof this.collation === 'object') {
+        Object.assign(cmd, { collation: this.collation });
       }
     }
 
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
+    if (typeof this.maxTimeMS === 'number') {
+      cmd.maxTimeMS = this.maxTimeMS;
     }
 
-    if (typeof options.comment === 'string') {
-      cmd.comment = options.comment;
+    if (typeof this.comment === 'string') {
+      cmd.comment = this.comment;
     }
 
     if (this.logger && this.logger.isDebug()) {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(
-      this.ns.toString(),
-      cmd,
-      { fullResult: !!this.fullResponse, ...this.options },
-      callback
-    );
+    server.command(this.ns.toString(), cmd, { fullResult: !!this.fullResponse, ...this }, callback);
   }
 }
 

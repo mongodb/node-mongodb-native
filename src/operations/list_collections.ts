@@ -34,7 +34,9 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
+export class ListCollectionsOperation
+  extends CommandOperation<string[]>
+  implements ListCollectionsOptions {
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -45,10 +47,10 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
 
     this.db = db;
     this.filter = filter;
-    this.nameOnly = !!this.options.nameOnly;
+    this.nameOnly = !!options.nameOnly;
 
-    if (typeof this.options.batchSize === 'number') {
-      this.batchSize = this.options.batchSize;
+    if (typeof options.batchSize === 'number') {
+      this.batchSize = options.batchSize;
     }
   }
 

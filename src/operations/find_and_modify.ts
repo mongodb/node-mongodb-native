@@ -6,11 +6,12 @@ import {
   applyWriteConcern,
   formattedOrderClause,
   hasAtomicOperators,
-  Callback
+  Callback,
+  HasRetryableWrites
 } from '../utils';
 import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, Hint } from './operation';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -33,20 +34,36 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
-  hint?: Document;
+  hint?: Hint;
 
   // NOTE: These types are a misuse of options, can we think of a way to remove them?
+  // TODO: Why is this a misuse?
   update?: boolean;
   remove?: boolean;
   new?: boolean;
 }
 
 /** @internal */
-export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
+export class FindAndModifyOperation
+  extends CommandOperation
+  implements FindAndModifyOptions, HasRetryableWrites {
   collection: Collection;
   query: Document;
   sort?: Sort;
   doc?: Document;
+
+  new?: boolean;
+  remove?: boolean;
+  upsert?: boolean;
+  projection?: Document;
+  /** @deprecated Use projection instead */
+  fields?: Document;
+  arrayFilters?: Document[];
+  serializeFunctions?: boolean;
+  checkKeys?: boolean;
+  bypassDocumentValidation?: boolean;
+  hint?: Hint;
+  retryWrites?: boolean;
 
   constructor(
     collection: Collection,
@@ -71,7 +88,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
     const doc = this.doc;
-    let options = this.options;
 
     // Create findAndModify command object
     const cmd: Document = {
@@ -83,57 +99,57 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
       cmd.sort = sort;
     }
 
-    cmd.new = options.new ? true : false;
-    cmd.remove = options.remove ? true : false;
-    cmd.upsert = options.upsert ? true : false;
+    cmd.new = this.new ? true : false;
+    cmd.remove = this.remove ? true : false;
+    cmd.upsert = this.upsert ? true : false;
 
-    const projection = options.projection || options.fields;
+    const projection = this.projection || this.fields;
 
     if (projection) {
       cmd.fields = projection;
     }
 
-    if (options.arrayFilters) {
-      cmd.arrayFilters = options.arrayFilters;
+    if (this.arrayFilters) {
+      cmd.arrayFilters = this.arrayFilters;
     }
 
-    if (doc && !options.remove) {
+    if (doc && !this.remove) {
       cmd.update = doc;
     }
 
-    if (options.maxTimeMS) {
-      cmd.maxTimeMS = options.maxTimeMS;
+    if (this.maxTimeMS) {
+      cmd.maxTimeMS = this.maxTimeMS;
     }
 
     // Either use override on the function, or go back to default on either the collection
     // level or db
-    options.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
+    this.serializeFunctions = this.serializeFunctions || coll.s.serializeFunctions;
 
     // No check on the documents
-    options.checkKeys = false;
+    this.checkKeys = false;
 
     // Final options for retryable writes and write concern
-    options = applyRetryableWrites(options, coll.s.db);
-    options = applyWriteConcern(options, { db: coll.s.db, collection: coll }, options);
+    applyRetryableWrites(this, coll.s.db);
+    applyWriteConcern(this, { db: coll.s.db, collection: coll }, this);
 
     // Decorate the findAndModify command with the write Concern
-    if (options.writeConcern) {
-      cmd.writeConcern = options.writeConcern;
+    if (this.writeConcern) {
+      cmd.writeConcern = this.writeConcern;
     }
 
     // Have we specified bypassDocumentValidation
-    if (options.bypassDocumentValidation === true) {
-      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
+    if (this.bypassDocumentValidation === true) {
+      cmd.bypassDocumentValidation = this.bypassDocumentValidation;
     }
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll, options);
+      decorateWithCollation(cmd, coll, this);
     } catch (err) {
       return callback(err);
     }
 
-    if (options.hint) {
+    if (this.hint) {
       // TODO: once this method becomes a CommandOperation we will have the server
       // in place to check.
       const unacknowledgedWrite = this.writeConcern?.w === 0;
@@ -145,7 +161,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
         return;
       }
 
-      cmd.hint = options.hint;
+      cmd.hint = this.hint;
     }
 
     // Execute the command

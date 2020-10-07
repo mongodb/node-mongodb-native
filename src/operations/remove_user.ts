@@ -8,7 +8,7 @@ import type { Db } from '../db';
 export type RemoveUserOptions = CommandOperationOptions;
 
 /** @internal */
-export class RemoveUserOperation extends CommandOperation<RemoveUserOptions, boolean> {
+export class RemoveUserOperation extends CommandOperation<boolean> implements RemoveUserOptions {
   username: string;
 
   constructor(db: Db, username: string, options: RemoveUserOptions) {

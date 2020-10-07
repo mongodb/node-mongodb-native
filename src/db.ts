@@ -37,7 +37,6 @@ import {
 import {
   DropCollectionOperation,
   DropDatabaseOperation,
-  DropDatabaseOptions,
   DropCollectionOptions
 } from './operations/drop';
 import { ListCollectionsOperation, ListCollectionsOptions } from './operations/list_collections';
@@ -54,7 +53,7 @@ import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
-import type { OperationParent } from './operations/command';
+import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Admin } from './admin';
 
 // Allowed parameters
@@ -513,10 +512,10 @@ export class Db implements OperationParent {
    */
   dropDatabase(): Promise<boolean>;
   dropDatabase(callback: Callback<boolean>): void;
-  dropDatabase(options: DropDatabaseOptions): Promise<boolean>;
-  dropDatabase(options: DropDatabaseOptions, callback: Callback<boolean>): void;
+  dropDatabase(options: CommandOperationOptions): Promise<boolean>;
+  dropDatabase(options: CommandOperationOptions, callback: Callback<boolean>): void;
   dropDatabase(
-    options?: DropDatabaseOptions | Callback<boolean>,
+    options?: CommandOperationOptions | Callback<boolean>,
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});

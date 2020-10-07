@@ -15,10 +15,7 @@ export enum ProfilingLevel {
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandOperation<
-  SetProfilingLevelOptions,
-  ProfilingLevel
-> {
+export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
 

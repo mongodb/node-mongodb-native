@@ -28,7 +28,7 @@ export interface DeleteResult {
 }
 
 /** @internal */
-export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
+export class DeleteOperation extends OperationBase implements WriteCommandOptions {
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
@@ -42,18 +42,14 @@ export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
   }
 
   execute(server: Server, callback: Callback): void {
-    server.remove(
-      this.ns.toString(),
-      this.operations,
-      this.options as WriteCommandOptions,
-      callback
-    );
+    server.remove(this.ns.toString(), this.operations, this, callback);
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+export class DeleteOneOperation extends CommandOperation<DeleteResult> implements DeleteOptions {
   collection: Collection;
   filter: Document;
+  single?: boolean;
 
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
@@ -65,10 +61,9 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
   execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options = this.options;
 
-    options.single = true;
-    removeDocuments(server, coll, filter, options, (err, r) => {
+    this.single = true;
+    removeDocuments(server, coll, filter, this, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       if (r == null) {
@@ -81,9 +76,10 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+export class DeleteManyOperation extends CommandOperation<DeleteResult> implements DeleteOptions {
   collection: Collection;
   filter: Document;
+  single?: boolean;
 
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
@@ -94,19 +90,19 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
 
     this.collection = collection;
     this.filter = filter;
+    this.single = options.single;
   }
 
   execute(server: Server, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options = this.options;
 
     // a user can pass `single: true` in to `deleteMany` to remove a single document, theoretically
-    if (typeof options.single !== 'boolean') {
-      options.single = false;
+    if (typeof this.single !== 'boolean') {
+      this.single = false;
     }
 
-    removeDocuments(server, coll, filter, options, (err, r) => {
+    removeDocuments(server, coll, filter, this, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       if (r == null) {

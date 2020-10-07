@@ -1,4 +1,4 @@
-import { Aspect, defineAspects } from './operation';
+import { Aspect, defineAspects, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
 import type { Document } from '../bson';
@@ -15,18 +15,28 @@ export interface CountOptions extends CommandOperationOptions {
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
   /** An index name hint for the query. */
-  hint?: string | Document;
+  hint?: Hint;
 }
 
 type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
 /** @internal */
-export class CountOperation extends CommandOperation<CountOptions, number> {
+export class CountOperation extends CommandOperation<number> implements CountOptions {
   cursor: Cursor;
   applySkipLimit: boolean;
 
+  skip?: number;
+  limit?: number;
+  hint?: Hint;
+  collectionName: string;
+
   constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOptions) {
     super(({ s: cursor } as unknown) as Collection, options);
+
+    this.skip = options.skip;
+    this.limit = options.limit;
+    this.hint = options.hint;
+    this.collectionName = cursor.namespace.collection ?? '';
 
     this.cursor = cursor;
     this.applySkipLimit = applySkipLimit;
@@ -35,33 +45,23 @@ export class CountOperation extends CommandOperation<CountOptions, number> {
   execute(server: Server, callback: Callback<number>): void {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
-    const options = this.options;
 
     if (applySkipLimit) {
-      if (typeof cursor.cursorSkip === 'number') options.skip = cursor.cursorSkip;
-      if (typeof cursor.cursorLimit === 'number') options.limit = cursor.cursorLimit;
+      if (typeof cursor.cursorSkip === 'number') this.skip = cursor.cursorSkip;
+      if (typeof cursor.cursorLimit === 'number') this.limit = cursor.cursorLimit;
     }
 
     if (
-      typeof options.maxTimeMS !== 'number' &&
+      typeof this.maxTimeMS !== 'number' &&
       cursor.cmd &&
       typeof cursor.cmd.maxTimeMS === 'number'
     ) {
-      options.maxTimeMS = cursor.cmd.maxTimeMS;
+      this.maxTimeMS = cursor.cmd.maxTimeMS;
     }
-
-    const finalOptions: BuildCountCommandOptions = {
-      collectionName: cursor.namespace.collection ?? ''
-    };
-
-    finalOptions.skip = options.skip;
-    finalOptions.limit = options.limit;
-    finalOptions.hint = options.hint;
-    finalOptions.maxTimeMS = options.maxTimeMS;
 
     let command;
     try {
-      command = buildCountCommand(cursor, cursor.cmd.query, finalOptions);
+      command = buildCountCommand(cursor, cursor.cmd.query, this);
     } catch (err) {
       return callback(err);
     }

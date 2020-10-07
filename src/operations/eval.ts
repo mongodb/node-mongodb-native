@@ -13,9 +13,10 @@ export interface EvalOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EvalOperation extends CommandOperation<EvalOptions, Document> {
+export class EvalOperation extends CommandOperation implements EvalOptions {
   code: Code;
   parameters?: Document | Document[];
+  nolock?: boolean;
 
   constructor(
     db: Db | Collection,
@@ -53,8 +54,8 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
     const cmd: Document = { $eval: finalCode, args: finalParameters };
 
     // Check if the nolock parameter is passed in
-    if (this.options.nolock) {
-      cmd.nolock = this.options.nolock;
+    if (this.nolock) {
+      cmd.nolock = this.nolock;
     }
 
     // Execute the command

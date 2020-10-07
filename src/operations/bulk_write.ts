@@ -1,4 +1,10 @@
-import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
+import {
+  applyRetryableWrites,
+  applyWriteConcern,
+  Callback,
+  HasRetryableWrites,
+  HasWriteConcern
+} from '../utils';
 import { OperationBase } from './operation';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
@@ -11,9 +17,20 @@ import type {
 import type { Server } from '../sdam/server';
 
 /** @internal */
-export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
+export class BulkWriteOperation
+  extends OperationBase<BulkWriteResult>
+  implements BulkWriteOptions, HasRetryableWrites, HasWriteConcern {
   collection: Collection;
   operations: AnyBulkWriteOperation[];
+
+  bypassDocumentValidation?: boolean;
+  ordered?: boolean;
+  /** @deprecated use `ordered` instead */
+  keepGoing?: boolean;
+  forceServerObjectId?: boolean;
+  ignoreUndefined?: boolean;
+  retryWrites?: boolean;
+  writeConcern?: WriteConcern;
 
   constructor(
     collection: Collection,
@@ -29,19 +46,17 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
 
     // Add ignoreUndefined
-    if (coll.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = coll.s.options.ignoreUndefined;
+    if (typeof coll.s.options.ignoreUndefined === 'boolean') {
+      this.ignoreUndefined = coll.s.options.ignoreUndefined;
     }
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
-      options.ordered === true || options.ordered == null
-        ? coll.initializeOrderedBulkOp(options)
-        : coll.initializeUnorderedBulkOp(options);
+      this.ordered === true || this.ordered == null
+        ? coll.initializeOrderedBulkOp(this)
+        : coll.initializeUnorderedBulkOp(this);
 
     // for each op go through and add to the bulk
     try {
@@ -53,14 +68,13 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     }
 
     // Final options for retryable writes and write concern
-    let finalOptions = Object.assign({}, options);
-    finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-    finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
+    applyRetryableWrites(this, coll.s.db);
+    applyWriteConcern(this, { db: coll.s.db, collection: coll }, this);
 
-    const writeCon = WriteConcern.fromOptions(finalOptions);
+    const writeCon = WriteConcern.fromOptions(this);
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err, r) => {
+    bulk.execute(writeCon, this, (err, r) => {
       // We have connection level error
       if (!r && err) {
         return callback(err);

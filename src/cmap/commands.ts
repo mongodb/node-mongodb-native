@@ -543,16 +543,13 @@ export class Response {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
-    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
-    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
-    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
-    let bsonSize;
 
+    let bsonSize;
     // Set up the options
-    const _options: BSONSerializeOptions = {
-      promoteLongs: promoteLongs,
-      promoteValues: promoteValues,
-      promoteBuffers: promoteBuffers
+    const bsonOptions: BSONSerializeOptions = {
+      promoteLongs: options.promoteLongs ?? this.opts.promoteLongs,
+      promoteValues: options.promoteValues ?? this.opts.promoteValues,
+      promoteBuffers: options.promoteBuffers ?? this.opts.promoteBuffers
     };
 
     // Position within OP_REPLY at which documents start
@@ -573,7 +570,7 @@ export class Response {
       } else {
         this.documents[i] = BSON.deserialize(
           this.data.slice(this.index, this.index + bsonSize),
-          _options
+          bsonOptions
         );
       }
 
@@ -584,9 +581,9 @@ export class Response {
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
       const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
-      _options.fieldsAsRaw = fieldsAsRaw;
+      bsonOptions.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
       this.documents = [doc];
     }
 
@@ -812,15 +809,12 @@ export class BinMsg {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
-    const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
-    const promoteValues = options.promoteValues ?? this.opts.promoteValues;
-    const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
 
     // Set up the options
-    const _options: BSONSerializeOptions = {
-      promoteLongs: promoteLongs,
-      promoteValues: promoteValues,
-      promoteBuffers: promoteBuffers
+    const bsonOptions: BSONSerializeOptions = {
+      promoteLongs: options.promoteLongs ?? this.opts.promoteLongs,
+      promoteValues: options.promoteValues ?? this.opts.promoteValues,
+      promoteBuffers: options.promoteBuffers ?? this.opts.promoteBuffers
     };
 
     while (this.index < this.data.length) {
@@ -830,7 +824,7 @@ export class BinMsg {
       } else if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : BSON.deserialize(bin, _options));
+        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
 
         this.index += bsonSize;
       }
@@ -839,9 +833,9 @@ export class BinMsg {
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
       const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
-      _options.fieldsAsRaw = fieldsAsRaw;
+      bsonOptions.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
+      const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
       this.documents = [doc];
     }
 

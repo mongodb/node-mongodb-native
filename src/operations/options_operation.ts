@@ -6,7 +6,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 
 /** @internal */
-export class OptionsOperation extends OperationBase<OperationOptions, Document> {
+export class OptionsOperation extends OperationBase implements OperationOptions {
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {
@@ -17,14 +17,11 @@ export class OptionsOperation extends OperationBase<OperationOptions, Document> 
 
   execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
-    const opts = this.options;
 
-    coll.s.db.listCollections({ name: coll.collectionName }, opts).toArray((err, collections) => {
+    coll.s.db.listCollections({ name: coll.collectionName }, this).toArray((err, collections) => {
       if (err || !collections) return callback(err);
       if (collections.length === 0) {
-        return callback(
-          MongoError.create({ message: `collection ${coll.namespace} not found`, driver: true })
-        );
+        return callback(new MongoError(`collection ${coll.namespace} not found`));
       }
 
       callback(err, collections[0].options || null);

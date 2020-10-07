@@ -1,4 +1,4 @@
-import { ReadPreference } from '../read_preference';
+import type { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
@@ -34,23 +34,42 @@ export interface OperationOptions extends BSONSerializeOptions {
  * a specific aspect.
  * @internal
  */
-export abstract class OperationBase<
-  T extends OperationOptions = OperationOptions,
-  TResult = Document
-> {
-  options: T;
+export abstract class OperationBase<TResult = Document> {
   ns!: MongoDBNamespace;
   cmd!: Document;
-  readPreference: ReadPreference;
+  readPreference!: ReadPreference;
   server!: Server;
+  session?: ClientSession;
   fullResponse?: boolean;
+  /** Explain returns the aggregation execution plan (requires mongodb 2.6 \>) */
+  explain?: boolean;
+
+  promoteBuffers?: boolean;
+  promoteValues?: boolean;
+  promoteLongs?: boolean;
+  raw?: boolean;
+  ignoreUndefined?: boolean;
 
   // BSON serialization options
-  bsonOptions?: BSONSerializeOptions;
+  get bsonOptions(): BSONSerializeOptions {
+    const bsonOptions: Document = {
+      promoteBuffers: this.promoteBuffers,
+      promoteValues: this.promoteValues,
+      promoteLongs: this.promoteLongs,
+      raw: this.raw,
+      ignoreUndefined: this.ignoreUndefined
+    } as const;
 
-  constructor(options: T = {} as T) {
-    this.options = Object.assign({}, options);
-    this.readPreference = ReadPreference.primary;
+    for (const key in bsonOptions) {
+      bsonOptions[key] === undefined && delete bsonOptions[key];
+    }
+
+    return bsonOptions;
+  }
+
+  constructor(options = {}) {
+    // this.readPreference = ReadPreference.primary;
+    Object.assign(this, options);
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -64,20 +83,8 @@ export abstract class OperationBase<
     return ctor.aspects.has(aspect);
   }
 
-  set session(session: ClientSession) {
-    Object.assign(this.options, { session });
-  }
-
-  get session(): ClientSession {
-    // NOTE: Using the bang operator here because we know there is always a
-    //       session, explicit or implicit. We should disambiguate the session
-    //       from the options and set it as an explicit field
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.options.session!;
-  }
-
   clearSession(): void {
-    delete this.options.session;
+    delete this.session;
   }
 
   get canRetryRead(): boolean {

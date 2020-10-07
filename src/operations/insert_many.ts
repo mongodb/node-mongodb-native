@@ -21,9 +21,13 @@ export interface InsertManyResult {
 }
 
 /** @internal */
-export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertManyResult> {
+export class InsertManyOperation
+  extends OperationBase<InsertManyResult>
+  implements BulkWriteOptions {
   collection: Collection;
   docs: Document[];
+  serializeFunctions?: boolean;
+  forceServerObjectId?: boolean;
 
   constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
     super(options);
@@ -35,22 +39,19 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
   execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
-    const options = this.options;
 
     if (!Array.isArray(docs)) {
-      return callback(
-        MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
-      );
+      return callback(new MongoError('docs parameter must be an array of documents'));
     }
 
     // If keep going set unordered
-    options['serializeFunctions'] = options['serializeFunctions'] || coll.s.serializeFunctions;
+    this.serializeFunctions = this.serializeFunctions || coll.s.serializeFunctions;
 
-    docs = prepareDocs(coll, docs, options);
+    docs = prepareDocs(coll, docs, this);
 
     // Generate the bulk write operations
     const operations = [{ insertMany: docs }];
-    const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
+    const bulkWriteOperation = new BulkWriteOperation(coll, operations, this);
 
     bulkWriteOperation.execute(server, (err, result) => {
       if (err || !result) return callback(err);

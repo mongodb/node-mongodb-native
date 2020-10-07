@@ -15,16 +15,17 @@ import type { Sort } from './find';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
 
-const exclusionList = [
-  'readPreference',
-  'session',
-  'bypassDocumentValidation',
-  'w',
-  'wtimeout',
-  'j',
-  'writeConcern',
-  'scope' // this option is reformatted thus exclude the original
-];
+const optionsAllowList = new Set([
+  'out',
+  'query',
+  'sort',
+  'limit',
+  'finalize',
+  'jsMode',
+  'verbose'
+  // 'scope', // this option is reformatted thus exclude the original
+  // 'bypassDocumentValidation'  // this option is only set if explicitly 'true'
+]);
 
 /** @public */
 export type MapFunction = () => void;
@@ -64,12 +65,18 @@ interface MapReduceStats {
 }
 
 /** @internal Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection. */
-export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
+export class MapReduceOperation
+  extends CommandOperation<Document | Document[]>
+  implements MapReduceOptions {
   collection: Collection;
   /** The mapping function. */
   map: MapFunction | string;
   /** The reduce function. */
   reduce: ReduceFunction | string;
+  scope: any;
+  out: MapReduceOptions['out'];
+  bypassDocumentValidation?: boolean;
+  verbose?: boolean;
 
   /**
    * Constructs a MapReduce operation.
@@ -96,7 +103,6 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
-    let options = this.options;
 
     const mapCommandHash: Document = {
       mapReduce: coll.collectionName,
@@ -104,47 +110,45 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       reduce: reduce
     };
 
-    if (options.scope) {
-      mapCommandHash.scope = processScope(options.scope);
+    if (this.scope) {
+      mapCommandHash.scope = processScope(this.scope);
     }
 
     // Add any other options passed in
-    for (const n in options) {
-      // Only include if not in exclusion list
-      if (exclusionList.indexOf(n) === -1) {
-        mapCommandHash[n] = (options as any)[n];
+    for (const n in this) {
+      // Only include if defined on this
+      if (optionsAllowList.has(n)) {
+        mapCommandHash[n] = this[n];
       }
     }
 
-    options = Object.assign({}, options);
-
     // Ensure we have the right read preference inheritance
-    options.readPreference = ReadPreference.resolve(coll, options);
+    this.readPreference = ReadPreference.resolve(coll, this);
 
     // If we have a read preference and inline is not set as output fail hard
     if (
-      options.readPreference &&
-      options.readPreference.mode === ReadPreferenceMode.primary &&
-      options.out &&
-      (options.out as any).inline !== 1 &&
-      options.out !== 'inline'
+      this.readPreference &&
+      this.readPreference.mode === ReadPreferenceMode.primary &&
+      this.out &&
+      (this.out as any).inline !== 1 &&
+      this.out !== 'inline'
     ) {
       // Force readPreference to primary
-      options.readPreference = ReadPreference.primary;
+      this.readPreference = ReadPreference.primary;
       // Decorate command with writeConcern if supported
-      applyWriteConcern(mapCommandHash, { db: coll.s.db, collection: coll }, options);
+      applyWriteConcern(mapCommandHash, { db: coll.s.db, collection: coll }, this);
     } else {
-      decorateWithReadConcern(mapCommandHash, coll, options);
+      decorateWithReadConcern(mapCommandHash, coll, this);
     }
 
     // Is bypassDocumentValidation specified
-    if (options.bypassDocumentValidation === true) {
-      mapCommandHash.bypassDocumentValidation = options.bypassDocumentValidation;
+    if (this.bypassDocumentValidation === true) {
+      mapCommandHash.bypassDocumentValidation = this.bypassDocumentValidation;
     }
 
     // Have we specified collation
     try {
-      decorateWithCollation(mapCommandHash, coll, options);
+      decorateWithCollation(mapCommandHash, coll, this);
     } catch (err) {
       return callback(err);
     }
@@ -166,7 +170,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       // invoked with inline?
       if (result.results) {
         // If we wish for no verbosity
-        if (options['verbose'] == null || !options['verbose']) {
+        if (this.verbose == null || !this.verbose) {
           return callback(undefined, result.results);
         }
 
@@ -190,7 +194,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       }
 
       // If we wish for no verbosity
-      if (options['verbose'] == null || !options['verbose']) {
+      if (this.verbose == null || !this.verbose) {
         return callback(err, collection);
       }
 

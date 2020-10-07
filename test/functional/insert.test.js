@@ -1846,8 +1846,6 @@ describe('Insert', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var o = configuration.writeConcernMax();
-      o.promoteLongs = false;
 
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
@@ -1891,9 +1889,14 @@ describe('Insert', function () {
               .batchSize(2)
               .toArray(function (err, docs) {
                 expect(err).to.not.exist;
-                var doc = docs.pop();
 
-                test.ok(doc.a._bsontype === 'Long');
+                docs.forEach((d, i) => {
+                  expect(d.a, `Failed on the document at index ${i}`).to.not.be.a('number');
+                  expect(d.a, `Failed on the document at index ${i}`).to.have.property('_bsontype');
+                  expect(d.a._bsontype, `Failed on the document at index ${i}`).to.be.equal('Long');
+                });
+
+                // expect(doc.a).to.have.property('_bsontype').to.be.equal('Long');
                 client.close(done);
               });
           }

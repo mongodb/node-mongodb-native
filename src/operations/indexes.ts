@@ -9,7 +9,6 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { FindOptions } from './find';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -118,7 +117,7 @@ function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescri
 }
 
 /** @internal */
-export class IndexesOperation extends OperationBase<IndexInformationOptions, Document> {
+export class IndexesOperation extends OperationBase implements IndexInformationOptions {
   collection: Collection;
 
   constructor(collection: Collection, options: IndexInformationOptions) {
@@ -129,17 +128,17 @@ export class IndexesOperation extends OperationBase<IndexInformationOptions, Doc
 
   execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
-    const options = this.options;
 
-    indexInformation(coll.s.db, coll.collectionName, { full: true, ...options }, callback);
+    indexInformation(coll.s.db, coll.collectionName, { full: true, ...this }, callback);
   }
 }
 
 /** @internal */
-export class CreateIndexesOperation extends CommandOperation<CreateIndexesOptions, Document> {
+export class CreateIndexesOperation extends CommandOperation implements CreateIndexesOptions {
   collectionName: string;
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: IndexDescription[];
+  commitQuorum?: number | string;
 
   constructor(
     parent: OperationParent,
@@ -157,7 +156,6 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    const options = this.options;
     const indexes = this.indexes;
 
     const serverWireVersion = maxWireVersion(server);
@@ -189,18 +187,18 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
 
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
-    if (options.commitQuorum != null) {
+    if (this.commitQuorum != null) {
       if (serverWireVersion < 9) {
         callback(
           new MongoError('`commitQuorum` option for `createIndexes` not supported on servers < 4.4')
         );
         return;
       }
-      cmd.commitQuorum = options.commitQuorum;
+      cmd.commitQuorum = this.commitQuorum;
     }
 
     // collation is set on each index, it should not be defined at the root
-    this.options.collation = undefined;
+    // this.collation = undefined; FIXME!!!!!!
 
     super.executeCommand(server, cmd, (err, result) => {
       if (err) {
@@ -275,7 +273,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropIndexOperation extends CommandOperation<DropIndexesOptions, Document> {
+export class DropIndexOperation extends CommandOperation implements DropIndexesOptions {
   collection: Collection;
   indexName: string;
 
@@ -316,8 +314,9 @@ export interface ListIndexesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, Document> {
+export class ListIndexesOperation extends CommandOperation implements ListIndexesOptions {
   collectionNamespace: MongoDBNamespace;
+  batchSize?: number;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
     super(collection, options);
@@ -331,16 +330,11 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
       const collectionNS = this.collectionNamespace.toString();
 
-      server.query(
-        systemIndexesNS,
-        { query: { ns: collectionNS } },
-        this.options as FindOptions,
-        callback
-      );
+      server.query(systemIndexesNS, { query: { ns: collectionNS } }, this, callback);
       return;
     }
 
-    const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
+    const cursor = this.batchSize ? { batchSize: this.batchSize } : {};
     super.executeCommand(
       server,
       { listIndexes: this.collectionNamespace.collection, cursor },
@@ -350,7 +344,9 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
 }
 
 /** @internal */
-export class IndexExistsOperation extends OperationBase<IndexInformationOptions, boolean> {
+export class IndexExistsOperation
+  extends OperationBase<boolean>
+  implements IndexInformationOptions {
   collection: Collection;
   indexes: string | string[];
 
@@ -368,9 +364,8 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions,
   execute(server: Server, callback: Callback<boolean>): void {
     const coll = this.collection;
     const indexes = this.indexes;
-    const options = this.options;
 
-    indexInformation(coll.s.db, coll.collectionName, options, (err, indexInformation) => {
+    indexInformation(coll.s.db, coll.collectionName, this, (err, indexInformation) => {
       // If we have an error return
       if (err != null) return callback(err);
       // Let's check for the index names
@@ -389,7 +384,7 @@ export class IndexExistsOperation extends OperationBase<IndexInformationOptions,
 }
 
 /** @internal */
-export class IndexInformationOperation extends OperationBase<IndexInformationOptions, Document> {
+export class IndexInformationOperation extends OperationBase implements IndexInformationOptions {
   db: Db;
   name: string;
 
@@ -403,9 +398,8 @@ export class IndexInformationOperation extends OperationBase<IndexInformationOpt
   execute(server: Server, callback: Callback<Document>): void {
     const db = this.db;
     const name = this.name;
-    const options = this.options;
 
-    indexInformation(db, name, options, callback);
+    indexInformation(db, name, this, callback);
   }
 }
 

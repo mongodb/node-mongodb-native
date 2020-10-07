@@ -640,7 +640,7 @@ function executeCommands(
     err.ok = 0;
     // Merge top level error and return
     mergeBatchResults(batch, bulkOperation.s.bulkResult, err, undefined);
-    callback();
+    callback(err); // FIXME, seems wrong???
   }
 }
 

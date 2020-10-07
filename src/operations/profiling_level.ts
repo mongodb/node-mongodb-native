@@ -7,7 +7,9 @@ import type { Db } from '../db';
 export type ProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class ProfilingLevelOperation extends CommandOperation<ProfilingLevelOptions, string> {
+export class ProfilingLevelOperation
+  extends CommandOperation<string>
+  implements ProfilingLevelOptions {
   constructor(db: Db, options: ProfilingLevelOptions) {
     super(db, options);
   }

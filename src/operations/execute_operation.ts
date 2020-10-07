@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { MongoError, isRetryableError, AnyError } from '../error';
-import { Aspect, OperationBase, OperationOptions } from './operation';
+import { Aspect, OperationBase } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
@@ -11,15 +11,7 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<
-  OperationOptions,
-  infer K
->
-  ? K
-  : never;
-type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K, unknown>
-  ? K
-  : never;
+type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<infer K> ? K : never;
 
 /**
  * Executes the given operation with provided arguments.
@@ -37,23 +29,19 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
  * @param callback - The command result callback
  */
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends OperationBase<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T): Promise<TResult>;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends OperationBase<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends OperationBase<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends OperationBase<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (topology == null) {
@@ -72,7 +60,7 @@ export function executeOperation<
           return;
         }
 
-        executeOperation<T, TOptions, TResult>(topology, operation, cb);
+        executeOperation<T, TResult>(topology, operation, cb);
       });
     });
   }
@@ -209,7 +197,7 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
         (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite))
     ) {
       if (operation.hasAspect(Aspect.WRITE_OPERATION) && willRetryWrite) {
-        operation.options.willRetryWrite = true;
+        operation.willRetryWrite = true;
         session.incrementTransactionNumber();
       }
 

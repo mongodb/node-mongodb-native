@@ -12,8 +12,9 @@ export interface CollStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal Get all the collection statistics. */
-export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
+export class CollStatsOperation extends CommandOperation implements CollStatsOptions {
   collectionName: string;
+  scale?: number;
 
   /**
    * Construct a Stats operation.
@@ -28,8 +29,8 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions, Docum
 
   execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { collStats: this.collectionName };
-    if (this.options.scale != null) {
-      command.scale = this.options.scale;
+    if (this.scale != null) {
+      command.scale = this.scale;
     }
 
     super.executeCommand(server, command, callback);
@@ -43,11 +44,13 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
+export class DbStatsOperation extends CommandOperation implements DbStatsOptions {
+  scale?: number;
+
   execute(server: Server, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };
-    if (this.options.scale != null) {
-      command.scale = this.options.scale;
+    if (this.scale != null) {
+      command.scale = this.scale;
     }
 
     super.executeCommand(server, command, callback);

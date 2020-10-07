@@ -4,7 +4,7 @@ import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
 
 /** @public */
@@ -41,7 +41,7 @@ export interface UpdateResult {
 }
 
 /** @internal */
-export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
+export class UpdateOperation extends OperationBase implements UpdateOptions {
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
@@ -55,20 +55,16 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    server.update(
-      this.ns.toString(),
-      this.operations,
-      this.options as WriteCommandOptions,
-      callback
-    );
+    server.update(this.ns.toString(), this.operations, this, callback);
   }
 }
 
 /** @internal */
-export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateOneOperation extends CommandOperation<UpdateResult> implements UpdateOptions {
   collection: Collection;
   filter: Document;
   update: Document;
+  multi?: boolean;
 
   constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(collection, options);
@@ -86,12 +82,11 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = this.options;
 
     // Set single document update
-    options.multi = false;
+    this.multi = false;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err, r) => {
+    updateDocuments(server, coll, filter, update, this, (err, r) => {
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {
@@ -111,10 +106,11 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
 }
 
 /** @internal */
-export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateManyOperation extends CommandOperation<UpdateResult> implements UpdateOptions {
   collection: Collection;
   filter: Document;
   update: Document;
+  multi?: boolean;
 
   constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(collection, options);
@@ -128,12 +124,11 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = this.options;
 
     // Set single document update
-    options.multi = true;
+    this.multi = true;
     // Execute update
-    updateDocuments(server, coll, filter, update, options, (err, r) => {
+    updateDocuments(server, coll, filter, update, this, (err, r) => {
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {

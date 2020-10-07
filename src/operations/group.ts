@@ -9,7 +9,7 @@ import type { Collection } from '../collection';
 export type GroupOptions = CommandOperationOptions;
 
 /** @internal */
-export class GroupOperation extends CommandOperation<GroupOptions, Document> {
+export class GroupOperation extends CommandOperation implements GroupOptions {
   collectionName: string;
   keys: any;
   condition: Document;

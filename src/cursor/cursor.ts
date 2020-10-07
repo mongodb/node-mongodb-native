@@ -123,7 +123,7 @@ export class Cursor<
     super(topology, operation, options);
 
     if (this.operation) {
-      options = this.operation.options as T;
+      options = (this.operation as unknown) as T;
     }
 
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
@@ -892,7 +892,7 @@ export class Cursor<
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
     if (this.operation && this.operation.cmd == null) {
-      this.operation.options.explain = true;
+      this.operation.explain = true;
       return executeOperation(this.topology, this.operation as any, callback);
     }
 

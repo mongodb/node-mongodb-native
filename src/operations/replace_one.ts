@@ -19,15 +19,16 @@ export interface ReplaceOptions extends CommandOperationOptions {
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
 
-  // FIXME:
+  // FIXME: ????!!!! neal why?
   multi?: boolean;
 }
 
 /** @internal */
-export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
+export class ReplaceOneOperation extends CommandOperation<UpdateResult> implements ReplaceOptions {
   collection: Collection;
   filter: Document;
   replacement: Document;
+  multi?: boolean;
 
   constructor(
     collection: Collection,
@@ -50,13 +51,12 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, Update
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
-    const options = this.options;
 
     // Set single document update
-    options.multi = false;
+    this.multi = false;
 
     // Execute update
-    updateDocuments(server, coll, filter, replacement, options, (err, r) => {
+    updateDocuments(server, coll, filter, replacement, this, (err, r) => {
       if (err || !r) return callback(err);
 
       const result: UpdateResult = {

@@ -5,11 +5,10 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 
-/** @public */
-export type DistinctOptions = CommandOperationOptions;
-
 /** @internal Return a list of distinct values for the given key across a collection. */
-export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
+export class DistinctOperation
+  extends CommandOperation<Document[]>
+  implements CommandOperationOptions {
   collection: Collection;
   /** Field of the document to find distinct values for. */
   key: string;
@@ -24,7 +23,12 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
    * @param query - The query for filtering the set of documents to which we apply the distinct filter.
    * @param options - Optional settings. See Collection.prototype.distinct for a list of options.
    */
-  constructor(collection: Collection, key: string, query: Document, options?: DistinctOptions) {
+  constructor(
+    collection: Collection,
+    key: string,
+    query: Document,
+    options?: CommandOperationOptions
+  ) {
     super(collection, options);
 
     this.collection = collection;
@@ -36,7 +40,6 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
-    const options = this.options;
 
     // Distinct command
     const cmd: Document = {
@@ -46,16 +49,16 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     };
 
     // Add maxTimeMS if defined
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
+    if (typeof this.maxTimeMS === 'number') {
+      cmd.maxTimeMS = this.maxTimeMS;
     }
 
     // Do we have a readConcern specified
-    decorateWithReadConcern(cmd, coll, options);
+    decorateWithReadConcern(cmd, coll, this);
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll, options);
+      decorateWithCollation(cmd, coll, this);
     } catch (err) {
       return callback(err);
     }
@@ -66,7 +69,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
         return;
       }
 
-      callback(undefined, this.options.fullResponse ? result : result.values);
+      callback(undefined, this.fullResponse ? result : result.values);
     });
   }
 }

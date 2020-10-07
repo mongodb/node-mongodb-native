@@ -10,18 +10,19 @@ import type { PkFactory } from '../mongo_client';
 // eslint-disable-next-line
 import type { Collection } from '../collection';
 
-const ILLEGAL_COMMAND_FIELDS = new Set([
-  'w',
-  'wtimeout',
-  'j',
-  'fsync',
+const optionsAllowList = new Set([
+  'capped',
   'autoIndexId',
-  'serializeFunctions',
-  'pkFactory',
-  'raw',
-  'readPreference',
-  'session',
-  'readConcern',
+  'size',
+  'max',
+  'storageEngine',
+  'validator',
+  'validationLevel',
+  'validationAction',
+  'indexOptionDefaults',
+  'viewOn',
+  'pipeline',
+  'collation',
   'writeConcern'
 ]);
 
@@ -58,12 +59,26 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class CreateCollectionOperation extends CommandOperation<
-  CreateCollectionOptions,
-  Collection
-> {
+export class CreateCollectionOperation
+  extends CommandOperation<Collection>
+  implements CreateCollectionOptions {
   db: Db;
   name: string;
+
+  strict?: boolean;
+  capped?: boolean;
+  autoIndexId?: boolean;
+  size?: number;
+  max?: number;
+  flags?: number;
+  storageEngine?: Document;
+  validator?: Document;
+  validationLevel?: string;
+  validationAction?: string;
+  indexOptionDefaults?: Document;
+  viewOn?: string;
+  pipeline?: Document[];
+  pkFactory?: PkFactory;
 
   constructor(db: Db, name: string, options: CreateCollectionOptions = {}) {
     super(db, options);
@@ -74,7 +89,6 @@ export class CreateCollectionOperation extends CommandOperation<
   execute(server: Server, callback: Callback<Collection>): void {
     const db = this.db;
     const name = this.name;
-    const options = this.options;
     const Collection = loadCollection();
 
     const done: Callback = err => {
@@ -82,17 +96,13 @@ export class CreateCollectionOperation extends CommandOperation<
         return callback(err);
       }
 
-      callback(undefined, new Collection(db, name, options));
+      callback(undefined, new Collection(db, name, this));
     };
 
     const cmd: Document = { create: name };
-    for (const n in options) {
-      if (
-        (options as any)[n] != null &&
-        typeof (options as any)[n] !== 'function' &&
-        !ILLEGAL_COMMAND_FIELDS.has(n)
-      ) {
-        cmd[n] = (options as any)[n];
+    for (const n in this) {
+      if (optionsAllowList.has(n) && this[n] != null && typeof this[n] !== 'function') {
+        cmd[n] = this[n];
       }
     }
 

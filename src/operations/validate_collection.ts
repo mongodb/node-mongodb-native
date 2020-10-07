@@ -11,10 +11,9 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends CommandOperation<
-  ValidateCollectionOptions,
-  Document
-> {
+export class ValidateCollectionOperation
+  extends CommandOperation
+  implements ValidateCollectionOptions {
   collectionName: string;
   command: Document;
 

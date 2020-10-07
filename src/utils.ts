@@ -410,7 +410,7 @@ export function executeLegacyOperation<T extends OperationBase>(
   });
 }
 
-interface HasRetryableWrites {
+export interface HasRetryableWrites {
   retryWrites?: boolean;
 }
 /**
@@ -428,7 +428,7 @@ export function applyRetryableWrites<T extends HasRetryableWrites>(target: T, db
   return target;
 }
 
-interface HasWriteConcern {
+export interface HasWriteConcern {
   writeConcern?: WriteConcernOptions | WriteConcern | W;
 }
 /**

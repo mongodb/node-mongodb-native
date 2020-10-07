@@ -19,10 +19,13 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandOperation<
-  ListDatabasesOptions,
-  ListDatabasesResult
-> {
+export class ListDatabasesOperation
+  extends CommandOperation<ListDatabasesResult>
+  implements ListDatabasesOptions {
+  nameOnly?: boolean;
+  filter?: Document;
+  authorizedDatabases?: boolean;
+
   constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
@@ -30,16 +33,16 @@ export class ListDatabasesOperation extends CommandOperation<
 
   execute(server: Server, callback: Callback<ListDatabasesResult>): void {
     const cmd: Document = { listDatabases: 1 };
-    if (this.options.nameOnly) {
+    if (this.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);
     }
 
-    if (this.options.filter) {
-      cmd.filter = this.options.filter;
+    if (this.filter) {
+      cmd.filter = this.filter;
     }
 
-    if (typeof this.options.authorizedDatabases === 'boolean') {
-      cmd.authorizedDatabases = this.options.authorizedDatabases;
+    if (typeof this.authorizedDatabases === 'boolean') {
+      cmd.authorizedDatabases = this.authorizedDatabases;
     }
 
     super.executeCommand(server, cmd, callback);

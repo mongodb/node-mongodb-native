@@ -12,8 +12,11 @@ export interface CollectionsOptions extends OperationOptions {
 }
 
 /** @internal */
-export class CollectionsOperation extends OperationBase<CollectionsOptions, Collection[]> {
+export class CollectionsOperation
+  extends OperationBase<Collection[]>
+  implements CollectionsOptions {
   db: Db;
+  nameOnly?: boolean;
 
   constructor(db: Db, options: CollectionsOptions) {
     super(options);
@@ -23,13 +26,12 @@ export class CollectionsOperation extends OperationBase<CollectionsOptions, Coll
 
   execute(server: Server, callback: Callback<Collection[]>): void {
     const db = this.db;
-    let options: CollectionsOptions = this.options;
 
     const Collection = loadCollection();
 
-    options = Object.assign({}, options, { nameOnly: true });
+    this.nameOnly = true;
     // Let's get the collection names
-    db.listCollections({}, options).toArray((err, documents) => {
+    db.listCollections({}, this).toArray((err, documents) => {
       if (err || !documents) return callback(err);
       // Filter collections removing any illegal ones
       documents = documents.filter(doc => doc.name.indexOf('$') === -1);

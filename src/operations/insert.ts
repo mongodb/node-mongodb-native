@@ -12,7 +12,7 @@ import type { BulkWriteOptions } from '../bulk/common';
 import type { WriteConcernOptions } from '../write_concern';
 
 /** @internal */
-export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
+export class InsertOperation extends OperationBase implements BulkWriteOptions {
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: BulkWriteOptions) {
@@ -22,12 +22,7 @@ export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    server.insert(
-      this.ns.toString(),
-      this.operations,
-      this.options as WriteCommandOptions,
-      callback
-    );
+    server.insert(this.ns.toString(), this.operations, this, callback);
   }
 }
 
@@ -51,7 +46,9 @@ export interface InsertOneResult {
   result: Document;
 }
 
-export class InsertOneOperation extends CommandOperation<InsertOneOptions, InsertOneResult> {
+export class InsertOneOperation
+  extends CommandOperation<InsertOneResult>
+  implements InsertOneOptions {
   collection: Collection;
   doc: Document;
 
@@ -65,15 +62,12 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
   execute(server: Server, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
-    const options = this.options;
 
     if (Array.isArray(doc)) {
-      return callback(
-        MongoError.create({ message: 'doc parameter must be an object', driver: true })
-      );
+      return callback(new MongoError('doc parameter must be an object'));
     }
 
-    insertDocuments(server, coll, [doc], options, (err, r) => {
+    insertDocuments(server, coll, [doc], this, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers

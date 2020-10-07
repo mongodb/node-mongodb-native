@@ -89,12 +89,39 @@ export interface FindOptions extends QueryOptions, CommandOperationOptions {
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @internal */
-export class FindOperation extends CommandOperation<FindOptions, Document> {
+export class FindOperation extends CommandOperation implements FindOptions {
   cmd: Document;
   filter: Document;
   readPreference: ReadPreference;
 
   hint?: Hint;
+  allowDiskUse: any;
+  sort: any;
+  projection: any;
+  fields: any;
+  skip: any;
+  limit: any;
+  batchSize: any;
+  max: any;
+  min: any;
+  returnKey: any;
+  showRecordId: any;
+  tailable: any;
+  oplogReplay: any;
+  timeout: any;
+  noCursorTimeout: any;
+  awaitData: any;
+  awaitdata: any;
+  allowPartialResults: any;
+  partial: any;
+  snapshot: any;
+  showDiskLoc: any;
+  singleBatch: any;
+  raw: boolean;
+  promoteLongs: boolean;
+  promoteValues: boolean;
+  promoteBuffers: boolean;
+  ignoreUndefined: boolean;
 
   constructor(
     collection: Collection,
@@ -104,7 +131,7 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   ) {
     super(collection, options);
     this.ns = ns;
-    this.readPreference = ReadPreference.resolve(collection, this.options);
+    this.readPreference = ReadPreference.resolve(collection, this);
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
       throw new MongoError('Query filter must be a plain object or ObjectId');
@@ -129,14 +156,11 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       query: this.filter
     };
 
-    // TODO: figure out our story about inheriting BSON serialization options
-    this.bsonOptions = {
-      raw: options.raw ?? collection.s.raw ?? false,
-      promoteLongs: options.promoteLongs ?? collection.s.promoteLongs ?? true,
-      promoteValues: options.promoteValues ?? collection.s.promoteValues ?? true,
-      promoteBuffers: options.promoteBuffers ?? collection.s.promoteBuffers ?? false,
-      ignoreUndefined: options.ignoreUndefined ?? collection.s.ignoreUndefined ?? false
-    };
+    this.raw = options.raw ?? collection.s.raw ?? false;
+    this.promoteLongs = options.promoteLongs ?? collection.s.promoteLongs ?? true;
+    this.promoteValues = options.promoteValues ?? collection.s.promoteValues ?? true;
+    this.promoteBuffers = options.promoteBuffers ?? collection.s.promoteBuffers ?? false;
+    this.ignoreUndefined = options.ignoreUndefined ?? collection.s.ignoreUndefined ?? false;
   }
 
   execute(server: Server, callback: Callback<Document>): void {
@@ -144,20 +168,19 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     this.server = server;
     const serverWireVersion = maxWireVersion(server);
 
-    const options = this.options;
-    if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
+    if (typeof this.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
       callback(new MongoError('The `allowDiskUse` option is not supported on MongoDB < 3.2'));
       return;
     }
 
     const findCommand: Document = Object.assign({}, this.cmd);
 
-    if (options.sort) {
-      findCommand.sort = formattedOrderClause(options.sort);
+    if (this.sort) {
+      findCommand.sort = formattedOrderClause(this.sort);
     }
 
-    if (options.projection || options.fields) {
-      let projection = options.projection || options.fields;
+    if (this.projection || this.fields) {
+      let projection = this.projection || this.fields;
       if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
         projection = projection.length
           ? projection.reduce((result, field) => {
@@ -170,81 +193,81 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       findCommand.fields = projection;
     }
 
-    if (options.hint) {
-      findCommand.hint = normalizeHintField(options.hint);
+    if (this.hint) {
+      findCommand.hint = normalizeHintField(this.hint);
     }
 
-    if (typeof options.skip === 'number') {
-      findCommand.skip = options.skip;
+    if (typeof this.skip === 'number') {
+      findCommand.skip = this.skip;
     }
 
-    if (typeof options.limit === 'number') {
-      findCommand.limit = options.limit;
+    if (typeof this.limit === 'number') {
+      findCommand.limit = this.limit;
     }
 
-    if (typeof options.batchSize === 'number') {
-      findCommand.batchSize = options.batchSize;
+    if (typeof this.batchSize === 'number') {
+      findCommand.batchSize = this.batchSize;
     }
 
-    if (typeof options.singleBatch === 'boolean') {
-      findCommand.singleBatch = options.singleBatch;
+    if (typeof this.singleBatch === 'boolean') {
+      findCommand.singleBatch = this.singleBatch;
     }
 
-    if (options.comment) {
-      findCommand.comment = options.comment;
+    if (this.comment) {
+      findCommand.comment = this.comment;
     }
 
-    if (typeof options.maxTimeMS === 'number') {
-      findCommand.maxTimeMS = options.maxTimeMS;
+    if (typeof this.maxTimeMS === 'number') {
+      findCommand.maxTimeMS = this.maxTimeMS;
     }
 
     if (this.readConcern && (!this.session || !this.session.inTransaction())) {
       findCommand.readConcern = this.readConcern;
     }
 
-    if (options.max) {
-      findCommand.max = options.max;
+    if (this.max) {
+      findCommand.max = this.max;
     }
 
-    if (options.min) {
-      findCommand.min = options.min;
+    if (this.min) {
+      findCommand.min = this.min;
     }
 
-    if (typeof options.returnKey === 'boolean') {
-      findCommand.returnKey = options.returnKey;
+    if (typeof this.returnKey === 'boolean') {
+      findCommand.returnKey = this.returnKey;
     }
 
-    if (typeof options.showRecordId === 'boolean') {
-      findCommand.showRecordId = options.showRecordId;
+    if (typeof this.showRecordId === 'boolean') {
+      findCommand.showRecordId = this.showRecordId;
     }
 
-    if (typeof options.tailable === 'boolean') {
-      findCommand.tailable = options.tailable;
+    if (typeof this.tailable === 'boolean') {
+      findCommand.tailable = this.tailable;
     }
 
-    if (typeof options.oplogReplay === 'boolean') {
-      findCommand.oplogReplay = options.oplogReplay;
+    if (typeof this.oplogReplay === 'boolean') {
+      findCommand.oplogReplay = this.oplogReplay;
     }
 
-    if (typeof options.timeout === 'boolean') {
-      findCommand.noCursorTimeout = options.timeout;
-    } else if (typeof options.noCursorTimeout === 'boolean') {
-      findCommand.noCursorTimeout = options.noCursorTimeout;
+    if (typeof this.timeout === 'boolean') {
+      findCommand.noCursorTimeout = this.timeout;
+    } else if (typeof this.noCursorTimeout === 'boolean') {
+      findCommand.noCursorTimeout = this.noCursorTimeout;
     }
 
-    if (typeof options.awaitData === 'boolean') {
-      findCommand.awaitData = options.awaitData;
-    } else if (typeof options.awaitdata === 'boolean') {
-      findCommand.awaitData = options.awaitdata;
+    if (typeof this.awaitData === 'boolean') {
+      findCommand.awaitData = this.awaitData;
+    } else if (typeof this.awaitdata === 'boolean') {
+      findCommand.awaitData = this.awaitdata;
     }
 
-    if (typeof options.allowPartialResults === 'boolean') {
-      findCommand.allowPartialResults = options.allowPartialResults;
-    } else if (typeof options.partial === 'boolean') {
-      findCommand.allowPartialResults = options.partial;
+    if (typeof this.allowPartialResults === 'boolean') {
+      findCommand.allowPartialResults = this.allowPartialResults;
+    } else if (typeof this.partial === 'boolean') {
+      findCommand.allowPartialResults = this.partial;
     }
 
-    if (options.collation) {
+    if (this.collation) {
       if (serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
         callback(
           new MongoError(
@@ -255,26 +278,26 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
         return;
       }
 
-      findCommand.collation = options.collation;
+      findCommand.collation = this.collation;
     }
 
-    if (typeof options.allowDiskUse === 'boolean') {
-      findCommand.allowDiskUse = options.allowDiskUse;
+    if (typeof this.allowDiskUse === 'boolean') {
+      findCommand.allowDiskUse = this.allowDiskUse;
     }
 
-    if (typeof options.snapshot === 'boolean') {
-      findCommand.snapshot = options.snapshot;
+    if (typeof this.snapshot === 'boolean') {
+      findCommand.snapshot = this.snapshot;
     }
 
-    if (typeof options.showDiskLoc === 'boolean') {
-      findCommand.showDiskLoc = options.showDiskLoc;
+    if (typeof this.showDiskLoc === 'boolean') {
+      findCommand.showDiskLoc = this.showDiskLoc;
     }
 
     // TODO: use `MongoDBNamespace` through and through
     server.query(
       this.ns.toString(),
       findCommand,
-      { fullResult: !!this.fullResponse, ...this.options, ...this.bsonOptions },
+      { fullResult: !!this.fullResponse, ...this },
       callback
     );
   }

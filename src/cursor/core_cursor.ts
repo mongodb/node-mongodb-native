@@ -156,7 +156,7 @@ export class CoreCursor<
     this.ns = this.operation.ns.toString();
     this.namespace = MongoDBNamespace.fromString(this.ns);
     this.cmd = cmd;
-    this.options = this.operation.options as T;
+    this.options = (this.operation as unknown) as T;
     this.topology = topology;
 
     const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);

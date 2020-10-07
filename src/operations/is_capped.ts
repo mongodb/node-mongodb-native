@@ -5,7 +5,7 @@ import type { Server } from '../sdam/server';
 import { MongoError } from '..';
 
 /** @internal */
-export class IsCappedOperation extends OperationBase<OperationOptions, boolean> {
+export class IsCappedOperation extends OperationBase<boolean> implements OperationOptions {
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {
@@ -15,9 +15,8 @@ export class IsCappedOperation extends OperationBase<OperationOptions, boolean> 
 
   execute(server: Server, callback: Callback<boolean>): void {
     const coll = this.collection;
-    const opts = this.options;
 
-    coll.s.db.listCollections({ name: coll.collectionName }, opts).toArray((err, collections) => {
+    coll.s.db.listCollections({ name: coll.collectionName }, this).toArray((err, collections) => {
       if (err || !collections) return callback(err);
       if (collections.length === 0) {
         return callback(new MongoError(`collection ${coll.namespace} not found`));

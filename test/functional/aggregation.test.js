@@ -54,8 +54,8 @@ describe('Aggregation', function () {
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function (err, result) {
-          expect(result).to.exist;
           expect(err).to.not.exist;
+          expect(result).to.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           const cursor = collection.aggregate([

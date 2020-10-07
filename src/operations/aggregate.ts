@@ -36,10 +36,20 @@ export interface AggregateOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
+export class AggregateOperation<T = Document>
+  extends CommandOperation<T>
+  implements AggregateOptions {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
+
+  allowDiskUse?: boolean;
+  batchSize?: number;
+  bypassDocumentValidation?: boolean;
+  cursor?: Document;
+  maxAwaitTimeMS?: number;
+  hint?: Hint;
+  out?: string;
 
   constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
     super(parent, options);
@@ -87,7 +97,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   }
 
   execute(server: Server, callback: Callback<T>): void {
-    const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 
@@ -101,25 +110,25 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
       }
     }
 
-    if (options.bypassDocumentValidation === true) {
-      command.bypassDocumentValidation = options.bypassDocumentValidation;
+    if (this.bypassDocumentValidation === true) {
+      command.bypassDocumentValidation = this.bypassDocumentValidation;
     }
 
-    if (typeof options.allowDiskUse === 'boolean') {
-      command.allowDiskUse = options.allowDiskUse;
+    if (typeof this.allowDiskUse === 'boolean') {
+      command.allowDiskUse = this.allowDiskUse;
     }
 
-    if (options.hint) {
-      command.hint = options.hint;
+    if (this.hint) {
+      command.hint = this.hint;
     }
 
-    if (options.explain) {
-      command.explain = options.explain;
+    if (this.explain) {
+      command.explain = this.explain;
     }
 
-    command.cursor = options.cursor || {};
-    if (options.batchSize && !this.hasWriteStage) {
-      command.cursor.batchSize = options.batchSize;
+    command.cursor = this.cursor || {};
+    if (this.batchSize && !this.hasWriteStage) {
+      command.cursor.batchSize = this.batchSize;
     }
 
     super.executeCommand(server, command, callback);
