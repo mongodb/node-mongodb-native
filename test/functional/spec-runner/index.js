@@ -166,7 +166,6 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
-  const coll = db.collection(context.collectionName);
 
   if (context.dataLake) return Promise.resolve();
 
@@ -185,6 +184,7 @@ function prepareDatabaseForSuite(suite, context) {
     return setupPromise;
   }
 
+  const coll = db.collection(context.collectionName);
   return setupPromise
     .then(() => coll.drop({ writeConcern: 'majority' }))
     .catch(err => {
