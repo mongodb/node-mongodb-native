@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, AnyError, isResumableError } from './error';
-import { Cursor, CursorOptions, CursorStream } from './cursor/cursor';
+import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import {
@@ -162,12 +162,6 @@ export class ChangeStreamStream extends CursorStream {
   constructor(cursor: ChangeStreamCursor) {
     super(cursor);
   }
-}
-
-/** @public */
-export interface CursorStreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
 }
 
 /**
