@@ -17,6 +17,7 @@ import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
+import type { TagSet } from './sdam/server_description';
 
 /** @public */
 export enum LogLevel {
@@ -97,7 +98,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
   maxStalenessSeconds?: number;
   /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
-  readPreferenceTags?: string;
+  readPreferenceTags?: TagSet[];
   /** Specify the database name associated with the user’s credentials. */
   authSource?: string;
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
@@ -220,6 +221,7 @@ export interface MongoClientPrivate {
   sessions: Set<ClientSession>;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
+  readPreference: ReadPreference;
   namespace: MongoDBNamespace;
   logger: Logger;
 }
@@ -281,6 +283,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
       sessions: new Set(),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
+      readPreference: ReadPreference.fromOptions(options) || ReadPreference.primary,
       namespace: new MongoDBNamespace('admin'),
       logger: options?.logger ?? new Logger('MongoClient')
     };
@@ -295,7 +298,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   }
 
   get readPreference(): ReadPreference {
-    return ReadPreference.primary;
+    return this.s.readPreference;
   }
 
   get logger(): Logger {
