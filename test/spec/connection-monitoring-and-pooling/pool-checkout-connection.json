@@ -13,14 +13,22 @@
       "address": 42
     },
     {
+      "type": "ConnectionCreated",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
+      "type": "ConnectionReady",
+      "connectionId": 1,
+      "address": 42
+    },
+    {
       "type": "ConnectionCheckedOut",
       "connectionId": 1,
       "address": 42
     }
   ],
   "ignore": [
-    "ConnectionPoolCreated",
-    "ConnectionCreated",
-    "ConnectionReady"
+    "ConnectionPoolCreated"
   ]
 }
