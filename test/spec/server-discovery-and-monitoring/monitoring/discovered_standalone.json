@@ -1,6 +1,6 @@
 {
-  "description": "Monitoring a direct connection",
-  "uri": "mongodb://a:27017/?directConnection=true",
+  "description": "Monitoring a discovered standalone connection",
+  "uri": "mongodb://a:27017/?directConnection=false",
   "phases": [
     {
       "responses": [
@@ -29,7 +29,7 @@
                 "servers": []
               },
               "newDescription": {
-                "topologyType": "Single",
+                "topologyType": "Unknown",
                 "servers": [
                   {
                     "address": "a:27017",
@@ -72,7 +72,7 @@
             "topology_description_changed_event": {
               "topologyId": "42",
               "previousDescription": {
-                "topologyType": "Single",
+                "topologyType": "Unknown",
                 "servers": [
                   {
                     "address": "a:27017",

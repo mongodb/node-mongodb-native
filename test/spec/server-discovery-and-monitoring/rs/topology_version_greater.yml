@@ -107,8 +107,7 @@ phases: [
                 hosts: ["a:27017", "d:27017"],
                 setName: "rs",
                 minWireVersion: 0,
-                maxWireVersion: 9,
-                topologyVersion: null
+                maxWireVersion: 9
             }]
         ],
 

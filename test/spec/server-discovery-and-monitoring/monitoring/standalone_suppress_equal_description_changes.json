@@ -1,6 +1,6 @@
 {
-  "description": "Monitoring a standalone connection - suppress update events for equal server descriptions",
-  "uri": "mongodb://a:27017",
+  "description": "Monitoring a direct connection - suppress update events for equal server descriptions",
+  "uri": "mongodb://a:27017/?directConnection=true",
   "phases": [
     {
       "responses": [
