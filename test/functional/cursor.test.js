@@ -1782,7 +1782,8 @@ describe('Cursor', function () {
               resumed = 0,
               i = 0;
 
-            var stream = collection.find().stream();
+            const cursor = collection.find();
+            const stream = cursor.stream();
 
             stream.on('data', function (doc) {
               test.equal(true, !!doc);
@@ -1821,7 +1822,7 @@ describe('Cursor', function () {
               test.equal(1, closed);
               test.equal(1, paused);
               test.equal(1, resumed);
-              test.strictEqual(stream.isClosed(), true);
+              test.strictEqual(cursor.isClosed(), true);
               done();
             }
           });
@@ -1858,13 +1859,14 @@ describe('Cursor', function () {
             collection.insert(docs, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
-              var stream = collection.find().stream();
+              const cursor = collection.find();
+              const stream = cursor.stream();
 
               stream.on('data', function () {
                 i++;
               });
 
-              stream.once('close', testDone('close'));
+              cursor.once('close', testDone('close'));
               stream.once('error', testDone('error'));
 
               stream.destroy();
@@ -1876,7 +1878,7 @@ describe('Cursor', function () {
                   if (doneCalled === 1) {
                     expect(err).to.not.exist;
                     test.strictEqual(0, i);
-                    test.strictEqual(true, stream.isClosed());
+                    test.strictEqual(true, cursor.isClosed());
                     done();
                   }
                 };
@@ -1916,9 +1918,10 @@ describe('Cursor', function () {
             var finished = 0,
               i = 0;
 
-            var stream = collection.find().stream();
+            const cursor = collection.find();
+            const stream = cursor.stream();
 
-            test.strictEqual(false, stream.isClosed());
+            test.strictEqual(false, cursor.isClosed());
 
             stream.on('data', function () {
               if (++i === 5) {
@@ -1926,8 +1929,9 @@ describe('Cursor', function () {
               }
             });
 
-            stream.once('close', testDone);
+            cursor.once('close', testDone);
             stream.once('error', testDone);
+            stream.once('end', testDone);
 
             function testDone(err) {
               ++finished;
@@ -1935,7 +1939,7 @@ describe('Cursor', function () {
                 test.strictEqual(undefined, err);
                 test.strictEqual(5, i);
                 test.strictEqual(1, finished);
-                test.strictEqual(true, stream.isClosed());
+                test.strictEqual(true, cursor.isClosed());
                 done();
               }, 150);
             }
@@ -1972,7 +1976,8 @@ describe('Cursor', function () {
             var finished = 0,
               i = 0;
 
-            var stream = collection.find({}, { batchSize: 5 }).stream();
+            const cursor = collection.find({}, { batchSize: 5 });
+            const stream = cursor.stream();
 
             stream.on('data', function () {
               if (++i === 4) {
@@ -1991,7 +1996,7 @@ describe('Cursor', function () {
                 if (finished === 2) {
                   setTimeout(function () {
                     test.equal(5, i);
-                    test.equal(true, stream.isClosed());
+                    test.equal(true, cursor.isClosed());
                     client.close();
 
                     configuration.manager.start().then(function () {
@@ -2110,7 +2115,8 @@ describe('Cursor', function () {
               count = count - 1;
 
               if (count === 0) {
-                var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
+                const cursor = collection.find({}, { tailable: true, awaitData: true });
+                const stream = cursor.stream();
                 // let index = 0;
                 stream.resume();
 
@@ -2128,7 +2134,7 @@ describe('Cursor', function () {
                 };
 
                 stream.on('end', validator);
-                stream.on('close', validator);
+                cursor.on('close', validator);
 
                 // Just hammer the server
                 for (var i = 0; i < 100; i++) {
@@ -3574,8 +3580,9 @@ describe('Cursor', function () {
 
           // Let's attempt to skip and limit
           var cursor = collection.find({}).batchSize(10);
-          cursor.on('data', function () {
-            cursor.destroy();
+          const stream = cursor.stream();
+          stream.on('data', function () {
+            stream.destroy();
           });
 
           cursor.on('close', function () {
@@ -4236,13 +4243,15 @@ describe('Cursor', function () {
               }
             });
 
-            cursor.on('close', () => {
+            const cursorStream = cursor.stream();
+
+            cursorStream.on('end', () => {
               expect(collected).to.have.length(3);
               expect(collected).to.eql(docs);
               done();
             });
 
-            cursor.pipe(stream);
+            cursorStream.pipe(stream);
           });
         });
       });
@@ -4267,6 +4276,7 @@ describe('Cursor', function () {
             .find()
             .project({ _id: 0, name: 1 })
             .map(doc => ({ mapped: doc }))
+            .stream()
             .on('data', doc => bag.push(doc));
 
           stream.on('error', done).on('end', () => {

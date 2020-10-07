@@ -2,7 +2,8 @@
 
 const { expect } = require('chai');
 
-describe('Cursor Async Iterator Tests', function () {
+// TODO: unskip as part of NODE-2590
+describe.skip('Cursor Async Iterator Tests', function () {
   let client, collection;
   before(async function () {
     client = this.configuration.newClient();
@@ -83,6 +84,7 @@ describe('Cursor Async Iterator Tests', function () {
         count++;
         await cursor.close();
       }
+
       expect(count).to.equal(1);
     }
   });

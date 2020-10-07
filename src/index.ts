@@ -104,7 +104,8 @@ export type {
   ResumeToken,
   PipeOptions,
   ChangeStreamCursorOptions,
-  OperationTime
+  OperationTime,
+  ResumeOptions
 } from './change_stream';
 export type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
@@ -148,7 +149,7 @@ export type { CommandCursorOptions } from './cursor/command_cursor';
 export type {
   CursorCloseOptions,
   DocumentTransforms,
-  StreamOptions,
+  CursorStreamOptions,
   CoreCursorOptions,
   CoreCursorPrivate,
   CursorState,
@@ -236,12 +237,18 @@ export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
 export type { UpdateResult, UpdateOptions } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type { ReadConcern, ReadConcernLevel } from './read_concern';
+export type {
+  ReadConcern,
+  ReadConcernLevel,
+  ReadConcernLike,
+  ReadConcernLevelLike
+} from './read_concern';
 export type {
   ReadPreferenceLike,
   ReadPreferenceMode,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
+  ReadPreferenceFromOptions,
   HedgeOptions
 } from './read_preference';
 export type { ClusterTime, ServerType, TimerQueue, TopologyType } from './sdam/common';

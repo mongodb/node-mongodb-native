@@ -4,7 +4,8 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
-const { ReadPreference } = require('../../src');
+const { ReadPreference, Topology } = require('../../src');
+const { withClient } = require('./shared');
 
 describe('ReadPreference', function () {
   before(function () {
@@ -585,6 +586,76 @@ describe('ReadPreference', function () {
             done();
           });
       })
+    });
+  });
+
+  context('should enforce fixed primary read preference', function () {
+    const collectionName = 'ddl_collection';
+
+    beforeEach(function () {
+      const configuration = this.configuration;
+      const client = this.configuration.newClient(configuration.writeConcernMax(), {
+        useUnifiedTopology: true,
+        readPreference: 'primaryPreferred'
+      });
+      return withClient(client, (client, done) => {
+        const db = client.db(configuration.db);
+        db.addUser('default', 'pass', { roles: 'readWrite' }, () => {
+          db.createCollection('before_collection', () => {
+            db.createIndex(collectionName, { aloha: 1 }, done);
+          });
+        });
+      });
+    });
+
+    const methods = {
+      'Collection#createIndex': [{ quote: 'text' }],
+      'Db#createIndex': [collectionName, { quote: 'text' }],
+      'Db#addUser': ['thomas', 'pass', { roles: 'readWrite' }],
+      'Db#removeUser': ['default'],
+      'Db#createCollection': ['created_collection'],
+      'Db#dropCollection': ['before_collection'],
+      'Collection#dropIndex': ['aloha_1'],
+      'Collection#rename': ['new_name'],
+      'Db#dropDatabase': []
+    };
+
+    Object.keys(methods).forEach(operation => {
+      it(`${operation}`, {
+        metadata: {
+          requires: { topology: ['replicaset', 'sharded'] }
+        },
+        test: function () {
+          const configuration = this.configuration;
+          const client = this.configuration.newClient(configuration.writeConcernMax(), {
+            useUnifiedTopology: true,
+            readPreference: 'primaryPreferred'
+          });
+          return withClient(client, (client, done) => {
+            const db = client.db(configuration.db);
+            const args = methods[operation];
+            const [parentId, method] = operation.split('#');
+            const collection = db.collection(collectionName);
+            const parent = parentId === 'Collection' ? collection : parentId === 'Db' ? db : null;
+            const selectServerSpy = this.sinon.spy(Topology.prototype, 'selectServer');
+            const callback = err => {
+              expect(err).to.not.exist;
+              expect(selectServerSpy.called).to.equal(true);
+              if (typeof selectServerSpy.args[0][0] === 'function') {
+                expect(selectServerSpy)
+                  .nested.property('args[0][1].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              } else {
+                expect(selectServerSpy)
+                  .nested.property('args[0][0].readPreference.mode')
+                  .to.equal(ReadPreference.PRIMARY);
+              }
+              done();
+            };
+            parent[method].apply(parent, [...args, callback]);
+          });
+        }
+      });
     });
   });
 });

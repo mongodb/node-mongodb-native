@@ -12,7 +12,7 @@ const { expect } = require('chai');
 
 describe('Operation (Generators)', function () {
   before(function () {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['integration_tests_2']);
   });
 
   /**
@@ -4618,8 +4618,9 @@ describe('Operation (Generators)', function () {
             .find({})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true);
+          const stream = cursor.stream();
 
-          cursor.on('data', function () {
+          stream.on('data', function () {
             total = total + 1;
 
             if (total === 1000) {
@@ -4627,7 +4628,7 @@ describe('Operation (Generators)', function () {
             }
           });
 
-          cursor.on('end', function () {
+          stream.on('end', function () {
             // TODO: forced because the cursor is still open/active
             client.close(true, err => {
               if (err) return reject(err);

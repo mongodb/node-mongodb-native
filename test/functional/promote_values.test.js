@@ -235,6 +235,7 @@ describe('Promote Values', function () {
           // initial find, but not for subsequent getMores
           db.collection('haystack')
             .find({}, { limit: 102, promoteValues: false })
+            .stream()
             .on('data', function (doc) {
               test.equal(typeof doc.int, 'object');
               test.equal(doc.int._bsontype, 'Int32');

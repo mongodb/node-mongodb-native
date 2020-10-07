@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import { Transform, PassThrough, Readable } from 'stream';
 
 import { Long, Document, BSONSerializeOptions } from '../bson';
-import { MongoError, MongoNetworkError } from '../error';
+import { MongoError, MongoNetworkError, AnyError } from '../error';
 import { Logger } from '../logger';
 import { executeOperation } from '../operations/execute_operation';
-import { each } from '../operations/cursor_ops';
+import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation, CountOptions } from '../operations/count';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
@@ -143,8 +143,16 @@ export interface InternalCursorState extends BSONSerializeOptions {
   raw?: boolean;
 }
 
+const kCursor = Symbol('cursor');
+
+export interface CursorStreamOptions {
+  /** A transformation method applied to each document emitted by the stream */
+  transform?(doc: Document): Document;
+}
+
 export class CursorStream extends Readable {
-  cursor: Cursor;
+  [kCursor]: Cursor;
+  options: CursorStreamOptions;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -163,48 +171,47 @@ export class CursorStream extends Readable {
   /** @event */
   static readonly RESUME = 'resume' as const;
 
-  constructor(cursor: Cursor) {
+  constructor(cursor: Cursor, options?: CursorStreamOptions) {
     super({ objectMode: true });
-    this.cursor = cursor;
+    this[kCursor] = cursor;
+    this.options = options || {};
+  }
+
+  destroy(err?: AnyError): void {
+    this.pause();
+    this[kCursor].close();
+    super.destroy(err);
   }
 
   /** @internal */
   _read(): void {
-    if ((this.cursor.s && this.cursor.s.state === CursorState.CLOSED) || this.cursor.isDead()) {
+    const cursor = this[kCursor];
+    if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
       this.push(null);
       return;
     }
 
     // Get the next item
-    this.cursor._next((err, result) => {
+    cursor._next((err, result) => {
       if (err) {
-        if (this.listeners(CursorStream.ERROR) && this.listeners(CursorStream.ERROR).length > 0) {
-          this.emit(CursorStream.ERROR, err);
-        }
-        if (!this.cursor.isDead()) this.cursor.close();
-
-        // Emit end event
-        this.emit(CursorStream.END);
-        this.emit(CursorStream.FINISH);
+        if (cursor.s && cursor.s.state === CursorState.CLOSED) return;
+        if (!cursor.isDead()) this.emit(CursorStream.ERROR, err);
+        cursor.close(() => this.emit(CursorStream.END));
         return;
       }
 
       // If we provided a transformation method
-      if (
-        this.cursor.streamOptions &&
-        typeof this.cursor.streamOptions.transform === 'function' &&
-        result != null
-      ) {
-        this.push(this.cursor.streamOptions.transform(result));
+      if (typeof this.options.transform === 'function' && result != null) {
+        this.push(this.options.transform(result));
         return;
       }
 
       // Return the result
       this.push(result);
 
-      if (result === null && this.cursor.isDead()) {
+      if (result === null && cursor.isDead()) {
         this.once(CursorStream.END, () => {
-          this.cursor.close();
+          cursor.close();
           this.emit(CursorStream.FINISH);
         });
       }
@@ -334,6 +341,7 @@ export class Cursor<
    */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
     super();
+
     const cmd = operation.cmd ? operation.cmd : {};
 
     // Set local values
@@ -402,14 +410,14 @@ export class Cursor<
     const currentNumberOfRetries = numberOfRetries;
 
     // Get the batchSize
-    // let batchSize = 1000;
-    // if (this.cmd.cursor && this.cmd.cursor.batchSize) {
-    //   batchSize = this.cmd.cursor.batchSize;
-    // } else if (options.cursor && options.cursor.batchSize) {
-    //   batchSize = options.cursor.batchSize ?? 1000;
-    // } else if (typeof options.batchSize === 'number') {
-    //   batchSize = options.batchSize;
-    // }
+    let batchSizeA = 1000;
+    if (this.cmd.cursor && this.cmd.cursor.batchSize) {
+      batchSizeA = this.cmd.cursor.batchSize;
+    } else if (options.cursor && options.cursor.batchSize) {
+      batchSizeA = options.cursor.batchSize ?? 1000;
+    } else if (typeof options.batchSize === 'number') {
+      batchSizeA = options.batchSize;
+    }
 
     // Internal cursor state
     this.s = {
@@ -421,7 +429,7 @@ export class Cursor<
       state: CursorState.INIT,
       // explicitlyIgnoreSession
       explicitlyIgnoreSession: !!options.explicitlyIgnoreSession,
-      batchSize
+      batchSize: batchSizeA
     };
 
     // Optional ClientSession
@@ -435,7 +443,7 @@ export class Cursor<
     }
 
     // Set the batch size
-    this.cursorBatchSize = batchSize;
+    this.cursorBatchSize = batchSizeA;
   }
 
   get id(): Long | undefined {
@@ -1123,6 +1131,25 @@ export class Cursor<
   }
 
   /**
+   * Iterates over all the documents for this cursor. As with `cursor.toArray`,
+   * not all of the elements will be iterated if this cursor had been previously accessed.
+   * In that case, `cursor.rewind` can be used to reset the cursor. However, unlike
+   * `cursor.toArray`, the cursor will only hold a maximum of batch size elements
+   * at any given time if batch size is specified. Otherwise, the caller is responsible
+   * for making sure that the entire result can fit the memory.
+   *
+   * @deprecated Please use {@link Cursor.forEach} instead
+   */
+  each(callback: EachCallback): void {
+    // Rewind cursor state
+    this.rewind();
+    // Set current cursor to INIT
+    this.s.state = CursorState.INIT;
+    // Run the query
+    each(this, callback);
+  }
+
+  /**
    * Iterates over all the documents for this cursor using the iterator, callback pattern.
    *
    * @param iterator - The iteration callback.
@@ -1317,25 +1344,17 @@ export class Cursor<
     return this.isDead();
   }
 
-  // TODO - remove, just use close
-  // destroy(err?: AnyError): void {
-  //   if (err) this.emit(Cursor.ERROR, err);
-  //   // this.pause();
-  //   this.close();
-  // }
-
   /** Return a modified Readable stream including a possible transform method. */
-  stream(options?: StreamOptions): CursorStream {
+  stream(options?: CursorStreamOptions): CursorStream {
     // TODO: replace this method with transformStream in next major release
-    this.streamOptions = options || {};
-    return new CursorStream(this);
+    return new CursorStream(this, options);
   }
 
   /**
    * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
    * returns a stream of unmodified docs.
    */
-  transformStream(options?: StreamOptions): Transform {
+  transformStream(options?: CursorStreamOptions): Transform {
     const streamOptions: typeof options = options || {};
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({
@@ -1347,11 +1366,10 @@ export class Cursor<
           callback();
         }
       });
-
       return this.stream().pipe(stream);
     }
 
-    return this.stream().pipe(new PassThrough({ objectMode: true }));
+    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**
