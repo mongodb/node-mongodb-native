@@ -17,6 +17,19 @@ if [ "$#" -lt 1 ]; then
     exit 0
 fi
 
+is_replica() {
+  [[ "$1" =~ ^(replica|replicaset|replica_set|rs)$ ]]
+}
+
+is_sharded() {
+  [[ "$1" =~ ^(sharded|sharded_cluster|shardedcluster|sc|mongos)$ ]]
+}
+
+is_single() {
+  [[ "$1" =~ ^(standalone|stand_alone|server|single)$ ]]
+}
+
+
 PORT_REPLICA=31000
 PORT_SHARDED=51000
 PORT_SINGLE=27017
@@ -29,16 +42,16 @@ cluster () {
     COMMAND="$1"
     if [[ "$COMMAND" == "uri" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             MONGODB_URI="mongodb://localhost:$PORT_REPLICA/?replicaSet=rs"
             export MONGODB_URI
             echo $MONGODB_URI
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             ADD_PORT=$(( $PORT_SHARDED + 1 ))
             MONGODB_URI="mongodb://localhost:$PORT_SHARDED,localhost:$ADD_PORT"
             export MONGODB_URI
             echo $MONGODB_URI
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             MONGODB_URI="mongodb://localhost:$PORT_SINGLE"
             export MONGODB_URI
             echo $MONGODB_URI
@@ -48,15 +61,15 @@ cluster () {
         fi
     elif [[ "$COMMAND" == "init" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             log 'init replica'
             mlaunch init --dir "./data/$PORT_REPLICA" --replicaset --nodes 3 --arbiter --name rs --port "$PORT_REPLICA" --enableMajorityReadConcern --setParameter enableTestCommands=1
             cluster uri replica
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             log 'init sharded'
             mlaunch init --dir "./data/$PORT_SHARDED" --replicaset --nodes 3 --arbiter --name rs --port "$PORT_SHARDED" --setParameter enableTestCommands=1 --sharded 1 --mongos 2
             cluster uri sharded
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             log 'init single'
             mlaunch init --dir "./data/$PORT_SINGLE" --single --setParameter enableTestCommands=1
             cluster uri single
@@ -67,19 +80,19 @@ cluster () {
         fi
     elif [[ "$COMMAND" == "start" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             log 'starting replica'
             mlaunch start --dir "./data/$PORT_REPLICA"
             if [ $? -ne 0 ]; then
                 cluster init replica
             fi
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             log 'starting shared'
             mlaunch start --dir "./data/$PORT_SHARDED"
             if [ $? -ne 0 ]; then
                 cluster init sharded
             fi
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             log 'starting single'
             mlaunch start --dir "./data/$PORT_SINGLE"
             if [ $? -ne 0 ]; then
@@ -92,19 +105,19 @@ cluster () {
         fi
     elif [[ "$COMMAND" == "stop" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             log 'stopping replica'
             mlaunch stop --dir "./data/$PORT_REPLICA"
             if [ $? -ne 0 ]; then
                 echo "error: cannot stop replica, not initalized"
             fi
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             log 'stopping sharded'
             mlaunch stop --dir "./data/$PORT_SHARDED"
             if [ $? -ne 0 ]; then
                 echo "error: cannot stop sharded, not initalized"
             fi
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             log 'stopping single'
             mlaunch stop --dir "./data/$PORT_SINGLE"
             if [ $? -ne 0 ]; then
@@ -117,17 +130,17 @@ cluster () {
         fi
     elif [[ "$COMMAND" == "prune" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             log 'pruning replica'
             cluster stop replica
             log 'removing replica'
             rm -rf "./data/$PORT_REPLICA";
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             log 'pruning sharded'
             cluster stop sharded
             log 'removing sharded'
             rm -rf "./data/$PORT_SHARDED";
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             log 'pruning server'
             cluster stop single
             log 'removing server'
@@ -139,14 +152,14 @@ cluster () {
         fi
       elif [[ "$COMMAND" == "kill" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             log 'killing replica'
             PORT1=$PORT_REPLICA
             PORT2=$(( $PORT1 + 1 ))
             PORT3=$(( $PORT2 + 1 ))
             PORT4=$(( $PORT3 + 1 ))
             npx -q fkill-cli :"$PORT1" :"$PORT2" :"$PORT3" :"$PORT4" -fs
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             log 'killing sharded'
             PORT1=$PORT_SHARDED
             PORT2=$(( $PORT1 + 1 ))
@@ -156,7 +169,7 @@ cluster () {
             PORT6=$(( $PORT5 + 1 ))
             PORT7=$(( $PORT6 + 1 ))
             npx -q fkill-cli :"$PORT1" :"$PORT2" :"$PORT3" :"$PORT4" :"$PORT5" :"$PORT6" :"$PORT7" -fs
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             log 'killing single'
             npx -q fkill-cli :$PORT_SINGLE -fs
         else
@@ -166,11 +179,11 @@ cluster () {
         fi
       elif [[ "$COMMAND" == "test" ]]; then
         TOPOLOGY=$2
-        if [[ "$TOPOLOGY" == "replica" ]] || [[ "$TOPOLOGY" == "replicaset" ]] || [[ "$TOPOLOGY" == "replica_set" ]]; then
+        if is_replica $TOPOLOGY; then
             cluster start replica && cluster uri replica && npm run test-nolint --if-present && npm run check:test --if-present
-        elif [[ "$TOPOLOGY" == "sharded" ]] || [[ "$TOPOLOGY" == "sharded_clister" ]] || [[ "$TOPOLOGY" == "shardedcluster" ]] || [[ "$TOPOLOGY" == "mongos" ]]; then
+        elif is_sharded $TOPOLOGY; then
             cluster start sharded && cluster uri sharded && npm run test-nolint --if-present && npm run check:test --if-present
-        elif [[ "$TOPOLOGY" == "standalone" ]] || [[ "$TOPOLOGY" == "server" ]] || [[ "$TOPOLOGY" == "single" ]]; then
+        elif is_single $TOPOLOGY; then
             cluster start single && cluster uri single && npm run test-nolint --if-present && npm run check:test --if-present
         else
             echo "test subcommand needs one argument"
