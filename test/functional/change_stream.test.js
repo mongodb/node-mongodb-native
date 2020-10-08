@@ -1446,7 +1446,7 @@ describe('Change Streams', function () {
     }
   });
 
-  // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
+  // TODO: resuming currently broken on piped change streams, fix as part of NODE-2172
   it.skip('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
@@ -2795,6 +2795,7 @@ describe('Change Stream Resume Error Tests', function () {
     })
   });
 
+  // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
   it.skip('should continue piping changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
