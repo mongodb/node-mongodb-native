@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$#" -lt 1 ]; then
     printf "usage: cluster COMMAND TOPOLOGY\n"
