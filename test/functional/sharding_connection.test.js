@@ -10,7 +10,7 @@ describe('Sharding (Connection)', function() {
     return setupDatabase(this.configuration);
   });
 
-  it.only('Should use sharded topology', {
+  it('Should use sharded topology', {
     metadata: { requires: { topology: 'sharded' } },
     test: function() {
       const client = this.configuration.newClient({}, { useUnifiedTopology: true });
