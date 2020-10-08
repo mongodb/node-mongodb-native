@@ -180,11 +180,11 @@ cluster () {
       elif [[ "$COMMAND" == "test" ]]; then
         TOPOLOGY=$2
         if is_replica $TOPOLOGY; then
-            cluster start replica && cluster uri replica && npm run test-nolint --if-present && npm run check:test --if-present
+            cluster start replica && cluster uri replica && npm run test-nolint --if-present -- "${@:3}" && npm run check:test --if-present -- "${@:3}"
         elif is_sharded $TOPOLOGY; then
-            cluster start sharded && cluster uri sharded && npm run test-nolint --if-present && npm run check:test --if-present
+            cluster start sharded && cluster uri sharded && npm run test-nolint --if-present -- "${@:3}" && npm run check:test --if-present -- "${@:3}"
         elif is_single $TOPOLOGY; then
-            cluster start single && cluster uri single && npm run test-nolint --if-present && npm run check:test --if-present
+            cluster start single && cluster uri single && npm run test-nolint --if-present -- "${@:3}" && npm run check:test --if-present -- "${@:3}"
         else
             echo "test subcommand needs one argument"
             exit 1
