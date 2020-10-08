@@ -22,15 +22,15 @@ export class BulkWriteOperation
   implements BulkWriteOptions, HasRetryableWrites, HasWriteConcern {
   collection: Collection;
   operations: AnyBulkWriteOperation[];
-
   bypassDocumentValidation?: boolean;
   ordered?: boolean;
-  /** @deprecated use `ordered` instead */
-  keepGoing?: boolean;
   forceServerObjectId?: boolean;
   ignoreUndefined?: boolean;
   retryWrites?: boolean;
   writeConcern?: WriteConcern;
+
+  /** @deprecated use `ordered` instead */
+  keepGoing?: boolean;
 
   constructor(
     collection: Collection,

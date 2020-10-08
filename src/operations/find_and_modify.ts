@@ -56,14 +56,15 @@ export class FindAndModifyOperation
   remove?: boolean;
   upsert?: boolean;
   projection?: Document;
-  /** @deprecated Use projection instead */
-  fields?: Document;
   arrayFilters?: Document[];
   serializeFunctions?: boolean;
   checkKeys?: boolean;
   bypassDocumentValidation?: boolean;
   hint?: Hint;
   retryWrites?: boolean;
+
+  /** @deprecated Use projection instead */
+  fields?: Document;
 
   constructor(
     collection: Collection,

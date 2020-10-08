@@ -10,7 +10,7 @@ import type { Db } from '../db';
 /** @public */
 export interface AddUserOptions extends CommandOperationOptions {
   /** @deprecated Please use db.command('createUser', ...) instead for this option */
-  digestPassword?: null;
+  digestPassword?: string;
   /** Roles associated with the created user (only Mongodb 2.6 or higher) */
   roles?: string | string[];
   /** Custom data associated with the user (only Mongodb 2.6 or higher) */
@@ -22,11 +22,11 @@ export class AddUserOperation extends CommandOperation implements AddUserOptions
   db: Db;
   username: string;
   password?: string;
-
-  /** @deprecated Please use db.command('createUser', ...) instead for this option */
-  digestPassword?: null;
   roles?: string | string[];
   customData?: Document;
+
+  /** @deprecated Please use db.command('createUser', ...) instead for this option */
+  digestPassword?: string;
 
   constructor(db: Db, username: string, password: string | undefined, options?: AddUserOptions) {
     super(db, options);
