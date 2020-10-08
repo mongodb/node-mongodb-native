@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+if ! command -v mlaunch &> /dev/null
+then
+    printf "This script uses the dependency 'mlaunch'\n"
+    printf "Please visit http://blog.rueckstiess.com/mtools/install.html to install\n"
+    printf "Or run: pip3 install mtools\n"
+    exit
+fi
+
 if [ "$#" -lt 1 ]; then
     printf "usage: cluster COMMAND TOPOLOGY\n"
     printf "COMMAND\n"
