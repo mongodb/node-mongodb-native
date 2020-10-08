@@ -58,17 +58,12 @@ export abstract class OperationBase<TResult = Document> {
       promoteLongs: this.promoteLongs,
       raw: this.raw,
       ignoreUndefined: this.ignoreUndefined
-    } as const;
-
-    for (const key in bsonOptions) {
-      bsonOptions[key] === undefined && delete bsonOptions[key];
-    }
+    };
 
     return bsonOptions;
   }
 
   constructor(options = {}) {
-    // this.readPreference = ReadPreference.primary;
     Object.assign(this, options);
   }
 
@@ -84,7 +79,7 @@ export abstract class OperationBase<TResult = Document> {
   }
 
   clearSession(): void {
-    delete this.session;
+    this.session = undefined;
   }
 
   get canRetryRead(): boolean {

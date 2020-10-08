@@ -198,7 +198,7 @@ export class CreateIndexesOperation extends CommandOperation implements CreateIn
     }
 
     // collation is set on each index, it should not be defined at the root
-    // this.collation = undefined; FIXME!!!!!!
+    this.collation = undefined;
 
     super.executeCommand(server, cmd, (err, result) => {
       if (err) {

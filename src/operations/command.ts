@@ -53,9 +53,9 @@ export abstract class CommandOperation<TResult = Document> extends OperationBase
   fullResponse?: boolean;
   logger?: Logger;
 
-  collation!: CollationOptions;
-  maxTimeMS!: number;
-  comment!: string;
+  collation?: CollationOptions;
+  maxTimeMS?: number;
+  comment?: string;
 
   constructor(parent?: OperationParent, options: AnyOptions = {}) {
     super(options);

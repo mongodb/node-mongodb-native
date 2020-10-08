@@ -15,7 +15,7 @@ import type { Sort } from './find';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
 
-const optionsAllowList = new Set([
+const OPTIONS_ALLOW_LIST = new Set([
   'out',
   'query',
   'sort',
@@ -117,7 +117,7 @@ export class MapReduceOperation
     // Add any other options passed in
     for (const n in this) {
       // Only include if defined on this
-      if (optionsAllowList.has(n)) {
+      if (OPTIONS_ALLOW_LIST.has(n)) {
         mapCommandHash[n] = this[n];
       }
     }

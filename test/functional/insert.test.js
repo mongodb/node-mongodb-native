@@ -1896,7 +1896,6 @@ describe('Insert', function () {
                   expect(d.a._bsontype, `Failed on the document at index ${i}`).to.be.equal('Long');
                 });
 
-                // expect(doc.a).to.have.property('_bsontype').to.be.equal('Long');
                 client.close(done);
               });
           }

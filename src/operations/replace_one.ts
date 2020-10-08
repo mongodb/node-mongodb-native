@@ -18,9 +18,6 @@ export interface ReplaceOptions extends CommandOperationOptions {
   hint?: string | Document;
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
-
-  // FIXME: ????!!!! neal why?
-  multi?: boolean;
 }
 
 /** @internal */

@@ -10,7 +10,7 @@ import type { PkFactory } from '../mongo_client';
 // eslint-disable-next-line
 import type { Collection } from '../collection';
 
-const optionsAllowList = new Set([
+const OPTIONS_ALLOW_LIST = new Set([
   'capped',
   'autoIndexId',
   'size',
@@ -101,7 +101,7 @@ export class CreateCollectionOperation
 
     const cmd: Document = { create: name };
     for (const n in this) {
-      if (optionsAllowList.has(n) && this[n] != null && typeof this[n] !== 'function') {
+      if (OPTIONS_ALLOW_LIST.has(n) && this[n] != null && typeof this[n] !== 'function') {
         cmd[n] = this[n];
       }
     }
