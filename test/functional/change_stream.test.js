@@ -1446,6 +1446,7 @@ describe('Change Streams', function () {
     }
   });
 
+  // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
   it.skip('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
