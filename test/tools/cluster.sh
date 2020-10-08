@@ -1,7 +1,19 @@
 #!/bin/bash
 
 if [ "$#" -lt 1 ]; then
-    echo "usage: cluster <init|start|stop|prune|kill|uri|test> <single|replica|sharded>"
+    printf "usage: cluster COMMAND TOPOLOGY\n"
+    printf "COMMAND\n"
+    printf "\tinit\tsetup the topology\n"
+    printf "\tstart\trun the topology in background\n"
+    printf "\tstop\tshutdown the topology gracefully\n"
+    printf "\tprune\tdelete the topology's data directory including logs\n"
+    printf "\tkill\tforce shutdown the topology\n"
+    printf "\turi\techo the uri for the topology\n"
+    printf "\ttest\trun the tests against the specified topology\n"
+    printf "TOPOLOGY\n"
+    printf "\tsingle\ta single standalone mongod\n"
+    printf "\treplica\ta 3 node replicaset named 'rs'\n"
+    printf "\tsharded\ta sharded cluster\n"
     exit 0
 fi
 
