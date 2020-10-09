@@ -518,7 +518,10 @@ describe('MongoClient', function() {
         {},
         {
           keepAlive: true,
-          keepAliveInitialDelay: 100
+          keepAliveInitialDelay: 100,
+          // keepAliveInitialDelay is clamped to half the size of socketTimeout
+          // if socketTimeout is less than keepAliveInitialDelay
+          socketTimeout: 101
         }
       );
 
