@@ -27,7 +27,7 @@ tests:
       appname: timeoutMonitorHandshakeTest
     operations:
       # The network error on the initial handshake should mark the server
-      # Unknown and clear the pool.
+      # Unknown (emitting a ServerDescriptionChangedEvent) and clear the pool.
       - name: waitForEvent
         object: testRunner
         arguments:
@@ -101,6 +101,9 @@ tests:
                 failCommands: ["isMaster"]
                 appName: timeoutMonitorCheckTest
                 blockConnection: true
+                # blockTimeMS is evaluated after the waiting for heartbeatFrequencyMS server-side, so this value only
+                # needs to be greater than connectTimeoutMS. The driver will wait for (500+750)ms and the server will
+                # respond after (500+1000)ms.
                 blockTimeMS: 1000
       # The network error on the next check should mark the server Unknown and
       # clear the pool.
