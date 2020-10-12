@@ -31,7 +31,7 @@ class Thread {
 
 class TestRunnerContext {
   constructor(opts) {
-    this.skipInit = opts.skipInit || false;
+    this.skipInit = (opts && opts.skipInit) || false;
     this.url = null;
     this.sharedClient = null;
     this.failPointClients = [];
