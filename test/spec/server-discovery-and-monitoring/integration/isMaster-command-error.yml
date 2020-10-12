@@ -27,7 +27,7 @@ tests:
       appname: commandErrorHandshakeTest
     operations:
       # The command error on the initial handshake should mark the server
-      # Unknown and clear the pool.
+      # Unknown (emitting a ServerDescriptionChangedEvent) and clear the pool.
       - name: waitForEvent
         object: testRunner
         arguments:

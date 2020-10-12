@@ -157,8 +157,7 @@
             ],
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 9,
-            "topologyVersion": null
+            "maxWireVersion": 9
           }
         ]
       ],
