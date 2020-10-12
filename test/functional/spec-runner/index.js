@@ -167,7 +167,7 @@ function prepareDatabaseForSuite(suite, context) {
 
   const db = context.sharedClient.db(context.dbName);
 
-  if (context.dataLake) return Promise.resolve();
+  if (context.skipInit) return Promise.resolve();
 
   const setupPromise = db
     .admin()
@@ -307,13 +307,14 @@ function runTestSuiteTest(configuration, spec, context) {
   return client.connect().then(client => {
     context.testClient = client;
     const sessionOptions = Object.assign({}, spec.transactionOptions);
-
-    spec.sessionOptions = spec.sessionOptions || {};
     const database = client.db(context.dbName);
 
     let session0, session1;
     let savedSessionData;
-    if (!context.dataLake) {
+
+    if (spec.sessionOptions) {
+      spec.sessionOptions = spec.sessionOptions || {};
+
       try {
         session0 = client.startSession(
           Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
@@ -353,10 +354,8 @@ function runTestSuiteTest(configuration, spec, context) {
       })
       .then(() => {
         const promises = [];
-        if (!context.dataLake) {
-          if (session0) promises.push(session0.endSession());
-          if (session1) promises.push(session1.endSession());
-        }
+        if (session0) promises.push(session0.endSession());
+        if (session1) promises.push(session1.endSession());
         return Promise.all(promises);
       })
       .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
