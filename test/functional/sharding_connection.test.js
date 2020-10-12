@@ -17,9 +17,7 @@ describe('Sharding (Connection)', function() {
       expect(client.s.options).to.have.property('useUnifiedTopology', true);
       return withClient(client, (client, done) => {
         expect(client).to.exist;
-        expect(client.topology).to.exist;
-        expect(client.topology.description).to.exist;
-        expect(client.topology.description).to.have.property('type', TopologyType.Sharded);
+        expect(client).nested.property('topology.description.type').to.equal(TopologyType.Sharded);
         return done();
       })();
     }
