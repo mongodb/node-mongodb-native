@@ -14,10 +14,11 @@ describe('Sharding (Connection)', function() {
     metadata: { requires: { topology: 'sharded' } },
     test: function() {
       const client = this.configuration.newClient({}, { useUnifiedTopology: true });
-      expect(client.s.options).to.have.property('useUnifiedTopology', true);
       return withClient(client, (client, done) => {
         expect(client).to.exist;
-        expect(client).nested.property('topology.description.type').to.equal(TopologyType.Sharded);
+        expect(client)
+          .nested.property('topology.description.type')
+          .to.equal(TopologyType.Sharded);
         return done();
       })();
     }
