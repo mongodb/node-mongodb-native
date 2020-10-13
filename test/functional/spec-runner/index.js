@@ -291,6 +291,7 @@ function runTestSuiteTest(configuration, spec, context) {
     if (IGNORED_COMMANDS.has(event.commandName)) {
       return;
     }
+
     // TODO: This should be removed if NODE-2471 accomidates it
     if (event.command.thisPingShouldBeIgnored) {
       return;
@@ -307,14 +308,14 @@ function runTestSuiteTest(configuration, spec, context) {
   return client.connect().then(client => {
     context.testClient = client;
     const sessionOptions = Object.assign({}, spec.transactionOptions);
+
+    spec.sessionOptions = spec.sessionOptions || {};
     const database = client.db(context.dbName);
 
     let session0, session1;
     let savedSessionData;
 
-    if (spec.sessionOptions) {
-      spec.sessionOptions = spec.sessionOptions || {};
-
+    if (context.useSessions) {
       try {
         session0 = client.startSession(
           Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
@@ -331,7 +332,6 @@ function runTestSuiteTest(configuration, spec, context) {
         // ignore
       }
     }
-
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 

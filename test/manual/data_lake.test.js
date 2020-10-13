@@ -8,13 +8,17 @@ const { withClient } = require('../functional/shared');
 
 describe('Atlas Data Lake', function () {
   context('spec tests', function () {
-    const testContext = new TestRunnerContext({ skipInit: true });
+    const testContext = new TestRunnerContext({
+      skipInit: true,
+      useSessions: false,
+      user: 'mhuser',
+      password: 'pencil'
+    });
+
     let testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/atlas-data-lake-testing'));
 
     after(() => testContext.teardown());
     before(function () {
-      this.configuration.user = 'mhuser';
-      this.configuration.password = 'pencil';
       return testContext.setup(this.configuration);
     });
 

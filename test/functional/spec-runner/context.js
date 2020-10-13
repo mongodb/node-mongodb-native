@@ -31,8 +31,12 @@ class Thread {
 
 class TestRunnerContext {
   constructor(opts) {
-    this.skipInit = (opts && opts.skipInit) || false;
-    this.url = null;
+    const d = { password: undefined, user: undefined, skipInit: false, useSessions: true };
+    opts = Object.assign({}, d, opts || {});
+    this.useSessions = opts.useSessions;
+    this.skipInit = opts.skipInit;
+    this.user = opts.user;
+    this.password = opts.password;
     this.sharedClient = null;
     this.failPointClients = [];
     this.appliedFailPoints = [];
@@ -58,9 +62,12 @@ class TestRunnerContext {
 
   setup(config) {
     this.sharedClient = config.newClient(
-      resolveConnectionString(config, { useMultipleMongoses: true })
+      resolveConnectionString(config, {
+        useMultipleMongoses: true,
+        user: this.user,
+        password: this.password
+      })
     );
-
     if (config.topologyType === 'Sharded') {
       this.failPointClients = config.options.hosts.map(proxy =>
         config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)

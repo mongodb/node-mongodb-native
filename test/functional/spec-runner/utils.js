@@ -1,12 +1,12 @@
 'use strict';
 
-function resolveConnectionString(configuration, spec) {
+function resolveConnectionString(configuration, opts) {
   const isShardedEnvironment = configuration.topologyType === 'Sharded';
-  const useMultipleMongoses = spec && !!spec.useMultipleMongoses;
+  const useMultipleMongoses = opts && !!opts.useMultipleMongoses;
 
   return isShardedEnvironment && !useMultipleMongoses
     ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}?directConnection=false`
-    : configuration.url(configuration.user, configuration.password);
+    : configuration.url(opts.user, opts.password);
 }
 
 module.exports = { resolveConnectionString };
