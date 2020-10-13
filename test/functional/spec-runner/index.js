@@ -125,9 +125,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
       describe(suiteName, {
         metadata: { requires },
         test: function () {
-          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-          afterEach(() => testContext.cleanupAfterSuite());
-
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
               if (
@@ -137,7 +134,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 return this.skip();
               }
 
-              let testPromise = Promise.resolve();
+              let testPromise = prepareDatabaseForSuite(testSuite, testContext);
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
               }
@@ -151,7 +148,9 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
               }
 
-              return testPromise.then(() => validateOutcome(spec, testContext));
+              return testPromise
+                .then(() => validateOutcome(spec, testContext))
+                .then(() => testContext.cleanupAfterSuite());
             });
           });
         }

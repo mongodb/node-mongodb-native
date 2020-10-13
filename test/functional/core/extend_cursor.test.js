@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { CoreCursor } = require('../../../src/cursor');
+const { Cursor } = require('../../../src/cursor');
 
 describe('Extend cursor tests', function () {
   it('should correctly extend the cursor with custom implementation', {
@@ -14,7 +14,7 @@ describe('Extend cursor tests', function () {
       const config = this.configuration;
 
       // Create an extended cursor that adds a toArray function
-      class ExtendedCursor extends CoreCursor {
+      class ExtendedCursor extends Cursor {
         constructor(topology, ns, cmd, options) {
           super(topology, ns, cmd, options);
           var extendedCursorSelf = this;

@@ -1,5 +1,5 @@
 import { MongoError, AnyError } from '../error';
-import { CursorState } from '../cursor/core_cursor';
+import { CursorState } from '../cursor';
 import type { Cursor } from '../cursor';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
