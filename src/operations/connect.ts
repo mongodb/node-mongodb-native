@@ -211,7 +211,7 @@ export function connect(
     const finalOptions = createUnifiedOptions(urlOptions, options);
 
     // Check if we have connection and socket timeout set
-    if (finalOptions.socketTimeoutMS == null) finalOptions.socketTimeoutMS = 360000;
+    if (finalOptions.socketTimeoutMS == null) finalOptions.socketTimeoutMS = 0;
     if (finalOptions.connectTimeoutMS == null) finalOptions.connectTimeoutMS = 10000;
     if (finalOptions.retryWrites == null) finalOptions.retryWrites = true;
     if (finalOptions.useRecoveryToken == null) finalOptions.useRecoveryToken = true;
@@ -582,7 +582,7 @@ function translateOptions(options: any) {
   }
 
   // Set the socket and connection timeouts
-  if (options.socketTimeoutMS == null) options.socketTimeoutMS = 360000;
+  if (options.socketTimeoutMS == null) options.socketTimeoutMS = 0;
   if (options.connectTimeoutMS == null) options.connectTimeoutMS = 10000;
 
   const translations = {

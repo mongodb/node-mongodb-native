@@ -277,7 +277,7 @@ function makeConnection(
       : typeof options.connectTimeoutMS === 'number'
       ? options.connectTimeoutMS
       : 30000;
-  const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
+  const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 0;
   const rejectUnauthorized =
     typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
 

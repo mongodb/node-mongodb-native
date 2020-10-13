@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, AnyError, isResumableError } from './error';
-import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
+import { Cursor, CursorOptions, CursorStream } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import {
@@ -18,6 +18,7 @@ import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
+import type { CursorStreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 
@@ -259,11 +260,6 @@ export class ChangeStream extends EventEmitter {
         this[kCursorStream]?.removeAllListeners(CursorStream.DATA);
       }
     });
-  }
-
-  /** @internal */
-  triggerError(error: AnyError): void {
-    processError(this, error);
   }
 
   /** @internal */
@@ -567,12 +563,19 @@ function processNewChange(
   change: ChangeStreamDocument,
   callback?: Callback
 ) {
-  if (changeStream.closed) return callback && callback(CHANGESTREAM_CLOSED_ERROR);
+  if (changeStream.closed) {
+    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    return;
+  }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
-  if (change == null) return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+  if (change == null) {
+    return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+  }
 
-  if (change && !change._id) return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+  if (change && !change._id) {
+    return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+  }
 
   // cache the resume token
   changeStream.cursor?.cacheResumeToken(change._id);

@@ -1,6 +1,6 @@
 import { MongoError } from '../error';
-import { Cursor, CursorState, CursorOptions } from './cursor';
-import { deprecate } from 'util';
+import { Cursor, CursorOptions } from './cursor';
+import { CursorState } from './core_cursor';
 import type { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import type { Document } from '../bson';
 import type { Sort } from '../operations/find';
@@ -109,8 +109,8 @@ export class AggregationCursor extends Cursor<AggregateOperation, AggregationCur
 
   // deprecated methods
   /** @deprecated Add a geoNear stage to the aggregation pipeline */
-  geoNear = deprecate(($geoNear: Document) => {
+  geoNear($geoNear: Document): this {
     this.operation.addToPipeline({ $geoNear });
     return this;
-  }, 'The `$geoNear` stage is deprecated in MongoDB 4.0, and removed in version 4.2.');
+  }
 }

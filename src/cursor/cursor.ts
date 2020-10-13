@@ -219,11 +219,6 @@ export class CursorStream extends Readable {
   }
 }
 
-export interface StreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
-}
-
 /**
  * **CURSORS Cannot directly be instantiated**
  * The `Cursor` class is an internal class that embodies a cursor on MongoDB

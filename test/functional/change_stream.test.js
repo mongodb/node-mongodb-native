@@ -29,19 +29,16 @@ function withChangeStream(dbName, collectionName, callback) {
 
   return withClient((client, done) => {
     const db = client.db(dbName);
-    db.dropCollection(collectionName)
-      .catch(() => {})
-      .then(() =>
-        db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
-          if (err) return done(err);
-          withCursor(
-            collection.watch(),
-            (cursor, done) => callback(collection, cursor, done),
-            err => collection.drop(dropErr => done(err || dropErr))
-          );
-        })
-      )
-      .catch(done);
+    db.dropCollection(collectionName, () => {
+      db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
+        if (err) return done(err);
+        withCursor(
+          collection.watch(),
+          (cursor, done) => callback(collection, cursor, done),
+          err => collection.drop(dropErr => done(err || dropErr))
+        );
+      });
+    });
   });
 }
 
@@ -66,7 +63,18 @@ function triggerResumableError(changeStream, delay, onClose) {
   });
 
   function triggerError() {
-    changeStream.triggerError(new MongoNetworkError('fake error'));
+    const cursorStream = changeStream.cursorStream;
+    if (cursorStream) {
+      cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
+      return;
+    }
+
+    const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
+      callback(new MongoNetworkError('error triggered from test'));
+      nextStub.restore();
+    });
+
+    changeStream.next(() => {});
   }
 
   if (delay != null) {
@@ -1446,6 +1454,7 @@ describe('Change Streams', function () {
     }
   });
 
+  // TODO: resuming currently broken on piped change streams, fix as part of NODE-2172
   it.skip('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
@@ -2794,6 +2803,10 @@ describe('Change Stream Resume Error Tests', function () {
     })
   });
 
+<<<<<<< HEAD
+=======
+  // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
+>>>>>>> origin/master
   it.skip('should continue piping changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
