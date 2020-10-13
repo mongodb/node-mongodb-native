@@ -4093,7 +4093,7 @@ describe('Cursor', function () {
     });
   });
 
-  const testTransformStream = (config, _done) => {
+  const testStream = (config, _done) => {
     const client = config.client;
     const configuration = config.configuration;
     const collectionName = config.collectionName;
@@ -4121,7 +4121,7 @@ describe('Cursor', function () {
         .then(() => collection.insertMany(docs))
         .then(() => {
           cursor = collection.find();
-          return cursor.transformStream(transformParam);
+          return cursor.stream(transformParam);
         })
         .then(stream => {
           stream.on('data', function (doc) {
@@ -4141,7 +4141,7 @@ describe('Cursor', function () {
     });
   };
 
-  it('transformStream should apply the supplied transformation function to each document in the stream', function (done) {
+  it('stream should apply the supplied transformation function to each document in the stream', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4152,15 +4152,15 @@ describe('Cursor', function () {
     const config = {
       client: client,
       configuration: configuration,
-      collectionName: 'transformStream-test-transform',
+      collectionName: '-test-transform',
       transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    testStream(config, done);
   });
 
-  it('transformStream should return a stream of unmodified docs if no transform function applied', function (done) {
+  it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4176,7 +4176,7 @@ describe('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    testStream(config, done);
   });
 
   it.skip('should apply parent read preference to count command', function (done) {
