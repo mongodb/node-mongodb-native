@@ -22,6 +22,7 @@ import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
+import { PromiseProvider } from '../promise_provider';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -858,7 +859,7 @@ export class Cursor<
   }
 
   /** Close the cursor, sending a KillCursor command and emitting close. */
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
@@ -972,6 +973,27 @@ export class Cursor<
   /** Return the cursor logger */
   getLogger(): Logger {
     return this.logger;
+  }
+
+  [Symbol.asyncIterator](): AsyncIterator<Document> {
+    const Promise = PromiseProvider.get();
+    return {
+      next: () => {
+        if (this.isClosed()) {
+          return Promise.resolve({ value: null, done: true });
+        }
+        return Promise.resolve()
+          .then(() => {
+            return this.next();
+          })
+          .then(value => {
+            if (!value) {
+              return this.close().then(() => ({ value, done: true }));
+            }
+            return { value, done: false };
+          });
+      }
+    };
   }
 }
 
