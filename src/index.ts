@@ -210,7 +210,8 @@ export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
 export type { EvalOptions } from './operations/eval';
-export type { FindOptions, Sort, SortDirection } from './operations/find';
+export type { FindOptions } from './operations/find';
+export type { Sort, SortDirection } from './sort';
 export type { FindAndModifyOptions } from './operations/find_and_modify';
 export type {
   IndexSpecification,

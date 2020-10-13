@@ -1,12 +1,6 @@
 import { Aspect, defineAspects, Hint } from './operation';
 import { ReadPreference } from '../read_preference';
-import {
-  maxWireVersion,
-  MongoDBNamespace,
-  Callback,
-  formattedOrderClause,
-  normalizeHintField
-} from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, normalizeHintField } from '../utils';
 import { MongoError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -14,14 +8,7 @@ import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
 import { CommandOperation, CommandOperationOptions } from './command';
-
-/** @public */
-export type SortDirection = 1 | -1 | 'asc' | 'desc' | { $meta: string };
-/** @public */
-export type Sort =
-  | { [key: string]: SortDirection }
-  | [string, SortDirection][]
-  | [string, SortDirection];
+import { Sort, formatSort } from '../sort';
 
 /** @public */
 export interface FindOptions extends QueryOptions, CommandOperationOptions {
@@ -153,9 +140,8 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     const findCommand: Document = Object.assign({}, this.cmd);
 
     if (options.sort) {
-      findCommand.sort = formattedOrderClause(options.sort);
+      findCommand.sort = formatSort(options.sort);
     }
-
     if (options.projection || options.fields) {
       let projection = options.projection || options.fields;
       if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {

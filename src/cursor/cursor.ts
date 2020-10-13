@@ -12,16 +12,16 @@ import {
   CursorCloseOptions,
   DocumentTransforms
 } from './core_cursor';
-import { maybePromise, formattedOrderClause, Callback } from '../utils';
+import { maybePromise, Callback } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation, CountOptions } from '../operations/count';
 import type { Logger } from '../logger';
 import type { Topology } from '../sdam/topology';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
+import { Sort, SortDirection, formatSort } from '../sort';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -52,6 +52,7 @@ export interface CursorOptions extends CoreCursorOptions {
   topology?: Topology;
   /** Session to use for the operation */
   numberOfRetries?: number;
+  sort?: Sort;
 }
 
 const kCursor = Symbol('cursor');
@@ -237,6 +238,10 @@ export class Cursor<
       this.addCursorFlag('noCursorTimeout', true);
     }
 
+    if (this.options.sort) {
+      this.cmd.sort = formatSort(this.options.sort);
+    }
+
     // Set the batch size
     this.cursorBatchSize = batchSize;
   }
@@ -301,14 +306,6 @@ export class Cursor<
       if (this.s.state === CursorState.CLOSED || (this.isDead && this.isDead())) {
         cb(new MongoError('Cursor is closed'));
         return;
-      }
-
-      if (this.s.state === CursorState.INIT && this.cmd.sort) {
-        try {
-          this.cmd.sort = formattedOrderClause(this.cmd.sort);
-        } catch (err) {
-          return cb(err);
-        }
       }
 
       this._next((err, doc) => {
@@ -587,37 +584,7 @@ export class Cursor<
       throw new MongoError('Cursor is closed');
     }
 
-    let order = sort;
-
-    // We have an array of arrays, we need to preserve the order of the sort
-    // so we will us a Map
-    if (Array.isArray(order) && Array.isArray(order[0])) {
-      this.cmd.sort = new Map<string, unknown>(
-        (order as [string, SortDirection][]).map(([key, dir]) => {
-          if (dir === 'asc') {
-            return [key, 1];
-          } else if (dir === 'desc') {
-            return [key, -1];
-          } else if (dir === 1 || dir === -1 || dir.$meta) {
-            return [key, dir];
-          } else {
-            throw new MongoError(
-              "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]"
-            );
-          }
-
-          return [key, null];
-        })
-      );
-
-      return this;
-    }
-
-    if (direction != null) {
-      order = [[sort as string, direction]];
-    }
-
-    this.cmd.sort = order;
+    this.cmd.sort = formatSort(sort, direction);
     return this;
   }
 
