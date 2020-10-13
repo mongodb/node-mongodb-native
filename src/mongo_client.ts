@@ -430,10 +430,6 @@ export class MongoClient extends EventEmitter implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (options && options.promiseLibrary) {
-      PromiseProvider.set(options.promiseLibrary);
-    }
-
     // Create client
     const mongoClient = new MongoClient(url, options);
     // Execute the connect method
