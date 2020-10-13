@@ -563,12 +563,19 @@ function processNewChange(
   change: ChangeStreamDocument,
   callback?: Callback
 ) {
-  if (changeStream.closed) return callback && callback(CHANGESTREAM_CLOSED_ERROR);
+  if (changeStream.closed) {
+    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    return;
+  }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
-  if (change == null) return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+  if (change == null) {
+    return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+  }
 
-  if (change && !change._id) return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+  if (change && !change._id) {
+    return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+  }
 
   // cache the resume token
   changeStream.cursor?.cacheResumeToken(change._id);

@@ -29,19 +29,16 @@ function withChangeStream(dbName, collectionName, callback) {
 
   return withClient((client, done) => {
     const db = client.db(dbName);
-    db.dropCollection(collectionName)
-      .catch(() => {})
-      .then(() =>
-        db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
-          if (err) return done(err);
-          withCursor(
-            collection.watch(),
-            (cursor, done) => callback(collection, cursor, done),
-            err => collection.drop(dropErr => done(err || dropErr))
-          );
-        })
-      )
-      .catch(done);
+    db.dropCollection(collectionName, () => {
+      db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
+        if (err) return done(err);
+        withCursor(
+          collection.watch(),
+          (cursor, done) => callback(collection, cursor, done),
+          err => collection.drop(dropErr => done(err || dropErr))
+        );
+      });
+    });
   });
 }
 
