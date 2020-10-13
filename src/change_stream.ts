@@ -263,11 +263,6 @@ export class ChangeStream extends EventEmitter {
   }
 
   /** @internal */
-  triggerError(error: AnyError): void {
-    processError(this, error);
-  }
-
-  /** @internal */
   get cursorStream(): CursorStream | undefined {
     return this[kCursorStream];
   }

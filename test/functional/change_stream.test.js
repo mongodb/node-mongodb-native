@@ -66,7 +66,18 @@ function triggerResumableError(changeStream, delay, onClose) {
   });
 
   function triggerError() {
-    changeStream.triggerError(new MongoNetworkError('fake error'));
+    const cursorStream = changeStream.cursorStream;
+    if (cursorStream) {
+      cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
+      return;
+    }
+
+    const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
+      callback(new MongoNetworkError('error triggered from test'));
+      nextStub.restore();
+    });
+
+    changeStream.next(() => {});
   }
 
   if (delay != null) {
