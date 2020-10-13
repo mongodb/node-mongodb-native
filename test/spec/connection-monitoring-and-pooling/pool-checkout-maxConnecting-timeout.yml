@@ -1,0 +1,71 @@
+version: 1
+style: integration
+description: waiting on maxConnecting is limited by WaitQueueTimeoutMS
+runOn:
+  -
+    # required for blockConnection in fail point
+    minServerVersion: "4.4.0"
+failPoint:
+  configureFailPoint: failCommand
+  # high amount to ensure not interfered with by monitor checks.
+  mode: { times: 20 }
+  data:
+    failCommands: ["isMaster"]
+    closeConnection: false
+    blockConnection: true
+    blockTimeMS: 750
+poolOptions:
+  maxPoolSize: 10
+  waitQueueTimeoutMS: 50
+operations:
+  # start creating two connections simultaneously.
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+  - name: start
+    target: thread2
+  - name: checkOut
+    thread: thread2
+  # wait for other two threads to start establishing
+  - name: waitForEvent
+    event: ConnectionCreated
+    count: 2
+  # start a third thread that will be blocked waiting for
+  # one of the other two to finish
+  - name: start
+    target: thread3
+  - name: checkOut
+    thread: thread3
+  - name: waitForEvent
+    event: ConnectionCheckOutFailed
+    count: 1
+  # rejoin thread3, should experience error
+  - name: waitForThread
+    target: thread3
+  - name: waitForEvent
+    event: ConnectionReady
+    count: 2
+error:
+  type: WaitQueueTimeoutError
+  message: Timed out while checking out a connection from connection pool
+events:
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutFailed
+    reason: timeout
+    address: 42
+  - type: ConnectionReady
+    address: 42
+  - type: ConnectionReady
+    address: 42
+ignore:
+  - ConnectionCreated
+  - ConnectionCheckedIn
+  - ConnectionCheckedOut
+  - ConnectionClosed
+  - ConnectionPoolCreated

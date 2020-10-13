@@ -24,7 +24,11 @@ Common Test Format
 Each YAML file has the following keys:
 
 - ``version``: A version number indicating the expected format of the spec tests (current version = 1)
-- ``style``: A string indicating what style of tests this file contains. Currently ``unit`` is the only valid value
+- ``style``: A string indicating what style of tests this file contains. Contains one of the following:
+
+  - ``"unit"``: a test that may be run without connecting to a MongoDB deployment.
+  - ``"integration"``: a test that MUST be run against a real MongoDB deployment.
+
 - ``description``: A text description of what the test is meant to assert
 
 Unit Test Format:
@@ -83,6 +87,32 @@ Valid Unit Test Operations are the following:
 
 - ``pool.clear()``: call ``clear`` on Pool
 - ``pool.close()``: call ``close`` on Pool
+
+
+Integration Test Format
+=======================
+
+The integration test format is identical to the unit test format with
+the addition of the following fields to each test:
+
+- ``runOn`` (optional): An array of server version and/or topology requirements
+  for which the tests can be run. If the test environment satisfies one or more
+  of these requirements, the tests may be executed; otherwise, this test should
+  be skipped. If this field is omitted, the tests can be assumed to have no
+  particular requirements and should be executed. Each element will have some or
+  all of the following fields:
+
+  - ``minServerVersion`` (optional): The minimum server version (inclusive)
+    required to successfully run the tests. If this field is omitted, it should
+    be assumed that there is no lower bound on the required server version.
+
+  - ``maxServerVersion`` (optional): The maximum server version (inclusive)
+    against which the tests can be run successfully. If this field is omitted,
+    it should be assumed that there is no upper bound on the required server
+    version.
+
+- ``failPoint``: optional, a document containing a ``configureFailPoint``
+  command to run against the endpoint being used for the test.
 
 Spec Test Match Function
 ========================
@@ -144,6 +174,30 @@ For each YAML file with ``style: unit``:
 
 
 It is important to note that the ``ignore`` list is used for calculating ``actualEvents``, but is NOT used for the ``waitForEvent`` command
+
+Integration Test Runner
+=======================
+
+The steps to run the integration tests are the same as those used to run the
+unit tests with the following modifications:
+
+ - The integration tests MUST be run against an actual endpoint. If the
+   deployment being tested contains multiple endpoints, then the runner MUST
+   only use one of them to run the tests against.
+
+- For each test, if `failPoint` is specified, its value is a
+  ``configureFailPoint`` command. Run the command on the admin database of the
+  endpoint being tested to enable the fail point.
+
+- At the end of each test, any enabled fail point MUST be disabled to avoid
+  spurious failures in subsequent tests. The fail point may be disabled like
+  so::
+
+    db.adminCommand({
+        configureFailPoint: <fail point name>,
+        mode: "off"
+    });
+
 
 Prose Tests
 ===========
