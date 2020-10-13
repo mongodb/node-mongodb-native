@@ -18,7 +18,7 @@ This tutorial covers both the basic CRUD methods and the specialized ``findAndMo
 as well as the new Bulk API methods for efficient bulk write operations.
 
 <div class="pull-right">
-  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2015" data-off="ES2017" data-offstyle="success">
+  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2017" data-off="ES2015" data-offstyle="success">
 </div>
 
 
@@ -33,7 +33,7 @@ The ``insertOne`` and ``insertMany`` methods exist on the ``Collection`` class a
 
 
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   // Insert a single document
@@ -52,7 +52,7 @@ The ``insertOne`` and ``insertMany`` methods exist on the ``Collection`` class a
 });
 
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Insert a single document
@@ -90,7 +90,7 @@ The ``insertOne`` and ``insertMany`` methods also accept a second argument which
 The following example shows how to serialize a passed-in function when writing to a
 [replica set](https://docs.mongodb.org/manual/core/replica-set-members/).
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   // Insert a single document
@@ -108,7 +108,7 @@ The following example shows how to serialize a passed-in function when writing t
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Insert a single document
@@ -140,7 +140,7 @@ when inserting documents with the ``insertMany`` method.
 The Decimal128 data type requires MongoDB server version 3.4 or higher.
 {{% /note %}}
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const Long = require('mongodb').Long;
 const Decimal = require('mongodb').Decimal128;
 
@@ -158,7 +158,7 @@ const Decimal = require('mongodb').Decimal128;
 });
 
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const Long = require('mongodb').Long;
 const Decimal = require('mongodb').Decimal128;
 
@@ -191,7 +191,7 @@ The above operation inserts the following documents into the
 
 The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class and are used to update and upsert documents.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('updates');
@@ -226,7 +226,7 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the updates collection
@@ -276,7 +276,7 @@ Just as for ``insert``, the ``update`` method allows you to specify a per operat
 
 The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class and are used to remove documents from MongoDB.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('removes');
@@ -300,7 +300,7 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the removes collection
@@ -343,7 +343,7 @@ allow the user to update or upsert a document and have the modified or existing 
 methods, the operation takes a write lock for the duration of the operation in order to ensure the modification is
 [atomic](https://docs.mongodb.org/manual/core/write-operations-atomicity/).
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('findAndModify');
@@ -371,7 +371,7 @@ methods, the operation takes a write lock for the duration of the operation in o
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the findAndModify collection
@@ -414,7 +414,7 @@ The ``findOneAndUpdate`` method also accepts a third argument which can be an op
 
 The ``findOneAndDelete`` function is designed to help remove a document.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('findAndModify');
@@ -435,7 +435,7 @@ The ``findOneAndDelete`` function is designed to help remove a document.
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the findAndModify collection
@@ -471,7 +471,7 @@ Like ``findOneAndUpdate``, it allows an object of options to be passed in which 
 
 The ``bulkWrite`` function allows a simple set of bulk operations to run in a non-fluent way, in comparison to the bulk API discussed next.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   // Get the collection
@@ -498,7 +498,7 @@ The ``bulkWrite`` function allows a simple set of bulk operations to run in a no
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the collection
@@ -540,7 +540,7 @@ The ``bulkWrite`` function takes an array of operations which can be objects of 
 
 Bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB version 2.6 or higher, which supports the new write commands. Bulk operations are split into *ordered* and *unordered* bulk operations. An *ordered* bulk operation guarantees the order of execution of writes while the *unordered* bulk operation makes no assumptions about the order of execution. In the Node.js driver the *unordered* bulk operations will group operations according to type and write them in parallel.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('bulkops');
@@ -566,7 +566,7 @@ Bulk write operations make it easy to write groups of operations together to Mon
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the collection
@@ -641,7 +641,7 @@ The main method for querying the database is the ``find`` method.
 
 The following example materializes all the documents from a query using the ``toArray`` method, but limits the number of returned results to two documents.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('find');
@@ -659,7 +659,7 @@ The following example materializes all the documents from a query using the ``to
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 {{% js6-connect %}}
 
     // Get the collection
@@ -715,7 +715,7 @@ More information can be found in the [Cursor API documentation](/node-mongodb-na
 
 The following example uses the ``next`` method.
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 {{% myproject-connect %}}
 
   const col = db.collection('find');
@@ -733,7 +733,7 @@ The following example uses the ``next`` method.
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden">
+<section class="javascript6">
 In ECMAScript 6, The new `generator` functions allow for what is arguably a
 much cleaner and easier way to read iteration code.
 
