@@ -2803,10 +2803,7 @@ describe('Change Stream Resume Error Tests', function () {
     })
   });
 
-<<<<<<< HEAD
-=======
   // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
->>>>>>> origin/master
   it.skip('should continue piping changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
