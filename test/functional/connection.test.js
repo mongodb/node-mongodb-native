@@ -2,6 +2,7 @@
 const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
+const withClient = require('./shared').withClient;
 
 describe('Connection', function () {
   before(function () {
@@ -272,5 +273,32 @@ describe('Connection', function () {
       test.equal(false, client.isConnected());
       done();
     }
+  });
+
+  it('should be able to connect again after close', function () {
+    return withClient.call(this, (client, done) => {
+      expect(client.isConnected()).to.be.true;
+
+      const collection = () => client.db('testReconnect').collection('test');
+      collection().insertOne({ a: 1 }, (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        client.close(err => {
+          expect(err).to.not.exist;
+
+          client.connect(err => {
+            expect(err).to.not.exist;
+
+            collection().insertOne({ b: 2 }, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+              expect(client.topology.isDestroyed()).to.be.false;
+              done();
+            });
+          });
+        });
+      });
+    });
   });
 });
