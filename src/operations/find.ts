@@ -97,7 +97,7 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   hint?: Hint;
 
   constructor(
-    collection: Collection,
+    collection: Collection | undefined,
     ns: MongoDBNamespace,
     filter: Document = {},
     options: FindOptions = {}
@@ -131,11 +131,13 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
 
     // TODO: figure out our story about inheriting BSON serialization options
     this.bsonOptions = {
-      raw: options.raw ?? collection.s.raw ?? false,
-      promoteLongs: options.promoteLongs ?? collection.s.promoteLongs ?? true,
-      promoteValues: options.promoteValues ?? collection.s.promoteValues ?? true,
-      promoteBuffers: options.promoteBuffers ?? collection.s.promoteBuffers ?? false,
-      ignoreUndefined: options.ignoreUndefined ?? collection.s.ignoreUndefined ?? false
+      raw: options.raw ?? (collection && collection.s.raw) ?? false,
+      promoteLongs: options.promoteLongs ?? (collection && collection.s.promoteLongs) ?? true,
+      promoteValues: options.promoteValues ?? (collection && collection.s.promoteValues) ?? true,
+      promoteBuffers:
+        options.promoteBuffers ?? (collection && collection.s.promoteBuffers) ?? false,
+      ignoreUndefined:
+        options.ignoreUndefined ?? (collection && collection.s.ignoreUndefined) ?? false
     };
   }
 

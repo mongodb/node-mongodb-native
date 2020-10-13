@@ -1139,7 +1139,7 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('timeoutFalse', function (err, collection) {
           const cursor = collection.find({}, {});
-          test.ok(!cursor.cmd.noCursorTimeout);
+          test.ok(!cursor.options.noCursorTimeout);
           client.close(done);
         });
       });
@@ -2317,7 +2317,8 @@ describe('Find', function () {
     }
   });
 
-  it('Should simulate closed cursor', {
+  // FIXME: cursors are being redesigned to no longer have a "state", this test should be removed/updated
+  it.skip('Should simulate closed cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },

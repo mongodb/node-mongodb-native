@@ -15,7 +15,7 @@ import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern, ReadConcernLike } from './read_concern';
-import { AggregationCursor, CommandCursor, Cursor } from './cursor';
+import { AggregationCursor, CommandCursor } from './cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
@@ -41,7 +41,7 @@ import {
   EstimatedDocumentCountOperation,
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { FindOperation, FindOptions, Sort } from './operations/find';
+import type { FindOptions, Sort } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
@@ -86,6 +86,7 @@ import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
+import { FindCursor } from './cursor/find_cursor';
 
 /** @public */
 export interface Collection {
@@ -681,10 +682,10 @@ export class Collection implements OperationParent {
    *
    * @param filter - The query predicate. If unspecified, then all documents in the collection will match the predicate
    */
-  find(): Cursor;
-  find(filter: Document): Cursor;
-  find(filter: Document, options: FindOptions): Cursor;
-  find(filter?: Document, options?: FindOptions): Cursor {
+  find(): FindCursor;
+  find(filter: Document): FindCursor;
+  find(filter: Document, options: FindOptions): FindCursor;
+  find(filter?: Document, options?: FindOptions): FindCursor {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -692,11 +693,7 @@ export class Collection implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    return new Cursor(
-      this.s.topology,
-      new FindOperation(this, this.s.namespace, filter, options),
-      options
-    );
+    return new FindCursor(this.s.topology, this.s.namespace, filter, options);
   }
 
   /**
@@ -1249,11 +1246,7 @@ export class Collection implements OperationParent {
     }
 
     options = options || {};
-    return new AggregationCursor(
-      this.s.topology,
-      new AggregateOperation(this, pipeline, options),
-      options
-    );
+    return new AggregationCursor(this.s.topology, this.s.namespace, this, pipeline, options);
   }
 
   /**

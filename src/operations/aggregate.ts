@@ -7,6 +7,7 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import { compressSync } from 'snappy';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;
@@ -44,8 +45,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
     super(parent, options);
 
+    if (!pipeline) {
+      throw new Error('pipeline should be an array');
+    }
+
     this.target =
-      parent.s.namespace && parent.s.namespace.collection
+      parent.s && parent.s.namespace && parent.s.namespace.collection
         ? parent.s.namespace.collection
         : DB_AGGREGATE_COLLECTION;
 
@@ -66,16 +71,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
     if (this.hasWriteStage) {
       this.readPreference = ReadPreference.primary;
     }
-
-    if (options?.explain && (this.readConcern || this.writeConcern)) {
-      throw new MongoError(
-        '"explain" cannot be used on an aggregate call with readConcern/writeConcern'
-      );
-    }
-
-    if (options?.cursor != null && typeof options.cursor !== 'object') {
-      throw new MongoError('cursor options must be an object');
-    }
   }
 
   get canRetryRead(): boolean {
@@ -88,6 +83,17 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
 
   execute(server: Server, callback: Callback<T>): void {
     const options: AggregateOptions = this.options;
+
+    if (options?.explain && (this.readConcern || this.writeConcern)) {
+      throw new MongoError(
+        '"explain" cannot be used on an aggregate call with readConcern/writeConcern'
+      );
+    }
+
+    if (options?.cursor != null && typeof options.cursor !== 'object') {
+      throw new MongoError('cursor options must be an object');
+    }
+
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 

@@ -4,7 +4,7 @@ import { decorateWithCollation, decorateWithReadConcern, Callback } from '../uti
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { Cursor } from '../cursor/cursor';
+import type { FindCursor } from '../cursor/find_cursor';
 
 /** @public */
 export interface CountOptions extends CommandOperationOptions {
@@ -22,10 +22,10 @@ type BuildCountCommandOptions = CountOptions & { collectionName: string };
 
 /** @internal */
 export class CountOperation extends CommandOperation<CountOptions, number> {
-  cursor: Cursor;
+  cursor: FindCursor;
   applySkipLimit: boolean;
 
-  constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOptions) {
+  constructor(cursor: FindCursor, applySkipLimit: boolean, options: CountOptions) {
     super(({ s: cursor } as unknown) as Collection, options);
 
     this.cursor = cursor;
@@ -38,16 +38,12 @@ export class CountOperation extends CommandOperation<CountOptions, number> {
     const options = this.options;
 
     if (applySkipLimit) {
-      if (typeof cursor.cursorSkip === 'number') options.skip = cursor.cursorSkip;
-      if (typeof cursor.cursorLimit === 'number') options.limit = cursor.cursorLimit;
+      if (typeof cursor.skip === 'number') options.skip = cursor.options.skip;
+      if (typeof cursor.limit === 'number') options.limit = cursor.options.limit;
     }
 
-    if (
-      typeof options.maxTimeMS !== 'number' &&
-      cursor.cmd &&
-      typeof cursor.cmd.maxTimeMS === 'number'
-    ) {
-      options.maxTimeMS = cursor.cmd.maxTimeMS;
+    if (typeof options.maxTimeMS !== 'number' && typeof cursor.options.maxTimeMS === 'number') {
+      options.maxTimeMS = cursor.options.maxTimeMS;
     }
 
     const finalOptions: BuildCountCommandOptions = {
@@ -61,7 +57,7 @@ export class CountOperation extends CommandOperation<CountOptions, number> {
 
     let command;
     try {
-      command = buildCountCommand(cursor, cursor.cmd.query, finalOptions);
+      command = buildCountCommand(cursor, cursor.filter, finalOptions);
     } catch (err) {
       return callback(err);
     }
@@ -80,7 +76,7 @@ export class CountOperation extends CommandOperation<CountOptions, number> {
  * @param options - Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
  */
 function buildCountCommand(
-  collectionOrCursor: Collection | Cursor,
+  cursor: FindCursor,
   query: Document,
   options: BuildCountCommandOptions
 ) {
@@ -96,17 +92,12 @@ function buildCountCommand(
     query: query
   };
 
-  if (isCursor(collectionOrCursor)) {
-    // collectionOrCursor is a cursor
-    if (collectionOrCursor.options.hint) {
-      hint = collectionOrCursor.options.hint;
-    } else if (collectionOrCursor.cmd.hint) {
-      hint = collectionOrCursor.cmd.hint;
-    }
-    decorateWithCollation(cmd, collectionOrCursor, collectionOrCursor.cmd);
-  } else {
-    decorateWithCollation(cmd, collectionOrCursor, options);
+  if (cursor.options.hint) {
+    hint = cursor.options.hint;
+  } else if (cursor.options.hint) {
+    hint = cursor.options.hint;
   }
+  decorateWithCollation(cmd, cursor, cursor.options);
 
   // Add limit, skip and maxTimeMS if defined
   if (typeof skip === 'number') cmd.skip = skip;
@@ -114,14 +105,11 @@ function buildCountCommand(
   if (typeof maxTimeMS === 'number') cmd.maxTimeMS = maxTimeMS;
   if (hint) cmd.hint = hint;
 
+  // FIXME
   // Do we have a readConcern specified
-  decorateWithReadConcern(cmd, collectionOrCursor);
+  // decorateWithReadConcern(cmd, cursor);
 
   return cmd;
-}
-
-function isCursor(c: Collection | Cursor): c is Cursor {
-  return 'numberOfRetries' in c.s && 'undefined' !== typeof c.s.numberOfRetries;
 }
 
 defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

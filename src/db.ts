@@ -303,13 +303,7 @@ export class Db implements OperationParent {
     }
 
     options = options || {};
-    const cursor = new AggregationCursor(
-      this.s.topology,
-      new AggregateOperation(this, pipeline, options),
-      options
-    );
-
-    return cursor;
+    return new AggregationCursor(this.s.topology, this.s.namespace, this, pipeline, options);
   }
 
   /** Return the Admin db instance */

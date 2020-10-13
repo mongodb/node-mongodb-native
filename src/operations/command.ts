@@ -67,9 +67,10 @@ export abstract class CommandOperation<
     if (dbNameOverride) {
       this.ns = new MongoDBNamespace(dbNameOverride, '$cmd');
     } else {
-      this.ns = parent
-        ? parent.s.namespace.withCollection('$cmd')
-        : new MongoDBNamespace('admin', '$cmd');
+      this.ns =
+        parent && parent.s
+          ? parent.s.namespace.withCollection('$cmd')
+          : new MongoDBNamespace('admin', '$cmd');
     }
 
     const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
