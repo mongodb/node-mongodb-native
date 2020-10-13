@@ -283,7 +283,7 @@ function runTestSuiteTest(configuration, spec, context) {
     )
   );
 
-  const url = resolveConnectionString(configuration, spec);
+  const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
