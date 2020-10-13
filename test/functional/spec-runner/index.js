@@ -134,8 +134,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 spec.skipReason ||
                 (filter && typeof filter === 'function' && !filter(spec, this.configuration))
               ) {
-                this.skip();
-                return;
+                return this.skip();
               }
 
               let testPromise = Promise.resolve();

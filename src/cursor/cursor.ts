@@ -1,6 +1,6 @@
 import { emitDeprecatedOptionWarning } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { Transform, PassThrough } from 'stream';
+import { Transform, PassThrough, Readable } from 'stream';
 import { deprecate } from 'util';
 import { MongoError, AnyError } from '../error';
 import {
@@ -8,7 +8,7 @@ import {
   CursorState,
   CoreCursorOptions,
   CoreCursorPrivate,
-  StreamOptions,
+  CursorStreamOptions,
   CursorCloseOptions,
   DocumentTransforms
 } from './core_cursor';
@@ -52,6 +52,77 @@ export interface CursorOptions extends CoreCursorOptions {
   topology?: Topology;
   /** Session to use for the operation */
   numberOfRetries?: number;
+}
+
+const kCursor = Symbol('cursor');
+
+export class CursorStream extends Readable {
+  [kCursor]: Cursor;
+  options: CursorStreamOptions;
+
+  /** @event */
+  static readonly CLOSE = 'close' as const;
+  /** @event */
+  static readonly DATA = 'data' as const;
+  /** @event */
+  static readonly END = 'end' as const;
+  /** @event */
+  static readonly FINISH = 'finish' as const;
+  /** @event */
+  static readonly ERROR = 'error' as const;
+  /** @event */
+  static readonly PAUSE = 'pause' as const;
+  /** @event */
+  static readonly READABLE = 'readable' as const;
+  /** @event */
+  static readonly RESUME = 'resume' as const;
+
+  constructor(cursor: Cursor, options?: CursorStreamOptions) {
+    super({ objectMode: true });
+    this[kCursor] = cursor;
+    this.options = options || {};
+  }
+
+  destroy(err?: AnyError): void {
+    this.pause();
+    this[kCursor].close();
+    super.destroy(err);
+  }
+
+  /** @internal */
+  _read(): void {
+    const cursor = this[kCursor];
+    if ((cursor.s && cursor.s.state === CursorState.CLOSED) || cursor.isDead()) {
+      this.push(null);
+      return;
+    }
+
+    // Get the next item
+    cursor._next((err, result) => {
+      if (err) {
+        if (cursor.s && cursor.s.state === CursorState.CLOSED) return;
+        if (!cursor.isDead()) this.emit(CursorStream.ERROR, err);
+        cursor.close(() => this.emit(CursorStream.END));
+        return;
+      }
+
+      // If we provided a transformation method
+      if (typeof this.options.transform === 'function' && result != null) {
+        this.push(this.options.transform(result));
+        return;
+      }
+
+      // Return the result
+      this.push(result);
+
+      if (result === null && cursor.isDead()) {
+        this.once(CursorStream.END, () => {
+          cursor.close();
+          this.emit(CursorStream.FINISH);
+        });
+      }
+    });
+  }
 }
 
 /**
@@ -845,24 +916,17 @@ export class Cursor<
     return this.isDead();
   }
 
-  destroy(err?: AnyError): void {
-    if (err) this.emit(Cursor.ERROR, err);
-    this.pause();
-    this.close();
-  }
-
   /** Return a modified Readable stream including a possible transform method. */
-  stream(options?: StreamOptions): this {
+  stream(options?: CursorStreamOptions): CursorStream {
     // TODO: replace this method with transformStream in next major release
-    this.streamOptions = options || {};
-    return this;
+    return new CursorStream(this, options);
   }
 
   /**
    * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
    * returns a stream of unmodified docs.
    */
-  transformStream(options?: StreamOptions): Transform {
+  transformStream(options?: CursorStreamOptions): Transform {
     const streamOptions: typeof options = options || {};
     if (typeof streamOptions.transform === 'function') {
       const stream = new Transform({
@@ -874,11 +938,10 @@ export class Cursor<
           callback();
         }
       });
-
-      return this.pipe(stream);
+      return this.stream().pipe(stream);
     }
 
-    return this.pipe(new PassThrough({ objectMode: true }));
+    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**

@@ -622,14 +622,15 @@ describe('Operation Examples', function () {
             ],
             { cursor: { batchSize: 1 } }
           );
+          const stream = cursor.stream();
 
           var count = 0;
           // Get all the aggregation results
-          cursor.on('data', function () {
+          stream.on('data', function () {
             count = count + 1;
           });
 
-          cursor.once('end', function () {
+          stream.once('end', function () {
             test.equal(2, count);
             client.close(done);
           });
@@ -5686,7 +5687,8 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Perform a find to get a cursor
-          var stream = collection.find().stream();
+          const cursor = collection.find();
+          const stream = cursor.stream();
 
           // For each data item
           stream.on('data', function () {
@@ -5695,7 +5697,7 @@ describe('Operation Examples', function () {
           });
 
           // When the stream is done
-          stream.on('close', function () {
+          cursor.on('close', function () {
             client.close(done);
           });
         });
@@ -6720,18 +6722,17 @@ describe('Operation Examples', function () {
                 .find({})
                 .addCursorFlag('tailable', true)
                 .addCursorFlag('awaitData', true);
+              const stream = cursor.stream();
 
-              cursor.on('data', function () {
+              stream.on('data', function () {
                 total = total + 1;
-
                 if (total === 1000) {
                   cursor.kill();
                 }
               });
 
-              cursor.on('end', function () {
-                // TODO: forced because the cursor is still open/active
-                client.close(true, done);
+              stream.on('end', function () {
+                client.close(done);
               });
             });
           }
