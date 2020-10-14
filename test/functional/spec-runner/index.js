@@ -295,7 +295,7 @@ function runTestSuiteTest(configuration, spec, context) {
 
     // This gets rid of the first ping command
     if (event.commandName === 'ping') {
-      pingTracker++
+      pingTracker++;
       if (pingTracker === 1) return;
     }
 
