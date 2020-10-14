@@ -92,6 +92,10 @@ function parseTopologies(topologies) {
 }
 
 function parseRunOn(runOn) {
+  if (!Array.isArray(runOn)) {
+    return {};
+  }
+
   return runOn.map(config => {
     const topology = parseTopologies(config.topology);
     const version = [];

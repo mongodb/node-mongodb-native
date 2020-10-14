@@ -2,10 +2,10 @@
 
 require('util.promisify/shim')();
 const util = require('util');
-const loadSpecTests = require('../../spec').loadSpecTests;
-const ConnectionPool = require('../../../lib/cmap/connection_pool').ConnectionPool;
-const WaitQueueTimeoutError = require('../../../lib/cmap/errors').WaitQueueTimeoutError;
-const EventEmitter = require('events').EventEmitter;
+const { loadSpecTests } = require('../../spec');
+const { ConnectionPool } = require('../../../lib/cmap/connection_pool');
+const { WaitQueueTimeoutError } = require('../../../lib/cmap/errors');
+const { EventEmitter } = require('events');
 const mock = require('mongodb-mock-server');
 const BSON = require('bson');
 const cmapEvents = require('../../../lib/cmap/events');
@@ -13,6 +13,8 @@ const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('../../functional/spec-runner/matcher').default);
 const expect = chai.expect;
+const { MongoClient } = require('../../..');
+const { parseRunOn } = require('../../functional/spec-runner');
 
 const ALL_POOL_EVENTS = new Set([
   'connectionPoolCreated',
@@ -268,8 +270,8 @@ describe('Connection Pool', function() {
     let pool = undefined;
 
     function createPool(options) {
-      options = Object.assign({}, options, { bson: new BSON() }, server.address());
-      pool = new ConnectionPool(options);
+      pool = new ConnectionPool(Object.assign(server.address(), options, { bson: new BSON() }));
+
       ALL_POOL_EVENTS.forEach(ev => {
         pool.on(ev, x => {
           poolEvents.push(x);
@@ -295,13 +297,20 @@ describe('Connection Pool', function() {
 
     const OPERATION_FUNCTIONS = {
       checkOut: function(op) {
-        return PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool).then(connection => {
-          if (op.label != null) {
-            connections.set(op.label, connection);
-          } else {
-            orphans.add(connection);
-          }
-        });
+        console.log('=> checkout');
+        return PROMISIFIED_POOL_FUNCTIONS.checkOut
+          .call(pool)
+          .then(connection => {
+            if (op.label != null) {
+              connections.set(op.label, connection);
+            } else {
+              orphans.add(connection);
+            }
+          })
+          .catch(err => {
+            console.log('checkout failed: ', err.message);
+            throw err;
+          });
       },
       checkIn: function(op) {
         const connection = connections.get(op.connection);
@@ -437,67 +446,104 @@ describe('Connection Pool', function() {
         });
     });
 
+    function setFailPoint(client, failPoint) {
+      return client.db('admin').command(failPoint);
+    }
+
+    function unsetFailPoint(client, failPoint) {
+      return client.db('admin').command({
+        configureFailPoint: failPoint.configureFailPoint,
+        mode: 'off'
+      });
+    }
+
     loadSpecTests('connection-monitoring-and-pooling').forEach(test => {
-      it(test.description, function() {
-        const operations = test.operations;
-        const expectedEvents = test.events || [];
-        const ignoreEvents = test.ignore || [];
-        const expectedError = test.error;
-        const poolOptions = test.poolOptions || {};
-
-        let actualError;
-
-        const MAIN_THREAD_KEY = Symbol('Main Thread');
-        const mainThread = new Thread();
-        threads.set(MAIN_THREAD_KEY, mainThread);
-        mainThread.start();
-
-        createPool(poolOptions);
-
-        let basePromise = Promise.resolve();
-
-        for (let idx in operations) {
-          const op = operations[idx];
-
-          const threadKey = op.thread || MAIN_THREAD_KEY;
-          const thread = getThread(threadKey);
-
-          basePromise = basePromise.then(() => {
-            if (!thread) {
-              throw new Error(`Invalid thread ${threadKey}`);
-            }
-
-            return Promise.resolve()
-              .then(() => thread.run(op))
-              .then(() => new Promise(r => setTimeout(r)));
+      it(test.description, {
+        metadata: parseRunOn(test.runOn),
+        test: function() {
+          const operations = test.operations;
+          const expectedEvents = test.events || [];
+          const ignoreEvents = test.ignore || [];
+          const expectedError = test.error;
+          const poolOptions = test.poolOptions || {};
+          const failPoint = test.failPoint;
+          const client = new MongoClient('mongodb://127.0.0.1:27017/', {
+            useUnifiedTopology: true
           });
-        }
 
-        return basePromise
-          .then(() => mainThread.finish())
-          .catch(e => (actualError = e))
-          .then(() => {
-            const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
+          let actualError;
 
-            if (expectedError) {
-              expect(actualError).to.exist;
-              expect(actualError)
-                .property('message')
-                .to.equal(expectedError.message);
-            } else if (actualError) {
-              throw actualError;
-            }
+          const MAIN_THREAD_KEY = Symbol('Main Thread');
+          const mainThread = new Thread();
+          threads.set(MAIN_THREAD_KEY, mainThread);
+          mainThread.start();
 
-            expectedEvents.forEach((expected, index) => {
-              const actual = actualEvents[index];
-              if (expected.type) {
-                expect(actual.constructor.name).to.equal(`${expected.type}Event`);
-                delete expected.type;
+          if (test.style === 'integration') {
+            poolOptions.host = '127.0.0.1';
+            poolOptions.port = 27017;
+          }
+
+          createPool(poolOptions);
+
+          let basePromise = Promise.resolve();
+
+          if (failPoint) {
+            basePromise = basePromise
+              .then(() => client.connect())
+              .then(() => setFailPoint(client, failPoint));
+          }
+
+          for (let idx in operations) {
+            const op = operations[idx];
+
+            const threadKey = op.thread || MAIN_THREAD_KEY;
+            const thread = getThread(threadKey);
+
+            basePromise = basePromise.then(() => {
+              if (!thread) {
+                throw new Error(`Invalid thread ${threadKey}`);
               }
 
-              expect(actual).to.matchMongoSpec(expected);
+              return Promise.resolve()
+                .then(() => thread.run(op))
+                .then(() => new Promise(r => setTimeout(r)));
             });
-          });
+          }
+
+          return basePromise
+            .then(() => mainThread.finish())
+            .catch(e => (actualError = e))
+            .then(() => {
+              const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
+
+              if (expectedError) {
+                expect(actualError).to.exist;
+                expect(actualError)
+                  .property('message')
+                  .to.equal(expectedError.message);
+              } else if (actualError) {
+                throw actualError;
+              }
+
+              expectedEvents.forEach((expected, index) => {
+                const actual = actualEvents[index];
+                if (expected.type) {
+                  expect(actual.constructor.name).to.equal(`${expected.type}Event`);
+                  delete expected.type;
+                }
+
+                expect(actual).to.matchMongoSpec(expected);
+              });
+            })
+            .finally(() => {
+              let promise = Promise.resolve();
+              if (failPoint) {
+                promise = promise.then(() => unsetFailPoint(client, failPoint));
+              }
+
+              return promise.then(() => client.close());
+            });
+        }
       });
     });
   });

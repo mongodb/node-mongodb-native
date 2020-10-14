@@ -129,13 +129,13 @@ class TestRunnerContext {
 
   enableFailPoint(failPoint) {
     return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+      return client.db('admin').command(failPoint);
     });
   }
 
   disableFailPoint(failPoint) {
     return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand({
+      return client.db('admin').command({
         configureFailPoint: failPoint.configureFailPoint,
         mode: 'off'
       });
