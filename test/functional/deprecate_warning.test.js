@@ -46,12 +46,6 @@ describe('Deprecation Warnings', function () {
 
           // split stderr into separate lines, trimming the first line to just the warning message
           const split = stderr.split('\n');
-          const warning = split.shift().split(')')[1].trim();
-
-          // ensure warning message matches expected
-          expect(warning).to.equal(
-            'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
-          );
 
           // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
           split.pop();
@@ -83,35 +77,11 @@ describe('Deprecation Warnings', function () {
     }
   });
 
-  it('test behavior for classes with an associated logger', function () {
-    const fakeClass = new ClassWithLogger();
-    const logger = fakeClass.getLogger();
-    const stub = sinon.stub(logger, 'warn');
-
-    fakeClass.f({ maxScan: 5, snapshot: true });
-    fakeClass.f({ maxScan: 5, snapshot: true });
-    expect(stub).to.have.been.calledTwice;
-    ensureCalledWith(stub, [
-      'f option [maxScan] is deprecated and will be removed in a later version.',
-      'f option [snapshot] is deprecated and will be removed in a later version.'
-    ]);
-  });
-
   it('test behavior for classes without an associated logger', function () {
     const fakeClass = new ClassWithoutLogger();
 
     function func() {
-      fakeClass.f({ maxScan: 5, snapshot: true });
-    }
-
-    expect(func).to.not.throw();
-  });
-
-  it('test behavior for classes with an undefined logger', function () {
-    const fakeClass = new ClassWithUndefinedLogger();
-
-    function func() {
-      fakeClass.f({ maxScan: 5, snapshot: true });
+      fakeClass.f();
     }
 
     expect(func).to.not.throw();
