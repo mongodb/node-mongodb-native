@@ -287,9 +287,11 @@ describe('Connection', function () {
 
         client.close(err => {
           expect(err).to.not.exist;
+          expect(client.isConnected()).to.be.false;
 
           client.connect(err => {
             expect(err).to.not.exist;
+            expect(client.isConnected()).to.be.true;
 
             collection().insertOne({ b: 2 }, (err, result) => {
               expect(err).to.not.exist;
