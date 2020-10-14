@@ -26,44 +26,48 @@ describe('Atlas Data Lake', function () {
   });
 
   describe('prose Tests', function () {
-    it('should properly constructs and issues a killCursors command', function () {
-      return withClient('mongodb://mhuser:pencil@localhost', (client, done) => {
+    it(
+      'should properly constructs and issues a killCursors command',
+      withClient('mongodb://mhuser:pencil@localhost', function (client, done) {
         const db = client.db('admin');
-        db.runCommand({ killCursors: 'kill_cursor_collection' }, err => {
+        db.command({ killCursors: 'kill_cursor_collection' }, err => {
           expect(err).to.not.exist;
           done();
         });
-      });
-    });
-    it('should connect without authentication', function () {
-      return withClient('mongodb://localhost', (client, done) => {
+      })
+    );
+    it(
+      'should connect without authentication',
+      withClient('mongodb://localhost', function (client, done) {
         expect(client).to.exist;
         done();
-      });
-    });
-    it('should connect with auth SCRAM-SHA-1', function () {
-      return withClient(
-        'mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1',
-        (client, done) => {
-          const db = client.db('admin');
-          db.runCommand({ killCursors: 'kill_cursor_collection' }, err => {
-            expect(err).to.not.exist;
-            done();
-          });
-        }
-      );
-    });
-    it('should connect with auth SCRAM-SHA-256', function () {
-      return withClient(
-        'mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256',
-        (client, done) => {
-          const db = client.db('admin');
-          db.runCommand({ killCursors: 'kill_cursor_collection' }, err => {
-            expect(err).to.not.exist;
-            done();
-          });
-        }
-      );
-    });
+      })
+    );
+    it(
+      'should connect with auth SCRAM-SHA-1',
+      withClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1', function (
+        client,
+        done
+      ) {
+        const db = client.db('admin');
+        db.command({ killCursors: 'kill_cursor_collection' }, err => {
+          expect(err).to.not.exist;
+          done();
+        });
+      })
+    );
+    it(
+      'should connect with auth SCRAM-SHA-256',
+      withClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256', function (
+        client,
+        done
+      ) {
+        const db = client.db('admin');
+        db.command({ killCursors: 'kill_cursor_collection' }, err => {
+          expect(err).to.not.exist;
+          done();
+        });
+      })
+    );
   });
 });
