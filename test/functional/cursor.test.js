@@ -7,6 +7,7 @@ const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 const { ReadPreference } = require('../../src/read_preference');
+const { ReadConcern } = require('../../src/read_concern');
 const { ServerType } = require('../../src/sdam/common');
 
 describe('Cursor', function () {
@@ -2623,12 +2624,12 @@ describe('Cursor', function () {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    test: function(done) {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         const db = client.db(configuration.db);
-        const cursor = db.collection('shouldSetReadConcern').find()
+        const cursor = db.collection('shouldSetReadConcern').find();
         cursor.setReadConcern('available');
         expect(cursor).to.have.nested.property('options.readConcern');
         expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
