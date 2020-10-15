@@ -4157,7 +4157,7 @@ describe('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testStream(config, done);
+    testTransformStream(config, done);
   });
 
   it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
