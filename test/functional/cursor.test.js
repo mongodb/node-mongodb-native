@@ -4321,6 +4321,7 @@ describe('Cursor', function () {
       return withCursorFromClient.bind(this)(
         {
           batchSize: 2,
+          collection: 'cursor0',
           docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
         },
         ({ cursor }) => {
@@ -4351,6 +4352,7 @@ describe('Cursor', function () {
       return withCursorFromClient.bind(this)(
         {
           batchSize: 5,
+          collection: 'cursor1',
           docs: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }]
         },
         ({ cursor }) => {
@@ -4381,6 +4383,7 @@ describe('Cursor', function () {
       return withCursorFromClient.bind(this)(
         {
           batchSize: 5,
+          collection: 'cursor2',
           docs: [{ a: 1 }]
         },
         ({ cursor }) => {
@@ -4414,6 +4417,7 @@ describe('Cursor', function () {
       return withCursorFromClient.bind(this)(
         {
           batchSize: 2,
+          collection: 'cursor3',
           docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
         },
         ({ cursor }) => {
@@ -4448,6 +4452,7 @@ describe('Cursor', function () {
       return withCursorFromClient.bind(this)(
         {
           batchSize: 2,
+          collection: 'cursor4',
           docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
         },
         ({ cursor }) => {
