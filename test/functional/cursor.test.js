@@ -4093,7 +4093,7 @@ describe('Cursor', function () {
     });
   });
 
-  const testStream = (config, _done) => {
+  const testTransformStream = (config, _done) => {
     const client = config.client;
     const configuration = config.configuration;
     const collectionName = config.collectionName;
