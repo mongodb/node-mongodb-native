@@ -72,9 +72,11 @@ function isDeep(t: Sort): t is [string, SortDirection][] {
 
 /** @internal */
 function deepToObject(t: [string, SortDirection][]): SortForCmd {
-  return t.reduce((acq, i) => {
-    return { ...acq, ...pairToObject(i) };
-  }, {});
+  const sortObject: SortForCmd = {};
+  for (const [name, value] of t) {
+    sortObject[name] = prepareDirection(value);
+  }
+  return sortObject;
 }
 
 /** @internal */
