@@ -1060,7 +1060,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Perform a simple find and return all the documents
-            return collection.findOne({ a: 2 }, { fields: { b: 1 } });
+            return collection.findOne({ a: 2 }, { projection: { b: 1 } });
           })
           .then(function (doc) {
             expect(doc.a).to.not.exist;

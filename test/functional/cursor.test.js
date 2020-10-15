@@ -1670,7 +1670,7 @@ describe('Cursor', function () {
           collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            collection.find({}, { fields: { x: 0 } }).toArray((err, items) => {
+            collection.find({}, { projection: { x: 0 } }).toArray((err, items) => {
               expect(err).to.not.exist;
               test.equal(1, items.length);
               test.equal(2, items[0].a);
@@ -2177,8 +2177,8 @@ describe('Cursor', function () {
             collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
-              // Create cursor with awaitdata, and timeout after the period specified
-              const cursor = collection.find({}, { tailable: true, awaitdata: true });
+              // Create cursor with awaitData, and timeout after the period specified
+              const cursor = collection.find({}, { tailable: true, awaitData: true });
               this.defer(() => cursor.close());
 
               // Execute each
@@ -2189,7 +2189,7 @@ describe('Cursor', function () {
 
                 if (err != null) {
                   // Even though cursor is exhausted, should not close session
-                  // unless cursor is manually closed, due to awaitdata / tailable
+                  // unless cursor is manually closed, due to awaitData / tailable
                   done();
                 }
               });
@@ -2221,8 +2221,8 @@ describe('Cursor', function () {
         db.createCollection('should_await_data_no_docs', options, (err, collection) => {
           expect(err).to.not.exist;
 
-          // Create cursor with awaitdata, and timeout after the period specified
-          const cursor = collection.find({}, { tailable: true, awaitdata: true });
+          // Create cursor with awaitData, and timeout after the period specified
+          const cursor = collection.find({}, { tailable: true, awaitData: true });
           this.defer(() => cursor.close());
 
           const rewind = cursor.rewind;
@@ -2266,7 +2266,7 @@ describe('Cursor', function () {
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             const cursor = collection.find({}, {});
             this.defer(() => cursor.close());
 
@@ -2275,7 +2275,7 @@ describe('Cursor', function () {
             cursor.each(err => {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
-                // unless cursor is manually closed, due to awaitdata / tailable
+                // unless cursor is manually closed, due to awaitData / tailable
                 done();
               } else {
                 cursor.kill();
@@ -2302,7 +2302,7 @@ describe('Cursor', function () {
         db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
             // should not timeout
-            collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
+            collection.find({}, {tailable:true, awaitData:false}).each(function(err, result) {
               test.ok(err != null);
             });
 
@@ -2338,8 +2338,8 @@ describe('Cursor', function () {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            // Create cursor with awaitdata, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitdata: true });
+            // Create cursor with awaitData, and timeout after the period specified
+            var cursor = collection.find({}, { tailable: true, awaitData: true });
             cursor.each(err => {
               if (err != null) {
                 // kill cursor b/c cursor is tailable / awaitable
@@ -3521,7 +3521,7 @@ describe('Cursor', function () {
             expect(err).to.not.exist;
 
             var s = new Date();
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection
               .find({})
               .addCursorFlag('tailable', true)
