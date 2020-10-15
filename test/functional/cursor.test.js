@@ -2619,6 +2619,25 @@ describe('Cursor', function () {
     }
   });
 
+  it('shouldSetReadConcern', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const cursor = db.collection('shouldSetReadConcern').find()
+        cursor.setReadConcern('available');
+        expect(cursor).to.have.nested.property('options.readConcern');
+        expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
+        expect(cursor.options.readConcern.level).to.equal('available');
+        client.close(done);
+      });
+    }
+  });
+
   it('shouldFailToSetReadPreferenceOnCursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run

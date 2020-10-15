@@ -22,6 +22,7 @@ import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
 import type { Document } from '../bson';
+import { ReadConcern, ReadConcernLike } from '../read_concern';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -749,24 +750,25 @@ export class Cursor<
     });
   }
 
-  /**
-   * Set the ReadPreference for the cursor.
-   *
-   * @param readPreference - The new read preference for the cursor.
-   */
+  /** Set the readConcern for the cursor. */
+  setReadConcern(readConcern: ReadConcernLike): this {
+    if (this.s.state !== CursorState.INIT) {
+      throw new MongoError('cannot change cursor readConcern after cursor has been accessed');
+    }
+    const rc = ReadConcern.fromOptions({ readConcern });
+    if (!rc) throw new TypeError('Invalid read concern: ' + readConcern);
+    this.options.readConcern = rc;
+    return this;
+  }
+
+  /** Set the readPreference for the cursor. */
   setReadPreference(readPreference: ReadPreferenceLike): this {
     if (this.s.state !== CursorState.INIT) {
       throw new MongoError('cannot change cursor readPreference after cursor has been accessed');
     }
-
-    if (readPreference instanceof ReadPreference) {
-      this.options.readPreference = readPreference;
-    } else if (typeof readPreference === 'string') {
-      this.options.readPreference = ReadPreference.fromString(readPreference);
-    } else {
-      throw new TypeError('Invalid read preference: ' + readPreference);
-    }
-
+    const rp = ReadPreference.fromOptions({ readPreference });
+    if (!rp) throw new TypeError('Invalid read preference: ' + readPreference);
+    this.options.readPreference = rp;
     return this;
   }
 
