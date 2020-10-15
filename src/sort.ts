@@ -81,16 +81,20 @@ function deepToObject(t: [string, SortDirection][]): SortForCmd {
 
 /** @internal */
 function stringsToObject(t: string[]): SortForCmd {
-  return t.reduce((acq, key) => {
-    return { ...acq, [key]: 1 };
-  }, {});
+  const sortObject: SortForCmd = {};
+  for (const key of t) {
+    sortObject[key] = 1;
+  }
+  return sortObject;
 }
 
 /** @internal */
-function validate(t: { [key: string]: SortDirection }): SortForCmd {
-  return Object.keys(t).reduce((acq, key) => {
-    return { ...acq, [key]: prepareDirection(t[key]) };
-  }, {});
+function objectToObject(t: { [key: string]: SortDirection }): SortForCmd {
+  const sortObject: SortForCmd = {};
+  for (const key in t) {
+    sortObject[key] = prepareDirection(t[key]);
+  }
+  return sortObject;
 }
 
 /** converts a Sort type into a type that is valid for the server (SortForCmd) */
@@ -105,6 +109,6 @@ export function formatSort(
   if (isPair(sort)) return pairToObject(sort);
   if (isDeep(sort)) return deepToObject(sort);
   if (Array.isArray(sort)) return stringsToObject(sort);
-  if (typeof sort === 'object') return validate(sort);
+  if (typeof sort === 'object') return objectToObject(sort);
   throw new Error(`Invalid sort format: ${JSON.stringify(sort)}`);
 }
