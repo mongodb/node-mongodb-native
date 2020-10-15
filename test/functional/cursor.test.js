@@ -4152,7 +4152,7 @@ describe('Cursor', function () {
     const config = {
       client: client,
       configuration: configuration,
-      collectionName: '-test-transform',
+      collectionName: 'stream-test-transform',
       transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
       expectedSet: new Set(expectedDocs)
     };
