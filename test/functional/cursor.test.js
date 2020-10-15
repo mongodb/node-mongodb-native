@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands } = require('./shared');
+const { assert: test, filterForCommands, withCursorFromClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -4311,5 +4311,167 @@ describe('Cursor', function () {
         });
       });
     });
+  });
+
+  it('should iterate cursor (with a batch size of 2)', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+    },
+    test: function (done) {
+      return withCursorFromClient.bind(this)(
+        {
+          batchSize: 2,
+          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
+        },
+        ({ cursor }) => {
+          // Execute next
+          return cursor._next((nextCursorErr, nextCursorD) => {
+            expect(nextCursorErr).to.not.exist;
+            expect(nextCursorD.a).to.equal(1);
+            expect(cursor.bufferedCount()).to.equal(1);
+            // Kill the cursor
+            return cursor._next((killCursorErr, killCursorD) => {
+              expect(killCursorErr).to.not.exist;
+              expect(killCursorD.a).to.equal(2);
+              expect(cursor.bufferedCount()).to.equal(0);
+              // Destroy the server connection
+              return done();
+            });
+          });
+        }
+      );
+    }
+  });
+
+  it('should iterate cursor but readBuffered', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+    },
+    test: function (done) {
+      return withCursorFromClient.bind(this)(
+        {
+          batchSize: 5,
+          docs: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }]
+        },
+        ({ cursor }) => {
+          // Execute next
+          return cursor._next((nextCursorErr, nextCursorD) => {
+            expect(nextCursorErr).to.not.exist;
+            expect(nextCursorD.a).to.equal(1);
+            expect(cursor.bufferedCount()).to.equal(4);
+            // Read the buffered Count
+            cursor.readBufferedDocuments(cursor.bufferedCount());
+            // Get the next item
+            return cursor._next((secondCursorErr, secondCursorD) => {
+              expect(secondCursorErr).to.not.exist;
+              expect(secondCursorD).to.not.exist;
+              return done();
+            });
+          });
+        }
+      );
+    }
+  });
+
+  it('should callback exhausted cursor with error', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+    },
+    test: function (done) {
+      return withCursorFromClient.bind(this)(
+        {
+          batchSize: 5,
+          docs: [{ a: 1 }]
+        },
+        ({ cursor }) => {
+          // Execute next
+          return cursor._next((nextCursorErr, nextCursorD) => {
+            expect(nextCursorErr).to.not.exist;
+            expect(nextCursorD.a).to.equal(1);
+            // Get the next item
+            return cursor._next((secondCursorErr, secondCursorD) => {
+              expect(secondCursorErr).to.not.exist;
+              expect(secondCursorD).to.not.exist;
+              return cursor._next((thirdCursorErr, thirdCursorD) => {
+                expect(thirdCursorErr).to.be.ok;
+                expect(thirdCursorD).to.be.undefined;
+                // Destroy the server connection
+                return done();
+              });
+            });
+          });
+        }
+      );
+    }
+  });
+
+  it('should force a getMore call to happen', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+    },
+
+    test: function (done) {
+      return withCursorFromClient.bind(this)(
+        {
+          batchSize: 2,
+          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
+        },
+        ({ cursor }) => {
+          // Execute next
+          return cursor._next((nextCursorErr, nextCursorD) => {
+            expect(nextCursorErr).to.not.exist;
+            expect(nextCursorD.a).to.equal(1);
+
+            // Get the next item
+            return cursor._next((secondCursorErr, secondCursorD) => {
+              expect(secondCursorErr).to.not.exist;
+              expect(secondCursorD.a).to.equal(2);
+
+              return cursor._next((thirdCursorErr, thirdCursorD) => {
+                expect(thirdCursorErr).to.not.exist;
+                expect(thirdCursorD.a).to.equal(3);
+                // Destroy the server connection
+                return done();
+              });
+            });
+          });
+        }
+      );
+    }
+  });
+
+  it('should force a getMore call to happen then call killCursor', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+    },
+    test: function (done) {
+      return withCursorFromClient.bind(this)(
+        {
+          batchSize: 2,
+          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
+        },
+        ({ cursor }) => {
+          return cursor._next((nextCursorErr, nextCursorD) => {
+            expect(nextCursorErr).to.not.exist;
+            expect(nextCursorD.a).to.equal(1);
+            // Get the next item
+            return cursor._next((secondCursorErr, secondCursorD) => {
+              expect(secondCursorErr).to.not.exist;
+              expect(secondCursorD.a).to.equal(2);
+              // Kill cursor
+              return cursor.kill(() => {
+                // Should error out
+                return cursor._next((thirdCursorErr, thirdCursorD) => {
+                  expect(thirdCursorErr).to.not.exist;
+                  expect(thirdCursorD).to.not.exist;
+                  // Destroy the server connection
+                  return done();
+                });
+              });
+            });
+          });
+        }
+      );
+    }
   });
 });

@@ -276,6 +276,116 @@ class APMEventCollector {
   }
 }
 
+/**
+ * makes documents can take an array of documents or a count / shape and create
+ * then progamatically create documents
+ *
+ * @example
+ * docMaker.bind(this)({ count: 10, shape: (x) => ({x}) })
+ *
+ * @example
+ * docMaker.bind(this)([{a:1}])
+ */
+function docMaker(collection, docs, callback) {
+  if (Array.isArray(docs)) {
+    return collection.insertMany(docs, this.configuration.writeConcernMax(), callback);
+  } else if (docs.count && docs.shape) {
+    var total = docs.count;
+    for (var i = 0; i < docs.count; i++) {
+      collection.insertOne(docs.shape(i), this.configuration.writeConcernMax(), e => {
+        expect(e).to.not.exist;
+        total = total - 1;
+        if (total === 0) callback();
+      });
+    }
+  } else {
+    return callback();
+  }
+}
+
+// TODO: [THOMAS] Will remove just wanted to ensure that we dont want to test cursor on topology / server directly
+// function withCursorFromServer(options, callback) {
+//   const defaultOptions = {
+//     docs: [],
+//     database: 'integration_tests',
+//     collection: 'cursor',
+//     readPreference: 'primary',
+//     writeConcern: { w: 1 },
+//     ordered: true,
+//     batchSize: undefined
+//   };
+//   const opts = { ...defaultOptions, ...options };
+//   if (opts.collection === defaultOptions.collection) {
+//     throw new Error('please set a collection');
+//   }
+//   opts.ns = `${opts.collection}.${opts.database}`;
+//   const topology = this.configuration.newTopology();
+//   return topology.connect(err => {
+//     expect(err).to.not.exist;
+//     this.defer(() => topology.close());
+//     return topology.selectServer(opts.readPreference, (err, server) => {
+//       this.defer(() => server.destroy());
+//       expect(err).to.not.exist;
+//       const { ns, docs, writeConcern, ordered, batchSize } = opts;
+//       return server.insert(ns, docs, { writeConcern, ordered }, (err, results) => {
+//         expect(err).to.not.exist;
+//         expect(results.n).to.equal(docs.length);
+//         const cursor = topology.cursor(ns, {
+//           find: ns.split('.')[1],
+//           filter: {},
+//           batchSize: batchSize || docs.length
+//         });
+//         return callback(cursor);
+//       });
+//     });
+//   });
+// }
+
+function withCursorFromClient(optionsOrCallback, callback) {
+  const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
+  callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
+  const defaultOptions = {
+    // programatically generated docs
+    // docs: { count: 0, shape: (i) => ({ x: i }) },
+    docs: [],
+    collection: 'cursor',
+    readPreference: 'primary',
+    writeConcern: { w: 1 },
+    ordered: true,
+    batchSize: undefined,
+    monitorCommands: undefined,
+    query: {}
+  };
+  const events = [];
+  const opts = { ...defaultOptions, ...options };
+  const configuration = this.configuration;
+  const monitorCommands = Boolean(opts.monitorCommands);
+  const client = configuration.newClient(configuration.writeConcernMax(), {
+    poolSize: 1,
+    monitorCommands
+  });
+  if (opts.monitorCommands) {
+    client.on('commandStarted', filterForCommands(opts.monitorCommands, events));
+  }
+  return client.connect((err, client) => {
+    expect(err).to.not.exist;
+    this.defer(() => client.close());
+    const db = client.db(configuration.db);
+    return db.createCollection(opts.collection, (err, collection) => {
+      expect(err).to.not.exist;
+      return docMaker.bind(this)(collection, opts.docs, () => {
+        expect(err).to.not.exist;
+        const cursor = collection.find(opts.query);
+        this.defer(() => cursor.close());
+        if (typeof opts.batchSize !== 'undefined') {
+          cursor.batchSize(opts.batchSize);
+        }
+        return callback({ cursor, collection, db, client, events });
+      });
+    });
+  });
+}
+
 module.exports = {
   assert,
   delay,
@@ -287,5 +397,7 @@ module.exports = {
   withClient,
   withMonitoredClient,
   withCursor,
-  APMEventCollector
+  APMEventCollector,
+  docMaker,
+  withCursorFromClient
 };
