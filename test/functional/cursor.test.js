@@ -2852,7 +2852,7 @@ describe('Cursor', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
-        const cursor = db.collection('shouldSetReadConcern').find()
+        const cursor = db.collection('shouldSetReadConcern').find();
         cursor.setReadConcern('available');
         expect(cursor).to.have.nested.property('options.readConcern');
         expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
