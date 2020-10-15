@@ -317,7 +317,7 @@ function runTestSuiteTest(configuration, spec, context) {
     let session0, session1;
     let savedSessionData;
 
-    if (context.useSessions) {
+    if (spec && spec.sessionOptions && Object.keys(spec.sessionOptions).length) {
       try {
         session0 = client.startSession(
           Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
