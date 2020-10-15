@@ -34,7 +34,7 @@ class TestRunnerContext {
     const d = { password: undefined, user: undefined, useSessions: true, skipPrepareDatabase: false };
     opts = Object.assign({}, d, opts || {});
     this.skipPrepareDatabase = opts.skipPrepareDatabase;
-    this.useSessions = oprs.useSessions;
+    this.useSessions = opts.useSessions;
     this.user = opts.user;
     this.password = opts.password;
     this.sharedClient = null;
