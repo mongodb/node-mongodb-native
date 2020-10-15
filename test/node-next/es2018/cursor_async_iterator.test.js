@@ -90,7 +90,7 @@ describe('Cursor Async Iterator Tests', function () {
       }
     });
   });
-  context.only('custom promise library', () => {
+  context('custom promise library', () => {
     let client, collection, promiseSpy;
     before(async function () {
       class CustomPromise extends Promise {}

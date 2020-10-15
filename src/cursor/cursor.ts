@@ -982,16 +982,7 @@ export class Cursor<
         if (this.isClosed()) {
           return Promise.resolve({ value: null, done: true });
         }
-        return Promise.resolve()
-          .then(() => {
-            return this.next();
-          })
-          .then(value => {
-            if (!value) {
-              return this.close().then(() => ({ value, done: true }));
-            }
-            return { value, done: false };
-          });
+        return this.next().then(value => ({ value, done: value === null }));
       }
     };
   }
