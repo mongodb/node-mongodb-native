@@ -69,21 +69,6 @@ export interface FindOptions extends QueryOptions, CommandOperationOptions {
   allowPartialResults?: boolean;
   /** Determines whether to return the record identifier for each document. If true, adds a field $recordId to the returned documents. */
   showRecordId?: boolean;
-
-  /** @deprecated Use `awaitData` instead */
-  awaitdata?: boolean;
-  /** @deprecated Use `projection` instead */
-  fields?: Document;
-  /** @deprecated Limit the number of items to scan. */
-  maxScan?: number;
-  /** @deprecated An internal command for replaying a replica set’s oplog. */
-  oplogReplay?: boolean;
-  /** @deprecated Snapshot query. */
-  snapshot?: boolean;
-  /** @deprecated Show disk location of results. */
-  showDiskLoc?: boolean;
-  /** @deprecated Use `allowPartialResults` instead */
-  partial?: boolean;
 }
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
@@ -156,8 +141,8 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       findCommand.sort = formattedOrderClause(options.sort);
     }
 
-    if (options.projection || options.fields) {
-      let projection = options.projection || options.fields;
+    if (options.projection) {
+      let projection = options.projection;
       if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
         projection = projection.length
           ? projection.reduce((result, field) => {
@@ -222,10 +207,6 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       findCommand.tailable = options.tailable;
     }
 
-    if (typeof options.oplogReplay === 'boolean') {
-      findCommand.oplogReplay = options.oplogReplay;
-    }
-
     if (typeof options.timeout === 'boolean') {
       findCommand.noCursorTimeout = options.timeout;
     } else if (typeof options.noCursorTimeout === 'boolean') {
@@ -234,14 +215,10 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
 
     if (typeof options.awaitData === 'boolean') {
       findCommand.awaitData = options.awaitData;
-    } else if (typeof options.awaitdata === 'boolean') {
-      findCommand.awaitData = options.awaitdata;
     }
 
     if (typeof options.allowPartialResults === 'boolean') {
       findCommand.allowPartialResults = options.allowPartialResults;
-    } else if (typeof options.partial === 'boolean') {
-      findCommand.allowPartialResults = options.partial;
     }
 
     if (options.collation) {
@@ -260,14 +237,6 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
 
     if (typeof options.allowDiskUse === 'boolean') {
       findCommand.allowDiskUse = options.allowDiskUse;
-    }
-
-    if (typeof options.snapshot === 'boolean') {
-      findCommand.snapshot = options.snapshot;
-    }
-
-    if (typeof options.showDiskLoc === 'boolean') {
-      findCommand.showDiskLoc = options.showDiskLoc;
     }
 
     // TODO: use `MongoDBNamespace` through and through
