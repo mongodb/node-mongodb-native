@@ -4369,9 +4369,15 @@ describe('Cursor', function () {
     it('formatSort - multi key', () => {
       expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
       expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
-      expect(formatSort([['alpha', 'asc'], ['beta', 'ascending']])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(
+        formatSort([
+          ['alpha', 'asc'],
+          ['beta', 'ascending']
+        ])
+      ).to.deep.equal({ alpha: 1, beta: 1 });
       expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
-        alpha: { $meta: 'hi' }, beta: 1
+        alpha: { $meta: 'hi' },
+        beta: 1
       });
     });
   });
