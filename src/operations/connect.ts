@@ -199,7 +199,7 @@ export function connect(
 
   // Has a connection already been established?
   if (mongoClient.topology && mongoClient.topology.isConnected()) {
-    throw new Error(`'connect' cannot be called when already connected`);
+    throw new MongoError(`'connect' cannot be called when already connected`);
   }
 
   let didRequestAuthentication = false;
