@@ -7,7 +7,7 @@ describe('Tailable cursor tests', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should correctly perform awaitdata', {
+  it('should correctly perform awaitData', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
