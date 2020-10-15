@@ -4347,11 +4347,12 @@ describe('Cursor', function () {
     it('should use cursor.sort shallow array', cursorSort(['alpha', 1], { alpha: 1 }));
     it('should use cursor.sort deep array', cursorSort([['alpha', 1]], { alpha: 1 }));
 
-    it('formatSort', () => {
+    it('formatSort - one key', () => {
       expect(formatSort('alpha')).to.deep.equal({ alpha: 1 });
       expect(formatSort(['alpha'])).to.deep.equal({ alpha: 1 });
       expect(formatSort('alpha', 1)).to.deep.equal({ alpha: 1 });
       expect(formatSort('alpha', 'asc')).to.deep.equal({ alpha: 1 });
+      expect(formatSort([['alpha', 'asc']])).to.deep.equal({ alpha: 1 });
       expect(formatSort('alpha', 'ascending')).to.deep.equal({ alpha: 1 });
       expect(formatSort({ alpha: 1 })).to.deep.equal({ alpha: 1 });
       expect(formatSort('beta')).to.deep.equal({ beta: 1 });
@@ -4362,6 +4363,15 @@ describe('Cursor', function () {
       expect(formatSort({ beta: -1 })).to.deep.equal({ beta: -1 });
       expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal({
         alpha: { $meta: 'hi' }
+      });
+    });
+
+    it('formatSort - multi key', () => {
+      expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort([['alpha', 'asc'], ['beta', 'ascending']])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
+        alpha: { $meta: 'hi' }, beta: 1
       });
     });
   });
