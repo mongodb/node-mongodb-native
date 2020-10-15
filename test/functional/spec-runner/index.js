@@ -167,7 +167,7 @@ function prepareDatabaseForSuite(suite, context) {
 
   const db = context.sharedClient.db(context.dbName);
 
-  if (context.skipInit) return Promise.resolve();
+  if (context.skipPrepareDatabase) return Promise.resolve();
 
   const setupPromise = db
     .admin()

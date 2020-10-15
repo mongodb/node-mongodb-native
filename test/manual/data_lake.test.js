@@ -9,8 +9,7 @@ const { withClient } = require('../functional/shared');
 describe('Atlas Data Lake', function () {
   context('spec tests', function () {
     const testContext = new TestRunnerContext({
-      skipInit: true,
-      useSessions: false,
+      skipPrepareDatabase: true,
       user: 'mhuser',
       password: 'pencil'
     });
