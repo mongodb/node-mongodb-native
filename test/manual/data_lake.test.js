@@ -10,6 +10,7 @@ describe('Atlas Data Lake', function () {
   context('spec tests', function () {
     const testContext = new TestRunnerContext({
       skipPrepareDatabase: true,
+      useSessions: false,
       user: 'mhuser',
       password: 'pencil'
     });
