@@ -301,12 +301,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(this.s.topology, new InsertOneOperation(this, doc, options), callback);
   }
 
@@ -428,12 +422,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new UpdateOneOperation(this, filter, update, options),
@@ -471,12 +459,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new ReplaceOneOperation(this, filter, replacement, options),
@@ -510,12 +492,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new UpdateManyOperation(this, filter, update, options),
@@ -541,12 +517,6 @@ export class Collection implements OperationParent {
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return executeOperation(
       this.s.topology,
@@ -585,12 +555,6 @@ export class Collection implements OperationParent {
     }
 
     options = Object.assign({}, options);
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return executeOperation(
       this.s.topology,

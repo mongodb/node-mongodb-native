@@ -65,7 +65,7 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
   execute(server: Server, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
-    const options = this.options;
+    const options = Object.assign({}, this.options, this.bsonOptions);
 
     if (Array.isArray(doc)) {
       return callback(

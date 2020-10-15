@@ -69,3 +69,21 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     raw
   };
 }
+
+// TODO: naming
+// TODO: testing
+export function inheritOrDefaultBSONSerializableOptions(
+  options?: BSONSerializeOptions,
+  parentOptions?: BSONSerializeOptions
+): BSONSerializeOptions {
+  // Merge the BSONSerializeOptions, preferring options over parentOptions, and substituting a
+  // default for values not set.
+  // Note that we exclude fieldsAsRaw and serializeFunctions because I was not sure about their usage
+  return {
+    raw: options?.raw ?? parentOptions?.raw ?? false,
+    promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,
+    promoteValues: options?.promoteValues ?? parentOptions?.promoteValues ?? true,
+    promoteBuffers: options?.promoteBuffers ?? parentOptions?.promoteBuffers ?? false,
+    ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false
+  };
+}

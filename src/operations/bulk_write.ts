@@ -1,5 +1,6 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { OperationBase } from './operation';
+import { inheritOrDefaultBSONSerializableOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type {
@@ -24,18 +25,15 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
 
     this.collection = collection;
     this.operations = operations;
+
+    // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
+    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
-
-    // Add ignoreUndefined
-    if (coll.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = coll.s.options.ignoreUndefined;
-    }
+    const options = this.options;
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
@@ -53,7 +51,7 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     }
 
     // Final options for retryable writes and write concern
-    let finalOptions = Object.assign({}, options);
+    let finalOptions = Object.assign({}, options, this.bsonOptions);
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
     finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
