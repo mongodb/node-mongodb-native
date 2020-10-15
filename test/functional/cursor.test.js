@@ -9,6 +9,7 @@ const Buffer = require('safe-buffer').Buffer;
 const Writable = require('stream').Writable;
 
 const core = require('../../lib/core');
+const ReadConcern = require('../../lib/read_concern');
 const ReadPreference = core.ReadPreference;
 
 describe('Cursor', function() {
@@ -2835,6 +2836,28 @@ describe('Cursor', function() {
               client.close(done);
             });
         });
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('shouldSetReadConcern', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const cursor = db.collection('shouldSetReadConcern').find()
+        cursor.setReadConcern('available');
+        expect(cursor).to.have.nested.property('options.readConcern');
+        expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
+        expect(cursor.options.readConcern.level).to.equal('available');
+        client.close(done);
       });
     }
   });
