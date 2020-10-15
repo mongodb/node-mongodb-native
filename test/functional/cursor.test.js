@@ -4176,7 +4176,7 @@ describe('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testStream(config, done);
+    testTransformStream(config, done);
   });
 
   it.skip('should apply parent read preference to count command', function (done) {
