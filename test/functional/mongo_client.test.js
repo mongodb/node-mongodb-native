@@ -3,6 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { ReadPreference } = require('../../src');
 const { Db } = require('../../src/db');
 const expect = require('chai').expect;
 
@@ -300,5 +301,11 @@ describe('MongoClient', function () {
           throw err;
         }
       });
+  });
+
+  it('should cache a resolved readPreference from options', function () {
+    const client = this.configuration.newClient({}, { readPreference: ReadPreference.SECONDARY });
+    expect(client.readPreference).to.be.instanceOf(ReadPreference);
+    expect(client.readPreference).to.have.property('mode', ReadPreference.SECONDARY);
   });
 });

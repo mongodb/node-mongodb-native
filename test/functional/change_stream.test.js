@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { Transform } = require('stream');
+const { Transform, PassThrough } = require('stream');
 const { MongoNetworkError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
@@ -29,13 +29,15 @@ function withChangeStream(dbName, collectionName, callback) {
 
   return withClient((client, done) => {
     const db = client.db(dbName);
-    db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
-      if (err) return done(err);
-      withCursor(
-        collection.watch(),
-        (cursor, done) => callback(collection, cursor, done),
-        err => collection.drop(dropErr => done(err || dropErr))
-      );
+    db.dropCollection(collectionName, () => {
+      db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
+        if (err) return done(err);
+        withCursor(
+          collection.watch(),
+          (cursor, done) => callback(collection, cursor, done),
+          err => collection.drop(dropErr => done(err || dropErr))
+        );
+      });
     });
   });
 }
@@ -61,7 +63,18 @@ function triggerResumableError(changeStream, delay, onClose) {
   });
 
   function triggerError() {
-    changeStream.cursor.emit('error', new MongoNetworkError('fake error'));
+    const cursorStream = changeStream.cursorStream;
+    if (cursorStream) {
+      cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
+      return;
+    }
+
+    const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
+      callback(new MongoNetworkError('error triggered from test'));
+      nextStub.restore();
+    });
+
+    changeStream.next(() => {});
   }
 
   if (delay != null) {
@@ -200,10 +213,10 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         changeStream.on('change', () => {
-          const internalCursor = changeStream.cursor;
-          expect(internalCursor.listenerCount('data')).to.equal(1);
+          expect(changeStream.cursorStream.listenerCount('data')).to.equal(1);
           changeStream.close(err => {
-            expect(internalCursor.listenerCount('data')).to.equal(0);
+            expect(changeStream.cursorStream).to.not.exist;
+            expect(err).to.not.exist;
             close(err);
           });
         });
@@ -1441,6 +1454,7 @@ describe('Change Streams', function () {
     }
   });
 
+  // TODO: resuming currently broken on piped change streams, fix as part of NODE-2172
   it.skip('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
@@ -1611,7 +1625,8 @@ describe('Change Streams', function () {
         this.defer(() => changeStream.close());
 
         // Make a stream transforming to JSON and piping to the file
-        const basicStream = changeStream.pipe(
+        const stream = changeStream.stream();
+        const basicStream = stream.pipe(
           new Transform({
             transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
             objectMode: true
@@ -1624,7 +1639,7 @@ describe('Change Streams', function () {
           dataEmitted += data.toString();
 
           // Work around poor compatibility with crypto cipher
-          changeStream.cursor.emit('end');
+          stream.emit('end');
         });
 
         pipedStream.on('end', function () {
@@ -1838,7 +1853,6 @@ describe('Change Streams', function () {
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      const closeSpy = sinon.spy();
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
@@ -1850,18 +1864,19 @@ describe('Change Streams', function () {
         // This will cause an error because the _id will be projected out, which causes the following error:
         // "A change stream document has been received that lacks a resume token (_id)."
         const changeStream = coll.watch([{ $project: { _id: false } }]);
-        changeStream.on('close', closeSpy);
         changeStream.on('change', changeDoc => {
           expect(changeDoc).to.be.null;
         });
 
+        let errored = false;
         changeStream.on('error', err => {
           expect(err).to.exist;
+          errored = true;
+        });
 
-          changeStream.close(() => {
-            expect(closeSpy).property('calledOnce').to.be.true;
-            done();
-          });
+        changeStream.once('close', () => {
+          expect(errored).to.be.true;
+          done();
         });
 
         // Trigger the first database event
@@ -2656,6 +2671,7 @@ describe('Change Streams', function () {
             operationType: 'insert',
             fullDocument: { x: 2 }
           });
+
           expect(events).to.be.an('array').with.lengthOf(3);
           expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
           expect(events[1]).to.equal('error');
@@ -2664,8 +2680,10 @@ describe('Change Streams', function () {
         });
 
         waitForStarted(changeStream, () => {
-          triggerResumableError(changeStream, () => events.push('error'));
-          this.defer(coll.insertOne({ x: 2 }, { w: 'majority', j: true }));
+          triggerResumableError(changeStream, () => {
+            events.push('error');
+            coll.insertOne({ x: 2 }, { w: 'majority', j: true });
+          });
         });
       }
     });
@@ -2779,6 +2797,38 @@ describe('Change Stream Resume Error Tests', function () {
           expect(change).to.containSubset({
             operationType: 'insert',
             fullDocument: { a: 42 }
+          });
+        });
+      });
+    })
+  });
+
+  // TODO: resuming currently broken on piped change streams, unskip as part of NODE-2172
+  it.skip('should continue piping changes after a resumable error', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    test: withChangeStream((collection, changeStream, done) => {
+      const d = new PassThrough({ objectMode: true });
+      const bucket = [];
+      d.on('data', data => {
+        bucket.push(data.fullDocument.x);
+        console.log({ bucket });
+        if (bucket.length === 2) {
+          expect(bucket[0]).to.be(1);
+          expect(bucket[0]).to.be(2);
+          done();
+        }
+      });
+      changeStream.stream().pipe(d);
+      waitForStarted(changeStream, () => {
+        collection.insertOne({ x: 1 }, (err, result) => {
+          expect(err).to.not.exist;
+          expect(result).to.exist;
+          triggerResumableError(changeStream, 250, () => {
+            console.log('triggered error');
+            collection.insertOne({ x: 2 }, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+            });
           });
         });
       });

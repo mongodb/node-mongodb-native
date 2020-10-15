@@ -2,7 +2,6 @@ import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoDBNamespace, Callback } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
-import { Readable } from 'stream';
 import { MongoError, MongoNetworkError } from '../error';
 import { Long, Document, BSONSerializeOptions } from '../bson';
 import type { OperationBase, Hint } from '../operations/operation';
@@ -13,6 +12,7 @@ import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { ReadConcern } from '../read_concern';
+import { EventEmitter } from 'events';
 
 /** @public */
 export interface DocumentTransforms {
@@ -43,7 +43,7 @@ export interface CursorCloseOptions {
 }
 
 /** @public */
-export interface StreamOptions {
+export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
@@ -83,7 +83,7 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 export class CoreCursor<
   O extends OperationBase = OperationBase,
   T extends CoreCursorOptions = CoreCursorOptions
-> extends Readable {
+> extends EventEmitter {
   operation: O;
   server?: Server;
   ns: string;
@@ -109,7 +109,6 @@ export class CoreCursor<
   operationTime?: OperationTime;
   reconnect?: boolean;
   session?: ClientSession;
-  streamOptions?: StreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
   tailable: boolean;
@@ -147,8 +146,7 @@ export class CoreCursor<
    * @param options - Optional settings for the cursor
    */
   constructor(topology: Topology, operation: O, options: T = {} as T) {
-    super({ objectMode: true });
-
+    super();
     const cmd = operation.cmd ? operation.cmd : {};
 
     // Set local values
@@ -344,50 +342,6 @@ export class CoreCursor<
       this.tailable = false;
       this.awaitData = false;
     }
-  }
-
-  // Internal methods
-  /** @internal */
-  _read(): void {
-    if ((this.s && this.s.state === CursorState.CLOSED) || this.isDead()) {
-      this.push(null);
-      return;
-    }
-
-    // Get the next item
-    this._next((err, result) => {
-      if (err) {
-        if (this.listeners(CoreCursor.ERROR) && this.listeners(CoreCursor.ERROR).length > 0) {
-          this.emit(CoreCursor.ERROR, err);
-        }
-        if (!this.isDead()) this.close();
-
-        // Emit end event
-        this.emit(CoreCursor.END);
-        this.emit(CoreCursor.FINISH);
-        return;
-      }
-
-      // If we provided a transformation method
-      if (
-        this.streamOptions &&
-        typeof this.streamOptions.transform === 'function' &&
-        result != null
-      ) {
-        this.push(this.streamOptions.transform(result));
-        return;
-      }
-
-      // Return the result
-      this.push(result);
-
-      if (result === null && this.isDead()) {
-        this.once(CoreCursor.END, () => {
-          this.close();
-          this.emit(CoreCursor.FINISH);
-        });
-      }
-    });
   }
 
   close(): void;
