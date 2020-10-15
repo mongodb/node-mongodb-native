@@ -31,7 +31,12 @@ class Thread {
 
 class TestRunnerContext {
   constructor(opts) {
-    const d = { password: undefined, user: undefined, useSessions: true, skipPrepareDatabase: false };
+    const d = {
+      password: undefined,
+      user: undefined,
+      useSessions: true,
+      skipPrepareDatabase: false
+    };
     opts = Object.assign({}, d, opts || {});
     this.skipPrepareDatabase = opts.skipPrepareDatabase;
     this.useSessions = opts.useSessions;
