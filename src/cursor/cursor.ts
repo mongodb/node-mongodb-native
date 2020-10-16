@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Transform, PassThrough, Readable } from 'stream';
-
+import { deprecate } from 'util';
 import { Long, Document, BSONSerializeOptions } from '../bson';
 import { MongoError, MongoNetworkError, AnyError } from '../error';
 import { Logger } from '../logger';
@@ -272,7 +272,6 @@ export class CursorStream extends Readable {
  * ```js
  * const docs = await collection.find({})
  *   .maxTimeMS(1000)
- *   .maxScan(100)
  *   .skip(1)
  *   .toArray()
  * ```
@@ -833,7 +832,6 @@ export class Cursor<
    * Set a node.js specific cursor option
    *
    * @param field - The cursor option to set 'numberOfRetries' | 'tailableRetryInterval'.
-   *
    * @param value - The field value.
    */
   setCursorOption(field: typeof FIELDS[number], value: number): this {
@@ -1704,3 +1702,6 @@ function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document
 
   return { limit, skip, batchSize };
 }
+
+// deprecated methods
+deprecate(Cursor.prototype.each, 'Cursor.each is deprecated. Use Cursor.forEach instead.');

@@ -1679,7 +1679,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
-            collection.findOne({ a: 2 }, { fields: { b: 1 } }, function (err, doc) {
+            collection.findOne({ a: 2 }, { projection: { b: 1 } }, function (err, doc) {
               expect(err).to.not.exist;
               expect(doc.a).to.not.exist;
               test.equal(2, doc.b);
