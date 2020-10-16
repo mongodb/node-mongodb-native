@@ -2843,7 +2843,7 @@ describe('Cursor', function() {
   /**
    * @ignore
    */
-  it('shouldSetReadConcern', {
+  it('should allow setting the readConcern through a builder method', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
