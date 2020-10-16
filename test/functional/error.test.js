@@ -90,7 +90,7 @@ describe('Errors', function () {
       const c = db.collection('test_error_object_should_include_message');
       c.insertOne({ a: 2, b: 5 }, { w: 1 }, err => {
         expect(err).to.not.exist;
-        c.findOne({ a: 2 }, { fields: { a: 1, b: 0 } }, err => {
+        c.findOne({ a: 2 }, { projection: { a: 1, b: 0 } }, err => {
           expect(PROJECTION_ERRORS).to.include(err.errmsg);
           done();
         });
@@ -103,7 +103,7 @@ describe('Errors', function () {
     test: function (done) {
       const db = client.db(this.configuration.db);
       const c = db.collection('test_error_object_should_include_message');
-      c.findOne({}, { fields: { a: 1, b: 0 } }, err => {
+      c.findOne({}, { projection: { a: 1, b: 0 } }, err => {
         expect(PROJECTION_ERRORS).to.include(err.errmsg);
         done();
       });

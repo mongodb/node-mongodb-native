@@ -51,13 +51,12 @@ describe('Response', function () {
         const cursor = client.cursor('test.test', { find: 'test' });
 
         // Execute next
-        cursor._next(function (err) {
+        cursor.next(function (err) {
           expect(err).to.exist;
           expect(err).to.be.instanceof(MongoError);
           expect(err.message).to.equal(errdoc.errmsg);
 
-          client.destroy();
-          done();
+          client.close(done);
         });
       });
       client.connect();

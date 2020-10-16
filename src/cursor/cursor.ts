@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
-import { Transform, PassThrough, Readable } from 'stream';
-
+import { Readable } from 'stream';
+import { deprecate } from 'util';
 import { Long, Document, BSONSerializeOptions } from '../bson';
 import { MongoError, MongoNetworkError, AnyError } from '../error';
 import { Logger } from '../logger';
 import { executeOperation } from '../operations/execute_operation';
-import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation, CountOptions } from '../operations/count';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
@@ -26,6 +25,8 @@ import type { Hint, OperationBase } from '../operations/operation';
 import type { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+
+const kCursor = Symbol('cursor');
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -52,7 +53,7 @@ export interface DocumentTransforms {
 }
 
 /** @internal */
-export interface CoreCursorPrivate {
+interface CursorPrivate {
   /** Transforms functions */
   transforms?: DocumentTransforms;
   numberOfRetries: number;
@@ -64,9 +65,6 @@ export interface CoreCursorPrivate {
   state: CursorState;
   readConcern?: ReadConcern;
 }
-
-/** @internal */
-export type CursorPrivate = CoreCursorPrivate;
 
 /** @public Possible states for a cursor */
 export enum CursorState {
@@ -96,7 +94,22 @@ export interface CoreCursorOptions extends CommandOperationOptions {
 }
 
 /** @public */
-export interface CursorOptions extends CoreCursorOptions {
+export interface CursorOptions extends CommandOperationOptions {
+  noCursorTimeout?: boolean;
+  tailable?: boolean;
+  awaitData?: boolean;
+  /** @deprecated Use `awaitData` instead */
+  awaitdata?: boolean;
+  raw?: boolean;
+  hint?: Hint;
+  limit?: number;
+  skip?: number;
+  /** The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/| find command documentation} and {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
+  batchSize?: number;
+  /** Initial documents list for cursor */
+  documents?: Document[];
+  /** Transform function */
+  transforms?: DocumentTransforms;
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
@@ -108,48 +121,18 @@ export interface CursorOptions extends CoreCursorOptions {
 }
 
 /** @public */
-export interface StreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
-}
-
-/** @public */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
 }
 
-/** @internal */
-export interface InternalCursorState extends BSONSerializeOptions {
-  postBatchResumeToken?: ResumeToken;
-  batchSize: number;
-  cmd: Document;
-  currentLimit: number;
-  cursorId?: Long;
-  lastCursorId?: Long;
-  cursorIndex: number;
-  dead: boolean;
-  killed: boolean;
-  init: boolean;
-  notified: boolean;
-  documents: Document[];
-  limit: number;
-  operationTime?: OperationTime;
-  reconnect?: boolean;
-  session?: ClientSession;
-  skip: number;
-  streamOptions?: StreamOptions;
-  transforms?: DocumentTransforms;
-  raw?: boolean;
-}
-
-const kCursor = Symbol('cursor');
-
+/** @public */
 export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
 
+/** @public */
 export class CursorStream extends Readable {
   [kCursor]: Cursor;
   options: CursorStreamOptions;
@@ -192,7 +175,7 @@ export class CursorStream extends Readable {
     }
 
     // Get the next item
-    cursor._next((err, result) => {
+    nextFunction(cursor, (err, result) => {
       if (err) {
         if (cursor.s && cursor.s.state === CursorState.CLOSED) return;
         if (!cursor.isDead()) this.emit(CursorStream.ERROR, err);
@@ -272,7 +255,6 @@ export class CursorStream extends Readable {
  * ```js
  * const docs = await collection.find({})
  *   .maxTimeMS(1000)
- *   .maxScan(100)
  *   .skip(1)
  *   .toArray()
  * ```
@@ -307,7 +289,7 @@ export class Cursor<
   operationTime?: OperationTime;
   reconnect?: boolean;
   session?: ClientSession;
-  streamOptions?: StreamOptions;
+  streamOptions?: CursorStreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
   tailable: boolean;
@@ -347,7 +329,7 @@ export class Cursor<
     this.options = this.operation.options as T;
     this.topology = topology;
 
-    const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);
+    const { limit, skip } = getLimitSkipBatchSizeDefaults(options, cmd);
 
     let cursorId = undefined;
     let lastCursorId = undefined;
@@ -384,7 +366,6 @@ export class Cursor<
     // get rid of these?
     this._limit = limit;
     this._skip = skip;
-    this._batchSize = batchSize;
 
     if (typeof options.session === 'object') {
       this.session = options.session;
@@ -405,13 +386,13 @@ export class Cursor<
     const currentNumberOfRetries = numberOfRetries;
 
     // Get the batchSize
-    let batchSizeA = 1000;
+    let batchSize = 1000;
     if (this.cmd.cursor && this.cmd.cursor.batchSize) {
-      batchSizeA = this.cmd.cursor.batchSize;
+      batchSize = this.cmd.cursor.batchSize;
     } else if (options.cursor && options.cursor.batchSize) {
-      batchSizeA = options.cursor.batchSize ?? 1000;
+      batchSize = options.cursor.batchSize ?? 1000;
     } else if (typeof options.batchSize === 'number') {
-      batchSizeA = options.batchSize;
+      batchSize = options.batchSize;
     }
 
     // Internal cursor state
@@ -424,7 +405,7 @@ export class Cursor<
       state: CursorState.INIT,
       // explicitlyIgnoreSession
       explicitlyIgnoreSession: !!options.explicitlyIgnoreSession,
-      batchSize: batchSizeA
+      batchSize
     };
 
     // Optional ClientSession
@@ -438,7 +419,7 @@ export class Cursor<
     }
 
     // Set the batch size
-    this.cursorBatchSize = batchSizeA;
+    this._batchSize = batchSize;
   }
 
   get id(): Long | undefined {
@@ -492,11 +473,6 @@ export class Cursor<
       }
     }
 
-    this._initializeCoreCursor(callback);
-  }
-
-  /** @internal */
-  _initializeCoreCursor(callback: Callback): void {
     // NOTE: this goes away once cursors use `executeOperation`
     if (this.topology.shouldCheckForSessionSupport()) {
       this.topology.selectServer(ReadPreference.primaryPreferred, err => {
@@ -708,7 +684,7 @@ export class Cursor<
         return cb(undefined, false);
       }
 
-      this._next((err, doc) => {
+      nextFunction(this, (err, doc) => {
         if (err) return cb(err);
         if (doc == null || this.s.state === CursorState.CLOSED || this.isDead()) {
           return cb(undefined, false);
@@ -739,7 +715,7 @@ export class Cursor<
         }
       }
 
-      this._next((err, doc) => {
+      nextFunction(this, (err, doc) => {
         if (err) return cb(err);
         this.s.state = CursorState.OPEN;
         cb(undefined, doc);
@@ -833,7 +809,6 @@ export class Cursor<
    * Set a node.js specific cursor option
    *
    * @param field - The cursor option to set 'numberOfRetries' | 'tailableRetryInterval'.
-   *
    * @param value - The field value.
    */
   setCursorOption(field: typeof FIELDS[number], value: number): this {
@@ -1037,7 +1012,7 @@ export class Cursor<
     }
 
     this.cmd.batchSize = value;
-    this.cursorBatchSize = value;
+    this._batchSize = value;
     return this;
   }
 
@@ -1246,7 +1221,7 @@ export class Cursor<
 
       // Fetch all the documents
       const fetchDocs = () => {
-        this._next((err, doc) => {
+        nextFunction(this, (err, doc) => {
           if (err) {
             return cb(err);
           }
@@ -1371,30 +1346,7 @@ export class Cursor<
 
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: CursorStreamOptions): CursorStream {
-    // TODO: replace this method with transformStream in next major release
     return new CursorStream(this, options);
-  }
-
-  /**
-   * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
-   * returns a stream of unmodified docs.
-   */
-  transformStream(options?: CursorStreamOptions): Transform {
-    const streamOptions: typeof options = options || {};
-    if (typeof streamOptions.transform === 'function') {
-      const stream = new Transform({
-        objectMode: true,
-        transform(chunk, encoding, callback) {
-          if (streamOptions.transform) {
-            this.push(streamOptions.transform(chunk));
-          }
-          callback();
-        }
-      });
-      return this.stream().pipe(stream);
-    }
-
-    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**
@@ -1419,7 +1371,7 @@ export class Cursor<
       delete this.cmd['readConcern'];
     }
 
-    return maybePromise(callback, cb => this._next(cb));
+    return maybePromise(callback, cb => nextFunction(this, cb));
   }
 
   /** Return the cursor logger */
@@ -1428,11 +1380,6 @@ export class Cursor<
   }
 
   // Internal methods
-
-  /** @internal Retrieve the next document from the cursor */
-  _next(callback: Callback<Document>): void {
-    nextFunction(this, callback);
-  }
 
   /** @internal */
   _getMore(callback: Callback<Document>): void {
@@ -1671,7 +1618,7 @@ function nextFunction(self: Cursor, callback: Callback) {
 }
 
 /** @internal */
-function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
+function getLimitSkipBatchSizeDefaults(options: CursorOptions, cmd: Document) {
   cmd = cmd ? cmd : {};
   let limit = options.limit;
 
@@ -1704,3 +1651,105 @@ function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document
 
   return { limit, skip, batchSize };
 }
+
+/** @public */
+export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
+
+/**
+ * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
+ * @internal
+ *
+ * @deprecated Please use forEach instead
+ * @param cursor - The Cursor instance on which to run.
+ * @param callback - The result callback.
+ */
+export function each(cursor: Cursor, callback: EachCallback): void {
+  if (!callback) throw new MongoError('callback is mandatory');
+  if (cursor.isNotified()) return;
+  if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
+    callback(new MongoError('Cursor is closed'));
+    return;
+  }
+
+  if (cursor.s.state === CursorState.INIT) {
+    cursor.s.state = CursorState.OPEN;
+  }
+
+  // Define function to avoid global scope escape
+  let fn = null;
+  // Trampoline all the entries
+  if (cursor.bufferedCount() > 0) {
+    while ((fn = loop(cursor, callback))) fn(cursor, callback);
+    each(cursor, callback);
+  } else {
+    cursor.next((err, item) => {
+      if (err) return callback(err);
+      if (item == null) {
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, null));
+      }
+
+      if (callback(undefined, item) === false) return;
+      each(cursor, callback);
+    });
+  }
+}
+
+/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+function loop(cursor: Cursor, callback: Callback) {
+  // No more items we are done
+  if (cursor.bufferedCount() === 0) return;
+  // Get the next document
+  nextFunction(cursor, callback);
+  // Loop
+  return loop;
+}
+
+/**
+ * Returns an array of documents. See Cursor.prototype.toArray for more information.
+ * @internal
+ *
+ * @param cursor - The Cursor instance from which to get the next document.
+ */
+export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
+  const items: Document[] = [];
+
+  // Reset cursor
+  cursor.rewind();
+  cursor.s.state = CursorState.INIT;
+
+  // Fetch all the documents
+  const fetchDocs = () => {
+    nextFunction(cursor, (err, doc) => {
+      if (err) {
+        return callback(err);
+      }
+
+      if (doc == null) {
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, items));
+      }
+
+      // Add doc to items
+      items.push(doc);
+
+      // Get all buffered objects
+      if (cursor.bufferedCount() > 0) {
+        let docs = cursor.readBufferedDocuments(cursor.bufferedCount());
+
+        // Transform the doc if transform method added
+        if (cursor.s.transforms && typeof cursor.s.transforms.doc === 'function') {
+          docs = docs.map(cursor.s.transforms.doc);
+        }
+
+        items.push(...docs);
+      }
+
+      // Attempt a fetch
+      fetchDocs();
+    });
+  };
+
+  fetchDocs();
+}
+
+// deprecated methods
+deprecate(Cursor.prototype.each, 'Cursor.each is deprecated. Use Cursor.forEach instead.');

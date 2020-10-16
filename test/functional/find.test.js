@@ -673,7 +673,10 @@ describe('Find', function () {
 
           collection.insert(doc, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
-            collection.findOne({ _id: doc._id }, { w: 1, fields: undefined }, function (err, doc) {
+            collection.findOne({ _id: doc._id }, { w: 1, projection: undefined }, function (
+              err,
+              doc
+            ) {
               expect(err).to.not.exist;
               test.equal(2, doc.comments.length);
               test.equal('number 1', doc.comments[0].title);
@@ -870,7 +873,7 @@ describe('Find', function () {
                                       { a: 100 },
                                       [],
                                       { $set: { b: 5 } },
-                                      { new: true, fields: { b: 1 } },
+                                      { new: true, projection: { b: 1 } },
                                       function (err, updated_doc) {
                                         test.equal(2, Object.keys(updated_doc.value).length);
                                         test.equal(
@@ -923,7 +926,7 @@ describe('Find', function () {
               { a: 1 },
               [['a', 1]],
               { $set: { b: 3 } },
-              { new: true, fields: { a: 1 } },
+              { new: true, projection: { a: 1 } },
               function (err, updated_doc) {
                 test.equal(2, Object.keys(updated_doc.value).length);
                 test.equal(1, updated_doc.value.a);
@@ -1321,7 +1324,7 @@ describe('Find', function () {
             { _id: self._id, 'plays.uuid': _uuid },
             [],
             { $set: { 'plays.$.active': true } },
-            { new: true, fields: { plays: 0, results: 0 }, safe: true },
+            { new: true, projection: { plays: 0, results: 0 }, safe: true },
             function (err) {
               expect(err).to.not.exist;
               client.close(done);
@@ -1401,18 +1404,20 @@ describe('Find', function () {
               expect(err).to.not.exist;
 
               // Get one document, excluding the _id field
-              collection.findOne({ a: 1 }, { fields: { _id: 0 } }, function (err, item) {
+              collection.findOne({ a: 1 }, { projection: { _id: 0 } }, function (err, item) {
                 expect(item._id).to.not.exist;
                 test.equal(1, item.a);
                 test.equal(2, item.c);
 
-                collection.find({ a: 1 }, { fields: { _id: 0 } }).toArray(function (err, items) {
-                  var item = items[0];
-                  expect(item._id).to.not.exist;
-                  test.equal(1, item.a);
-                  test.equal(2, item.c);
-                  p_client.close(done);
-                });
+                collection
+                  .find({ a: 1 }, { projection: { _id: 0 } })
+                  .toArray(function (err, items) {
+                    var item = items[0];
+                    expect(item._id).to.not.exist;
+                    test.equal(1, item.a);
+                    test.equal(2, item.c);
+                    p_client.close(done);
+                  });
               });
             });
           }
@@ -1846,7 +1851,7 @@ describe('Find', function () {
           function (err) {
             expect(err).to.not.exist;
 
-            col.find({}, { skip: 1, limit: 1, fields: { a: 1, b: 0 } }).toArray(function (err) {
+            col.find({}, { skip: 1, limit: 1, projection: { a: 1, b: 0 } }).toArray(function (err) {
               test.ok(err instanceof Error);
               client.close(done);
             });
@@ -2237,7 +2242,10 @@ describe('Find', function () {
                   test.equal(10, docs[0].max);
 
                   collection
-                    .find({ _id: { $in: ['some', 'value', 123] } }, { fields: { _id: 1, max: 1 } })
+                    .find(
+                      { _id: { $in: ['some', 'value', 123] } },
+                      { projection: { _id: 1, max: 1 } }
+                    )
                     .toArray(function (err, docs) {
                       expect(err).to.not.exist;
                       test.equal(10, docs[0].max);
@@ -2281,7 +2289,7 @@ describe('Find', function () {
               collection
                 .find(
                   { $text: { $search: 'spam' } },
-                  { fields: { _id: false, s: true, score: { $meta: 'textScore' } } }
+                  { projection: { _id: false, s: true, score: { $meta: 'textScore' } } }
                 )
                 .sort({ score: { $meta: 'textScore' } })
                 .toArray(function (err, items) {
