@@ -7,7 +7,7 @@ import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import { Document, inheritOrDefaultBSONSerializableOptions } from '../bson';
+import { BSONSerializeOptions, Document, inheritOrDefaultBSONSerializableOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 
@@ -45,6 +45,7 @@ export interface OperationParent {
     promoteValues?: boolean;
     promoteBuffers?: boolean;
     ignoreUndefined?: boolean;
+    options?: BSONSerializeOptions;
   };
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -102,7 +103,8 @@ export abstract class CommandOperation<
     // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
     // TODO, for collection it makes sense to take it from parent.s -- is this true for others?
     // TODO: downside of this is after the command is created these values are *fixed* because they are already set to default/inherited values
-    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, parent?.s));
+    const base = Object.assign({}, parent?.s.options, parent?.s);
+    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, base));
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
