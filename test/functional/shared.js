@@ -148,7 +148,7 @@ function withClient(client, callback) {
     }
     return client
       .connect()
-      .then(callback)
+      .then(callback.bind(this))
       .then(() => cleanup(), cleanup);
   }
 
