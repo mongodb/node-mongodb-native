@@ -756,7 +756,7 @@ export class Cursor<
       throw new MongoError('cannot change cursor readConcern after cursor has been accessed');
     }
     const rc = ReadConcern.fromOptions({ readConcern });
-    if (!rc) throw new TypeError('Invalid read concern: ' + readConcern);
+    if (!rc) throw new TypeError('Invalid read concern: ' + JSON.stringify(readConcern));
     this.options.readConcern = rc;
     return this;
   }
@@ -767,7 +767,7 @@ export class Cursor<
       throw new MongoError('cannot change cursor readPreference after cursor has been accessed');
     }
     const rp = ReadPreference.fromOptions({ readPreference });
-    if (!rp) throw new TypeError('Invalid read preference: ' + readPreference);
+    if (!rp) throw new TypeError('Invalid read preference: ' + JSON.stringify(readPreference));
     this.options.readPreference = rp;
     return this;
   }
