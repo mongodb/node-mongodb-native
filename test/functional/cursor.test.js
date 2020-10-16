@@ -2844,7 +2844,7 @@ describe('Cursor', function() {
   /**
    * @ignore
    */
-  it.only(
+  it(
     'should allow setting the readConcern through a builder method',
     withClient(function(client) {
       const db = client.db(this.configuration.db);
