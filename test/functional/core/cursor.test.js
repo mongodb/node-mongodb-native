@@ -282,7 +282,8 @@ describe('Cursor tests', function () {
                   cursor.kill(() => {
                     // Should error out
                     cursor.next((thirdCursorErr, thirdCursorD) => {
-                      expect(thirdCursorErr).to.not.exist;
+                      expect(thirdCursorErr).to.exist;
+                      expect(thirdCursorErr.message).to.equal('Cursor is closed');
                       expect(thirdCursorD).to.not.exist;
 
                       // Destroy the server connection
