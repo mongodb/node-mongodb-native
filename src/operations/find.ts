@@ -127,7 +127,7 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     if (options.sort) {
       findCommand.sort = formatSort(options.sort);
     }
-      
+
     if (options.projection) {
       let projection = options.projection;
       if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
