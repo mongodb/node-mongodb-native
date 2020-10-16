@@ -53,7 +53,7 @@ export interface DocumentTransforms {
 }
 
 /** @internal */
-export interface CoreCursorPrivate {
+interface CursorPrivate {
   /** Transforms functions */
   transforms?: DocumentTransforms;
   numberOfRetries: number;
@@ -66,9 +66,6 @@ export interface CoreCursorPrivate {
   readConcern?: ReadConcern;
 }
 
-/** @internal */
-export type CursorPrivate = CoreCursorPrivate;
-
 /** @public Possible states for a cursor */
 export enum CursorState {
   INIT = 0,
@@ -78,7 +75,7 @@ export enum CursorState {
 }
 
 /** @public */
-export interface CoreCursorOptions extends CommandOperationOptions {
+export interface CursorOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   tailable?: boolean;
   awaitData?: boolean;
@@ -94,10 +91,6 @@ export interface CoreCursorOptions extends CommandOperationOptions {
   documents?: Document[];
   /** Transform function */
   transforms?: DocumentTransforms;
-}
-
-/** @public */
-export interface CursorOptions extends CoreCursorOptions {
   cursorFactory?: typeof Cursor;
   tailableRetryInterval?: number;
   explicitlyIgnoreSession?: boolean;
@@ -112,30 +105,6 @@ export interface CursorOptions extends CoreCursorOptions {
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
-}
-
-/** @internal */
-interface InternalCursorState extends BSONSerializeOptions {
-  postBatchResumeToken?: ResumeToken;
-  batchSize: number;
-  cmd: Document;
-  currentLimit: number;
-  cursorId?: Long;
-  lastCursorId?: Long;
-  cursorIndex: number;
-  dead: boolean;
-  killed: boolean;
-  init: boolean;
-  notified: boolean;
-  documents: Document[];
-  limit: number;
-  operationTime?: OperationTime;
-  reconnect?: boolean;
-  session?: ClientSession;
-  skip: number;
-  streamOptions?: CursorStreamOptions;
-  transforms?: DocumentTransforms;
-  raw?: boolean;
 }
 
 /** @public */
@@ -1630,7 +1599,7 @@ function nextFunction(self: Cursor, callback: Callback) {
 }
 
 /** @internal */
-function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document) {
+function getLimitSkipBatchSizeDefaults(options: CursorOptions, cmd: Document) {
   cmd = cmd ? cmd : {};
   let limit = options.limit;
 
