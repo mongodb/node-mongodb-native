@@ -5,7 +5,6 @@ import { Long, Document, BSONSerializeOptions } from '../bson';
 import { MongoError, MongoNetworkError, AnyError } from '../error';
 import { Logger } from '../logger';
 import { executeOperation } from '../operations/execute_operation';
-import { each, EachCallback } from '../operations/cursor_ops';
 import { CountOperation, CountOptions } from '../operations/count';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
@@ -26,6 +25,8 @@ import type { Hint, OperationBase } from '../operations/operation';
 import type { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+
+const kCursor = Symbol('cursor');
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -120,7 +121,7 @@ export interface CursorCloseOptions {
 }
 
 /** @internal */
-export interface InternalCursorState extends BSONSerializeOptions {
+interface InternalCursorState extends BSONSerializeOptions {
   postBatchResumeToken?: ResumeToken;
   batchSize: number;
   cmd: Document;
@@ -143,13 +144,13 @@ export interface InternalCursorState extends BSONSerializeOptions {
   raw?: boolean;
 }
 
-const kCursor = Symbol('cursor');
-
+/** @public */
 export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
   transform?(doc: Document): Document;
 }
 
+/** @public */
 export class CursorStream extends Readable {
   [kCursor]: Cursor;
   options: CursorStreamOptions;
@@ -192,7 +193,7 @@ export class CursorStream extends Readable {
     }
 
     // Get the next item
-    cursor._next((err, result) => {
+    nextFunction(cursor, (err, result) => {
       if (err) {
         if (cursor.s && cursor.s.state === CursorState.CLOSED) return;
         if (!cursor.isDead()) this.emit(CursorStream.ERROR, err);
@@ -707,7 +708,7 @@ export class Cursor<
         return cb(undefined, false);
       }
 
-      this._next((err, doc) => {
+      nextFunction(this, (err, doc) => {
         if (err) return cb(err);
         if (doc == null || this.s.state === CursorState.CLOSED || this.isDead()) {
           return cb(undefined, false);
@@ -738,7 +739,7 @@ export class Cursor<
         }
       }
 
-      this._next((err, doc) => {
+      nextFunction(this, (err, doc) => {
         if (err) return cb(err);
         this.s.state = CursorState.OPEN;
         cb(undefined, doc);
@@ -1244,7 +1245,7 @@ export class Cursor<
 
       // Fetch all the documents
       const fetchDocs = () => {
-        this._next((err, doc) => {
+        nextFunction(this, (err, doc) => {
           if (err) {
             return cb(err);
           }
@@ -1417,7 +1418,7 @@ export class Cursor<
       delete this.cmd['readConcern'];
     }
 
-    return maybePromise(callback, cb => this._next(cb));
+    return maybePromise(callback, cb => nextFunction(this, cb));
   }
 
   /** Return the cursor logger */
@@ -1426,11 +1427,6 @@ export class Cursor<
   }
 
   // Internal methods
-
-  /** @internal Retrieve the next document from the cursor */
-  _next(callback: Callback<Document>): void {
-    nextFunction(this, callback);
-  }
 
   /** @internal */
   _getMore(callback: Callback<Document>): void {
@@ -1701,6 +1697,105 @@ function getLimitSkipBatchSizeDefaults(options: CoreCursorOptions, cmd: Document
   }
 
   return { limit, skip, batchSize };
+}
+
+/** @public */
+export type EachCallback = (error?: AnyError, result?: Document | null) => boolean | void;
+
+/**
+ * Iterates over all the documents for this cursor. See Cursor.prototype.each for more information.
+ * @internal
+ *
+ * @deprecated Please use forEach instead
+ * @param cursor - The Cursor instance on which to run.
+ * @param callback - The result callback.
+ */
+export function each(cursor: Cursor, callback: EachCallback): void {
+  if (!callback) throw new MongoError('callback is mandatory');
+  if (cursor.isNotified()) return;
+  if (cursor.s.state === CursorState.CLOSED || cursor.isDead()) {
+    callback(new MongoError('Cursor is closed'));
+    return;
+  }
+
+  if (cursor.s.state === CursorState.INIT) {
+    cursor.s.state = CursorState.OPEN;
+  }
+
+  // Define function to avoid global scope escape
+  let fn = null;
+  // Trampoline all the entries
+  if (cursor.bufferedCount() > 0) {
+    while ((fn = loop(cursor, callback))) fn(cursor, callback);
+    each(cursor, callback);
+  } else {
+    cursor.next((err, item) => {
+      if (err) return callback(err);
+      if (item == null) {
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, null));
+      }
+
+      if (callback(undefined, item) === false) return;
+      each(cursor, callback);
+    });
+  }
+}
+
+/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+function loop(cursor: Cursor, callback: Callback) {
+  // No more items we are done
+  if (cursor.bufferedCount() === 0) return;
+  // Get the next document
+  nextFunction(cursor, callback);
+  // Loop
+  return loop;
+}
+
+/**
+ * Returns an array of documents. See Cursor.prototype.toArray for more information.
+ * @internal
+ *
+ * @param cursor - The Cursor instance from which to get the next document.
+ */
+export function toArray(cursor: Cursor, callback: Callback<Document[]>): void {
+  const items: Document[] = [];
+
+  // Reset cursor
+  cursor.rewind();
+  cursor.s.state = CursorState.INIT;
+
+  // Fetch all the documents
+  const fetchDocs = () => {
+    nextFunction(cursor, (err, doc) => {
+      if (err) {
+        return callback(err);
+      }
+
+      if (doc == null) {
+        return cursor.close({ skipKillCursors: true }, () => callback(undefined, items));
+      }
+
+      // Add doc to items
+      items.push(doc);
+
+      // Get all buffered objects
+      if (cursor.bufferedCount() > 0) {
+        let docs = cursor.readBufferedDocuments(cursor.bufferedCount());
+
+        // Transform the doc if transform method added
+        if (cursor.s.transforms && typeof cursor.s.transforms.doc === 'function') {
+          docs = docs.map(cursor.s.transforms.doc);
+        }
+
+        items.push(...docs);
+      }
+
+      // Attempt a fetch
+      fetchDocs();
+    });
+  };
+
+  fetchDocs();
 }
 
 // deprecated methods
