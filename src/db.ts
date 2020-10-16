@@ -340,11 +340,6 @@ export class Db implements OperationParent {
     // If we have not set a collection level readConcern set the db level one
     options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
 
-    // Do we have ignoreUndefined set
-    if (this.s.options?.ignoreUndefined) {
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     // Merge in all needed options and ensure correct writeConcern merging from db level
     const finalOptions = mergeOptionsAndWriteConcern(
       options,

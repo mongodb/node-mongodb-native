@@ -1378,12 +1378,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return this.updateMany(selector, update, options, callback);
   }
 
@@ -1402,12 +1396,6 @@ export class Collection implements OperationParent {
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return this.deleteMany(selector, options, callback);
   }
