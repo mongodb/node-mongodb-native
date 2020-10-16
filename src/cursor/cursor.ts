@@ -109,12 +109,6 @@ export interface CursorOptions extends CoreCursorOptions {
 }
 
 /** @public */
-export interface StreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
-}
-
-/** @public */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
@@ -139,7 +133,7 @@ interface InternalCursorState extends BSONSerializeOptions {
   reconnect?: boolean;
   session?: ClientSession;
   skip: number;
-  streamOptions?: StreamOptions;
+  streamOptions?: CursorStreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
 }
@@ -307,7 +301,7 @@ export class Cursor<
   operationTime?: OperationTime;
   reconnect?: boolean;
   session?: ClientSession;
-  streamOptions?: StreamOptions;
+  streamOptions?: CursorStreamOptions;
   transforms?: DocumentTransforms;
   raw?: boolean;
   tailable: boolean;
@@ -347,7 +341,7 @@ export class Cursor<
     this.options = this.operation.options as T;
     this.topology = topology;
 
-    const { limit, skip, batchSize } = getLimitSkipBatchSizeDefaults(options, cmd);
+    const { limit, skip } = getLimitSkipBatchSizeDefaults(options, cmd);
 
     let cursorId = undefined;
     let lastCursorId = undefined;
@@ -384,7 +378,6 @@ export class Cursor<
     // get rid of these?
     this._limit = limit;
     this._skip = skip;
-    this._batchSize = batchSize;
 
     if (typeof options.session === 'object') {
       this.session = options.session;
@@ -405,13 +398,13 @@ export class Cursor<
     const currentNumberOfRetries = numberOfRetries;
 
     // Get the batchSize
-    let batchSizeA = 1000;
+    let batchSize = 1000;
     if (this.cmd.cursor && this.cmd.cursor.batchSize) {
-      batchSizeA = this.cmd.cursor.batchSize;
+      batchSize = this.cmd.cursor.batchSize;
     } else if (options.cursor && options.cursor.batchSize) {
-      batchSizeA = options.cursor.batchSize ?? 1000;
+      batchSize = options.cursor.batchSize ?? 1000;
     } else if (typeof options.batchSize === 'number') {
-      batchSizeA = options.batchSize;
+      batchSize = options.batchSize;
     }
 
     // Internal cursor state
@@ -424,7 +417,7 @@ export class Cursor<
       state: CursorState.INIT,
       // explicitlyIgnoreSession
       explicitlyIgnoreSession: !!options.explicitlyIgnoreSession,
-      batchSize: batchSizeA
+      batchSize
     };
 
     // Optional ClientSession
@@ -438,7 +431,7 @@ export class Cursor<
     }
 
     // Set the batch size
-    this.cursorBatchSize = batchSizeA;
+    this._batchSize = batchSize;
   }
 
   get id(): Long | undefined {
@@ -492,11 +485,6 @@ export class Cursor<
       }
     }
 
-    this._initializeCoreCursor(callback);
-  }
-
-  /** @internal */
-  _initializeCoreCursor(callback: Callback): void {
     // NOTE: this goes away once cursors use `executeOperation`
     if (this.topology.shouldCheckForSessionSupport()) {
       this.topology.selectServer(ReadPreference.primaryPreferred, err => {
@@ -1036,7 +1024,7 @@ export class Cursor<
     }
 
     this.cmd.batchSize = value;
-    this.cursorBatchSize = value;
+    this._batchSize = value;
     return this;
   }
 
