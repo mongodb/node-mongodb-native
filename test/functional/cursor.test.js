@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands } = require('./shared');
+const { assert: test, filterForCommands, withClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -2620,24 +2620,17 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldSetReadConcern', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const cursor = db.collection('shouldSetReadConcern').find();
-        cursor.setReadConcern('available');
-        expect(cursor).to.have.nested.property('options.readConcern');
-        expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
-        expect(cursor.options.readConcern.level).to.equal('available');
-        client.close(done);
-      });
-    }
-  });
+  it(
+    'should allow setting the readConcern through a builder method',
+    withClient(function (client) {
+      const db = client.db(this.configuration.db);
+      const cursor = db.collection('shouldSetReadConcern').find();
+      cursor.setReadConcern('available');
+      expect(cursor).to.have.nested.property('options.readConcern');
+      expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
+      expect(cursor.options.readConcern.level).to.equal('available');
+    })
+  );
 
   it('shouldFailToSetReadPreferenceOnCursor', {
     // Add a tag that our runner can trigger on
