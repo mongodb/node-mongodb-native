@@ -1,12 +1,5 @@
 import { MongoError } from '../error';
-import { CursorState, Cursor } from '../cursor';
-import {
-  applyRetryableWrites,
-  applyWriteConcern,
-  decorateWithCollation,
-  formattedOrderClause,
-  Callback
-} from '../utils';
+import { applyRetryableWrites, applyWriteConcern, decorateWithCollation, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -103,28 +96,6 @@ export function prepareDocs(
     }
 
     return doc;
-  });
-}
-
-// Get the next available document from the cursor, returns null if no more documents are available.
-export function nextObject(cursor: Cursor, callback: Callback): void {
-  if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
-    return callback(MongoError.create({ message: 'Cursor is closed', driver: true }));
-  }
-
-  if (cursor.s.state === CursorState.INIT && cursor.cmd && cursor.cmd.sort) {
-    try {
-      cursor.cmd.sort = formattedOrderClause(cursor.cmd.sort);
-    } catch (err) {
-      return callback(err);
-    }
-  }
-
-  // Get the next object
-  cursor._next((err, doc) => {
-    cursor.s.state = CursorState.OPEN;
-    if (err) return callback(err);
-    callback(undefined, doc);
   });
 }
 

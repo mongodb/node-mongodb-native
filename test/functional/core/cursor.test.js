@@ -44,13 +44,13 @@ describe('Cursor tests', function () {
               });
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
                 expect(cursor.bufferedCount()).to.equal(1);
 
                 // Kill the cursor
-                cursor._next((killCursorErr, killCursorD) => {
+                cursor.next((killCursorErr, killCursorD) => {
                   expect(killCursorErr).to.not.exist;
                   expect(killCursorD.a).to.equal(2);
                   expect(cursor.bufferedCount()).to.equal(0);
@@ -101,7 +101,7 @@ describe('Cursor tests', function () {
               });
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
                 expect(cursor.bufferedCount()).to.equal(4);
@@ -110,7 +110,7 @@ describe('Cursor tests', function () {
                 cursor.readBufferedDocuments(cursor.bufferedCount());
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
 
@@ -157,16 +157,16 @@ describe('Cursor tests', function () {
               const cursor = topology.cursor(ns, { find: 'cursor3', filter: {}, batchSize: 5 });
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
 
-                  cursor._next((thirdCursorErr, thirdCursorD) => {
+                  cursor.next((thirdCursorErr, thirdCursorD) => {
                     expect(thirdCursorErr).to.be.ok;
                     expect(thirdCursorD).to.be.undefined;
                     // Destroy the server connection
@@ -213,16 +213,16 @@ describe('Cursor tests', function () {
               const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD.a).to.equal(2);
 
-                  cursor._next((thirdCursorErr, thirdCursorD) => {
+                  cursor.next((thirdCursorErr, thirdCursorD) => {
                     expect(thirdCursorErr).to.not.exist;
                     expect(thirdCursorD.a).to.equal(3);
                     // Destroy the server connection
@@ -269,20 +269,21 @@ describe('Cursor tests', function () {
               const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD.a).to.equal(2);
 
                   // Kill cursor
                   cursor.kill(() => {
                     // Should error out
-                    cursor._next((thirdCursorErr, thirdCursorD) => {
-                      expect(thirdCursorErr).to.not.exist;
+                    cursor.next((thirdCursorErr, thirdCursorD) => {
+                      expect(thirdCursorErr).to.exist;
+                      expect(thirdCursorErr.message).to.equal('Cursor is closed');
                       expect(thirdCursorD).to.not.exist;
 
                       // Destroy the server connection
@@ -326,18 +327,18 @@ describe('Cursor tests', function () {
             var cursor = _server.cursor(ns, { find: 'cursor5', filter: {}, batchSize: 2 });
 
             // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
+            cursor.next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.not.exist;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
+              cursor.next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.not.exist;
                 expect(secondCursorD.a).to.equal(2);
 
                 self.configuration.manager.restart(false).then(function () {
                   // Should error out
-                  cursor._next(function (thirdCursorErr, thirdCursorD) {
+                  cursor.next(function (thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.be.ok;
                     expect(thirdCursorD).to.be.undefined;
 
@@ -395,7 +396,7 @@ describe('Cursor tests', function () {
   //           });
 
   //           // Execute next
-  //           cursor._next(function(err) {
+  //           cursor.next(function(err) {
   //             expect(err).to.exist;
 
   //             cursor = server.cursor(ns, {
@@ -404,7 +405,7 @@ describe('Cursor tests', function () {
   //               batchSize: 1
   //             });
 
-  //             cursor._next(function(err) {
+  //             cursor.next(function(err) {
   //               expect(err).to.exist;
   //               done();
   //             });
