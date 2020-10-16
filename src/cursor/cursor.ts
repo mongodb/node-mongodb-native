@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Transform, PassThrough, Readable } from 'stream';
+import { Readable } from 'stream';
 import { deprecate } from 'util';
 import { Long, Document, BSONSerializeOptions } from '../bson';
 import { MongoError, MongoNetworkError, AnyError } from '../error';
@@ -1358,30 +1358,7 @@ export class Cursor<
 
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: CursorStreamOptions): CursorStream {
-    // TODO: replace this method with transformStream in next major release
     return new CursorStream(this, options);
-  }
-
-  /**
-   * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
-   * returns a stream of unmodified docs.
-   */
-  transformStream(options?: CursorStreamOptions): Transform {
-    const streamOptions: typeof options = options || {};
-    if (typeof streamOptions.transform === 'function') {
-      const stream = new Transform({
-        objectMode: true,
-        transform(chunk, encoding, callback) {
-          if (streamOptions.transform) {
-            this.push(streamOptions.transform(chunk));
-          }
-          callback();
-        }
-      });
-      return this.stream().pipe(stream);
-    }
-
-    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**
