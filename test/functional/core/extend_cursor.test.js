@@ -21,7 +21,7 @@ describe('Extend cursor tests', function () {
 
           // Resolve all the next
           var getAllNexts = function (items, callback) {
-            extendedCursorSelf._next(function (err, item) {
+            extendedCursorSelf.next(function (err, item) {
               if (err) return callback(err);
               if (item === null) return callback(null, null);
               items.push(item);
