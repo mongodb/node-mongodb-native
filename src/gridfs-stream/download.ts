@@ -1,7 +1,8 @@
 import { Readable } from 'stream';
 import type { AnyError } from '../error';
 import type { Document } from '../bson';
-import type { FindOptions, Sort } from '../operations/find';
+import type { FindOptions } from '../operations/find';
+import type { Sort } from '../sort';
 import type { Cursor } from './../cursor/cursor';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';

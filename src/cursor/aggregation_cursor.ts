@@ -2,7 +2,7 @@ import { MongoError } from '../error';
 import { Cursor, CursorOptions, CursorState } from './cursor';
 import type { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import type { Document } from '../bson';
-import type { Sort } from '../operations/find';
+import type { Sort } from '../sort';
 import type { Topology } from '../sdam/topology';
 
 /** @public */

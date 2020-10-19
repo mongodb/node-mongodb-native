@@ -7,21 +7,14 @@ import { Logger } from '../logger';
 import { executeOperation } from '../operations/execute_operation';
 import { CountOperation, CountOptions } from '../operations/count';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import {
-  Callback,
-  emitDeprecatedOptionWarning,
-  formattedOrderClause,
-  maybePromise,
-  MongoDBNamespace
-} from '../utils';
-
+import { Callback, emitDeprecatedOptionWarning, maybePromise, MongoDBNamespace } from '../utils';
+import { Sort, SortDirection, formatSort } from '../sort';
 import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { Hint, OperationBase } from '../operations/operation';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
-import type { Sort, SortDirection } from '../operations/find';
-import type { Hint, OperationBase } from '../operations/operation';
 import type { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -99,6 +92,7 @@ export interface CursorOptions extends CommandOperationOptions {
   topology?: Topology;
   /** Session to use for the operation */
   numberOfRetries?: number;
+  sort?: Sort;
 }
 
 /** @public */
@@ -399,6 +393,10 @@ export class Cursor<
       this.addCursorFlag('noCursorTimeout', true);
     }
 
+    if (this.options.sort) {
+      this.cmd.sort = formatSort(this.options.sort);
+    }
+
     // Set the batch size
     this._batchSize = batchSize;
   }
@@ -688,14 +686,6 @@ export class Cursor<
         return;
       }
 
-      if (this.s.state === CursorState.INIT && this.cmd.sort) {
-        try {
-          this.cmd.sort = formattedOrderClause(this.cmd.sort);
-        } catch (err) {
-          return cb(err);
-        }
-      }
-
       nextFunction(this, (err, doc) => {
         if (err) return cb(err);
         this.s.state = CursorState.OPEN;
@@ -940,37 +930,7 @@ export class Cursor<
       throw new MongoError('Cursor is closed');
     }
 
-    let order = sort;
-
-    // We have an array of arrays, we need to preserve the order of the sort
-    // so we will us a Map
-    if (Array.isArray(order) && Array.isArray(order[0])) {
-      this.cmd.sort = new Map<string, unknown>(
-        (order as [string, SortDirection][]).map(([key, dir]) => {
-          if (dir === 'asc') {
-            return [key, 1];
-          } else if (dir === 'desc') {
-            return [key, -1];
-          } else if (dir === 1 || dir === -1 || dir.$meta) {
-            return [key, dir];
-          } else {
-            throw new MongoError(
-              "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]"
-            );
-          }
-
-          return [key, null];
-        })
-      );
-
-      return this;
-    }
-
-    if (direction != null) {
-      order = [[sort as string, direction]];
-    }
-
-    this.cmd.sort = order;
+    this.cmd.sort = formatSort(sort, direction);
     return this;
   }
 
