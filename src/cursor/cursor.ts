@@ -1,6 +1,6 @@
 import { emitDeprecatedOptionWarning } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { Transform, PassThrough, Readable } from 'stream';
+import { Readable } from 'stream';
 import { deprecate } from 'util';
 import { MongoError, AnyError } from '../error';
 import {
@@ -330,21 +330,6 @@ export class Cursor<
   }
 
   /**
-   * Set the cursor maxScan
-   *
-   * @deprecated Instead, use maxTimeMS option or the helper {@link Cursor.maxTimeMS}.
-   * @param maxScan - Constrains the query to only scan the specified number of documents when fulfilling the query
-   */
-  maxScan(maxScan: number): this {
-    if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
-      throw new MongoError('Cursor is closed');
-    }
-
-    this.cmd.maxScan = maxScan;
-    return this;
-  }
-
-  /**
    * Set the cursor hint
    *
    * @param hint - If specified, then the query system will only consider plans using the hinted index.
@@ -417,26 +402,9 @@ export class Cursor<
   }
 
   /**
-   * Set the cursor snapshot
-   *
-   * @deprecated as of MongoDB 4.0
-   *
-   * @param value - The $snapshot operator prevents the cursor from returning a document more than once because an intervening write operation results in a move of the document.
-   */
-  snapshot(value: boolean): this {
-    if (this.s.state === CursorState.CLOSED || this.s.state === CursorState.OPEN || this.isDead()) {
-      throw new MongoError('Cursor is closed');
-    }
-
-    this.cmd.snapshot = value;
-    return this;
-  }
-
-  /**
    * Set a node.js specific cursor option
    *
    * @param field - The cursor option to set 'numberOfRetries' | 'tailableRetryInterval'.
-   *
    * @param value - The field value.
    */
   setCursorOption(field: typeof FIELDS[number], value: number): this {
@@ -918,30 +886,7 @@ export class Cursor<
 
   /** Return a modified Readable stream including a possible transform method. */
   stream(options?: CursorStreamOptions): CursorStream {
-    // TODO: replace this method with transformStream in next major release
     return new CursorStream(this, options);
-  }
-
-  /**
-   * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
-   * returns a stream of unmodified docs.
-   */
-  transformStream(options?: CursorStreamOptions): Transform {
-    const streamOptions: typeof options = options || {};
-    if (typeof streamOptions.transform === 'function') {
-      const stream = new Transform({
-        objectMode: true,
-        transform(chunk, encoding, callback) {
-          if (streamOptions.transform) {
-            this.push(streamOptions.transform(chunk));
-          }
-          callback();
-        }
-      });
-      return this.stream().pipe(stream);
-    }
-
-    return this.stream(options).pipe(new PassThrough({ objectMode: true }));
   }
 
   /**
@@ -977,12 +922,3 @@ export class Cursor<
 
 // deprecated methods
 deprecate(Cursor.prototype.each, 'Cursor.each is deprecated. Use Cursor.forEach instead.');
-deprecate(
-  Cursor.prototype.maxScan,
-  'Cursor.maxScan is deprecated, and will be removed in a later version'
-);
-
-deprecate(
-  Cursor.prototype.snapshot,
-  'Cursor Snapshot is deprecated, and will be removed in a later version'
-);
