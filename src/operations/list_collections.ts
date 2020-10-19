@@ -5,7 +5,7 @@ import * as CONSTANTS from '../constants';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import type { DocumentTransforms } from '../cursor/core_cursor';
+import type { DocumentTransforms } from '../cursor/cursor';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 

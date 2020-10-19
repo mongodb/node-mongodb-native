@@ -147,20 +147,15 @@ export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type { CommandCursorOptions } from './cursor/command_cursor';
 export type {
-  CoreCursor,
   CursorCloseOptions,
   DocumentTransforms,
   CursorStreamOptions,
-  CoreCursorOptions,
-  CoreCursorPrivate,
-  CursorState
-} from './cursor/core_cursor';
-export type {
+  CursorState,
   CursorOptions,
-  CursorPrivate,
   FIELDS as CURSOR_FIELDS,
   FLAGS as CURSOR_FLAGS,
-  CursorFlag
+  CursorFlag,
+  EachCallback
 } from './cursor/cursor';
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
@@ -204,7 +199,6 @@ export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
 export type { CreateCollectionOptions } from './operations/create_collection';
-export type { EachCallback } from './operations/cursor_ops';
 export type { DeleteOptions, DeleteResult } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';

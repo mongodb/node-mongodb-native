@@ -127,7 +127,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
         test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
-
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
               if (

@@ -46,7 +46,7 @@ describe('A server', function () {
                 });
 
                 // Execute next
-                cursor._next((nextErr, d) => {
+                cursor.next((nextErr, d) => {
                   expect(nextErr).to.not.exist;
                   expect(d.b).to.be.undefined;
 
@@ -106,7 +106,7 @@ describe('A server', function () {
                 });
 
                 // Execute next
-                cursor._next((nextErr, d) => {
+                cursor.next((nextErr, d) => {
                   expect(nextErr).to.not.exist;
                   expect(d.b).to.be.undefined;
 
