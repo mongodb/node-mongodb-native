@@ -1475,7 +1475,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it('should resume piping of Change Streams when a resumable error is encountered', {
+  it.only('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1490,9 +1490,6 @@ describe('Change Streams', function() {
       const ObjectId = configuration.require.ObjectId;
       const Timestamp = configuration.require.Timestamp;
       const Long = configuration.require.Long;
-
-      // Contain mock server
-      let primaryServer = null;
 
       // Default message fields
       const defaultFields = {
@@ -1509,9 +1506,8 @@ describe('Change Streams', function() {
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
-      co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-
+      mock.createServer(32000, 'localhost').then(primaryServer => {
+        this.defer(() => mock.cleanup());
         let counter = 0;
         primaryServer.setMessageHandler(request => {
           const doc = request.document;
@@ -1597,6 +1593,7 @@ describe('Change Streams', function() {
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
+          this.defer(() => client.close());
 
           const database = client.db('integration_tests5');
           const collection = database.collection('MongoNetworkErrorTestPromises');
@@ -1605,22 +1602,17 @@ describe('Change Streams', function() {
           const outStream = fs.createWriteStream(filename);
 
           changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-
+          this.defer(() => changeStream.close());
           // Listen for changes to the file
-          const watcher = fs.watch(filename, function(eventType) {
+          const watcher = fs.watch(filename, eventType => {
+            this.defer(() => watcher.close());
             expect(eventType).to.equal('change');
 
             const fileContents = fs.readFileSync(filename, 'utf8');
             const parsedFileContents = JSON.parse(fileContents);
             expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
 
-            watcher.close();
-
-            changeStream.close(err => {
-              expect(err).to.not.exist;
-
-              mock.cleanup(() => done());
-            });
+            done();
           });
         });
       });
