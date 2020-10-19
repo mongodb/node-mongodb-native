@@ -1,10 +1,11 @@
 {
   "root": true,
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2015
   },
   "plugins": [
-    "prettier"
+    "prettier",
+    "es"
   ],
   "extends": [
     "eslint:recommended",
@@ -17,9 +18,10 @@
   },
   "rules": {
     "prettier/prettier": "error",
-
+    "es/no-destructuring": "error",
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "strict": ["error", "global"]
-  }
+  },
+  "ignorePatterns": ["test/benchmarks/*.js", "test/examples/*.js"]
 }

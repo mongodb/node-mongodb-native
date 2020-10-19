@@ -6,7 +6,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const withMonitoredClient = require('./shared').withMonitoredClient;
 const expect = require('chai').expect;
 const ReadPreference = require('../../lib/core/topologies/read_preference');
-const { withClient } = require('./shared');
+const withClient = require('./shared').withClient;
 
 describe('ReadPreference', function() {
   before(function() {
@@ -702,7 +702,9 @@ describe('ReadPreference', function() {
           return withClient(client, (client, done) => {
             const db = client.db(configuration.db);
             const args = methods[operation];
-            const [parentId, method] = operation.split('#');
+            const split = operation.split('#');
+            const parentId = split[0];
+            const method = split[1];
             const collection = db.collection(collectionName);
             const parent = parentId === 'Collection' ? collection : parentId === 'Db' ? db : null;
             const selectServerSpy = this.sinon.spy(Topology.prototype, 'selectServer');
