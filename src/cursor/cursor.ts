@@ -14,7 +14,7 @@ import {
   maybePromise,
   MongoDBNamespace
 } from '../utils';
-
+import { PromiseProvider } from '../promise_provider';
 import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
@@ -22,7 +22,6 @@ import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { Sort, SortDirection } from '../operations/find';
 import type { Hint, OperationBase } from '../operations/operation';
-import { PromiseProvider } from '../promise_provider';
 import type { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
