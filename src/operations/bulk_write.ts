@@ -33,7 +33,7 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    const options = this.options;
+    const options = Object.assign({}, this.options, this.bsonOptions);
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
@@ -51,7 +51,7 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     }
 
     // Final options for retryable writes and write concern
-    let finalOptions = Object.assign({}, options, this.bsonOptions);
+    let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
     finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 

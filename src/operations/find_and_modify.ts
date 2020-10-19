@@ -105,10 +105,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    // Either use override on the function, or go back to default on either the collection
-    // level or db
-    options.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
-
     // No check on the documents
     options.checkKeys = false;
 

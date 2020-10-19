@@ -46,9 +46,6 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
       );
     }
 
-    // If keep going set unordered
-    options['serializeFunctions'] = options['serializeFunctions'] || coll.s.serializeFunctions;
-
     docs = prepareDocs(coll, docs, options);
 
     // Generate the bulk write operations

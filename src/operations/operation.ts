@@ -46,11 +46,11 @@ export abstract class OperationBase<
   fullResponse?: boolean;
 
   // BSON serialization options
-  // fieldsAsRaw?: { [key: string]: boolean };
+  fieldsAsRaw?: { [key: string]: boolean };
   promoteValues?: boolean;
   promoteBuffers?: boolean;
   promoteLongs?: boolean;
-  // serializeFunctions?: boolean;
+  serializeFunctions?: boolean;
   ignoreUndefined?: boolean;
   raw?: boolean;
 
@@ -60,14 +60,15 @@ export abstract class OperationBase<
   }
 
   // BSON serialization options
-  // Have omitted fieldsAsRaw and serializeFunctions because I am not sure if we want those used...
   get bsonOptions(): BSONSerializeOptions {
     const bsonOptions: Document = {
       promoteBuffers: this.promoteBuffers,
       promoteValues: this.promoteValues,
       promoteLongs: this.promoteLongs,
       raw: this.raw,
-      ignoreUndefined: this.ignoreUndefined
+      ignoreUndefined: this.ignoreUndefined,
+      serializeFunctions: this.serializeFunctions,
+      fieldsAsRaw: this.fieldsAsRaw
     };
     return bsonOptions;
   }
