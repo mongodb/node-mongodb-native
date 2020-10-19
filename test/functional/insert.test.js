@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test } = require('./shared');
+const { assert: test, withClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const Script = require('vm');
 const { expect } = require('chai');
@@ -1909,14 +1909,15 @@ describe('Insert', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
+    test: function () {
       var configuration = this.configuration;
 
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         promoteLongs: true
       });
-      client.connect(function (err, client) {
+
+      return withClient(client, (client, done) => {
         var db = client.db(configuration.db, { promoteLongs: false });
         db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore').insertMany(
           [
@@ -1945,19 +1946,19 @@ describe('Insert', function () {
             { a: Long.fromNumber(10) },
             { a: Long.fromNumber(10) }
           ],
-          function (err, doc) {
+          (err, doc) => {
             expect(err).to.not.exist;
             test.ok(doc);
 
             db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore')
               .find({})
               .batchSize(2)
-              .toArray(function (err, docs) {
+              .toArray((err, docs) => {
                 expect(err).to.not.exist;
                 var doc = docs.pop();
 
                 test.ok(doc.a._bsontype === 'Long');
-                client.close(done);
+                done();
               });
           }
         );
