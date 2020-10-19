@@ -70,14 +70,12 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
   };
 }
 
-// TODO: naming
-// TODO: testing
+// Merge the given BSONSerializeOptions, preferring options over parentOptions, and substituting a
+// default for values not set.
 export function inheritOrDefaultBSONSerializableOptions(
   options?: BSONSerializeOptions,
   parentOptions?: BSONSerializeOptions
 ): BSONSerializeOptions {
-  // Merge the BSONSerializeOptions, preferring options over parentOptions, and substituting a
-  // default for values not set.
   return {
     raw: options?.raw ?? parentOptions?.raw ?? false,
     promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,

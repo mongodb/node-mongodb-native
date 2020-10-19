@@ -1917,7 +1917,7 @@ describe('Insert', function () {
         promoteLongs: true
       });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        var db = client.db(configuration.db, { promoteLongs: false });
         db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore').insertMany(
           [
             { a: Long.fromNumber(10) },
@@ -1950,7 +1950,7 @@ describe('Insert', function () {
             test.ok(doc);
 
             db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore')
-              .find({}, { promoteLongs: false })
+              .find({})
               .batchSize(2)
               .toArray(function (err, docs) {
                 expect(err).to.not.exist;
