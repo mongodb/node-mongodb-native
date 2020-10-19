@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands } = require('./shared');
+const { assert: test, filterForCommands, withMonitoredClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -8,6 +8,7 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
+const { formatSort } = require('../../src/sort');
 
 describe('Cursor', function () {
   before(function () {
@@ -405,74 +406,66 @@ describe('Cursor', function () {
           }
 
           function f() {
-            var number_of_functions = 9;
-            var finished = function () {
+            var number_of_functions = 7;
+            var finished = function (cursor) {
               number_of_functions = number_of_functions - 1;
               if (number_of_functions === 0) {
-                done();
+                cursor.close(done);
+              } else {
+                cursor.close();
               }
             };
 
             var cursor = collection.find().sort(['a', 1]);
-            test.deepEqual(['a', 1], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 1);
-            test.deepEqual([['a', 1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', -1);
-            test.deepEqual([['a', -1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: -1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 'asc');
-            test.deepEqual([['a', 'asc']], cursor.sortValue);
-            finished();
-
-            cursor = collection.find().sort([
-              ['a', -1],
-              ['b', 1]
-            ]);
-            var entries = cursor.sortValue.entries();
-            test.deepEqual(['a', -1], entries.next().value);
-            test.deepEqual(['b', 1], entries.next().value);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 1).sort('a', -1);
-            test.deepEqual([['a', -1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: -1 }, cursor.sortValue);
+            finished(cursor);
 
+            cursor = collection.find();
             cursor.next(err => {
               expect(err).to.not.exist;
               try {
                 cursor.sort(['a']);
               } catch (err) {
                 test.equal('Cursor is closed', err.message);
-                finished();
+                finished(cursor);
               }
             });
 
-            collection
-              .find()
-              .sort('a', 25)
-              .next(err => {
-                test.equal(
-                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                  err.message
-                );
-                finished();
-              });
+            cursor = collection.find();
+            try {
+              cursor.sort('a', 25);
+            } catch (err) {
+              test.equal('Invalid sort direction: 25', err.message);
+            }
+            cursor.next(() => {
+              finished(cursor);
+            });
 
-            collection
-              .find()
-              .sort(25)
-              .next(err => {
-                test.equal(
-                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                  err.message
-                );
-                finished();
-              });
+            cursor = collection.find();
+            try {
+              cursor.sort(25);
+            } catch (err) {
+              test.equal('Invalid sort format: 25', err.message);
+            }
+            cursor.next(() => {
+              finished(cursor);
+            });
           }
 
           insert(function () {
@@ -4309,6 +4302,82 @@ describe('Cursor', function () {
               done();
             });
         });
+      });
+    });
+  });
+
+  context('sort', function () {
+    const findSort = (input, output) =>
+      withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_dos', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}, { sort: input });
+          expect(cursor.sortValue).to.deep.equal(output);
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            expect(events[0].command.sort).to.deep.equal(output);
+            cursor.close(done);
+          });
+        });
+      });
+
+    const cursorSort = (input, output) =>
+      withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_dos', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}).sort(input);
+          expect(cursor.sortValue).to.deep.equal(output);
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            expect(events[0].command.sort).to.deep.equal(output);
+            cursor.close(done);
+          });
+        });
+      });
+
+    it('should use find options object', findSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use find options string', findSort('alpha', { alpha: 1 }));
+    it('should use find options shallow array', findSort(['alpha', 1], { alpha: 1 }));
+    it('should use find options deep array', findSort([['alpha', 1]], { alpha: 1 }));
+
+    it('should use cursor.sort object', cursorSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use cursor.sort string', cursorSort('alpha', { alpha: 1 }));
+    it('should use cursor.sort shallow array', cursorSort(['alpha', 1], { alpha: 1 }));
+    it('should use cursor.sort deep array', cursorSort([['alpha', 1]], { alpha: 1 }));
+
+    it('formatSort - one key', () => {
+      expect(formatSort('alpha')).to.deep.equal({ alpha: 1 });
+      expect(formatSort(['alpha'])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 1)).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'asc')).to.deep.equal({ alpha: 1 });
+      expect(formatSort([['alpha', 'asc']])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'ascending')).to.deep.equal({ alpha: 1 });
+      expect(formatSort({ alpha: 1 })).to.deep.equal({ alpha: 1 });
+      expect(formatSort('beta')).to.deep.equal({ beta: 1 });
+      expect(formatSort(['beta'])).to.deep.equal({ beta: 1 });
+      expect(formatSort('beta', -1)).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'desc')).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'descending')).to.deep.equal({ beta: -1 });
+      expect(formatSort({ beta: -1 })).to.deep.equal({ beta: -1 });
+      expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal({
+        alpha: { $meta: 'hi' }
+      });
+    });
+
+    it('formatSort - multi key', () => {
+      expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(
+        formatSort([
+          ['alpha', 'asc'],
+          ['beta', 'ascending']
+        ])
+      ).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
+        alpha: { $meta: 'hi' },
+        beta: 1
       });
     });
   });

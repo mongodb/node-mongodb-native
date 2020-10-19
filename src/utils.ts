@@ -12,7 +12,6 @@ import type { OperationOptions, OperationBase, Hint } from './operations/operati
 import type { ClientSession } from './sessions';
 import type { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
-import type { SortDirection, Sort } from './operations/find';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Document } from './bson';
@@ -42,64 +41,6 @@ export function getSingleProperty(
       return value;
     }
   });
-}
-
-/**
- * Translate the variety of sort specifiers into 1 or -1
- * @internal
- */
-export function formatSortValue(sortDirection: SortDirection): -1 | 1 {
-  const value = ('' + sortDirection).toLowerCase();
-
-  switch (value) {
-    case 'ascending':
-    case 'asc':
-    case '1':
-      return 1;
-    case 'descending':
-    case 'desc':
-    case '-1':
-      return -1;
-    default:
-      throw new Error(
-        'Illegal sort clause, must be of the form ' +
-          "[['field1', '(ascending|descending)'], " +
-          "['field2', '(ascending|descending)']]"
-      );
-  }
-}
-
-/**
- * Ensure the sort specifier is in a shape we expect, and maps keys to 1 or -1.
- * @internal
- */
-export function formattedOrderClause(sortValue?: unknown): Sort | null {
-  let orderBy: any = {};
-  if (sortValue == null) return null;
-  if (Array.isArray(sortValue)) {
-    if (sortValue.length === 0) {
-      return null;
-    }
-
-    for (let i = 0; i < sortValue.length; i++) {
-      if (sortValue[i].constructor === String) {
-        orderBy[sortValue[i]] = 1;
-      } else {
-        orderBy[sortValue[i][0]] = formatSortValue(sortValue[i][1]);
-      }
-    }
-  } else if (sortValue != null && typeof sortValue === 'object') {
-    orderBy = sortValue;
-  } else if (typeof sortValue === 'string') {
-    orderBy[sortValue] = 1;
-  } else {
-    throw new Error(
-      'Illegal sort clause, must be of the form ' +
-        "[['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]"
-    );
-  }
-
-  return orderBy;
 }
 
 /**

@@ -41,7 +41,7 @@ import {
   EstimatedDocumentCountOperation,
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { FindOperation, FindOptions, Sort } from './operations/find';
+import { FindOperation, FindOptions } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
@@ -86,6 +86,7 @@ import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
+import type { Sort } from './sort';
 
 /** @public */
 export interface Collection {

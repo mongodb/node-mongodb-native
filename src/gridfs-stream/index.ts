@@ -13,7 +13,8 @@ import type { Db } from '../db';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
 import type { Cursor } from './../cursor/cursor';
-import type { FindOptions, Sort } from './../operations/find';
+import type { FindOptions } from './../operations/find';
+import type { Sort } from '../sort';
 import type { Logger } from '../logger';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {

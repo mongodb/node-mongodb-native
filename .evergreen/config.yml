@@ -83,6 +83,18 @@ functions:
     - command: expansions.update
       params:
         file: mo-expansion.yml
+  bootstrap mongohoused:
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/build-mongohouse-local.sh
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          ${PREPARE_SHELL}
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
   run tests:
     - command: shell.exec
       type: test
@@ -189,6 +201,15 @@ functions:
         script: |
           MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
+  run data lake tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          MONGODB_URI='mongodb://mhuser:pencil@localhost' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
   run tls tests:
     - command: shell.exec
       type: test
@@ -723,6 +744,11 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
+  - name: test-atlas-data-lake
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongohoused
+      - func: run data lake tests
   - name: test-auth-kerberos
     tags:
       - auth
@@ -1111,6 +1137,7 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
       - test-tls-support
@@ -1178,6 +1205,7 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+      - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
   - name: ubuntu-14.04-erbium
@@ -1215,6 +1243,7 @@ buildvariants:
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
       - test-atlas-connectivity
+      - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
       - test-tls-support

@@ -149,7 +149,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
               }
-
               return testPromise.then(() => validateOutcome(spec, testContext));
             });
           });
@@ -165,6 +164,9 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
+
+  if (context.skipPrepareDatabase) return Promise.resolve();
+
   const setupPromise = db
     .admin()
     .command({ killAllSessions: [] })
@@ -279,13 +281,20 @@ function runTestSuiteTest(configuration, spec, context) {
     )
   );
 
-  const url = resolveConnectionString(configuration, spec);
+  const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
+  let pingTracker = 0;
   client.on('commandStarted', event => {
     if (IGNORED_COMMANDS.has(event.commandName)) {
       return;
+    }
+
+    // This gets rid of the first ping command
+    if (event.commandName === 'ping') {
+      pingTracker++;
+      if (pingTracker === 1) return;
     }
 
     context.commandEvents.push(event);
@@ -305,22 +314,24 @@ function runTestSuiteTest(configuration, spec, context) {
 
     let session0, session1;
     let savedSessionData;
-    try {
-      session0 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-      );
-      session1 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-      );
 
-      savedSessionData = {
-        session0: JSON.parse(EJSON.stringify(session0.id)),
-        session1: JSON.parse(EJSON.stringify(session1.id))
-      };
-    } catch (err) {
-      // ignore
+    if (context.useSessions) {
+      try {
+        session0 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+        );
+        session1 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+        );
+
+        savedSessionData = {
+          session0: JSON.parse(EJSON.stringify(session0.id)),
+          session1: JSON.parse(EJSON.stringify(session1.id))
+        };
+      } catch (err) {
+        // ignore
+      }
     }
-
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 
