@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import { deprecate } from 'util';
-import { Long, BSONSerializeOptions } from '../bson';
+import { Long, Document, BSONSerializeOptions } from '../bson';
 import { MongoError, MongoNetworkError, AnyError } from '../error';
 import { Logger } from '../logger';
 import { executeOperation } from '../operations/execute_operation';
@@ -13,7 +13,6 @@ import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Hint, OperationBase } from '../operations/operation';
-import type { Document } from '../bson';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { ReadConcern } from '../read_concern';
