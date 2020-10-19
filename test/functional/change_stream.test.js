@@ -1510,7 +1510,7 @@ describe('Change Streams', function() {
       };
 
       co(function*() {
-        primaryServer = yield mock.createServer();
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
         let counter = 0;
         primaryServer.setMessageHandler(request => {
