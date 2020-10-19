@@ -334,7 +334,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
 }
 
 function checkIndexes(stream: GridFSBucketWriteStream, callback: Callback): void {
-  stream.files.findOne({}, { fields: { _id: 1 } }, (error, doc) => {
+  stream.files.findOne({}, { projection: { _id: 1 } }, (error, doc) => {
     if (error) {
       return callback(error);
     }

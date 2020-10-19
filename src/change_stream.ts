@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { MongoError, AnyError, isResumableError } from './error';
-import { Cursor, CursorOptions, CursorStream } from './cursor/cursor';
+import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import {
@@ -18,7 +18,6 @@ import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import type { CursorStreamOptions } from './cursor/core_cursor';
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 

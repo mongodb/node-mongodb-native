@@ -7,7 +7,7 @@ describe('Tailable cursor tests', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should correctly perform awaitdata', {
+  it('should correctly perform awaitData', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
@@ -54,12 +54,12 @@ describe('Tailable cursor tests', function () {
                   });
 
                   // Execute next
-                  cursor._next((cursorErr, cursorD) => {
+                  cursor.next((cursorErr, cursorD) => {
                     expect(cursorErr).to.not.exist;
                     expect(cursorD).to.exist;
 
                     const s = new Date();
-                    cursor._next(() => {
+                    cursor.next(() => {
                       const e = new Date();
                       expect(e.getTime() - s.getTime()).to.be.at.least(300);
 

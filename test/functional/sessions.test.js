@@ -123,7 +123,7 @@ describe('Sessions', function () {
               // verify that the `endSessions` command was sent
               const lastCommand = test.commands.started[test.commands.started.length - 1];
               expect(lastCommand.commandName).to.equal('endSessions');
-              expect(client.topology.s.sessionPool.sessions).to.have.length(0);
+              expect(client.topology).to.not.exist;
             });
         });
       });
@@ -143,7 +143,7 @@ describe('Sessions', function () {
             // verify that the `endSessions` command was sent
             const lastCommand = test.commands.started[test.commands.started.length - 1];
             expect(lastCommand.commandName).to.equal('endSessions');
-            expect(client.topology.s.sessionPool.sessions).to.have.length(0);
+            expect(client.topology).to.not.exist;
           });
       });
     }
