@@ -1,0 +1,57 @@
+{
+  "collection_name": "driverdata",
+  "database_name": "test",
+  "tests": [
+    {
+      "description": "A successful find event with getMore",
+      "operations": [
+        {
+          "object": "collection",
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "a": {
+                "$gte": 2
+              }
+            },
+            "sort": {
+              "a": 1
+            },
+            "batchSize": 3,
+            "limit": 4
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "driverdata",
+              "filter": {
+                "a": {
+                  "$gte": 2
+                }
+              },
+              "sort": {
+                "a": 1
+              },
+              "batchSize": 3,
+              "limit": 4
+            },
+            "command_name": "find",
+            "database_name": "test"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "batchSize": 1
+            },
+            "command_name": "getMore",
+            "database_name": "cursors"
+          }
+        }
+      ]
+    }
+  ]
+}
