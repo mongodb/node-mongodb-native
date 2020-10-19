@@ -78,7 +78,7 @@ export function inheritOrDefaultBSONSerializableOptions(
 ): BSONSerializeOptions {
   // Merge the BSONSerializeOptions, preferring options over parentOptions, and substituting a
   // default for values not set.
-  // Note that we exclude fieldsAsRaw and serializeFunctions because I was not sure about their usage
+  // Note that we exclude fieldsAsRaw and serializeFunctions because I was not sure about their usage //TODO: serialize functions?
   return {
     raw: options?.raw ?? parentOptions?.raw ?? false,
     promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,

@@ -101,8 +101,7 @@ export abstract class CommandOperation<
     }
 
     // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
-    // TODO, for collection it makes sense to take it from parent.s -- is this true for others?
-    // TODO: downside of this is after the command is created these values are *fixed* because they are already set to default/inherited values
+    // base accounts for the fact that Collection stores bson options in s, while Db stores bson options in s.options
     const base = Object.assign({}, parent?.s.options, parent?.s);
     Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, base));
   }

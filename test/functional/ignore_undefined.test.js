@@ -38,6 +38,75 @@ describe('Ignore Undefined', function () {
     }
   });
 
+  it('Should correctly inherit ignore undefined field from collection during insert', {
+    metadata: { requires: { topology: ['single'] } },
+
+    test: function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: false
+      });
+
+      client.connect(function (err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue', {
+          ignoreUndefined: true
+        });
+
+        // Ignore the undefined field
+        collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function (err) {
+          expect(err).to.not.exist;
+
+          // Locate the doument
+          collection.findOne(function (err, item) {
+            test.equal(1, item.a);
+            test.ok(item.b === undefined);
+            client.close(done);
+          });
+        });
+      });
+    }
+  });
+
+  it('Should correctly inherit ignore undefined field from operation during findOneAndReplace', {
+    metadata: { requires: { topology: ['single'] } },
+
+    test: function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: false
+      });
+
+      client.connect(function (err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
+
+        collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
+          expect(err).to.not.exist;
+
+          // Replace the doument, ignoring undefined fields
+          collection.findOneAndReplace(
+            {},
+            { a: 1, b: undefined },
+            { ignoreUndefined: true },
+            function (err) {
+              expect(err).to.not.exist;
+
+              // Locate the doument
+              collection.findOne(function (err, item) {
+                test.equal(1, item.a);
+                test.ok(item.b === undefined);
+                client.close(done);
+              });
+            }
+          );
+        });
+      });
+    }
+  });
+
   it(
     'Should correctly connect using MongoClient and perform insert document ignoring undefined field',
     {

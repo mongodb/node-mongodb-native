@@ -1902,6 +1902,69 @@ describe('Insert', function () {
     }
   });
 
+  it('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function (done) {
+      var configuration = this.configuration;
+
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        promoteLongs: true
+      });
+      client.connect(function (err, client) {
+        var db = client.db(configuration.db);
+        db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore').insertMany(
+          [
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) }
+          ],
+          function (err, doc) {
+            expect(err).to.not.exist;
+            test.ok(doc);
+
+            db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore')
+              .find({}, { promoteLongs: false })
+              .batchSize(2)
+              .toArray(function (err, docs) {
+                expect(err).to.not.exist;
+                var doc = docs.pop();
+
+                test.ok(doc.a._bsontype === 'Long');
+                client.close(done);
+              });
+          }
+        );
+      });
+    }
+  });
+
   it('shouldCorrectlyHonorPromoteLongTrueNativeBSON', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
