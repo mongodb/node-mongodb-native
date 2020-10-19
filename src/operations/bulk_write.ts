@@ -26,7 +26,7 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     this.collection = collection;
     this.operations = operations;
 
-    // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
+    // Assign BSON serialize options to OperationBase, preferring options over collection options
     Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
   }
 

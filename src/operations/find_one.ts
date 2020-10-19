@@ -17,7 +17,7 @@ export class FindOneOperation extends OperationBase<FindOptions, Document> {
     this.collection = collection;
     this.query = query;
 
-    // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
+    // Assign BSON serialize options to OperationBase, preferring options over collection options
     Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
   }
 

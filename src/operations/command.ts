@@ -38,7 +38,7 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
 /** @internal */
 export interface OperationParent {
   s: {
-    namespace: MongoDBNamespace; // TODO: how to improve?
+    namespace: MongoDBNamespace;
     serializeFunctions?: boolean;
     raw?: boolean;
     promoteLongs?: boolean;
@@ -100,7 +100,7 @@ export abstract class CommandOperation<
       this.logger = parent.logger;
     }
 
-    // Assign all bsonOptions to OperationBase obj, preferring command options over parent options.
+    // Assign BSON serialize options to OperationBase, preferring options over parent options.
     // base accounts for the fact that Collection stores bson options in s, while other parents,
     // like Db, stores bson options in s.options
     const base = Object.assign({}, parent?.s.options, parent?.s);

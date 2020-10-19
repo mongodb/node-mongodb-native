@@ -31,7 +31,7 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
     this.collection = collection;
     this.docs = docs;
 
-    // Assign all bsonOptions to OperationBase obj, preferring command options over parent options
+    // Assign BSON serialize options to OperationBase, preferring options over collection options
     Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
   }
 
