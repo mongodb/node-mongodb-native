@@ -1909,61 +1909,58 @@ describe('Insert', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function () {
-      var configuration = this.configuration;
-
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+    test: withClient((client, done) => {
+      const db = client.db('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore', {
         promoteLongs: true
       });
+      const collection = db.collection('test', { promoteLongs: false });
+      collection.insertMany(
+        [
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) },
+          { a: Long.fromNumber(10) }
+        ],
+        (err, doc) => {
+          expect(err).to.not.exist;
+          test.ok(doc);
 
-      return withClient(client, (client, done) => {
-        var db = client.db(configuration.db, { promoteLongs: false });
-        db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore').insertMany(
-          [
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) }
-          ],
-          (err, doc) => {
-            expect(err).to.not.exist;
-            test.ok(doc);
+          collection
+            .find({})
+            .batchSize(2)
+            .toArray((err, docs) => {
+              expect(err).to.not.exist;
 
-            db.collection('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore')
-              .find({})
-              .batchSize(2)
-              .toArray((err, docs) => {
-                expect(err).to.not.exist;
-                var doc = docs.pop();
-
-                test.ok(doc.a._bsontype === 'Long');
-                done();
+              docs.forEach((d, i) => {
+                expect(d.a, `Failed on the document at index ${i}`).to.not.be.a('number');
+                expect(d.a, `Failed on the document at index ${i}`).to.have.property('_bsontype');
+                expect(d.a._bsontype, `Failed on the document at index ${i}`).to.be.equal('Long');
               });
-          }
-        );
-      });
-    }
+              done();
+            });
+        }
+      );
+    })
   });
 
   it('shouldCorrectlyHonorPromoteLongTrueNativeBSON', {

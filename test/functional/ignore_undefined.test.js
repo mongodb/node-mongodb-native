@@ -153,14 +153,14 @@ describe('Ignore Undefined', function () {
   it('Should correctly inherit ignore undefined field from db during insert', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function () {
+    test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         ignoreUndefined: false
       });
 
-      return withClient(client, (client, done) => {
+      client.connect(function (err, client) {
         var db = client.db(configuration.db, { ignoreUndefined: true });
         var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue3');
 
