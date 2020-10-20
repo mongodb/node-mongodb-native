@@ -70,9 +70,12 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
   };
 }
 
-// Merge the given BSONSerializeOptions, preferring options over parentOptions, and substituting
-// defaults for values not set.
-export function inheritOrDefaultBSONSerializableOptions(
+/**
+ * Merge the given BSONSerializeOptions, preferring options over parentOptions, and substituting
+ * defaults for values not set.
+ * @internal
+ */
+export function inheritBSONOptions(
   options?: BSONSerializeOptions,
   parentOptions?: BSONSerializeOptions
 ): BSONSerializeOptions {

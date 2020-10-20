@@ -7,7 +7,7 @@ import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import { BSONSerializeOptions, Document, inheritOrDefaultBSONSerializableOptions } from '../bson';
+import { BSONSerializeOptions, Document, inheritBSONOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 
@@ -101,10 +101,9 @@ export abstract class CommandOperation<
     }
 
     // Assign BSON serialize options to OperationBase, preferring options over parent options.
-    // base accounts for the fact that Collection stores bson options in s, while other parents,
+    // Here, we account for the fact that Collection stores bson options in s, while other parents,
     // like Db, stores bson options in s.options
-    const base = Object.assign({}, parent?.s.options, parent?.s);
-    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, base));
+    Object.assign(this, inheritBSONOptions(options, { ...parent?.s.options, ...parent?.s }));
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -113,7 +112,7 @@ export abstract class CommandOperation<
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
-    const options = Object.assign({}, this.options, this.bsonOptions);
+    const options = { ...this.options, ...this.bsonOptions };
     const serverWireVersion = maxWireVersion(server);
     const inTransaction = this.session && this.session.inTransaction();
 

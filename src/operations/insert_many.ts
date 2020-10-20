@@ -4,7 +4,7 @@ import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import { ObjectId, Document, inheritOrDefaultBSONSerializableOptions } from '../bson';
+import { ObjectId, Document, inheritBSONOptions } from '../bson';
 import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
@@ -32,13 +32,13 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
     this.docs = docs;
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
-    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
+    Object.assign(this, inheritBSONOptions(options, collection.s));
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
-    const options = Object.assign({}, this.options, this.bsonOptions);
+    const options = { ...this.options, ...this.bsonOptions };
 
     if (!Array.isArray(docs)) {
       return callback(

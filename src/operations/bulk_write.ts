@@ -1,6 +1,6 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { OperationBase } from './operation';
-import { inheritOrDefaultBSONSerializableOptions } from '../bson';
+import { inheritBSONOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type {
@@ -27,13 +27,13 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     this.operations = operations;
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
-    Object.assign(this, inheritOrDefaultBSONSerializableOptions(options, collection.s));
+    Object.assign(this, inheritBSONOptions(options, collection.s));
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    const options = Object.assign({}, this.options, this.bsonOptions);
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Create the bulk operation
     const bulk: BulkOperationBase =

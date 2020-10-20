@@ -71,7 +71,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     const query = this.query;
     const sort = formattedOrderClause(this.sort);
     const doc = this.doc;
-    let options = Object.assign({}, this.options, this.bsonOptions);
+    let options = { ...this.options, ...this.bsonOptions };
 
     // Create findAndModify command object
     const cmd: Document = {
