@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands, withCursorFromClient } = require('./shared');
+const { assert: test, filterForCommands } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -8,6 +8,9 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
+const { format: f } = require('util');
+const { ObjectId } = require('bson');
+const { CoreCursor } = require('../../src/cursor/core_cursor');
 
 describe('Cursor', function () {
   before(function () {
@@ -4318,29 +4321,45 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
     test: function (done) {
-      return withCursorFromClient.bind(this)(
-        {
-          batchSize: 2,
-          collection: 'cursor0',
-          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
-        },
-        ({ cursor }) => {
-          // Execute next
-          return cursor._next((nextCursorErr, nextCursorD) => {
-            expect(nextCursorErr).to.not.exist;
-            expect(nextCursorD.a).to.equal(1);
-            expect(cursor.bufferedCount()).to.equal(1);
-            // Kill the cursor
-            return cursor._next((killCursorErr, killCursorD) => {
-              expect(killCursorErr).to.not.exist;
-              expect(killCursorD.a).to.equal(2);
-              expect(cursor.bufferedCount()).to.equal(0);
-              // Destroy the server connection
-              return done();
-            });
+      const BATCH_SIZE = 2;
+      const COLLECTION = 'cursor0';
+      const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
+
+      const testCursor = cursor => {
+        // Execute next
+        return cursor._next((nextCursorErr, nextCursorD) => {
+          expect(nextCursorErr).to.not.exist;
+          expect(nextCursorD.a).to.equal(1);
+          expect(cursor.bufferedCount()).to.equal(1);
+          // Kill the cursor
+          return cursor._next((killCursorErr, killCursorD) => {
+            expect(killCursorErr).to.not.exist;
+            expect(killCursorD.a).to.equal(2);
+            expect(cursor.bufferedCount()).to.equal(0);
+            // Destroy the server connection
+            return done();
           });
-        }
-      );
+        });
+      };
+
+      // prepare the cursor
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      return client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const db = client.db(configuration.db);
+        return db.createCollection(COLLECTION, (err, collection) => {
+          expect(err).to.not.exist;
+          return collection.insertMany(DOCS, this.configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const cursor = collection.find({});
+            this.defer(() => cursor.close());
+            cursor.batchSize(BATCH_SIZE);
+            return testCursor(cursor);
+          });
+        });
+      });
     }
   });
 
@@ -4349,29 +4368,44 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
     test: function (done) {
-      return withCursorFromClient.bind(this)(
-        {
-          batchSize: 5,
-          collection: 'cursor1',
-          docs: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }]
-        },
-        ({ cursor }) => {
-          // Execute next
-          return cursor._next((nextCursorErr, nextCursorD) => {
-            expect(nextCursorErr).to.not.exist;
-            expect(nextCursorD.a).to.equal(1);
-            expect(cursor.bufferedCount()).to.equal(4);
-            // Read the buffered Count
-            cursor.readBufferedDocuments(cursor.bufferedCount());
-            // Get the next item
-            return cursor._next((secondCursorErr, secondCursorD) => {
-              expect(secondCursorErr).to.not.exist;
-              expect(secondCursorD).to.not.exist;
-              return done();
-            });
+      const BATCH_SIZE = 5;
+      const COLLECTION = 'cursor1';
+      const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }];
+
+      const testCursor = cursor => {
+        return cursor._next((nextCursorErr, nextCursorD) => {
+          expect(nextCursorErr).to.not.exist;
+          expect(nextCursorD.a).to.equal(1);
+          expect(cursor.bufferedCount()).to.equal(4);
+          // Read the buffered Count
+          cursor.readBufferedDocuments(cursor.bufferedCount());
+          // Get the next item
+          return cursor._next((secondCursorErr, secondCursorD) => {
+            expect(secondCursorErr).to.not.exist;
+            expect(secondCursorD).to.not.exist;
+            return done();
           });
-        }
-      );
+        });
+      };
+
+      // prepare the cursor
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      return client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const db = client.db(configuration.db);
+        return db.createCollection(COLLECTION, (err, collection) => {
+          expect(err).to.not.exist;
+          return collection.insertMany(DOCS, this.configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const cursor = collection.find({});
+            this.defer(() => cursor.close());
+            cursor.batchSize(BATCH_SIZE);
+            return testCursor(cursor);
+          });
+        });
+      });
     }
   });
 
@@ -4380,31 +4414,47 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
     test: function (done) {
-      return withCursorFromClient.bind(this)(
-        {
-          batchSize: 5,
-          collection: 'cursor2',
-          docs: [{ a: 1 }]
-        },
-        ({ cursor }) => {
-          // Execute next
-          return cursor._next((nextCursorErr, nextCursorD) => {
-            expect(nextCursorErr).to.not.exist;
-            expect(nextCursorD.a).to.equal(1);
-            // Get the next item
-            return cursor._next((secondCursorErr, secondCursorD) => {
-              expect(secondCursorErr).to.not.exist;
-              expect(secondCursorD).to.not.exist;
-              return cursor._next((thirdCursorErr, thirdCursorD) => {
-                expect(thirdCursorErr).to.be.ok;
-                expect(thirdCursorD).to.be.undefined;
-                // Destroy the server connection
-                return done();
-              });
+      const BATCH_SIZE = 5;
+      const COLLECTION = 'cursor2';
+      const DOCS = [{ a: 1 }];
+
+      const testCursor = cursor => {
+        // Execute next
+        return cursor._next((nextCursorErr, nextCursorD) => {
+          expect(nextCursorErr).to.not.exist;
+          expect(nextCursorD.a).to.equal(1);
+          // Get the next item
+          return cursor._next((secondCursorErr, secondCursorD) => {
+            expect(secondCursorErr).to.not.exist;
+            expect(secondCursorD).to.not.exist;
+            return cursor._next((thirdCursorErr, thirdCursorD) => {
+              expect(thirdCursorErr).to.be.ok;
+              expect(thirdCursorD).to.be.undefined;
+              // Destroy the server connection
+              return done();
             });
           });
-        }
-      );
+        });
+      };
+
+      // prepare the cursor
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      return client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const db = client.db(configuration.db);
+        return db.createCollection(COLLECTION, (err, collection) => {
+          expect(err).to.not.exist;
+          return collection.insertMany(DOCS, this.configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const cursor = collection.find({});
+            this.defer(() => cursor.close());
+            cursor.batchSize(BATCH_SIZE);
+            return testCursor(cursor);
+          });
+        });
+      });
     }
   });
 
@@ -4414,33 +4464,49 @@ describe('Cursor', function () {
     },
 
     test: function (done) {
-      return withCursorFromClient.bind(this)(
-        {
-          batchSize: 2,
-          collection: 'cursor3',
-          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
-        },
-        ({ cursor }) => {
-          // Execute next
-          return cursor._next((nextCursorErr, nextCursorD) => {
-            expect(nextCursorErr).to.not.exist;
-            expect(nextCursorD.a).to.equal(1);
+      const BATCH_SIZE = 2;
+      const COLLECTION = 'cursor3';
+      const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
 
-            // Get the next item
-            return cursor._next((secondCursorErr, secondCursorD) => {
-              expect(secondCursorErr).to.not.exist;
-              expect(secondCursorD.a).to.equal(2);
+      const testCursor = cursor => {
+        // Execute next
+        return cursor._next((nextCursorErr, nextCursorD) => {
+          expect(nextCursorErr).to.not.exist;
+          expect(nextCursorD.a).to.equal(1);
 
-              return cursor._next((thirdCursorErr, thirdCursorD) => {
-                expect(thirdCursorErr).to.not.exist;
-                expect(thirdCursorD.a).to.equal(3);
-                // Destroy the server connection
-                return done();
-              });
+          // Get the next item
+          return cursor._next((secondCursorErr, secondCursorD) => {
+            expect(secondCursorErr).to.not.exist;
+            expect(secondCursorD.a).to.equal(2);
+
+            return cursor._next((thirdCursorErr, thirdCursorD) => {
+              expect(thirdCursorErr).to.not.exist;
+              expect(thirdCursorD.a).to.equal(3);
+              // Destroy the server connection
+              return done();
             });
           });
-        }
-      );
+        });
+      };
+
+      // prepare the cursor
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      return client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const db = client.db(configuration.db);
+        return db.createCollection(COLLECTION, (err, collection) => {
+          expect(err).to.not.exist;
+          return collection.insertMany(DOCS, this.configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const cursor = collection.find({});
+            this.defer(() => cursor.close());
+            cursor.batchSize(BATCH_SIZE);
+            return testCursor(cursor);
+          });
+        });
+      });
     }
   });
 
@@ -4449,34 +4515,459 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
     test: function (done) {
-      return withCursorFromClient.bind(this)(
-        {
-          batchSize: 2,
-          collection: 'cursor4',
-          docs: [{ a: 1 }, { a: 2 }, { a: 3 }]
-        },
-        ({ cursor }) => {
-          return cursor._next((nextCursorErr, nextCursorD) => {
-            expect(nextCursorErr).to.not.exist;
-            expect(nextCursorD.a).to.equal(1);
-            // Get the next item
-            return cursor._next((secondCursorErr, secondCursorD) => {
-              expect(secondCursorErr).to.not.exist;
-              expect(secondCursorD.a).to.equal(2);
-              // Kill cursor
-              return cursor.kill(() => {
-                // Should error out
-                return cursor._next((thirdCursorErr, thirdCursorD) => {
-                  expect(thirdCursorErr).to.not.exist;
-                  expect(thirdCursorD).to.not.exist;
-                  // Destroy the server connection
-                  return done();
-                });
+      const BATCH_SIZE = 2;
+      const COLLECTION = 'cursor4';
+      const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
+
+      const testCursor = cursor => {
+        return cursor._next((nextCursorErr, nextCursorD) => {
+          expect(nextCursorErr).to.not.exist;
+          expect(nextCursorD.a).to.equal(1);
+          // Get the next item
+          return cursor._next((secondCursorErr, secondCursorD) => {
+            expect(secondCursorErr).to.not.exist;
+            expect(secondCursorD.a).to.equal(2);
+            // Kill cursor
+            return cursor.kill(() => {
+              // Should error out
+              return cursor._next((thirdCursorErr, thirdCursorD) => {
+                expect(thirdCursorErr).to.not.exist;
+                expect(thirdCursorD).to.not.exist;
+                // Destroy the server connection
+                return done();
               });
             });
           });
-        }
-      );
+        });
+      };
+
+      // prepare the cursor
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      return client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const db = client.db(configuration.db);
+        return db.createCollection(COLLECTION, (err, collection) => {
+          expect(err).to.not.exist;
+          return collection.insertMany(DOCS, this.configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const cursor = collection.find({});
+            this.defer(() => cursor.close());
+            cursor.batchSize(BATCH_SIZE);
+            return testCursor(cursor);
+          });
+        });
+      });
     }
+  });
+
+  context('Extend cursor tests', function () {
+    it('should correctly extend the cursor with custom implementation', {
+      metadata: {
+        requires: { topology: ['single'], mongodb: '>=3.2' }
+      },
+
+      test: function (done) {
+        var self = this;
+        const config = this.configuration;
+
+        // Create an extended cursor that adds a toArray function
+        class ExtendedCursor extends CoreCursor {
+          constructor(topology, ns, cmd, options) {
+            super(topology, ns, cmd, options);
+            var extendedCursorSelf = this;
+
+            // Resolve all the next
+            var getAllNexts = function (items, callback) {
+              extendedCursorSelf._next(function (err, item) {
+                if (err) return callback(err);
+                if (item === null) return callback(null, null);
+                items.push(item);
+                getAllNexts(items, callback);
+              });
+            };
+
+            // Adding a toArray function to the cursor
+            this.toArray = function (callback) {
+              var items = [];
+
+              getAllNexts(items, function (err) {
+                if (err) return callback(err, null);
+                callback(null, items);
+              });
+            };
+          }
+        }
+
+        // Attempt to connect, adding a custom cursor creator
+        const topology = config.newTopology(this.configuration.host, this.configuration.port, {
+          cursorFactory: ExtendedCursor
+        });
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            const ns = `${self.configuration.db}.inserts_extend_cursors`;
+            // Execute the write
+            server.insert(
+              ns,
+              [{ a: 1 }, { a: 2 }, { a: 3 }],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              (err, results) => {
+                expect(err).to.not.exist;
+                expect(results).property('n').to.equal(3);
+
+                // Execute find
+                const cursor = topology.cursor(ns, { find: 'inserts_extend_cursors', filter: {} });
+
+                // Force a single
+                // Logger.setLevel('debug');
+                // Set the batch size
+                cursor.batchSize = 2;
+                // Execute next
+                cursor.toArray((cursorErr, cursorItems) => {
+                  expect(cursorErr).to.not.exist;
+                  expect(cursorItems.length).to.equal(3);
+                  // Destroy the connection
+                  server.destroy(done);
+                });
+              }
+            );
+          });
+        });
+      }
+    });
+  });
+
+  context('Tailable cursor tests', function () {
+    before(function () {
+      return setupDatabase(this.configuration);
+    });
+
+    it('should correctly perform awaitdata', {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+      },
+
+      test: function (done) {
+        const self = this;
+        const topology = this.configuration.newTopology();
+        const ns = `${this.configuration.db}.cursor_tailable`;
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            // Create a capped collection
+            server.command(
+              `${self.configuration.db}.$cmd`,
+              { create: 'cursor_tailable', capped: true, size: 10000 },
+              (cmdErr, cmdRes) => {
+                expect(cmdErr).to.not.exist;
+                expect(cmdRes).to.exist;
+
+                // Execute the write
+                server.insert(
+                  ns,
+                  [{ a: 1 }],
+                  {
+                    writeConcern: { w: 1 },
+                    ordered: true
+                  },
+                  (insertErr, results) => {
+                    expect(insertErr).to.not.exist;
+                    expect(results.n).to.equal(1);
+
+                    // Execute find
+                    const cursor = topology.cursor(ns, {
+                      find: 'cursor_tailable',
+                      filter: {},
+                      batchSize: 2,
+                      tailable: true,
+                      awaitData: true
+                    });
+
+                    // Execute next
+                    cursor._next((cursorErr, cursorD) => {
+                      expect(cursorErr).to.not.exist;
+                      expect(cursorD).to.exist;
+
+                      const s = new Date();
+                      cursor._next(() => {
+                        const e = new Date();
+                        expect(e.getTime() - s.getTime()).to.be.at.least(300);
+
+                        // Destroy the server connection
+                        server.destroy(done);
+                      });
+
+                      setTimeout(() => cursor.kill(), 300);
+                    });
+                  }
+                );
+              }
+            );
+          });
+        });
+      }
+    });
+  });
+
+  context('Cursor undefined Tests', function () {
+    it('should correctly execute insert culling undefined', {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+      },
+
+      test: function (done) {
+        const self = this;
+        const topology = this.configuration.newTopology();
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            // Drop collection
+            server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, () => {
+              const ns = f('%s.insert1', self.configuration.db);
+              const objectId = new ObjectId();
+              // Execute the write
+              server.insert(
+                ns,
+                [{ _id: objectId, a: 1, b: undefined }],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true,
+                  ignoreUndefined: true
+                },
+                (insertErr, results) => {
+                  expect(insertErr).to.not.exist;
+                  expect(results.n).to.eql(1);
+
+                  // Execute find
+                  var cursor = topology.cursor(ns, {
+                    find: 'insert1',
+                    filter: { _id: objectId },
+                    batchSize: 2
+                  });
+
+                  // Execute next
+                  cursor._next((nextErr, d) => {
+                    expect(nextErr).to.not.exist;
+                    expect(d.b).to.be.undefined;
+
+                    // Destroy the connection
+                    server.destroy(done);
+                  });
+                }
+              );
+            });
+          });
+        });
+      }
+    });
+
+    it('should correctly execute update culling undefined', {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+      },
+
+      test: function (done) {
+        var self = this;
+        const topology = this.configuration.newTopology();
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            // Drop collection
+            server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, () => {
+              const ns = f('%s.update1', self.configuration.db);
+              const objectId = new ObjectId();
+              // Execute the write
+              server.update(
+                ns,
+                {
+                  q: { _id: objectId, a: 1, b: undefined },
+                  u: { $set: { a: 1, b: undefined } },
+                  upsert: true
+                },
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true,
+                  ignoreUndefined: true
+                },
+                (insertErr, results) => {
+                  expect(insertErr).to.not.exist;
+                  expect(results.n).to.eql(1);
+
+                  // Execute find
+                  const cursor = topology.cursor(ns, {
+                    find: 'update1',
+                    filter: { _id: objectId },
+                    batchSize: 2
+                  });
+
+                  // Execute next
+                  cursor._next((nextErr, d) => {
+                    expect(nextErr).to.not.exist;
+                    expect(d.b).to.be.undefined;
+
+                    // Destroy the connection
+                    server.destroy(done);
+                  });
+                }
+              );
+            });
+          });
+        });
+      }
+    });
+
+    it('should correctly execute remove culling undefined', {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded'] }
+      },
+
+      test: function (done) {
+        const self = this;
+        const topology = this.configuration.newTopology();
+        const ns = f('%s.remove1', this.configuration.db);
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            const objectId = new ObjectId();
+            server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, () => {
+              // Execute the write
+              server.insert(
+                ns,
+                [
+                  { id: objectId, a: 1, b: undefined },
+                  { id: objectId, a: 2, b: 1 }
+                ],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true
+                },
+                (insertErr, results) => {
+                  expect(insertErr).to.not.exist;
+                  expect(results.n).to.eql(2);
+
+                  // Execute the write
+                  server.remove(
+                    ns,
+                    [
+                      {
+                        q: { b: undefined },
+                        limit: 0
+                      }
+                    ],
+                    {
+                      writeConcern: { w: 1 },
+                      ordered: true,
+                      ignoreUndefined: true
+                    },
+                    (removeErr, removeResults) => {
+                      expect(removeErr).to.not.exist;
+                      expect(removeResults.n).to.eql(2);
+
+                      // Destroy the connection
+                      server.destroy(done);
+                    }
+                  );
+                }
+              );
+            });
+          });
+        });
+      }
+    });
+
+    it('should correctly execute remove not culling undefined', {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded'] }
+      },
+
+      test: function (done) {
+        const self = this;
+        const topology = this.configuration.newTopology();
+        const ns = f('%s.remove2', this.configuration.db);
+
+        topology.connect(err => {
+          expect(err).to.not.exist;
+          this.defer(() => topology.close());
+
+          topology.selectServer('primary', (err, server) => {
+            expect(err).to.not.exist;
+
+            const objectId = new ObjectId();
+            server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, () => {
+              // Execute the write
+              server.insert(
+                ns,
+                [
+                  { id: objectId, a: 1, b: undefined },
+                  { id: objectId, a: 2, b: 1 }
+                ],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true
+                },
+                (insertErr, results) => {
+                  expect(insertErr).to.not.exist;
+                  expect(results.n).to.eql(2);
+
+                  // Execute the write
+                  server.remove(
+                    ns,
+                    [
+                      {
+                        q: { b: null },
+                        limit: 0
+                      }
+                    ],
+                    {
+                      writeConcern: { w: 1 },
+                      ordered: true
+                    },
+                    (removeErr, removeResults) => {
+                      expect(removeErr).to.not.exist;
+                      expect(removeResults.n).to.eql(1);
+
+                      // Destroy the connection
+                      server.destroy();
+                      // Finish the test
+                      done();
+                    }
+                  );
+                }
+              );
+            });
+          });
+        });
+      }
+    });
   });
 });
