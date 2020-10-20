@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands } = require('./shared');
+const { assert: test, filterForCommands, withMonitoredClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -10,7 +10,8 @@ const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 const { format: f } = require('util');
 const { ObjectId } = require('bson');
-const { CoreCursor } = require('../../src/cursor/core_cursor');
+const { Cursor } = require('../../src/cursor/cursor');
+const { formatSort } = require('../../src/sort');
 
 describe('Cursor', function () {
   before(function () {
@@ -408,74 +409,66 @@ describe('Cursor', function () {
           }
 
           function f() {
-            var number_of_functions = 9;
-            var finished = function () {
+            var number_of_functions = 7;
+            var finished = function (cursor) {
               number_of_functions = number_of_functions - 1;
               if (number_of_functions === 0) {
-                done();
+                cursor.close(done);
+              } else {
+                cursor.close();
               }
             };
 
             var cursor = collection.find().sort(['a', 1]);
-            test.deepEqual(['a', 1], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 1);
-            test.deepEqual([['a', 1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', -1);
-            test.deepEqual([['a', -1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: -1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 'asc');
-            test.deepEqual([['a', 'asc']], cursor.sortValue);
-            finished();
-
-            cursor = collection.find().sort([
-              ['a', -1],
-              ['b', 1]
-            ]);
-            var entries = cursor.sortValue.entries();
-            test.deepEqual(['a', -1], entries.next().value);
-            test.deepEqual(['b', 1], entries.next().value);
-            finished();
+            test.deepEqual({ a: 1 }, cursor.sortValue);
+            finished(cursor);
 
             cursor = collection.find().sort('a', 1).sort('a', -1);
-            test.deepEqual([['a', -1]], cursor.sortValue);
-            finished();
+            test.deepEqual({ a: -1 }, cursor.sortValue);
+            finished(cursor);
 
+            cursor = collection.find();
             cursor.next(err => {
               expect(err).to.not.exist;
               try {
                 cursor.sort(['a']);
               } catch (err) {
                 test.equal('Cursor is closed', err.message);
-                finished();
+                finished(cursor);
               }
             });
 
-            collection
-              .find()
-              .sort('a', 25)
-              .next(err => {
-                test.equal(
-                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                  err.message
-                );
-                finished();
-              });
+            cursor = collection.find();
+            try {
+              cursor.sort('a', 25);
+            } catch (err) {
+              test.equal('Invalid sort direction: 25', err.message);
+            }
+            cursor.next(() => {
+              finished(cursor);
+            });
 
-            collection
-              .find()
-              .sort(25)
-              .next(err => {
-                test.equal(
-                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                  err.message
-                );
-                finished();
-              });
+            cursor = collection.find();
+            try {
+              cursor.sort(25);
+            } catch (err) {
+              test.equal('Invalid sort format: 25', err.message);
+            }
+            cursor.next(() => {
+              finished(cursor);
+            });
           }
 
           insert(function () {
@@ -1680,7 +1673,7 @@ describe('Cursor', function () {
           collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            collection.find({}, { fields: { x: 0 } }).toArray((err, items) => {
+            collection.find({}, { projection: { x: 0 } }).toArray((err, items) => {
               expect(err).to.not.exist;
               test.equal(1, items.length);
               test.equal(2, items[0].a);
@@ -2187,8 +2180,8 @@ describe('Cursor', function () {
             collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
-              // Create cursor with awaitdata, and timeout after the period specified
-              const cursor = collection.find({}, { tailable: true, awaitdata: true });
+              // Create cursor with awaitData, and timeout after the period specified
+              const cursor = collection.find({}, { tailable: true, awaitData: true });
               this.defer(() => cursor.close());
 
               // Execute each
@@ -2199,7 +2192,7 @@ describe('Cursor', function () {
 
                 if (err != null) {
                   // Even though cursor is exhausted, should not close session
-                  // unless cursor is manually closed, due to awaitdata / tailable
+                  // unless cursor is manually closed, due to awaitData / tailable
                   done();
                 }
               });
@@ -2231,8 +2224,8 @@ describe('Cursor', function () {
         db.createCollection('should_await_data_no_docs', options, (err, collection) => {
           expect(err).to.not.exist;
 
-          // Create cursor with awaitdata, and timeout after the period specified
-          const cursor = collection.find({}, { tailable: true, awaitdata: true });
+          // Create cursor with awaitData, and timeout after the period specified
+          const cursor = collection.find({}, { tailable: true, awaitData: true });
           this.defer(() => cursor.close());
 
           const rewind = cursor.rewind;
@@ -2276,7 +2269,7 @@ describe('Cursor', function () {
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             const cursor = collection.find({}, {});
             this.defer(() => cursor.close());
 
@@ -2285,7 +2278,7 @@ describe('Cursor', function () {
             cursor.each(err => {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
-                // unless cursor is manually closed, due to awaitdata / tailable
+                // unless cursor is manually closed, due to awaitData / tailable
                 done();
               } else {
                 cursor.kill();
@@ -2312,7 +2305,7 @@ describe('Cursor', function () {
         db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
             // should not timeout
-            collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
+            collection.find({}, {tailable:true, awaitData:false}).each(function(err, result) {
               test.ok(err != null);
             });
 
@@ -2348,8 +2341,8 @@ describe('Cursor', function () {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            // Create cursor with awaitdata, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitdata: true });
+            // Create cursor with awaitData, and timeout after the period specified
+            var cursor = collection.find({}, { tailable: true, awaitData: true });
             cursor.each(err => {
               if (err != null) {
                 // kill cursor b/c cursor is tailable / awaitable
@@ -3531,7 +3524,7 @@ describe('Cursor', function () {
             expect(err).to.not.exist;
 
             var s = new Date();
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection
               .find({})
               .addCursorFlag('tailable', true)
@@ -4124,7 +4117,7 @@ describe('Cursor', function () {
         .then(() => collection.insertMany(docs))
         .then(() => {
           cursor = collection.find();
-          return cursor.transformStream(transformParam);
+          return cursor.stream(transformParam);
         })
         .then(stream => {
           stream.on('data', function (doc) {
@@ -4144,7 +4137,7 @@ describe('Cursor', function () {
     });
   };
 
-  it('transformStream should apply the supplied transformation function to each document in the stream', function (done) {
+  it('stream should apply the supplied transformation function to each document in the stream', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4155,7 +4148,7 @@ describe('Cursor', function () {
     const config = {
       client: client,
       configuration: configuration,
-      collectionName: 'transformStream-test-transform',
+      collectionName: 'stream-test-transform',
       transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
       expectedSet: new Set(expectedDocs)
     };
@@ -4163,7 +4156,7 @@ describe('Cursor', function () {
     testTransformStream(config, done);
   });
 
-  it('transformStream should return a stream of unmodified docs if no transform function applied', function (done) {
+  it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [
@@ -4573,7 +4566,7 @@ describe('Cursor', function () {
         const config = this.configuration;
 
         // Create an extended cursor that adds a toArray function
-        class ExtendedCursor extends CoreCursor {
+        class ExtendedCursor extends Cursor {
           constructor(topology, ns, cmd, options) {
             super(topology, ns, cmd, options);
             var extendedCursorSelf = this;
@@ -4968,6 +4961,82 @@ describe('Cursor', function () {
           });
         });
       }
+    });
+  });
+
+  context('sort', function () {
+    const findSort = (input, output) =>
+      withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_dos', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}, { sort: input });
+          expect(cursor.sortValue).to.deep.equal(output);
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            expect(events[0].command.sort).to.deep.equal(output);
+            cursor.close(done);
+          });
+        });
+      });
+
+    const cursorSort = (input, output) =>
+      withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_dos', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}).sort(input);
+          expect(cursor.sortValue).to.deep.equal(output);
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            expect(events[0].command.sort).to.deep.equal(output);
+            cursor.close(done);
+          });
+        });
+      });
+
+    it('should use find options object', findSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use find options string', findSort('alpha', { alpha: 1 }));
+    it('should use find options shallow array', findSort(['alpha', 1], { alpha: 1 }));
+    it('should use find options deep array', findSort([['alpha', 1]], { alpha: 1 }));
+
+    it('should use cursor.sort object', cursorSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use cursor.sort string', cursorSort('alpha', { alpha: 1 }));
+    it('should use cursor.sort shallow array', cursorSort(['alpha', 1], { alpha: 1 }));
+    it('should use cursor.sort deep array', cursorSort([['alpha', 1]], { alpha: 1 }));
+
+    it('formatSort - one key', () => {
+      expect(formatSort('alpha')).to.deep.equal({ alpha: 1 });
+      expect(formatSort(['alpha'])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 1)).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'asc')).to.deep.equal({ alpha: 1 });
+      expect(formatSort([['alpha', 'asc']])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'ascending')).to.deep.equal({ alpha: 1 });
+      expect(formatSort({ alpha: 1 })).to.deep.equal({ alpha: 1 });
+      expect(formatSort('beta')).to.deep.equal({ beta: 1 });
+      expect(formatSort(['beta'])).to.deep.equal({ beta: 1 });
+      expect(formatSort('beta', -1)).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'desc')).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'descending')).to.deep.equal({ beta: -1 });
+      expect(formatSort({ beta: -1 })).to.deep.equal({ beta: -1 });
+      expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal({
+        alpha: { $meta: 'hi' }
+      });
+    });
+
+    it('formatSort - multi key', () => {
+      expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(
+        formatSort([
+          ['alpha', 'asc'],
+          ['beta', 'ascending']
+        ])
+      ).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
+        alpha: { $meta: 'hi' },
+        beta: 1
+      });
     });
   });
 });

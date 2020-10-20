@@ -102,6 +102,14 @@ Array.prototype.push.apply(TASKS, [
     ]
   },
   {
+    name: "test-atlas-data-lake",
+    commands: [
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongohoused' },
+      { func: 'run data lake tests' }
+    ]
+  },
+  {
     name: 'test-auth-kerberos',
     tags: ['auth', 'kerberos'],
     commands: [

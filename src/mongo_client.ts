@@ -273,6 +273,9 @@ export class MongoClient extends EventEmitter implements OperationParent {
 
     if (options && options.promiseLibrary) {
       PromiseProvider.set(options.promiseLibrary);
+      // TODO NODE-2530: this will go away when client options are sorted out
+      // NOTE: need this to prevent deprecation notice from being inherited in Db, Collection
+      delete options.promiseLibrary;
     }
 
     // The internal state
@@ -349,19 +352,29 @@ export class MongoClient extends EventEmitter implements OperationParent {
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
     return maybePromise(callback, cb => {
+      const completeClose = (err?: AnyError) => {
+        // clear out references to old topology
+        this.topology = undefined;
+        this.s.dbCache = new Map();
+        this.s.sessions = new Set();
+
+        cb(err);
+      };
+
       if (this.topology == null) {
-        return cb();
+        completeClose();
+        return;
       }
 
       const topology = this.topology;
       topology.close({ force }, err => {
         const autoEncrypter = topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
-          cb(err);
+          completeClose(err);
           return;
         }
 
-        autoEncrypter.teardown(force, err2 => cb(err || err2));
+        autoEncrypter.teardown(force, err2 => completeClose(err || err2));
       });
     });
   }
@@ -429,10 +442,6 @@ export class MongoClient extends EventEmitter implements OperationParent {
   ): Promise<MongoClient> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    if (options && options.promiseLibrary) {
-      PromiseProvider.set(options.promiseLibrary);
-    }
 
     // Create client
     const mongoClient = new MongoClient(url, options);

@@ -1,7 +1,6 @@
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { MongoError } from '../error';
-import { Cursor, CursorOptions } from './cursor';
-import { CursorState } from './core_cursor';
+import { Cursor, CursorOptions, CursorState } from './cursor';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperation } from '../operations/command';
 

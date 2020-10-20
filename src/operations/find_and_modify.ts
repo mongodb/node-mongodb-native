@@ -4,7 +4,6 @@ import {
   applyRetryableWrites,
   decorateWithCollation,
   applyWriteConcern,
-  formattedOrderClause,
   hasAtomicOperators,
   Callback
 } from '../utils';
@@ -14,7 +13,7 @@ import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { Sort } from './find';
+import { Sort, formatSort } from '../sort';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
@@ -69,7 +68,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
   execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
-    const sort = formattedOrderClause(this.sort);
+    const sort = formatSort(this.sort);
     const doc = this.doc;
     let options = this.options;
 
