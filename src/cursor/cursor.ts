@@ -9,6 +9,7 @@ import { CountOperation, CountOptions } from '../operations/count';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { Callback, emitDeprecatedOptionWarning, maybePromise, MongoDBNamespace } from '../utils';
 import { Sort, SortDirection, formatSort } from '../sort';
+import { PromiseProvider } from '../promise_provider';
 import type { OperationTime, ResumeToken } from '../change_stream';
 import type { CloseOptions } from '../cmap/connection_pool';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
@@ -1227,7 +1228,7 @@ export class Cursor<
   }
 
   /** Close the cursor, sending a KillCursor command and emitting close. */
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
@@ -1320,6 +1321,17 @@ export class Cursor<
     return this.logger;
   }
 
+  [Symbol.asyncIterator](): AsyncIterator<Document> {
+    const Promise = PromiseProvider.get();
+    return {
+      next: () => {
+        if (this.isClosed()) {
+          return Promise.resolve({ value: null, done: true });
+        }
+        return this.next().then(value => ({ value, done: value === null }));
+      }
+    };
+  }
   // Internal methods
 
   /** @internal */

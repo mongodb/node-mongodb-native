@@ -273,6 +273,9 @@ export class MongoClient extends EventEmitter implements OperationParent {
 
     if (options && options.promiseLibrary) {
       PromiseProvider.set(options.promiseLibrary);
+      // TODO NODE-2530: this will go away when client options are sorted out
+      // NOTE: need this to prevent deprecation notice from being inherited in Db, Collection
+      delete options.promiseLibrary;
     }
 
     // The internal state
@@ -439,10 +442,6 @@ export class MongoClient extends EventEmitter implements OperationParent {
   ): Promise<MongoClient> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    if (options && options.promiseLibrary) {
-      PromiseProvider.set(options.promiseLibrary);
-    }
 
     // Create client
     const mongoClient = new MongoClient(url, options);
