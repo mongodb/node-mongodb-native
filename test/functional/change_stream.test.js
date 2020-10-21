@@ -1039,7 +1039,7 @@ describe('Change Streams', function () {
     }
   });
 
-  it('should resume piping of Change Streams when a resumable error is encountered', {
+  it.skip('should resume Change Stream when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1048,12 +1048,10 @@ describe('Change Streams', function () {
       }
     },
     test: function (done) {
-      const filename = path.join(__dirname, '_nodemongodbnative_resumepipe.txt');
-      this.defer(() => fs.unlinkSync(filename));
       const configuration = this.configuration;
-      const ObjectId = configuration.require.ObjectId;
-      const Timestamp = configuration.require.Timestamp;
-      const Long = configuration.require.Long;
+
+      // Contain mock server
+      let primaryServer = null;
 
       // Default message fields
       const defaultFields = {
@@ -1070,8 +1068,13 @@ describe('Change Streams', function () {
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
-      mock.createServer(32000, 'localhost').then(primaryServer => {
-        this.defer(() => mock.cleanup());
+      // Die
+      let callsToGetMore = 0;
+
+      // Boot the mock
+      co(function* () {
+        primaryServer = yield mock.createServer(32000, 'localhost');
+
         let counter = 0;
         primaryServer.setMessageHandler(request => {
           const doc = request.document;
@@ -1083,44 +1086,17 @@ describe('Change Streams', function () {
                 {
                   ismaster: true,
                   secondary: false,
-                  me: primaryServer.uri(),
-                  primary: primaryServer.uri(),
+                  me: 'localhost:32000',
+                  primary: 'localhost:32000',
                   tags: { loc: 'ny' }
                 },
                 defaultFields
               )
             );
           } else if (doc.getMore) {
-            var changeDoc = {
-              cursor: {
-                id: new Long(1407, 1407),
-                nextBatch: [
-                  {
-                    _id: {
-                      ts: new Timestamp(4, 1501511802),
-                      ns: 'integration_tests.docsDataEvent',
-                      _id: new ObjectId('597f407a8fd4abb616feca93')
-                    },
-                    operationType: 'insert',
-                    ns: {
-                      db: 'integration_tests',
-                      coll: 'docsDataEvent'
-                    },
-                    fullDocument: {
-                      _id: new ObjectId('597f407a8fd4abb616feca93'),
-                      a: 1,
-                      counter: counter++
-                    }
-                  }
-                ]
-              },
-              ok: 1
-            };
-            request.reply(changeDoc, {
-              cursorId: new Long(1407, 1407)
-            });
+            callsToGetMore++;
           } else if (doc.aggregate) {
-            changeDoc = {
+            var changeDoc = {
               _id: {
                 ts: new Timestamp(4, 1501511802),
                 ns: 'integration_tests.docsDataEvent',
@@ -1149,37 +1125,53 @@ describe('Change Streams', function () {
             request.reply({ ok: 1 });
           }
         });
+      });
 
-        const client = configuration.newClient(`mongodb://${primaryServer.uri()}/`, {
-          socketTimeoutMS: 500,
-          validateOptions: true
-        });
+      let finalError = undefined;
+      const client = configuration.newClient('mongodb://localhost:32000/', {
+        socketTimeoutMS: 500,
+        validateOptions: true
+      });
 
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const database = client.db('integration_tests5');
+      client
+        .connect()
+        .then(client => {
+          const database = client.db('integration_tests');
           const collection = database.collection('MongoNetworkErrorTestPromises');
           const changeStream = collection.watch(pipeline);
 
-          const outStream = fs.createWriteStream(filename);
+          return changeStream
+            .next()
+            .then(function (change) {
+              assert.ok(change);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.fullDocument.counter, 0);
 
-          changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-          this.defer(() => changeStream.close());
-          // Listen for changes to the file
-          const watcher = fs.watch(filename, eventType => {
-            this.defer(() => watcher.close());
-            expect(eventType).to.equal('change');
+              // Add a tag to the cursor
+              changeStream.cursor.track = 1;
 
-            const fileContents = fs.readFileSync(filename, 'utf8');
-            const parsedFileContents = JSON.parse(fileContents);
-            expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
+              return changeStream.next();
+            })
+            .then(function (change) {
+              assert.ok(change);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.fullDocument.counter, 1);
 
-            done();
-          });
-        });
-      });
+              // Check this cursor doesn't have the tag added earlier (therefore it is a new cursor)
+              assert.notEqual(changeStream.cursor.track, 1);
+
+              // Check that only one getMore call was made
+              assert.equal(callsToGetMore, 1);
+
+              return Promise.all([changeStream.close(), primaryServer.destroy]).then(() =>
+                client.close()
+              );
+            });
+        })
+        .catch(err => (finalError = err))
+        .then(() => mock.cleanup())
+        .catch(err => (finalError = err))
+        .then(() => done(finalError));
     }
   });
 
@@ -1463,8 +1455,7 @@ describe('Change Streams', function () {
     }
   });
 
-  // TODO: resuming currently broken on piped change streams, fix as part of NODE-2172
-  it.skip('should resume piping of Change Streams when a resumable error is encountered', {
+  it('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1473,10 +1464,9 @@ describe('Change Streams', function () {
       }
     },
     test: function (done) {
+      const filename = path.join(__dirname, '_nodemongodbnative_resumepipe.txt');
+      this.defer(() => fs.unlinkSync(filename));
       const configuration = this.configuration;
-
-      // Contain mock server
-      let primaryServer = null;
 
       // Default message fields
       const defaultFields = {
@@ -1493,9 +1483,8 @@ describe('Change Streams', function () {
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
-      co(function* () {
-        primaryServer = yield mock.createServer();
-
+      mock.createServer(32000, 'localhost').then(primaryServer => {
+        this.defer(() => mock.cleanup());
         let counter = 0;
         primaryServer.setMessageHandler(request => {
           const doc = request.document;
@@ -1581,31 +1570,26 @@ describe('Change Streams', function () {
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
+          this.defer(() => client.close());
 
           const database = client.db('integration_tests5');
           const collection = database.collection('MongoNetworkErrorTestPromises');
           const changeStream = collection.watch(pipeline);
 
-          const filename = '/tmp/_nodemongodbnative_resumepipe.txt';
           const outStream = fs.createWriteStream(filename);
 
           changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-
+          this.defer(() => changeStream.close());
           // Listen for changes to the file
-          const watcher = fs.watch(filename, function (eventType) {
-            assert.equal(eventType, 'change');
+          const watcher = fs.watch(filename, eventType => {
+            this.defer(() => watcher.close());
+            expect(eventType).to.equal('change');
 
             const fileContents = fs.readFileSync(filename, 'utf8');
             const parsedFileContents = JSON.parse(fileContents);
-            assert.equal(parsedFileContents.fullDocument.a, 1);
+            expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
 
-            watcher.close();
-
-            changeStream.close(err => {
-              expect(err).to.not.exist;
-
-              mock.cleanup(() => done());
-            });
+            done();
           });
         });
       });
