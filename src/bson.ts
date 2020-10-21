@@ -71,21 +71,30 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
 }
 
 /**
- * Merge the given BSONSerializeOptions, preferring options over parentOptions, and substituting
- * defaults for values not set.
+ * Merge the given BSONSerializeOptions, preferring options over parentOptions, and optionally
+ * substituting defaults for values not set.
+ *
  * @internal
+ *
+ * @param options - The primary options to use
+ * @param parentOptions - The secondary options to use
+ * @param includeDefaultOptions - Whether to include default options for any values not set
  */
 export function inheritBSONOptions(
   options?: BSONSerializeOptions,
-  parentOptions?: BSONSerializeOptions
+  parentOptions?: BSONSerializeOptions,
+  includeDefaultOptions?: boolean
 ): BSONSerializeOptions {
-  return {
-    raw: options?.raw ?? parentOptions?.raw ?? false,
-    promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,
-    promoteValues: options?.promoteValues ?? parentOptions?.promoteValues ?? true,
-    promoteBuffers: options?.promoteBuffers ?? parentOptions?.promoteBuffers ?? false,
-    ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false,
-    serializeFunctions: options?.serializeFunctions ?? parentOptions?.serializeFunctions ?? false,
-    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {}
+  const defaults = {
+    raw: false,
+    promoteLongs: true,
+    promoteValues: true,
+    promoteBuffers: false,
+    ignoreUndefined: false,
+    serializeFunctions: false,
+    fieldsAsRaw: {}
   };
+
+  const base = includeDefaultOptions ? defaults : {};
+  return pluckBSONSerializeOptions({ ...base, ...parentOptions, ...options });
 }

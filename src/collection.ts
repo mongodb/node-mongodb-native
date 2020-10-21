@@ -8,7 +8,7 @@ import {
   MongoDBNamespace,
   Callback
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions } from './bson';
+import { ObjectId, Document, BSONSerializeOptions, inheritBSONOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -127,12 +127,6 @@ export interface CollectionPrivate {
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
   slaveOk?: boolean;
-  serializeFunctions?: boolean;
-  raw?: boolean;
-  promoteLongs?: boolean;
-  promoteValues?: boolean;
-  promoteBuffers?: boolean;
-  ignoreUndefined?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -190,29 +184,11 @@ export class Collection implements OperationParent {
       readPreference: ReadPreference.fromOptions(options),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
-      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk,
-      serializeFunctions:
-        options == null || options.serializeFunctions == null
-          ? db.s.options?.serializeFunctions
-          : options.serializeFunctions,
-      raw: options == null || options.raw == null ? db.s.options?.raw : options.raw,
-      promoteLongs:
-        options == null || options.promoteLongs == null
-          ? db.s.options?.promoteLongs
-          : options.promoteLongs,
-      promoteValues:
-        options == null || options.promoteValues == null
-          ? db.s.options?.promoteValues
-          : options.promoteValues,
-      promoteBuffers:
-        options == null || options.promoteBuffers == null
-          ? db.s.options?.promoteBuffers
-          : options.promoteBuffers,
-      ignoreUndefined:
-        options == null || options.ignoreUndefined == null
-          ? db.s.options?.ignoreUndefined
-          : options.ignoreUndefined
+      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk
     };
+
+    // Modify internal state with inherited BSON options
+    this.s.options = { ...this.s.options, ...inheritBSONOptions(options, db.s.options, false) };
   }
 
   /**

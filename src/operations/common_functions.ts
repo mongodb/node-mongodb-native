@@ -250,7 +250,7 @@ export function updateDocuments(
   // Do we return the actual result document
   // Either use override on the function, or go back to default on either the collection
   // level or db
-  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
+  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.options.serializeFunctions;
 
   // Execute the operation
   const op: Document = { q: selector, u: document };

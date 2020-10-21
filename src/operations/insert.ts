@@ -105,7 +105,6 @@ function insertDocuments(
 
   // If keep going set unordered
   if (finalOptions.keepGoing === true) finalOptions.ordered = false;
-  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
   docs = prepareDocs(coll, docs, options);
 
