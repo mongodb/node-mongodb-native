@@ -153,16 +153,16 @@ describe('Ignore Undefined', function () {
   it('Should correctly inherit ignore undefined field from db during insert', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+    test: function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         ignoreUndefined: false
       });
 
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db, { ignoreUndefined: true });
-        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue3');
+      return withClient.call(this, client, (client, done) => {
+        const db = client.db(configuration.db, { ignoreUndefined: true });
+        const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue3');
 
         // Ignore the undefined field
         collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), err => {
@@ -170,20 +170,20 @@ describe('Ignore Undefined', function () {
 
           // Locate the doument
           collection.findOne((err, item) => {
-            test.equal(1, item.a);
-            test.ok(item.b === undefined);
-            client.close(done);
+            expect(item).to.have.property('a', 1);
+            expect(item.b).to.be.undefined;
+            done();
           });
         });
       });
     }
   });
 
-  it(
-    'Should correctly inherit ignore undefined field from collection during insert',
-    withClient(function (client, done) {
-      var db = client.db('shouldCorrectlyIgnoreUndefinedValue4', { ignoreUndefined: false });
-      var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue4', {
+  it('Should correctly inherit ignore undefined field from collection during insert', {
+    metadata: { requires: { topology: ['single'] } },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldCorrectlyIgnoreUndefinedValue4', { ignoreUndefined: false });
+      const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue4', {
         ignoreUndefined: true
       });
 
@@ -193,19 +193,19 @@ describe('Ignore Undefined', function () {
 
         // Locate the doument
         collection.findOne((err, item) => {
-          test.equal(1, item.a);
-          test.ok(item.b === undefined);
+          expect(item).to.have.property('a', 1);
+          expect(item.b).to.be.undefined;
           done();
         });
       });
     })
-  );
+  });
 
-  it(
-    'Should correctly inherit ignore undefined field from operation during insert',
-    withClient(function (client, done) {
-      var db = client.db('shouldCorrectlyIgnoreUndefinedValue5');
-      var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue5', {
+  it('Should correctly inherit ignore undefined field from operation during insert', {
+    metadata: { requires: { topology: ['single'] } },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldCorrectlyIgnoreUndefinedValue5');
+      const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue5', {
         ignoreUndefined: false
       });
 
@@ -216,19 +216,19 @@ describe('Ignore Undefined', function () {
         // Locate the doument
         collection.findOne({}, (err, item) => {
           expect(err).to.not.exist;
-          test.equal(1, item.a);
-          test.ok(item.b === undefined);
+          expect(item).to.have.property('a', 1);
+          expect(item.b).to.be.undefined;
           done();
         });
       });
     })
-  );
+  });
 
-  it(
-    'Should correctly inherit ignore undefined field from operation during findOneAndReplace',
-    withClient(function (client, done) {
-      var db = client.db('shouldCorrectlyIgnoreUndefinedValue6');
-      var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue6', {
+  it('Should correctly inherit ignore undefined field from operation during findOneAndReplace', {
+    metadata: { requires: { topology: ['single'] } },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldCorrectlyIgnoreUndefinedValue6');
+      const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue6', {
         ignoreUndefined: false
       });
 
@@ -241,36 +241,36 @@ describe('Ignore Undefined', function () {
 
           // Locate the doument
           collection.findOne((err, item) => {
-            test.equal(1, item.a);
-            test.ok(item.b === undefined);
+            expect(item).to.have.property('a', 1);
+            expect(item.b).to.be.undefined;
             done();
           });
         });
       });
     })
-  );
+  });
 
-  it(
-    'Should correctly ignore undefined field during bulk write',
-    withClient(function (client, done) {
-      var db = client.db('shouldCorrectlyIgnoreUndefinedValue7');
-      var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue7');
+  it('Should correctly ignore undefined field during bulk write', {
+    metadata: { requires: { topology: ['single'] } },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldCorrectlyIgnoreUndefinedValue7');
+      const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue7');
 
       // Ignore the undefined field
       collection.bulkWrite(
-        [{ insertOne: { a: 0, b: undefined } }],
+        [{ insertOne: { a: 1, b: undefined } }],
         { ignoreUndefined: true },
         err => {
           expect(err).to.not.exist;
 
           // Locate the doument
           collection.findOne((err, item) => {
-            test.equal(0, item.a);
-            test.ok(item.b === undefined);
+            expect(item).to.have.property('a', 1);
+            expect(item.b).to.be.undefined;
             done();
           });
         }
       );
     })
-  );
+  });
 });
