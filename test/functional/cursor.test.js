@@ -17,11 +17,11 @@ const { formatSort } = require('../../src/sort');
 let count = 0;
 const collections = [];
 const uniqueCursorCollection = () => {
-  count++
+  count++;
   const collection = `cursor${count}`;
   collections.push(collection);
   return collection;
-}
+};
 
 describe('Cursor', function () {
   before(function () {
@@ -33,21 +33,23 @@ describe('Cursor', function () {
   });
 
   // tear down used collections
-  after(withClient((client, done) => {
-    if (!collections.length) return done();
-    const configuration = this
-    const db = client.db(configuration.db)
-    let dropsRan = 0;
-    const finish = () => {
-      dropsRan++;
-      if (collections.length === dropsRan) {
-        return done()
-      }
-    }
-    collections.forEach(collection => {
-      db.collection(collection).drop(finish);
-    });
-  }));
+  after(
+    withClient((client, done) => {
+      if (!collections.length) return done();
+      const configuration = this;
+      const db = client.db(configuration.db);
+      let dropsRan = 0;
+      const finish = () => {
+        dropsRan++;
+        if (collections.length === dropsRan) {
+          return done();
+        }
+      };
+      collections.forEach(collection => {
+        db.collection(collection).drop(finish);
+      });
+    })
+  );
 
   it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
     // Add a tag that our runner can trigger on
