@@ -10,6 +10,7 @@ import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
+import type { Topology } from '../sdam/topology';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -42,6 +43,7 @@ export interface OperationParent {
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   logger?: Logger;
+  topology?: Topology;
 }
 
 /** @internal */

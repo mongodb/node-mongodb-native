@@ -905,10 +905,14 @@ export abstract class BulkOperationBase {
    * @internal
    */
   constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
+    if (!collection.topology) {
+      throw new MongoError('MongoClient must be connected before attempting this operation');
+    }
+
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
-    const topology = collection.s.topology;
+    const topology = collection.topology;
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster
     // Get the namespace for the write operations

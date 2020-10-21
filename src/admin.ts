@@ -80,7 +80,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      this.s.db.topology,
       new RunCommandOperation(this.s.db, command, options),
       callback
     );
@@ -204,7 +204,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      this.s.db.topology,
       new AddUserOperation(this.s.db, username, password, options),
       callback
     );
@@ -230,7 +230,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      this.s.db.topology,
       new RemoveUserOperation(this.s.db, username, options),
       callback
     );
@@ -260,7 +260,7 @@ export class Admin {
     options = options || {};
 
     return executeOperation(
-      this.s.db.s.topology,
+      this.s.db.topology,
       new ValidateCollectionOperation(this, collectionName, options),
       callback
     );
@@ -284,7 +284,7 @@ export class Admin {
     options = options || {};
 
     return executeOperation(
-      this.s.db.s.topology,
+      this.s.db.topology,
       new ListDatabasesOperation(this.s.db, options),
       callback
     );

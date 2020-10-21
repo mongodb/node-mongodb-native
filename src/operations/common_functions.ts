@@ -45,7 +45,7 @@ export function indexInformation(
   const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
-  if (db.s.topology && db.s.topology.isDestroyed())
+  if (db.topology && db.topology.isDestroyed())
     return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
@@ -152,7 +152,7 @@ export function removeDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll, options);
+    decorateWithCollation(finalOptions, coll.topology, options);
   } catch (err) {
     return callback ? callback(err, null) : undefined;
   }
@@ -243,7 +243,7 @@ export function updateDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll, options);
+    decorateWithCollation(finalOptions, coll.topology, options);
   } catch (err) {
     return callback(err, null);
   }

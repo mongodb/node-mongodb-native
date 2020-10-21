@@ -103,9 +103,9 @@ function buildCountCommand(
     } else if (collectionOrCursor.cmd.hint) {
       hint = collectionOrCursor.cmd.hint;
     }
-    decorateWithCollation(cmd, collectionOrCursor, collectionOrCursor.cmd);
+    decorateWithCollation(cmd, collectionOrCursor.topology, collectionOrCursor.cmd);
   } else {
-    decorateWithCollation(cmd, collectionOrCursor, options);
+    decorateWithCollation(cmd, collectionOrCursor.topology, options);
   }
 
   // Add limit, skip and maxTimeMS if defined

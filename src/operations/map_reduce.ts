@@ -144,7 +144,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // Have we specified collation
     try {
-      decorateWithCollation(mapCommandHash, coll, options);
+      decorateWithCollation(mapCommandHash, coll.topology, options);
     } catch (err) {
       return callback(err);
     }
@@ -181,7 +181,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
         const doc = result.result;
         // Return a collection from another db
         const Db = loadDb();
-        collection = new Db(doc.db, coll.s.db.s.topology, coll.s.db.s.options).collection(
+        collection = new Db(doc.db, coll.s.db.s.client, coll.s.db.s.options).collection(
           doc.collection
         );
       } else {

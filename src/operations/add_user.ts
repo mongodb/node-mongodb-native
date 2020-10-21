@@ -74,7 +74,12 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
       roles = ['dbOwner'];
     }
 
-    const digestPassword = db.s.topology.lastIsMaster().maxWireVersion >= 7;
+    if (!db.topology) {
+      return callback(
+        new MongoError('MongoClient must be connected before attempting this operation')
+      );
+    }
+    const digestPassword = db.topology.lastIsMaster().maxWireVersion >= 7;
 
     let userPassword = password;
 

@@ -55,7 +55,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll, options);
+      decorateWithCollation(cmd, coll.topology, options);
     } catch (err) {
       return callback(err);
     }

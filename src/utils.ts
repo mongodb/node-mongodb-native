@@ -263,7 +263,7 @@ export function mergeOptionsAndWriteConcern(
  * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
-  topology: Topology,
+  topology: Topology | undefined,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
   options?: AnyOptions
@@ -433,19 +433,16 @@ export function isPromiseLike<T = any>(
  * @internal
  *
  * @param command - the command on which to apply collation
- * @param target - target of command
+ * @param topology - topology of command
  * @param options - options containing collation settings
  */
 export function decorateWithCollation(
   command: Document,
-  target: { s: { topology: Topology } } | { topology: Topology },
+  topology: Topology | undefined,
   options: AnyOptions
 ): void {
-  const topology =
-    ('s' in target && target.s.topology) || ('topology' in target && target.topology);
-
   if (!topology) {
-    throw new TypeError('parameter "target" is missing a topology');
+    throw new MongoError('MongoClient must be connected before attempting this operation');
   }
 
   const capabilities = topology.capabilities();
