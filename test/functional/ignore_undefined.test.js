@@ -170,8 +170,9 @@ describe('Ignore Undefined', function () {
 
           // Locate the doument
           collection.findOne((err, item) => {
+            expect(err).to.not.exist;
             expect(item).to.have.property('a', 1);
-            expect(item.b).to.be.undefined;
+            expect(item).to.not.have.property('b');
             done();
           });
         });
@@ -193,8 +194,9 @@ describe('Ignore Undefined', function () {
 
         // Locate the doument
         collection.findOne((err, item) => {
+          expect(err).to.not.exist;
           expect(item).to.have.property('a', 1);
-          expect(item.b).to.be.undefined;
+          expect(item).to.not.have.property('b');
           done();
         });
       });
@@ -217,7 +219,7 @@ describe('Ignore Undefined', function () {
         collection.findOne({}, (err, item) => {
           expect(err).to.not.exist;
           expect(item).to.have.property('a', 1);
-          expect(item.b).to.be.undefined;
+          expect(item).to.not.have.property('b');
           done();
         });
       });
@@ -241,8 +243,9 @@ describe('Ignore Undefined', function () {
 
           // Locate the doument
           collection.findOne((err, item) => {
+            expect(err).to.not.exist;
             expect(item).to.have.property('a', 1);
-            expect(item.b).to.be.undefined;
+            expect(item).to.not.have.property('b');
             done();
           });
         });
@@ -265,8 +268,9 @@ describe('Ignore Undefined', function () {
 
           // Locate the doument
           collection.findOne((err, item) => {
+            expect(err).to.not.exist;
             expect(item).to.have.property('a', 1);
-            expect(item.b).to.be.undefined;
+            expect(item).to.not.have.property('b');
             done();
           });
         }
