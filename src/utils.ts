@@ -263,7 +263,7 @@ export function mergeOptionsAndWriteConcern(
  * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
-  topology: Topology | undefined,
+  topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
   options?: AnyOptions
