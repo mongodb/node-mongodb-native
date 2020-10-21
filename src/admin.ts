@@ -15,6 +15,7 @@ import type { Callback } from './utils';
 import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
+import { MongoError } from './error';
 
 /** @internal */
 export interface AdminPrivate {
@@ -77,6 +78,9 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
+    if (!this.s.db.topology)
+      throw new MongoError('MongoClient must be connected to perform this operation');
+
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
@@ -189,6 +193,8 @@ export class Admin {
     options?: AddUserOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
+    if (!this.s.db.topology)
+      throw new MongoError('MongoClient must be connected to perform this operation');
     if (typeof password === 'function') {
       (callback = password), (password = undefined), (options = {});
     } else if (typeof password !== 'string') {
@@ -228,6 +234,8 @@ export class Admin {
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({ dbName: 'admin' }, options);
+    if (!this.s.db.topology)
+      throw new MongoError('MongoClient must be connected to perform this operation');
 
     return executeOperation(
       this.s.db.topology,
@@ -258,6 +266,8 @@ export class Admin {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
+    if (!this.s.db.topology)
+      throw new MongoError('MongoClient must be connected to perform this operation');
 
     return executeOperation(
       this.s.db.topology,
@@ -282,6 +292,8 @@ export class Admin {
   ): Promise<ListDatabasesResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
+    if (!this.s.db.topology)
+      throw new MongoError('MongoClient must be connected to perform this operation');
 
     return executeOperation(
       this.s.db.topology,

@@ -40,30 +40,22 @@ export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology | undefined, operation: T): Promise<TResult>;
+>(topology: Topology, operation: T): Promise<TResult>;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology | undefined, operation: T, callback: Callback<TResult>): void;
+>(topology: Topology, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(
-  topology: Topology | undefined,
-  operation: T,
-  callback?: Callback<TResult>
-): Promise<TResult> | void;
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(
-  topology: Topology | undefined,
-  operation: T,
-  callback?: Callback<TResult>
-): Promise<TResult> | void {
+>(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (topology == null) {
     throw new TypeError('This method requires a valid topology instance');
   }
