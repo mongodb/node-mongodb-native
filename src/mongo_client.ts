@@ -352,29 +352,19 @@ export class MongoClient extends EventEmitter implements OperationParent {
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
     return maybePromise(callback, cb => {
-      const completeClose = (err?: AnyError) => {
-        // clear out references to old topology
-        this.topology = undefined;
-        this.s.dbCache = new Map();
-        this.s.sessions = new Set();
-
-        cb(err);
-      };
-
       if (this.topology == null) {
-        completeClose();
-        return;
+        return cb();
       }
 
       const topology = this.topology;
       topology.close({ force }, err => {
         const autoEncrypter = topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
-          completeClose(err);
+          cb(err);
           return;
         }
 
-        autoEncrypter.teardown(force, err2 => completeClose(err || err2));
+        autoEncrypter.teardown(force, err2 => cb(err || err2));
       });
     });
   }
