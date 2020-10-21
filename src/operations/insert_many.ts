@@ -2,7 +2,7 @@ import { OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
-import type { Callback } from '../utils';
+import { Callback, deepFreeze } from '../utils';
 import type { Collection } from '../collection';
 import { ObjectId, Document, resolveBSONOptions } from '../bson';
 import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
@@ -25,6 +25,19 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
   collection: Collection;
   docs: Document[];
 
+  private bypassDocumentValidation;
+  private ordered;
+  private forceServerObjectId;
+
+  get builtOptions(): BulkWriteOptions {
+    return deepFreeze({
+      ...super.builtOptions,
+      bypassDocumentValidation: this.bypassDocumentValidation,
+      ordered: this.ordered,
+      forceServerObjectId: this.forceServerObjectId
+    });
+  }
+
   constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
     super(options);
 
@@ -33,20 +46,26 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
     this.bsonOptions = resolveBSONOptions(options, collection);
+    this.bypassDocumentValidation = options.bypassDocumentValidation;
+    this.ordered = options.ordered ?? !options.keepGoing;
+    this.forceServerObjectId = options.forceServerObjectId;
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
-    const options = { ...this.options, ...this.bsonOptions };
 
     if (!Array.isArray(docs)) {
-      return callback(
-        MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
-      );
+      return callback(new MongoError('docs parameter must be an array of documents'));
     }
 
+    const options = {
+      ...this.builtOptions,
+      serializeFunctions: this.builtOptions.serializeFunctions || coll.s.bsonOptions.serializeFunctions
+    };
+
     docs = prepareDocs(coll, docs, options);
+    // If keep going set unordered
 
     // Generate the bulk write operations
     const operations = [{ insertMany: docs }];

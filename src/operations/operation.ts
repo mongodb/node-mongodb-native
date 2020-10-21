@@ -1,7 +1,7 @@
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Document, BSONSerializeOptions } from '../bson';
-import type { MongoDBNamespace, Callback } from '../utils';
+import { MongoDBNamespace, Callback, deepFreeze } from '../utils';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {
@@ -22,7 +22,6 @@ export interface OperationConstructor extends Function {
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
-
   explain?: boolean;
   willRetryWrites?: boolean;
 }
@@ -44,12 +43,26 @@ export abstract class OperationBase<
   readPreference: ReadPreference;
   server!: Server;
   fullResponse?: boolean;
+  protected explain;
+  protected willRetryWrites;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
 
+  get builtOptions(): Readonly<OperationOptions> {
+    return deepFreeze({
+      ...this.options, // Should go away when options aren't generic params anymore.
+      ...this.bsonOptions,
+      session: this.session,
+      explain: this.explain,
+      willRetryWrites: this.willRetryWrites
+    });
+  }
+
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
+    this.explain = options.explain;
+    this.willRetryWrites = options.willRetryWrites;
     this.readPreference = ReadPreference.primary;
   }
 

@@ -1,38 +1,54 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
-import { CommandOperation } from './command';
-import { applyRetryableWrites, applyWriteConcern, Callback, MongoDBNamespace } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import {
+  applyRetryableWrites,
+  applyWriteConcern,
+  Callback,
+  deepFreeze,
+  MongoDBNamespace
+} from '../utils';
 import { prepareDocs } from './common_functions';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { Connection } from '../cmap/connection';
 import type { BulkWriteOptions } from '../bulk/common';
-import type { WriteConcernOptions } from '../write_concern';
 
 /** @internal */
 export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
   operations: Document[];
+  protected bypassDocumentValidation;
+  protected ordered;
+  protected forceServerObjectId;
+
+  get builtOptions(): BulkWriteOptions {
+    return deepFreeze({
+      ...super.builtOptions,
+      bypassDocumentValidation: this.bypassDocumentValidation,
+      ordered: this.ordered,
+      forceServerObjectId: this.forceServerObjectId
+    });
+  }
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: BulkWriteOptions) {
     super(options);
     this.ns = ns;
     this.operations = ops;
+
+    this.bypassDocumentValidation = options.bypassDocumentValidation;
+    this.ordered = options.ordered ?? !options.keepGoing;
+    this.forceServerObjectId = options.forceServerObjectId;
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    server.insert(
-      this.ns.toString(),
-      this.operations,
-      this.options as WriteCommandOptions,
-      callback
-    );
+    server.insert(this.ns.toString(), this.operations, this.builtOptions as any, callback);
   }
 }
 
 /** @public */
-export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface InsertOneOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
 }
@@ -54,26 +70,32 @@ export interface InsertOneResult {
 export class InsertOneOperation extends CommandOperation<InsertOneOptions, InsertOneResult> {
   collection: Collection;
   doc: Document;
+  protected bypassDocumentValidation;
+
+  get builtOptions(): InsertOneOptions {
+    return deepFreeze({
+      ...super.builtOptions,
+      bypassDocumentValidation: this.bypassDocumentValidation
+    });
+  }
 
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
     super(collection, options);
 
     this.collection = collection;
     this.doc = doc;
+    this.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
   execute(server: Server, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
-    const options = { ...this.options, ...this.bsonOptions };
 
     if (Array.isArray(doc)) {
-      return callback(
-        MongoError.create({ message: 'doc parameter must be an object', driver: true })
-      );
+      return callback(new MongoError('doc parameter must be an object'));
     }
 
-    insertDocuments(server, coll, [doc], options, (err, r) => {
+    insertDocuments(server, coll, [doc], this.builtOptions, (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers

@@ -1116,3 +1116,23 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   const keys = Object.keys(doc);
   return keys.length > 0 && keys[0][0] === '$';
 }
+
+export function deepFreeze<O extends Record<string, any>>(object: O): Readonly<O> {
+  // Retrieve the property names defined on object
+  const propNames = Object.getOwnPropertyNames(object);
+
+  // Freeze properties before freezing self
+
+  for (const name of propNames) {
+    const value = object[name];
+
+    if (name === 'session') continue;
+    if (ArrayBuffer.isView(value)) continue;
+
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      deepFreeze(value);
+    }
+  }
+
+  return Object.freeze(object);
+}
