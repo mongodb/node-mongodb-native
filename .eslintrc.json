@@ -20,6 +20,7 @@
     "prettier/prettier": "error",
     "es/no-destructuring": "error",
     "es/no-rest-spread-properties": "error",
+    "es/no-spread-elements": "error",
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "strict": ["error", "global"]

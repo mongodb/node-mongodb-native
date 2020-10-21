@@ -722,7 +722,8 @@ describe('ReadPreference', function() {
               }
               done();
             };
-            parent[method].apply(parent, [...args, callback]);
+            args.push(callback);
+            parent[method].apply(parent, args);
           });
         }
       });
