@@ -953,6 +953,7 @@ export class Cursor<
       throw new MongoError('batchSize requires an integer');
     }
 
+    this.s.batchSize = value;
     this.cmd.batchSize = value;
     this._batchSize = value;
     return this;

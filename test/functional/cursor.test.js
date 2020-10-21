@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands, withMonitoredClient } = require('./shared');
+const { assert: test, filterForCommands, withMonitoredClient, withClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -13,6 +13,16 @@ const { ObjectId } = require('bson');
 const { Cursor } = require('../../src/cursor/cursor');
 const { formatSort } = require('../../src/sort');
 
+// makes it easy to create new collections and track them
+let count = 0;
+const collections = [];
+const uniqueCursorCollection = () => {
+  count++
+  const collection = `cursor${count}`;
+  collections.push(collection);
+  return collection;
+}
+
 describe('Cursor', function () {
   before(function () {
     return setupDatabase(this.configuration, [
@@ -21,6 +31,23 @@ describe('Cursor', function () {
       'cursor_session_tests2'
     ]);
   });
+
+  // tear down used collections
+  after(withClient((client, done) => {
+    if (!collections.length) return done();
+    const configuration = this
+    const db = client.db(configuration.db)
+    let dropsRan = 0;
+    const finish = () => {
+      dropsRan++;
+      if (collections.length === dropsRan) {
+        return done()
+      }
+    }
+    collections.forEach(collection => {
+      db.collection(collection).drop(finish);
+    });
+  }));
 
   it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
     // Add a tag that our runner can trigger on
@@ -4315,7 +4342,7 @@ describe('Cursor', function () {
     },
     test: function (done) {
       const BATCH_SIZE = 2;
-      const COLLECTION = 'cursor0';
+      const COLLECTION = uniqueCursorCollection();
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
 
       const testCursor = cursor => {
@@ -4362,7 +4389,7 @@ describe('Cursor', function () {
     },
     test: function (done) {
       const BATCH_SIZE = 5;
-      const COLLECTION = 'cursor1';
+      const COLLECTION = uniqueCursorCollection();
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }];
 
       const testCursor = cursor => {
@@ -4408,7 +4435,7 @@ describe('Cursor', function () {
     },
     test: function (done) {
       const BATCH_SIZE = 5;
-      const COLLECTION = 'cursor2';
+      const COLLECTION = uniqueCursorCollection();
       const DOCS = [{ a: 1 }];
 
       const testCursor = cursor => {
@@ -4458,7 +4485,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const BATCH_SIZE = 2;
-      const COLLECTION = 'cursor3';
+      const COLLECTION = uniqueCursorCollection();
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
 
       const testCursor = cursor => {
@@ -4509,7 +4536,7 @@ describe('Cursor', function () {
     },
     test: function (done) {
       const BATCH_SIZE = 2;
-      const COLLECTION = 'cursor4';
+      const COLLECTION = uniqueCursorCollection();
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
 
       const testCursor = cursor => {
@@ -4524,9 +4551,9 @@ describe('Cursor', function () {
             return cursor.kill(() => {
               // Should error out
               return cursor.next((thirdCursorErr, thirdCursorD) => {
-                expect(thirdCursorErr).to.not.exist;
+                expect(thirdCursorErr).to.exist;
+                expect(thirdCursorErr.message).to.equal('Cursor is closed');
                 expect(thirdCursorD).to.not.exist;
-                // Destroy the server connection
                 return done();
               });
             });
