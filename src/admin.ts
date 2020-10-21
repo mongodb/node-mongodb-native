@@ -15,7 +15,6 @@ import type { Callback } from './utils';
 import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
-import { MongoClientClosedError } from './error';
 
 /** @internal */
 export interface AdminPrivate {
@@ -80,7 +79,6 @@ export class Admin {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({ dbName: 'admin' }, options);
 
-    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new RunCommandOperation(this.s.db, command, options),
@@ -205,7 +203,6 @@ export class Admin {
 
     options = Object.assign({ dbName: 'admin' }, options);
 
-    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new AddUserOperation(this.s.db, username, password, options),
@@ -232,7 +229,6 @@ export class Admin {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({ dbName: 'admin' }, options);
 
-    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new RemoveUserOperation(this.s.db, username, options),
@@ -263,7 +259,6 @@ export class Admin {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new ValidateCollectionOperation(this, collectionName, options),
@@ -288,7 +283,6 @@ export class Admin {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new ListDatabasesOperation(this.s.db, options),

@@ -252,7 +252,6 @@ export class Db implements OperationParent {
     options = options || {};
     options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new CreateCollectionOperation(this, name, options),
@@ -279,7 +278,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new RunCommandOperation(this, command, options),
@@ -419,7 +417,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.client.topology, new DbStatsOperation(this, options), callback);
   }
 
@@ -478,7 +475,6 @@ export class Db implements OperationParent {
     // Add return new collection
     options.new_collection = true;
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new RenameOperation(this.collection(fromCollection), toCollection, options),
@@ -505,7 +501,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new DropCollectionOperation(this, name, options),
@@ -530,7 +525,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new DropDatabaseOperation(this, options),
@@ -555,7 +549,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new CollectionsOperation(this, options),
@@ -586,7 +579,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new RunAdminCommandOperation(this, command, options),
@@ -624,7 +616,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new CreateIndexOperation(this, name, indexSpec, options),
@@ -672,8 +663,6 @@ export class Db implements OperationParent {
     }
 
     options = options || {};
-
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new AddUserOperation(this, username, password, options),
@@ -700,7 +689,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new RemoveUserOperation(this, username, options),
@@ -734,7 +722,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new SetProfilingLevelOperation(this, level, options),
@@ -759,7 +746,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new ProfilingLevelOperation(this, options),
@@ -790,7 +776,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new IndexInformationOperation(this, name, options),
@@ -864,7 +849,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new EvalOperation(this, code, parameters, options),
@@ -903,7 +887,6 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.client.topology,
       new EnsureIndexOperation(this, name, fieldOrSpec, options),

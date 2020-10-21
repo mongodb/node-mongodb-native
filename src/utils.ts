@@ -263,16 +263,14 @@ export function mergeOptionsAndWriteConcern(
  * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
-  topology: Topology,
+  topology: Topology | undefined,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
   options?: AnyOptions
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
-  if (topology == null) {
-    throw new TypeError('This method requires a valid topology instance');
-  }
+  if (topology == null) throw new MongoClientClosedError();
 
   if (!Array.isArray(args)) {
     throw new TypeError('This method requires an array of arguments to apply');

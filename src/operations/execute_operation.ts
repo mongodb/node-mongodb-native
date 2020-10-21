@@ -1,5 +1,5 @@
 import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError, AnyError } from '../error';
+import { MongoError, isRetryableError, AnyError, MongoClientClosedError } from '../error';
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
@@ -40,24 +40,32 @@ export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T): Promise<TResult>;
+>(topology: Topology | undefined, operation: T): Promise<TResult>;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback: Callback<TResult>): void;
+>(topology: Topology | undefined, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
+>(
+  topology: Topology | undefined,
+  operation: T,
+  callback?: Callback<TResult>
+): Promise<TResult> | void;
 export function executeOperation<
   T extends OperationBase<TOptions, TResult>,
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
+>(
+  topology: Topology | undefined,
+  operation: T,
+  callback?: Callback<TResult>
+): Promise<TResult> | void {
   if (topology == null) {
-    throw new TypeError('This method requires a valid topology instance');
+    throw new MongoClientClosedError();
   }
 
   if (!(operation instanceof OperationBase)) {
