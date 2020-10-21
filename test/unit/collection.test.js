@@ -4,7 +4,6 @@ const chai = require('chai');
 const expect = chai.expect;
 const { withClient } = require('../functional/shared');
 
-// TODO: does this test no longer count as unit?
 describe('Collection', function () {
   it('should not allow atomic operators for findOneAndReplace', {
     metadata: { requires: { topology: 'single' } },
