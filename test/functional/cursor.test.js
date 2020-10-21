@@ -4320,12 +4320,12 @@ describe('Cursor', function () {
 
       const testCursor = cursor => {
         // Execute next
-        return cursor._next((nextCursorErr, nextCursorD) => {
+        return cursor.next((nextCursorErr, nextCursorD) => {
           expect(nextCursorErr).to.not.exist;
           expect(nextCursorD.a).to.equal(1);
           expect(cursor.bufferedCount()).to.equal(1);
           // Kill the cursor
-          return cursor._next((killCursorErr, killCursorD) => {
+          return cursor.next((killCursorErr, killCursorD) => {
             expect(killCursorErr).to.not.exist;
             expect(killCursorD.a).to.equal(2);
             expect(cursor.bufferedCount()).to.equal(0);
@@ -4366,14 +4366,14 @@ describe('Cursor', function () {
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }];
 
       const testCursor = cursor => {
-        return cursor._next((nextCursorErr, nextCursorD) => {
+        return cursor.next((nextCursorErr, nextCursorD) => {
           expect(nextCursorErr).to.not.exist;
           expect(nextCursorD.a).to.equal(1);
           expect(cursor.bufferedCount()).to.equal(4);
           // Read the buffered Count
           cursor.readBufferedDocuments(cursor.bufferedCount());
           // Get the next item
-          return cursor._next((secondCursorErr, secondCursorD) => {
+          return cursor.next((secondCursorErr, secondCursorD) => {
             expect(secondCursorErr).to.not.exist;
             expect(secondCursorD).to.not.exist;
             return done();
@@ -4413,14 +4413,14 @@ describe('Cursor', function () {
 
       const testCursor = cursor => {
         // Execute next
-        return cursor._next((nextCursorErr, nextCursorD) => {
+        return cursor.next((nextCursorErr, nextCursorD) => {
           expect(nextCursorErr).to.not.exist;
           expect(nextCursorD.a).to.equal(1);
           // Get the next item
-          return cursor._next((secondCursorErr, secondCursorD) => {
+          return cursor.next((secondCursorErr, secondCursorD) => {
             expect(secondCursorErr).to.not.exist;
             expect(secondCursorD).to.not.exist;
-            return cursor._next((thirdCursorErr, thirdCursorD) => {
+            return cursor.next((thirdCursorErr, thirdCursorD) => {
               expect(thirdCursorErr).to.be.ok;
               expect(thirdCursorD).to.be.undefined;
               // Destroy the server connection
@@ -4463,16 +4463,16 @@ describe('Cursor', function () {
 
       const testCursor = cursor => {
         // Execute next
-        return cursor._next((nextCursorErr, nextCursorD) => {
+        return cursor.next((nextCursorErr, nextCursorD) => {
           expect(nextCursorErr).to.not.exist;
           expect(nextCursorD.a).to.equal(1);
 
           // Get the next item
-          return cursor._next((secondCursorErr, secondCursorD) => {
+          return cursor.next((secondCursorErr, secondCursorD) => {
             expect(secondCursorErr).to.not.exist;
             expect(secondCursorD.a).to.equal(2);
 
-            return cursor._next((thirdCursorErr, thirdCursorD) => {
+            return cursor.next((thirdCursorErr, thirdCursorD) => {
               expect(thirdCursorErr).to.not.exist;
               expect(thirdCursorD.a).to.equal(3);
               // Destroy the server connection
@@ -4513,17 +4513,17 @@ describe('Cursor', function () {
       const DOCS = [{ a: 1 }, { a: 2 }, { a: 3 }];
 
       const testCursor = cursor => {
-        return cursor._next((nextCursorErr, nextCursorD) => {
+        return cursor.next((nextCursorErr, nextCursorD) => {
           expect(nextCursorErr).to.not.exist;
           expect(nextCursorD.a).to.equal(1);
           // Get the next item
-          return cursor._next((secondCursorErr, secondCursorD) => {
+          return cursor.next((secondCursorErr, secondCursorD) => {
             expect(secondCursorErr).to.not.exist;
             expect(secondCursorD.a).to.equal(2);
             // Kill cursor
             return cursor.kill(() => {
               // Should error out
-              return cursor._next((thirdCursorErr, thirdCursorD) => {
+              return cursor.next((thirdCursorErr, thirdCursorD) => {
                 expect(thirdCursorErr).to.not.exist;
                 expect(thirdCursorD).to.not.exist;
                 // Destroy the server connection
@@ -4573,7 +4573,7 @@ describe('Cursor', function () {
 
             // Resolve all the next
             var getAllNexts = function (items, callback) {
-              extendedCursorSelf._next(function (err, item) {
+              extendedCursorSelf.next(function (err, item) {
                 if (err) return callback(err);
                 if (item === null) return callback(null, null);
                 items.push(item);
@@ -4692,12 +4692,12 @@ describe('Cursor', function () {
                     });
 
                     // Execute next
-                    cursor._next((cursorErr, cursorD) => {
+                    cursor.next((cursorErr, cursorD) => {
                       expect(cursorErr).to.not.exist;
                       expect(cursorD).to.exist;
 
                       const s = new Date();
-                      cursor._next(() => {
+                      cursor.next(() => {
                         const e = new Date();
                         expect(e.getTime() - s.getTime()).to.be.at.least(300);
 
@@ -4759,7 +4759,7 @@ describe('Cursor', function () {
                   });
 
                   // Execute next
-                  cursor._next((nextErr, d) => {
+                  cursor.next((nextErr, d) => {
                     expect(nextErr).to.not.exist;
                     expect(d.b).to.be.undefined;
 
@@ -4819,7 +4819,7 @@ describe('Cursor', function () {
                   });
 
                   // Execute next
-                  cursor._next((nextErr, d) => {
+                  cursor.next((nextErr, d) => {
                     expect(nextErr).to.not.exist;
                     expect(d.b).to.be.undefined;
 
