@@ -12,7 +12,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from '../sort';
-import { MongoClientClosedError, MongoError } from '../error';
+import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
 
 const exclusionList = [
@@ -144,7 +144,6 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // Have we specified collation
     try {
-      if (!coll.topology) throw new MongoClientClosedError();
       decorateWithCollation(mapCommandHash, coll.topology, options);
     } catch (err) {
       return callback(err);

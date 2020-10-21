@@ -5,7 +5,6 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
-import { MongoClientClosedError } from '../error';
 
 /** @public */
 export interface CountOptions extends CommandOperationOptions {
@@ -106,7 +105,6 @@ function buildCountCommand(
     }
     decorateWithCollation(cmd, collectionOrCursor.topology, collectionOrCursor.cmd);
   } else {
-    if (!collectionOrCursor.topology) throw new MongoClientClosedError();
     decorateWithCollation(cmd, collectionOrCursor.topology, options);
   }
 

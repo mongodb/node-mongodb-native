@@ -1,4 +1,4 @@
-import { MongoClientClosedError, MongoError } from '../error';
+import { MongoError } from '../error';
 import { applyRetryableWrites, applyWriteConcern, decorateWithCollation, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -152,7 +152,6 @@ export function removeDocuments(
 
   // Have we specified collation
   try {
-    if (!coll.topology) throw new MongoClientClosedError();
     decorateWithCollation(finalOptions, coll.topology, options);
   } catch (err) {
     return callback ? callback(err, null) : undefined;
@@ -244,7 +243,6 @@ export function updateDocuments(
 
   // Have we specified collation
   try {
-    if (!coll.topology) throw new MongoClientClosedError();
     decorateWithCollation(finalOptions, coll.topology, options);
   } catch (err) {
     return callback(err, null);

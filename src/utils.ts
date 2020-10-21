@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { MongoError, AnyError } from './error';
+import { MongoError, AnyError, MongoClientClosedError } from './error';
 import { WriteConcern, WriteConcernOptions, W, writeConcernKeys } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -438,9 +438,13 @@ export function isPromiseLike<T = any>(
  */
 export function decorateWithCollation(
   command: Document,
-  topology: Topology,
+  topology: Topology | undefined,
   options: AnyOptions
 ): void {
+  if (!topology) {
+    throw new MongoClientClosedError();
+  }
+
   const capabilities = topology.capabilities();
   if (options.collation && typeof options.collation === 'object') {
     if (capabilities && capabilities.commandsTakeCollation) {
