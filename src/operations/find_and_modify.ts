@@ -7,7 +7,7 @@ import {
   hasAtomicOperators,
   Callback
 } from '../utils';
-import { MongoError } from '../error';
+import { MongoClientClosedError, MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
@@ -127,6 +127,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
 
     // Have we specified collation
     try {
+      if (!coll.topology) throw new MongoClientClosedError();
       decorateWithCollation(cmd, coll.topology, options);
     } catch (err) {
       return callback(err);

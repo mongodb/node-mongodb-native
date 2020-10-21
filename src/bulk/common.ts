@@ -1,6 +1,6 @@
 import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId, Document } from '../bson';
-import { MongoError, MongoWriteConcernError, AnyError } from '../error';
+import { MongoError, MongoWriteConcernError, AnyError, MongoClientClosedError } from '../error';
 import {
   applyWriteConcern,
   applyRetryableWrites,
@@ -905,13 +905,10 @@ export abstract class BulkOperationBase {
    * @internal
    */
   constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
-    if (!collection.topology) {
-      throw new MongoError('MongoClient must be connected before attempting this operation');
-    }
-
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
+    if (!collection.topology) throw new MongoClientClosedError();
     const topology = collection.topology;
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster

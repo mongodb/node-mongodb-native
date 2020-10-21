@@ -2,7 +2,7 @@ import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { MongoError, AnyError } from './error';
+import { MongoError, AnyError, MongoClientClosedError } from './error';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { maybePromise, MongoDBNamespace, Callback } from './utils';
 import { deprecate } from 'util';
@@ -407,9 +407,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
     }
 
     // If no topology throw an error message
-    if (!this.topology) {
-      throw new MongoError('MongoClient must be connected before calling MongoClient.prototype.db');
-    }
+    if (!this.topology) throw new MongoClientClosedError('MongoClient.prototype.db');
 
     // Return the db object
     const db = new Db(dbName, this, finalOptions);

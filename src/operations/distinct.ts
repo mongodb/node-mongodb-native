@@ -4,6 +4,7 @@ import { decorateWithCollation, decorateWithReadConcern, Callback } from '../uti
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import { MongoClientClosedError } from '../error';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
@@ -55,6 +56,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
 
     // Have we specified collation
     try {
+      if (!coll.topology) throw new MongoClientClosedError();
       decorateWithCollation(cmd, coll.topology, options);
     } catch (err) {
       return callback(err);

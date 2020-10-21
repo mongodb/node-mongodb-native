@@ -132,7 +132,7 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
 export class MongoClientClosedError extends MongoError {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(message?: string) {
-    message = message || 'MongoClient must be connected to perform this operation';
+    message = 'MongoClient must be connected to perform this operation ${message}';
     super(message);
     this.name = 'MongoClientClosedError';
   }

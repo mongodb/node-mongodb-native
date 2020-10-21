@@ -1,6 +1,6 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
-import { MongoError, AnyError, isResumableError } from './error';
+import { MongoError, AnyError, isResumableError, MongoClientClosedError } from './error';
 import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
@@ -232,9 +232,7 @@ export class ChangeStream extends EventEmitter {
       );
     }
 
-    if (!parent.topology) {
-      throw new MongoError('MongoClient must be connected before attempting this operation');
-    }
+    if (!parent.topology) throw new MongoClientClosedError();
     this.topology = parent.topology;
 
     if (!this.options.readPreference && parent.readPreference) {

@@ -438,13 +438,9 @@ export function isPromiseLike<T = any>(
  */
 export function decorateWithCollation(
   command: Document,
-  topology: Topology | undefined,
+  topology: Topology,
   options: AnyOptions
 ): void {
-  if (!topology) {
-    throw new MongoError('MongoClient must be connected before attempting this operation');
-  }
-
   const capabilities = topology.capabilities();
   if (options.collation && typeof options.collation === 'object') {
     if (capabilities && capabilities.commandsTakeCollation) {

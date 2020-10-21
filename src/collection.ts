@@ -9,7 +9,7 @@ import {
   Callback
 } from './utils';
 import { ObjectId, Document, BSONSerializeOptions } from './bson';
-import { MongoError } from './error';
+import { MongoClientClosedError, MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
@@ -306,8 +306,6 @@ export class Collection implements OperationParent {
   ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add ignoreUndefined
     if (this.s.options.ignoreUndefined) {
@@ -315,6 +313,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new InsertOneOperation(this, doc, options),
@@ -346,9 +345,8 @@ export class Collection implements OperationParent {
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : { ordered: true };
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new InsertManyOperation(this, docs, options),
@@ -404,13 +402,12 @@ export class Collection implements OperationParent {
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: true };
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     if (!Array.isArray(operations)) {
       throw new MongoError('operations must be an array of documents');
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new BulkWriteOperation(this, operations, options),
@@ -443,8 +440,6 @@ export class Collection implements OperationParent {
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add ignoreUndefined
     if (this.s.options.ignoreUndefined) {
@@ -452,6 +447,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new UpdateOneOperation(this, filter, update, options),
@@ -488,8 +484,6 @@ export class Collection implements OperationParent {
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add ignoreUndefined
     if (this.s.options.ignoreUndefined) {
@@ -497,6 +491,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new ReplaceOneOperation(this, filter, replacement, options),
@@ -529,8 +524,6 @@ export class Collection implements OperationParent {
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add ignoreUndefined
     if (this.s.options.ignoreUndefined) {
@@ -538,6 +531,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new UpdateManyOperation(this, filter, update, options),
@@ -563,8 +557,6 @@ export class Collection implements OperationParent {
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add ignoreUndefined
     if (this.s.options.ignoreUndefined) {
@@ -572,6 +564,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new DeleteOneOperation(this, filter, options),
@@ -595,8 +588,6 @@ export class Collection implements OperationParent {
     options?: DeleteOptions | Callback<DeleteResult>,
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
     if (filter == null) {
       filter = {};
       options = {};
@@ -618,6 +609,7 @@ export class Collection implements OperationParent {
       options.ignoreUndefined = this.s.options.ignoreUndefined;
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new DeleteManyOperation(this, filter, options),
@@ -643,9 +635,8 @@ export class Collection implements OperationParent {
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new RenameOperation(this, newName, options),
@@ -669,9 +660,8 @@ export class Collection implements OperationParent {
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new DropCollectionOperation(this.s.db, this.collectionName, options),
@@ -700,8 +690,6 @@ export class Collection implements OperationParent {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     if (typeof query === 'function')
       (callback = query as Callback<Document>), (query = {}), (options = {});
@@ -709,6 +697,7 @@ export class Collection implements OperationParent {
     query = query || {};
     options = options || {};
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindOneOperation(this, query, options),
@@ -731,12 +720,8 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') {
       throw new TypeError('`options` parameter must not be function');
     }
-    if (!this.s.db.topology) {
-      throw new MongoError('MongoClient must be connected before attepting this operation');
-    }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return new Cursor(
       this.s.db.topology,
       new FindOperation(this, this.s.namespace, filter, options),
@@ -760,9 +745,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.db.topology, new OptionsOperation(this, options), callback);
   }
 
@@ -782,9 +766,8 @@ export class Collection implements OperationParent {
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.db.topology, new IsCappedOperation(this, options), callback);
   }
 
@@ -832,9 +815,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new CreateIndexOperation(this, this.collectionName, indexSpec, options),
@@ -890,9 +872,8 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new CreateIndexesOperation(this, this.collectionName, indexSpecs, options),
@@ -918,12 +899,11 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Run only against primary
     options.readPreference = ReadPreference.primary;
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new DropIndexOperation(this, indexName, options),
@@ -947,9 +927,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.db.topology, new DropIndexesOperation(this, options), callback);
   }
 
@@ -959,9 +938,7 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
-
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     const cursor = new CommandCursor(
       this.s.db.topology,
       new ListIndexesOperation(this, options),
@@ -993,9 +970,8 @@ export class Collection implements OperationParent {
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new IndexExistsOperation(this, indexes, options),
@@ -1019,9 +995,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new IndexInformationOperation(this.s.db, this.collectionName, options),
@@ -1045,9 +1020,8 @@ export class Collection implements OperationParent {
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new EstimatedDocumentCountOperation(this, options),
@@ -1101,11 +1075,11 @@ export class Collection implements OperationParent {
         if (typeof options === 'function') (callback = options), (options = {});
       }
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     query = query || {};
     options = options || {};
+
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
@@ -1145,11 +1119,11 @@ export class Collection implements OperationParent {
         (callback = options), (options = {});
       }
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     query = query || {};
     options = options || {};
+
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new DistinctOperation(this, key, query as Document, options as DistinctOptions),
@@ -1173,9 +1147,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.db.topology, new IndexesOperation(this, options), callback);
   }
 
@@ -1195,9 +1168,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(this.s.db.topology, new CollStatsOperation(this, options), callback);
   }
 
@@ -1223,9 +1195,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindOneAndDeleteOperation(this, filter, options),
@@ -1262,9 +1233,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindOneAndReplaceOperation(this, filter, replacement, options),
@@ -1301,9 +1271,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindOneAndUpdateOperation(this, filter, update, options),
@@ -1327,13 +1296,10 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') {
       throw new TypeError('`options` parameter must not be function');
     }
-    if (!this.s.db.topology) {
-      throw new MongoError('MongoClient must be connected before attempting this operation');
-    }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     options = options || {};
+
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return new AggregationCursor(
       this.s.db.topology,
       new AggregateOperation(this, pipeline, options),
@@ -1404,8 +1370,6 @@ export class Collection implements OperationParent {
         'the out option parameter must be defined, see mongodb docs for possible values'
       );
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     if ('function' === typeof map) {
       map = map.toString();
@@ -1419,6 +1383,7 @@ export class Collection implements OperationParent {
       options.finalize = options.finalize.toString();
     }
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new MapReduceOperation(this, map, reduce, options),
@@ -1550,9 +1515,8 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new EnsureIndexOperation(this.s.db, this.collectionName, fieldOrSpec, options),
@@ -1589,11 +1553,11 @@ export class Collection implements OperationParent {
     } else {
       if (typeof options === 'function') (callback = options), (options = {});
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     query = query || {};
     options = options || {};
+
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new EstimatedDocumentCountOperation(this, query, options),
@@ -1639,12 +1603,11 @@ export class Collection implements OperationParent {
       callback = options;
       options = {};
     }
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Add the remove option
     options.remove = true;
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindAndModifyOperation(this, query, sort as Sort, undefined, options),
@@ -1702,12 +1665,10 @@ export class Collection implements OperationParent {
       finalize = finalize.toString();
     }
 
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
-
     // Set up the command as default
     command = command == null ? true : command;
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     if (command == null) {
       return executeOperation(
         this.s.db.topology,
@@ -1763,12 +1724,11 @@ export class Collection implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-    if (!this.s.db.topology)
-      throw new MongoError('MongoClient must be connected to perform this operation');
 
     // Force read preference primary
     options.readPreference = ReadPreference.primary;
 
+    if (!this.s.db.topology) throw new MongoClientClosedError();
     return executeOperation(
       this.s.db.topology,
       new FindAndModifyOperation(this, query, sort, doc, options),

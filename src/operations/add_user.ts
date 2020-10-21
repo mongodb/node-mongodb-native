@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { MongoError } from '../error';
+import { MongoClientClosedError, MongoError } from '../error';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -74,11 +74,7 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
       roles = ['dbOwner'];
     }
 
-    if (!db.topology) {
-      return callback(
-        new MongoError('MongoClient must be connected before attempting this operation')
-      );
-    }
+    if (!db.topology) return callback(new MongoClientClosedError());
     const digestPassword = db.topology.lastIsMaster().maxWireVersion >= 7;
 
     let userPassword = password;
