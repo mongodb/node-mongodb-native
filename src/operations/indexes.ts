@@ -1,7 +1,13 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, MongoDBNamespace, Callback } from '../utils';
+import {
+  maxWireVersion,
+  parseIndexOptions,
+  MongoDBNamespace,
+  Callback,
+  deepFreeze
+} from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -141,6 +147,14 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: IndexDescription[];
 
+  get builtOptions(): Readonly<CreateIndexesOptions> {
+    return deepFreeze({
+      ...super.builtOptions,
+      // collation is set on each index, it should not be defined at the root
+      collation: undefined
+    });
+  }
+
   constructor(
     parent: OperationParent,
     collectionName: string,
@@ -157,7 +171,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    const options = this.options;
+    const options = this.builtOptions;
     const indexes = this.indexes;
 
     const serverWireVersion = maxWireVersion(server);
@@ -198,9 +212,6 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
       }
       cmd.commitQuorum = options.commitQuorum;
     }
-
-    // collation is set on each index, it should not be defined at the root
-    this.options.collation = undefined;
 
     super.executeCommand(server, cmd, (err, result) => {
       if (err) {
