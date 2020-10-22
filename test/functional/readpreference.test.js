@@ -770,7 +770,7 @@ describe('ReadPreference', function() {
     });
   });
 
-  context.only('.validateMode()', () => {
+  context('.validateMode()', () => {
     it('should convert to standard casing', () => {
       expect(ReadPreference.validateMode('PRIMARY')).to.equal('primary');
       expect(ReadPreference.validateMode('Primary')).to.equal('primary');
