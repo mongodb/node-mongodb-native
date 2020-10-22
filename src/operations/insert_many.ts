@@ -32,7 +32,7 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
     this.docs = docs;
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
-    Object.assign(this, inheritBSONOptions(options, collection.s.options, true));
+    this.bsonOptions = inheritBSONOptions(options, collection.s.options, true);
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {

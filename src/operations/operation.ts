@@ -46,31 +46,11 @@ export abstract class OperationBase<
   fullResponse?: boolean;
 
   // BSON serialization options
-  fieldsAsRaw?: { [key: string]: boolean };
-  promoteValues?: boolean;
-  promoteBuffers?: boolean;
-  promoteLongs?: boolean;
-  serializeFunctions?: boolean;
-  ignoreUndefined?: boolean;
-  raw?: boolean;
+  bsonOptions?: BSONSerializeOptions;
 
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
     this.readPreference = ReadPreference.primary;
-  }
-
-  // BSON serialization options
-  get bsonOptions(): BSONSerializeOptions {
-    const bsonOptions: Document = {
-      promoteBuffers: this.promoteBuffers,
-      promoteValues: this.promoteValues,
-      promoteLongs: this.promoteLongs,
-      raw: this.raw,
-      ignoreUndefined: this.ignoreUndefined,
-      serializeFunctions: this.serializeFunctions,
-      fieldsAsRaw: this.fieldsAsRaw
-    };
-    return bsonOptions;
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;

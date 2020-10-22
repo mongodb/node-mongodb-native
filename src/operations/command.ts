@@ -95,7 +95,7 @@ export abstract class CommandOperation<
     }
 
     // Assign BSON serialize options to OperationBase, preferring options over parent options.
-    Object.assign(this, inheritBSONOptions(options, parent?.s.options, true));
+    this.bsonOptions = inheritBSONOptions(options, parent?.s.options, true);
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
