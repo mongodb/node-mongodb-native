@@ -239,7 +239,7 @@ describe('Transactions', function() {
 
           const session = client.startSession();
           const db = client.db(configuration.db);
-          db.collection('transaction_error_test_2', (err, coll) => {
+          db.createCollection('transaction_error_test_2', (err, coll) => {
             expect(err).to.not.exist;
 
             session.startTransaction();
