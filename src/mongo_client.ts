@@ -10,7 +10,7 @@ import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
 import { ReadConcern, ReadConcernLevelLike, ReadConcernLike } from './read_concern';
-import type { BSONSerializeOptions, Document } from './bson';
+import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
@@ -222,6 +222,7 @@ export interface MongoClientPrivate {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   readPreference: ReadPreference;
+  bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   logger: Logger;
 }
@@ -284,6 +285,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
       readPreference: ReadPreference.fromOptions(options) || ReadPreference.primary,
+      bsonOptions: resolveBSONOptions(options),
       namespace: new MongoDBNamespace('admin'),
       logger: options?.logger ?? new Logger('MongoClient')
     };
@@ -299,6 +301,10 @@ export class MongoClient extends EventEmitter implements OperationParent {
 
   get readPreference(): ReadPreference {
     return this.s.readPreference;
+  }
+
+  get bsonOptions(): BSONSerializeOptions {
+    return this.s.bsonOptions;
   }
 
   get logger(): Logger {

@@ -1,6 +1,6 @@
 import { OperationBase } from './operation';
 import type { Callback } from '../utils';
-import { Document, inheritBSONOptions } from '../bson';
+import { Document, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
 import { MongoError } from '../error';
@@ -18,7 +18,7 @@ export class FindOneOperation extends OperationBase<FindOptions, Document> {
     this.query = query;
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
-    this.bsonOptions = inheritBSONOptions(options, collection.s.options, true);
+    this.bsonOptions = resolveBSONOptions(options, collection);
   }
 
   execute(server: Server, callback: Callback<Document>): void {

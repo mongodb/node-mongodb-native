@@ -7,7 +7,7 @@ import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import { BSONSerializeOptions, Document, inheritBSONOptions } from '../bson';
+import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 
@@ -37,14 +37,12 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
 
 /** @internal */
 export interface OperationParent {
-  s: {
-    namespace: MongoDBNamespace;
-    options?: BSONSerializeOptions;
-  };
+  s: { namespace: MongoDBNamespace };
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   logger?: Logger;
+  bsonOptions?: BSONSerializeOptions;
 }
 
 /** @internal */
@@ -95,7 +93,7 @@ export abstract class CommandOperation<
     }
 
     // Assign BSON serialize options to OperationBase, preferring options over parent options.
-    this.bsonOptions = inheritBSONOptions(options, parent?.s.options, true);
+    this.bsonOptions = resolveBSONOptions(options, parent);
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;

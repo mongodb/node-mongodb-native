@@ -8,7 +8,7 @@ import {
   MongoDBNamespace,
   Callback
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions, inheritBSONOptions } from './bson';
+import { ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -126,6 +126,7 @@ export interface CollectionPrivate {
   options: any;
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
+  bsonOptions: BSONSerializeOptions;
   slaveOk?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
@@ -182,13 +183,11 @@ export class Collection implements OperationParent {
         }
       },
       readPreference: ReadPreference.fromOptions(options),
+      bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
       slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk
     };
-
-    // Modify internal state with inherited BSON options
-    this.s.options = { ...this.s.options, ...inheritBSONOptions(options, db.s.options, false) };
   }
 
   /**
@@ -234,6 +233,10 @@ export class Collection implements OperationParent {
     }
 
     return this.s.readPreference;
+  }
+
+  get bsonOptions(): BSONSerializeOptions {
+    return this.s.bsonOptions;
   }
 
   /**
@@ -1284,7 +1287,7 @@ export class Collection implements OperationParent {
     options = options || {};
     // Give function's options precedence over session options.
     if (options.ignoreUndefined == null) {
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
     }
 
     return new UnorderedBulkOperation(this, options);
@@ -1295,7 +1298,7 @@ export class Collection implements OperationParent {
     options = options || {};
     // Give function's options precedence over session's options.
     if (options.ignoreUndefined == null) {
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
     }
 
     return new OrderedBulkOperation(this, options);

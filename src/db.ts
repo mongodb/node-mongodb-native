@@ -2,7 +2,7 @@ import { deprecate } from 'util';
 import { emitDeprecatedOptionWarning, Callback } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId, Code, Document, BSONSerializeOptions } from './bson';
+import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -94,6 +94,7 @@ export interface DbPrivate {
   readPreference?: ReadPreference;
   pkFactory: PkFactory;
   readConcern?: ReadConcern;
+  bsonOptions: BSONSerializeOptions;
   writeConcern?: WriteConcern;
   namespace: MongoDBNamespace;
 }
@@ -171,6 +172,8 @@ export class Db implements OperationParent {
       logger: new Logger('Db', options),
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
+      // Merge bson options TODO: include client bson options, after NODE-2850
+      bsonOptions: resolveBSONOptions(options),
       // Set up the primary key factory or fallback to ObjectId
       pkFactory: options?.pkFactory ?? {
         createPk() {
@@ -216,6 +219,10 @@ export class Db implements OperationParent {
     }
 
     return this.s.readPreference;
+  }
+
+  get bsonOptions(): BSONSerializeOptions {
+    return this.s.bsonOptions;
   }
 
   // get the write Concern
