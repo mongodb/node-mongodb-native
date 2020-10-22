@@ -10,7 +10,7 @@ const Writable = require('stream').Writable;
 
 const core = require('../../lib/core');
 const ReadConcern = require('../../lib/read_concern');
-const { withClient } = require('./shared');
+const withClient = require('./shared').withClient;
 const ReadPreference = core.ReadPreference;
 
 describe('Cursor', function() {
