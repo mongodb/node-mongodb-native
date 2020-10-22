@@ -769,4 +769,20 @@ describe('ReadPreference', function() {
       );
     });
   });
+
+  context.only('.validateMode()', () => {
+    it('should convert to standard casing', () => {
+      expect(ReadPreference.validateMode('PRIMARY')).to.equal('primary');
+      expect(ReadPreference.validateMode('Primary')).to.equal('primary');
+      expect(ReadPreference.validateMode('primary')).to.equal('primary');
+
+      expect(ReadPreference.validateMode('SECONDARY')).to.equal('secondary');
+      expect(ReadPreference.validateMode('Secondary')).to.equal('secondary');
+      expect(ReadPreference.validateMode('secondary')).to.equal('secondary');
+
+      expect(ReadPreference.validateMode('PRIMARYPREFERRED')).to.equal('primaryPreferred');
+      expect(ReadPreference.validateMode('primarypreferred')).to.equal('primaryPreferred');
+      expect(ReadPreference.validateMode('primaryPreferred')).to.equal('primaryPreferred');
+    });
+  });
 });
