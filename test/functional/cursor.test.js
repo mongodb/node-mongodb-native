@@ -2849,7 +2849,7 @@ describe('Cursor', function() {
     withClient(function(client) {
       const db = client.db(this.configuration.db);
       const cursor = db.collection('shouldSetReadConcern').find();
-      cursor.setReadConcern('available');
+      cursor.withReadConcern('available');
       expect(cursor).to.have.nested.property('options.readConcern');
       expect(cursor.options.readConcern).to.be.instanceOf(ReadConcern);
       expect(cursor.options.readConcern.level).to.equal('available');
