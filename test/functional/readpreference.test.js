@@ -726,4 +726,44 @@ describe('ReadPreference', function() {
       });
     });
   });
+
+  context('.fromJSON()', () => {
+    it('should create ReadPreference without tags', () => {
+      const readPreference = ReadPreference.fromJSON({
+        mode: 'secondary',
+        maxStalenessSeconds: 1000
+      });
+      expect(readPreference.mode).to.equal('secondary');
+      expect(readPreference.maxStalenessSeconds).to.equal(1000);
+      console.log(readPreference);
+    });
+  });
+
+  context('.toJSON()', () => {
+    it('should convert to json', () => {
+      const readPreference = ReadPreference.fromJSON({
+        mode: 'secondary',
+        maxStalenessSeconds: 1000
+      });
+      // NOTE: no undefined properties / values
+      expect(readPreference.toJSON()).to.deep.equal({
+        mode: 'secondary',
+        maxStalenessSeconds: 1000
+      });
+    });
+  });
+
+  context('.fromLike()', () => {
+    it('should create primary from like', () => {
+      expect(ReadPreference.fromLike(ReadPreference.primary)).to.have.property('mode', 'primary');
+      expect(ReadPreference.fromLike({ mode: ReadPreference.PRIMARY })).to.have.property(
+        'mode',
+        'primary'
+      );
+      expect(ReadPreference.fromLike({ mode: ReadPreference.PRIMARY })).to.have.property(
+        'mode',
+        'primary'
+      );
+    });
+  });
 });
