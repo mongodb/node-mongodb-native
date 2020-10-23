@@ -1,5 +1,7 @@
 'use strict';
 
+const { MongoClient } = require('../../src');
+
 const expect = require('chai').expect;
 
 // helpers for using chai.expect in the assert style
@@ -97,31 +99,27 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-/** @typedef {(client: MongoClient) => Promise | (client: MongoClient, done: Function) => void} withClientCallback */
+/** @typedef {((this: Mocha.Context, client: MongoClient) => Promise) | ((this: Mocha.Context, client: MongoClient, done: Function) => void)} withClientCallback */
 /**
  * Safely perform a test with provided MongoClient, ensuring client won't leak.
  *
- * @param {string|MongoClient} [client] if not provided, `withClient` must be bound to test function `this`
- * @param {withClientCallback} callback the test function
+ * @this Mocha.Context
+ * @param {string|MongoClient|withClientCallback} clientOrCallback if not provided, `withClient` must be bound to test function `this`
+ * @param {withClientCallback} [callback] the test function
  */
-function withClient(client, callback) {
-  let connectionString;
-  if (arguments.length === 1) {
-    callback = client;
-    client = undefined;
-  } else {
-    if (typeof client === 'string') {
-      connectionString = client;
-      client = undefined;
-    }
-  }
+function withClient(clientOrCallback, callback) {
+  const connectionString = typeof clientOrCallback === 'string' ? clientOrCallback : undefined;
+  let client = clientOrCallback instanceof MongoClient ? clientOrCallback : undefined;
+  callback = typeof clientOrCallback === 'function' ? clientOrCallback : callback;
+
+  if (!callback) throw new Error('withClient is missing a callback');
 
   if (callback.length === 2) {
-    const cb = callback;
+    const cb = callback.bind(this);
     callback = client => new Promise(resolve => cb(client, resolve));
   }
 
-  function cleanup(err) {
+  function cleanup(err, client) {
     return new Promise((resolve, reject) => {
       try {
         client.close(closeErr => {
@@ -137,15 +135,21 @@ function withClient(client, callback) {
     });
   }
 
+  /**
+   * @this Mocha.Context
+   */
   function lambda() {
     if (!client) {
       client = this.configuration.newClient(connectionString);
     }
+    const lambdaCallback = callback;
+    if (!client) throw new Error('withClient lambda does not have client available');
+    if (!lambdaCallback) throw new Error('withClient lambda is missing a callback');
     return client
       .connect()
-      .then(callback)
+      .then(() => lambdaCallback.bind(this))
       .then(err => {
-        cleanup();
+        cleanup(err, client);
         if (err) {
           throw err;
         }
@@ -153,8 +157,10 @@ function withClient(client, callback) {
   }
 
   if (this && this.configuration) {
+    /** Executes Functon */
     return lambda.call(this);
   }
+  /** Returns Functon */
   return lambda;
 }
 

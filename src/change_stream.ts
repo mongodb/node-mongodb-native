@@ -282,6 +282,8 @@ export class ChangeStream extends EventEmitter {
   }
 
   /** Get the next available document from the Change Stream. */
+  next(): Promise<void>;
+  next(callback: Callback): void;
   next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {

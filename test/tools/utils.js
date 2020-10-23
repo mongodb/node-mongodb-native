@@ -2,7 +2,7 @@
 
 const { Logger } = require('../../src/logger');
 const { deprecateOptions, arrayStrictEqual, errorStrictEqual } = require('../../src/utils');
-const chalk = require('chalk');
+const chalk = require('chalk').default;
 const util = require('util');
 const chai = require('chai');
 const expect = chai.expect;
