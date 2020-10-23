@@ -42,5 +42,6 @@
         "augments": "extends"
       }
     }
-  }
+  },
+  "ignorePatterns": ["mocha.ts"]
 }
