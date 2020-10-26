@@ -4,7 +4,7 @@ import type { MongoClient } from "../src";
 import type { withClientCallback } from "./functional/shared";
 import NativeConfiguration = require("./tools/runner/config");
 
-type Topologies = 'single' | 'replicaset' | 'sharded' | 'ssl' | 'heap' | 'wiredtiger' | 'auth'
+type Topologies = 'single' | 'replicaset' | 'sharded' | 'ssl' | 'heap' | 'wiredtiger' | 'auth' | 'scram'
 
 declare global {
   namespace Mocha {
@@ -17,13 +17,16 @@ declare global {
 
     interface MongoOptions {
       configuration?: NativeConfiguration;
-      metadata?: { requires?: {
-        generators?: boolean,
-        topology?: Topologies | Topologies[],
-        mongodb?: string,
-        node?: string,
-        ignore?: { travis?: boolean }
-      } }
+      metadata?: {
+        sessions?: { skipLeakTests?: boolean }
+        requires?: {
+          generators?: boolean,
+          topology?: Topologies | Topologies[],
+          mongodb?: string,
+          node?: string,
+          ignore?: { travis?: boolean }
+        }
+      }
       test?: Func | AsyncFunc;
     }
 
@@ -55,6 +58,10 @@ declare global {
     }
 
     export interface Assertion {
+      containSubset(subset: any[]): void;
+    }
+
+    export interface Include {
       containSubset(subset: any[]): void;
     }
 

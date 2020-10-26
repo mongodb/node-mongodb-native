@@ -1,7 +1,5 @@
 'use strict';
 
-const { MongoClient } = require('../../src');
-
 const expect = require('chai').expect;
 
 // helpers for using chai.expect in the assert style
@@ -99,28 +97,31 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-/** @typedef {((this: Mocha.Context, client: MongoClient) => Promise) | ((this: Mocha.Context, client: MongoClient, done: Function) => void)} withClientCallback */
+/** @typedef {(client: MongoClient) => Promise | (client: MongoClient, done: Function) => void} withClientCallback */
 /**
  * Safely perform a test with provided MongoClient, ensuring client won't leak.
  *
- * @this Mocha.Context
- * @param {string|MongoClient|withClientCallback} clientOrCallback if not provided, `withClient` must be bound to test function `this`
- * @param {withClientCallback} [callback] the test function
- * @returns {any}
+ * @param {string|MongoClient} [client] if not provided, `withClient` must be bound to test function `this`
+ * @param {withClientCallback} callback the test function
  */
-function withClient(clientOrCallback, callback) {
-  const connectionString = typeof clientOrCallback === 'string' ? clientOrCallback : undefined;
-  let client = clientOrCallback instanceof MongoClient ? clientOrCallback : undefined;
-  callback = typeof clientOrCallback === 'function' ? clientOrCallback : callback;
-
-  if (!callback) throw new Error('withClient is missing a callback');
+function withClient(client, callback) {
+  let connectionString;
+  if (arguments.length === 1) {
+    callback = client;
+    client = undefined;
+  } else {
+    if (typeof client === 'string') {
+      connectionString = client;
+      client = undefined;
+    }
+  }
 
   if (callback.length === 2) {
-    const cb = callback.bind(this);
+    const cb = callback;
     callback = client => new Promise(resolve => cb(client, resolve));
   }
 
-  function cleanup(err, client) {
+  function cleanup(err) {
     return new Promise((resolve, reject) => {
       try {
         client.close(closeErr => {
@@ -136,21 +137,15 @@ function withClient(clientOrCallback, callback) {
     });
   }
 
-  /**
-   * @this Mocha.Context
-   */
   function lambda() {
     if (!client) {
       client = this.configuration.newClient(connectionString);
     }
-    const lambdaCallback = callback;
-    if (!client) throw new Error('withClient lambda does not have client available');
-    if (!lambdaCallback) throw new Error('withClient lambda is missing a callback');
     return client
       .connect()
-      .then(() => lambdaCallback.bind(this))
+      .then(callback)
       .then(err => {
-        cleanup(err, client);
+        cleanup();
         if (err) {
           throw err;
         }
@@ -158,10 +153,8 @@ function withClient(clientOrCallback, callback) {
   }
 
   if (this && this.configuration) {
-    /** Executes Functon */
     return lambda.call(this);
   }
-  /** Returns Functon */
   return lambda;
 }
 
@@ -170,11 +163,10 @@ function withClient(clientOrCallback, callback) {
  * Perform a test with a monitored MongoClient that will filter for certain commands.
  *
  * @param {string|Array|Function} commands commands to filter for
- * @param {object|withMonitoredClientCallback} [options] options to pass on to configuration.newClient
+ * @param {object} [options] options to pass on to configuration.newClient
  * @param {object} [options.queryOptions] connection string options
  * @param {object} [options.clientOptions] MongoClient options
- * @param {withMonitoredClientCallback} [callback] the test function
- * @returns any
+ * @param {withMonitoredClientCallback} callback the test function
  */
 function withMonitoredClient(commands, options, callback) {
   if (arguments.length === 2) {
@@ -191,7 +183,6 @@ function withMonitoredClient(commands, options, callback) {
     );
     const events = [];
     monitoredClient.on('commandStarted', filterForCommands(commands, events));
-    // @ts-ignore
     return withClient(monitoredClient, (client, done) =>
       callback.bind(this)(client, events, done)
     )();
