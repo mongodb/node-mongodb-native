@@ -5,7 +5,9 @@
     "checkJs": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "sourceType": "module",
+    "noImplicitThis": false,
+    "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["**/*"]
+  "include": ["**/*"],
+  "exclude": ["benchmarks/**/*", "disabled/**/*", "examples/**/*", "tools/**/*"],
 }
