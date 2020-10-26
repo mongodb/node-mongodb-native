@@ -106,6 +106,7 @@ function setupDatabase(configuration, dbsToClean) {
  * @this Mocha.Context
  * @param {string|MongoClient|withClientCallback} clientOrCallback if not provided, `withClient` must be bound to test function `this`
  * @param {withClientCallback} [callback] the test function
+ * @returns any
  */
 function withClient(clientOrCallback, callback) {
   const connectionString = typeof clientOrCallback === 'string' ? clientOrCallback : undefined;
@@ -169,10 +170,11 @@ function withClient(clientOrCallback, callback) {
  * Perform a test with a monitored MongoClient that will filter for certain commands.
  *
  * @param {string|Array|Function} commands commands to filter for
- * @param {object} [options] options to pass on to configuration.newClient
+ * @param {object|withMonitoredClientCallback} [options] options to pass on to configuration.newClient
  * @param {object} [options.queryOptions] connection string options
  * @param {object} [options.clientOptions] MongoClient options
- * @param {withMonitoredClientCallback} callback the test function
+ * @param {withMonitoredClientCallback} [callback] the test function
+ * @returns any
  */
 function withMonitoredClient(commands, options, callback) {
   if (arguments.length === 2) {
@@ -189,6 +191,7 @@ function withMonitoredClient(commands, options, callback) {
     );
     const events = [];
     monitoredClient.on('commandStarted', filterForCommands(commands, events));
+    // @ts-ignore
     return withClient(monitoredClient, (client, done) =>
       callback.bind(this)(client, events, done)
     )();
