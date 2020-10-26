@@ -106,7 +106,7 @@ function setupDatabase(configuration, dbsToClean) {
  * @this Mocha.Context
  * @param {string|MongoClient|withClientCallback} clientOrCallback if not provided, `withClient` must be bound to test function `this`
  * @param {withClientCallback} [callback] the test function
- * @returns any
+ * @returns {any}
  */
 function withClient(clientOrCallback, callback) {
   const connectionString = typeof clientOrCallback === 'string' ? clientOrCallback : undefined;

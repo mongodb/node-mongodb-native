@@ -1,40 +1,22 @@
-import M = require("mocha")
-import S = require("sinon");
+import "mocha";
+import type { SinonFakeTimers, SinonSandbox } from "sinon";
 import type { MongoClient } from "../src";
+import type { withClientCallback } from "./functional/shared";
 import NativeConfiguration = require("./tools/runner/config");
 
 type Topologies = 'single' | 'replicaset' | 'sharded' | 'ssl' | 'heap' | 'wiredtiger' | 'auth'
 
 declare global {
-
   namespace Mocha {
-
-    /**
-     * NOTE: Sometimes TS complains:
-     * "Type 'Context' recursively references itself as a base type."
-     * But the issues intermitently go away, and things still do work correctly
-     * ts-ignore gets rid of these issues
-     */
-
-    /** @ts-ignore */
-    export interface Context extends M.Context {
+    interface Context {
       configuration: NativeConfiguration;
       defer(arg: (() => any) | PromiseLike<any>): unknown;
-      sinon: S.SinonSandbox,
-      clock: S.SinonFakeTimers
+      sinon: SinonSandbox,
+      clock: SinonFakeTimers
     }
 
-    /**
-     * TypeScript currently can't handle this funciton unions correctly
-     * @see https://github.com/microsoft/TypeScript/issues/41213
-     * `this` context is not set for functions without `done` argument
-     */
-    type OptionsTest =
-      | ((this: Context) => void)
-      | ((this: Context) => PromiseLike<any>)
-      | ((this: Context, done: Done) => void)
-
-    export interface MongoOptions {
+    interface MongoOptions {
+      configuration?: NativeConfiguration;
       metadata?: { requires?: {
         generators?: boolean,
         topology?: Topologies | Topologies[],
@@ -42,46 +24,47 @@ declare global {
         node?: string,
         ignore?: { travis?: boolean }
       } }
-      test?: OptionsTest
+      test?: Func | AsyncFunc;
     }
-    /** @ts-ignore */
-    export interface SuiteFunction extends M.SuiteFunction {
-      (title: string, mongoOptions?: MongoOptions): M.Suite;
+
+    export interface TestFunction {
+      (title: string, mongoOptions?: MongoOptions): Test;
+      (title: string, mongoOptions?: MongoOptions, fn?: Func): Test;
+      (title: string, mongoOptions?: MongoOptions, fn?: AsyncFunc): Test;
     }
-    /** @ts-ignore */
-    export interface TestFunction extends M.TestFunction {
-      (title: string, mongoOptions?: MongoOptions): M.Test;
-      (title: string, mongoOptions?: MongoOptions, fn?: Func): M.Test;
-      (title: string, mongoOptions?: MongoOptions, fn?: AsyncFunc): M.Test;
+
+    export interface SuiteFunction {
+      (title: string, mongoOptions?: MongoOptions): Suite;
     }
-    /** @ts-ignore */
-    export interface ExclusiveTestFunction extends M.ExclusiveTestFunction {
-      (title: string, mongoOptions?: MongoOptions): M.Test;
+
+    export interface ExclusiveTestFunction {
+      (title: string, mongoOptions?: MongoOptions): Test;
     }
-    /** @ts-ignore */
-    export interface PendingTestFunction extends M.PendingTestFunction {
-      (title: string, mongoOptions?: MongoOptions): M.Test;
+
+    export interface PendingTestFunction {
+      (title: string, mongoOptions?: MongoOptions): Test;
     }
 
   }
-
-  type withClientCallback = (this: Mocha.Context, client: MongoClient) => PromiseLike<any>
-
-
-  /**
-   * NOTE: hard to match return type to mocha M.AsyncFunc because (executes lambda | returns lambda)
-   */
-  export interface withClient {
-    (callback: withClientCallback);
-    (client: String, callback: withClientCallback);
-    (client: MongoClient, callback: withClientCallback);
-    (client?: MongoClient | String | withClientCallback, callback?: withClientCallback);
-  }
-
   namespace Chai {
     export interface Assertion {
       matchMongoSpec(value: any): void;
     }
+    export interface TypeComparison {
+      lengthOf(number: number): void;
+    }
+
+    export interface Assertion {
+      containSubset(subset: any[]): void;
+    }
+
+  }
+
+  export interface withClient {
+    (callback: withClientCallback): any;
+    (client: String, callback: withClientCallback): any;
+    (client: MongoClient, callback: withClientCallback): any;
+    (client?: MongoClient | String | withClientCallback, callback?: withClientCallback): any;
   }
 
 }
