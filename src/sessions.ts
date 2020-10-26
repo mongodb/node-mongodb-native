@@ -45,7 +45,7 @@ export interface ClientSessionOptions {
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
 
-  owner?: symbol | Cursor;
+  owner: symbol | Cursor;
   explicit?: boolean;
   initialClusterTime?: ClusterTime;
 }
@@ -70,7 +70,7 @@ class ClientSession extends EventEmitter {
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
   explicit: boolean;
-  owner?: symbol | Cursor; // TODO - change to AbstractCursor
+  owner: symbol | Cursor; // TODO - change to AbstractCursor
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
   [kServerSession]?: ServerSession;
@@ -86,7 +86,7 @@ class ClientSession extends EventEmitter {
   constructor(
     topology: Topology,
     sessionPool: ServerSessionPool,
-    options?: ClientSessionOptions,
+    options: ClientSessionOptions,
     clientOptions?: MongoClientOptions
   ) {
     super();

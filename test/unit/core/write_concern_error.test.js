@@ -83,9 +83,9 @@ describe('WriteConcernError', function () {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
-        setTimeout(() => request.reply(test.primaryStates[0]), 0);
+        setTimeout(() => request.reply(test.primaryStates[0]));
       } else if (doc.createUser) {
-        setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR), 0);
+        setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR));
       }
     });
 
@@ -124,9 +124,9 @@ describe('WriteConcernError', function () {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
-        setTimeout(() => request.reply(test.primaryStates[0]), 0);
+        setTimeout(() => request.reply(test.primaryStates[0]));
       } else if (doc.createUser) {
-        setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO), 0);
+        setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO));
       }
     });
 

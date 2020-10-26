@@ -34,8 +34,8 @@ export class SrvPollingEvent {
 
 /** @internal */
 export interface SrvPollerOptions extends LoggerOptions {
-  srvHost?: string;
-  heartbeatFrequencyMS?: number;
+  srvHost: string;
+  heartbeatFrequencyMS: number;
 }
 
 /** @internal */
@@ -48,7 +48,7 @@ export class SrvPoller extends EventEmitter {
   generation: number;
   _timeout?: NodeJS.Timeout;
 
-  constructor(options?: SrvPollerOptions) {
+  constructor(options: SrvPollerOptions) {
     super();
 
     if (!options || !options.srvHost) {

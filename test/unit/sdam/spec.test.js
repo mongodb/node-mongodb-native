@@ -30,11 +30,11 @@ function collectTests() {
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f), 'utf8'), {
+        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
           relaxed: true
         });
 
-        result['type'] = testType;
+        result.type = testType;
         return result;
       });
   });

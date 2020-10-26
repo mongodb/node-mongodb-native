@@ -609,7 +609,7 @@ export class Collection implements OperationParent {
    */
   rename(newName: string): Promise<Collection>;
   rename(newName: string, callback: Callback<Collection>): void;
-  rename(newName: string, options: RenameOptions): Promise<Collection>;
+  rename(newName: string, options: RenameOptions): Promise<Collection> | void;
   rename(newName: string, options: RenameOptions, callback: Callback<Collection>): void;
   rename(
     newName: string,
@@ -1381,27 +1381,20 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  insert(docs: Document | Document[]): Promise<InsertManyResult>;
-  insert(docs: Document | Document[], options: BulkWriteOptions): Promise<InsertManyResult>;
   insert(
-    docs: Document | Document[],
+    docs: Document[],
     options: BulkWriteOptions,
     callback: Callback<InsertManyResult>
-  ): void;
-  insert(
-    docs: Document | Document[],
-    options?: BulkWriteOptions,
-    callback?: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: false };
-    const multiDocs = !Array.isArray(docs) ? [docs] : docs;
+    docs = !Array.isArray(docs) ? [docs] : docs;
 
     if (options.keepGoing === true) {
       options.ordered = false;
     }
-    if (callback) return this.insertMany(multiDocs, options, callback);
-    return this.insertMany(multiDocs, options);
+
+    return this.insertMany(docs, options, callback);
   }
 
   /**

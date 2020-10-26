@@ -324,9 +324,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Initiate server connect */
-  connect(callback: Callback): void;
-  connect(options: ConnectOptions, callback: Callback): void;
-  connect(options?: ConnectOptions | Callback, callback?: Callback): void {
+  connect(options?: ConnectOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
     if (this.s.state === STATE_CONNECTED) {
@@ -392,13 +390,11 @@ export class Topology extends EventEmitter {
   }
 
   /** Close this topology */
-  close(): void;
-  close(options: CloseOptions): void;
-  close(callback: Callback): void;
-  close(options: CloseOptions, callback: Callback): void;
-  close(optionsOrCallback?: CloseOptions | Callback, callback?: Callback): void {
-    let options = typeof optionsOrCallback !== 'function' ? optionsOrCallback : {};
-    callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback;
+  close(options?: CloseOptions, callback?: Callback): void {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
     if (typeof options === 'boolean') {
       options = { force: options };

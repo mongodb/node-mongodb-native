@@ -33,12 +33,12 @@ function collectSelectionTests(specDir) {
           .filter(f => path.extname(f) === '.json')
           .map(f => {
             const subTypeData = EJSON.parse(
-              fs.readFileSync(path.join(specDir, testType, subType, f), 'utf8'),
+              fs.readFileSync(path.join(specDir, testType, subType, f)),
               { relaxed: true }
             );
-            subTypeData['name'] = path.basename(f, '.json');
-            subTypeData['type'] = testType;
-            subTypeData['subType'] = subType;
+            subTypeData.name = path.basename(f, '.json');
+            subTypeData.type = testType;
+            subTypeData.subType = subType;
             return subTypeData;
           });
 
@@ -103,11 +103,11 @@ function collectStalenessTests(specDir) {
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f), 'utf8'), {
+        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
           relaxed: true
         });
-        result['description'] = path.basename(f, '.json');
-        result['type'] = testType;
+        result.description = path.basename(f, '.json');
+        result.type = testType;
         return result;
       });
   });
