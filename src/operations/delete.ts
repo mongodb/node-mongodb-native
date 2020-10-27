@@ -8,9 +8,10 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
+import type { ExplainOptions } from '../explain';
 
 /** @public */
-export interface DeleteOptions extends CommandOperationOptions {
+export interface DeleteOptions extends CommandOperationOptions, ExplainOptions {
   single?: boolean;
   hint?: Hint;
 }
@@ -75,6 +76,9 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
         return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
       }
 
+      // If an explain option was executed, don't process the server results
+      if (options.explain) return callback(undefined, r);
+
       r.deletedCount = r.n;
       if (callback) callback(undefined, r);
     });
@@ -112,6 +116,9 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
       if (r == null) {
         return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
       }
+
+      // If an explain option was executed, don't process the server results
+      if (options.explain) return callback(undefined, r);
 
       r.deletedCount = r.n;
       if (callback) callback(undefined, r);

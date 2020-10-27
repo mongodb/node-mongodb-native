@@ -45,6 +45,7 @@ import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { FindOptions } from '../operations/find';
+import { explainSupported, validExplainVerbosity } from '../explain';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -453,6 +454,18 @@ function executeWriteOperation(
   if (unacknowledgedWrite || maxWireVersion(server) < 5) {
     if ((op === 'update' || op === 'remove') && ops.find((o: Document) => o.hint)) {
       callback(new MongoError(`servers < 3.4 do not support hint on ${op}`));
+      return;
+    }
+  }
+
+  if (options.explain) {
+    if (!validExplainVerbosity(options.explain)) {
+      callback(new MongoError(`${options.explain} is an invalid explain verbosity`));
+      return;
+    }
+
+    if (!explainSupported(server, op)) {
+      callback(new MongoError(`server ${server.name} does not support explain on ${op}`));
       return;
     }
   }

@@ -22,8 +22,6 @@ export interface OperationConstructor extends Function {
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
-
-  explain?: boolean;
   willRetryWrites?: boolean;
 }
 
