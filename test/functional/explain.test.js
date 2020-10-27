@@ -246,28 +246,105 @@ describe('Explain', function () {
   //     });
   //   })
   // });
-});
 
-it('shouldHonorBooleanExplainWithDistinct', {
-  metadata: {
-    requires: {
-      mongodb: '>3.2'
-    }
-  },
-  test: withClient(function (client, done) {
-    var db = client.db('shouldHonorBooleanExplainWithDistinct');
-    var collection = db.collection('test');
+  it('shouldHonorBooleanExplainWithDistinct', {
+    metadata: {
+      requires: {
+        mongodb: '>3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithDistinct');
+      var collection = db.collection('test');
 
-    collection.insertOne({ a: 1 }, (err, res) => {
-      expect(err).to.not.exist;
-      expect(res).to.exist;
-
-      collection.distinct('a', {}, { explain: true }, (err, explanation) => {
+      collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
-        expect(explanation).to.exist;
-        expect(explanation).property('queryPlanner').to.exist;
-        done();
+        expect(res).to.exist;
+
+        collection.distinct('a', {}, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
       });
-    });
-  })
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithFindOneAndDelete', {
+    metadata: {
+      requires: {
+        mongodb: '>3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithFindOneAndDelete');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.findOneAndDelete({ a: 1 }, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithFindOneAndReplace', {
+    metadata: {
+      requires: {
+        mongodb: '>3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithFindOneAndReplace');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithFindOneAndUpdate', {
+    metadata: {
+      requires: {
+        mongodb: '>3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithFindOneAndUpdate');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.findOneAndUpdate(
+          { a: 1 },
+          { $inc: { a: 2 } },
+          { explain: true },
+          (err, explanation) => {
+            expect(err).to.not.exist;
+            expect(explanation).to.exist;
+            expect(explanation).property('queryPlanner').to.exist;
+            done();
+          }
+        );
+      });
+    })
+  });
 });
