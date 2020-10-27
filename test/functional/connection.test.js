@@ -132,17 +132,16 @@ describe('Connection', function () {
       var db = client.db(configuration.db);
       expect(err).to.not.exist;
 
-      db.collection(testName, function (err, collection) {
+      const collection = db.collection(testName);
+      expect(err).to.not.exist;
+
+      collection.insert({ foo: 123 }, { w: 1 }, function (err) {
         expect(err).to.not.exist;
 
-        collection.insert({ foo: 123 }, { w: 1 }, function (err) {
+        db.dropDatabase(function (err, dropped) {
           expect(err).to.not.exist;
-
-          db.dropDatabase(function (err, dropped) {
-            expect(err).to.not.exist;
-            test.ok(dropped);
-            if (callback) return callback(client);
-          });
+          test.ok(dropped);
+          if (callback) return callback(client);
         });
       });
     };

@@ -76,12 +76,11 @@ describe('Multiple Databases', function () {
         db_instance = client.db('site2');
         db_instance = client.db('rss');
 
-        db_instance.collection('counters', function (err, collection) {
+        const collection = db_instance.collection('counters');
+        expect(err).to.not.exist;
+        collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function (err) {
           expect(err).to.not.exist;
-          collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function (err) {
-            expect(err).to.not.exist;
-            client.close(done);
-          });
+          client.close(done);
         });
       });
     }

@@ -808,37 +808,36 @@ describe('Aggregation', function () {
         expect(err).to.not.exist;
 
         var db = client.db(databaseName);
-        db.collection('te.st', function (err, col) {
+        const col = db.collection('te.st');
+        expect(err).to.not.exist;
+        var count = 0;
+
+        col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
           expect(err).to.not.exist;
-          var count = 0;
+          expect(r.result.n).to.equal(3);
 
-          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
+          const cursor = col.aggregate([{ $project: { a: 1 } }]);
+
+          cursor.toArray(function (err, docs) {
             expect(err).to.not.exist;
-            expect(r.result.n).to.equal(3);
+            expect(docs.length).to.be.greaterThan(0);
 
-            const cursor = col.aggregate([{ $project: { a: 1 } }]);
+            //Using cursor - KO
+            col
+              .aggregate([{ $project: { a: 1 } }], {
+                cursor: { batchSize: 10000 }
+              })
+              .forEach(
+                function () {
+                  count = count + 1;
+                },
+                function (err) {
+                  expect(err).to.not.exist;
+                  expect(count).to.be.greaterThan(0);
 
-            cursor.toArray(function (err, docs) {
-              expect(err).to.not.exist;
-              expect(docs.length).to.be.greaterThan(0);
-
-              //Using cursor - KO
-              col
-                .aggregate([{ $project: { a: 1 } }], {
-                  cursor: { batchSize: 10000 }
-                })
-                .forEach(
-                  function () {
-                    count = count + 1;
-                  },
-                  function (err) {
-                    expect(err).to.not.exist;
-                    expect(count).to.be.greaterThan(0);
-
-                    client.close(done);
-                  }
-                );
-            });
+                  client.close(done);
+                }
+              );
           });
         });
       });

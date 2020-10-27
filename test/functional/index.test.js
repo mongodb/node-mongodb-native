@@ -357,32 +357,31 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         db.createCollection('create_and_use_sparse_index_test', function (err) {
           expect(err).to.not.exist;
-          db.collection('create_and_use_sparse_index_test', function (err, collection) {
+          const collection = db.collection('create_and_use_sparse_index_test');
+          expect(err).to.not.exist;
+          collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function (err) {
             expect(err).to.not.exist;
-            collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function (err) {
-              expect(err).to.not.exist;
-              collection.insert(
-                [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  collection
-                    .find({ title: { $ne: null } })
-                    .sort({ title: 1 })
-                    .toArray(function (err, items) {
-                      test.equal(1, items.length);
-                      test.equal('Sarah', items[0].name);
+            collection.insert(
+              [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
+                collection
+                  .find({ title: { $ne: null } })
+                  .sort({ title: 1 })
+                  .toArray(function (err, items) {
+                    test.equal(1, items.length);
+                    test.equal('Sarah', items[0].name);
 
-                      // Fetch the info for the indexes
-                      collection.indexInformation({ full: true }, function (err, indexInfo) {
-                        expect(err).to.not.exist;
-                        test.equal(2, indexInfo.length);
-                        client.close(done);
-                      });
+                    // Fetch the info for the indexes
+                    collection.indexInformation({ full: true }, function (err, indexInfo) {
+                      expect(err).to.not.exist;
+                      test.equal(2, indexInfo.length);
+                      client.close(done);
                     });
-                }
-              );
-            });
+                  });
+              }
+            );
           });
         });
       });
@@ -406,22 +405,21 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         db.createCollection('geospatial_index_test', function (err) {
           expect(err).to.not.exist;
-          db.collection('geospatial_index_test', function (err, collection) {
-            collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
+          const collection = db.collection('geospatial_index_test');
+          collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
+            expect(err).to.not.exist;
+            collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (
+              err
+            ) {
               expect(err).to.not.exist;
-              collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (
+
+              collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
                 err
               ) {
-                expect(err).to.not.exist;
-
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
-                  err
-                ) {
-                  test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                  test.ok(err.errmsg.indexOf('-180') !== -1);
-                  test.ok(err.errmsg.indexOf('180') !== -1);
-                  client.close(done);
-                });
+                test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                test.ok(err.errmsg.indexOf('-180') !== -1);
+                test.ok(err.errmsg.indexOf('180') !== -1);
+                client.close(done);
               });
             });
           });
@@ -447,27 +445,22 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         db.createCollection('geospatial_index_altered_test', function (err) {
           expect(err).to.not.exist;
-          db.collection('geospatial_index_altered_test', function (err, collection) {
-            collection.ensureIndex({ loc: '2d' }, { min: 0, max: 1024, w: 1 }, function (err) {
+          const collection = db.collection('geospatial_index_altered_test');
+          collection.ensureIndex({ loc: '2d' }, { min: 0, max: 1024, w: 1 }, function (err) {
+            expect(err).to.not.exist;
+            collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (err) {
               expect(err).to.not.exist;
-              collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (
+              collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
                 err
               ) {
                 expect(err).to.not.exist;
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
+                collection.insert({ loc: [-200, -200] }, configuration.writeConcernMax(), function (
                   err
                 ) {
-                  expect(err).to.not.exist;
-                  collection.insert(
-                    { loc: [-200, -200] },
-                    configuration.writeConcernMax(),
-                    function (err) {
-                      test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                      test.ok(err.errmsg.indexOf('0') !== -1);
-                      test.ok(err.errmsg.indexOf('1024') !== -1);
-                      client.close(done);
-                    }
-                  );
+                  test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                  test.ok(err.errmsg.indexOf('0') !== -1);
+                  test.ok(err.errmsg.indexOf('1024') !== -1);
+                  client.close(done);
                 });
               });
             });

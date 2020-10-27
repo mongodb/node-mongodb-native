@@ -325,17 +325,9 @@ export class Db implements OperationParent {
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance if not in strict mode
    */
-  collection(name: string): Collection;
-  collection(name: string, options: CollectionOptions): Collection;
-  collection(name: string, callback: Callback<Collection>): void;
-  collection(name: string, options: CollectionOptions, callback: Callback<Collection>): void;
-  collection(
-    name: string,
-    options?: CollectionOptions | Callback<Collection>,
-    callback?: Callback<Collection>
-  ): Collection | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+
+  collection(name: string, options?: CollectionOptions): Collection {
+    options = options ?? {};
 
     // If we have not set a collection level readConcern set the db level one
     options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
@@ -353,49 +345,7 @@ export class Db implements OperationParent {
       true
     ) as CollectionOptions;
 
-    // Execute
-    if (finalOptions == null || !finalOptions.strict) {
-      try {
-        const collection = new Collection(this, name, finalOptions);
-        if (callback) callback(undefined, collection);
-        return collection;
-      } catch (err) {
-        if (err instanceof MongoError && callback) return callback(err);
-        throw err;
-      }
-    }
-
-    // Strict mode
-    if (typeof callback !== 'function') {
-      throw new MongoError(
-        `A callback is required in strict mode. While getting collection ${name}`
-      );
-    }
-
-    // Did the user destroy the topology
-    if (this.s.topology && this.s.topology.isDestroyed()) {
-      return callback(new MongoError('topology was destroyed'));
-    }
-
-    const listCollectionOptions: ListCollectionsOptions = Object.assign({}, finalOptions, {
-      nameOnly: true
-    });
-
-    // Strict mode
-    this.listCollections({ name }, listCollectionOptions).toArray((err, collections) => {
-      if (callback == null) return;
-      if (err != null || !collections) return callback(err);
-      if (collections.length === 0)
-        return callback(
-          new MongoError(`Collection ${name} does not exist. Currently in strict mode.`)
-        );
-
-      try {
-        return callback(undefined, new Collection(this, name, finalOptions));
-      } catch (err) {
-        return callback(err);
-      }
-    });
+    return new Collection(this, name, finalOptions);
   }
 
   /**

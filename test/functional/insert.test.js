@@ -275,48 +275,44 @@ describe('Insert', function () {
           };
         }
 
-        db.collection(
-          'users',
-          getResult(function (user_collection) {
-            user_collection.remove({}, configuration.writeConcernMax(), function (err) {
-              expect(err).to.not.exist;
+        const user_collection = db.collection('users');
+        user_collection.remove({}, configuration.writeConcernMax(), function (err) {
+          expect(err).to.not.exist;
 
-              //first, create a user object
-              var newUser = { name: 'Test Account', settings: {} };
-              user_collection.insert(
-                [newUser],
+          //first, create a user object
+          var newUser = { name: 'Test Account', settings: {} };
+          user_collection.insert(
+            [newUser],
+            configuration.writeConcernMax(),
+            getResult(function (r) {
+              var user = r.ops[0];
+
+              var scriptCode = "settings.block = []; settings.block.push('test');";
+              var context = { settings: { thisOneWorks: 'somestring' } };
+
+              Script.runInNewContext(scriptCode, context, 'testScript');
+
+              //now create update command and issue it
+              var updateCommand = { $set: context };
+
+              user_collection.update(
+                { _id: user._id },
+                updateCommand,
                 configuration.writeConcernMax(),
-                getResult(function (r) {
-                  var user = r.ops[0];
-
-                  var scriptCode = "settings.block = []; settings.block.push('test');";
-                  var context = { settings: { thisOneWorks: 'somestring' } };
-
-                  Script.runInNewContext(scriptCode, context, 'testScript');
-
-                  //now create update command and issue it
-                  var updateCommand = { $set: context };
-
-                  user_collection.update(
-                    { _id: user._id },
-                    updateCommand,
-                    configuration.writeConcernMax(),
-                    getResult(function () {
-                      // Fetch the object and check that the changes are persisted
-                      user_collection.findOne({ _id: user._id }, function (err, doc) {
-                        test.ok(err == null);
-                        test.equal('Test Account', doc.name);
-                        test.equal('somestring', doc.settings.thisOneWorks);
-                        test.equal('test', doc.settings.block[0]);
-                        client.close(done);
-                      });
-                    })
-                  );
+                getResult(function () {
+                  // Fetch the object and check that the changes are persisted
+                  user_collection.findOne({ _id: user._id }, function (err, doc) {
+                    test.ok(err == null);
+                    test.equal('Test Account', doc.name);
+                    test.equal('somestring', doc.settings.thisOneWorks);
+                    test.equal('test', doc.settings.block[0]);
+                    client.close(done);
+                  });
                 })
               );
-            });
-          })
-        );
+            })
+          );
+        });
       });
     }
   });

@@ -4310,30 +4310,28 @@ describe('Cursor', function () {
     const findSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}, { sort: input });
+        this.defer(() => cursor.close);
+        expect(cursor.sortValue).to.deep.equal(output);
+        return cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}, { sort: input });
-          expect(cursor.sortValue).to.deep.equal(output);
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.deep.equal(output);
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.deep.equal(output);
+          return done();
         });
       });
 
     const cursorSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}).sort(input);
+        expect(cursor.sortValue).to.deep.equal(output);
+        this.defer(() => cursor.close);
+        return cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}).sort(input);
-          expect(cursor.sortValue).to.deep.equal(output);
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.deep.equal(output);
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.deep.equal(output);
+          return done();
         });
       });
 
