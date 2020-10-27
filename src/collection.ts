@@ -176,7 +176,7 @@ export class Collection implements OperationParent {
   constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
-    const BSON = BSONProvider.get();
+    const { ObjectId } = BSONProvider.get();
     // Internal state
     this.s = {
       db,
@@ -186,7 +186,7 @@ export class Collection implements OperationParent {
       pkFactory: db.options?.pkFactory ?? {
         createPk() {
           // We prefer not to rely on ObjectId having a createPk method
-          return new BSON.ObjectId();
+          return new ObjectId();
         }
       },
       readPreference: ReadPreference.fromOptions(options),
