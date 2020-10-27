@@ -1,5 +1,5 @@
 import { PromiseProvider } from '../promise_provider';
-import { Long, ObjectId, Document } from '../bson';
+import { Long, ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
 import { MongoError, MongoWriteConcernError, AnyError } from '../error';
 import {
   applyWriteConcern,
@@ -570,7 +570,11 @@ function executeCommands(
     executeCommands(bulkOperation, options, callback);
   }
 
-  const finalOptions = Object.assign({ ordered: bulkOperation.isOrdered }, options);
+  const finalOptions = Object.assign(
+    { ordered: bulkOperation.isOrdered },
+    bulkOperation.s.bsonOptions,
+    options
+  );
   if (bulkOperation.s.writeConcern != null) {
     finalOptions.writeConcern = bulkOperation.s.writeConcern;
   }
@@ -582,16 +586,6 @@ function executeCommands(
   // Set an operationIf if provided
   if (bulkOperation.operationId) {
     resultHandler.operationId = bulkOperation.operationId;
-  }
-
-  // Serialize functions
-  if (bulkOperation.s.options.serializeFunctions) {
-    finalOptions.serializeFunctions = true;
-  }
-
-  // Ignore undefined
-  if (bulkOperation.s.options.ignoreUndefined) {
-    finalOptions.ignoreUndefined = true;
   }
 
   // Is the bypassDocumentValidation options specific
@@ -870,6 +864,8 @@ interface BulkOperationPrivate {
   topology: Topology;
   // Options
   options: BulkWriteOptions;
+  // BSON options
+  bsonOptions: BSONSerializeOptions;
   // Document used to build a bulk operation
   currentOp?: Document;
   // Executed
@@ -985,6 +981,8 @@ export abstract class BulkOperationBase {
       topology,
       // Options
       options: finalOptions,
+      // BSON options
+      bsonOptions: resolveBSONOptions(options, collection),
       // Current operation
       currentOp,
       // Executed
