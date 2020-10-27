@@ -50,7 +50,7 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, Update
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Set single document update
     options.multi = false;

@@ -1,3 +1,4 @@
+import type { OperationParent } from './operations/command';
 // import type * as _BSON from 'bson';
 // let BSON: typeof _BSON = require('bson');
 // try {
@@ -67,5 +68,27 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     serializeFunctions,
     ignoreUndefined,
     raw
+  };
+}
+
+/**
+ * Merge the given BSONSerializeOptions, preferring options over the parent's options, and
+ * substituting defaults for values not set.
+ *
+ * @internal
+ */
+export function resolveBSONOptions(
+  options?: BSONSerializeOptions,
+  parent?: OperationParent
+): BSONSerializeOptions {
+  const parentOptions = parent?.bsonOptions;
+  return {
+    raw: options?.raw ?? parentOptions?.raw ?? false,
+    promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,
+    promoteValues: options?.promoteValues ?? parentOptions?.promoteValues ?? true,
+    promoteBuffers: options?.promoteBuffers ?? parentOptions?.promoteBuffers ?? false,
+    ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false,
+    serializeFunctions: options?.serializeFunctions ?? parentOptions?.serializeFunctions ?? false,
+    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {}
   };
 }

@@ -86,7 +86,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Set single document update
     options.multi = false;
@@ -128,7 +128,7 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Set single document update
     options.multi = true;

@@ -8,7 +8,7 @@ import {
   MongoDBNamespace,
   Callback
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions } from './bson';
+import { ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -127,13 +127,8 @@ export interface CollectionPrivate {
   options: any;
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
+  bsonOptions: BSONSerializeOptions;
   slaveOk?: boolean;
-  serializeFunctions?: boolean;
-  raw?: boolean;
-  promoteLongs?: boolean;
-  promoteValues?: boolean;
-  promoteBuffers?: boolean;
-  ignoreUndefined?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -189,30 +184,10 @@ export class Collection implements OperationParent {
         }
       },
       readPreference: ReadPreference.fromOptions(options),
+      bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
-      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk,
-      serializeFunctions:
-        options == null || options.serializeFunctions == null
-          ? db.s.options?.serializeFunctions
-          : options.serializeFunctions,
-      raw: options == null || options.raw == null ? db.s.options?.raw : options.raw,
-      promoteLongs:
-        options == null || options.promoteLongs == null
-          ? db.s.options?.promoteLongs
-          : options.promoteLongs,
-      promoteValues:
-        options == null || options.promoteValues == null
-          ? db.s.options?.promoteValues
-          : options.promoteValues,
-      promoteBuffers:
-        options == null || options.promoteBuffers == null
-          ? db.s.options?.promoteBuffers
-          : options.promoteBuffers,
-      ignoreUndefined:
-        options == null || options.ignoreUndefined == null
-          ? db.s.options?.ignoreUndefined
-          : options.ignoreUndefined
+      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk
     };
   }
 
@@ -261,6 +236,10 @@ export class Collection implements OperationParent {
     return this.s.readPreference;
   }
 
+  get bsonOptions(): BSONSerializeOptions {
+    return this.s.bsonOptions;
+  }
+
   /**
    * The current writeConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
@@ -301,12 +280,6 @@ export class Collection implements OperationParent {
   ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return executeOperation(this.s.topology, new InsertOneOperation(this, doc, options), callback);
   }
@@ -429,12 +402,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new UpdateOneOperation(this, filter, update, options),
@@ -472,12 +439,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new ReplaceOneOperation(this, filter, replacement, options),
@@ -511,12 +472,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return executeOperation(
       this.s.topology,
       new UpdateManyOperation(this, filter, update, options),
@@ -542,12 +497,6 @@ export class Collection implements OperationParent {
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = Object.assign({}, options);
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return executeOperation(
       this.s.topology,
@@ -586,12 +535,6 @@ export class Collection implements OperationParent {
     }
 
     options = Object.assign({}, options);
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return executeOperation(
       this.s.topology,
@@ -1345,7 +1288,7 @@ export class Collection implements OperationParent {
     options = options || {};
     // Give function's options precedence over session options.
     if (options.ignoreUndefined == null) {
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
     }
 
     return new UnorderedBulkOperation(this, options);
@@ -1356,7 +1299,7 @@ export class Collection implements OperationParent {
     options = options || {};
     // Give function's options precedence over session's options.
     if (options.ignoreUndefined == null) {
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
     }
 
     return new OrderedBulkOperation(this, options);
@@ -1415,12 +1358,6 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
-
     return this.updateMany(selector, update, options, callback);
   }
 
@@ -1439,12 +1376,6 @@ export class Collection implements OperationParent {
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
-    // Add ignoreUndefined
-    if (this.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = this.s.options.ignoreUndefined;
-    }
 
     return this.deleteMany(selector, options, callback);
   }

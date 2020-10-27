@@ -100,15 +100,6 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       find: this.ns.toString(),
       query: this.filter
     };
-
-    // TODO: figure out our story about inheriting BSON serialization options
-    this.bsonOptions = {
-      raw: options.raw ?? collection.s.raw ?? false,
-      promoteLongs: options.promoteLongs ?? collection.s.promoteLongs ?? true,
-      promoteValues: options.promoteValues ?? collection.s.promoteValues ?? true,
-      promoteBuffers: options.promoteBuffers ?? collection.s.promoteBuffers ?? false,
-      ignoreUndefined: options.ignoreUndefined ?? collection.s.ignoreUndefined ?? false
-    };
   }
 
   execute(server: Server, callback: Callback<Document>): void {

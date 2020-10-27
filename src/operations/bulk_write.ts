@@ -1,5 +1,6 @@
 import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
 import { OperationBase } from './operation';
+import { resolveBSONOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type {
@@ -24,18 +25,15 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
 
     this.collection = collection;
     this.operations = operations;
+
+    // Assign BSON serialize options to OperationBase, preferring options over collection options
+    this.bsonOptions = resolveBSONOptions(options, collection);
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
-
-    // Add ignoreUndefined
-    if (coll.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = coll.s.options.ignoreUndefined;
-    }
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
