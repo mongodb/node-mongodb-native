@@ -2,7 +2,6 @@ import { deprecate } from 'util';
 import { emitDeprecatedOptionWarning, Callback } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId, Code, Document, BSONSerializeOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -51,11 +50,13 @@ import {
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
+import { BSONProvider } from './bson_provider';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { PkFactory } from './mongo_client';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
+import type { Code, Document, BSONSerializeOptions } from './bson';
 
 // Allowed parameters
 const legalOptionNames = [
@@ -152,6 +153,7 @@ export class Db implements OperationParent {
    * @param options - Optional settings for Db construction
    */
   constructor(databaseName: string, topology: Topology, options?: DbOptions) {
+    const { ObjectId } = BSONProvider.get();
     options = options || {};
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
@@ -831,7 +833,6 @@ export class Db implements OperationParent {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
-
     return executeOperation(
       this.s.topology,
       new EvalOperation(this, code, parameters, options),

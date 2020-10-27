@@ -10,6 +10,7 @@ import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
 import { ReadConcern, ReadConcernLevelLike, ReadConcernLike } from './read_concern';
+import { BSONProvider } from './bson_provider';
 import type { BSONSerializeOptions, Document } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -18,6 +19,7 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 import type { TagSet } from './sdam/server_description';
+import type * as BSON from './bson';
 
 /** @public */
 export enum LogLevel {
@@ -206,8 +208,10 @@ export interface MongoClientOptions
   driverInfo?: DriverInfo;
   /** String containing the server name requested via TLS SNI. */
   servername?: string;
-
+  /** The database name */
   dbName?: string;
+  /** Provide a custom implementation of BSON */
+  bsonLibrary?: typeof BSON;
 }
 
 /** @public */
@@ -276,6 +280,10 @@ export class MongoClient extends EventEmitter implements OperationParent {
       // TODO NODE-2530: this will go away when client options are sorted out
       // NOTE: need this to prevent deprecation notice from being inherited in Db, Collection
       delete options.promiseLibrary;
+    }
+    if (options && options.bsonLibrary) {
+      BSONProvider.set(options.bsonLibrary);
+      delete options.bsonLibrary;
     }
 
     // The internal state

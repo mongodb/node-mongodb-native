@@ -1,6 +1,5 @@
 import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
-import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
 import { resolveClusterTime, ClusterTime } from './sdam/common';
@@ -15,12 +14,14 @@ import {
   maxWireVersion,
   maybePromise
 } from './utils';
+import { executeOperation } from './operations/execute_operation';
+import { RunAdminCommandOperation } from './operations/run_command';
+import { BSONProvider } from './bson_provider';
+import type { Binary, Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { MongoClientOptions } from './mongo_client';
 import type { Cursor } from './cursor/cursor';
 import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
-import { executeOperation } from './operations/execute_operation';
-import { RunAdminCommandOperation } from './operations/run_command';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -601,6 +602,7 @@ class ServerSession {
 
   /** @internal */
   constructor() {
+    const { Binary } = BSONProvider.get();
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
     this.txnNumber = 0;
@@ -752,6 +754,7 @@ function applySession(
   command: Document,
   options?: WriteCommandOptions
 ): MongoError | undefined {
+  const { Long } = BSONProvider.get();
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
     return new MongoError('Attemped to use a session that has ended');

@@ -1,3 +1,4 @@
+import { BSONProvider } from './bson_provider';
 import { emitDeprecatedOptionWarning } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
@@ -8,7 +9,6 @@ import {
   MongoDBNamespace,
   Callback
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -87,6 +87,7 @@ import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
+import type { Document, BSONSerializeOptions } from './bson';
 
 /** @public */
 export interface Collection {
@@ -175,7 +176,7 @@ export class Collection implements OperationParent {
   constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
-
+    const BSON = BSONProvider.get();
     // Internal state
     this.s = {
       db,
@@ -185,7 +186,7 @@ export class Collection implements OperationParent {
       pkFactory: db.options?.pkFactory ?? {
         createPk() {
           // We prefer not to rely on ObjectId having a createPk method
-          return new ObjectId();
+          return new BSON.ObjectId();
         }
       },
       readPreference: ReadPreference.fromOptions(options),
