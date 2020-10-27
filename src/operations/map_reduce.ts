@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback
+  Callback,
+  maxWireVersion
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -14,8 +15,14 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
+import {
+  ExplainOptions,
+  SUPPORTS_EXPLAIN_WITH_MAP_REDUCE,
+  validExplainVerbosity
+} from '../explain';
 
 const exclusionList = [
+  'explain',
   'readPreference',
   'session',
   'bypassDocumentValidation',
@@ -34,7 +41,7 @@ export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
 /** @public */
-export interface MapReduceOptions extends CommandOperationOptions {
+export interface MapReduceOptions extends CommandOperationOptions, ExplainOptions {
   /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
@@ -93,6 +100,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
     this.collection = collection;
     this.map = map;
     this.reduce = reduce;
+    this.explain = options?.explain;
   }
 
   execute(server: Server, callback: Callback<Document | Document[]>): void {
@@ -152,6 +160,20 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       return callback(err);
     }
 
+    if (this.explain) {
+      if (!validExplainVerbosity(this.explain)) {
+        callback(new MongoError(`${this.explain} is an invalid explain verbosity`));
+        return;
+      }
+
+      if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_MAP_REDUCE) {
+        callback(
+          new MongoError('the current topology does not support explain on mapReduce commands')
+        );
+        return;
+      }
+    }
+
     // Execute command
     super.executeCommand(server, mapCommandHash, (err, result) => {
       if (err) return callback(err);
@@ -159,6 +181,9 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       if (1 !== result.ok || result.err || result.errmsg) {
         return callback(new MongoError(result));
       }
+
+      // If an explain option was executed, don't process the server results
+      if (this.explain) return callback(undefined, result);
 
       // Create statistics value
       const stats: MapReduceStats = {};

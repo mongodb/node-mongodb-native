@@ -347,4 +347,36 @@ describe('Explain', function () {
       });
     })
   });
+
+  it('shouldHonorBooleanExplainWithMapReduce', {
+    metadata: {
+      requires: {
+        mongodb: '>4.4'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithMapReduce');
+      var collection = db.collection('test');
+
+      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        var map = 'function() { emit(this.user_id, 1); }';
+        var reduce = 'function(k,vals) { return 1; }';
+
+        collection.mapReduce(
+          map,
+          reduce,
+          { out: { replace: 'tempCollection' }, explain: true },
+          (err, explanation) => {
+            expect(err).to.not.exist;
+            expect(explanation).to.exist;
+            expect(explanation).property('stages').to.exist;
+            done();
+          }
+        );
+      });
+    })
+  });
 });
