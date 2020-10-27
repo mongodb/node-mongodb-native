@@ -1,7 +1,7 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -10,6 +10,7 @@ import type { Server } from '../sdam/server';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
+import type { Verbosity } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -54,7 +55,7 @@ export abstract class CommandOperation<
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
-  explain: boolean;
+  explain?: Verbosity;
   fullResponse?: boolean;
   logger?: Logger;
 
@@ -79,7 +80,6 @@ export abstract class CommandOperation<
       : ReadPreference.resolve(propertyProvider, this.options);
     this.readConcern = resolveReadConcern(propertyProvider, this.options);
     this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
-    this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
 
@@ -135,6 +135,12 @@ export abstract class CommandOperation<
 
     if (typeof options.comment === 'string') {
       cmd.comment = options.comment;
+    }
+
+    // If we have reached this point, then the explain verbosity must be valid
+    // Note: explain inherits any comment from its command
+    if (this.explain) {
+      cmd = decorateWithExplain(cmd, { explain: this.explain });
     }
 
     if (this.logger && this.logger.isDebug()) {

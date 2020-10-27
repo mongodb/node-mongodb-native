@@ -1,12 +1,14 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersion } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import { ExplainOptions, SUPPORTS_EXPLAIN_WITH_DISTINCT, validExplainVerbosity } from '../explain';
+import { MongoError } from '../error';
 
 /** @public */
-export type DistinctOptions = CommandOperationOptions;
+export interface DistinctOptions extends CommandOperationOptions, ExplainOptions {}
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -33,6 +35,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     this.collection = collection;
     this.key = key;
     this.query = query;
+    this.explain = options?.explain;
   }
 
   execute(server: Server, callback: Callback<Document[]>): void {
@@ -63,13 +66,27 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
       return callback(err);
     }
 
+    if (this.explain) {
+      if (!validExplainVerbosity(this.explain)) {
+        callback(new MongoError(`${this.explain} is an invalid explain verbosity`));
+        return;
+      }
+
+      if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_DISTINCT) {
+        callback(
+          new MongoError('the current topology does not support explain on distinct commands')
+        );
+        return;
+      }
+    }
+
     super.executeCommand(server, cmd, (err, result) => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(undefined, this.options.fullResponse ? result : result.values);
+      callback(undefined, this.options.fullResponse || this.explain ? result : result.values);
     });
   }
 }

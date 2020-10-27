@@ -247,3 +247,27 @@ describe('Explain', function () {
   //   })
   // });
 });
+
+it('shouldHonorBooleanExplainWithDistinct', {
+  metadata: {
+    requires: {
+      mongodb: '>3.2'
+    }
+  },
+  test: withClient(function (client, done) {
+    var db = client.db('shouldHonorBooleanExplainWithDistinct');
+    var collection = db.collection('test');
+
+    collection.insertOne({ a: 1 }, (err, res) => {
+      expect(err).to.not.exist;
+      expect(res).to.exist;
+
+      collection.distinct('a', {}, { explain: true }, (err, explanation) => {
+        expect(err).to.not.exist;
+        expect(explanation).to.exist;
+        expect(explanation).property('queryPlanner').to.exist;
+        done();
+      });
+    });
+  })
+});
