@@ -1,7 +1,7 @@
 import { ReadPreference } from '../read_preference';
-import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
+import { BSONProvider } from '../bson_provider';
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './wire_protocol/command';
@@ -181,7 +181,7 @@ export class Query {
 
     // Add header to buffers
     buffers.push(header);
-
+    const BSON = BSONProvider.get();
     // Serialize the query
     const query = BSON.serialize(this.query, {
       checkKeys: this.checkKeys,
@@ -498,6 +498,7 @@ export class Response {
     msgBody: Buffer,
     opts?: OpResponseOptions
   ) {
+    const BSON = BSONProvider.get();
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
@@ -536,6 +537,7 @@ export class Response {
   }
 
   parse(options: OpResponseOptions): void {
+    const BSON = BSONProvider.get();
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};
@@ -733,6 +735,7 @@ export class Msg {
   }
 
   serializeBson(document: Document): Buffer {
+    const BSON = BSONProvider.get();
     return BSON.serialize(document, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
@@ -804,6 +807,7 @@ export class BinMsg {
   }
 
   parse(options: OpResponseOptions): void {
+    const BSON = BSONProvider.get();
     // Don't parse again if not needed
     if (this.parsed) return;
     options = options || {};

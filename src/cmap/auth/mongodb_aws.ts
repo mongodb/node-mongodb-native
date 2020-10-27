@@ -1,7 +1,6 @@
 import * as http from 'http';
 import * as crypto from 'crypto';
 import * as url from 'url';
-import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
@@ -10,6 +9,7 @@ import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
 import { AuthMechanism } from './defaultAuthProviders';
+import { BSONProvider } from '../../bson_provider';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
@@ -29,6 +29,7 @@ interface AWSSaslContinuePayload {
 
 export class MongoDBAWS extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
+    const BSON = BSONProvider.get();
     const { connection, credentials } = authContext;
     if (!credentials) {
       return callback(new MongoError('AuthContext must provide credentials.'));
