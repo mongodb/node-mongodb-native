@@ -2,14 +2,13 @@
 # Separating the build into multiple stages lets Docker skip rebuilding previous stages, improving build times e.g. when only updating the entrypoint script
 # `docker build --no-cache` to force a full rebuild, e.g. when new server versions are released
 
-FROM ubuntu:focal as mtools
+FROM ubuntu:bionic as mtools
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    npm curl \
-  #     libcurl3-nss libcurl3-gnutls \
+    nodejs-dev node-gyp npm curl \
     python3-pip python3-dev python3-setuptools python3-wheel \
-    build-essential \
+    build-essential libssl1.0-dev \
   && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install wheel
@@ -33,6 +32,8 @@ RUN m 4.0
 RUN m 4.2
 RUN m 4.4
 RUN m latest
+
+# Stage 3: add entrypoint script
 
 FROM mongo_preloaded
 

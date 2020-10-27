@@ -52,7 +52,7 @@ else
     if [[ $(docker image ls -q ${DOCKER_IMAGE}) ]]; then
         echo "Image already cached, skipping build; force a rebuild with 'docker build --no-cache'"
     else
-        cd "${0%/*}"
+        cd "${0%/*}/docker-mongodb"
         docker build -t ${DOCKER_IMAGE} .
     fi
     docker_mongodb $1 $2
