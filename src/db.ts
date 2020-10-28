@@ -172,8 +172,8 @@ export class Db implements OperationParent {
       logger: new Logger('Db', options),
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
-      // Merge bson options TODO: include client bson options, after NODE-2850
-      bsonOptions: resolveBSONOptions(options),
+      // Merge bson options
+      bsonOptions: resolveBSONOptions(options, client),
       // Set up the primary key factory or fallback to ObjectId
       pkFactory: options?.pkFactory ?? {
         createPk() {
@@ -208,14 +208,17 @@ export class Db implements OperationParent {
     return this.s.readPreference?.preference !== 'primary' || false;
   }
 
+  /**
+   * The current readPreference of the Db. If not explicitly defined for
+   * this Db, will be inherited from the parent MongoClient
+   */
   get readConcern(): ReadConcern | undefined {
     return this.s.readConcern;
   }
 
   get readPreference(): ReadPreference {
     if (this.s.readPreference == null) {
-      // TODO: check client
-      return ReadPreference.primary;
+      return this.s.client.readPreference;
     }
 
     return this.s.readPreference;
