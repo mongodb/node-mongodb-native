@@ -8,12 +8,7 @@ enum VerbosityStrings {
   allPlansExecution = 'allPlansExecution'
 }
 
-export type Verbosity =
-  | boolean
-  | VerbosityStrings.queryPlannerExtended
-  | VerbosityStrings.queryPlannerExtended
-  | VerbosityStrings.executionStats
-  | VerbosityStrings.allPlansExecution;
+export type Verbosity = boolean | VerbosityStrings;
 
 /** @public */
 export interface ExplainOptions {
@@ -55,12 +50,7 @@ export function explainSupported(server: Server, op: string): boolean {
  */
 export function validExplainVerbosity(verbosity: boolean | string): boolean {
   if (typeof verbosity === 'string') {
-    return (
-      verbosity === VerbosityStrings.queryPlanner ||
-      verbosity === VerbosityStrings.queryPlannerExtended ||
-      verbosity === VerbosityStrings.allPlansExecution ||
-      verbosity === VerbosityStrings.executionStats
-    );
+    return verbosity in VerbosityStrings;
   }
   return true;
 }
