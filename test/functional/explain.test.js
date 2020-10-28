@@ -9,6 +9,112 @@ describe('Explain', function () {
     return setupDatabase(this.configuration);
   });
 
+  it('shouldHonorBooleanExplainWithDeleteOne', {
+    metadata: {
+      requires: {
+        mongodb: '>3.0'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithDeleteOne');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.deleteOne({ a: 1 }, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithDeleteMany', {
+    metadata: {
+      requires: {
+        mongodb: '>3.0'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithDeleteMany');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.deleteMany({ a: 1 }, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithUpdateOne', {
+    metadata: {
+      requires: {
+        mongodb: '>3.0'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithUpdateOne');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.updateOne(
+          { a: 1 },
+          { $inc: { a: 2 } },
+          { explain: true },
+          (err, explanation) => {
+            expect(err).to.not.exist;
+            expect(explanation).to.exist;
+            expect(explanation).property('queryPlanner').to.exist;
+            done();
+          }
+        );
+      });
+    })
+  });
+
+  it('shouldHonorBooleanExplainWithUpdateMany', {
+    metadata: {
+      requires: {
+        mongodb: '>3.0'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithUpdateMany');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.updateMany(
+          { a: 1 },
+          { $inc: { a: 2 } },
+          { explain: true },
+          (err, explanation) => {
+            expect(err).to.not.exist;
+            expect(explanation).to.exist;
+            expect(explanation).nested.property('queryPlanner').to.exist;
+            done();
+          }
+        );
+      });
+    })
+  });
+
   it('shouldHonorBooleanExplainWithRemoveOne', {
     metadata: {
       requires: {
@@ -57,64 +163,6 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithUpdateOne', {
-    metadata: {
-      requires: {
-        mongodb: '>3.0'
-      }
-    },
-    test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithUpdateOne');
-      var collection = db.collection('test');
-
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection.updateOne(
-          { a: 1 },
-          { $inc: { a: 2 } },
-          { explain: true },
-          (err, explanation) => {
-            expect(err).to.not.exist;
-            expect(explanation).to.exist;
-            expect(explanation).property('queryPlanner').to.exist; // nested result is how updateOne is returned, unfortunately
-            done();
-          }
-        );
-      });
-    })
-  });
-
-  it('shouldHonorBooleanExplainWithUpdateMany', {
-    metadata: {
-      requires: {
-        mongodb: '>3.0'
-      }
-    },
-    test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithUpdateMany');
-      var collection = db.collection('test');
-
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection.updateMany(
-          { a: 1 },
-          { $inc: { a: 2 } },
-          { explain: true },
-          (err, explanation) => {
-            expect(err).to.not.exist;
-            expect(explanation).to.exist;
-            expect(explanation).nested.property('queryPlanner').to.exist;
-            done();
-          }
-        );
-      });
-    })
-  });
-
   it('shouldUseAllPlansExecutionAsDefaultExplainVerbosity', {
     metadata: {
       requires: {
@@ -130,7 +178,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of allPlansExecution output
-        collection.removeOne({ a: 1 }, { explain: true }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: true }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -141,14 +189,14 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorQueryPlannerStringExplainWithRemoveOne', {
+  it('shouldHonorQueryPlannerStringExplain', {
     metadata: {
       requires: {
         mongodb: '>3.0'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorQueryPlannerStringExplainWithRemoveOne');
+      var db = client.db('shouldHonorQueryPlannerStringExplain');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
@@ -156,7 +204,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of queryPlanner output
-        collection.removeOne({ a: 1 }, { explain: 'queryPlanner' }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: 'queryPlanner' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -167,14 +215,14 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorExecutionStatsStringExplainWithRemoveOne', {
+  it('shouldHonorExecutionStatsStringExplain', {
     metadata: {
       requires: {
         mongodb: '>3.0'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorExecutionStatsStringExplainWithRemoveOne');
+      var db = client.db('shouldHonorExecutionStatsStringExplain');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
@@ -182,7 +230,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of executionStats output
-        collection.removeOne({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -194,14 +242,14 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorAllPlansStringExplainWithRemoveOne', {
+  it('shouldHonorAllPlansStringExplain', {
     metadata: {
       requires: {
         mongodb: '>3.0'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorAllPlansStringExplainWithRemoveOne');
+      var db = client.db('shouldHonorAllPlansStringExplain');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
@@ -209,7 +257,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of allPlansExecution output
-        collection.removeOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -219,33 +267,6 @@ describe('Explain', function () {
       });
     })
   });
-
-  // have to skip this Or move it to a data lake testing file
-  // it('shouldHonorQueryPlannerExtendedStringExplainWithRemoveOne', {
-  //   metadata: {
-  //     requires: {
-  //       mongodb: '>3.0'
-  //     }
-  //   },
-  //   test: withClient(function (client, done) {
-  //     var db = client.db('shouldHonorQueryPlannerExtendedStringExplainWithRemoveOne');
-  //     var collection = db.collection('test');
-
-  //     collection.insertOne({ a: 1 }, (err, res) => {
-  //       expect(err).to.not.exist;
-  //       expect(res).to.exist;
-
-  //       // Verify explanation result contains properties of queryPlannerExtended (treated like allPlansExecution)
-  //       collection.removeOne({ a: 1 }, { explain: 'queryPlannerExtended' }, (err, explanation) => {
-  //         expect(err).to.not.exist;
-  //         expect(explanation).to.exist;
-  //         expect(explanation).property('queryPlanner').to.exist;
-  //         expect(explanation).nested.property('executionStats.allPlansExecution').to.exist;
-  //         done();
-  //       });
-  //     });
-  //   })
-  // });
 
   it('shouldHonorBooleanExplainWithDistinct', {
     metadata: {
