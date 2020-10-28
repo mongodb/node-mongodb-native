@@ -572,7 +572,7 @@ function executeCommands(
 
   const finalOptions = Object.assign(
     { ordered: bulkOperation.isOrdered },
-    bulkOperation.s.bsonOptions,
+    bulkOperation.bsonOptions,
     options
   );
   if (bulkOperation.s.writeConcern != null) {
@@ -1162,6 +1162,10 @@ export abstract class BulkOperationBase {
     throw TypeError(
       'bulkWrite only supports insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, deleteOne, deleteMany'
     );
+  }
+
+  get bsonOptions(): BSONSerializeOptions {
+    return this.s.bsonOptions;
   }
 
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
