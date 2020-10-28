@@ -81,6 +81,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     this.collection = collection;
     this.filter = filter;
     this.update = update;
+    this.explain = options.explain;
   }
 
   execute(server: Server, callback: Callback<UpdateResult>): void {
@@ -96,7 +97,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
       if (err || !r) return callback(err);
 
       // If an explain option was executed, don't process the server results
-      if (options.explain) return callback(undefined, r);
+      if (this.explain) return callback(undefined, r);
 
       const result: UpdateResult = {
         modifiedCount: r.nModified != null ? r.nModified : r.n,
@@ -126,6 +127,7 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     this.collection = collection;
     this.filter = filter;
     this.update = update;
+    this.explain = options.explain;
   }
 
   execute(server: Server, callback: Callback<UpdateResult>): void {
@@ -141,7 +143,7 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
       if (err || !r) return callback(err);
 
       // If an explain option was executed, don't process the server results
-      if (options.explain) return callback(undefined, r);
+      if (this.explain) return callback(undefined, r);
 
       const result: UpdateResult = {
         modifiedCount: r.nModified != null ? r.nModified : r.n,

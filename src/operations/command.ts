@@ -96,6 +96,10 @@ export abstract class CommandOperation<
     this.bsonOptions = resolveBSONOptions(options, parent);
   }
 
+  get canRetryWrite(): boolean {
+    return !this.explain;
+  }
+
   abstract execute(server: Server, callback: Callback<TResult>): void;
 
   executeCommand(server: Server, cmd: Document, callback: Callback): void {

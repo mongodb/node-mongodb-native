@@ -777,7 +777,7 @@ function applySession(
 
   // first apply non-transaction-specific sessions data
   const inTransaction = session.inTransaction() || isTransactionCommand(command);
-  const isRetryableWrite = (!command.explain && options?.willRetryWrite) || false;
+  const isRetryableWrite = options?.willRetryWrite || false;
   const shouldApplyReadConcern = commandSupportsReadConcern(command, options);
 
   if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {

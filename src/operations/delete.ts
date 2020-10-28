@@ -61,6 +61,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
 
     this.collection = collection;
     this.filter = filter;
+    this.explain = options.explain;
   }
 
   execute(server: Server, callback: Callback<DeleteResult>): void {
@@ -77,7 +78,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
       }
 
       // If an explain option was executed, don't process the server results
-      if (options.explain) return callback(undefined, r);
+      if (this.explain) return callback(undefined, r);
 
       r.deletedCount = r.n;
       if (callback) callback(undefined, r);
@@ -98,6 +99,7 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
 
     this.collection = collection;
     this.filter = filter;
+    this.explain = options.explain;
   }
 
   execute(server: Server, callback: Callback<DeleteResult>): void {
@@ -118,7 +120,7 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
       }
 
       // If an explain option was executed, don't process the server results
-      if (options.explain) return callback(undefined, r);
+      if (this.explain) return callback(undefined, r);
 
       r.deletedCount = r.n;
       if (callback) callback(undefined, r);
