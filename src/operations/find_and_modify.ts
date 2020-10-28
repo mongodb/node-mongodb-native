@@ -123,7 +123,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll.topology, options);
+      decorateWithCollation(cmd, coll.getTopology(), options);
     } catch (err) {
       return callback(err);
     }

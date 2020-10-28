@@ -152,7 +152,7 @@ export function removeDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll.topology, options);
+    decorateWithCollation(finalOptions, coll.getTopology(), options);
   } catch (err) {
     return callback ? callback(err, null) : undefined;
   }
@@ -244,7 +244,7 @@ export function updateDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll.topology, options);
+    decorateWithCollation(finalOptions, coll.getTopology(), options);
   } catch (err) {
     return callback(err, null);
   }

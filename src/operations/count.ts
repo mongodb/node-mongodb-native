@@ -105,7 +105,7 @@ function buildCountCommand(
     }
     decorateWithCollation(cmd, collectionOrCursor.topology, collectionOrCursor.cmd);
   } else {
-    decorateWithCollation(cmd, collectionOrCursor.topology, options);
+    decorateWithCollation(cmd, collectionOrCursor.getTopology(), options);
   }
 
   // Add limit, skip and maxTimeMS if defined

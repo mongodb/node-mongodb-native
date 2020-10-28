@@ -908,8 +908,8 @@ export abstract class BulkOperationBase {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
-    if (!collection.topology) throw new MongoClientClosedError();
-    const topology = collection.topology;
+    const topology = collection.getTopology();
+    if (!topology) throw new MongoClientClosedError();
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster
     // Get the namespace for the write operations

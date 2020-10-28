@@ -144,7 +144,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // Have we specified collation
     try {
-      decorateWithCollation(mapCommandHash, coll.topology, options);
+      decorateWithCollation(mapCommandHash, coll.getTopology(), options);
     } catch (err) {
       return callback(err);
     }
