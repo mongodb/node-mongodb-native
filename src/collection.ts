@@ -243,7 +243,7 @@ export class Collection implements OperationParent {
    * @internal
    */
   getTopology(): Topology | undefined {
-    return this.s.db.s.client.topology;
+    return this.s.db.topology;
   }
 
   /**
