@@ -64,9 +64,7 @@ export function executeOperation<
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void {
-  if (topology == null) {
-    throw new MongoClientClosedError();
-  }
+  if (!topology) throw new MongoClientClosedError();
 
   if (!(operation instanceof OperationBase)) {
     throw new TypeError('This method requires a valid operation instance');

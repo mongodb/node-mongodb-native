@@ -655,7 +655,7 @@ export class Collection implements OperationParent {
     }
 
     const topology = this.getTopology();
-    if (!topology) throw new MongoClientClosedError();
+    if (!topology) throw new MongoClientClosedError('Collection.prototype.find');
     return new Cursor(
       topology,
       new FindOperation(this, this.s.namespace, filter, options),
@@ -867,7 +867,7 @@ export class Collection implements OperationParent {
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
     const topology = this.getTopology();
-    if (!topology) throw new MongoClientClosedError();
+    if (!topology) throw new MongoClientClosedError('Collection.prototype.listIndexes');
     const cursor = new CommandCursor(topology, new ListIndexesOperation(this, options), options);
 
     return cursor;
@@ -1213,7 +1213,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     const topology = this.getTopology();
-    if (!topology) throw new MongoClientClosedError();
+    if (!topology) throw new MongoClientClosedError('Collection.prototype.aggregate');
     return new AggregationCursor(
       topology,
       new AggregateOperation(this, pipeline, options),

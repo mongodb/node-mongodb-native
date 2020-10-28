@@ -311,7 +311,7 @@ export class Db implements OperationParent {
 
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
+    if (!this.s.client.topology) throw new MongoClientClosedError('Db.prototype.aggregate');
     const cursor = new AggregationCursor(
       this.s.client.topology,
       new AggregateOperation(this, pipeline, options),
@@ -432,7 +432,7 @@ export class Db implements OperationParent {
     filter = filter || {};
     options = options || {};
 
-    if (!this.s.client.topology) throw new MongoClientClosedError();
+    if (!this.s.client.topology) throw new MongoClientClosedError('Db.prototype.listCollections');
     return new CommandCursor(
       this.s.client.topology,
       new ListCollectionsOperation(this, filter, options),

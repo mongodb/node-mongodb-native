@@ -270,7 +270,7 @@ export function executeLegacyOperation<T extends OperationBase>(
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
-  if (topology == null) throw new MongoClientClosedError();
+  if (!topology) throw new MongoClientClosedError();
 
   if (!Array.isArray(args)) {
     throw new TypeError('This method requires an array of arguments to apply');
@@ -439,9 +439,7 @@ export function decorateWithCollation(
   topology: Topology | undefined,
   options: AnyOptions
 ): void {
-  if (!topology) {
-    throw new MongoClientClosedError();
-  }
+  if (!topology) throw new MongoClientClosedError();
 
   const capabilities = topology.capabilities();
   if (options.collation && typeof options.collation === 'object') {
