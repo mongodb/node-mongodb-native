@@ -57,8 +57,8 @@ describe('MongoClient', function () {
 
         test.equal(true, db.s.options.forceServerObjectId);
         test.equal(1, db.s.pkFactory.createPk());
-        test.equal(true, db.s.options.serializeFunctions);
-        test.equal(true, db.s.options.raw);
+        test.equal(true, db.bsonOptions.serializeFunctions);
+        test.equal(true, db.bsonOptions.raw);
         test.equal(10, db.s.options.numberOfRetries);
         test.equal(0, db.s.options.bufferMaxEntries);
 

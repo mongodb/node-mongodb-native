@@ -217,7 +217,7 @@ export function mergeOptionsAndWriteConcern(
 ): AnyOptions {
   // Mix in any allowed options
   for (let i = 0; i < keys.length; i++) {
-    if (!targetOptions[keys[i]] && sourceOptions[keys[i]] !== undefined) {
+    if (targetOptions[keys[i]] === undefined && sourceOptions[keys[i]] !== undefined) {
       targetOptions[keys[i]] = sourceOptions[keys[i]];
     }
   }

@@ -70,7 +70,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     const query = this.query;
     const sort = formatSort(this.sort);
     const doc = this.doc;
-    let options = this.options;
+    let options = { ...this.options, ...this.bsonOptions };
 
     // Create findAndModify command object
     const cmd: Document = {
@@ -103,10 +103,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     if (options.maxTimeMS) {
       cmd.maxTimeMS = options.maxTimeMS;
     }
-
-    // Either use override on the function, or go back to default on either the collection
-    // level or db
-    options.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
     // No check on the documents
     options.checkKeys = false;

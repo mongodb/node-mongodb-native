@@ -4,7 +4,7 @@ import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import type { ObjectId, Document } from '../bson';
+import { ObjectId, Document, resolveBSONOptions } from '../bson';
 import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
@@ -30,21 +30,21 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
 
     this.collection = collection;
     this.docs = docs;
+
+    // Assign BSON serialize options to OperationBase, preferring options over collection options
+    this.bsonOptions = resolveBSONOptions(options, collection);
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     if (!Array.isArray(docs)) {
       return callback(
         MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
       );
     }
-
-    // If keep going set unordered
-    options['serializeFunctions'] = options['serializeFunctions'] || coll.s.serializeFunctions;
 
     docs = prepareDocs(coll, docs, options);
 
