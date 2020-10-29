@@ -172,7 +172,7 @@ export class Collection implements OperationParent {
   s: CollectionPrivate;
 
   /**
-   * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
+   * Create a new Collection instance
    * @internal
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {

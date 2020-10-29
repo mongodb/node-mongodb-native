@@ -56,7 +56,7 @@ export class Admin {
   s: AdminPrivate;
 
   /**
-   * Create a new Admin instance (INTERNAL TYPE, do not instantiate directly)
+   * Create a new Admin instance
    * @internal
    */
   constructor(db: Db) {
