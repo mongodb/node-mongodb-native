@@ -69,7 +69,6 @@ const validOptionNames = [
   'promoteValues',
   'promoteBuffers',
   'promoteLongs',
-  'domainsEnabled',
   'checkServerIdentity',
   'validateOptions',
   'appname',

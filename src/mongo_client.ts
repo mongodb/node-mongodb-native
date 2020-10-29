@@ -180,8 +180,6 @@ export interface MongoClientOptions
   loggerLevel?: LogLevel;
   /** Custom logger object */
   logger?: Logger;
-  /** Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit */
-  domainsEnabled?: boolean;
   /** Validate MongoClient passed in options for correctness */
   validateOptions?: boolean;
   /** The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections */

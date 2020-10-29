@@ -75,7 +75,6 @@ The table below shows all settings and what topology they affect.
 | **promoteLongs** | Server, ReplicaSet, Mongos | boolean | true | Promotes Long values to number if they fit inside the 53 bits resolution. |
 | **promoteBuffers** | Server, ReplicaSet, Mongos | boolean | false | Promotes Binary BSON values to native Node Buffers. |
 | **promoteValues** | Server, ReplicaSet, Mongos | boolean | true | Promotes BSON values to native types where possible, set to false to only receive wrapper types. |
-| **domainsEnabled** | Server, ReplicaSet, Mongos | boolean | false | Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit. |
 | **bufferMaxEntries** | Server, ReplicaSet, Mongos | integer | -1 | Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited. |
 | **readPreference** | Server, ReplicaSet, Mongos | object | null | The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). |
 | **pkFactory** | Server, ReplicaSet, Mongos | object | null | A primary key factory object for generation of custom _id keys. |
