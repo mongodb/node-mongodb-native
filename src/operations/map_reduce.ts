@@ -63,7 +63,10 @@ interface MapReduceStats {
   timing?: number;
 }
 
-/** @internal Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection. */
+/**
+ * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
+ * @internal
+ */
 export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
   collection: Collection;
   /** The mapping function. */

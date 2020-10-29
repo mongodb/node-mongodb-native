@@ -31,7 +31,10 @@ export interface Document {
 
 import type { SerializeOptions } from 'bson';
 
-/** @public BSON Serialization options. TODO: Remove me when types from BSON are updated */
+/**
+ * BSON Serialization options. TODO: Remove me when types from BSON are updated
+ * @public
+ */
 export interface BSONSerializeOptions extends SerializeOptions {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };

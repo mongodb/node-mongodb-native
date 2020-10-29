@@ -42,7 +42,10 @@ const stateMachine = {
   ]
 };
 
-/** @public Configuration options for a transaction. */
+/**
+ * Configuration options for a transaction.
+ * @public
+ */
 export interface TransactionOptions extends CommandOperationOptions {
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;

@@ -22,7 +22,10 @@ import type { ClientSession } from '../sessions';
 
 const kCursor = Symbol('cursor');
 
-/** @public Flags allowed for cursor */
+/**
+ * Flags allowed for cursor
+ * @public
+ */
 export const FLAGS = [
   'tailable',
   'oplogReplay',
@@ -47,7 +50,7 @@ export interface DocumentTransforms {
 }
 
 /** @internal */
-interface CursorPrivate {
+export interface CursorPrivate {
   /** Transforms functions */
   transforms?: DocumentTransforms;
   numberOfRetries: number;
@@ -60,7 +63,10 @@ interface CursorPrivate {
   readConcern?: ReadConcern;
 }
 
-/** @public Possible states for a cursor */
+/**
+ * Possible states for a cursor
+ * @public
+ */
 export enum CursorState {
   INIT = 0,
   OPEN = 1,
@@ -1647,7 +1653,10 @@ export function each(cursor: Cursor, callback: EachCallback): void {
   }
 }
 
-/** @internal Trampoline emptying the number of retrieved items without incurring a nextTick operation */
+/**
+ * Trampoline emptying the number of retrieved items without incurring a nextTick operation
+ * @internal
+ */
 function loop(cursor: Cursor, callback: Callback) {
   // No more items we are done
   if (cursor.bufferedCount() === 0) return;

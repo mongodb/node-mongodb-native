@@ -16,7 +16,10 @@ export interface TopologyDescriptionOptions {
   localThresholdMS?: number;
 }
 
-/** @public Representation of a deployment of servers */
+/**
+ * Representation of a deployment of servers
+ * @public
+ */
 export class TopologyDescription {
   type: TopologyType;
   setName?: string;

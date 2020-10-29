@@ -17,7 +17,10 @@ import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 
-/** @public MongoDB Driver style callback */
+/**
+ * MongoDB Driver style callback
+ * @public
+ */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 /** @public */
 export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
@@ -668,7 +671,10 @@ export function collectionNamespace(ns: string): string {
   return ns.split('.').slice(1).join('.');
 }
 
-/** @internal Synchronously Generate a UUIDv4 */
+/**
+ * Synchronously Generate a UUIDv4
+ * @internal
+ */
 export function uuidV4(): Buffer {
   const result = crypto.randomBytes(16);
   result[6] = (result[6] & 0x0f) | 0x40;
@@ -978,7 +984,10 @@ export interface InterruptableAsyncIntervalOptions {
   /** Whether the method should be called immediately when the interval is started  */
   immediate: boolean;
 
-  /* @internal only used for testing unreliable timer environments */
+  /**
+   * Only used for testing unreliable timer environments
+   * @internal
+   */
   clock: () => number;
 }
 

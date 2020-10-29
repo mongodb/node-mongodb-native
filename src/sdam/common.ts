@@ -8,7 +8,10 @@ export const STATE_CLOSED = 'closed';
 export const STATE_CONNECTING = 'connecting';
 export const STATE_CONNECTED = 'connected';
 
-/** @public An enumeration of topology types we know about */
+/**
+ * An enumeration of topology types we know about
+ * @public
+ */
 export enum TopologyType {
   Single = 'Single',
   ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
@@ -17,7 +20,10 @@ export enum TopologyType {
   Unknown = 'Unknown'
 }
 
-/** @public An enumeration of server types we know about */
+/**
+ * An enumeration of server types we know about
+ * @public
+ */
 export enum ServerType {
   Standalone = 'Standalone',
   Mongos = 'Mongos',
