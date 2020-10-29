@@ -16,7 +16,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
-import type { ExplainOptions } from './explain';
+import { Explain, ExplainOptions } from './explain';
 
 /**
  * MongoDB Driver style callback
@@ -495,13 +495,9 @@ export function decorateWithReadConcern(
  * @param options - the options containing the explain verbosity
  */
 export function decorateWithExplain(command: Document, options: ExplainOptions): Document {
-  if (options.explain) {
-    // Reformat command into explain command
-    command = { explain: command };
-    if (typeof options.explain === 'string') {
-      command.verbosity = options.explain;
-    }
-  }
+  const explain = Explain.fromOptions(options);
+  if (explain === undefined) return command;
+  command = { explain: command, verbosity: explain.explain }; // todo at this point, this could be invalid?
   return command;
 }
 

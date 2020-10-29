@@ -65,7 +65,7 @@ export function writeCommand(
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
-  if (options.explain) {
+  if (options.explain !== undefined) {
     writeCommand = decorateWithExplain(writeCommand, options);
   }
 

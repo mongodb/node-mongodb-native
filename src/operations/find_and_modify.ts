@@ -14,11 +14,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
-import {
-  ExplainOptions,
-  SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY,
-  validExplainVerbosity
-} from '../explain';
+import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY } from '../explain';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOptions {
@@ -68,7 +64,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     this.query = query;
     this.sort = sort;
     this.doc = doc;
-    this.explain = options?.explain;
+    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document>): void {
@@ -150,11 +146,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     }
 
     if (this.explain) {
-      if (!validExplainVerbosity(this.explain)) {
-        callback(new MongoError(`${this.explain} is an invalid explain verbosity`));
-        return;
-      }
-
       if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY) {
         callback(
           new MongoError('the current topology does not support explain on findAndModify commands')

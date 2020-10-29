@@ -15,11 +15,7 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
-import {
-  ExplainOptions,
-  SUPPORTS_EXPLAIN_WITH_MAP_REDUCE,
-  validExplainVerbosity
-} from '../explain';
+import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_MAP_REDUCE } from '../explain';
 
 const exclusionList = [
   'explain',
@@ -100,7 +96,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
     this.collection = collection;
     this.map = map;
     this.reduce = reduce;
-    this.explain = options?.explain;
+    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document | Document[]>): void {
@@ -161,11 +157,6 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
     }
 
     if (this.explain) {
-      if (!validExplainVerbosity(this.explain)) {
-        callback(new MongoError(`${this.explain} is an invalid explain verbosity`));
-        return;
-      }
-
       if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_MAP_REDUCE) {
         callback(
           new MongoError('the current topology does not support explain on mapReduce commands')

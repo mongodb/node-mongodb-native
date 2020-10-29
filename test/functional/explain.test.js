@@ -163,14 +163,14 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldUseAllPlansExecutionAsDefaultExplainVerbosity', {
+  it('shouldUseAllPlansExecutionAsTrueExplainVerbosity', {
     metadata: {
       requires: {
         mongodb: '>3.0'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldUseAllPlansExecutionAsDefaultExplainVerbosity');
+      var db = client.db('shouldUseAllPlansExecutionAsTrueExplainVerbosity');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
@@ -183,6 +183,32 @@ describe('Explain', function () {
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
           expect(explanation).nested.property('executionStats.allPlansExecution').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('shouldUseQueryPlannerAsFalseExplainVerbosity', {
+    metadata: {
+      requires: {
+        mongodb: '>3.0'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldUseQueryPlannerAsFalseExplainVerbosity');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        // Verify explanation result contains properties of queryPlanner output
+        collection.deleteOne({ a: 1 }, { explain: false }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          expect(explanation).to.not.have.property('executionStats');
           done();
         });
       });

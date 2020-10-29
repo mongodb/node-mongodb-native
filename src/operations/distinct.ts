@@ -4,7 +4,7 @@ import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersio
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { ExplainOptions, SUPPORTS_EXPLAIN_WITH_DISTINCT, validExplainVerbosity } from '../explain';
+import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_DISTINCT } from '../explain';
 import { MongoError } from '../error';
 
 /** @public */
@@ -35,7 +35,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     this.collection = collection;
     this.key = key;
     this.query = query;
-    this.explain = options?.explain;
+    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document[]>): void {
@@ -67,11 +67,6 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     }
 
     if (this.explain) {
-      if (!validExplainVerbosity(this.explain)) {
-        callback(new MongoError(`${this.explain} is an invalid explain verbosity`));
-        return;
-      }
-
       if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_DISTINCT) {
         callback(
           new MongoError('the current topology does not support explain on distinct commands')

@@ -8,7 +8,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
-import type { ExplainOptions } from '../explain';
+import { Explain, ExplainOptions } from '../explain';
 
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions, ExplainOptions {
@@ -61,7 +61,7 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
 
     this.collection = collection;
     this.filter = filter;
-    this.explain = options.explain;
+    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<DeleteResult>): void {
@@ -99,7 +99,7 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
 
     this.collection = collection;
     this.filter = filter;
-    this.explain = options.explain;
+    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<DeleteResult>): void {
