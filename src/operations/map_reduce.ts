@@ -5,17 +5,15 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback,
-  maxWireVersion
+  Callback
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
-import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
-import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_MAP_REDUCE } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../explain';
 
 const exclusionList = [
   'explain',
@@ -37,7 +35,7 @@ export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
 /** @public */
-export interface MapReduceOptions extends CommandOperationOptions, ExplainOptions {
+export interface MapReduceOptions extends ExplainOptions {
   /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
@@ -70,7 +68,10 @@ interface MapReduceStats {
  * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
  * @internal
  */
-export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
+export class MapReduceOperation extends ExplainableCommand<
+  MapReduceOptions,
+  Document | Document[]
+> {
   collection: Collection;
   /** The mapping function. */
   map: MapFunction | string;
@@ -96,7 +97,6 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
     this.collection = collection;
     this.map = map;
     this.reduce = reduce;
-    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document | Document[]>): void {
@@ -154,15 +154,6 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       decorateWithCollation(mapCommandHash, coll, options);
     } catch (err) {
       return callback(err);
-    }
-
-    if (this.explain) {
-      if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_MAP_REDUCE) {
-        callback(
-          new MongoError('the current topology does not support explain on mapReduce commands')
-        );
-        return;
-      }
     }
 
     // Execute command

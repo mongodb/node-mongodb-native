@@ -8,16 +8,15 @@ import {
   Callback
 } from '../utils';
 import { MongoError } from '../error';
-import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
-import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../explain';
 
 /** @public */
-export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOptions {
+export interface FindAndModifyOptions extends ExplainOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */
@@ -42,7 +41,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOp
 }
 
 /** @internal */
-export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
+export class FindAndModifyOperation extends ExplainableCommand<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
   sort?: Sort;
@@ -64,7 +63,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     this.query = query;
     this.sort = sort;
     this.doc = doc;
-    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document>): void {
@@ -143,15 +141,6 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
       }
 
       cmd.hint = options.hint;
-    }
-
-    if (this.explain) {
-      if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY) {
-        callback(
-          new MongoError('the current topology does not support explain on findAndModify commands')
-        );
-        return;
-      }
     }
 
     // Execute the command

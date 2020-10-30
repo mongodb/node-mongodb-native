@@ -1,20 +1,18 @@
 import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersion } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { Explain, ExplainOptions, SUPPORTS_EXPLAIN_WITH_DISTINCT } from '../explain';
-import { MongoError } from '../error';
+import { ExplainableCommand, ExplainOptions } from '../explain';
 
 /** @public */
-export interface DistinctOptions extends CommandOperationOptions, ExplainOptions {}
+export type DistinctOptions = ExplainOptions;
 
 /**
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
+export class DistinctOperation extends ExplainableCommand<DistinctOptions, Document[]> {
   collection: Collection;
   /** Field of the document to find distinct values for. */
   key: string;
@@ -35,7 +33,6 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
     this.collection = collection;
     this.key = key;
     this.query = query;
-    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<Document[]>): void {
@@ -64,15 +61,6 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err);
-    }
-
-    if (this.explain) {
-      if (maxWireVersion(server) < SUPPORTS_EXPLAIN_WITH_DISTINCT) {
-        callback(
-          new MongoError('the current topology does not support explain on distinct commands')
-        );
-        return;
-      }
     }
 
     super.executeCommand(server, cmd, (err, result) => {

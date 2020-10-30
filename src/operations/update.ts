@@ -1,15 +1,14 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
-import { Explain, ExplainOptions } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../explain';
 
 /** @public */
-export interface UpdateOptions extends CommandOperationOptions, ExplainOptions {
+export interface UpdateOptions extends ExplainOptions {
   /** A set of filters specifying to which array elements an update should apply */
   arrayFilters?: Document[];
   /** If true, allows the write to opt-out of document level validation */
@@ -66,7 +65,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
 }
 
 /** @internal */
-export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateOneOperation extends ExplainableCommand<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -81,7 +80,6 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     this.collection = collection;
     this.filter = filter;
     this.update = update;
-    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<UpdateResult>): void {
@@ -116,7 +114,7 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
 }
 
 /** @internal */
-export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateManyOperation extends ExplainableCommand<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -127,7 +125,6 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     this.collection = collection;
     this.filter = filter;
     this.update = update;
-    this.explain = Explain.fromOptions(options);
   }
 
   execute(server: Server, callback: Callback<UpdateResult>): void {

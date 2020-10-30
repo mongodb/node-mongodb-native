@@ -10,6 +10,7 @@ import type { Topology } from '../../sdam/topology';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { WriteConcernOptions, WriteConcern, W } from '../../write_concern';
 import type { WriteCommandOptions } from './write_command';
+import { decorateWithExplain } from '../../explain';
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -66,6 +67,11 @@ export function command(
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
+  }
+
+  // TODO: should not modify the command here
+  if (cmd.explain !== undefined) {
+    cmd = decorateWithExplain(cmd, cmd.explain);
   }
 
   if (!isClientEncryptionEnabled(server)) {

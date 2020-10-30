@@ -1,10 +1,10 @@
 import { MongoError } from '../../error';
-import { collectionNamespace, Callback, decorateWithExplain } from '../../utils';
+import { collectionNamespace, Callback } from '../../utils';
 import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
-import type { ExplainOptions } from '../../explain';
+import { Explain, ExplainOptions } from '../../explain';
 
 /** @public */
 export interface CollationOptions {
@@ -44,7 +44,7 @@ export function writeCommand(
   options = options || {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
-  let writeCommand: Document = {};
+  const writeCommand: Document = {};
   writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -66,7 +66,7 @@ export function writeCommand(
   }
 
   if (options.explain !== undefined) {
-    writeCommand = decorateWithExplain(writeCommand, options);
+    writeCommand.explain = Explain.fromOptions(options);
   }
 
   const commandOptions = Object.assign(

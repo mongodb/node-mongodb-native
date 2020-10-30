@@ -1,17 +1,50 @@
+import type { Callback, Document } from '.';
+import { MongoError } from './error';
+import { CommandOperation, CommandOperationOptions, OperationParent } from './operations/command';
 import type { Server } from './sdam/server';
 import { maxWireVersion } from './utils';
 
-export const SUPPORTS_EXPLAIN_WITH_REMOVE = 3;
-export const SUPPORTS_EXPLAIN_WITH_UPDATE = 3;
-export const SUPPORTS_EXPLAIN_WITH_DISTINCT = 3.2;
-export const SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY = 3.2;
-export const SUPPORTS_EXPLAIN_WITH_MAP_REDUCE = 4.4;
+const SUPPORTS_EXPLAIN_WITH_REMOVE = 3;
+const SUPPORTS_EXPLAIN_WITH_UPDATE = 3;
+const SUPPORTS_EXPLAIN_WITH_DISTINCT = 3.2;
+const SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY = 3.2;
+const SUPPORTS_EXPLAIN_WITH_MAP_REDUCE = 4.4;
+
+/** @internal */
+export abstract class ExplainableCommand<
+  T extends ExplainOptions = ExplainOptions,
+  TResult = Document
+> extends CommandOperation<T, TResult> {
+  explain?: Explain;
+
+  constructor(parent?: OperationParent, options?: T) {
+    super(parent, options);
+    this.explain = Explain.fromOptions(options);
+  }
+
+  get canRetryWrite(): boolean {
+    return this.explain === undefined;
+  }
+
+  executeCommand(server: Server, cmd: Document, callback: Callback): void {
+    if (this.explain) {
+      if (!Explain.explainSupportedOnCmd(server, cmd)) {
+        callback(new MongoError(`server ${server.name} does not support explain on this command`));
+        return;
+      }
+
+      cmd.explain = this.explain;
+    }
+    super.executeCommand(server, cmd, callback);
+  }
+}
 
 /** @public */
-export interface ExplainOptions {
+export interface ExplainOptions extends CommandOperationOptions {
   explain?: VerbosityLike;
 }
 
+/** @public */
 export enum Verbosity {
   queryPlanner = 'queryPlanner',
   queryPlannerExtended = 'queryPlannerExtended',
@@ -22,6 +55,7 @@ export enum Verbosity {
 /** @public */
 export type VerbosityLike = Verbosity | boolean;
 
+/** @internal */
 export class Explain {
   explain: Verbosity;
 
@@ -51,16 +85,43 @@ export class Explain {
    */
   static explainSupported(server: Server, op: string): boolean {
     const wireVersion = maxWireVersion(server);
-    if (
+    return (
       (op === 'remove' && wireVersion >= SUPPORTS_EXPLAIN_WITH_REMOVE) ||
       (op === 'update' && wireVersion >= SUPPORTS_EXPLAIN_WITH_UPDATE) ||
       (op === 'distinct' && wireVersion >= SUPPORTS_EXPLAIN_WITH_DISTINCT) ||
       (op === 'findAndModify' && wireVersion >= SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY) ||
       (op === 'mapReduce' && wireVersion >= SUPPORTS_EXPLAIN_WITH_MAP_REDUCE)
-    ) {
-      return true;
-    }
-
-    return false;
+    );
   }
+
+  static explainSupportedOnCmd(server: Server, cmd: Document): boolean {
+    const wireVersion = maxWireVersion(server);
+    return (
+      (cmd.remove && wireVersion >= SUPPORTS_EXPLAIN_WITH_REMOVE) ||
+      (cmd.update && wireVersion >= SUPPORTS_EXPLAIN_WITH_UPDATE) ||
+      (cmd.distinct && wireVersion >= SUPPORTS_EXPLAIN_WITH_DISTINCT) ||
+      (cmd.findAndModify && wireVersion >= SUPPORTS_EXPLAIN_WITH_FIND_AND_MODIFY) ||
+      (cmd.mapReduce && wireVersion >= SUPPORTS_EXPLAIN_WITH_MAP_REDUCE)
+    );
+  }
+}
+
+/**
+ * Applies an explain to a given command.
+ * @internal
+ *
+ * @param command - the command on which to apply the read concern
+ * @param options - the options containing the explain verbosity
+ */
+export function decorateWithExplain(command: Document, options: ExplainOptions): Document {
+  const explain = Explain.fromOptions(options);
+  if (explain === undefined) return command;
+
+  // A command being explained may not have an explain field directly on it
+  if (command.explain !== undefined) {
+    delete command.explain;
+  }
+
+  command = { explain: command, verbosity: explain.explain };
+  return command;
 }

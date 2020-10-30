@@ -1,7 +1,7 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -10,7 +10,6 @@ import type { Server } from '../sdam/server';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
-import type { Explain } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -55,7 +54,6 @@ export abstract class CommandOperation<
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
-  explain?: Explain;
   fullResponse?: boolean;
   logger?: Logger;
 
@@ -94,10 +92,6 @@ export abstract class CommandOperation<
 
     // Assign BSON serialize options to OperationBase, preferring options over parent options.
     this.bsonOptions = resolveBSONOptions(options, parent);
-  }
-
-  get canRetryWrite(): boolean {
-    return this.explain === undefined;
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -139,12 +133,6 @@ export abstract class CommandOperation<
 
     if (typeof options.comment === 'string') {
       cmd.comment = options.comment;
-    }
-
-    // If we have reached this point, then the explain verbosity must be valid
-    // Note: explain inherits any comment from its command
-    if (this.explain) {
-      cmd = decorateWithExplain(cmd, { explain: this.explain.explain }); // TODO!
     }
 
     if (this.logger && this.logger.isDebug()) {
