@@ -1,24 +1,21 @@
-import { OperationBase } from './operation';
 import type { Callback } from '../utils';
-import { Document, resolveBSONOptions } from '../bson';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
 import { MongoError } from '../error';
 import type { Server } from '../sdam/server';
+import { CommandOperation } from './command';
 
 /** @internal */
-export class FindOneOperation extends OperationBase<FindOptions, Document> {
+export class FindOneOperation extends CommandOperation<FindOptions, Document> {
   collection: Collection;
   query: Document;
 
   constructor(collection: Collection, query: Document, options: FindOptions) {
-    super(options);
+    super(collection, options);
 
     this.collection = collection;
     this.query = query;
-
-    // Assign BSON serialize options to OperationBase, preferring options over collection options
-    this.bsonOptions = resolveBSONOptions(options, collection);
   }
 
   execute(server: Server, callback: Callback<Document>): void {
