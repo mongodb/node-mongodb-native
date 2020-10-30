@@ -242,16 +242,17 @@ functions:
         script: |
           MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
-  
+
   "run data lake tests":
       - command: shell.exec
         type: test
         params:
           working_dir: src
           script: |
+            ${PREPARE_SHELL}
             MONGODB_URI='mongodb://mhuser:pencil@localhost' NODE_LTS_NAME='${NODE_LTS_NAME}' \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
-  
+
   "run tls tests":
     - command: shell.exec
       type: test

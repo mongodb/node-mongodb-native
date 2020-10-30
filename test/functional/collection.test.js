@@ -6,7 +6,7 @@ const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
 chai.use(sinonChai);
 
-describe('Collection', function () {
+describe('Collection (functional)', function () {
   let configuration;
   before(function () {
     configuration = this.configuration;

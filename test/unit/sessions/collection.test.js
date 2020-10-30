@@ -5,7 +5,7 @@ const mock = require('mongodb-mock-server');
 
 const test = {};
 describe('Sessions', function () {
-  describe('Collection', function () {
+  describe('Collection (sessions)', function () {
     afterEach(() => mock.cleanup());
     beforeEach(() => {
       return mock.createServer().then(server => {
@@ -45,7 +45,8 @@ describe('Sessions', function () {
             .then(() => coll.findOne({}, { session: session, readConcern: { level: 'majority' } }))
             .then(() => {
               expect(findCommand.readConcern).to.have.keys(['level', 'afterClusterTime']);
-              expect(findCommand.readConcern.afterClusterTime).to.eql(insertOperationTime);
+              expect(insertOperationTime.equals(findCommand.readConcern.afterClusterTime)).to.be
+                .true;
 
               session.endSession({ skipCommand: true });
               return client.close();

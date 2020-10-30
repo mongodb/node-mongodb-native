@@ -11,6 +11,7 @@ pids
 *.png
 test*.*
 output
+xunit.xml
 
 types
 docs/gen

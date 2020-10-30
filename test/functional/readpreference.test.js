@@ -458,7 +458,7 @@ describe('ReadPreference', function () {
   });
 
   context('hedge', function () {
-    it('should set hedge using [find option & empty hedge]', {
+    it('should set hedge using [find option and empty hedge]', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
@@ -475,7 +475,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & empty hedge] ', {
+    it('should set hedge using [.setReadPreference and empty hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
@@ -493,7 +493,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & enabled hedge] ', {
+    it('should set hedge using [.setReadPreference and enabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
@@ -511,7 +511,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & disabled hedge] ', {
+    it('should set hedge using [.setReadPreference and disabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
@@ -531,7 +531,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & undefined hedge] ', {
+    it('should set hedge using [.setReadPreference and undefined hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null);

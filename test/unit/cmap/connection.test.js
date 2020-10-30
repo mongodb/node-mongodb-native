@@ -5,7 +5,7 @@ const { connect } = require('../../../src/cmap/connect');
 const Connection = require('../../../src/cmap/connection').Connection;
 const expect = require('chai').expect;
 
-describe('Connection', function () {
+describe('Connection (unit/cmap)', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));

@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Connection = require('../../../src/core/connection/connection');
 
-describe('Connection', function () {
+describe('Connection (disabled)', function () {
   const noop = () => {};
   let server;
   afterEach(() => mock.cleanup());

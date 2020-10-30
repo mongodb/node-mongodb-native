@@ -70,7 +70,7 @@ describe('SASLPrep', function () {
     const username = user.username;
     const password = user.password;
 
-    it(`should be able to login with username "${username}" and password "${password}"`, {
+    it(`should be able to login with username '${username}' and password '${password}'`, {
       metadata: {
         requires: {
           mongodb: '>=3.7.3',

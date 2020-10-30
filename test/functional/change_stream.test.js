@@ -2248,7 +2248,7 @@ describe('Change Streams', function () {
     //   getResumeToken must return the _id of the last document returned if one exists.
     //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
     //   If ``resumeAfter`` was not specified, the ``getResumeToken`` result must be empty.
-    describe('for emptied batch on server <= 4.0.7', function () {
+    describe('for emptied batch on server less than 4.0.7', function () {
       it('must return the _id of the last document returned if one exists', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {

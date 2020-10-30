@@ -992,6 +992,10 @@ describe('GridFS Stream', function () {
         this.skip();
       }
 
+      after(function () {
+        fs.unlinkSync('output');
+      });
+
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function (err, client) {
@@ -1324,63 +1328,66 @@ describe('GridFS Stream', function () {
    * @example-class GridFSBucket
    * @example-method openDownloadStream
    */
-  it('NODE-829 start/end options for openDownloadStream where start-end is < size of chunk', {
-    metadata: { requires: { topology: ['single'] } },
+  it(
+    'NODE-829 start/end options for openDownloadStream where start-end is less than size of chunk',
+    {
+      metadata: { requires: { topology: ['single'] } },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      // LINE var MongoClient = require('mongodb').MongoClient,
-      // LINE   test = require('assert');
-      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-      // LINE const db = client.db('test);
-      // REPLACE configuration.writeConcernMax() WITH {w:1}
-      // REMOVE-LINE restartAndDone
-      // REMOVE-LINE done();
-      // REMOVE-LINE var db = client.db(configuration.db);
-      // BEGIN
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var bucket = new GridFSBucket(db, {
-          bucketName: 'gridfsdownload',
-          chunkSizeBytes: 20
+      test: function (done) {
+        var configuration = this.configuration;
+        var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+        // LINE var MongoClient = require('mongodb').MongoClient,
+        // LINE   test = require('assert');
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE const db = client.db('test);
+        // REPLACE configuration.writeConcernMax() WITH {w:1}
+        // REMOVE-LINE restartAndDone
+        // REMOVE-LINE done();
+        // REMOVE-LINE var db = client.db(configuration.db);
+        // BEGIN
+        client.connect(function (err, client) {
+          var db = client.db(configuration.db);
+          var bucket = new GridFSBucket(db, {
+            bucketName: 'gridfsdownload',
+            chunkSizeBytes: 20
+          });
+
+          var readStream = fs.createReadStream('./LICENSE.md');
+          var uploadStream = bucket.openUploadStream('teststart.dat');
+
+          uploadStream.once('finish', function () {
+            var downloadStream = bucket
+              .openDownloadStreamByName('teststart.dat', { start: 1 })
+              .end(6);
+
+            downloadStream.on('error', function (error) {
+              expect(error).to.not.exist;
+            });
+
+            var gotData = 0;
+            var str = '';
+            downloadStream.on('data', function (data) {
+              ++gotData;
+              str += data.toString('utf8');
+            });
+
+            downloadStream.on('end', function () {
+              // Depending on different versions of node, we may get
+              // different amounts of 'data' events. node 0.10 gives 2,
+              // node >= 0.12 gives 3. Either is correct, but we just
+              // care that we got between 1 and 3, and got the right result
+              test.ok(gotData >= 1 && gotData <= 3);
+              test.equal(str, 'pache');
+              client.close(done);
+            });
+          });
+
+          readStream.pipe(uploadStream);
         });
-
-        var readStream = fs.createReadStream('./LICENSE.md');
-        var uploadStream = bucket.openUploadStream('teststart.dat');
-
-        uploadStream.once('finish', function () {
-          var downloadStream = bucket
-            .openDownloadStreamByName('teststart.dat', { start: 1 })
-            .end(6);
-
-          downloadStream.on('error', function (error) {
-            expect(error).to.not.exist;
-          });
-
-          var gotData = 0;
-          var str = '';
-          downloadStream.on('data', function (data) {
-            ++gotData;
-            str += data.toString('utf8');
-          });
-
-          downloadStream.on('end', function () {
-            // Depending on different versions of node, we may get
-            // different amounts of 'data' events. node 0.10 gives 2,
-            // node >= 0.12 gives 3. Either is correct, but we just
-            // care that we got between 1 and 3, and got the right result
-            test.ok(gotData >= 1 && gotData <= 3);
-            test.equal(str, 'pache');
-            client.close(done);
-          });
-        });
-
-        readStream.pipe(uploadStream);
-      });
-      // END
+        // END
+      }
     }
-  });
+  );
 
   it('should correctly handle indexes create with BSON.Double', function (done) {
     const configuration = this.configuration;

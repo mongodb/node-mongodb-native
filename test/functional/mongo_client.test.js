@@ -284,7 +284,7 @@ describe('MongoClient', function () {
     }
   });
 
-  it('should be able to access a database named "constructor"', function () {
+  it("should be able to access a database named 'constructor'", function () {
     const client = this.configuration.newClient();
     let err;
     return client

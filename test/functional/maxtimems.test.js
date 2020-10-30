@@ -3,7 +3,7 @@ var test = require('./shared').assert;
 const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Unicode', function () {
+describe('Unicode (maxTimeMS)', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
