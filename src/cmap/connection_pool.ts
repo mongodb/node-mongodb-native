@@ -127,7 +127,8 @@ export interface CloseOptions {
   force?: boolean;
 }
 
-/** @public NOTE: to be removed as part of NODE-2745 */
+// NOTE: to be removed as part of NODE-2745
+/** @public */
 export interface ConnectionPool {
   isConnected(): boolean;
   write(
@@ -137,7 +138,10 @@ export interface ConnectionPool {
   ): void;
 }
 
-/** @public A pool of connections which dynamically resizes, and emit events related to pool activity */
+/**
+ * A pool of connections which dynamically resizes, and emit events related to pool activity
+ * @public
+ */
 export class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;

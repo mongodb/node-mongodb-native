@@ -158,6 +158,7 @@ interface UpdateDescription {
   removedFields: string[];
 }
 
+/** @internal */
 export class ChangeStreamStream extends CursorStream {
   constructor(cursor: ChangeStreamCursor) {
     super(cursor);
@@ -465,7 +466,10 @@ export class ChangeStreamCursor extends Cursor<AggregateOperation, ChangeStreamC
   }
 }
 
-/** @internal Create a new change stream cursor based on self's configuration */
+/**
+ * Create a new change stream cursor based on self's configuration
+ * @internal
+ */
 function createChangeStreamCursor(
   self: ChangeStream,
   options: ChangeStreamOptions

@@ -11,7 +11,10 @@ export interface CollStatsOptions extends CommandOperationOptions {
   scale?: number;
 }
 
-/** @internal Get all the collection statistics. */
+/**
+ * Get all the collection statistics.
+ * @internal
+ */
 export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
   collectionName: string;
 

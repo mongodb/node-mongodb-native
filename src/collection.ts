@@ -166,7 +166,10 @@ export class Collection implements OperationParent {
   /** @internal */
   s: CollectionPrivate;
 
-  /** @internal Create a new Collection instance (INTERNAL TYPE, do not instantiate directly) */
+  /**
+   * Create a new Collection instance
+   * @internal
+   */
   constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);

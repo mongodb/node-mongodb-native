@@ -99,6 +99,7 @@ export type {
 } from './bulk/common';
 export type {
   ChangeStream,
+  ChangeStreamStream,
   ChangeStreamOptions,
   ChangeStreamCursor,
   ResumeToken,
@@ -150,12 +151,14 @@ export type {
   CursorCloseOptions,
   DocumentTransforms,
   CursorStreamOptions,
+  CursorStream,
   CursorState,
   CursorOptions,
   FIELDS as CURSOR_FIELDS,
   FLAGS as CURSOR_FLAGS,
   CursorFlag,
-  EachCallback
+  EachCallback,
+  CursorPrivate
 } from './cursor/cursor';
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
