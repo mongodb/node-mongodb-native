@@ -13,10 +13,11 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
-import { ExplainableCommand, ExplainOptions } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
+import type { CommandOperationOptions } from './command';
 
 /** @public */
-export interface FindAndModifyOptions extends ExplainOptions {
+export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */

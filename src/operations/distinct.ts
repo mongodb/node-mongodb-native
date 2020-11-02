@@ -3,10 +3,11 @@ import { decorateWithCollation, decorateWithReadConcern, Callback } from '../uti
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { ExplainableCommand, ExplainOptions } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
+import type { CommandOperationOptions } from './command';
 
 /** @public */
-export type DistinctOptions = ExplainOptions;
+export interface DistinctOptions extends CommandOperationOptions, ExplainOptions {}
 
 /**
  * Return a list of distinct values for the given key across a collection.

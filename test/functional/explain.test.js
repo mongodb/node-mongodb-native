@@ -256,7 +256,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of executionStats output
-        collection.deleteOne({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
+        collection.findOneAndDelete({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -283,7 +283,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of allPlansExecution output
-        collection.deleteOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
+        collection.distinct('a', {}, { explain: 'allPlansExecution' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;

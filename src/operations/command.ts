@@ -1,7 +1,7 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -137,6 +137,12 @@ export abstract class CommandOperation<
 
     if (this.logger && this.logger.isDebug()) {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
+    }
+
+    // If a command is to be explained, we need to reformat the command after
+    // the other command properties are specified.
+    if (cmd.explain) {
+      cmd = decorateWithExplain(cmd, cmd.explain);
     }
 
     server.command(

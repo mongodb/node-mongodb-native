@@ -7,10 +7,11 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
-import { ExplainableCommand, ExplainOptions } from '../explain';
+import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
+import type { CommandOperationOptions } from './command';
 
 /** @public */
-export interface DeleteOptions extends ExplainOptions {
+export interface DeleteOptions extends CommandOperationOptions, ExplainOptions {
   single?: boolean;
   hint?: Hint;
 }

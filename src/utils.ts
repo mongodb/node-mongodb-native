@@ -16,6 +16,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
+import type { Explain } from './explain';
 
 /**
  * MongoDB Driver style callback
@@ -484,6 +485,23 @@ export function decorateWithReadConcern(
   if (Object.keys(readConcern).length > 0) {
     Object.assign(command, { readConcern: readConcern });
   }
+}
+
+/**
+ * Applies an explain to a given command.
+ * @internal
+ *
+ * @param command - the command on which to apply the read concern
+ * @param options - the options containing the explain verbosity
+ */
+export function decorateWithExplain(command: Document, explain: Explain): Document {
+  // A command being explained may not have an explain field directly on it
+  if (command.explain !== undefined) {
+    delete command.explain;
+  }
+
+  command = { explain: command, verbosity: explain.verbosity };
+  return command;
 }
 
 /** @internal */
