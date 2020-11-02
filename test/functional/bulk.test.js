@@ -1,11 +1,8 @@
 'use strict';
-const { withClient } = require('./shared');
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
-
-const MongoError = require('../../src/error').MongoError;
-const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
+const { withClient, setupDatabase, ignoreNsNotFound } = require('./shared');
+const test = require('./shared').assert;
+const { expect } = require('chai');
+const { MongoError } = require('../../src/error');
 const { Long } = require('../../src');
 
 describe('Bulk', function () {
