@@ -19,6 +19,11 @@ export abstract class ExplainableCommand<
 
   constructor(parent?: OperationParent, options?: T) {
     super(parent, options);
+
+    if (!Explain.explainOptionsValid(options)) {
+      throw new MongoError(`explain must be one of ${Object.keys(Verbosity)} or a boolean`);
+    }
+
     this.explain = Explain.fromOptions(options);
   }
 
@@ -57,15 +62,15 @@ export type VerbosityLike = Verbosity | boolean;
 
 /** @internal */
 export class Explain {
-  explain: Verbosity;
+  verbosity: Verbosity;
 
-  constructor(explain: VerbosityLike) {
-    if (typeof explain === 'boolean') {
+  constructor(verbosity: VerbosityLike) {
+    if (typeof verbosity === 'boolean') {
       // For backwards compatibility, true is interpreted as
       // "allPlansExecution" and false as "queryPlanner".
-      this.explain = explain ? Verbosity.allPlansExecution : Verbosity.queryPlanner;
+      this.verbosity = verbosity ? Verbosity.allPlansExecution : Verbosity.queryPlanner;
     } else {
-      this.explain = Verbosity[explain];
+      this.verbosity = Verbosity[verbosity];
     }
   }
 
@@ -74,6 +79,14 @@ export class Explain {
       return;
     }
     return new Explain(options.explain);
+  }
+
+  static explainOptionsValid(options?: ExplainOptions): boolean {
+    if (options == null || options.explain === undefined) {
+      return true;
+    }
+    const explain = options.explain;
+    return typeof explain === 'boolean' || explain in Verbosity;
   }
 
   /**
@@ -113,15 +126,12 @@ export class Explain {
  * @param command - the command on which to apply the read concern
  * @param options - the options containing the explain verbosity
  */
-export function decorateWithExplain(command: Document, options: ExplainOptions): Document {
-  const explain = Explain.fromOptions(options);
-  if (explain === undefined) return command;
-
+export function decorateWithExplain(command: Document, explain: Explain): Document {
   // A command being explained may not have an explain field directly on it
   if (command.explain !== undefined) {
     delete command.explain;
   }
 
-  command = { explain: command, verbosity: explain.explain };
+  command = { explain: command, verbosity: explain.verbosity };
   return command;
 }
