@@ -1,6 +1,6 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -55,7 +55,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll.getTopology(), options);
+      decorateWithCollation(cmd, getTopology(coll), options);
     } catch (err) {
       return callback(err);
     }

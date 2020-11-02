@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   hasAtomicOperators,
-  Callback
+  Callback,
+  getTopology
 } from '../utils';
 import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -123,7 +124,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, coll.getTopology(), options);
+      decorateWithCollation(cmd, getTopology(coll), options);
     } catch (err) {
       return callback(err);
     }

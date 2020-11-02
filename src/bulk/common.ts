@@ -8,7 +8,8 @@ import {
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion
+  maxWireVersion,
+  getTopology
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -908,7 +909,7 @@ export abstract class BulkOperationBase {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
-    const topology = collection.getTopology();
+    const topology = getTopology(collection);
     if (!topology) throw new MongoClientClosedError();
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster

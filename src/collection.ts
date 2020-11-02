@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning } from './utils';
+import { emitDeprecatedOptionWarning, getTopology } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
@@ -83,7 +83,6 @@ import type { IndexInformationOptions } from './operations/common_functions';
 import type { CountOptions } from './operations/count';
 import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
-import type { Topology } from './sdam/topology';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
@@ -239,14 +238,6 @@ export class Collection implements OperationParent {
   }
 
   /**
-   * The current topology of the collection.
-   * @internal
-   */
-  getTopology(): Topology | undefined {
-    return this.s.db.topology;
-  }
-
-  /**
    * The current writeConcern of the collection. If not explicitly defined for
    * this collection, will be inherited from the parent DB
    */
@@ -288,7 +279,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new InsertOneOperation(this, doc, options),
       callback
     );
@@ -320,7 +311,7 @@ export class Collection implements OperationParent {
     options = options ? Object.assign({}, options) : { ordered: true };
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new InsertManyOperation(this, docs, options),
       callback
     );
@@ -380,7 +371,7 @@ export class Collection implements OperationParent {
     }
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new BulkWriteOperation(this, operations, options),
       callback
     );
@@ -413,7 +404,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options);
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new UpdateOneOperation(this, filter, update, options),
       callback
     );
@@ -450,7 +441,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options);
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new ReplaceOneOperation(this, filter, replacement, options),
       callback
     );
@@ -483,7 +474,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options);
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new UpdateManyOperation(this, filter, update, options),
       callback
     );
@@ -509,7 +500,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options);
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new DeleteOneOperation(this, filter, options),
       callback
     );
@@ -547,7 +538,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options);
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new DeleteManyOperation(this, filter, options),
       callback
     );
@@ -573,7 +564,7 @@ export class Collection implements OperationParent {
     options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new RenameOperation(this, newName, options),
       callback
     );
@@ -597,7 +588,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new DropCollectionOperation(this.s.db, this.collectionName, options),
       callback
     );
@@ -632,7 +623,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindOneOperation(this, query, options),
       callback
     );
@@ -654,7 +645,7 @@ export class Collection implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    const topology = this.getTopology();
+    const topology = getTopology(this);
     if (!topology) throw new MongoClientClosedError('Collection.prototype.find');
     return new Cursor(
       topology,
@@ -680,7 +671,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.getTopology(), new OptionsOperation(this, options), callback);
+    return executeOperation(getTopology(this), new OptionsOperation(this, options), callback);
   }
 
   /**
@@ -700,7 +691,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.getTopology(), new IsCappedOperation(this, options), callback);
+    return executeOperation(getTopology(this), new IsCappedOperation(this, options), callback);
   }
 
   /**
@@ -749,7 +740,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new CreateIndexOperation(this, this.collectionName, indexSpec, options),
       callback
     );
@@ -805,7 +796,7 @@ export class Collection implements OperationParent {
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new CreateIndexesOperation(this, this.collectionName, indexSpecs, options),
       callback
     );
@@ -834,7 +825,7 @@ export class Collection implements OperationParent {
     options.readPreference = ReadPreference.primary;
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new DropIndexOperation(this, indexName, options),
       callback
     );
@@ -857,7 +848,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
 
-    return executeOperation(this.getTopology(), new DropIndexesOperation(this, options), callback);
+    return executeOperation(getTopology(this), new DropIndexesOperation(this, options), callback);
   }
 
   /**
@@ -866,7 +857,7 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
-    const topology = this.getTopology();
+    const topology = getTopology(this);
     if (!topology) throw new MongoClientClosedError('Collection.prototype.listIndexes');
     const cursor = new CommandCursor(topology, new ListIndexesOperation(this, options), options);
 
@@ -897,7 +888,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new IndexExistsOperation(this, indexes, options),
       callback
     );
@@ -921,7 +912,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new IndexInformationOperation(this.s.db, this.collectionName, options),
       callback
     );
@@ -945,7 +936,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new EstimatedDocumentCountOperation(this, options),
       callback
     );
@@ -1001,7 +992,7 @@ export class Collection implements OperationParent {
     query = query || {};
     options = options || {};
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
       callback
     );
@@ -1043,7 +1034,7 @@ export class Collection implements OperationParent {
     query = query || {};
     options = options || {};
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new DistinctOperation(this, key, query as Document, options as DistinctOptions),
       callback
     );
@@ -1066,7 +1057,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.getTopology(), new IndexesOperation(this, options), callback);
+    return executeOperation(getTopology(this), new IndexesOperation(this, options), callback);
   }
 
   /**
@@ -1086,7 +1077,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.getTopology(), new CollStatsOperation(this, options), callback);
+    return executeOperation(getTopology(this), new CollStatsOperation(this, options), callback);
   }
 
   /**
@@ -1113,7 +1104,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindOneAndDeleteOperation(this, filter, options),
       callback
     );
@@ -1150,7 +1141,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindOneAndReplaceOperation(this, filter, replacement, options),
       callback
     );
@@ -1187,7 +1178,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindOneAndUpdateOperation(this, filter, update, options),
       callback
     );
@@ -1212,7 +1203,7 @@ export class Collection implements OperationParent {
 
     options = options || {};
 
-    const topology = this.getTopology();
+    const topology = getTopology(this);
     if (!topology) throw new MongoClientClosedError('Collection.prototype.aggregate');
     return new AggregationCursor(
       topology,
@@ -1298,7 +1289,7 @@ export class Collection implements OperationParent {
     }
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new MapReduceOperation(this, map, reduce, options),
       callback
     );
@@ -1418,7 +1409,7 @@ export class Collection implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new EnsureIndexOperation(this.s.db, this.collectionName, fieldOrSpec, options),
       callback
     );
@@ -1457,7 +1448,7 @@ export class Collection implements OperationParent {
     query = query || {};
     options = options || {};
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new EstimatedDocumentCountOperation(this, query, options),
       callback
     );
@@ -1506,7 +1497,7 @@ export class Collection implements OperationParent {
     options.remove = true;
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindAndModifyOperation(this, query, sort as Sort, undefined, options),
       callback
     );
@@ -1567,14 +1558,14 @@ export class Collection implements OperationParent {
 
     if (command == null) {
       return executeOperation(
-        this.getTopology(),
+        getTopology(this),
         new EvalGroupOperation(this, keys, condition, initial, reduce, finalize, options),
         callback
       );
     }
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new GroupOperation(this, keys, condition, initial, reduce, finalize, options),
       callback
     );
@@ -1625,7 +1616,7 @@ export class Collection implements OperationParent {
     options.readPreference = ReadPreference.primary;
 
     return executeOperation(
-      this.getTopology(),
+      getTopology(this),
       new FindAndModifyOperation(this, query, sort, doc, options),
       callback
     );

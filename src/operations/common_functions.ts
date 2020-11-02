@@ -1,5 +1,11 @@
 import { MongoError } from '../error';
-import { applyRetryableWrites, applyWriteConcern, decorateWithCollation, Callback } from '../utils';
+import {
+  applyRetryableWrites,
+  applyWriteConcern,
+  decorateWithCollation,
+  Callback,
+  getTopology
+} from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -45,8 +51,8 @@ export function indexInformation(
   const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
-  if (db.topology && db.topology.isDestroyed())
-    return callback(new MongoError('topology was destroyed'));
+  const topology = getTopology(db);
+  if (topology && topology.isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information
@@ -152,7 +158,7 @@ export function removeDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll.getTopology(), options);
+    decorateWithCollation(finalOptions, getTopology(coll), options);
   } catch (err) {
     return callback ? callback(err, null) : undefined;
   }
@@ -244,7 +250,7 @@ export function updateDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, coll.getTopology(), options);
+    decorateWithCollation(finalOptions, getTopology(coll), options);
   } catch (err) {
     return callback(err, null);
   }

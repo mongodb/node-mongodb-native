@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback
+  Callback,
+  getTopology
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -144,7 +145,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // Have we specified collation
     try {
-      decorateWithCollation(mapCommandHash, coll.getTopology(), options);
+      decorateWithCollation(mapCommandHash, getTopology(coll), options);
     } catch (err) {
       return callback(err);
     }

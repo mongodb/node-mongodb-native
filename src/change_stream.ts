@@ -11,7 +11,8 @@ import {
   now,
   maybePromise,
   MongoDBNamespace,
-  Callback
+  Callback,
+  getTopology
 } from './utils';
 import type { ReadPreference } from './read_preference';
 import type { Timestamp, Document } from './bson';
@@ -221,22 +222,19 @@ export class ChangeStream extends EventEmitter {
     this.parent = parent;
     this.namespace = parent.s.namespace;
 
-    let topology: Topology | undefined;
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
-      topology = parent.getTopology();
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
-      topology = parent.topology;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
-      topology = parent.topology;
     } else {
       throw new TypeError(
         'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
       );
     }
 
+    const topology = getTopology(parent);
     if (!topology) throw new MongoClientClosedError();
     this.topology = topology;
 

@@ -220,8 +220,8 @@ describe('MongoClient', function () {
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        expect(db).nested.property('topology.s.options.connectTimeoutMS').to.equal(0);
-        expect(db).nested.property('topology.s.options.socketTimeoutMS').to.equal(0);
+        expect(db).nested.property('s.client.topology.s.options.connectTimeoutMS').to.equal(0);
+        expect(db).nested.property('s.client.topology.s.options.socketTimeoutMS').to.equal(0);
 
         client.close(done);
       });

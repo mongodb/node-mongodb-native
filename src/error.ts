@@ -131,7 +131,7 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
  */
 export class MongoClientClosedError extends MongoError {
   constructor(message?: string) {
-    message = 'MongoClient must be connected to perform this operation ${message}';
+    message = `MongoClient must be connected to perform this operation ${message}`;
     super(message);
     this.name = 'MongoClientClosedError';
   }

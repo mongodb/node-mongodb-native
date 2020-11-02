@@ -16,6 +16,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
+import type { MongoClient } from './mongo_client';
+import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 
 /** @public MongoDB Driver style callback */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
@@ -708,6 +710,16 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
   }
 
   return 0;
+}
+
+export function getTopology(provider: MongoClient | Db | Collection): Topology | undefined {
+  const Collection = loadCollection();
+  const Db = loadDb();
+  const MongoClient = loadMongoClient();
+
+  if (provider instanceof MongoClient) return provider.topology;
+  if (provider instanceof Db) return provider.s.client.topology;
+  if (provider instanceof Collection) return provider.s.db.s.client.topology;
 }
 
 /**
