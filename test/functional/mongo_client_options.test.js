@@ -104,7 +104,7 @@ describe('MongoClient Options', function() {
       for (const connection of client.topology.s.coreTopology.connections()) {
         expect(connection.socketTimeout).to.deep.equal(0);
       }
-      done();
+      client.close(done);
     });
   });
 

@@ -3937,6 +3937,7 @@ describe('Operation Examples', function() {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
+        db.createCollection('example');
         test.equal(null, err);
 
         // Retry to get the collection, should work as it's now created

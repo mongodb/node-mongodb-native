@@ -3149,22 +3149,28 @@ describe('Operation (Promises)', function() {
         auto_reconnect: false
       });
 
-      return client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Retry to get the collection, should work as it's now created
-        return db.collections().then(function(collections) {
+      return client
+        .connect()
+        .then(function(client) {
+          var db = client.db(configuration.db);
+          return db.createCollection('example');
+        })
+        .then(() => {
+          // LINE var MongoClient = require('mongodb').MongoClient,
+          // LINE   test = require('assert');
+          // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+          // LINE client.connect().then(() => {
+          // LINE   var db = client.db('test);
+          // REPLACE configuration.writeConcernMax() WITH {w:1}
+          // REMOVE-LINE done();
+          // BEGIN
+          // Retry to get the collection, should work as it's now created
+          return client.db(configuration.db).collections();
+        })
+        .then(function(collections) {
           test.ok(collections.length > 0);
           return client.close();
         });
-      });
       // END
     }
   });

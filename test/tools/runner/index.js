@@ -86,7 +86,7 @@ before(function(_done) {
         }
 
         this.configuration = new TestConfiguration(parsedURI, context);
-        done();
+        client.close(done);
       });
     });
   });
