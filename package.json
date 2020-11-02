@@ -79,7 +79,7 @@
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.2",
     "xml2js": "^0.4.23",
-    "yargs": "^16.1.0"
+    "yargs": "^14.2.0"
   },
   "license": "Apache-2.0",
   "engines": {

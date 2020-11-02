@@ -3,7 +3,8 @@
 import { createReadStream, existsSync, promises } from 'fs';
 const { readFile } = promises;
 import { createInterface } from 'readline';
-import { parseStringPromise } from 'xml2js';
+import xml2js from 'xml2js';
+const { parseStringPromise } = xml2js;
 import yargs from 'yargs';
 import chalk from 'chalk';
 
