@@ -565,15 +565,11 @@ function processWaitQueue(pool: ConnectionPool) {
   if (pool.waitQueueSize && (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)) {
     createConnection(pool, (err, connection) => {
       const waitQueueMember = pool[kWaitQueue].shift();
-      if (!waitQueueMember) {
+      if (!waitQueueMember || waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
         }
 
-        return;
-      }
-
-      if (waitQueueMember[kCancelled]) {
         return;
       }
 
