@@ -23,6 +23,13 @@ const exclusionList = [
   'wtimeout',
   'j',
   'writeConcern',
+  'raw',
+  'fieldsAsRaw',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'serializeFunctions',
+  'ignoreUndefined',
   'scope' // this option is reformatted thus exclude the original
 ];
 

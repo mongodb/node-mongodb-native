@@ -22,7 +22,14 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'readPreference',
   'session',
   'readConcern',
-  'writeConcern'
+  'writeConcern',
+  'raw',
+  'fieldsAsRaw',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'serializeFunctions',
+  'ignoreUndefined'
 ]);
 
 /** @public */

@@ -10,12 +10,14 @@ import type { Db } from './db';
 import type { Collection } from './collection';
 import type { OperationOptions, OperationBase, Hint } from './operations/operation';
 import type { ClientSession } from './sessions';
-import type { ReadConcern } from './read_concern';
+import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { Document } from './bson';
+import { Document, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
+import type { CommandOperationOptions, OperationParent } from './operations/command';
+import { ReadPreference } from './read_preference';
 
 /**
  * MongoDB Driver style callback
@@ -1107,4 +1109,79 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
 
   const keys = Object.keys(doc);
   return keys.length > 0 && keys[0][0] === '$';
+}
+
+function resolveWriteConcern(
+  parent: OperationParent | undefined,
+  options: any
+): WriteConcern | undefined {
+  const session = options.session;
+  if (
+    session &&
+    session.inTransaction() &&
+    session.transaction.options.writeConcern !== 'undefined'
+  ) {
+    return session.transaction.options.writeConcern;
+  }
+  return WriteConcern.fromOptions(options) || parent?.writeConcern;
+}
+
+function resolveReadConcern(
+  parent: OperationParent | undefined,
+  options: any
+): ReadConcern | undefined {
+  const session = options.session;
+  if (
+    session &&
+    session.inTransaction() &&
+    session.transaction.options.readConcern !== 'undefined'
+  ) {
+    return session.transaction.options.readConcern;
+  }
+  return ReadConcern.fromOptions(options) || parent?.readConcern;
+}
+
+function resolveReadPreference(
+  parent: OperationParent | undefined,
+  options: any
+): ReadPreference | undefined {
+  const session = options.session;
+  if (
+    session &&
+    session.inTransaction() &&
+    session.transaction.options.readPreference !== 'undefined'
+  ) {
+    return session.transaction.options.readPreference;
+  }
+  return ReadPreference.fromOptions(options) || parent?.readPreference;
+}
+
+/** @internal   Prioritizes options from transaction, then from options, then from parent */
+export function resolveInheritedOptions<T extends CommandOperationOptions>(
+  parent: OperationParent | undefined,
+  options?: T
+): T {
+  const result: T = Object.assign({}, options);
+
+  const readPreference = resolveReadPreference(parent, result);
+  if (readPreference) {
+    result.readPreference = readPreference;
+  }
+
+  const readConcern = resolveReadConcern(parent, result);
+  if (readConcern) {
+    result.readConcern = readConcern;
+  }
+
+  const writeConcern = resolveWriteConcern(parent, result);
+  if (writeConcern) {
+    result.writeConcern = writeConcern;
+  }
+
+  const bsonOptions = resolveBSONOptions(result, parent);
+  Object.assign(result, bsonOptions);
+
+  // todo: are there others?
+
+  return result;
 }
