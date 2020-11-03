@@ -3936,16 +3936,17 @@ describe('Operation Examples', function() {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        db.createCollection('example');
-        test.equal(null, err);
+        db.createCollection('example', err => {
+          expect(err).to.not.exist;
+          // Retry to get the collection, should work as it's now created
+          db.collections(function(err, collections) {
+            expect(err).to.not.exist;
+            test.ok(collections.length > 0);
 
-        // Retry to get the collection, should work as it's now created
-        db.collections(function(err, collections) {
-          test.equal(null, err);
-          test.ok(collections.length > 0);
-
-          client.close(done);
+            client.close(done);
+          });
         });
       });
       // END
