@@ -8,8 +8,7 @@ import {
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion,
-  getTopology
+  maxWireVersion
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -17,7 +16,7 @@ import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
-import type { Topology } from '../sdam/topology';
+import { getTopology, Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Hint } from '../operations/operation';

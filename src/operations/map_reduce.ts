@@ -5,8 +5,7 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback,
-  getTopology
+  Callback
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -15,6 +14,7 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
+import { getTopology } from '../sdam/topology';
 
 const exclusionList = [
   'readPreference',

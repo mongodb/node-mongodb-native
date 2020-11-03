@@ -1,5 +1,5 @@
 import { deprecate } from 'util';
-import { emitDeprecatedOptionWarning, Callback, getTopology } from './utils';
+import { emitDeprecatedOptionWarning, Callback } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
@@ -53,7 +53,7 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
-import type { Topology } from './sdam/topology';
+import { getTopology, Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
 

@@ -57,6 +57,7 @@ import { DestroyOptions, Connection } from '../cmap/connection';
 import { RunCommandOperation } from '../operations/run_command';
 import type { CursorOptions } from '../cursor/cursor';
 import type { MongoClientOptions } from '../mongo_client';
+import { Db, Collection, MongoClient } from '..';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -1052,4 +1053,11 @@ export class ServerCapabilities {
   get commandsTakeCollation(): boolean {
     return this.maxWireVersion >= 5;
   }
+}
+
+/** @internal */
+export function getTopology(provider: MongoClient | Db | Collection): Topology | undefined {
+  if (provider instanceof MongoClient) return provider.topology;
+  if (provider instanceof Db) return provider.s.client.topology;
+  if (provider instanceof Collection) return provider.s.db.s.client.topology;
 }

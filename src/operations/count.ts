@@ -1,10 +1,11 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback, getTopology } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Cursor } from '../cursor/cursor';
+import { getTopology } from '../sdam/topology';
 
 /** @public */
 export interface CountOptions extends CommandOperationOptions {

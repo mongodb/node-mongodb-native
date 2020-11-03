@@ -1,11 +1,5 @@
 import { MongoError } from '../error';
-import {
-  applyRetryableWrites,
-  applyWriteConcern,
-  decorateWithCollation,
-  Callback,
-  getTopology
-} from '../utils';
+import { applyRetryableWrites, applyWriteConcern, decorateWithCollation, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -15,6 +9,7 @@ import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { DeleteOptions } from './delete';
+import { getTopology } from '../sdam/topology';
 
 /** @internal */
 export interface IndexInformationOptions {

@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning, getTopology } from './utils';
+import { emitDeprecatedOptionWarning } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
@@ -86,6 +86,7 @@ import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
+import { getTopology } from './sdam/topology';
 
 /** @public */
 export interface Collection {

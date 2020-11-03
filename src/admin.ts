@@ -11,10 +11,11 @@ import {
 } from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
-import { Callback, getTopology } from './utils';
+import type { Callback } from './utils';
 import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
+import { getTopology } from './sdam/topology';
 
 /** @internal */
 export interface AdminPrivate {

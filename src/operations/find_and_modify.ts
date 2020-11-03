@@ -5,8 +5,7 @@ import {
   decorateWithCollation,
   applyWriteConcern,
   hasAtomicOperators,
-  Callback,
-  getTopology
+  Callback
 } from '../utils';
 import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -15,6 +14,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
+import { getTopology } from '../sdam/topology';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
