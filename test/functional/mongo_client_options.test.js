@@ -100,7 +100,10 @@ describe('MongoClient Options', function() {
     const client = this.configuration.newClient();
     client.connect(() => {
       expect(client.s.options.socketTimeoutMS).to.deep.equal(0);
-      for (const connection of client.topology.s.coreTopology.connections()) {
+      const connections = client.topology.s.coreTopology
+        ? client.topology.s.coreTopology.connections()
+        : [];
+      for (const connection of connections) {
         expect(connection.socketTimeout).to.deep.equal(0);
       }
       client.close(done);
