@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning } from './utils';
+import { emitDeprecatedOptionWarning, resolveInheritedOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
@@ -280,7 +280,7 @@ export class Collection implements OperationParent {
     callback?: Callback<InsertOneResult>
   ): Promise<InsertOneResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -312,7 +312,7 @@ export class Collection implements OperationParent {
     callback?: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options ? Object.assign({}, options) : { ordered: true };
+    options = resolveInheritedOptions(this, options ?? { ordered: true });
 
     return executeOperation(
       getTopology(this),
@@ -368,7 +368,7 @@ export class Collection implements OperationParent {
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || { ordered: true };
+    options = resolveInheritedOptions(this, options ?? { ordered: true });
 
     if (!Array.isArray(operations)) {
       throw new MongoError('operations must be an array of documents');
@@ -405,7 +405,7 @@ export class Collection implements OperationParent {
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -442,7 +442,7 @@ export class Collection implements OperationParent {
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -475,7 +475,7 @@ export class Collection implements OperationParent {
     callback?: Callback<UpdateResult>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -501,7 +501,7 @@ export class Collection implements OperationParent {
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -539,7 +539,7 @@ export class Collection implements OperationParent {
       options = {};
     }
 
-    options = Object.assign({}, options);
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -565,8 +565,8 @@ export class Collection implements OperationParent {
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
-
+    options = resolveInheritedOptions(this, options);
+    options.readPreference = ReadPreference.PRIMARY;
     return executeOperation(
       getTopology(this),
       new RenameOperation(this, newName, options),
@@ -624,7 +624,7 @@ export class Collection implements OperationParent {
       (callback = query as Callback<Document>), (query = {}), (options = {});
     if (typeof options === 'function') (callback = options), (options = {});
     query = query || {};
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -649,6 +649,7 @@ export class Collection implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
+    options = resolveInheritedOptions(this, options);
     return new Cursor(
       getTopology(this),
       new FindOperation(this, this.s.namespace, filter, options),
@@ -671,7 +672,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(getTopology(this), new OptionsOperation(this, options), callback);
   }
@@ -691,7 +692,7 @@ export class Collection implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(getTopology(this), new IsCappedOperation(this, options), callback);
   }
@@ -739,7 +740,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -796,6 +797,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -821,7 +823,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     // Run only against primary
     options.readPreference = ReadPreference.primary;
@@ -848,7 +850,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options ? Object.assign({}, options) : {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(getTopology(this), new DropIndexesOperation(this, options), callback);
   }
@@ -859,6 +861,7 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
+    options = resolveInheritedOptions(this, options);
     const cursor = new CommandCursor(
       getTopology(this),
       new ListIndexesOperation(this, options),
@@ -889,7 +892,7 @@ export class Collection implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -913,7 +916,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -937,7 +940,7 @@ export class Collection implements OperationParent {
     callback?: Callback<number>
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -994,10 +997,10 @@ export class Collection implements OperationParent {
     }
 
     query = query || {};
-    options = options || {};
+    options = resolveInheritedOptions(this, options as CountDocumentsOptions);
     return executeOperation(
       getTopology(this),
-      new CountDocumentsOperation(this, query as Document, options as CountDocumentsOptions),
+      new CountDocumentsOperation(this, query as Document, options),
       callback
     );
   }
@@ -1036,10 +1039,10 @@ export class Collection implements OperationParent {
     }
 
     query = query || {};
-    options = options || {};
+    options = resolveInheritedOptions(this, options as DistinctOptions);
     return executeOperation(
       getTopology(this),
-      new DistinctOperation(this, key, query as Document, options as DistinctOptions),
+      new DistinctOperation(this, key, query as Document, options),
       callback
     );
   }
@@ -1059,7 +1062,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(getTopology(this), new IndexesOperation(this, options), callback);
   }
@@ -1105,7 +1108,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -1142,7 +1145,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -1179,7 +1182,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -1205,8 +1208,7 @@ export class Collection implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    options = options || {};
-
+    options = resolveInheritedOptions(this, options);
     return new AggregationCursor(
       getTopology(this),
       new AggregateOperation(this, pipeline, options),
@@ -1290,6 +1292,8 @@ export class Collection implements OperationParent {
       options.finalize = options.finalize.toString();
     }
 
+    options = resolveInheritedOptions(this, options);
+
     return executeOperation(
       getTopology(this),
       new MapReduceOperation(this, map, reduce, options),
@@ -1299,12 +1303,14 @@ export class Collection implements OperationParent {
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: BulkWriteOptions): any {
-    return new UnorderedBulkOperation(this, options ?? {});
+    options = resolveInheritedOptions(this, options);
+    return new UnorderedBulkOperation(this, options);
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: BulkWriteOptions): any {
-    return new OrderedBulkOperation(this, options ?? {});
+    options = resolveInheritedOptions(this, options);
+    return new OrderedBulkOperation(this, options);
   }
 
   /** Get the db scoped logger */
@@ -1396,7 +1402,7 @@ export class Collection implements OperationParent {
     callback: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
@@ -1436,7 +1442,7 @@ export class Collection implements OperationParent {
     }
 
     query = query || {};
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
     return executeOperation(
       getTopology(this),
       new EstimatedDocumentCountOperation(this, query, options),
@@ -1483,6 +1489,7 @@ export class Collection implements OperationParent {
       options = {};
     }
 
+    options = resolveInheritedOptions(this, options);
     // Add the remove option
     options.remove = true;
 
@@ -1600,7 +1607,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     // Force read preference primary
     options.readPreference = ReadPreference.primary;
