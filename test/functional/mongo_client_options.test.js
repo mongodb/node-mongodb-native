@@ -2,7 +2,6 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -98,7 +97,7 @@ describe('MongoClient Options', function() {
   });
 
   it('should default socketTimeout to infinity', function(done) {
-    const client = new MongoClient(this.configuration.url());
+    const client = this.configuration.newClient();
     client.connect(() => {
       expect(client.s.options.socketTimeoutMS).to.deep.equal(0);
       for (const connection of client.topology.s.coreTopology.connections()) {
