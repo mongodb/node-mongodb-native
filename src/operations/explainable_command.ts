@@ -35,6 +35,8 @@ export abstract class ExplainableCommand<
         return;
       }
 
+      // For now, tag the command with the explain; after cmd is finalized in the super class,
+      // it will be refactored into the required shape using the explain.
       cmd.explain = this.explain;
     }
     super.executeCommand(server, cmd, callback);
