@@ -112,7 +112,7 @@ describe('ReadPreference', function () {
     }
   });
 
-  it('Should correctly apply collection level read Preference to group', {
+  it.skip('Should correctly apply collection level read Preference to group', {
     metadata: { requires: { mongodb: '>=2.6.0,<=4.0.x', topology: ['single', 'ssl'] } },
 
     test: function (done) {

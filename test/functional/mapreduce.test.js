@@ -9,7 +9,7 @@ describe('MapReduce', function () {
     return setupDatabase(this.configuration, ['outputCollectionDb']);
   });
 
-  it('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
+  it.skip('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
     metadata: {
       requires: {
         mongodb: '<=4.1.0',
@@ -386,7 +386,7 @@ describe('MapReduce', function () {
     }
   });
 
-  it('shouldCorrectlyReturnNestedKeys', {
+  it.skip('shouldCorrectlyReturnNestedKeys', {
     metadata: {
       requires: {
         mongodb: '<=4.1.0', // Because of use of `group` command
