@@ -11,12 +11,7 @@ import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { Logger, LoggerOptions } from './logger';
-import {
-  filterOptions,
-  mergeOptionsAndWriteConcern,
-  deprecateOptions,
-  MongoDBNamespace
-} from './utils';
+import { filterOptions, deprecateOptions, MongoDBNamespace } from './utils';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';
@@ -308,11 +303,11 @@ export class Db implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    options = options || {};
+    resolveInheritedOptions(this, options);
     const cursor = new AggregationCursor(
       this.s.topology,
       new AggregateOperation(this, pipeline, options),
-      resolveInheritedOptions(this, options)
+      options
     );
 
     return cursor;
@@ -341,21 +336,10 @@ export class Db implements OperationParent {
     callback?: Callback<Collection>
   ): Collection | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = Object.assign({}, options);
-
-    // If we have not set a collection level readConcern set the db level one
-    options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
-
-    // Merge in all needed options and ensure correct writeConcern merging from db level
-    const finalOptions = mergeOptionsAndWriteConcern(
-      options,
-      this.s.options ?? {},
-      collectionKeys,
-      true
-    ) as CollectionOptions;
+    const finalOptions = resolveInheritedOptions(this, options);
 
     // Execute
-    if (finalOptions == null || !finalOptions.strict) {
+    if (!finalOptions.strict) {
       try {
         const collection = new Collection(this, name, finalOptions);
         if (callback) callback(undefined, collection);
@@ -426,12 +410,12 @@ export class Db implements OperationParent {
    */
   listCollections(filter?: Document, options?: ListCollectionsOptions): CommandCursor {
     filter = filter || {};
-    options = options || {};
+    options = resolveInheritedOptions(this, options);
 
     return new CommandCursor(
       this.s.topology,
       new ListCollectionsOperation(this, filter, options),
-      resolveInheritedOptions(this, options)
+      options
     );
   }
 
@@ -900,18 +884,6 @@ export class Db implements OperationParent {
     return callback ? cursor.toArray(callback) : cursor.toArray();
   }
 }
-
-const collectionKeys = [
-  'pkFactory',
-  'readPreference',
-  'serializeFunctions',
-  'strict',
-  'readConcern',
-  'ignoreUndefined',
-  'promoteValues',
-  'promoteBuffers',
-  'promoteLongs'
-];
 
 Db.prototype.createCollection = deprecateOptions(
   {
