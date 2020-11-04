@@ -35,7 +35,7 @@ function docker_mongodb {
     docker logs -f $(docker ps -f name=mongo_${1}_${2} -q)
 }
 
-if [ $1 != "killall" ] && [ "$#" -ne 2 ]; then
+if [ "$#" -ne 2 ] && [ ${1:-''} != "killall" ]; then
     die_with_usage
 fi
 
