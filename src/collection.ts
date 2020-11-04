@@ -368,7 +368,7 @@ export class Collection implements OperationParent {
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options ?? { ordered: true });
+    options = options || { ordered: true };
 
     if (!Array.isArray(operations)) {
       throw new MongoError('operations must be an array of documents');
@@ -1305,14 +1305,24 @@ export class Collection implements OperationParent {
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: BulkWriteOptions): any {
-    options = resolveInheritedOptions(this, options);
-    return new UnorderedBulkOperation(this, options);
+    options = options || {};
+    // Give function's options precedence over session options.
+    if (options.ignoreUndefined == null) {
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
+    }
+
+    return new UnorderedBulkOperation(this, options ?? {});
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: BulkWriteOptions): any {
-    options = resolveInheritedOptions(this, options);
-    return new OrderedBulkOperation(this, options);
+    options = options || {};
+    // Give function's options precedence over session options.
+    if (options.ignoreUndefined == null) {
+      options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
+    }
+
+    return new OrderedBulkOperation(this, options ?? {});
   }
 
   /** Get the db scoped logger */
