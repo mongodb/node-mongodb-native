@@ -305,7 +305,7 @@ export class Db implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    resolveInheritedOptions(this, options);
+    options = resolveInheritedOptions(this, options);
     const cursor = new AggregationCursor(
       this.s.topology,
       new AggregateOperation(this, pipeline, options),
