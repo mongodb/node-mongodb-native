@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
 import { MongoError, AnyError } from './error';
-import { WriteConcern, WriteConcernOptions, W, writeConcernKeys } from './write_concern';
+import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
 import type { EventEmitter } from 'events';
@@ -215,42 +215,44 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
   return filterOptions;
 }
 
-/** @internal */
-export function mergeOptionsAndWriteConcern(
-  targetOptions: AnyOptions,
-  sourceOptions: AnyOptions,
-  keys: string[],
-  mergeWriteConcern: boolean
-): AnyOptions {
-  // Mix in any allowed options
-  for (let i = 0; i < keys.length; i++) {
-    if (targetOptions[keys[i]] === undefined && sourceOptions[keys[i]] !== undefined) {
-      targetOptions[keys[i]] = sourceOptions[keys[i]];
-    }
-  }
+// /** @internal */
+// export function mergeOptionsAndWriteConcern(
+//   targetOptions: AnyOptions,
+//   sourceOptions: AnyOptions,
+//   keys: string[]
+// ): AnyOptions {
+//   // Mix in any allowed options
+//   for (let i = 0; i < keys.length; i++) {
+//     if (targetOptions[keys[i]] === undefined && sourceOptions[keys[i]] !== undefined) {
+//       targetOptions[keys[i]] = sourceOptions[keys[i]];
+//     }
+//   }
 
-  // No merging of write concern
-  if (!mergeWriteConcern) return targetOptions;
+//   // todo could do this with an object.assign and then pluck the keys, except this doesn't work w mergeWriteconcern
+//   // but we always set that to true so we're good!
 
-  // Found no write Concern options
-  let found = false;
-  for (let i = 0; i < writeConcernKeys.length; i++) {
-    if (targetOptions[writeConcernKeys[i]]) {
-      found = true;
-      break;
-    }
-  }
+//   // Found no write Concern options
+//   let found = false;
+//   for (let i = 0; i < writeConcernKeys.length; i++) {
+//     if (targetOptions[writeConcernKeys[i]]) {
+//       found = true;
+//       break;
+//     }
+//   }
 
-  if (!found) {
-    for (let i = 0; i < writeConcernKeys.length; i++) {
-      if (sourceOptions[writeConcernKeys[i]]) {
-        targetOptions[writeConcernKeys[i]] = sourceOptions[writeConcernKeys[i]];
-      }
-    }
-  }
+//   // merge write concern keys iff none are found
+//   if (!found) {
+//     for (let i = 0; i < writeConcernKeys.length; i++) {
+//       if (sourceOptions[writeConcernKeys[i]]) {
+//         targetOptions[writeConcernKeys[i]] = sourceOptions[writeConcernKeys[i]];
+//       }
+//     }
+//   }
 
-  return targetOptions;
-}
+//   results = resolveInheritedOptions(this, options);
+
+//   return targetOptions;
+// }
 
 /**
  * Executes the given operation with provided arguments.
@@ -1164,7 +1166,7 @@ function resolveReadPreference(
   return ReadPreference.fromOptions(options) || parent?.readPreference;
 }
 
-/** @internal   Prioritizes options from transaction, then from options, then from parent */
+/** @internal Prioritizes options from transaction, then from options, then from parent */
 export function resolveInheritedOptions<T extends CommandOperationOptions>(
   parent: OperationParent | undefined,
   options?: T
