@@ -1,5 +1,4 @@
 import type { TagSet } from './sdam/server_description';
-import type { OperationParent } from './operations/command';
 import type { Document } from './bson';
 import type { ClientSession } from './sessions';
 
