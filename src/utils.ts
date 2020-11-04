@@ -215,45 +215,6 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
   return filterOptions;
 }
 
-// /** @internal */
-// export function mergeOptionsAndWriteConcern(
-//   targetOptions: AnyOptions,
-//   sourceOptions: AnyOptions,
-//   keys: string[]
-// ): AnyOptions {
-//   // Mix in any allowed options
-//   for (let i = 0; i < keys.length; i++) {
-//     if (targetOptions[keys[i]] === undefined && sourceOptions[keys[i]] !== undefined) {
-//       targetOptions[keys[i]] = sourceOptions[keys[i]];
-//     }
-//   }
-
-//   // todo could do this with an object.assign and then pluck the keys, except this doesn't work w mergeWriteconcern
-//   // but we always set that to true so we're good!
-
-//   // Found no write Concern options
-//   let found = false;
-//   for (let i = 0; i < writeConcernKeys.length; i++) {
-//     if (targetOptions[writeConcernKeys[i]]) {
-//       found = true;
-//       break;
-//     }
-//   }
-
-//   // merge write concern keys iff none are found
-//   if (!found) {
-//     for (let i = 0; i < writeConcernKeys.length; i++) {
-//       if (sourceOptions[writeConcernKeys[i]]) {
-//         targetOptions[writeConcernKeys[i]] = sourceOptions[writeConcernKeys[i]];
-//       }
-//     }
-//   }
-
-//   results = resolveInheritedOptions(this, options);
-
-//   return targetOptions;
-// }
-
 /**
  * Executes the given operation with provided arguments.
  *

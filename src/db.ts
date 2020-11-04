@@ -459,8 +459,7 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    options = options || {};
-    options.readPreference = ReadPreference.PRIMARY;
+    options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
     // Add return new collection
     options.new_collection = true;

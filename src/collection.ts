@@ -567,8 +567,7 @@ export class Collection implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    options = options || {};
-    options.readPreference = ReadPreference.PRIMARY;
+    options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
     return executeOperation(
       getTopology(this),
       new RenameOperation(this, newName, options),
@@ -1317,7 +1316,7 @@ export class Collection implements OperationParent {
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: BulkWriteOptions): any {
     options = options || {};
-    // Give function's options precedence over session options.
+    // Give function's options precedence over session's options.
     if (options.ignoreUndefined == null) {
       options.ignoreUndefined = this.bsonOptions.ignoreUndefined;
     }
