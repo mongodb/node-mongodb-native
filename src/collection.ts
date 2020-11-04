@@ -563,7 +563,9 @@ export class Collection implements OperationParent {
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
+
+    // Intentionally, we do not inherit options from parent for this operation.
+    options = options || {};
     options.readPreference = ReadPreference.PRIMARY;
     return executeOperation(this.s.topology, new RenameOperation(this, newName, options), callback);
   }

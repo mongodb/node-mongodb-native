@@ -277,7 +277,9 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
+
+    // Intentionally, we do not inherit options from parent for this operation.
+    options = options || {};
 
     return executeOperation(
       this.s.topology,
@@ -451,7 +453,9 @@ export class Db implements OperationParent {
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
+
+    // Intentionally, we do not inherit options from parent for this operation.
+    options = options || {};
     options.readPreference = ReadPreference.PRIMARY;
 
     // Add return new collection
@@ -551,7 +555,9 @@ export class Db implements OperationParent {
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
+
+    // Intentionally, we do not inherit options from parent for this operation.
+    options = options || {};
 
     return executeOperation(
       this.s.topology,

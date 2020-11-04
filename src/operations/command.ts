@@ -73,7 +73,6 @@ export abstract class CommandOperation<
         : new MongoDBNamespace('admin', '$cmd');
     }
 
-    // todo what about this.hasAspect(Aspect.NO_INHERIT_OPTIONS)
     const readPref = ReadPreference.fromOptions(options);
     this.readPreference =
       this.hasAspect(Aspect.WRITE_OPERATION) || readPref === undefined

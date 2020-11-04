@@ -1181,9 +1181,6 @@ export function resolveInheritedOptions<T extends CommandOperationOptions>(
   }
 
   const bsonOptions = resolveBSONOptions(result, parent);
-  Object.assign(result, bsonOptions);
 
-  // todo: are there others?
-
-  return result;
+  return { ...result, ...bsonOptions };
 }
