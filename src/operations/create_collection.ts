@@ -16,7 +16,6 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'j',
   'fsync',
   'autoIndexId',
-  'serializeFunctions',
   'pkFactory',
   'raw',
   'readPreference',
