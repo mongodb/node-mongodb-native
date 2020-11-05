@@ -17,6 +17,7 @@ import type { ObjectId } from '../bson';
 
 const exclusionList = [
   'readPreference',
+  'readConcern',
   'session',
   'bypassDocumentValidation',
   'w',

@@ -141,7 +141,8 @@ export class ReadPreference {
    */
   static fromOptions(options?: ReadPreferenceFromOptions): ReadPreference | undefined {
     if (!options) return;
-    const readPreference = options.readPreference;
+    const readPreference =
+      options.readPreference ?? options.session?.transaction.options.readPreference;
     const readPreferenceTags = options.readPreferenceTags;
 
     if (readPreference == null) {
