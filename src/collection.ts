@@ -1536,7 +1536,7 @@ export class Collection implements OperationParent {
     let reduce = args.length ? args.shift() : undefined;
     let finalize = args.length ? args.shift() : undefined;
     let command = args.length ? args.shift() : undefined;
-    const options = args.length ? args.shift() || {} : {};
+    let options = args.length ? args.shift() || {} : {};
 
     // Make sure we are backward compatible
     if (!(typeof finalize === 'function')) {
@@ -1563,6 +1563,8 @@ export class Collection implements OperationParent {
 
     // Set up the command as default
     command = command == null ? true : command;
+
+    options = resolveInheritedOptions(this, options);
 
     if (command == null) {
       return executeOperation(
