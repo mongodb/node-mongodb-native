@@ -1,10 +1,9 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
-
-const MongoError = require('../../src/error').MongoError;
-const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
+const { withClient, setupDatabase, ignoreNsNotFound } = require('./shared');
+const test = require('./shared').assert;
+const { expect } = require('chai');
+const { MongoError } = require('../../src/error');
+const { Long } = require('../../src');
 
 describe('Bulk', function () {
   before(function () {
@@ -157,6 +156,108 @@ describe('Bulk', function () {
       });
     }
   });
+
+  it('should inherit promote long false from db during unordered bulk operation', function () {
+    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      promoteLongs: true
+    });
+
+    return withClient.call(this, client, (client, done) => {
+      const db = client.db('shouldInheritPromoteLongFalseFromDb1', { promoteLongs: false });
+      const coll = db.collection('test');
+
+      const batch = coll.initializeUnorderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    });
+  });
+
+  it(
+    'should inherit promote long false from collection during unordered bulk operation',
+    withClient(function (client, done) {
+      const db = client.db('shouldInheritPromoteLongFalseFromColl1', { promoteLongs: true });
+      const coll = db.collection('test', { promoteLongs: false });
+
+      const batch = coll.initializeUnorderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    })
+  );
+
+  it('should inherit promote long false from db during ordered bulk operation', function () {
+    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      promoteLongs: true
+    });
+
+    return withClient.call(this, client, (client, done) => {
+      const db = client.db('shouldInheritPromoteLongFalseFromDb2', { promoteLongs: false });
+      const coll = db.collection('test');
+
+      const batch = coll.initializeOrderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    });
+  });
+
+  it(
+    'should inherit promote long false from collection during ordered bulk operation',
+    withClient(function (client, done) {
+      const db = client.db('shouldInheritPromoteLongFalseFromColl2', { promoteLongs: true });
+      const coll = db.collection('test', { promoteLongs: false });
+
+      const batch = coll.initializeOrderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    })
+  );
 
   it('should correctly handle ordered multiple batch api write command errors', {
     metadata: {
