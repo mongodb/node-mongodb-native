@@ -1,5 +1,12 @@
 import { deprecate } from 'util';
-import { emitDeprecatedOptionWarning, Callback, resolveInheritedOptions } from './utils';
+import {
+  emitDeprecatedOptionWarning,
+  Callback,
+  resolveInheritedOptions,
+  filterOptions,
+  deprecateOptions,
+  MongoDBNamespace
+} from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
@@ -11,7 +18,6 @@ import * as CONSTANTS from './constants';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { ReadConcern } from './read_concern';
 import { Logger, LoggerOptions } from './logger';
-import { filterOptions, deprecateOptions, MongoDBNamespace } from './utils';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';

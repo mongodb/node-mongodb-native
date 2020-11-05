@@ -1074,57 +1074,34 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   return keys.length > 0 && keys[0][0] === '$';
 }
 
-function resolveWriteConcern(
-  parent: OperationParent | undefined,
-  options: any
-): WriteConcern | undefined {
-  const session = options.session;
-  if (session && session.inTransaction()) {
-    // Users cannot pass a writeConcern to operations in a transaction
-    return;
-  }
-  return WriteConcern.fromOptions(options) || parent?.writeConcern;
-}
-
-function resolveReadConcern(
-  parent: OperationParent | undefined,
-  options: any
-): ReadConcern | undefined {
-  const session = options.session;
-  if (session && session.inTransaction()) {
-    // Users cannot pass a readConcern to operations in a transaction
-    return;
-  }
-  return ReadConcern.fromOptions(options) || parent?.readConcern;
-}
-
-function resolveReadPreference(
-  parent: OperationParent | undefined,
-  options: any
-): ReadPreference | undefined {
-  return ReadPreference.fromOptions(options) ?? parent?.readPreference;
-}
-
-/** @internal Prioritizes options from transaction, then from options, then from parent */
+/**
+ * Merge inherited properties from parent into options, prioritizing values from options,
+ * then values from parent.
+ * @internal
+ */
 export function resolveInheritedOptions<T extends CommandOperationOptions>(
   parent: OperationParent | undefined,
   options?: T
 ): T {
   const result: T = Object.assign({}, options);
+  const session = options?.session;
 
-  const readPreference = resolveReadPreference(parent, result);
+  // Users cannot pass a readConcern/writeConcern to operations in a transaction
+  if (!session?.inTransaction()) {
+    const readConcern = ReadConcern.fromOptions(options) ?? parent?.readConcern;
+    if (readConcern) {
+      result.readConcern = readConcern;
+    }
+
+    const writeConcern = WriteConcern.fromOptions(options) ?? parent?.writeConcern;
+    if (writeConcern) {
+      result.writeConcern = writeConcern;
+    }
+  }
+
+  const readPreference = ReadPreference.fromOptions(options) ?? parent?.readPreference;
   if (readPreference) {
     result.readPreference = readPreference;
-  }
-
-  const readConcern = resolveReadConcern(parent, result);
-  if (readConcern) {
-    result.readConcern = readConcern;
-  }
-
-  const writeConcern = resolveWriteConcern(parent, result);
-  if (writeConcern) {
-    result.writeConcern = writeConcern;
   }
 
   const bsonOptions = resolveBSONOptions(result, parent);
