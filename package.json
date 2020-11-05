@@ -23,6 +23,26 @@
     "snappy": "^6.3.4",
     "bson-ext": "^2.0.0"
   },
+  "peerDependenciesMeta": {
+    "kerberos": {
+      "optional": true
+    },
+    "mongodb-client-encryption": {
+      "optional": true
+    },
+    "mongodb-extjson": {
+      "optional": true
+    },
+    "snappy": {
+      "optional": true
+    },
+    "bson-ext": {
+      "optional": true
+    },
+    "aws4": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "bl": "^2.2.1",
     "bson": "^1.1.4",
