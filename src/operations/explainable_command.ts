@@ -30,7 +30,7 @@ export abstract class ExplainableCommand<
 
   executeCommand(server: Server, cmd: Document, callback: Callback): void {
     if (this.explain) {
-      if (!Explain.explainSupportedOnCmd(server, cmd)) {
+      if (!Explain.explainSupported(server, cmd)) {
         callback(new MongoError(`server ${server.name} does not support explain on this command`));
         return;
       }

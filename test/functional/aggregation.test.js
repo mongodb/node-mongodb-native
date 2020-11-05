@@ -387,7 +387,8 @@ describe('Aggregation', function () {
    * @example-method aggregate
    */
   it.skip('should correctly return a cursor and call explain', {
-    // TODO: add back this test when cursor explain is fully implemented
+    // TODO NODE-2853: This had to be skipped during NODE-2852; un-skip while re-implementing
+    // cursor explain
 
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run

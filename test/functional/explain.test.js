@@ -12,7 +12,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithDeleteOne', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -36,7 +36,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithDeleteMany', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -60,7 +60,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithUpdateOne', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -89,7 +89,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithUpdateMany', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -118,7 +118,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithRemoveOne', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -142,7 +142,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithRemoveMany', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -166,7 +166,7 @@ describe('Explain', function () {
   it('shouldUseAllPlansExecutionAsTrueExplainVerbosity', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -192,7 +192,7 @@ describe('Explain', function () {
   it('shouldUseQueryPlannerAsFalseExplainVerbosity', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -218,7 +218,7 @@ describe('Explain', function () {
   it('shouldHonorQueryPlannerStringExplain', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -244,7 +244,7 @@ describe('Explain', function () {
   it('shouldHonorExecutionStatsStringExplain', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -271,7 +271,7 @@ describe('Explain', function () {
   it('shouldHonorAllPlansStringExplain', {
     metadata: {
       requires: {
-        mongodb: '>3.0'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -297,7 +297,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithDistinct', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
@@ -321,7 +321,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithFindOneAndDelete', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
@@ -345,7 +345,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithFindOneAndReplace', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
@@ -369,7 +369,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithFindOneAndUpdate', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
@@ -398,7 +398,7 @@ describe('Explain', function () {
   it('shouldHonorBooleanExplainWithMapReduce', {
     metadata: {
       requires: {
-        mongodb: '>4.4'
+        mongodb: '>=4.4'
       }
     },
     test: withClient(function (client, done) {

@@ -141,13 +141,9 @@ export abstract class CommandOperation<
 
     // If a command is to be explained, we need to reformat the command after
     // the other command properties are specified.
-    if (cmd.explain) {
-      cmd = decorateWithExplain(cmd, cmd.explain);
-    }
-
     server.command(
       this.ns.toString(),
-      cmd,
+      cmd.explain ? decorateWithExplain(cmd, cmd.explain) : cmd,
       { fullResult: !!this.fullResponse, ...this.options },
       callback
     );

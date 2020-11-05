@@ -500,8 +500,7 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
     delete command.explain;
   }
 
-  command = { explain: command, verbosity: explain.verbosity };
-  return command;
+  return { explain: command, verbosity: explain.verbosity };
 }
 
 /** @internal */
