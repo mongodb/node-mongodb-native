@@ -103,7 +103,7 @@ functions:
       params:
         file: mo-expansion.yml
 
-  bootstrap mongohoused:
+  "bootstrap mongohoused":
     - command: shell.exec
       params:
         script: |
@@ -242,7 +242,8 @@ functions:
         script: |
           MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
-  run data lake tests:
+  
+  "run data lake tests":
       - command: shell.exec
         type: test
         params:
@@ -250,6 +251,7 @@ functions:
           script: |
             MONGODB_URI='mongodb://mhuser:pencil@localhost' NODE_LTS_NAME='${NODE_LTS_NAME}' \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
+  
   "run tls tests":
     - command: shell.exec
       type: test
@@ -286,7 +288,7 @@ functions:
           }
           EOF
 
-  run aws auth test with regular aws credentials:
+  "run aws auth test with regular aws credentials":
     - command: shell.exec
       type: test
       params:
@@ -315,7 +317,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with assume role credentials:
+  "run aws auth test with assume role credentials":
     - command: shell.exec
       type: test
       params:
@@ -348,7 +350,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws EC2 credentials:
+  "run aws auth test with aws EC2 credentials":
     - command: shell.exec
       type: test
       params:
@@ -365,7 +367,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws credentials as environment variables:
+  "run aws auth test with aws credentials as environment variables":
     - command: shell.exec
       type: test
       params:
@@ -385,7 +387,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws credentials and session token as environment variables:
+  "run aws auth test with aws credentials and session token as environment variables":
     - command: shell.exec
       type: test
       params:
@@ -406,7 +408,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws ECS auth test:
+  "run aws ECS auth test":
     - command: shell.exec
       type: test
       params:
@@ -433,7 +435,7 @@ functions:
           cat setup.js
           mongo --nodb setup.js aws_e2e_ecs.js
 
-  run-ocsp-test:
+  "run-ocsp-test":
     - command: shell.exec
       type: test
       params:
@@ -446,7 +448,7 @@ functions:
           OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
 
-  run-valid-ocsp-server:
+  "run-valid-ocsp-server":
     - command: shell.exec
       params:
         script: |
@@ -464,7 +466,7 @@ functions:
             --ocsp_responder_key rsa/ca.key \
             -p 8100 -v
 
-  run-revoked-ocsp-server:
+  "run-revoked-ocsp-server":
     - command: shell.exec
       params:
         script: |
@@ -484,6 +486,11 @@ functions:
             -v \
             --fault revoked
 
+  "upload test results":
+    # Upload the xunit-format test results.
+    - command: attach.xunit_results
+      params:
+        file: "src/xunit.xml"
 
 pre:
   - func: "fetch source"
@@ -493,4 +500,5 @@ pre:
   - func: "make files executable"
 
 post:
+  - func: "upload test results"
   - func: "cleanup"

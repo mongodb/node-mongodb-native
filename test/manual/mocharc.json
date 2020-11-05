@@ -1,3 +1,4 @@
 {
-  "require": "ts-node/register"
+  "require": "ts-node/register",
+  "reporter": "spec-xunit-file"
 }
