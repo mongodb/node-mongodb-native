@@ -14,7 +14,6 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
-import { getTopology } from '../sdam/topology';
 
 const exclusionList = [
   'readPreference',
@@ -145,7 +144,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // Have we specified collation
     try {
-      decorateWithCollation(mapCommandHash, getTopology(coll), options);
+      decorateWithCollation(mapCommandHash, coll, options);
     } catch (err) {
       return callback(err);
     }
@@ -182,7 +181,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
         const doc = result.result;
         // Return a collection from another db
         const Db = loadDb();
-        collection = new Db(doc.db, coll.s.db.s.client, coll.s.db.s.options).collection(
+        collection = new Db(coll.s.db.s.client, doc.db, coll.s.db.s.options).collection(
           doc.collection
         );
       } else {

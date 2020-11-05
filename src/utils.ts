@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { MongoError, AnyError, MongoClientClosedError } from './error';
+import { MongoError, AnyError } from './error';
 import { WriteConcern, WriteConcernOptions, W, writeConcernKeys } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -16,6 +16,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
+import type { MongoClient } from './mongo_client';
+import type { Cursor } from './cursor/cursor';
 
 /** @public MongoDB Driver style callback */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
@@ -263,14 +265,12 @@ export function mergeOptionsAndWriteConcern(
  * @param options - Options that modify the behavior of the method
  */
 export function executeLegacyOperation<T extends OperationBase>(
-  topology: Topology | undefined,
+  topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
   options?: AnyOptions
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
-
-  if (!topology) throw new MongoClientClosedError();
 
   if (!Array.isArray(args)) {
     throw new TypeError('This method requires an array of arguments to apply');
@@ -431,17 +431,15 @@ export function isPromiseLike<T = any>(
  * @internal
  *
  * @param command - the command on which to apply collation
- * @param topology - topology of command
+ * @param target - target of command
  * @param options - options containing collation settings
  */
 export function decorateWithCollation(
   command: Document,
-  topology: Topology | undefined,
+  target: MongoClient | Db | Collection | Cursor,
   options: AnyOptions
 ): void {
-  if (!topology) throw new MongoClientClosedError();
-
-  const capabilities = topology.capabilities();
+  const capabilities = getTopology(target).capabilities();
   if (options.collation && typeof options.collation === 'object') {
     if (capabilities && capabilities.commandsTakeCollation) {
       command.collation = options.collation;
@@ -474,6 +472,23 @@ export function decorateWithReadConcern(
   if (Object.keys(readConcern).length > 0) {
     Object.assign(command, { readConcern: readConcern });
   }
+}
+
+/**
+ * A helper function to get the topology from a given provider. Throws
+ * if the topology cannot be found.
+ * @internal
+ */
+export function getTopology(provider: MongoClient | Db | Collection | Cursor): Topology {
+  if (`topology` in provider && provider.topology) {
+    return provider.topology;
+  } else if ('client' in provider.s && provider.s.client.topology) {
+    return provider.s.client.topology;
+  } else if ('db' in provider.s && provider.s.db.s.client.topology) {
+    return provider.s.db.s.client.topology;
+  }
+
+  throw new MongoError('MongoClient must be connected to perform this operation');
 }
 
 /** @internal */

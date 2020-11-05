@@ -125,19 +125,6 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
 }
 
 /**
- * An error thrown when an operation requiring a connected client was called on a closed client.
- * @public
- * @category Error
- */
-export class MongoClientClosedError extends MongoError {
-  constructor(message?: string) {
-    message = `MongoClient must be connected to perform this operation ${message}`;
-    super(message);
-    this.name = 'MongoClientClosedError';
-  }
-}
-
-/**
  * An error indicating an issue with the network, including TCP errors and timeouts.
  * @public
  * @category Error

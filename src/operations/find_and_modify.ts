@@ -14,7 +14,6 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
-import { getTopology } from '../sdam/topology';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
@@ -124,7 +123,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, getTopology(coll), options);
+      decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err);
     }

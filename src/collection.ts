@@ -6,10 +6,11 @@ import {
   checkCollectionName,
   deprecateOptions,
   MongoDBNamespace,
-  Callback
+  Callback,
+  getTopology
 } from './utils';
 import { ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { MongoError, MongoClientClosedError } from './error';
+import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
@@ -86,7 +87,6 @@ import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
-import { getTopology } from './sdam/topology';
 
 /** @public */
 export interface Collection {
@@ -646,10 +646,8 @@ export class Collection implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    const topology = getTopology(this);
-    if (!topology) throw new MongoClientClosedError('Collection.prototype.find');
     return new Cursor(
-      topology,
+      getTopology(this),
       new FindOperation(this, this.s.namespace, filter, options),
       options
     );
@@ -858,9 +856,11 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): CommandCursor {
-    const topology = getTopology(this);
-    if (!topology) throw new MongoClientClosedError('Collection.prototype.listIndexes');
-    const cursor = new CommandCursor(topology, new ListIndexesOperation(this, options), options);
+    const cursor = new CommandCursor(
+      getTopology(this),
+      new ListIndexesOperation(this, options),
+      options
+    );
 
     return cursor;
   }
@@ -1204,10 +1204,8 @@ export class Collection implements OperationParent {
 
     options = options || {};
 
-    const topology = getTopology(this);
-    if (!topology) throw new MongoClientClosedError('Collection.prototype.aggregate');
     return new AggregationCursor(
-      topology,
+      getTopology(this),
       new AggregateOperation(this, pipeline, options),
       options
     );

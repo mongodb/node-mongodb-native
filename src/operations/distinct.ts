@@ -4,7 +4,6 @@ import { decorateWithCollation, decorateWithReadConcern, Callback } from '../uti
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { getTopology } from '../sdam/topology';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
@@ -56,7 +55,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
 
     // Have we specified collation
     try {
-      decorateWithCollation(cmd, getTopology(coll), options);
+      decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err);
     }

@@ -4,7 +4,7 @@ import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor, CommandCursor } from './cursor';
 import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { MongoClientClosedError, MongoError } from './error';
+import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
@@ -15,7 +15,8 @@ import {
   filterOptions,
   mergeOptionsAndWriteConcern,
   deprecateOptions,
-  MongoDBNamespace
+  MongoDBNamespace,
+  getTopology
 } from './utils';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
@@ -53,7 +54,6 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
-import { getTopology, Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
 
@@ -148,11 +148,11 @@ export class Db implements OperationParent {
   /**
    * Creates a new Db instance
    *
-   * @param databaseName - The name of the database this instance represents.
    * @param client - The MongoClient for the database.
+   * @param databaseName - The name of the database this instance represents.
    * @param options - Optional settings for Db construction
    */
-  constructor(databaseName: string, client: MongoClient, options?: DbOptions) {
+  constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
     options = options || {};
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
@@ -191,11 +191,6 @@ export class Db implements OperationParent {
 
   get databaseName(): string {
     return this.s.namespace.db;
-  }
-
-  // Topology
-  get topology(): Topology | undefined {
-    return this.s.client.topology;
   }
 
   // Options
@@ -314,10 +309,8 @@ export class Db implements OperationParent {
 
     options = options || {};
 
-    const topology = getTopology(this);
-    if (!topology) throw new MongoClientClosedError('Db.prototype.aggregate');
     const cursor = new AggregationCursor(
-      topology,
+      getTopology(this),
       new AggregateOperation(this, pipeline, options),
       options
     );
@@ -381,8 +374,7 @@ export class Db implements OperationParent {
     }
 
     // Did the user destroy the topology
-    const topology = getTopology(this);
-    if (topology && topology.isDestroyed()) {
+    if (getTopology(this).isDestroyed()) {
       return callback(new MongoError('topology was destroyed'));
     }
 
@@ -437,10 +429,8 @@ export class Db implements OperationParent {
     filter = filter || {};
     options = options || {};
 
-    const topology = getTopology(this);
-    if (!topology) throw new MongoClientClosedError('Db.prototype.listCollections');
     return new CommandCursor(
-      topology,
+      getTopology(this),
       new ListCollectionsOperation(this, filter, options),
       options
     );
@@ -785,10 +775,7 @@ export class Db implements OperationParent {
 
   /** Unref all sockets */
   unref(): void {
-    const topology = getTopology(this);
-    if (topology) {
-      topology.unref();
-    }
+    getTopology(this).unref();
   }
 
   /**

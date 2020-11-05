@@ -1,12 +1,11 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { MongoClientClosedError, MongoError } from '../error';
-import type { Callback } from '../utils';
+import { MongoError } from '../error';
+import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import { getTopology } from '../sdam/topology';
 
 /** @public */
 export interface AddUserOptions extends CommandOperationOptions {
@@ -75,9 +74,7 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
       roles = ['dbOwner'];
     }
 
-    const topology = getTopology(db);
-    if (!topology) return callback(new MongoClientClosedError());
-    const digestPassword = topology.lastIsMaster().maxWireVersion >= 7;
+    const digestPassword = getTopology(db).lastIsMaster().maxWireVersion >= 7;
 
     let userPassword = password;
 

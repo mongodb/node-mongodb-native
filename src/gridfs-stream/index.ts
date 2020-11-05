@@ -6,7 +6,7 @@ import {
   GridFSBucketReadStreamOptionsWithRevision
 } from './download';
 import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
-import { executeLegacyOperation, Callback } from '../utils';
+import { executeLegacyOperation, Callback, getTopology } from '../utils';
 import { WriteConcernOptions, WriteConcern } from '../write_concern';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -16,7 +16,6 @@ import type { Cursor } from './../cursor/cursor';
 import type { FindOptions } from './../operations/find';
 import type { Sort } from '../sort';
 import type { Logger } from '../logger';
-import { getTopology } from '../sdam/topology';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;

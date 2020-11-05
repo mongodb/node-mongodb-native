@@ -1,6 +1,6 @@
 import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId, Document } from '../bson';
-import { MongoError, MongoWriteConcernError, AnyError, MongoClientClosedError } from '../error';
+import { MongoError, MongoWriteConcernError, AnyError } from '../error';
 import {
   applyWriteConcern,
   applyRetryableWrites,
@@ -8,7 +8,8 @@ import {
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion
+  maxWireVersion,
+  getTopology
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -16,7 +17,7 @@ import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
-import { getTopology, Topology } from '../sdam/topology';
+import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Hint } from '../operations/operation';
@@ -909,7 +910,6 @@ export abstract class BulkOperationBase {
     this.isOrdered = isOrdered;
 
     const topology = getTopology(collection);
-    if (!topology) throw new MongoClientClosedError();
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster
     // Get the namespace for the write operations

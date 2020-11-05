@@ -1,5 +1,11 @@
 import { MongoError } from '../error';
-import { applyRetryableWrites, applyWriteConcern, decorateWithCollation, Callback } from '../utils';
+import {
+  applyRetryableWrites,
+  applyWriteConcern,
+  decorateWithCollation,
+  Callback,
+  getTopology
+} from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -9,7 +15,6 @@ import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { DeleteOptions } from './delete';
-import { getTopology } from '../sdam/topology';
 
 /** @internal */
 export interface IndexInformationOptions {
@@ -46,8 +51,7 @@ export function indexInformation(
   const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
-  const topology = getTopology(db);
-  if (topology && topology.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+  if (getTopology(db).isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information
@@ -153,7 +157,7 @@ export function removeDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, getTopology(coll), options);
+    decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
     return callback ? callback(err, null) : undefined;
   }
@@ -245,7 +249,7 @@ export function updateDocuments(
 
   // Have we specified collation
   try {
-    decorateWithCollation(finalOptions, getTopology(coll), options);
+    decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
     return callback(err, null);
   }
