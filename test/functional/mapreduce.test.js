@@ -9,62 +9,6 @@ describe('MapReduce', function () {
     return setupDatabase(this.configuration, ['outputCollectionDb']);
   });
 
-  it.skip('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
-    metadata: {
-      requires: {
-        mongodb: '<=4.1.0',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_group2', function (err, collection) {
-          collection.group(
-            [],
-            {},
-            { count: 0 },
-            'function (obj, prev) { prev.count++; }',
-            true,
-            function (err, results) {
-              test.deepEqual([], results);
-
-              // Trigger some inserts
-              collection.insert(
-                [{ a: 2 }, { b: 5, a: 0 }, { a: 1 }, { c: 2, a: 0 }],
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  collection.group(
-                    [],
-                    {},
-                    { count: 0, running_average: 0 },
-                    function (doc, out) {
-                      out.count++;
-                      out.running_average += doc.a;
-                    },
-                    function (out) {
-                      out.average = out.running_average / out.count;
-                    },
-                    true,
-                    function (err, results) {
-                      test.equal(3, results[0].running_average);
-                      test.equal(0.75, results[0].average);
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            }
-          );
-        });
-      });
-    }
-  });
-
   /**
    * Mapreduce tests
    */
