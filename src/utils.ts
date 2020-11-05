@@ -1079,12 +1079,9 @@ function resolveWriteConcern(
   options: any
 ): WriteConcern | undefined {
   const session = options.session;
-  if (
-    session &&
-    session.inTransaction() &&
-    session.transaction.options.writeConcern !== 'undefined'
-  ) {
-    return session.transaction.options.writeConcern;
+  if (session && session.inTransaction()) {
+    // Users cannot pass a writeConcern to operations in a transaction
+    return;
   }
   return WriteConcern.fromOptions(options) || parent?.writeConcern;
 }
@@ -1094,12 +1091,9 @@ function resolveReadConcern(
   options: any
 ): ReadConcern | undefined {
   const session = options.session;
-  if (
-    session &&
-    session.inTransaction() &&
-    session.transaction.options.readConcern !== 'undefined'
-  ) {
-    return session.transaction.options.readConcern;
+  if (session && session.inTransaction()) {
+    // Users cannot pass a readConcern to operations in a transaction
+    return;
   }
   return ReadConcern.fromOptions(options) || parent?.readConcern;
 }
@@ -1108,15 +1102,7 @@ function resolveReadPreference(
   parent: OperationParent | undefined,
   options: any
 ): ReadPreference | undefined {
-  const session = options.session;
-  if (
-    session &&
-    session.inTransaction() &&
-    session.transaction.options.readPreference !== 'undefined'
-  ) {
-    return session.transaction.options.readPreference;
-  }
-  return ReadPreference.fromOptions(options) || parent?.readPreference;
+  return ReadPreference.fromOptions(options) ?? parent?.readPreference;
 }
 
 /** @internal Prioritizes options from transaction, then from options, then from parent */

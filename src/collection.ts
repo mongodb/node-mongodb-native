@@ -310,7 +310,7 @@ export class Collection implements OperationParent {
     callback?: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options ?? { ordered: true });
+    options = options || {};
 
     return executeOperation(
       this.s.topology,
