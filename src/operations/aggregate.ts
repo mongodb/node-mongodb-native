@@ -66,6 +66,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
     }
 
     if (this.explain && this.writeConcern) {
+      console.dir({ writeConcern: this.writeConcern });
       throw new MongoError('"explain" cannot be used on an aggregate call with writeConcern');
     }
 

@@ -4,6 +4,7 @@ import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
 import type { Document } from '../bson';
 import type { AnyError } from '../error';
+import { cloneDeep } from 'lodash';
 
 /**
  * The base export class for all monitoring events published from the connection pool
@@ -394,6 +395,10 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {
+  if (reply) {
+    reply = cloneDeep(reply);
+  }
+
   if (command instanceof KillCursor) {
     return {
       ok: 1,

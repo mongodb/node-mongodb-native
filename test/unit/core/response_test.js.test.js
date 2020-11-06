@@ -5,6 +5,8 @@ const { MongoError } = require('../../../src/error');
 const mock = require('mongodb-mock-server');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
+const { MongoDBNamespace } = require('../../../src/utils');
+const { FindCursor } = require('../../../src/cursor/find_cursor');
 
 const test = {};
 describe('Response', function () {
@@ -48,7 +50,7 @@ describe('Response', function () {
 
       client.on('error', done);
       client.once('connect', () => {
-        const cursor = client.cursor('test.test', { find: 'test' });
+        const cursor = new FindCursor(client, MongoDBNamespace.fromString('test.test'), {}, {});
 
         // Execute next
         cursor.next(function (err) {

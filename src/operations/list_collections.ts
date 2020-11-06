@@ -1,29 +1,15 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion, Callback } from '../utils';
+import { maxWireVersion, Callback, getTopology } from '../utils';
 import * as CONSTANTS from '../constants';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import type { DocumentTransforms } from '../cursor/cursor';
+import { AbstractCursor } from '../cursor/abstract_cursor';
+import type { ClientSession } from '../sessions';
+import { executeOperation, ExecutionResult } from './execute_operation';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
-
-function listCollectionsTransforms(databaseName: string): DocumentTransforms {
-  const matching = `${databaseName}.`;
-
-  return {
-    doc(doc) {
-      const index = doc.name.indexOf(matching);
-      // Remove database name if available
-      if (doc.name && index === 0) {
-        doc.name = doc.name.substr(index + matching.length);
-      }
-
-      return doc;
-    }
-  };
-}
 
 /** @public */
 export interface ListCollectionsOptions extends CommandOperationOptions {
@@ -40,7 +26,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   nameOnly: boolean;
   batchSize?: number;
 
-  constructor(db: Db, filter: Document, options: ListCollectionsOptions) {
+  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
     super(db, options);
 
     this.db = db;
@@ -78,14 +64,24 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
         filter = { name: /^((?!\$).)*$/ };
       }
 
-      const transforms = listCollectionsTransforms(databaseName);
+      const documentTransform = (doc: Document) => {
+        const matching = `${databaseName}.`;
+        const index = doc.name.indexOf(matching);
+        // Remove database name if available
+        if (doc.name && index === 0) {
+          doc.name = doc.name.substr(index + matching.length);
+        }
+
+        return doc;
+      };
+
       server.query(
         `${databaseName}.${CONSTANTS.SYSTEM_NAMESPACE_COLLECTION}`,
         { query: filter },
         { batchSize: this.batchSize || 1000 },
         (err, result) => {
           if (result && result.documents && Array.isArray(result.documents)) {
-            result.documents = result.documents.map(transforms.doc);
+            result.documents = result.documents.map(documentTransform);
           }
 
           callback(err, result);
@@ -103,6 +99,34 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
     };
 
     return super.executeCommand(server, command, callback);
+  }
+}
+
+export class ListCollectionsCursor extends AbstractCursor {
+  parent: Db;
+  filter: Document;
+  options?: ListCollectionsOptions;
+
+  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
+    super(getTopology(db), db.s.namespace, options);
+    this.parent = db;
+    this.filter = filter;
+    this.options = options;
+  }
+
+  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+    const operation = new ListCollectionsOperation(this.parent, this.filter, {
+      ...this.cursorOptions,
+      ...this.options,
+      session
+    });
+
+    executeOperation(getTopology(this.parent), operation, (err, response) => {
+      if (err || response == null) return callback(err);
+
+      // TODO: NODE-2882
+      callback(undefined, { server: operation.server, session, response });
+    });
   }
 }
 

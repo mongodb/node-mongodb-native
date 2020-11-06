@@ -26,9 +26,11 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.164",
     "bl": "^2.2.1",
     "bson": "^4.0.4",
-    "denque": "^1.4.1"
+    "denque": "^1.4.1",
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",

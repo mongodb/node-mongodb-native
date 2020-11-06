@@ -11,7 +11,7 @@ export interface GetMoreOptions extends CommandOptions {
   batchSize?: number;
   maxTimeMS?: number;
   maxAwaitTimeMS?: number;
-  comment?: Document;
+  comment?: Document | string;
 }
 
 export function getMore(

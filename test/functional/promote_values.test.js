@@ -228,7 +228,7 @@ describe('Promote Values', function () {
 
         var db = client.db(configuration.db);
 
-        db.collection('haystack').insert(docs, function (errInsert) {
+        db.collection('haystack').insertMany(docs, function (errInsert) {
           if (errInsert) throw errInsert;
           // change limit from 102 to 101 and this test passes.
           // seems to indicate that the promoteValues flag is used for the

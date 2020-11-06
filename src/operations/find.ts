@@ -65,7 +65,7 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   hint?: Hint;
 
   constructor(
-    collection: Collection,
+    collection: Collection | undefined,
     ns: MongoDBNamespace,
     filter: Document = {},
     options: FindOptions = {}
@@ -137,11 +137,28 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     }
 
     if (typeof options.limit === 'number') {
-      findCommand.limit = options.limit;
+      if (options.limit < 0 && maxWireVersion(server) >= 4) {
+        findCommand.limit = Math.abs(options.limit);
+        findCommand.singleBatch = true;
+      } else {
+        findCommand.limit = options.limit;
+      }
     }
 
     if (typeof options.batchSize === 'number') {
-      findCommand.batchSize = options.batchSize;
+      if (options.batchSize < 0) {
+        if (
+          options.limit &&
+          options.limit !== 0 &&
+          Math.abs(options.batchSize) < Math.abs(options.limit)
+        ) {
+          findCommand.limit = Math.abs(options.batchSize);
+        }
+
+        findCommand.singleBatch = true;
+      } else {
+        findCommand.batchSize = Math.abs(options.batchSize);
+      }
     }
 
     if (typeof options.singleBatch === 'boolean') {
