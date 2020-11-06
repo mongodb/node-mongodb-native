@@ -284,7 +284,7 @@ export class Db implements OperationParent {
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
       getTopology(this),
-      new RunCommandOperation(this, command, options || {}),
+      new RunCommandOperation(this, command, options ?? {}),
       callback
     );
   }
@@ -567,7 +567,7 @@ export class Db implements OperationParent {
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
       getTopology(this),
-      new RunAdminCommandOperation(this, command, options || {}),
+      new RunAdminCommandOperation(this, command, options ?? {}),
       callback
     );
   }

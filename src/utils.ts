@@ -1091,10 +1091,10 @@ export function resolveOptions<T extends CommandOperationOptions>(
   parent: OperationParent | undefined,
   options?: T
 ): T {
-  const result: T = Object.assign({}, options);
-  const session = options?.session;
+  const result: T = Object.assign({}, options, resolveBSONOptions(options, parent));
 
   // Users cannot pass a readConcern/writeConcern to operations in a transaction
+  const session = options?.session;
   if (!session?.inTransaction()) {
     const readConcern = ReadConcern.fromOptions(options) ?? parent?.readConcern;
     if (readConcern) {
@@ -1112,7 +1112,5 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
-  const bsonOptions = resolveBSONOptions(result, parent);
-
-  return { ...result, ...bsonOptions };
+  return result;
 }

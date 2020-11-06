@@ -73,10 +73,9 @@ export abstract class CommandOperation<
         : new MongoDBNamespace('admin', '$cmd');
     }
 
-    const readPref = ReadPreference.fromOptions(options) ?? ReadPreference.primary;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
-      : readPref;
+      : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
     this.bsonOptions = resolveBSONOptions(options);
