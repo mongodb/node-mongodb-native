@@ -2637,7 +2637,8 @@ describe('Find', function () {
         expect(err).to.not.exist;
 
         let selectedServer;
-        const selectServerStub = sinon.stub(client.topology, 'selectServer').callsFake(function () {
+        const topology = client.topology;
+        const selectServerStub = sinon.stub(topology, 'selectServer').callsFake(function () {
           const args = Array.prototype.slice.call(arguments);
           const originalCallback = args.pop();
           args.push((err, server) => {
@@ -2645,7 +2646,7 @@ describe('Find', function () {
             originalCallback(err, server);
           });
 
-          return client.topology.selectServer.wrappedMethod.apply(this, args);
+          return topology.selectServer.wrappedMethod.apply(this, args);
         });
 
         const collection = client.db().collection('test_read_preference');
