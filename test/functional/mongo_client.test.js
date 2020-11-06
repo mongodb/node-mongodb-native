@@ -6,6 +6,7 @@ var setupDatabase = require('./shared').setupDatabase;
 const { ReadPreference } = require('../../src');
 const { Db } = require('../../src/db');
 const expect = require('chai').expect;
+const { getTopology } = require('../../src/utils');
 
 describe('MongoClient', function () {
   before(function () {
@@ -219,9 +220,9 @@ describe('MongoClient', function () {
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        expect(db).nested.property('s.topology.s.options.connectTimeoutMS').to.equal(0);
-        expect(db).nested.property('s.topology.s.options.socketTimeoutMS').to.equal(0);
+        const topology = getTopology(client.db(configuration.db));
+        expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
+        expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
 
         client.close(done);
       });

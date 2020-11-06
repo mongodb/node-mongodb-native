@@ -184,7 +184,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
         const doc = result.result;
         // Return a collection from another db
         const Db = loadDb();
-        collection = new Db(doc.db, coll.s.db.s.topology, coll.s.db.s.options).collection(
+        collection = new Db(coll.s.db.s.client, doc.db, coll.s.db.s.options).collection(
           doc.collection
         );
       } else {

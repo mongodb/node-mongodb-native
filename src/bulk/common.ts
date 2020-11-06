@@ -8,7 +8,8 @@ import {
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion
+  maxWireVersion,
+  getTopology
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -904,7 +905,7 @@ export abstract class BulkOperationBase {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
-    const topology = collection.s.topology;
+    const topology = getTopology(collection);
     options = options == null ? {} : options;
     // TODO Bring from driver information in isMaster
     // Get the namespace for the write operations

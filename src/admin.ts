@@ -11,7 +11,7 @@ import {
 } from './operations/list_databases';
 import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
-import type { Callback } from './utils';
+import { Callback, getTopology } from './utils';
 import type { Document } from './bson';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
@@ -83,7 +83,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      getTopology(this.s.db),
       new RunCommandOperation(this.s.db, command, options),
       callback
     );
@@ -207,7 +207,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      getTopology(this.s.db),
       new AddUserOperation(this.s.db, username, password, options),
       callback
     );
@@ -233,7 +233,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      this.s.db.s.topology,
+      getTopology(this.s.db),
       new RemoveUserOperation(this.s.db, username, options),
       callback
     );
@@ -263,7 +263,7 @@ export class Admin {
     options = options || {};
 
     return executeOperation(
-      this.s.db.s.topology,
+      getTopology(this.s.db),
       new ValidateCollectionOperation(this, collectionName, options),
       callback
     );
@@ -287,7 +287,7 @@ export class Admin {
     options = options || {};
 
     return executeOperation(
-      this.s.db.s.topology,
+      getTopology(this.s.db),
       new ListDatabasesOperation(this.s.db, options),
       callback
     );
