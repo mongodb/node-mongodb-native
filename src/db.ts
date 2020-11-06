@@ -2,7 +2,7 @@ import { deprecate } from 'util';
 import {
   emitDeprecatedOptionWarning,
   Callback,
-  resolveInheritedOptions,
+  resolveOptions,
   filterOptions,
   deprecateOptions,
   MongoDBNamespace,
@@ -255,11 +255,10 @@ export class Db implements OperationParent {
     callback?: Callback<Collection>
   ): Promise<Collection> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new CreateCollectionOperation(this, name, options),
+      new CreateCollectionOperation(this, name, resolveOptions(this, options)),
       callback
     );
   }
@@ -283,11 +282,9 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    options = options || {};
-
     return executeOperation(
       getTopology(this),
-      new RunCommandOperation(this, command, options),
+      new RunCommandOperation(this, command, options || {}),
       callback
     );
   }
@@ -309,7 +306,7 @@ export class Db implements OperationParent {
       throw new TypeError('`options` parameter must not be function');
     }
 
-    options = resolveInheritedOptions(this, options);
+    options = resolveOptions(this, options);
     const cursor = new AggregationCursor(
       getTopology(this),
       new AggregateOperation(this, pipeline, options),
@@ -342,7 +339,7 @@ export class Db implements OperationParent {
     callback?: Callback<Collection>
   ): Collection | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    const finalOptions = resolveInheritedOptions(this, options);
+    const finalOptions = resolveOptions(this, options);
 
     // Execute
     if (!finalOptions.strict) {
@@ -404,8 +401,11 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
-    return executeOperation(getTopology(this), new DbStatsOperation(this, options), callback);
+    return executeOperation(
+      getTopology(this),
+      new DbStatsOperation(this, resolveOptions(this, options)),
+      callback
+    );
   }
 
   /**
@@ -416,7 +416,7 @@ export class Db implements OperationParent {
    */
   listCollections(filter?: Document, options?: ListCollectionsOptions): CommandCursor {
     filter = filter || {};
-    options = resolveInheritedOptions(this, options);
+    options = resolveOptions(this, options);
 
     return new CommandCursor(
       getTopology(this),
@@ -459,7 +459,7 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
+    options = { ...options, readPreference: ReadPreference.PRIMARY };
 
     // Add return new collection
     options.new_collection = true;
@@ -488,11 +488,10 @@ export class Db implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new DropCollectionOperation(this, name, options),
+      new DropCollectionOperation(this, name, resolveOptions(this, options)),
       callback
     );
   }
@@ -512,9 +511,12 @@ export class Db implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
-    return executeOperation(getTopology(this), new DropDatabaseOperation(this, options), callback);
+    return executeOperation(
+      getTopology(this),
+      new DropDatabaseOperation(this, resolveOptions(this, options)),
+      callback
+    );
   }
 
   /**
@@ -532,9 +534,12 @@ export class Db implements OperationParent {
     callback?: Callback<Collection[]>
   ): Promise<Collection[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
-    return executeOperation(getTopology(this), new CollectionsOperation(this, options), callback);
+    return executeOperation(
+      getTopology(this),
+      new CollectionsOperation(this, resolveOptions(this, options)),
+      callback
+    );
   }
 
   /**
@@ -560,11 +565,9 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    options = options || {};
-
     return executeOperation(
       getTopology(this),
-      new RunAdminCommandOperation(this, command, options),
+      new RunAdminCommandOperation(this, command, options || {}),
       callback
     );
   }
@@ -597,11 +600,10 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new CreateIndexOperation(this, name, indexSpec, options),
+      new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options)),
       callback
     );
   }
@@ -645,10 +647,9 @@ export class Db implements OperationParent {
       if (typeof options === 'function') (callback = options), (options = {});
     }
 
-    options = resolveInheritedOptions(this, options);
     return executeOperation(
       getTopology(this),
-      new AddUserOperation(this, username, password, options),
+      new AddUserOperation(this, username, password, resolveOptions(this, options)),
       callback
     );
   }
@@ -670,11 +671,10 @@ export class Db implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new RemoveUserOperation(this, username, options),
+      new RemoveUserOperation(this, username, resolveOptions(this, options)),
       callback
     );
   }
@@ -703,11 +703,10 @@ export class Db implements OperationParent {
     callback?: Callback<ProfilingLevel>
   ): Promise<ProfilingLevel> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new SetProfilingLevelOperation(this, level, options),
+      new SetProfilingLevelOperation(this, level, resolveOptions(this, options)),
       callback
     );
   }
@@ -727,11 +726,10 @@ export class Db implements OperationParent {
     callback?: Callback<string>
   ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new ProfilingLevelOperation(this, options),
+      new ProfilingLevelOperation(this, resolveOptions(this, options)),
       callback
     );
   }
@@ -757,11 +755,10 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new IndexInformationOperation(this, name, options),
+      new IndexInformationOperation(this, name, resolveOptions(this, options)),
       callback
     );
   }
@@ -828,11 +825,10 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new EvalOperation(this, code, parameters, options),
+      new EvalOperation(this, code, parameters, resolveOptions(this, options)),
       callback
     );
   }
@@ -866,11 +862,10 @@ export class Db implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveInheritedOptions(this, options);
 
     return executeOperation(
       getTopology(this),
-      new EnsureIndexOperation(this, name, fieldOrSpec, options),
+      new EnsureIndexOperation(this, name, fieldOrSpec, resolveOptions(this, options)),
       callback
     );
   }

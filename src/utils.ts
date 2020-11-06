@@ -1087,7 +1087,7 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
  * then values from parent.
  * @internal
  */
-export function resolveInheritedOptions<T extends CommandOperationOptions>(
+export function resolveOptions<T extends CommandOperationOptions>(
   parent: OperationParent | undefined,
   options?: T
 ): T {
