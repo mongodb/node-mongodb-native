@@ -588,7 +588,6 @@ function processNewChange(
 }
 
 function processError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
-  const topology = getTopology(changeStream.parent);
   const cursor = changeStream.cursor;
 
   // If the change stream has been closed explicitly, do not process error.
@@ -618,6 +617,7 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
     // close internal cursor, ignore errors
     cursor.close();
 
+    const topology = getTopology(changeStream.parent);
     waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
       // if the topology can't reconnect, close the stream
       if (err) return unresumableError(err);
