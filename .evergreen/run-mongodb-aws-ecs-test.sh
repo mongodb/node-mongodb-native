@@ -16,4 +16,5 @@ export NVM_DIR="${PROJECT_DIRECTORY}/node-artifacts/nvm"
 set -x
 
 # run the tests
+npm install aws4 
 MONGODB_URI=$MONGODB_URI MONGODB_UNIFIED_TOPOLOGY=1 npx mocha test/functional/mongodb_aws.test.js
