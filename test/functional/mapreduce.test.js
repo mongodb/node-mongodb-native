@@ -330,68 +330,6 @@ describe('MapReduce', function () {
     }
   });
 
-  it.skip('shouldCorrectlyReturnNestedKeys', {
-    metadata: {
-      requires: {
-        mongodb: '<=4.1.0', // Because of use of `group` command
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var start = new Date().setTime(new Date().getTime() - 10000);
-        var end = new Date().setTime(new Date().getTime() + 10000);
-
-        var keys = {
-          'data.lastname': true
-        };
-
-        var condition = {
-          'data.date': {
-            $gte: start,
-            $lte: end
-          }
-        };
-
-        condition = {};
-
-        var initial = {
-          count: 0
-        };
-
-        var reduce = function (doc, output) {
-          output.count++;
-        };
-
-        // Execute the group
-        db.createCollection('data', function (err, collection) {
-          collection.insert(
-            {
-              data: {
-                lastname: 'smith',
-                date: new Date()
-              }
-            },
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
-              // Execute the group
-              collection.group(keys, condition, initial, reduce, true, function (err, r) {
-                test.equal(1, r[0].count);
-                test.equal('smith', r[0]['data.lastname']);
-                client.close(done);
-              });
-            }
-          );
-        });
-      });
-    }
-  });
-
   /**
    * Mapreduce tests
    */
