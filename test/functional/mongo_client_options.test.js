@@ -1,7 +1,7 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -94,6 +94,20 @@ describe('MongoClient Options', function() {
         }
       );
     }
+  });
+
+  it('should default socketTimeout to infinity', function(done) {
+    const client = this.configuration.newClient();
+    client.connect(() => {
+      expect(client.s.options.socketTimeoutMS).to.deep.equal(0);
+      const connections = client.topology.s.coreTopology
+        ? client.topology.s.coreTopology.connections()
+        : [];
+      for (const connection of connections) {
+        expect(connection.socketTimeout).to.deep.equal(0);
+      }
+      client.close(done);
+    });
   });
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.6.2",
+  "version": "3.6.3",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "files": [
@@ -22,6 +22,26 @@
     "mongodb-extjson": "^2.1.2",
     "snappy": "^6.3.4",
     "bson-ext": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "kerberos": {
+      "optional": true
+    },
+    "mongodb-client-encryption": {
+      "optional": true
+    },
+    "mongodb-extjson": {
+      "optional": true
+    },
+    "snappy": {
+      "optional": true
+    },
+    "bson-ext": {
+      "optional": true
+    },
+    "aws4": {
+      "optional": true
+    }
   },
   "dependencies": {
     "bl": "^2.2.1",

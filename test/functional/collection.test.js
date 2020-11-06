@@ -799,7 +799,7 @@ describe('Collection', function() {
 
           db.listCollections().toArray((err, documents) => {
             expect(err).to.not.exist;
-            expect(documents.length > 1).to.be.true;
+            expect(documents.length >= 1).to.be.true;
             let found = false;
 
             documents.forEach(document => {

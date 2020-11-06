@@ -1093,7 +1093,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { mongodb: '<=4.4', generators: true, topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2931,6 +2931,7 @@ describe('Operation (Generators)', function() {
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
+        yield db.createCollection('example');
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   co = require('co');
         // LINE   test = require('assert');
