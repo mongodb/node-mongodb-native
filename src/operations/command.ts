@@ -73,14 +73,14 @@ export abstract class CommandOperation<
         : new MongoDBNamespace('admin', '$cmd');
     }
 
-    const readPref = ReadPreference.fromOptions(options);
-    this.readPreference =
-      this.hasAspect(Aspect.WRITE_OPERATION) || readPref === undefined
-        ? ReadPreference.primary
-        : readPref;
+    const readPref = ReadPreference.fromOptions(options) ?? ReadPreference.primary;
+    this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
+      ? ReadPreference.primary
+      : readPref;
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
     this.bsonOptions = resolveBSONOptions(options);
+
     this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
