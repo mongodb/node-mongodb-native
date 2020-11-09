@@ -1,7 +1,7 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation } from './command';
-import { applyRetryableWrites, applyWriteConcern, Callback, MongoDBNamespace } from '../utils';
+import { applyRetryableWrites, Callback, MongoDBNamespace } from '../utils';
 import { prepareDocs } from './common_functions';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -98,10 +98,9 @@ function insertDocuments(
   // Ensure we are operating on an array op docs
   docs = Array.isArray(docs) ? docs : [docs];
 
-  // Final options for retryable writes and write concern
+  // Final options for retryable writes
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
   // If keep going set unordered
   if (finalOptions.keepGoing === true) finalOptions.ordered = false;

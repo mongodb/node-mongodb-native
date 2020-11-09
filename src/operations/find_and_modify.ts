@@ -3,7 +3,6 @@ import {
   maxWireVersion,
   applyRetryableWrites,
   decorateWithCollation,
-  applyWriteConcern,
   hasAtomicOperators,
   Callback
 } from '../utils';
@@ -107,9 +106,8 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     // No check on the documents
     options.checkKeys = false;
 
-    // Final options for retryable writes and write concern
+    // Final options for retryable writes
     options = applyRetryableWrites(options, coll.s.db);
-    options = applyWriteConcern(options, { db: coll.s.db, collection: coll }, options);
 
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {

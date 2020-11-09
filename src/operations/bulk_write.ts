@@ -1,4 +1,4 @@
-import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
+import { applyRetryableWrites, Callback } from '../utils';
 import { OperationBase } from './operation';
 import { resolveBSONOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
@@ -26,8 +26,8 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     this.collection = collection;
     this.operations = operations;
 
-    // Assign BSON serialize options to OperationBase, preferring options over collection options
-    this.bsonOptions = resolveBSONOptions(options, collection);
+    // Pull the BSON serialize options from the already-resolved options
+    this.bsonOptions = resolveBSONOptions(options);
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
@@ -50,11 +50,8 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
       return callback(err);
     }
 
-    // Final options for retryable writes and write concern
     let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-    finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
     const writeCon = WriteConcern.fromOptions(finalOptions);
 
     // Execute the bulk
