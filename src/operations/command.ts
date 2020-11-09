@@ -73,12 +73,13 @@ export abstract class CommandOperation<
         : new MongoDBNamespace('admin', '$cmd');
     }
 
-    const propertyProvider = this.hasAspect(Aspect.NO_INHERIT_OPTIONS) ? undefined : parent;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
-      : ReadPreference.resolve(propertyProvider, this.options);
-    this.readConcern = resolveReadConcern(propertyProvider, this.options);
-    this.writeConcern = resolveWriteConcern(propertyProvider, this.options);
+      : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
+    this.readConcern = ReadConcern.fromOptions(options);
+    this.writeConcern = WriteConcern.fromOptions(options);
+    this.bsonOptions = resolveBSONOptions(options);
+
     this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
@@ -91,9 +92,6 @@ export abstract class CommandOperation<
     if (parent && parent.logger) {
       this.logger = parent.logger;
     }
-
-    // Assign BSON serialize options to OperationBase, preferring options over parent options.
-    this.bsonOptions = resolveBSONOptions(options, parent);
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -148,12 +146,4 @@ export abstract class CommandOperation<
       callback
     );
   }
-}
-
-function resolveWriteConcern(parent: OperationParent | undefined, options: any) {
-  return WriteConcern.fromOptions(options) || parent?.writeConcern;
-}
-
-function resolveReadConcern(parent: OperationParent | undefined, options: any) {
-  return ReadConcern.fromOptions(options) || parent?.readConcern;
 }

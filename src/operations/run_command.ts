@@ -1,5 +1,4 @@
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
-import { defineAspects, Aspect } from './operation';
 import { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
@@ -34,6 +33,3 @@ export class RunAdminCommandOperation<
     this.ns = new MongoDBNamespace('admin');
   }
 }
-
-defineAspects(RunCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);
-defineAspects(RunAdminCommandOperation, [Aspect.NO_INHERIT_OPTIONS]);

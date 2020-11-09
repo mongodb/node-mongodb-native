@@ -1,5 +1,4 @@
 import { Aspect, defineAspects, Hint } from './operation';
-import { ReadPreference } from '../read_preference';
 import { maxWireVersion, MongoDBNamespace, Callback, normalizeHintField } from '../utils';
 import { MongoError } from '../error';
 import type { Document } from '../bson';
@@ -64,7 +63,6 @@ const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 export class FindOperation extends CommandOperation<FindOptions, Document> {
   cmd: Document;
   filter: Document;
-  readPreference: ReadPreference;
 
   hint?: Hint;
 
@@ -76,7 +74,6 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   ) {
     super(collection, options);
     this.ns = ns;
-    this.readPreference = ReadPreference.resolve(collection, this.options);
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
       throw new MongoError('Query filter must be a plain object or ObjectId');

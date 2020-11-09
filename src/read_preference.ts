@@ -1,5 +1,4 @@
 import type { TagSet } from './sdam/server_description';
-import type { OperationParent } from './operations/command';
 import type { Document } from './bson';
 import type { ClientSession } from './sessions';
 
@@ -142,7 +141,8 @@ export class ReadPreference {
    */
   static fromOptions(options?: ReadPreferenceFromOptions): ReadPreference | undefined {
     if (!options) return;
-    const readPreference = options.readPreference;
+    const readPreference =
+      options.readPreference ?? options.session?.transaction.options.readPreference;
     const readPreferenceTags = options.readPreferenceTags;
 
     if (readPreference == null) {
@@ -162,36 +162,6 @@ export class ReadPreference {
     }
 
     return readPreference as ReadPreference;
-  }
-
-  /**
-   * Resolves a read preference based on well-defined inheritance rules. This method will not only
-   * determine the read preference (if there is one), but will also ensure the returned value is a
-   * properly constructed instance of `ReadPreference`.
-   *
-   * @param parent - The parent of the operation on which to determine the read preference, used for determining the inherited read preference.
-   * @param options - The options passed into the method, potentially containing a read preference
-   */
-  static resolve(parent?: OperationParent, options?: ReadPreferenceFromOptions): ReadPreference {
-    options = options || {};
-    const session = options.session;
-
-    const inheritedReadPreference = parent?.readPreference;
-
-    let readPreference: ReadPreference = ReadPreference.primary;
-    if (options.readPreference) {
-      const readPrefFromOptions = ReadPreference.fromOptions(options);
-      readPreference = readPrefFromOptions ? readPrefFromOptions : readPreference;
-    } else if (session && session.inTransaction() && session.transaction.options.readPreference) {
-      // The transaction’s read preference MUST override all other user configurable read preferences.
-      readPreference = session.transaction.options.readPreference;
-    } else if (inheritedReadPreference != null) {
-      readPreference = inheritedReadPreference;
-    }
-
-    return typeof readPreference === 'string'
-      ? new ReadPreference(readPreference as ReadPreferenceMode)
-      : readPreference;
   }
 
   /**

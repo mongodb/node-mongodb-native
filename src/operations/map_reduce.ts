@@ -17,12 +17,20 @@ import type { ObjectId } from '../bson';
 
 const exclusionList = [
   'readPreference',
+  'readConcern',
   'session',
   'bypassDocumentValidation',
   'w',
   'wtimeout',
   'j',
   'writeConcern',
+  'raw',
+  'fieldsAsRaw',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'serializeFunctions',
+  'ignoreUndefined',
   'scope' // this option is reformatted thus exclude the original
 ];
 
@@ -121,13 +129,9 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     options = Object.assign({}, options);
 
-    // Ensure we have the right read preference inheritance
-    options.readPreference = ReadPreference.resolve(coll, options);
-
     // If we have a read preference and inline is not set as output fail hard
     if (
-      options.readPreference &&
-      options.readPreference.mode === ReadPreferenceMode.primary &&
+      this.readPreference.mode === ReadPreferenceMode.primary &&
       options.out &&
       (options.out as any).inline !== 1 &&
       options.out !== 'inline'
