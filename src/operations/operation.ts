@@ -7,8 +7,7 @@ import type { Server } from '../sdam/server';
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
-  RETRYABLE: Symbol('RETRYABLE'),
-  NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS')
+  RETRYABLE: Symbol('RETRYABLE')
 } as const;
 
 /** @public */

@@ -16,13 +16,19 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'j',
   'fsync',
   'autoIndexId',
-  'serializeFunctions',
   'pkFactory',
   'raw',
   'readPreference',
   'session',
   'readConcern',
-  'writeConcern'
+  'writeConcern',
+  'raw',
+  'fieldsAsRaw',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'serializeFunctions',
+  'ignoreUndefined'
 ]);
 
 /** @public */
