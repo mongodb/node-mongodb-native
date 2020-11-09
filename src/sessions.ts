@@ -717,14 +717,7 @@ class ServerSessionPool {
 // TODO: this should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
 function commandSupportsReadConcern(command: Document, options?: Document): boolean {
-  if (
-    command.aggregate ||
-    command.count ||
-    command.distinct ||
-    command.find ||
-    command.geoNear ||
-    command.group
-  ) {
+  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
     return true;
   }
 
