@@ -4,6 +4,7 @@ import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
+import { ReadPreference } from '../../read_preference';
 
 /** @public */
 export interface CollationOptions {
@@ -62,6 +63,12 @@ export function writeCommand(
 
   if (options.bypassDocumentValidation === true) {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+
+  // A read preference may be present in the options, inherited from a transaction or parent.
+  // For write commands, we need to ensure it is ReadPreference.primary, so we override it here.
+  if (options.readPreference) {
+    options.readPreference = ReadPreference.primary;
   }
 
   const commandOptions = Object.assign(
