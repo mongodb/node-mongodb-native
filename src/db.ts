@@ -15,7 +15,8 @@ import {
   filterOptions,
   mergeOptionsAndWriteConcern,
   deprecateOptions,
-  MongoDBNamespace
+  MongoDBNamespace,
+  getTopology
 } from './utils';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
@@ -52,8 +53,7 @@ import {
 import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
-import type { PkFactory } from './mongo_client';
-import type { Topology } from './sdam/topology';
+import type { MongoClient, PkFactory } from './mongo_client';
 import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
 
@@ -88,7 +88,7 @@ const legalOptionNames = [
 
 /** @internal */
 export interface DbPrivate {
-  topology: Topology;
+  client: MongoClient;
   options?: DbOptions;
   logger: Logger;
   readPreference?: ReadPreference;
@@ -148,11 +148,11 @@ export class Db implements OperationParent {
   /**
    * Creates a new Db instance
    *
+   * @param client - The MongoClient for the database.
    * @param databaseName - The name of the database this instance represents.
-   * @param topology - The server topology for the database.
    * @param options - Optional settings for Db construction
    */
-  constructor(databaseName: string, topology: Topology, options?: DbOptions) {
+  constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
     options = options || {};
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
@@ -164,16 +164,16 @@ export class Db implements OperationParent {
 
     // Internal state of the db object
     this.s = {
-      // Topology
-      topology,
+      // Client
+      client,
       // Options
       options,
       // Logger instance
       logger: new Logger('Db', options),
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
-      // Merge bson options TODO: include client bson options, after NODE-2850
-      bsonOptions: resolveBSONOptions(options),
+      // Merge bson options
+      bsonOptions: resolveBSONOptions(options, client),
       // Set up the primary key factory or fallback to ObjectId
       pkFactory: options?.pkFactory ?? {
         createPk() {
@@ -193,11 +193,6 @@ export class Db implements OperationParent {
     return this.s.namespace.db;
   }
 
-  // Topology
-  get topology(): Topology {
-    return this.s.topology;
-  }
-
   // Options
   get options(): DbOptions | undefined {
     return this.s.options;
@@ -212,10 +207,13 @@ export class Db implements OperationParent {
     return this.s.readConcern;
   }
 
+  /**
+   * The current readPreference of the Db. If not explicitly defined for
+   * this Db, will be inherited from the parent MongoClient
+   */
   get readPreference(): ReadPreference {
     if (this.s.readPreference == null) {
-      // TODO: check client
-      return ReadPreference.primary;
+      return this.s.client.readPreference;
     }
 
     return this.s.readPreference;
@@ -260,7 +258,7 @@ export class Db implements OperationParent {
     options.readConcern = ReadConcern.fromOptions(options) ?? this.readConcern;
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new CreateCollectionOperation(this, name, options),
       callback
     );
@@ -286,7 +284,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new RunCommandOperation(this, command, options),
       callback
     );
@@ -310,8 +308,9 @@ export class Db implements OperationParent {
     }
 
     options = options || {};
+
     const cursor = new AggregationCursor(
-      this.s.topology,
+      getTopology(this),
       new AggregateOperation(this, pipeline, options),
       options
     );
@@ -375,7 +374,7 @@ export class Db implements OperationParent {
     }
 
     // Did the user destroy the topology
-    if (this.s.topology && this.s.topology.isDestroyed()) {
+    if (getTopology(this).isDestroyed()) {
       return callback(new MongoError('topology was destroyed'));
     }
 
@@ -417,7 +416,7 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.s.topology, new DbStatsOperation(this, options), callback);
+    return executeOperation(getTopology(this), new DbStatsOperation(this, options), callback);
   }
 
   /**
@@ -431,7 +430,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return new CommandCursor(
-      this.s.topology,
+      getTopology(this),
       new ListCollectionsOperation(this, filter, options),
       options
     );
@@ -475,7 +474,7 @@ export class Db implements OperationParent {
     options.new_collection = true;
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new RenameOperation(this.collection(fromCollection), toCollection, options),
       callback
     );
@@ -501,7 +500,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new DropCollectionOperation(this, name, options),
       callback
     );
@@ -524,7 +523,7 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.s.topology, new DropDatabaseOperation(this, options), callback);
+    return executeOperation(getTopology(this), new DropDatabaseOperation(this, options), callback);
   }
 
   /**
@@ -544,7 +543,7 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.s.topology, new CollectionsOperation(this, options), callback);
+    return executeOperation(getTopology(this), new CollectionsOperation(this, options), callback);
   }
 
   /**
@@ -571,7 +570,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new RunAdminCommandOperation(this, command, options),
       callback
     );
@@ -608,7 +607,7 @@ export class Db implements OperationParent {
     options = options ? Object.assign({}, options) : {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new CreateIndexOperation(this, name, indexSpec, options),
       callback
     );
@@ -655,7 +654,7 @@ export class Db implements OperationParent {
 
     options = options || {};
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new AddUserOperation(this, username, password, options),
       callback
     );
@@ -681,7 +680,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new RemoveUserOperation(this, username, options),
       callback
     );
@@ -714,7 +713,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new SetProfilingLevelOperation(this, level, options),
       callback
     );
@@ -737,7 +736,11 @@ export class Db implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    return executeOperation(this.s.topology, new ProfilingLevelOperation(this, options), callback);
+    return executeOperation(
+      getTopology(this),
+      new ProfilingLevelOperation(this, options),
+      callback
+    );
   }
 
   /**
@@ -764,7 +767,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new IndexInformationOperation(this, name, options),
       callback
     );
@@ -772,7 +775,7 @@ export class Db implements OperationParent {
 
   /** Unref all sockets */
   unref(): void {
-    this.s.topology.unref();
+    getTopology(this).unref();
   }
 
   /**
@@ -835,7 +838,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new EvalOperation(this, code, parameters, options),
       callback
     );
@@ -873,7 +876,7 @@ export class Db implements OperationParent {
     options = options || {};
 
     return executeOperation(
-      this.s.topology,
+      getTopology(this),
       new EnsureIndexOperation(this, name, fieldOrSpec, options),
       callback
     );

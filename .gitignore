@@ -31,6 +31,9 @@ manual_tests/
 docs/build
 docs/Makefile
 
+# xunit test output for CI
+xunit.xml
+
 # Directory for dbs
 db
 

@@ -3,7 +3,6 @@ import { EventEmitter } from 'events';
 import { MongoError, AnyError, isResumableError } from './error';
 import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import { loadCollection, loadDb, loadMongoClient } from './dynamic_loaders';
 import {
   relayEvents,
   maxWireVersion,
@@ -11,13 +10,18 @@ import {
   now,
   maybePromise,
   MongoDBNamespace,
-  Callback
+  Callback,
+  getTopology
 } from './utils';
 import type { ReadPreference } from './read_preference';
 import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
 import type { OperationParent } from './operations/command';
 import type { CollationOptions } from './cmap/wire_protocol/write_command';
+import { MongoClient } from './mongo_client';
+import { Db } from './db';
+import { Collection } from './collection';
+
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 
@@ -172,10 +176,9 @@ export class ChangeStreamStream extends CursorStream {
 export class ChangeStream extends EventEmitter {
   pipeline: Document[];
   options: ChangeStreamOptions;
-  parent: OperationParent;
+  parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
-  topology: Topology;
   cursor?: ChangeStreamCursor;
   closed: boolean;
   streamOptions?: CursorStreamOptions;
@@ -212,31 +215,23 @@ export class ChangeStream extends EventEmitter {
   ) {
     super();
 
-    const Collection = loadCollection();
-    const Db = loadDb();
-    const MongoClient = loadMongoClient();
-
     this.pipeline = pipeline;
     this.options = options;
 
-    this.parent = parent;
-    this.namespace = parent.s.namespace;
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
-      this.topology = parent.s.db.s.topology;
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
-      this.topology = parent.s.topology;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.topology = parent.topology!;
     } else {
       throw new TypeError(
         'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
       );
     }
 
+    this.parent = parent;
+    this.namespace = parent.s.namespace;
     if (!this.options.readPreference && parent.readPreference) {
       this.options.readPreference = parent.readPreference;
     }
@@ -483,7 +478,7 @@ function createChangeStreamCursor(
   const pipeline = [{ $changeStream: changeStreamStageOptions } as Document].concat(self.pipeline);
   const cursorOptions = applyKnownOptions({}, options, CURSOR_OPTIONS);
   const changeStreamCursor = new ChangeStreamCursor(
-    self.topology,
+    getTopology(self.parent),
     new AggregateOperation(self.parent, pipeline, options),
     cursorOptions
   );
@@ -593,7 +588,7 @@ function processNewChange(
 }
 
 function processError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
-  const topology = changeStream.topology;
+  const topology = getTopology(changeStream.parent);
   const cursor = changeStream.cursor;
 
   // If the change stream has been closed explicitly, do not process error.

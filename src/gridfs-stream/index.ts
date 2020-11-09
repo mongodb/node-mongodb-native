@@ -6,7 +6,7 @@ import {
   GridFSBucketReadStreamOptionsWithRevision
 } from './download';
 import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
-import { executeLegacyOperation, Callback } from '../utils';
+import { executeLegacyOperation, Callback, getTopology } from '../utils';
 import { WriteConcernOptions, WriteConcern } from '../write_concern';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -134,7 +134,7 @@ export class GridFSBucket extends EventEmitter {
   delete(id: TFileId): Promise<undefined>;
   delete(id: TFileId, callback: Callback<void>): void;
   delete(id: TFileId, callback?: Callback<void>): Promise<undefined> | void {
-    return executeLegacyOperation(this.s.db.s.topology, _delete, [this, id, callback], {
+    return executeLegacyOperation(getTopology(this.s.db), _delete, [this, id, callback], {
       skipSessions: true
     });
   }
@@ -185,7 +185,7 @@ export class GridFSBucket extends EventEmitter {
   rename(id: TFileId, filename: string): Promise<void>;
   rename(id: TFileId, filename: string, callback: Callback<void>): void;
   rename(id: TFileId, filename: string, callback?: Callback<void>): Promise<void> | void {
-    return executeLegacyOperation(this.s.db.s.topology, _rename, [this, id, filename, callback], {
+    return executeLegacyOperation(getTopology(this.s.db), _rename, [this, id, filename, callback], {
       skipSessions: true
     });
   }
@@ -194,7 +194,7 @@ export class GridFSBucket extends EventEmitter {
   drop(): Promise<void>;
   drop(callback: Callback<void>): void;
   drop(callback?: Callback<void>): Promise<void> | void {
-    return executeLegacyOperation(this.s.db.s.topology, _drop, [this, callback], {
+    return executeLegacyOperation(getTopology(this.s.db), _drop, [this, callback], {
       skipSessions: true
     });
   }

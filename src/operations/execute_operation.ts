@@ -56,10 +56,6 @@ export function executeOperation<
   TOptions = OptionsFromOperation<T>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
-  if (topology == null) {
-    throw new TypeError('This method requires a valid topology instance');
-  }
-
   if (!(operation instanceof OperationBase)) {
     throw new TypeError('This method requires a valid operation instance');
   }

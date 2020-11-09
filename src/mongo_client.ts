@@ -408,7 +408,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
     }
 
     // Return the db object
-    const db = new Db(dbName, this.topology, finalOptions);
+    const db = new Db(this, dbName, finalOptions);
 
     // Add the db to the cache
     this.s.dbCache.set(dbName, db);

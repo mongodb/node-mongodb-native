@@ -17,6 +17,8 @@ import { resolve } from 'path';
 import type { Document } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 import type { Explain } from './explain';
+import type { MongoClient } from './mongo_client';
+import type { Cursor } from './cursor/cursor';
 
 /**
  * MongoDB Driver style callback
@@ -274,10 +276,6 @@ export function executeLegacyOperation<T extends OperationBase>(
 ): void | Promise<any> {
   const Promise = PromiseProvider.get();
 
-  if (topology == null) {
-    throw new TypeError('This method requires a valid topology instance');
-  }
-
   if (!Array.isArray(args)) {
     throw new TypeError('This method requires an array of arguments to apply');
   }
@@ -442,17 +440,10 @@ export function isPromiseLike<T = any>(
  */
 export function decorateWithCollation(
   command: Document,
-  target: { s: { topology: Topology } } | { topology: Topology },
+  target: MongoClient | Db | Collection | Cursor,
   options: AnyOptions
 ): void {
-  const topology =
-    ('s' in target && target.s.topology) || ('topology' in target && target.topology);
-
-  if (!topology) {
-    throw new TypeError('parameter "target" is missing a topology');
-  }
-
-  const capabilities = topology.capabilities();
+  const capabilities = getTopology(target).capabilities();
   if (options.collation && typeof options.collation === 'object') {
     if (capabilities && capabilities.commandsTakeCollation) {
       command.collation = options.collation;
@@ -501,6 +492,23 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
   }
 
   return { explain: command, verbosity: explain.verbosity };
+}
+
+/**
+ * A helper function to get the topology from a given provider. Throws
+ * if the topology cannot be found.
+ * @internal
+ */
+export function getTopology(provider: MongoClient | Db | Collection | Cursor): Topology {
+  if (`topology` in provider && provider.topology) {
+    return provider.topology;
+  } else if ('client' in provider.s && provider.s.client.topology) {
+    return provider.s.client.topology;
+  } else if ('db' in provider.s && provider.s.db.s.client.topology) {
+    return provider.s.db.s.client.topology;
+  }
+
+  throw new MongoError('MongoClient must be connected to perform this operation');
 }
 
 /** @internal */
