@@ -18,6 +18,7 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 import type { TagSet } from './sdam/server_description';
+import { MongoOptions, parseOptions } from './mongo_client_options';
 
 /** @public */
 export enum LogLevel {
@@ -269,6 +270,16 @@ export class MongoClient extends EventEmitter implements OperationParent {
   s: MongoClientPrivate;
   topology?: Topology;
 
+  /**
+   * The consolidate, parsed, transformed and merged options.
+   * @internal
+   */
+  options: MongoOptions;
+
+  // debugging
+  originalUri;
+  originalOptions;
+
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
@@ -278,16 +289,20 @@ export class MongoClient extends EventEmitter implements OperationParent {
       // NOTE: need this to prevent deprecation notice from being inherited in Db, Collection
       delete options.promiseLibrary;
     }
+    this.originalUri = url;
+    this.originalOptions = options;
+
+    this.options = parseOptions(url, options);
 
     // The internal state
     this.s = {
       url,
-      options: options || {},
+      options: options ?? {},
       dbCache: new Map(),
       sessions: new Set(),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
-      readPreference: ReadPreference.fromOptions(options) || ReadPreference.primary,
+      readPreference: ReadPreference.fromOptions(options) ?? ReadPreference.primary,
       bsonOptions: resolveBSONOptions(options),
       namespace: new MongoDBNamespace('admin'),
       logger: options?.logger ?? new Logger('MongoClient')
