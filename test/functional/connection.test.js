@@ -39,8 +39,8 @@ describe('Connection', function () {
       );
 
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
         expect(err).to.not.exist;
+        var db = client.db(configuration.db);
 
         db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function (err) {
           expect(err).to.not.exist;
@@ -103,8 +103,8 @@ describe('Connection', function () {
       );
 
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
         expect(err).to.not.exist;
+        var db = client.db(configuration.db);
 
         db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function (err) {
           expect(err).to.not.exist;
