@@ -8,19 +8,16 @@ import {
 } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
-import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
-import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { DeleteOptions } from './delete';
+import type { OperationOptions } from './operation';
 
 /** @internal */
-export interface IndexInformationOptions {
+export interface IndexInformationOptions extends OperationOptions {
   full?: boolean;
-  readPreference?: ReadPreference;
-  session?: ClientSession;
 }
 /**
  * Retrieves this collections index info.
@@ -28,25 +25,12 @@ export interface IndexInformationOptions {
  * @param db - The Db instance on which to retrieve the index info.
  * @param name - The name of the collection.
  */
-export function indexInformation(db: Db, name: string, callback: Callback): void;
 export function indexInformation(
   db: Db,
   name: string,
   options: IndexInformationOptions,
-  callback?: Callback
-): void;
-export function indexInformation(
-  db: Db,
-  name: string,
-  _optionsOrCallback: IndexInformationOptions | Callback,
-  _callback?: Callback
+  callback: Callback
 ): void {
-  let options = _optionsOrCallback as IndexInformationOptions;
-  let callback = _callback as Callback;
-  if ('function' === typeof _optionsOrCallback) {
-    callback = _optionsOrCallback as Callback;
-    options = {};
-  }
   // If we specified full information
   const full = options.full == null ? false : options.full;
 
@@ -104,26 +88,12 @@ export function prepareDocs(
   });
 }
 
-export function removeDocuments(server: Server, coll: Collection, callback?: Callback): void;
 export function removeDocuments(
   server: Server,
   coll: Collection,
-  selector?: Document,
-  callback?: Callback
-): void;
-export function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector?: Document,
-  options?: DeleteOptions,
-  callback?: Callback
-): void;
-export function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector?: Document,
-  options?: DeleteOptions | Document,
-  callback?: Callback
+  selector: Document,
+  options: DeleteOptions,
+  callback: Callback
 ): void {
   if (typeof options === 'function') {
     (callback = options as Callback), (options = {});
@@ -187,31 +157,9 @@ export function updateDocuments(
   coll: Collection,
   selector: Document,
   document: Document,
-  callback: Callback
-): void;
-export function updateDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  document: Document,
   options: UpdateOptions,
   callback: Callback
-): void;
-export function updateDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  document: Document,
-  _options: UpdateOptions | Callback,
-  _callback?: Callback
 ): void {
-  let options = _options as UpdateOptions;
-  let callback = _callback as Callback;
-  if ('function' === typeof options) {
-    callback = options;
-    options = {};
-  }
-
   // If we are not providing a selector or document throw
   if (selector == null || typeof selector !== 'object')
     return callback(new TypeError('selector must be a valid JavaScript object'));

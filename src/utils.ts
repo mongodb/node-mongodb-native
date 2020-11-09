@@ -9,7 +9,7 @@ import type { EventEmitter } from 'events';
 import type { Db } from './db';
 import type { Collection } from './collection';
 import type { OperationOptions, OperationBase, Hint } from './operations/operation';
-import type { ClientSession } from './sessions';
+import { ClientSession } from './sessions';
 import type { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
 import { readFileSync } from 'fs';
@@ -1126,8 +1126,8 @@ export function deepFreeze<O extends Record<string, any>>(object: O): Readonly<O
   for (const name of propNames) {
     const value = object[name];
 
-    if (name === 'session') continue;
-    if (ArrayBuffer.isView(value)) continue;
+    if (value instanceof ClientSession) continue; // Sessions have circular references
+    if (ArrayBuffer.isView(value)) continue; // Typed arrays that have nonzero size can't be frozen
 
     if (value && typeof value === 'object' && !Object.isFrozen(value)) {
       deepFreeze(value);

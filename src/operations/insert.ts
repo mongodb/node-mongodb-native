@@ -23,9 +23,9 @@ export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
   protected ordered;
   protected forceServerObjectId;
 
-  get builtOptions(): BulkWriteOptions {
+  getOptions(): BulkWriteOptions {
     return deepFreeze({
-      ...super.builtOptions,
+      ...super.getOptions(),
       bypassDocumentValidation: this.bypassDocumentValidation,
       ordered: this.ordered,
       forceServerObjectId: this.forceServerObjectId
@@ -43,7 +43,7 @@ export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    server.insert(this.ns.toString(), this.operations, this.builtOptions as any, callback);
+    server.insert(this.ns.toString(), this.operations, this.getOptions() as any, callback);
   }
 }
 
@@ -72,9 +72,9 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
   doc: Document;
   protected bypassDocumentValidation;
 
-  get builtOptions(): InsertOneOptions {
+  getOptions(): InsertOneOptions {
     return deepFreeze({
-      ...super.builtOptions,
+      ...super.getOptions(),
       bypassDocumentValidation: this.bypassDocumentValidation
     });
   }
@@ -95,7 +95,7 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
       return callback(new MongoError('doc parameter must be an object'));
     }
 
-    insertDocuments(server, coll, [doc], this.builtOptions, (err, r) => {
+    insertDocuments(server, coll, [doc], this.getOptions(), (err, r) => {
       if (callback == null) return;
       if (err && callback) return callback(err);
       // Workaround for pre 2.6 servers

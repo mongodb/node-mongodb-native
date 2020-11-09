@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { MongoError } from '../error';
-import { Callback, getTopology } from '../utils';
+import { Callback, deepFreeze, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
@@ -22,8 +22,23 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
   db: Db;
   username: string;
   password?: string;
+  private roles;
+  private customData;
 
-  constructor(db: Db, username: string, password: string | undefined, options?: AddUserOptions) {
+  getOptions(): Readonly<AddUserOptions> {
+    return deepFreeze({
+      ...super.getOptions(),
+      roles: this.roles,
+      customData: this.customData
+    });
+  }
+
+  constructor(
+    db: Db,
+    username: string,
+    password: string | undefined,
+    options: AddUserOptions = {}
+  ) {
     super(db, options);
 
     // Special case where there is no password ($external users)
@@ -35,23 +50,23 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
     this.db = db;
     this.username = username;
     this.password = password;
+    this.roles = options.roles;
+    this.customData = options.customData;
+
+    // Error out if digestPassword set
+    if (options?.digestPassword != null) {
+      throw new MongoError(
+        'The digestPassword option is not supported via add_user. ' +
+          "Please use db.command('createUser', ...) instead for this option."
+      );
+    }
   }
 
   execute(server: Server, callback: Callback<Document>): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;
-    const options = this.options;
-
-    // Error out if digestPassword set
-    if (options.digestPassword != null) {
-      return callback(
-        new MongoError(
-          'The digestPassword option is not supported via add_user. ' +
-            "Please use db.command('createUser', ...) instead for this option."
-        )
-      );
-    }
+    const options = this.getOptions();
 
     // Get additional values
     let roles: string[] = [];

@@ -68,15 +68,16 @@ export abstract class CommandOperation<
   protected retryWrites;
   protected noResponse;
 
-  get builtOptions(): Readonly<CommandOperationOptions> {
+  getOptions(): Readonly<CommandOperationOptions> {
     return deepFreeze({
-      ...super.builtOptions,
+      ...super.getOptions(),
       collation: this.collation,
       maxTimeMS: this.maxTimeMS,
       comment: this.comment,
       retryWrites: this.retryWrites,
       noResponse: this.noResponse,
-      fullResponse: this.fullResponse
+      fullResponse: this.fullResponse,
+      fullResult: !!this.fullResponse // this is the prop that server.command expects, we keep this here so not to refreeze
       // Override with proper type
       // writeConcern: this.writeConcern,
       // readConcern: this.readConcern
@@ -139,6 +140,7 @@ export abstract class CommandOperation<
   executeCommand(server: Server, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property
     this.server = server;
+    const options = this.getOptions();
 
     const serverWireVersion = maxWireVersion(server);
     const inTransaction = this.session && this.session.inTransaction();
@@ -147,7 +149,7 @@ export abstract class CommandOperation<
       Object.assign(cmd, { readConcern: this.readConcern });
     }
 
-    if (this.builtOptions.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+    if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
         new MongoError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
@@ -161,29 +163,24 @@ export abstract class CommandOperation<
         Object.assign(cmd, { writeConcern: this.writeConcern });
       }
 
-      if (this.builtOptions.collation && typeof this.builtOptions.collation === 'object') {
-        Object.assign(cmd, { collation: this.builtOptions.collation });
+      if (options.collation && typeof options.collation === 'object') {
+        Object.assign(cmd, { collation: options.collation });
       }
     }
 
-    if (typeof this.builtOptions.maxTimeMS === 'number') {
-      cmd.maxTimeMS = this.builtOptions.maxTimeMS;
+    if (typeof options.maxTimeMS === 'number') {
+      cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    if (typeof this.builtOptions.comment === 'string') {
-      cmd.comment = this.builtOptions.comment;
+    if (typeof options.comment === 'string') {
+      cmd.comment = options.comment;
     }
 
     if (this.logger && this.logger.isDebug()) {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    server.command(
-      this.ns.toString(),
-      cmd,
-      { fullResult: !!this.fullResponse, ...this.builtOptions },
-      callback
-    );
+    server.command(this.ns.toString(), cmd, options, callback);
   }
 }
 

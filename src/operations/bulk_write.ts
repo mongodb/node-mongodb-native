@@ -1,4 +1,4 @@
-import { applyRetryableWrites, applyWriteConcern, Callback } from '../utils';
+import { applyRetryableWrites, applyWriteConcern, Callback, deepFreeze } from '../utils';
 import { OperationBase } from './operation';
 import { resolveBSONOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
@@ -15,6 +15,18 @@ import type { Server } from '../sdam/server';
 export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
   collection: Collection;
   operations: AnyBulkWriteOperation[];
+  protected bypassDocumentValidation;
+  protected ordered;
+  protected forceServerObjectId;
+
+  getOptions(): Readonly<BulkWriteOptions> {
+    return deepFreeze({
+      ...super.getOptions(),
+      bypassDocumentValidation: this.bypassDocumentValidation,
+      ordered: this.ordered,
+      forceServerObjectId: this.forceServerObjectId
+    });
+  }
 
   constructor(
     collection: Collection,
@@ -28,12 +40,15 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
 
     // Assign BSON serialize options to OperationBase, preferring options over collection options
     this.bsonOptions = resolveBSONOptions(options, collection);
+    this.bypassDocumentValidation = options.bypassDocumentValidation;
+    this.ordered = options.ordered;
+    this.forceServerObjectId = options.forceServerObjectId;
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = this.getOptions();
 
     // Create the bulk operation
     const bulk: BulkOperationBase =

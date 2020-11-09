@@ -126,11 +126,17 @@ function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescri
 /** @internal */
 export class IndexesOperation extends OperationBase<IndexInformationOptions, Document> {
   collection: Collection;
+  protected full;
+
+  getOptions(): Readonly<IndexInformationOptions> {
+    return deepFreeze({ ...super.getOptions(), full: this.full });
+  }
 
   constructor(collection: Collection, options: IndexInformationOptions) {
     super(options);
 
     this.collection = collection;
+    this.full = options.full;
   }
 
   execute(server: Server, callback: Callback<Document>): void {
@@ -147,9 +153,9 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   onlyReturnNameOfCreatedIndex?: boolean;
   indexes: IndexDescription[];
 
-  get builtOptions(): Readonly<CreateIndexesOptions> {
+  getOptions(): Readonly<CreateIndexesOptions> {
     return deepFreeze({
-      ...super.builtOptions,
+      ...super.getOptions(),
       // collation is set on each index, it should not be defined at the root
       collation: undefined
     });
@@ -171,7 +177,7 @@ export class CreateIndexesOperation extends CommandOperation<CreateIndexesOption
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    const options = this.builtOptions;
+    const options = this.getOptions();
     const indexes = this.indexes;
 
     const serverWireVersion = maxWireVersion(server);

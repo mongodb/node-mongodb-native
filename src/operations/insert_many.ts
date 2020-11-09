@@ -29,9 +29,9 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
   private ordered;
   private forceServerObjectId;
 
-  get builtOptions(): BulkWriteOptions {
+  getOptions(): BulkWriteOptions {
     return deepFreeze({
-      ...super.builtOptions,
+      ...super.getOptions(),
       bypassDocumentValidation: this.bypassDocumentValidation,
       ordered: this.ordered,
       forceServerObjectId: this.forceServerObjectId
@@ -52,24 +52,20 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
-    const coll = this.collection;
+    const collection = this.collection;
+    const options = this.getOptions();
     let docs = this.docs;
 
     if (!Array.isArray(docs)) {
       return callback(new MongoError('docs parameter must be an array of documents'));
     }
 
-    const options = {
-      ...this.builtOptions,
-      serializeFunctions: this.builtOptions.serializeFunctions || coll.s.bsonOptions.serializeFunctions
-    };
-
-    docs = prepareDocs(coll, docs, options);
+    docs = prepareDocs(collection, docs, options);
     // If keep going set unordered
 
     // Generate the bulk write operations
     const operations = [{ insertMany: docs }];
-    const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
+    const bulkWriteOperation = new BulkWriteOperation(collection, operations, options);
 
     bulkWriteOperation.execute(server, (err, result) => {
       if (err || !result) return callback(err);

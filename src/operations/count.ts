@@ -1,6 +1,6 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback, deepFreeze } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -24,18 +24,36 @@ type BuildCountCommandOptions = CountOptions & { collectionName: string };
 export class CountOperation extends CommandOperation<CountOptions, number> {
   cursor: Cursor;
   applySkipLimit: boolean;
+  protected skip;
+  protected limit;
+  protected maxTimeMS;
+  protected hint;
+
+  getOptions(): Readonly<CountOptions> {
+    return deepFreeze({
+      ...super.getOptions(),
+      skip: this.skip,
+      limit: this.limit,
+      maxTimeMS: this.maxTimeMS,
+      hint: this.hint
+    });
+  }
 
   constructor(cursor: Cursor, applySkipLimit: boolean, options: CountOptions) {
     super(({ s: cursor } as unknown) as Collection, options);
 
     this.cursor = cursor;
     this.applySkipLimit = applySkipLimit;
+    this.skip = options.skip;
+    this.limit = options.limit;
+    this.maxTimeMS = options.maxTimeMS;
+    this.hint = options.hint;
   }
 
   execute(server: Server, callback: Callback<number>): void {
     const cursor = this.cursor;
     const applySkipLimit = this.applySkipLimit;
-    const options = this.options;
+    const options = { ...this.getOptions() }; // TODO: fix this!!
 
     if (applySkipLimit) {
       if (typeof cursor.cursorSkip === 'number') options.skip = cursor.cursorSkip;

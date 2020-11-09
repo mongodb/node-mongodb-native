@@ -49,7 +49,7 @@ export abstract class OperationBase<
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
 
-  get builtOptions(): Readonly<OperationOptions> {
+  getOptions(): Readonly<OperationOptions> {
     return deepFreeze({
       ...this.options, // Should go away when options aren't generic params anymore.
       ...this.bsonOptions,

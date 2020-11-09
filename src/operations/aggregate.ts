@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
-import { maxWireVersion } from '../utils';
+import { deepFreeze, maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
@@ -40,8 +40,34 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
+  protected allowDiskUse;
+  protected batchSize;
+  protected bypassDocumentValidation;
+  protected cursor;
+  protected explain;
+  protected maxTimeMS;
+  protected maxAwaitTimeMS;
+  protected collation;
+  protected hint;
+  protected out;
 
-  constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
+  getOptions(): Readonly<AggregateOptions> {
+    return deepFreeze({
+      ...super.getOptions(),
+      batchSize: this.batchSize,
+      allowDiskUse: this.allowDiskUse,
+      cursor: this.cursor,
+      bypassDocumentValidation: this.bypassDocumentValidation,
+      maxTimeMS: this.maxTimeMS,
+      explain: this.explain,
+      collation: this.collation,
+      maxAwaitTimeMS: this.maxAwaitTimeMS,
+      out: this.out,
+      hint: this.hint
+    });
+  }
+
+  constructor(parent: OperationParent, pipeline: Document[], options: AggregateOptions = {}) {
     super(parent, options);
 
     this.target =
@@ -76,6 +102,17 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
     if (options?.cursor != null && typeof options.cursor !== 'object') {
       throw new MongoError('cursor options must be an object');
     }
+
+    this.batchSize = options.batchSize;
+    this.allowDiskUse = options.allowDiskUse;
+    this.cursor = options.cursor;
+    this.bypassDocumentValidation = options.bypassDocumentValidation;
+    this.maxTimeMS = options.maxTimeMS;
+    this.explain = options.explain;
+    this.collation = options.collation;
+    this.maxAwaitTimeMS = options.maxAwaitTimeMS;
+    this.out = options.out;
+    this.hint = options.hint;
   }
 
   get canRetryRead(): boolean {
@@ -87,7 +124,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   }
 
   execute(server: Server, callback: Callback<T>): void {
-    const options: AggregateOptions = this.options;
+    const options = this.getOptions();
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 

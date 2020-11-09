@@ -1,10 +1,9 @@
 import { OperationBase, OperationOptions } from './operation';
-import { loadCollection } from '../dynamic_loaders';
-import type { Callback } from '../utils';
+import { Callback, deepFreeze } from '../utils';
 import type { Db } from '../db';
 
 // eslint-disable-next-line
-import type { Collection } from '../collection';
+import { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 
 export interface CollectionsOptions extends OperationOptions {
@@ -14,20 +13,26 @@ export interface CollectionsOptions extends OperationOptions {
 /** @internal */
 export class CollectionsOperation extends OperationBase<CollectionsOptions, Collection[]> {
   db: Db;
+  protected nameOnly;
+
+  getOptions(): Readonly<CollectionsOptions> {
+    return deepFreeze({
+      ...super.getOptions(),
+      nameOnly: this.nameOnly
+    });
+  }
 
   constructor(db: Db, options: CollectionsOptions) {
     super(options);
 
     this.db = db;
+    this.nameOnly = options.nameOnly ?? true;
   }
 
   execute(server: Server, callback: Callback<Collection[]>): void {
     const db = this.db;
-    let options: CollectionsOptions = this.options;
+    const options = this.getOptions();
 
-    const Collection = loadCollection();
-
-    options = Object.assign({}, options, { nameOnly: true });
     // Let's get the collection names
     db.listCollections({}, options).toArray((err, documents) => {
       if (err || !documents) return callback(err);
