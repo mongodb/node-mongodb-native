@@ -18,7 +18,7 @@ import { URL } from 'url';
  * @internal
  */
 export interface MongoOptions
-  extends BSONSerializeOptions,
+  extends Required<BSONSerializeOptions>,
     Omit<ConnectionOptions, 'port'>,
     Omit<TLSConnectionOptions, 'port'> {
   hosts: { host: string; port: number }[];
@@ -110,7 +110,7 @@ const HOSTS_RX = new RegExp(
 export function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
   const match = uri.match(HOSTS_RX);
   if (!match) {
-    throw new MongoParseError('Invalid connection string');
+    throw new MongoParseError(`Invalid connection string ${uri}`);
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-expect-error
@@ -131,9 +131,14 @@ export function parseOptions(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options: MongoClientOptions = {}
 ): Readonly<MongoOptions> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { srv, url, hosts } = parseURI(uri);
-  const mongoOptions: MongoOptions = ({ srv, hosts } as unknown) as MongoOptions;
-  // TODO(NODE-2699): option parse logic
-  return Object.freeze(mongoOptions);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { srv, url, hosts } = parseURI(uri);
+    const mongoOptions: MongoOptions = ({ srv, hosts } as unknown) as MongoOptions;
+    // TODO(NODE-2699): option parse logic
+    return Object.freeze(mongoOptions);
+  } catch {
+    return Object.freeze({} as MongoOptions);
+  }
 }
+
