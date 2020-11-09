@@ -307,3 +307,4 @@ export type {
 } from './bulk/common';
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
+export type { MongoOptions } from './mongo_client_options';
