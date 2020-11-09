@@ -1,6 +1,5 @@
 import { applyRetryableWrites, Callback } from '../utils';
 import { OperationBase } from './operation';
-import { resolveBSONOptions } from '../bson';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type {
@@ -25,9 +24,6 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
 
     this.collection = collection;
     this.operations = operations;
-
-    // Pull the BSON serialize options from the already-resolved options
-    this.bsonOptions = resolveBSONOptions(options);
   }
 
   execute(server: Server, callback: Callback<BulkWriteResult>): void {

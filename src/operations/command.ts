@@ -7,7 +7,7 @@ import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
+import type { BSONSerializeOptions, Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 
@@ -78,7 +78,6 @@ export abstract class CommandOperation<
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
-    this.bsonOptions = resolveBSONOptions(options);
 
     this.explain = false;
     this.fullResponse =

@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import type { Document, BSONSerializeOptions } from '../bson';
+import { Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
 
@@ -50,6 +50,9 @@ export abstract class OperationBase<
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
     this.readPreference = ReadPreference.primary;
+
+    // Pull the BSON serialize options from the already-resolved options
+    this.bsonOptions = resolveBSONOptions(options);
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
