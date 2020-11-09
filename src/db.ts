@@ -266,6 +266,9 @@ export class Db implements OperationParent {
   /**
    * Execute a command
    *
+   * @remarks
+   * This command does not inherit options from the MongoClient.
+   *
    * @param command - The command to run
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
@@ -428,6 +431,9 @@ export class Db implements OperationParent {
   /**
    * Rename a collection.
    *
+   * @remarks
+   * This operation does not inherit options from the MongoClient.
+   *
    * @param fromCollection - Name of current collection to rename
    * @param toCollection - New name of of the collection
    * @param options - Optional settings for the command
@@ -544,6 +550,9 @@ export class Db implements OperationParent {
 
   /**
    * Runs a command on the database as admin.
+   *
+   * @remarks
+   * This command does not inherit options from the MongoClient.
    *
    * @param command - The command to run
    * @param options - Optional settings for the command

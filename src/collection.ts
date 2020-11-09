@@ -544,6 +544,9 @@ export class Collection implements OperationParent {
   /**
    * Rename the collection.
    *
+   * @remarks
+   * This operation does not inherit options from the Db or MongoClient.
+   *
    * @param newName - New name of of the collection.
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
