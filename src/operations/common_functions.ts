@@ -215,12 +215,6 @@ export function updateDocuments(
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
 
-  // Do we return the actual result document
-  // Either use override on the function, or go back to default on either the collection
-  // level or db
-  finalOptions.serializeFunctions =
-    options.serializeFunctions || coll.bsonOptions.serializeFunctions;
-
   // Execute the operation
   const op: Document = { q: selector, u: document };
   op.upsert = options.upsert !== void 0 ? !!options.upsert : false;
