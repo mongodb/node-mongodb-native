@@ -138,7 +138,8 @@ export class Monitor extends EventEmitter {
   }
 
   reset(): void {
-    if (isInCloseState(this)) {
+    const topologyVersion = this[kServer].description.topologyVersion;
+    if (isInCloseState(this) || topologyVersion == null) {
       return;
     }
 
@@ -172,7 +173,6 @@ export class Monitor extends EventEmitter {
 }
 
 function resetMonitorState(monitor: Monitor) {
-  stateTransition(monitor, STATE_CLOSING);
   monitor[kMonitorId]?.stop();
   monitor[kMonitorId] = undefined;
 
