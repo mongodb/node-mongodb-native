@@ -141,4 +141,3 @@ export function parseOptions(
     return Object.freeze({} as MongoOptions);
   }
 }
-
