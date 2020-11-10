@@ -77,7 +77,6 @@ import { RenameOperation, RenameOptions } from './operations/rename';
 import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
 import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
-import { EvalGroupOperation, GroupOperation } from './operations/group';
 import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
@@ -1511,76 +1510,6 @@ export class Collection implements OperationParent {
   }
 
   /**
-   * Run a group command across a collection
-   *
-   * @deprecated MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.
-   * @param keys - An object, array or function expressing the keys to group by.
-   * @param condition - An optional condition that must be true for a row to be considered.
-   * @param initial - Initial value of the aggregation counter object.
-   * @param reduce - The reduce function aggregates (reduces) the objects iterated
-   * @param finalize - An optional function to be run on each item in the result set just before the item is returned.
-   * @param command - Specify if you wish to run using the internal group command or using eval, default is true.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  group(
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    keys: any,
-    condition: Document,
-    initial: Document,
-    // TODO: Use labeled tuples when api-extractor supports TS 4.0
-    ...args: [/*reduce?:*/ any, /*finalize?:*/ any, /*command?:*/ any, /*callback?:*/ Callback]
-  ): Promise<Document> | void {
-    const callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    let reduce = args.length ? args.shift() : undefined;
-    let finalize = args.length ? args.shift() : undefined;
-    let command = args.length ? args.shift() : undefined;
-    let options = args.length ? args.shift() || {} : {};
-
-    // Make sure we are backward compatible
-    if (!(typeof finalize === 'function')) {
-      command = finalize;
-      finalize = undefined;
-    }
-
-    if (
-      !Array.isArray(keys) &&
-      keys instanceof Object &&
-      typeof keys !== 'function' &&
-      !(keys._bsontype === 'Code')
-    ) {
-      keys = Object.keys(keys);
-    }
-
-    if (typeof reduce === 'function') {
-      reduce = reduce.toString();
-    }
-
-    if (typeof finalize === 'function') {
-      finalize = finalize.toString();
-    }
-
-    // Set up the command as default
-    command = command == null ? true : command;
-
-    options = resolveOptions(this, options);
-
-    if (command == null) {
-      return executeOperation(
-        getTopology(this),
-        new EvalGroupOperation(this, keys, condition, initial, reduce, finalize, options),
-        callback
-      );
-    }
-
-    return executeOperation(
-      getTopology(this),
-      new GroupOperation(this, keys, condition, initial, reduce, finalize, options),
-      callback
-    );
-  }
-
-  /**
    * Find and modify a document.
    *
    * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
@@ -1693,9 +1622,4 @@ Collection.prototype.findAndModify = deprecate(
 Collection.prototype.findAndRemove = deprecate(
   Collection.prototype.findAndRemove,
   'collection.findAndRemove is deprecated. Use findOneAndDelete instead.'
-);
-
-Collection.prototype.group = deprecate(
-  Collection.prototype.group,
-  'MongoDB 3.6 or higher no longer supports the group command. We recommend rewriting using the aggregation framework.'
 );
