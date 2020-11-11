@@ -1,4 +1,4 @@
-import { ReadPreference } from '../read_preference';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
@@ -24,6 +24,9 @@ export interface OperationOptions extends BSONSerializeOptions {
 
   explain?: boolean;
   willRetryWrites?: boolean;
+
+  /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
+  readPreference?: ReadPreferenceLike;
 }
 
 /**
@@ -49,7 +52,13 @@ export abstract class OperationBase<
 
   constructor(options: T = {} as T) {
     this.options = Object.assign({}, options);
-    this.readPreference = ReadPreference.primary;
+
+    this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
+      ? ReadPreference.primary
+      : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
+    // TODO: A lot of our code depends on having the read preference in the options. This should
+    //       go away, but also requires massive test rewrites.
+    this.options.readPreference = this.readPreference;
 
     // Pull the BSON serialize options from the already-resolved options
     this.bsonOptions = resolveBSONOptions(options);

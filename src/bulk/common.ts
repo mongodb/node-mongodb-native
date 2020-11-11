@@ -21,6 +21,7 @@ import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Hint } from '../operations/operation';
+import { ReadPreference } from '../read_preference';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
@@ -572,8 +573,8 @@ function executeCommands(
   }
 
   const finalOptions = resolveOptions(bulkOperation, {
-    ordered: bulkOperation.isOrdered,
-    ...options
+    ...options,
+    ordered: bulkOperation.isOrdered
   });
 
   if (finalOptions.bypassDocumentValidation !== true) {
@@ -1169,18 +1170,13 @@ export abstract class BulkOperationBase {
   }
 
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
-  execute(
-    _writeConcern?: WriteConcern,
-    options?: BulkWriteOptions,
-    callback?: Callback<BulkWriteResult>
-  ): Promise<void> | void {
+  execute(options?: BulkWriteOptions, callback?: Callback<BulkWriteResult>): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (typeof _writeConcern === 'function') {
-      callback = _writeConcern as Callback;
-    } else if (_writeConcern && typeof _writeConcern === 'object') {
-      this.s.writeConcern = _writeConcern;
+    const writeConcern = WriteConcern.fromOptions(options);
+    if (writeConcern) {
+      this.s.writeConcern = writeConcern;
     }
 
     if (this.s.executed) {

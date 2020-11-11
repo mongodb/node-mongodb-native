@@ -1,4 +1,4 @@
-import { OperationBase } from './operation';
+import { Aspect, defineAspects, OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
@@ -70,3 +70,5 @@ function mapInsertManyResults(docs: Document[], r: BulkWriteResult): InsertManyR
 
   return finalResult;
 }
+
+defineAspects(InsertManyOperation, [Aspect.WRITE_OPERATION]);

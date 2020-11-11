@@ -1,6 +1,5 @@
 import { applyRetryableWrites, Callback } from '../utils';
-import { OperationBase } from './operation';
-import { WriteConcern } from '../write_concern';
+import { Aspect, defineAspects, OperationBase } from './operation';
 import type { Collection } from '../collection';
 import type {
   BulkOperationBase,
@@ -48,10 +47,9 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
 
     let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-    const writeCon = WriteConcern.fromOptions(finalOptions);
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err, r) => {
+    bulk.execute(finalOptions, (err, r) => {
       // We have connection level error
       if (!r && err) {
         return callback(err);
@@ -62,3 +60,5 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     });
   }
 }
+
+defineAspects(BulkWriteOperation, [Aspect.WRITE_OPERATION]);
