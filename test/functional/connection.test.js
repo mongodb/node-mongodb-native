@@ -1,7 +1,7 @@
 'use strict';
 const { withClient, setupDatabase } = require('./shared');
-const test = require('./shared').assert,
-  expect = require('chai').expect;
+const test = require('./shared').assert;
+const { expect } = require('chai');
 
 describe('Connection', function () {
   before(function () {
@@ -280,8 +280,8 @@ it(
   withClient(function (client, done) {
     expect(client.isConnected()).to.be.true;
 
-    const collection = client.db('testReconnect').collection('test');
-    collection.insertOne({ a: 1 }, (err, result) => {
+    const collection = client.db('shouldConnectAfterClose').collection('test');
+    collection.insertOne({ a: 1, b: 2 }, (err, result) => {
       expect(err).to.not.exist;
       expect(result).to.exist;
 
@@ -293,9 +293,11 @@ it(
           expect(err).to.not.exist;
           expect(client.isConnected()).to.be.true;
 
-          collection.insertOne({ b: 2 }, (err, result) => {
+          collection.findOne({ a: 1 }, (err, result) => {
             expect(err).to.not.exist;
             expect(result).to.exist;
+            expect(result).to.have.property('a', 1);
+            expect(result).to.have.property('b', 2);
             expect(client.topology.isDestroyed()).to.be.false;
             done();
           });
