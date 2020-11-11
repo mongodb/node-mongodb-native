@@ -21,7 +21,6 @@ import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions } from '../operations/command';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Hint } from '../operations/operation';
-import { ReadPreference } from '../read_preference';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
