@@ -244,7 +244,7 @@ describe('Explain', function () {
   it('shouldHonorExecutionStatsStringExplain', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
@@ -271,7 +271,7 @@ describe('Explain', function () {
   it('shouldHonorAllPlansStringExplain', {
     metadata: {
       requires: {
-        mongodb: '>3.2'
+        mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {

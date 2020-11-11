@@ -163,6 +163,7 @@ export type {
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
 export type { AnyError, ErrorDescription } from './error';
+export type { Verbosity, VerbosityLike } from './explain';
 export type {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
@@ -207,6 +208,7 @@ export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
 export type { EvalOptions } from './operations/eval';
+export type { ExplainOptions } from './operations/explainable_command';
 export type { FindOptions } from './operations/find';
 export type { Sort, SortDirection } from './sort';
 export type { FindAndModifyOptions } from './operations/find_and_modify';

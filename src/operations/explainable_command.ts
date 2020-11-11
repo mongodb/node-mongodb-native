@@ -4,6 +4,7 @@ import { Callback, Document, MongoError, Server } from '..';
 
 /** @public */
 export interface ExplainOptions {
+  /** Specifies the verbosity mode for the explain output. */
   explain?: VerbosityLike;
 }
 
