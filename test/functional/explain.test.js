@@ -9,7 +9,7 @@ describe('Explain', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('shouldHonorBooleanExplainWithDeleteOne', {
+  it('should honor boolean explain with delete one', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -33,7 +33,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithDeleteMany', {
+  it('should honor boolean explain with delete many', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -57,7 +57,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithUpdateOne', {
+  it('should honor boolean explain with update one', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -86,7 +86,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithUpdateMany', {
+  it('should honor boolean explain with update many', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -115,7 +115,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithRemoveOne', {
+  it('should honor boolean explain with remove one', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -139,7 +139,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithRemoveMany', {
+  it('should honor boolean explain with remove many', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -163,7 +163,87 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldUseAllPlansExecutionAsTrueExplainVerbosity', {
+  it('should honor boolean explain with distinct', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithDistinct');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.distinct('a', {}, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('should honor boolean explain with findOneAndModify', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.2'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithFindOneAndModify');
+      var collection = db.collection('test');
+
+      collection.insertOne({ a: 1 }, (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        collection.findOneAndDelete({ a: 1 }, { explain: true }, (err, explanation) => {
+          expect(err).to.not.exist;
+          expect(explanation).to.exist;
+          expect(explanation).property('queryPlanner').to.exist;
+          done();
+        });
+      });
+    })
+  });
+
+  it('should honor boolean explain with mapReduce', {
+    metadata: {
+      requires: {
+        mongodb: '>=4.4'
+      }
+    },
+    test: withClient(function (client, done) {
+      var db = client.db('shouldHonorBooleanExplainWithMapReduce');
+      var collection = db.collection('test');
+
+      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], (err, res) => {
+        expect(err).to.not.exist;
+        expect(res).to.exist;
+
+        var map = 'function() { emit(this.user_id, 1); }';
+        var reduce = 'function(k,vals) { return 1; }';
+
+        collection.mapReduce(
+          map,
+          reduce,
+          { out: { replace: 'tempCollection' }, explain: true },
+          (err, explanation) => {
+            expect(err).to.not.exist;
+            expect(explanation).to.exist;
+            expect(explanation).property('stages').to.exist;
+            done();
+          }
+        );
+      });
+    })
+  });
+
+  it('should use allPlansExecution as true explain verbosity', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -189,7 +269,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldUseQueryPlannerAsFalseExplainVerbosity', {
+  it('should use queryPlanner as false explain verbosity', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -215,7 +295,7 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorQueryPlannerStringExplain', {
+  it('should honor queryPlanner string explain', {
     metadata: {
       requires: {
         mongodb: '>=3.0'
@@ -241,10 +321,10 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorExecutionStatsStringExplain', {
+  it('should honor executionStats string explain', {
     metadata: {
       requires: {
-        mongodb: '>=3.2'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -256,7 +336,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of executionStats output
-        collection.findOneAndDelete({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
+        collection.deleteMany({ a: 1 }, { explain: 'executionStats' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -268,10 +348,10 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorAllPlansStringExplain', {
+  it('should honor allPlansExecution string explain', {
     metadata: {
       requires: {
-        mongodb: '>=3.2'
+        mongodb: '>=3.0'
       }
     },
     test: withClient(function (client, done) {
@@ -283,7 +363,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of allPlansExecution output
-        collection.distinct('a', {}, { explain: 'allPlansExecution' }, (err, explanation) => {
+        collection.removeOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -294,96 +374,49 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithDistinct', {
+  it('should honor string explain with distinct', {
     metadata: {
       requires: {
         mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithDistinct');
+      var db = client.db('shouldHonorStringExplainWithDistinct');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
         expect(res).to.exist;
 
-        collection.distinct('a', {}, { explain: true }, (err, explanation) => {
+        collection.distinct('a', {}, { explain: 'executionStats' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
+          expect(explanation).property('executionStats').to.exist;
           done();
         });
       });
     })
   });
 
-  it('shouldHonorBooleanExplainWithFindOneAndDelete', {
+  it('should honor string explain with findOneAndModify', {
     metadata: {
       requires: {
         mongodb: '>=3.2'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithFindOneAndDelete');
+      var db = client.db('shouldHonorStringExplainWithFindOneAndModify');
       var collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
         expect(res).to.exist;
 
-        collection.findOneAndDelete({ a: 1 }, { explain: true }, (err, explanation) => {
-          expect(err).to.not.exist;
-          expect(explanation).to.exist;
-          expect(explanation).property('queryPlanner').to.exist;
-          done();
-        });
-      });
-    })
-  });
-
-  it('shouldHonorBooleanExplainWithFindOneAndReplace', {
-    metadata: {
-      requires: {
-        mongodb: '>=3.2'
-      }
-    },
-    test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithFindOneAndReplace');
-      var collection = db.collection('test');
-
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain: true }, (err, explanation) => {
-          expect(err).to.not.exist;
-          expect(explanation).to.exist;
-          expect(explanation).property('queryPlanner').to.exist;
-          done();
-        });
-      });
-    })
-  });
-
-  it('shouldHonorBooleanExplainWithFindOneAndUpdate', {
-    metadata: {
-      requires: {
-        mongodb: '>=3.2'
-      }
-    },
-    test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithFindOneAndUpdate');
-      var collection = db.collection('test');
-
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection.findOneAndUpdate(
+        collection.findOneAndReplace(
           { a: 1 },
-          { $inc: { a: 2 } },
-          { explain: true },
+          { a: 2 },
+          { explain: 'queryPlanner' },
           (err, explanation) => {
             expect(err).to.not.exist;
             expect(explanation).to.exist;
@@ -395,14 +428,14 @@ describe('Explain', function () {
     })
   });
 
-  it('shouldHonorBooleanExplainWithMapReduce', {
+  it('should honor string explain with mapReduce', {
     metadata: {
       requires: {
         mongodb: '>=4.4'
       }
     },
     test: withClient(function (client, done) {
-      var db = client.db('shouldHonorBooleanExplainWithMapReduce');
+      var db = client.db('shouldHonorStringExplainWithMapReduce');
       var collection = db.collection('test');
 
       collection.insertMany([{ user_id: 1 }, { user_id: 2 }], (err, res) => {
@@ -415,7 +448,7 @@ describe('Explain', function () {
         collection.mapReduce(
           map,
           reduce,
-          { out: { replace: 'tempCollection' }, explain: true },
+          { out: { replace: 'tempCollection' }, explain: 'executionStats' },
           (err, explanation) => {
             expect(err).to.not.exist;
             expect(explanation).to.exist;
