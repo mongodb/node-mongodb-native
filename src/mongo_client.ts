@@ -81,7 +81,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
   compressors?: string;
   /** An integer that specifies the compression level if using zlib for network compression. */
-  zlibCompressionLevel?: number;
+  zlibCompressionLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /** The maximum number of connections in the connection pool. */
   maxPoolSize?: number;
   /** The minimum number of connections in the connection pool. */
