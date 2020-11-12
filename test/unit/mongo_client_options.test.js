@@ -19,7 +19,7 @@ describe('MongoOptions', function () {
     });
     expect(options.directConnection).to.be.true;
     expect(options.domainsEnabled).to.be.false;
-    expect(options.hosts).to.have.length(1);
+    expect(options.hosts).has.length(1);
     expect(options.dbName).to.equal('test');
     expect(options.prototype).to.not.exist;
   });
@@ -28,8 +28,8 @@ describe('MongoOptions', function () {
     const options = parseOptions('mongodb://localhost:27017', { minSize: 2, poolSize: 4 });
     expect(options).to.not.have.property('minSize');
     expect(options).to.not.have.property('poolSize');
-    expect(options).to.have.property('maxPoolSize', 4);
-    expect(options).to.have.property('minPoolSize', 2);
+    expect(options).has.property('maxPoolSize', 4);
+    expect(options).has.property('minPoolSize', 2);
   });
 
   it('tls renames', function () {
@@ -61,14 +61,14 @@ describe('MongoOptions', function () {
     expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('sslCRL');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
-    expect(options).to.have.property('ca', 'tlsCAFile');
-    expect(options).to.have.property('crl', 'sslCRL');
-    expect(options).to.have.property('cert', 'tlsCertificateFile');
-    expect(options).to.have.property('key');
-    expect(options.key).to.have.length(2);
-    expect(options).to.have.property('passphrase', 'tlsCertificateKeyFilePassword');
-    expect(options).to.have.property('rejectUnauthorized', false);
-    expect(options).to.have.property('tls', true);
+    expect(options).has.property('ca', 'tlsCAFile');
+    expect(options).has.property('crl', 'sslCRL');
+    expect(options).has.property('cert', 'tlsCertificateFile');
+    expect(options).has.property('key');
+    expect(options.key).has.length(2);
+    expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
+    expect(options).has.property('rejectUnauthorized', false);
+    expect(options).has.property('tls', true);
   });
 
   const ALL_OPTIONS = {
@@ -165,10 +165,10 @@ describe('MongoOptions', function () {
     const options = parseOptions('mongodb://localhost:27017/', ALL_OPTIONS);
 
     // Check consolidated options
-    expect(options).to.have.property('writeConcern');
-    expect(options.writeConcern).to.have.property('w', 2);
-    expect(options.writeConcern).to.have.property('fsync', true);
-    expect(options.writeConcern).to.have.property('j', true);
+    expect(options).has.property('writeConcern');
+    expect(options.writeConcern).has.property('w', 2);
+    expect(options.writeConcern).to.not.have.property('fsync');
+    expect(options.writeConcern).has.property('j', true);
   });
 
   const allURIOptions =
@@ -215,11 +215,15 @@ describe('MongoOptions', function () {
 
   it('All URI options', function () {
     const options = parseOptions(allURIOptions);
-    console.log(options);
+    expect(options).has.property('zlibCompressionLevel', 2);
+
+    expect(options).has.property('writeConcern');
+    expect(options.writeConcern).has.property('w', 'majority');
+    expect(options.writeConcern).has.property('wtimeout', 2);
   });
 
   it('srv', function () {
     const options = parseOptions('mongodb+srv://server.example.com/');
-    expect(options).to.have.property('srv', true);
+    expect(options).has.property('srv', true);
   });
 });
