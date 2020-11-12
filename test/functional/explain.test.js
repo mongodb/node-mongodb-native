@@ -2,7 +2,6 @@
 const { setupDatabase, withClient } = require('./shared');
 const chai = require('chai');
 const expect = chai.expect;
-chai.use(require('chai-subset'));
 
 describe('Explain', function () {
   before(function () {

@@ -1,11 +1,11 @@
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
-import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {

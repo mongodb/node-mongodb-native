@@ -1,5 +1,6 @@
 import { defineAspects, Aspect, OperationBase, Hint } from './operation';
 import { removeDocuments } from './common_functions';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { Document } from '../bson';
@@ -7,7 +8,6 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
-import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions {

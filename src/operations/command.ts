@@ -58,9 +58,9 @@ export abstract class CommandOperation<
   readPreference: ReadPreference;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
+  explain?: Explain;
   fullResponse?: boolean;
   logger?: Logger;
-  explain?: Explain;
 
   constructor(parent?: OperationParent, options?: T) {
     super(options);

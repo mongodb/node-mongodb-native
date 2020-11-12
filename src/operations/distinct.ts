@@ -1,9 +1,9 @@
 import { Aspect, defineAspects } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
