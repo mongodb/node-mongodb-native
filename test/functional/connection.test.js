@@ -273,58 +273,58 @@ describe('Connection', function () {
       done();
     }
   });
-});
 
-it(
-  'should be able to connect again after close',
-  withClient(function (client, done) {
-    expect(client.isConnected()).to.be.true;
+  it(
+    'should be able to connect again after close',
+    withClient(function (client, done) {
+      expect(client.isConnected()).to.be.true;
 
-    const collection = client.db('shouldConnectAfterClose').collection('test');
-    collection.insertOne({ a: 1, b: 2 }, (err, result) => {
-      expect(err).to.not.exist;
-      expect(result).to.exist;
-
-      client.close(err => {
+      const collection = client.db('shouldConnectAfterClose').collection('test');
+      collection.insertOne({ a: 1, b: 2 }, (err, result) => {
         expect(err).to.not.exist;
-        expect(client.isConnected()).to.be.false;
+        expect(result).to.exist;
 
-        client.connect(err => {
+        client.close(err => {
           expect(err).to.not.exist;
-          expect(client.isConnected()).to.be.true;
+          expect(client.isConnected()).to.be.false;
 
-          collection.findOne({ a: 1 }, (err, result) => {
+          client.connect(err => {
             expect(err).to.not.exist;
-            expect(result).to.exist;
-            expect(result).to.have.property('a', 1);
-            expect(result).to.have.property('b', 2);
-            expect(client.topology.isDestroyed()).to.be.false;
-            done();
+            expect(client.isConnected()).to.be.true;
+
+            collection.findOne({ a: 1 }, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+              expect(result).to.have.property('a', 1);
+              expect(result).to.have.property('b', 2);
+              expect(client.topology.isDestroyed()).to.be.false;
+              done();
+            });
           });
         });
       });
-    });
-  })
-);
+    })
+  );
 
-it(
-  'should correctly fail on retry when client has been closed',
-  withClient(function (client, done) {
-    expect(client.isConnected()).to.be.true;
-    const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
-    collection.insertOne({ a: 1 }, (err, result) => {
-      expect(err).to.not.exist;
-      expect(result).to.exist;
-
-      client.close(true, function (err) {
+  it(
+    'should correctly fail on retry when client has been closed',
+    withClient(function (client, done) {
+      expect(client.isConnected()).to.be.true;
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      collection.insertOne({ a: 1 }, (err, result) => {
         expect(err).to.not.exist;
-        expect(client.isConnected()).to.be.false;
+        expect(result).to.exist;
 
-        expect(() => {
-          collection.insertOne({ a: 2 });
-        }).to.throw(/must be connected/);
-        done();
+        client.close(true, function (err) {
+          expect(err).to.not.exist;
+          expect(client.isConnected()).to.be.false;
+
+          expect(() => {
+            collection.insertOne({ a: 2 });
+          }).to.throw(/must be connected/);
+          done();
+        });
       });
-    });
-  })
-);
+    })
+  );
+});

@@ -197,9 +197,9 @@ export function connect(
     throw new Error('no callback function provided');
   }
 
-  // Has a connection already been established?
+  // If a connection already been established, we can terminate early
   if (mongoClient.topology && mongoClient.topology.isConnected()) {
-    return callback(new MongoError('MongoClient is already connected'));
+    return callback(undefined, mongoClient);
   }
 
   let didRequestAuthentication = false;
