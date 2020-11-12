@@ -1,8 +1,5 @@
 import type { MongoCredentials } from './cmap/auth/mongo_credentials';
-import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { AutoEncryptionOptions } from './deps';
-import type { Logger } from './logger';
-import type { DriverInfo, MongoClientOptions, PkFactory } from './mongo_client';
+import type { MongoClientOptions } from './mongo_client';
 import type { ReadConcern } from './read_concern';
 import type { ReadPreference } from './read_preference';
 import type { WriteConcern } from './write_concern';
@@ -20,79 +17,78 @@ import { URL } from 'url';
 export interface MongoOptions
   extends Required<BSONSerializeOptions>,
     Omit<ConnectionOptions, 'port'>,
-    Omit<TLSConnectionOptions, 'port'> {
+    Omit<TLSConnectionOptions, 'port'>,
+    Required<
+      Pick<
+        MongoClientOptions,
+        | 'autoEncryption'
+        | 'compression'
+        | 'compressors'
+        | 'connectTimeoutMS'
+        | 'dbName'
+        | 'directConnection'
+        | 'domainsEnabled'
+        | 'driverInfo'
+        | 'forceServerObjectId'
+        | 'gssapiServiceName'
+        | 'ha'
+        | 'haInterval'
+        | 'heartbeatFrequencyMS'
+        | 'keepAlive'
+        | 'keepAliveInitialDelay'
+        | 'localThresholdMS'
+        | 'logger'
+        | 'maxIdleTimeMS'
+        | 'maxPoolSize'
+        | 'minPoolSize'
+        | 'monitorCommands'
+        | 'noDelay'
+        | 'numberOfRetries'
+        | 'pkFactory'
+        | 'promiseLibrary'
+        | 'raw'
+        | 'reconnectInterval'
+        | 'reconnectTries'
+        | 'replicaSet'
+        | 'retryReads'
+        | 'retryWrites'
+        | 'serverSelectionTimeoutMS'
+        | 'serverSelectionTryOnce'
+        | 'socketTimeoutMS'
+        | 'tlsAllowInvalidCertificates'
+        | 'tlsAllowInvalidHostnames'
+        | 'tlsInsecure'
+        | 'waitQueueMultiple'
+        | 'waitQueueTimeoutMS'
+        | 'zlibCompressionLevel'
+      >
+    > {
   hosts: { host: string; port: number }[];
   srv: boolean;
-
-  autoEncryption: AutoEncryptionOptions;
   credentials: MongoCredentials;
-  compression: CompressorName;
-  compressors: CompressorName[];
-  connectTimeoutMS: number;
-  dbName: string;
-  directConnection: boolean;
-  domainsEnabled: boolean;
-  driverInfo: DriverInfo;
-  forceServerObjectId: boolean;
-  gssapiServiceName: string;
-  ha: boolean;
-  haInterval: number;
-  heartbeatFrequencyMS: number;
-  keepAlive: boolean;
-  keepAliveInitialDelay: number;
-  localThresholdMS: number;
-  logger: Logger;
-  maxIdleTimeMS: number;
-
-  // poolSize: number;
-  maxPoolSize: number;
-
-  maxStalenessSeconds: number;
-
-  // minSize: number;
-  minPoolSize: number;
-
-  monitorCommands: boolean;
-  noDelay: boolean;
-  numberOfRetries: number;
-  pkFactory: PkFactory;
-  promiseLibrary: PromiseConstructorLike;
-  raw: boolean;
-  readConcern: ReadConcern;
   readPreference: ReadPreference;
-  reconnectInterval: number;
-  reconnectTries: number;
-  replicaSet: string;
-  retryReads: boolean;
-  retryWrites: boolean;
-  serverSelectionTimeoutMS: number;
-  serverSelectionTryOnce: boolean;
-  socketTimeoutMS: number;
+  readConcern: ReadConcern;
+  writeConcern: WriteConcern;
 
   /**
+   * # NOTE ABOUT TLS Options
+   *
    * If set TLS enabled, equivalent to setting the ssl option.
    *
    * ### Additional options:
    *
-   * |    nodejs option     | MongoDB equivalent                                 | type                                   |
-   * |:---------------------|----------------------------------------------------|:---------------------------------------|
-   * | `ca`                 | sslCA, tlsCAFile                                   | `string \| Buffer \| Buffer[]`         |
-   * | `crl`                | sslCRL                                             | `string \| Buffer \| Buffer[]`         |
-   * | `cert`               | sslCert, tlsCertificateFile, tlsCertificateKeyFile | `string \| Buffer \| Buffer[]`         |
-   * | `key`                | sslKey, tlsCertificateKeyFile                      | `string \| Buffer \| KeyObject[]`      |
-   * | `passphrase`         | sslPass, tlsCertificateKeyFilePassword             | `string`                               |
-   * | `rejectUnauthorized` | sslValidate                                        | `boolean`                              |
+   * |    nodejs option     | MongoDB equivalent                                       | type                                   |
+   * |:---------------------|--------------------------------------------------------- |:---------------------------------------|
+   * | `ca`                 | `sslCA`, `tlsCAFile`                                     | `string \| Buffer \| Buffer[]`         |
+   * | `crl`                | `sslCRL`                                                 | `string \| Buffer \| Buffer[]`         |
+   * | `cert`               | `sslCert`, `tlsCertificateFile`, `tlsCertificateKeyFile` | `string \| Buffer \| Buffer[]`         |
+   * | `key`                | `sslKey`, `tlsCertificateKeyFile`                        | `string \| Buffer \| KeyObject[]`      |
+   * | `passphrase`         | `sslPass`, `tlsCertificateKeyFilePassword`               | `string`                               |
+   * | `rejectUnauthorized` | `sslValidate`                                            | `boolean`                              |
    *
    */
   tls: boolean;
-  tlsAllowInvalidCertificates: boolean;
-  tlsAllowInvalidHostnames: boolean;
-  tlsInsecure: boolean;
 
-  waitQueueMultiple: number;
-  waitQueueTimeoutMS: number;
-  writeConcern: WriteConcern;
-  zlibCompressionLevel: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /**
    * Turn these options into a reusable options dictionary
    */
