@@ -9,7 +9,7 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import { ReadConcern, ReadConcernLevelLike, ReadConcernLike } from './read_concern';
+import { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -24,12 +24,15 @@ import type { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { parseOptions } from './connection_string';
 
 /** @public */
-export enum LogLevel {
-  'error' = 'error',
-  'warn' = 'warn',
-  'info' = 'info',
-  'debug' = 'debug'
-}
+export const LogLevelEnum = {
+  error: 'error',
+  warn: 'warn',
+  info: 'info',
+  debug: 'debug'
+} as const;
+
+/** @public */
+export type LogLevel = typeof LogLevelEnum[keyof typeof LogLevelEnum];
 
 /** @public */
 export interface DriverInfo {
@@ -96,7 +99,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevelLike;
+  readConcernLevel?: ReadConcernLevel;
   /** Specifies the read preferences for this connection */
   readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
@@ -141,15 +144,15 @@ export interface MongoClientOptions
   /** Validate mongod server certificate against Certificate Authority */
   sslValidate?: boolean;
   /** SSL Certificate store binary buffer. */
-  sslCA?: Buffer;
+  sslCA?: string | Buffer | Array<string | Buffer>;
   /** SSL Certificate binary buffer. */
-  sslCert?: Buffer;
+  sslCert?: string | Buffer | Array<string | Buffer>;
   /** SSL Key file binary buffer. */
-  sslKey?: Buffer;
+  sslKey?: string | Buffer | Array<string | Buffer>;
   /** SSL Certificate pass phrase. */
   sslPass?: string;
   /** SSL Certificate revocation list binary buffer. */
-  sslCRL?: Buffer;
+  sslCRL?: string | Buffer | Array<string | Buffer>;
   /** Ensure we check server identify during SSL, set to false to disable checking. */
   checkServerIdentity?: boolean | ((hostname: string, cert: Document) => Error | undefined);
   /** TCP Connection no delay */
@@ -256,7 +259,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * The consolidate, parsed, transformed and merged options.
    * @internal
    */
-  options: MongoOptions;
+  options?: MongoOptions;
 
   // debugging
   originalUri;
@@ -274,7 +277,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
     this.originalUri = url;
     this.originalOptions = options;
 
-    this.options = parseOptions(url, options);
+    // this.options = parseOptions(url, options);
 
     // The internal state
     this.s = {

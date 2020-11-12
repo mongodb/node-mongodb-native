@@ -7,25 +7,28 @@ import { MongoDBAWS } from './mongodb_aws';
 import type { AuthProvider } from './auth_provider';
 
 /** @public */
-export enum AuthMechanism {
-  MONGODB_AWS = 'MONGODB-AWS',
-  MONGODB_CR = 'MONGODB-CR',
-  MONGODB_DEFAULT = 'DEFAULT',
-  MONGODB_GSSAPI = 'GSSAPI',
-  MONGODB_PLAIN = 'PLAIN',
-  MONGODB_SCRAM_SHA1 = 'SCRAM-SHA-1',
-  MONGODB_SCRAM_SHA256 = 'SCRAM-SHA-256',
-  MONGODB_X509 = 'MONGODB-X509'
-}
+export const AuthMechanismEnum = {
+  MONGODB_AWS: 'MONGODB-AWS',
+  MONGODB_CR: 'MONGODB-CR',
+  MONGODB_DEFAULT: 'DEFAULT',
+  MONGODB_GSSAPI: 'GSSAPI',
+  MONGODB_PLAIN: 'PLAIN',
+  MONGODB_SCRAM_SHA1: 'SCRAM-SHA-1',
+  MONGODB_SCRAM_SHA256: 'SCRAM-SHA-256',
+  MONGODB_X509: 'MONGODB-X509'
+} as const;
+
+/** @public */
+export type AuthMechanism = typeof AuthMechanismEnum[keyof typeof AuthMechanismEnum];
 
 export const AUTH_PROVIDERS = {
-  [AuthMechanism.MONGODB_AWS]: new MongoDBAWS(),
-  [AuthMechanism.MONGODB_CR]: new MongoCR(),
-  [AuthMechanism.MONGODB_GSSAPI]: new GSSAPI(),
-  [AuthMechanism.MONGODB_PLAIN]: new Plain(),
-  [AuthMechanism.MONGODB_SCRAM_SHA1]: new ScramSHA1(),
-  [AuthMechanism.MONGODB_SCRAM_SHA256]: new ScramSHA256(),
-  [AuthMechanism.MONGODB_X509]: new X509()
+  [AuthMechanismEnum.MONGODB_AWS]: new MongoDBAWS(),
+  [AuthMechanismEnum.MONGODB_CR]: new MongoCR(),
+  [AuthMechanismEnum.MONGODB_GSSAPI]: new GSSAPI(),
+  [AuthMechanismEnum.MONGODB_PLAIN]: new Plain(),
+  [AuthMechanismEnum.MONGODB_SCRAM_SHA1]: new ScramSHA1(),
+  [AuthMechanismEnum.MONGODB_SCRAM_SHA256]: new ScramSHA256(),
+  [AuthMechanismEnum.MONGODB_X509]: new X509()
 };
 
 // TODO: We can make auth mechanism more functional since we pass around a context object

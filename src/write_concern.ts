@@ -19,8 +19,6 @@ export interface WriteConcernOptions {
   writeConcern?: WriteConcernOptions | WriteConcern | W;
 }
 
-export const writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
-
 /**
  * A MongoDB WriteConcern, which describes the level of acknowledgement
  * requested from MongoDB for write operations.

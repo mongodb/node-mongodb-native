@@ -11,40 +11,31 @@ import type { Callback } from '../../utils';
 
 export { writeCommand };
 
-/** @internal */
-export type InsertOptions = WriteCommandOptions;
-
 export function insert(
   server: Server,
   ns: string,
   ops: Document[],
-  options: InsertOptions,
+  options: WriteCommandOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'insert', 'documents', ns, ops, options, callback);
 }
 
-/** @internal */
-export type UpdateOptions = WriteCommandOptions;
-
 export function update(
   server: Server,
   ns: string,
   ops: Document[],
-  options: UpdateOptions,
+  options: WriteCommandOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'update', 'updates', ns, ops, options, callback);
 }
 
-/** @internal */
-export type RemoveOptions = WriteCommandOptions;
-
 export function remove(
   server: Server,
   ns: string,
   ops: Document[],
-  options: RemoveOptions,
+  options: WriteCommandOptions,
   callback: Callback
 ): void {
   writeCommand(server, 'delete', 'deletes', ns, ops, options, callback);

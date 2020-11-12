@@ -27,10 +27,10 @@ import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
 import type { GetMoreOptions } from './wire_protocol/get_more';
-import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
 import type { QueryOptions } from './wire_protocol/query';
+import type { WriteCommandOptions } from './wire_protocol/write_command';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');

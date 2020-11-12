@@ -2,7 +2,7 @@ import * as net from 'net';
 import * as tls from 'tls';
 import { Connection, ConnectionOptions } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
-import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
+import { defaultAuthProviders, AuthMechanismEnum } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
 import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType } from '../utils';
 import {
@@ -179,7 +179,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
       });
 
       let provider;
-      if ((provider = AUTH_PROVIDERS[AuthMechanism.MONGODB_SCRAM_SHA256])) {
+      if ((provider = AUTH_PROVIDERS[AuthMechanismEnum.MONGODB_SCRAM_SHA256])) {
         // This auth mechanism is always present.
         provider.prepare(handshakeDoc, authContext, callback);
         return;

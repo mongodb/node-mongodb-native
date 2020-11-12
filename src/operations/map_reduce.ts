@@ -134,7 +134,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // If we have a read preference and inline is not set as output fail hard
     if (
-      this.readPreference.mode === ReadPreferenceMode.primary &&
+      this.readPreference.mode === ReadPreference.PRIMARY &&
       options.out &&
       (options.out as any).inline !== 1 &&
       options.out !== 'inline'

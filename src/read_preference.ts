@@ -3,19 +3,19 @@ import type { Document } from './bson';
 import type { ClientSession } from './sessions';
 
 /** @public */
-export type ReadPreferenceLike =
-  | ReadPreference
-  | ReadPreferenceMode
-  | keyof typeof ReadPreferenceMode;
+export type ReadPreferenceLike = ReadPreference | ReadPreferenceMode;
 
 /** @public */
-export enum ReadPreferenceMode {
-  primary = 'primary',
-  primaryPreferred = 'primaryPreferred',
-  secondary = 'secondary',
-  secondaryPreferred = 'secondaryPreferred',
-  nearest = 'nearest'
-}
+export const ReadPreferenceModeEnum = {
+  primary: 'primary',
+  primaryPreferred: 'primaryPreferred',
+  secondary: 'secondary',
+  secondaryPreferred: 'secondaryPreferred',
+  nearest: 'nearest'
+} as const;
+
+/** @public */
+export type ReadPreferenceMode = keyof typeof ReadPreferenceModeEnum;
 
 /** @public */
 export interface HedgeOptions {
@@ -65,17 +65,17 @@ export class ReadPreference {
   maxStalenessSeconds?: number;
   minWireVersion?: number;
 
-  public static PRIMARY = ReadPreferenceMode.primary;
-  public static PRIMARY_PREFERRED = ReadPreferenceMode.primaryPreferred;
-  public static SECONDARY = ReadPreferenceMode.secondary;
-  public static SECONDARY_PREFERRED = ReadPreferenceMode.secondaryPreferred;
-  public static NEAREST = ReadPreferenceMode.nearest;
+  public static PRIMARY = ReadPreferenceModeEnum.primary;
+  public static PRIMARY_PREFERRED = ReadPreferenceModeEnum.primaryPreferred;
+  public static SECONDARY = ReadPreferenceModeEnum.secondary;
+  public static SECONDARY_PREFERRED = ReadPreferenceModeEnum.secondaryPreferred;
+  public static NEAREST = ReadPreferenceModeEnum.nearest;
 
-  public static primary = new ReadPreference(ReadPreferenceMode.primary);
-  public static primaryPreferred = new ReadPreference(ReadPreferenceMode.primaryPreferred);
-  public static secondary = new ReadPreference(ReadPreferenceMode.secondary);
-  public static secondaryPreferred = new ReadPreference(ReadPreferenceMode.secondaryPreferred);
-  public static nearest = new ReadPreference(ReadPreferenceMode.nearest);
+  public static primary = new ReadPreference(ReadPreferenceModeEnum.primary);
+  public static primaryPreferred = new ReadPreference(ReadPreferenceModeEnum.primaryPreferred);
+  public static secondary = new ReadPreference(ReadPreferenceModeEnum.secondary);
+  public static secondaryPreferred = new ReadPreference(ReadPreferenceModeEnum.secondaryPreferred);
+  public static nearest = new ReadPreference(ReadPreferenceModeEnum.nearest);
 
   /**
    * @param mode - A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
@@ -84,7 +84,7 @@ export class ReadPreference {
    */
   constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
-      throw new TypeError(`Invalid read preference mode ${mode}`);
+      throw new TypeError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
     if (options === undefined && typeof tags === 'object' && !Array.isArray(tags)) {
       options = tags;
@@ -220,7 +220,7 @@ export class ReadPreference {
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean {
-    const NEEDS_SLAVEOK = new Set([
+    const NEEDS_SLAVEOK = new Set<string>([
       ReadPreference.PRIMARY_PREFERRED,
       ReadPreference.SECONDARY,
       ReadPreference.SECONDARY_PREFERRED,

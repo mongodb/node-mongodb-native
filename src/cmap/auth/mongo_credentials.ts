@@ -1,7 +1,7 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
-import { AuthMechanism } from './defaultAuthProviders';
+import { AuthMechanism, AuthMechanismEnum } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
 function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
@@ -10,18 +10,18 @@ function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
     // if it is available, else scram-sha-1
     if (Array.isArray(ismaster.saslSupportedMechs)) {
       return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
-        ? AuthMechanism.MONGODB_SCRAM_SHA256
-        : AuthMechanism.MONGODB_SCRAM_SHA1;
+        ? AuthMechanismEnum.MONGODB_SCRAM_SHA256
+        : AuthMechanismEnum.MONGODB_SCRAM_SHA1;
     }
 
     // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
     if (ismaster.maxWireVersion >= 3) {
-      return AuthMechanism.MONGODB_SCRAM_SHA1;
+      return AuthMechanismEnum.MONGODB_SCRAM_SHA1;
     }
   }
 
   // Default for wireprotocol < 3
-  return AuthMechanism.MONGODB_CR;
+  return AuthMechanismEnum.MONGODB_CR;
 }
 
 /** @public */
@@ -57,7 +57,7 @@ export class MongoCredentials {
     if (!this.source && options.db) {
       this.source = options.db;
     }
-    this.mechanism = options.mechanism || AuthMechanism.MONGODB_DEFAULT;
+    this.mechanism = options.mechanism || AuthMechanismEnum.MONGODB_DEFAULT;
     this.mechanismProperties = options.mechanismProperties || {};
 
     if (this.mechanism.match(/MONGODB-AWS/i)) {
