@@ -2,12 +2,12 @@ import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
+import type { BSONSerializeOptions, Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 
@@ -19,8 +19,6 @@ export interface CommandOperationOptions extends OperationOptions, WriteConcernO
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
-  /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
-  readPreference?: ReadPreferenceLike;
   /** Collation */
   collation?: CollationOptions;
   maxTimeMS?: number;
@@ -51,7 +49,6 @@ export abstract class CommandOperation<
   TResult = Document
 > extends OperationBase<T> {
   ns: MongoDBNamespace;
-  readPreference: ReadPreference;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   explain: boolean;
@@ -73,20 +70,12 @@ export abstract class CommandOperation<
         : new MongoDBNamespace('admin', '$cmd');
     }
 
-    this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
-      ? ReadPreference.primary
-      : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
-    this.bsonOptions = resolveBSONOptions(options);
 
     this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
-
-    // TODO: A lot of our code depends on having the read preference in the options. This should
-    //       go away, but also requires massive test rewrites.
-    this.options.readPreference = this.readPreference;
 
     // TODO(NODE-2056): make logger another "inheritable" property
     if (parent && parent.logger) {

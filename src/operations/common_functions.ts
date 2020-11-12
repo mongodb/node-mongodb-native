@@ -1,11 +1,5 @@
 import { MongoError } from '../error';
-import {
-  applyRetryableWrites,
-  applyWriteConcern,
-  decorateWithCollation,
-  Callback,
-  getTopology
-} from '../utils';
+import { applyRetryableWrites, decorateWithCollation, Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -136,10 +130,9 @@ export function removeDocuments(
   // Create an empty options object if the provided one is null
   options = options || {};
 
-  // Final options for retryable writes and write concern
+  // Final options for retryable writes
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
   // If selector is null set empty
   if (selector == null) selector = {};
@@ -218,16 +211,9 @@ export function updateDocuments(
   if (document == null || typeof document !== 'object')
     return callback(new TypeError('document must be a valid JavaScript object'));
 
-  // Final options for retryable writes and write concern
+  // Final options for retryable writes
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
-  // Do we return the actual result document
-  // Either use override on the function, or go back to default on either the collection
-  // level or db
-  finalOptions.serializeFunctions =
-    options.serializeFunctions || coll.bsonOptions.serializeFunctions;
 
   // Execute the operation
   const op: Document = { q: selector, u: document };

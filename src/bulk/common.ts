@@ -2,14 +2,14 @@ import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
 import { MongoError, MongoWriteConcernError, AnyError } from '../error';
 import {
-  applyWriteConcern,
   applyRetryableWrites,
   executeLegacyOperation,
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
   maxWireVersion,
-  getTopology
+  getTopology,
+  resolveOptions
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -571,14 +571,10 @@ function executeCommands(
     executeCommands(bulkOperation, options, callback);
   }
 
-  const finalOptions = Object.assign(
-    { ordered: bulkOperation.isOrdered },
-    bulkOperation.bsonOptions,
-    options
-  );
-  if (bulkOperation.s.writeConcern != null) {
-    finalOptions.writeConcern = bulkOperation.s.writeConcern;
-  }
+  const finalOptions = resolveOptions(bulkOperation, {
+    ...options,
+    ordered: bulkOperation.isOrdered
+  });
 
   if (finalOptions.bypassDocumentValidation !== true) {
     delete finalOptions.bypassDocumentValidation;
@@ -935,10 +931,9 @@ export abstract class BulkOperationBase {
     //   + 1 bytes for null terminator
     const maxKeySize = (maxWriteBatchSize - 1).toString(10).length + 2;
 
-    // Final options for retryable writes and write concern
+    // Final options for retryable writes
     let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, collection.s.db);
-    finalOptions = applyWriteConcern(finalOptions, { collection: collection }, options);
 
     // Final results
     const bulkResult: BulkResult = {
@@ -983,7 +978,7 @@ export abstract class BulkOperationBase {
       // Options
       options: finalOptions,
       // BSON options
-      bsonOptions: resolveBSONOptions(options, collection),
+      bsonOptions: resolveBSONOptions(options),
       // Current operation
       currentOp,
       // Executed
@@ -1169,19 +1164,18 @@ export abstract class BulkOperationBase {
     return this.s.bsonOptions;
   }
 
+  get writeConcern(): WriteConcern | undefined {
+    return this.s.writeConcern;
+  }
+
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
-  execute(
-    _writeConcern?: WriteConcern,
-    options?: BulkWriteOptions,
-    callback?: Callback<BulkWriteResult>
-  ): Promise<void> | void {
+  execute(options?: BulkWriteOptions, callback?: Callback<BulkWriteResult>): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
-    if (typeof _writeConcern === 'function') {
-      callback = _writeConcern as Callback;
-    } else if (_writeConcern && typeof _writeConcern === 'object') {
-      this.s.writeConcern = _writeConcern;
+    const writeConcern = WriteConcern.fromOptions(options);
+    if (writeConcern) {
+      this.s.writeConcern = writeConcern;
     }
 
     if (this.s.executed) {
