@@ -8,7 +8,6 @@ export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
-  NO_INHERIT_OPTIONS: Symbol('NO_INHERIT_OPTIONS'),
   EXPLAINABLE: Symbol('EXPLAINABLE')
 } as const;
 
