@@ -4,7 +4,7 @@ import type { Server } from './sdam/server';
 import { maxWireVersion } from './utils';
 
 /** @public */
-export const Verbosity = {
+export const ExplainVerbosity = {
   queryPlanner: 'queryPlanner',
   queryPlannerExtended: 'queryPlannerExtended',
   executionStats: 'executionStats',
@@ -16,12 +16,12 @@ export const Verbosity = {
  * "allPlansExecution" and false as "queryPlanner".
  * @public
  */
-export type VerbosityLike = keyof typeof Verbosity | boolean;
+export type ExplainVerbosityLike = keyof typeof ExplainVerbosity | boolean;
 
 /** @public */
 export interface ExplainOptions {
   /** Specifies the verbosity mode for the explain output. */
-  explain?: VerbosityLike;
+  explain?: ExplainVerbosityLike;
 }
 
 // Minimum server versions which support explain with specific operations
@@ -33,13 +33,15 @@ const SUPPORTS_EXPLAIN_WITH_MAP_REDUCE = 9;
 
 /** @internal */
 export class Explain {
-  verbosity: keyof typeof Verbosity;
+  verbosity: keyof typeof ExplainVerbosity;
 
-  constructor(verbosity: VerbosityLike) {
+  constructor(verbosity: ExplainVerbosityLike) {
     if (typeof verbosity === 'boolean') {
-      this.verbosity = verbosity ? Verbosity.allPlansExecution : Verbosity.queryPlanner;
+      this.verbosity = verbosity
+        ? ExplainVerbosity.allPlansExecution
+        : ExplainVerbosity.queryPlanner;
     } else {
-      this.verbosity = Verbosity[verbosity];
+      this.verbosity = ExplainVerbosity[verbosity];
     }
   }
 
@@ -47,11 +49,11 @@ export class Explain {
     if (options?.explain === undefined) return;
 
     const explain = options.explain;
-    if (typeof explain === 'boolean' || explain in Verbosity) {
+    if (typeof explain === 'boolean' || explain in ExplainVerbosity) {
       return new Explain(explain);
     }
 
-    throw new MongoError(`explain must be one of ${Object.keys(Verbosity)} or a boolean`);
+    throw new MongoError(`explain must be one of ${Object.keys(ExplainVerbosity)} or a boolean`);
   }
 
   /** Checks that the server supports explain on the given operation or command.*/
