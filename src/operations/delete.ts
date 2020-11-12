@@ -7,11 +7,10 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Connection } from '../cmap/connection';
-import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
-import type { CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
-export interface DeleteOptions extends CommandOperationOptions, ExplainOptions {
+export interface DeleteOptions extends CommandOperationOptions {
   single?: boolean;
   hint?: Hint;
 }
@@ -52,7 +51,7 @@ export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
   }
 }
 
-export class DeleteOneOperation extends ExplainableCommand<DeleteOptions, DeleteResult> {
+export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 
@@ -82,7 +81,7 @@ export class DeleteOneOperation extends ExplainableCommand<DeleteOptions, Delete
   }
 }
 
-export class DeleteManyOperation extends ExplainableCommand<DeleteOptions, DeleteResult> {
+export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
   collection: Collection;
   filter: Document;
 
@@ -121,5 +120,5 @@ export class DeleteManyOperation extends ExplainableCommand<DeleteOptions, Delet
 }
 
 defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);

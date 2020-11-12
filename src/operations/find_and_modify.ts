@@ -13,11 +13,10 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
-import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
-import type { CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
-export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOptions {
+export interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */
@@ -42,7 +41,7 @@ export interface FindAndModifyOptions extends CommandOperationOptions, ExplainOp
 }
 
 /** @internal */
-export class FindAndModifyOperation extends ExplainableCommand<FindAndModifyOptions, Document> {
+export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
   collection: Collection;
   query: Document;
   sort?: Sort;
@@ -232,4 +231,8 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   }
 }
 
-defineAspects(FindAndModifyOperation, [Aspect.WRITE_OPERATION, Aspect.RETRYABLE]);
+defineAspects(FindAndModifyOperation, [
+  Aspect.WRITE_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE
+]);

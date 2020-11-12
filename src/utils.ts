@@ -486,9 +486,8 @@ export function decorateWithReadConcern(
  * @param options - the options containing the explain verbosity
  */
 export function decorateWithExplain(command: Document, explain: Explain): Document {
-  // A command being explained cannot have an explain field directly on it
-  if (command.explain !== undefined) {
-    delete command.explain;
+  if (command.explain) {
+    return command;
   }
 
   return { explain: command, verbosity: explain.verbosity };

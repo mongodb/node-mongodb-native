@@ -10,11 +10,15 @@ import type { Server } from '../sdam/server';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
+import { Explain, ExplainOptions } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @public */
-export interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
+export interface CommandOperationOptions
+  extends OperationOptions,
+    WriteConcernOptions,
+    ExplainOptions {
   /** Return the full server response for the command */
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
@@ -56,6 +60,7 @@ export abstract class CommandOperation<
   writeConcern?: WriteConcern;
   fullResponse?: boolean;
   logger?: Logger;
+  explain?: Explain;
 
   constructor(parent?: OperationParent, options?: T) {
     super(options);
@@ -92,6 +97,19 @@ export abstract class CommandOperation<
 
     // Assign BSON serialize options to OperationBase, preferring options over parent options.
     this.bsonOptions = resolveBSONOptions(options, parent);
+
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      this.explain = Explain.fromOptions(options);
+    } else if (options?.explain !== undefined) {
+      throw new MongoError(`explain is not supported on this command`);
+    }
+  }
+
+  get canRetryWrite(): boolean {
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      return this.explain === undefined;
+    }
+    return true;
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -139,11 +157,18 @@ export abstract class CommandOperation<
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
-    // If a command is to be explained, we need to reformat the command after
-    // the other command properties are specified.
+    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
+      if (!Explain.explainSupported(server, cmd)) {
+        callback(new MongoError(`server ${server.name} does not support explain on this command`));
+        return;
+      }
+
+      cmd = decorateWithExplain(cmd, this.explain);
+    }
+
     server.command(
       this.ns.toString(),
-      cmd.explain ? decorateWithExplain(cmd, cmd.explain) : cmd,
+      cmd,
       { fullResult: !!this.fullResponse, ...this.options },
       callback
     );

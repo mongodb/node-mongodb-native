@@ -1,8 +1,9 @@
 import type { Document } from '.';
-import type { ExplainOptions } from './operations/explainable_command';
+import { MongoError } from './error';
 import type { Server } from './sdam/server';
 import { maxWireVersion } from './utils';
 
+/** @public */
 export const Verbosity = {
   queryPlanner: 'queryPlanner',
   queryPlannerExtended: 'queryPlannerExtended',
@@ -16,6 +17,12 @@ export const Verbosity = {
  * @public
  */
 export type VerbosityLike = keyof typeof Verbosity | boolean;
+
+/** @public */
+export interface ExplainOptions {
+  /** Specifies the verbosity mode for the explain output. */
+  explain?: VerbosityLike;
+}
 
 // Minimum server versions which support explain with specific operations
 const SUPPORTS_EXPLAIN_WITH_REMOVE = 3;
@@ -37,18 +44,14 @@ export class Explain {
   }
 
   static fromOptions(options?: ExplainOptions): Explain | undefined {
-    if (options?.explain === undefined) {
-      return;
-    }
-    return new Explain(options.explain);
-  }
+    if (options?.explain === undefined) return;
 
-  static valid(options?: ExplainOptions): boolean {
-    if (options?.explain === undefined) {
-      return true;
-    }
     const explain = options.explain;
-    return typeof explain === 'boolean' || explain in Verbosity;
+    if (typeof explain === 'boolean' || explain in Verbosity) {
+      return new Explain(explain);
+    }
+
+    throw new MongoError(`explain must be one of ${Object.keys(Verbosity)} or a boolean`);
   }
 
   /** Checks that the server supports explain on the given operation or command.*/

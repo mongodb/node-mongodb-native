@@ -5,11 +5,10 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
-import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
-import type { CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
-export interface UpdateOptions extends CommandOperationOptions, ExplainOptions {
+export interface UpdateOptions extends CommandOperationOptions {
   /** A set of filters specifying to which array elements an update should apply */
   arrayFilters?: Document[];
   /** If true, allows the write to opt-out of document level validation */
@@ -66,7 +65,7 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
 }
 
 /** @internal */
-export class UpdateOneOperation extends ExplainableCommand<UpdateOptions, UpdateResult> {
+export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -115,7 +114,7 @@ export class UpdateOneOperation extends ExplainableCommand<UpdateOptions, Update
 }
 
 /** @internal */
-export class UpdateManyOperation extends ExplainableCommand<UpdateOptions, UpdateResult> {
+export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
   collection: Collection;
   filter: Document;
   update: Document;
@@ -160,5 +159,5 @@ export class UpdateManyOperation extends ExplainableCommand<UpdateOptions, Updat
 }
 
 defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);

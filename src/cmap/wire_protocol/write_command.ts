@@ -4,8 +4,7 @@ import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
-import { Explain } from '../../explain';
-import type { ExplainOptions } from '../../operations/explainable_command';
+import { Explain, ExplainOptions } from '../../explain';
 
 /** @public */
 export interface CollationOptions {

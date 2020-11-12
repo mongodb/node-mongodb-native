@@ -13,8 +13,8 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
-import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
-import type { CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 const exclusionList = [
   'explain',
@@ -36,7 +36,7 @@ export type ReduceFunction = (key: string, values: Document[]) => Document;
 export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
 
 /** @public */
-export interface MapReduceOptions extends CommandOperationOptions, ExplainOptions {
+export interface MapReduceOptions extends CommandOperationOptions {
   /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
@@ -69,10 +69,7 @@ interface MapReduceStats {
  * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
  * @internal
  */
-export class MapReduceOperation extends ExplainableCommand<
-  MapReduceOptions,
-  Document | Document[]
-> {
+export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
   collection: Collection;
   /** The mapping function. */
   map: MapFunction | string;
@@ -231,3 +228,5 @@ function processScope(scope: Document | ObjectId) {
 
   return newScope;
 }
+
+defineAspects(MapReduceOperation, [Aspect.EXPLAINABLE]);

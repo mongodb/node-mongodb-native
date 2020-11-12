@@ -3,17 +3,16 @@ import { decorateWithCollation, decorateWithReadConcern, Callback } from '../uti
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { ExplainableCommand, ExplainOptions } from '../operations/explainable_command';
-import type { CommandOperationOptions } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
-export interface DistinctOptions extends CommandOperationOptions, ExplainOptions {}
+export type DistinctOptions = CommandOperationOptions;
 
 /**
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends ExplainableCommand<DistinctOptions, Document[]> {
+export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
   collection: Collection;
   /** Field of the document to find distinct values for. */
   key: string;
@@ -75,4 +74,4 @@ export class DistinctOperation extends ExplainableCommand<DistinctOptions, Docum
   }
 }
 
-defineAspects(DistinctOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(DistinctOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
