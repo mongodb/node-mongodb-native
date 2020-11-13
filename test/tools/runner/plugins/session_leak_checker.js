@@ -14,11 +14,11 @@ function getSessionLeakMetadata(currentTest) {
 
 const kTrace = Symbol('trace');
 function dumpSessionInfo(which, sessions) {
-  console.log(which);
+  console.warn(which);
   sessions.forEach(session => {
-    console.log(` >> ${JSON.stringify(session.id)}`);
+    console.warn(` >> ${JSON.stringify(session.id)}`);
     if (session[kTrace]) {
-      console.log(session[kTrace]);
+      console.warn(session[kTrace]);
     }
   });
 }
