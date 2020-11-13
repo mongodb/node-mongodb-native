@@ -1,5 +1,5 @@
 import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import type { Document } from '../bson';
 import type { Sort } from '../sort';
@@ -88,68 +88,79 @@ export class AggregationCursor extends AbstractCursor {
 
   /** Add a group stage to the aggregation pipeline */
   group($group: Document): this {
-    this.pipeline.push({ $group });
+    assertUninitialized(this);
+    this[kPipeline].push({ $group });
     return this;
   }
 
   /** Add a limit stage to the aggregation pipeline */
   limit($limit: number): this {
-    this.pipeline.push({ $limit });
+    assertUninitialized(this);
+    this[kPipeline].push({ $limit });
     return this;
   }
 
   /** Add a match stage to the aggregation pipeline */
   match($match: Document): this {
-    this.pipeline.push({ $match });
+    assertUninitialized(this);
+    this[kPipeline].push({ $match });
     return this;
   }
 
   /** Add a out stage to the aggregation pipeline */
   out($out: number): this {
-    this.pipeline.push({ $out });
+    assertUninitialized(this);
+    this[kPipeline].push({ $out });
     return this;
   }
 
   /** Add a project stage to the aggregation pipeline */
   project($project: Document): this {
-    this.pipeline.push({ $project });
+    assertUninitialized(this);
+    this[kPipeline].push({ $project });
     return this;
   }
 
   /** Add a lookup stage to the aggregation pipeline */
   lookup($lookup: Document): this {
-    this.pipeline.push({ $lookup });
+    assertUninitialized(this);
+    this[kPipeline].push({ $lookup });
     return this;
   }
 
   /** Add a redact stage to the aggregation pipeline */
   redact($redact: Document): this {
-    this.pipeline.push({ $redact });
+    assertUninitialized(this);
+    this[kPipeline].push({ $redact });
     return this;
   }
 
   /** Add a skip stage to the aggregation pipeline */
   skip($skip: number): this {
-    this.pipeline.push({ $skip });
+    assertUninitialized(this);
+    this[kPipeline].push({ $skip });
     return this;
   }
 
   /** Add a sort stage to the aggregation pipeline */
   sort($sort: Sort): this {
-    this.pipeline.push({ $sort });
+    assertUninitialized(this);
+    this[kPipeline].push({ $sort });
     return this;
   }
 
   /** Add a unwind stage to the aggregation pipeline */
   unwind($unwind: number): this {
-    this.pipeline.push({ $unwind });
+    assertUninitialized(this);
+    this[kPipeline].push({ $unwind });
     return this;
   }
 
   // deprecated methods
   /** @deprecated Add a geoNear stage to the aggregation pipeline */
   geoNear($geoNear: Document): this {
-    this.pipeline.push({ $geoNear });
+    assertUninitialized(this);
+    this[kPipeline].push({ $geoNear });
     return this;
   }
 }

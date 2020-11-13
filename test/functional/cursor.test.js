@@ -638,7 +638,7 @@ describe('Cursor', function () {
               expect(err).to.not.exist;
               expect(() => {
                 cursor.limit(1);
-              }).to.throw(/not extensible/);
+              }).to.throw(/Cursor is already initialized/);
 
               done();
             });
@@ -859,97 +859,6 @@ describe('Cursor', function () {
                   // }).to.throw(/not extensible/);
 
                   done();
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  it('shouldCorrectlyHandleChangesInBatchSizes', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        db.createCollection('test_not_multiple_batch_size', (err, collection) => {
-          expect(err).to.not.exist;
-
-          var records = 6;
-          var batchSize = 2;
-          var docs = [];
-          for (var i = 0; i < records; i++) {
-            docs.push({ a: i });
-          }
-
-          collection.insert(docs, configuration.writeConcernMax(), () => {
-            expect(err).to.not.exist;
-
-            const cursor = collection.find({}, { batchSize: batchSize });
-            this.defer(() => cursor.close());
-
-            //1st
-            cursor.next((err, items) => {
-              expect(err).to.not.exist;
-              //cursor.items should contain 1 since nextObject already popped one
-              test.equal(1, cursor.bufferedCount());
-              test.ok(items != null);
-
-              //2nd
-              cursor.next((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(0, cursor.bufferedCount());
-                test.ok(items != null);
-
-                //test batch size modification on the fly
-                batchSize = 3;
-                cursor.batchSize(batchSize);
-
-                //3rd
-                cursor.next((err, items) => {
-                  expect(err).to.not.exist;
-                  test.equal(2, cursor.bufferedCount());
-                  test.ok(items != null);
-
-                  //4th
-                  cursor.next((err, items) => {
-                    expect(err).to.not.exist;
-                    test.equal(1, cursor.bufferedCount());
-                    test.ok(items != null);
-
-                    //5th
-                    cursor.next((err, items) => {
-                      expect(err).to.not.exist;
-                      test.equal(0, cursor.bufferedCount());
-                      test.ok(items != null);
-
-                      //6th
-                      cursor.next((err, items) => {
-                        expect(err).to.not.exist;
-                        test.equal(0, cursor.bufferedCount());
-                        test.ok(items != null);
-
-                        //No more
-                        cursor.next((err, items) => {
-                          expect(err).to.not.exist;
-                          test.ok(items == null);
-                          test.ok(cursor.isClosed());
-                          done();
-                        });
-                      });
-                    });
-                  });
                 });
               });
             });

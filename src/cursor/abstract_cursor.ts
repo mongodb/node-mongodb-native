@@ -17,6 +17,7 @@ const kTopology = Symbol('topology');
 const kSession = Symbol('session');
 const kOptions = Symbol('options');
 const kTransform = Symbol('transform');
+const kInitialized = Symbol('iniitalized');
 const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 
@@ -77,6 +78,7 @@ export abstract class AbstractCursor extends EventEmitter {
   [kDocuments]: Document[];
   [kTopology]: Topology;
   [kTransform]?: (doc: Document) => Document;
+  [kInitialized]: boolean;
   [kClosed]: boolean;
   [kKilled]: boolean;
   [kOptions]: InternalAbstractCursorOptions;
@@ -94,6 +96,7 @@ export abstract class AbstractCursor extends EventEmitter {
     this[kTopology] = topology;
     this[kNamespace] = namespace;
     this[kDocuments] = []; // TODO: https://github.com/microsoft/TypeScript/issues/36230
+    this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
     this[kOptions] = {
@@ -386,6 +389,7 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param value - The flag boolean value.
    */
   addCursorFlag(flag: CursorFlag, value: boolean): this {
+    assertUninitialized(this);
     if (!CURSOR_FLAGS.includes(flag)) {
       throw new MongoError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
@@ -404,6 +408,7 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param transform - The mapping transformation method.
    */
   map(transform: (doc: Document) => Document): this {
+    assertUninitialized(this);
     const oldTransform = this[kTransform];
     if (oldTransform) {
       this[kTransform] = doc => {
@@ -422,6 +427,7 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param readPreference - The new read preference for the cursor.
    */
   setReadPreference(readPreference: ReadPreferenceLike): this {
+    assertUninitialized(this);
     if (readPreference instanceof ReadPreference) {
       this[kOptions].readPreference = readPreference;
     } else if (typeof readPreference === 'string') {
@@ -439,6 +445,7 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param value - Number of milliseconds to wait before aborting the query.
    */
   maxTimeMS(value: number): this {
+    assertUninitialized(this);
     if (typeof value !== 'number') {
       throw new TypeError('maxTimeMS must be a number');
     }
@@ -453,6 +460,7 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param value - The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
    */
   batchSize(value: number): this {
+    assertUninitialized(this);
     if (this[kOptions].tailable) {
       throw new MongoError('Tailable cursors do not support batchSize');
     }
@@ -570,6 +578,9 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
         }
       }
 
+      // the cursor is now initialized, even if an error occurred or it is dead
+      cursor[kInitialized] = true;
+
       if (err || cursorIsDead(cursor)) {
         return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
       }
@@ -621,6 +632,13 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
     session.endSession(callback);
   } else {
     callback();
+  }
+}
+
+/** @internal */
+export function assertUninitialized(cursor: AbstractCursor): void {
+  if (cursor[kInitialized]) {
+    throw new MongoError('Cursor is already initialized');
   }
 }
 
