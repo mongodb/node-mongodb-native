@@ -124,14 +124,4 @@ describe('AbstractCursor', function () {
       })
     );
   });
-
-  context('sessions', function () {
-    it(
-      'should end a session after close if the cursor owns the session',
-      withClientV2(function (client, done) {
-        // TBD
-        done();
-      })
-    );
-  });
 });
