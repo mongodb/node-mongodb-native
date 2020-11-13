@@ -166,7 +166,7 @@ function prepareLegacyFindQuery(
   options = options || {};
 
   const readPreference = getReadPreference(cmd, options);
-  const batchSize = cmd.batchSize || options.batchSize;
+  const batchSize = cmd.batchSize || options.batchSize || 0;
   const limit = cmd.limit || options.limit;
   const numberToSkip = cmd.skip || options.skip || 0;
 
