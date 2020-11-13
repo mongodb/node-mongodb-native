@@ -285,16 +285,18 @@ function runTestSuiteTest(configuration, spec, context) {
   const client = configuration.newClient(url, clientOptions);
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
-  let pingTracker = 0;
+
+  let skippedInitialPing = false;
   client.on('commandStarted', event => {
     if (IGNORED_COMMANDS.has(event.commandName)) {
       return;
     }
 
-    // This gets rid of the first ping command
-    if (event.commandName === 'ping') {
-      pingTracker++;
-      if (pingTracker === 1) return;
+    // If credentials were provided, then the Topology sends an initial `ping` command
+    // that we want to skip
+    if (event.commandName === 'ping' && client.topology.s.credentials && !skippedInitialPing) {
+      skippedInitialPing = true;
+      return;
     }
 
     context.commandEvents.push(event);

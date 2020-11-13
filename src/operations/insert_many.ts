@@ -1,10 +1,10 @@
-import { OperationBase } from './operation';
+import { Aspect, defineAspects, OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import { ObjectId, Document, resolveBSONOptions } from '../bson';
+import type { ObjectId, Document } from '../bson';
 import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 
@@ -30,9 +30,6 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
 
     this.collection = collection;
     this.docs = docs;
-
-    // Assign BSON serialize options to OperationBase, preferring options over collection options
-    this.bsonOptions = resolveBSONOptions(options, collection);
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
@@ -73,3 +70,5 @@ function mapInsertManyResults(docs: Document[], r: BulkWriteResult): InsertManyR
 
   return finalResult;
 }
+
+defineAspects(InsertManyOperation, [Aspect.WRITE_OPERATION]);

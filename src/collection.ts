@@ -314,7 +314,7 @@ export class Collection implements OperationParent {
 
     return executeOperation(
       getTopology(this),
-      new InsertManyOperation(this, docs, options),
+      new InsertManyOperation(this, docs, resolveOptions(this, options)),
       callback
     );
   }
@@ -374,7 +374,7 @@ export class Collection implements OperationParent {
 
     return executeOperation(
       getTopology(this),
-      new BulkWriteOperation(this, operations, options),
+      new BulkWriteOperation(this, operations, resolveOptions(this, options)),
       callback
     );
   }
@@ -1311,12 +1311,12 @@ export class Collection implements OperationParent {
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: BulkWriteOptions): any {
-    return new UnorderedBulkOperation(this, options ?? {});
+    return new UnorderedBulkOperation(this, resolveOptions(this, options));
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: BulkWriteOptions): any {
-    return new OrderedBulkOperation(this, options ?? {});
+    return new OrderedBulkOperation(this, resolveOptions(this, options));
   }
 
   /** Get the db scoped logger */
