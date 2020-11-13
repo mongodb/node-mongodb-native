@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback
+  Callback,
+  maxWireVersion
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -156,6 +157,11 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       decorateWithCollation(mapCommandHash, coll, options);
     } catch (err) {
       return callback(err);
+    }
+
+    if (this.explain && maxWireVersion(server) < 9) {
+      callback(new MongoError(`server ${server.name} does not support explain on mapReduce`));
+      return;
     }
 
     // Execute command

@@ -1,9 +1,10 @@
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback } from '../utils';
+import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersion } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import { MongoError } from '../error';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
@@ -61,6 +62,11 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err);
+    }
+
+    if (this.explain && maxWireVersion(server) < 4) {
+      callback(new MongoError(`server ${server.name} does not support explain on distinct`));
+      return;
     }
 
     super.executeCommand(server, cmd, (err, result) => {

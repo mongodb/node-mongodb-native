@@ -67,11 +67,9 @@ export function writeCommand(
 
   // If a command is to be explained, we need to reformat the command after
   // the other command properties are specified.
-  if (options.explain !== undefined) {
-    const explain = Explain.fromOptions(options);
-    if (explain) {
-      writeCommand = decorateWithExplain(writeCommand, explain);
-    }
+  const explain = Explain.fromOptions(options);
+  if (explain) {
+    writeCommand = decorateWithExplain(writeCommand, explain);
   }
 
   const commandOptions = Object.assign(

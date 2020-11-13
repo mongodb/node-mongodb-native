@@ -447,7 +447,7 @@ export function decorateWithReadConcern(
  * Applies an explain to a given command.
  * @internal
  *
- * @param command - the command on which to apply the read concern
+ * @param command - the command on which to apply the explain
  * @param options - the options containing the explain verbosity
  */
 export function decorateWithExplain(command: Document, explain: Explain): Document {

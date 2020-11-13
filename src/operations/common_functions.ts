@@ -4,7 +4,8 @@ import {
   applyWriteConcern,
   decorateWithCollation,
   Callback,
-  getTopology
+  getTopology,
+  maxWireVersion
 } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -162,6 +163,12 @@ export function removeDocuments(
     return callback ? callback(err, null) : undefined;
   }
 
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
+      : undefined;
+  }
+
   // Execute the remove
   server.remove(
     coll.s.namespace.toString(),
@@ -252,6 +259,12 @@ export function updateDocuments(
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
     return callback(err, null);
+  }
+
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on update`))
+      : undefined;
   }
 
   // Update options

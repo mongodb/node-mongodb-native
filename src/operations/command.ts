@@ -156,11 +156,6 @@ export abstract class CommandOperation<
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      if (!Explain.explainSupported(server, cmd)) {
-        callback(new MongoError(`server ${server.name} does not support explain on this command`));
-        return;
-      }
-
       cmd = decorateWithExplain(cmd, this.explain);
     }
 
