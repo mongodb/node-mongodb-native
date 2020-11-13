@@ -5,6 +5,5 @@
   "ui": "test/tools/runner/metadata_ui.js",
   "reporter": "test/tools/reporter/mongodb_reporter.js",
   "recursive": true,
-  "timeout": 60000,
-  "reporter": "spec-xunit-file"
+  "timeout": 60000
 }

@@ -1,4 +1,4 @@
 {
   "require": "ts-node/register",
-  "reporter": "spec-xunit-file"
+  "reporter": "test/tools/reporter/mongodb_reporter.js"
 }
