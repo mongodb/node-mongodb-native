@@ -172,8 +172,8 @@ export abstract class AbstractCursor extends EventEmitter {
   }
 
   /** Returns current buffered documents */
-  readBufferedDocuments(number: number): Document[] {
-    return this[kDocuments].splice(0, Math.max(0, Math.min(number, this[kDocuments].length)));
+  readBufferedDocuments(number?: number): Document[] {
+    return this[kDocuments].splice(0, number ?? this[kDocuments].length);
   }
 
   [Symbol.asyncIterator](): AsyncIterator<Document | null> {
