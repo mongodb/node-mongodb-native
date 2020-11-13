@@ -17,7 +17,7 @@ const kTopology = Symbol('topology');
 const kSession = Symbol('session');
 const kOptions = Symbol('options');
 const kTransform = Symbol('transform');
-const kInitialized = Symbol('iniitalized');
+const kInitialized = Symbol('initialized');
 const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 
