@@ -178,10 +178,7 @@ export abstract class AbstractCursor extends EventEmitter {
 
   [Symbol.asyncIterator](): AsyncIterator<Document | null> {
     return {
-      next: async () => {
-        const value = await this.next();
-        return { value, done: value === null };
-      }
+      next: () => this.next().then(value => ({ value, done: value === null }))
     };
   }
 
