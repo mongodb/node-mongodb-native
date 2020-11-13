@@ -350,7 +350,7 @@ export class ChangeStreamCursor extends AbstractCursor {
   startAfter: ResumeToken;
   options: ChangeStreamCursorOptions;
 
-  postBatchResumeToken?: Document;
+  postBatchResumeToken?: ResumeToken;
   pipeline: Document[];
 
   constructor(
