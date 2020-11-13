@@ -379,8 +379,6 @@ export abstract class AbstractCursor extends EventEmitter {
     });
   }
 
-  // DO THESE PROPERTIES BELONG HERE?
-
   /**
    * Add a cursor flag to the cursor
    *
