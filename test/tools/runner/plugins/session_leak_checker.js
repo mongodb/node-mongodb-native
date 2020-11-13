@@ -12,11 +12,14 @@ function getSessionLeakMetadata(currentTest) {
   return (currentTest.metadata && currentTest.metadata.sessions) || {};
 }
 
+const kTrace = Symbol('trace');
 function dumpSessionInfo(which, sessions) {
-  console.log(which);
+  console.warn(which);
   sessions.forEach(session => {
-    console.log(` >> ${JSON.stringify(session.id)}`);
-    console.log(session.trace);
+    console.warn(` >> ${JSON.stringify(session.id)}`);
+    if (session[kTrace]) {
+      console.warn(session[kTrace]);
+    }
   });
 }
 
@@ -32,10 +35,31 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
     return;
   }
 
+  const _startSession = Topology.prototype.startSession;
+  sandbox.stub(Topology.prototype, 'startSession').callsFake(function () {
+    const session = _startSession.apply(this, arguments);
+    const stackTrace = new Error().stack;
+    const result = new Proxy(session, {
+      get: function (target, prop) {
+        if (prop === 'serverSession') {
+          const serverSession = target[prop];
+          if (serverSession[kTrace] == null) {
+            serverSession[kTrace] = stackTrace;
+          }
+
+          return serverSession;
+        }
+
+        return Reflect.get(...arguments);
+      }
+    });
+
+    return result;
+  });
+
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function () {
     const session = _acquire.apply(this, arguments);
-    session.trace = new Error().stack;
     activeSessions.add(session);
     return session;
   });
