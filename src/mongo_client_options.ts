@@ -103,18 +103,23 @@ const HOSTS_RX = new RegExp(
   '(?<protocol>mongodb(?:\\+srv|)):\\/\\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>[^\\/?]*)(?<rest>.*)'
 );
 
-export function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
+function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
   const match = uri.match(HOSTS_RX);
   if (!match) {
     throw new MongoParseError(`Invalid connection string ${uri}`);
   }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-expect-error
-  const { protocol, username, password, hosts, rest } = match.groups;
+
+  const protocol = match.groups?.protocol;
+  const username = match.groups?.username;
+  const password = match.groups?.password;
+  const hosts = match.groups?.hosts;
+  const rest = match.groups?.rest;
+
   if (!protocol || !hosts) {
     throw new MongoParseError('Invalid connection string, protocol and host(s) required');
   }
-  const authString = `${username ? `${password ? `${username}:${password}` : username}` : ''}`;
+
+  const authString = username ? (password ? `${username}:${password}` : `${username}`) : '';
   return {
     srv: protocol.includes('srv'),
     url: new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`),
