@@ -551,7 +551,9 @@ function executeCommands(
   function resultHandler(err?: AnyError, result?: Document) {
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
-      return callback(new BulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult)));
+      return callback(
+        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult))
+      );
     }
 
     if (err instanceof MongoWriteConcernError) {
@@ -651,7 +653,10 @@ function handleMongoWriteConcernError(
   );
 
   callback(
-    new BulkWriteError(new MongoError(wrappedWriteConcernError), new BulkWriteResult(bulkResult))
+    new MongoBulkWriteError(
+      new MongoError(wrappedWriteConcernError),
+      new BulkWriteResult(bulkResult)
+    )
   );
 }
 
@@ -660,7 +665,7 @@ function handleMongoWriteConcernError(
  * @public
  * @category Error
  */
-export class BulkWriteError extends MongoError {
+export class MongoBulkWriteError extends MongoError {
   result?: BulkWriteResult;
 
   /** Creates a new BulkWriteError */
@@ -668,7 +673,7 @@ export class BulkWriteError extends MongoError {
     super(error as Error);
     Object.assign(this, error);
 
-    this.name = 'BulkWriteError';
+    this.name = 'MongoBulkWriteError';
     this.result = result;
   }
 }
@@ -1214,7 +1219,7 @@ export abstract class BulkOperationBase {
         : 'write operation failed';
 
       callback(
-        new BulkWriteError(
+        new MongoBulkWriteError(
           new MongoError({
             message: msg,
             code: this.s.bulkResult.writeErrors[0].code,
@@ -1229,7 +1234,7 @@ export abstract class BulkOperationBase {
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new BulkWriteError(new MongoError(writeConcernError), writeResult));
+      callback(new MongoBulkWriteError(new MongoError(writeConcernError), writeResult));
       return true;
     }
   }

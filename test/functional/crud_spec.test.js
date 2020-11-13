@@ -6,7 +6,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const BulkWriteError = require('../../src/bulk/common').BulkWriteError;
+const { MongoBulkWriteError } = require('../../src/bulk/common');
 
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
@@ -153,7 +153,7 @@ describe('CRUD spec', function () {
   function assertWriteExpectations(collection, outcome) {
     return function (result) {
       // TODO: when we fix our bulk write errors, get rid of this
-      if (result instanceof BulkWriteError) {
+      if (result instanceof MongoBulkWriteError) {
         result = transformBulkWriteResult(result.result);
       }
 
