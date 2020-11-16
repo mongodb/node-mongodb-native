@@ -24,7 +24,7 @@ describe('Client Side Encryption', function() {
   }
 
   const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.join(__dirname, '../../spec/client-side-encryption'));
+  const testSuites = gatherTestSuites(path.join(__dirname, '../../spec/client-side-encryption/tests'));
   after(() => testContext.teardown());
   before(function() {
     return testContext.setup(this.configuration);
