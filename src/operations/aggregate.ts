@@ -65,7 +65,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
       this.readPreference = ReadPreference.primary;
     }
 
-    if (options?.explain && this.writeConcern) {
+    if (this.explain && this.writeConcern) {
       throw new MongoError('"explain" cannot be used on an aggregate call with writeConcern');
     }
 
