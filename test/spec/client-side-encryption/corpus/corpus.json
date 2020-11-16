@@ -2,6 +2,8 @@
   "_id": "client_side_encryption_corpus",
   "altname_aws": "aws",
   "altname_local": "local",
+  "altname_azure": "azure",
+  "altname_gcp": "gcp",
   "aws_double_rand_auto_id": {
     "kms": "aws",
     "type": "double",
@@ -9,7 +11,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_double_rand_auto_altname": {
     "kms": "aws",
@@ -18,7 +22,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_double_rand_explicit_id": {
     "kms": "aws",
@@ -27,7 +33,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_double_rand_explicit_altname": {
     "kms": "aws",
@@ -36,7 +44,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_double_det_explicit_id": {
     "kms": "aws",
@@ -45,7 +55,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_double_det_explicit_altname": {
     "kms": "aws",
@@ -54,7 +66,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "aws_string_rand_auto_id": {
     "kms": "aws",
@@ -126,7 +140,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_object_rand_auto_altname": {
     "kms": "aws",
@@ -135,7 +153,11 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_object_rand_explicit_id": {
     "kms": "aws",
@@ -144,7 +166,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_object_rand_explicit_altname": {
     "kms": "aws",
@@ -153,7 +179,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_object_det_explicit_id": {
     "kms": "aws",
@@ -162,7 +192,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_object_det_explicit_altname": {
     "kms": "aws",
@@ -171,7 +205,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "aws_array_rand_auto_id": {
     "kms": "aws",
@@ -181,9 +219,15 @@
     "identifier": "id",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_array_rand_auto_altname": {
@@ -194,9 +238,15 @@
     "identifier": "altname",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_array_rand_explicit_id": {
@@ -207,9 +257,15 @@
     "identifier": "id",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_array_rand_explicit_altname": {
@@ -220,9 +276,15 @@
     "identifier": "altname",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_array_det_explicit_id": {
@@ -233,9 +295,15 @@
     "identifier": "id",
     "allowed": false,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_array_det_explicit_altname": {
@@ -246,9 +314,15 @@
     "identifier": "altname",
     "allowed": false,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "aws_binData=00_rand_auto_id": {
@@ -258,7 +332,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_rand_auto_altname": {
     "kms": "aws",
@@ -267,7 +346,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_rand_explicit_id": {
     "kms": "aws",
@@ -276,7 +360,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_rand_explicit_altname": {
     "kms": "aws",
@@ -285,7 +374,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_det_auto_id": {
     "kms": "aws",
@@ -294,7 +388,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_det_explicit_id": {
     "kms": "aws",
@@ -303,7 +402,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=00_det_explicit_altname": {
     "kms": "aws",
@@ -312,7 +416,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "aws_binData=04_rand_auto_id": {
     "kms": "aws",
@@ -322,7 +431,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_rand_auto_altname": {
@@ -333,7 +445,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_rand_explicit_id": {
@@ -344,7 +459,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_rand_explicit_altname": {
@@ -355,7 +473,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_det_auto_id": {
@@ -366,7 +487,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_det_explicit_id": {
@@ -377,7 +501,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_binData=04_det_explicit_altname": {
@@ -388,7 +515,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "aws_undefined_rand_explicit_id": {
@@ -398,7 +528,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "aws_undefined_rand_explicit_altname": {
     "kms": "aws",
@@ -407,7 +539,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "aws_undefined_det_explicit_id": {
     "kms": "aws",
@@ -416,7 +550,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "aws_undefined_det_explicit_altname": {
     "kms": "aws",
@@ -425,7 +561,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "aws_objectId_rand_auto_id": {
     "kms": "aws",
@@ -434,7 +572,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_rand_auto_altname": {
     "kms": "aws",
@@ -443,7 +583,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_rand_explicit_id": {
     "kms": "aws",
@@ -452,7 +594,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_rand_explicit_altname": {
     "kms": "aws",
@@ -461,7 +605,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_det_auto_id": {
     "kms": "aws",
@@ -470,7 +616,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_det_explicit_id": {
     "kms": "aws",
@@ -479,7 +627,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_objectId_det_explicit_altname": {
     "kms": "aws",
@@ -488,7 +638,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "aws_bool_rand_auto_id": {
     "kms": "aws",
@@ -551,7 +703,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_rand_auto_altname": {
     "kms": "aws",
@@ -560,7 +716,11 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_rand_explicit_id": {
     "kms": "aws",
@@ -569,7 +729,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_rand_explicit_altname": {
     "kms": "aws",
@@ -578,7 +742,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_det_auto_id": {
     "kms": "aws",
@@ -587,7 +755,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_det_explicit_id": {
     "kms": "aws",
@@ -596,7 +768,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_date_det_explicit_altname": {
     "kms": "aws",
@@ -605,7 +781,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "aws_null_rand_explicit_id": {
     "kms": "aws",
@@ -650,7 +830,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_rand_auto_altname": {
     "kms": "aws",
@@ -659,7 +844,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_rand_explicit_id": {
     "kms": "aws",
@@ -668,7 +858,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_rand_explicit_altname": {
     "kms": "aws",
@@ -677,7 +872,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_det_auto_id": {
     "kms": "aws",
@@ -686,7 +886,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_det_explicit_id": {
     "kms": "aws",
@@ -695,7 +900,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_regex_det_explicit_altname": {
     "kms": "aws",
@@ -704,7 +914,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "aws_dbPointer_rand_auto_id": {
     "kms": "aws",
@@ -716,7 +931,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -730,7 +947,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -744,7 +963,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -758,7 +979,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -772,7 +995,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -786,7 +1011,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -800,7 +1027,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -811,7 +1040,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_rand_auto_altname": {
     "kms": "aws",
@@ -820,7 +1051,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_rand_explicit_id": {
     "kms": "aws",
@@ -829,7 +1062,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_rand_explicit_altname": {
     "kms": "aws",
@@ -838,7 +1073,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_det_auto_id": {
     "kms": "aws",
@@ -847,7 +1084,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_det_explicit_id": {
     "kms": "aws",
@@ -856,7 +1095,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_javascript_det_explicit_altname": {
     "kms": "aws",
@@ -865,7 +1106,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "aws_symbol_rand_auto_id": {
     "kms": "aws",
@@ -874,7 +1117,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_rand_auto_altname": {
     "kms": "aws",
@@ -883,7 +1128,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_rand_explicit_id": {
     "kms": "aws",
@@ -892,7 +1139,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_rand_explicit_altname": {
     "kms": "aws",
@@ -901,7 +1150,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_det_auto_id": {
     "kms": "aws",
@@ -910,7 +1161,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_det_explicit_id": {
     "kms": "aws",
@@ -919,7 +1172,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_symbol_det_explicit_altname": {
     "kms": "aws",
@@ -928,7 +1183,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "aws_javascriptWithScope_rand_auto_id": {
     "kms": "aws",
@@ -937,7 +1194,10 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_javascriptWithScope_rand_auto_altname": {
     "kms": "aws",
@@ -946,7 +1206,10 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_javascriptWithScope_rand_explicit_id": {
     "kms": "aws",
@@ -955,7 +1218,10 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_javascriptWithScope_rand_explicit_altname": {
     "kms": "aws",
@@ -964,7 +1230,10 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_javascriptWithScope_det_explicit_id": {
     "kms": "aws",
@@ -973,7 +1242,10 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_javascriptWithScope_det_explicit_altname": {
     "kms": "aws",
@@ -982,7 +1254,10 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "aws_int_rand_auto_id": {
     "kms": "aws",
@@ -991,7 +1266,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_rand_auto_altname": {
     "kms": "aws",
@@ -1000,7 +1277,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_rand_explicit_id": {
     "kms": "aws",
@@ -1009,7 +1288,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_rand_explicit_altname": {
     "kms": "aws",
@@ -1018,7 +1299,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_det_auto_id": {
     "kms": "aws",
@@ -1027,7 +1310,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_det_explicit_id": {
     "kms": "aws",
@@ -1036,7 +1321,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_int_det_explicit_altname": {
     "kms": "aws",
@@ -1045,7 +1332,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "aws_timestamp_rand_auto_id": {
     "kms": "aws",
@@ -1054,7 +1343,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_rand_auto_altname": {
     "kms": "aws",
@@ -1063,7 +1357,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_rand_explicit_id": {
     "kms": "aws",
@@ -1072,7 +1371,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_rand_explicit_altname": {
     "kms": "aws",
@@ -1081,7 +1385,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_det_auto_id": {
     "kms": "aws",
@@ -1090,7 +1399,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_det_explicit_id": {
     "kms": "aws",
@@ -1099,7 +1413,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_timestamp_det_explicit_altname": {
     "kms": "aws",
@@ -1108,7 +1427,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "aws_long_rand_auto_id": {
     "kms": "aws",
@@ -1117,7 +1441,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_rand_auto_altname": {
     "kms": "aws",
@@ -1126,7 +1452,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_rand_explicit_id": {
     "kms": "aws",
@@ -1135,7 +1463,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_rand_explicit_altname": {
     "kms": "aws",
@@ -1144,7 +1474,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_det_auto_id": {
     "kms": "aws",
@@ -1153,7 +1485,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_det_explicit_id": {
     "kms": "aws",
@@ -1162,7 +1496,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_long_det_explicit_altname": {
     "kms": "aws",
@@ -1171,7 +1507,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "aws_decimal_rand_auto_id": {
     "kms": "aws",
@@ -1180,7 +1518,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_decimal_rand_auto_altname": {
     "kms": "aws",
@@ -1189,7 +1529,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_decimal_rand_explicit_id": {
     "kms": "aws",
@@ -1198,7 +1540,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_decimal_rand_explicit_altname": {
     "kms": "aws",
@@ -1207,7 +1551,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_decimal_det_explicit_id": {
     "kms": "aws",
@@ -1216,7 +1562,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_decimal_det_explicit_altname": {
     "kms": "aws",
@@ -1225,7 +1573,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "aws_minKey_rand_explicit_id": {
     "kms": "aws",
@@ -1234,7 +1584,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "aws_minKey_rand_explicit_altname": {
     "kms": "aws",
@@ -1243,7 +1595,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "aws_minKey_det_explicit_id": {
     "kms": "aws",
@@ -1252,7 +1606,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "aws_minKey_det_explicit_altname": {
     "kms": "aws",
@@ -1261,7 +1617,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "aws_maxKey_rand_explicit_id": {
     "kms": "aws",
@@ -1270,7 +1628,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "aws_maxKey_rand_explicit_altname": {
     "kms": "aws",
@@ -1279,7 +1639,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "aws_maxKey_det_explicit_id": {
     "kms": "aws",
@@ -1288,7 +1650,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "aws_maxKey_det_explicit_altname": {
     "kms": "aws",
@@ -1297,7 +1661,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "local_double_rand_auto_id": {
     "kms": "local",
@@ -1306,7 +1672,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_double_rand_auto_altname": {
     "kms": "local",
@@ -1315,7 +1683,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_double_rand_explicit_id": {
     "kms": "local",
@@ -1324,7 +1694,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_double_rand_explicit_altname": {
     "kms": "local",
@@ -1333,7 +1705,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_double_det_explicit_id": {
     "kms": "local",
@@ -1342,7 +1716,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_double_det_explicit_altname": {
     "kms": "local",
@@ -1351,7 +1727,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$numberDouble": "1.234" }
+    "value": {
+      "$numberDouble": "1.234"
+    }
   },
   "local_string_rand_auto_id": {
     "kms": "local",
@@ -1423,7 +1801,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_object_rand_auto_altname": {
     "kms": "local",
@@ -1432,7 +1814,11 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_object_rand_explicit_id": {
     "kms": "local",
@@ -1441,7 +1827,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_object_rand_explicit_altname": {
     "kms": "local",
@@ -1450,7 +1840,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_object_det_explicit_id": {
     "kms": "local",
@@ -1459,7 +1853,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_object_det_explicit_altname": {
     "kms": "local",
@@ -1468,7 +1866,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "x": { "$numberInt": "1" } }
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
   },
   "local_array_rand_auto_id": {
     "kms": "local",
@@ -1478,9 +1880,15 @@
     "identifier": "id",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_array_rand_auto_altname": {
@@ -1491,9 +1899,15 @@
     "identifier": "altname",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_array_rand_explicit_id": {
@@ -1504,9 +1918,15 @@
     "identifier": "id",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_array_rand_explicit_altname": {
@@ -1517,9 +1937,15 @@
     "identifier": "altname",
     "allowed": true,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_array_det_explicit_id": {
@@ -1530,9 +1956,15 @@
     "identifier": "id",
     "allowed": false,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_array_det_explicit_altname": {
@@ -1543,9 +1975,15 @@
     "identifier": "altname",
     "allowed": false,
     "value": [
-      { "$numberInt": "1" },
-      { "$numberInt": "2" },
-      { "$numberInt": "3" }
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
     ]
   },
   "local_binData=00_rand_auto_id": {
@@ -1555,7 +1993,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_rand_auto_altname": {
     "kms": "local",
@@ -1564,7 +2007,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_rand_explicit_id": {
     "kms": "local",
@@ -1573,7 +2021,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_rand_explicit_altname": {
     "kms": "local",
@@ -1582,7 +2035,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_det_auto_id": {
     "kms": "local",
@@ -1591,7 +2049,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_det_explicit_id": {
     "kms": "local",
@@ -1600,7 +2063,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=00_det_explicit_altname": {
     "kms": "local",
@@ -1609,7 +2077,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$binary": { "base64": "AQIDBA==", "subType": "00" } }
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
   },
   "local_binData=04_rand_auto_id": {
     "kms": "local",
@@ -1619,7 +2092,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_rand_auto_altname": {
@@ -1630,7 +2106,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_rand_explicit_id": {
@@ -1641,7 +2120,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_rand_explicit_altname": {
@@ -1652,7 +2134,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_det_auto_id": {
@@ -1663,7 +2148,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_det_explicit_id": {
@@ -1674,7 +2162,10 @@
     "identifier": "id",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_binData=04_det_explicit_altname": {
@@ -1685,7 +2176,10 @@
     "identifier": "altname",
     "allowed": true,
     "value": {
-      "$binary": { "base64": "AAECAwQFBgcICQoLDA0ODw==", "subType": "04" }
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
     }
   },
   "local_undefined_rand_explicit_id": {
@@ -1695,7 +2189,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "local_undefined_rand_explicit_altname": {
     "kms": "local",
@@ -1704,7 +2200,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "local_undefined_det_explicit_id": {
     "kms": "local",
@@ -1713,7 +2211,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "local_undefined_det_explicit_altname": {
     "kms": "local",
@@ -1722,7 +2222,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$undefined": true }
+    "value": {
+      "$undefined": true
+    }
   },
   "local_objectId_rand_auto_id": {
     "kms": "local",
@@ -1731,7 +2233,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_rand_auto_altname": {
     "kms": "local",
@@ -1740,7 +2244,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_rand_explicit_id": {
     "kms": "local",
@@ -1749,7 +2255,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_rand_explicit_altname": {
     "kms": "local",
@@ -1758,7 +2266,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_det_auto_id": {
     "kms": "local",
@@ -1767,7 +2277,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_det_explicit_id": {
     "kms": "local",
@@ -1776,7 +2288,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_objectId_det_explicit_altname": {
     "kms": "local",
@@ -1785,7 +2299,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$oid": "01234567890abcdef0123456" }
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
   },
   "local_bool_rand_auto_id": {
     "kms": "local",
@@ -1848,7 +2364,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_rand_auto_altname": {
     "kms": "local",
@@ -1857,7 +2377,11 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_rand_explicit_id": {
     "kms": "local",
@@ -1866,7 +2390,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_rand_explicit_altname": {
     "kms": "local",
@@ -1875,7 +2403,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_det_auto_id": {
     "kms": "local",
@@ -1884,7 +2416,11 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_det_explicit_id": {
     "kms": "local",
@@ -1893,7 +2429,11 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_date_det_explicit_altname": {
     "kms": "local",
@@ -1902,7 +2442,11 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$date": { "$numberLong": "12345" } }
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
   },
   "local_null_rand_explicit_id": {
     "kms": "local",
@@ -1947,7 +2491,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_rand_auto_altname": {
     "kms": "local",
@@ -1956,7 +2505,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_rand_explicit_id": {
     "kms": "local",
@@ -1965,7 +2519,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_rand_explicit_altname": {
     "kms": "local",
@@ -1974,7 +2533,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_det_auto_id": {
     "kms": "local",
@@ -1983,7 +2547,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_det_explicit_id": {
     "kms": "local",
@@ -1992,7 +2561,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_regex_det_explicit_altname": {
     "kms": "local",
@@ -2001,7 +2575,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$regularExpression": { "pattern": ".*", "options": "" } }
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
   },
   "local_dbPointer_rand_auto_id": {
     "kms": "local",
@@ -2013,7 +2592,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2027,7 +2608,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2041,7 +2624,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2055,7 +2640,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2069,7 +2656,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2083,7 +2672,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2097,7 +2688,9 @@
     "value": {
       "$dbPointer": {
         "$ref": "db.example",
-        "$id": { "$oid": "01234567890abcdef0123456" }
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
       }
     }
   },
@@ -2108,7 +2701,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_rand_auto_altname": {
     "kms": "local",
@@ -2117,7 +2712,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_rand_explicit_id": {
     "kms": "local",
@@ -2126,7 +2723,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_rand_explicit_altname": {
     "kms": "local",
@@ -2135,7 +2734,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_det_auto_id": {
     "kms": "local",
@@ -2144,7 +2745,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_det_explicit_id": {
     "kms": "local",
@@ -2153,7 +2756,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_javascript_det_explicit_altname": {
     "kms": "local",
@@ -2162,7 +2767,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1" }
+    "value": {
+      "$code": "x=1"
+    }
   },
   "local_symbol_rand_auto_id": {
     "kms": "local",
@@ -2171,7 +2778,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_rand_auto_altname": {
     "kms": "local",
@@ -2180,7 +2789,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_rand_explicit_id": {
     "kms": "local",
@@ -2189,7 +2800,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_rand_explicit_altname": {
     "kms": "local",
@@ -2198,7 +2811,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_det_auto_id": {
     "kms": "local",
@@ -2207,7 +2822,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_det_explicit_id": {
     "kms": "local",
@@ -2216,7 +2833,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_symbol_det_explicit_altname": {
     "kms": "local",
@@ -2225,7 +2844,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$symbol": "mongodb-symbol" }
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
   },
   "local_javascriptWithScope_rand_auto_id": {
     "kms": "local",
@@ -2234,7 +2855,10 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_javascriptWithScope_rand_auto_altname": {
     "kms": "local",
@@ -2243,7 +2867,10 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_javascriptWithScope_rand_explicit_id": {
     "kms": "local",
@@ -2252,7 +2879,10 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_javascriptWithScope_rand_explicit_altname": {
     "kms": "local",
@@ -2261,7 +2891,10 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_javascriptWithScope_det_explicit_id": {
     "kms": "local",
@@ -2270,7 +2903,10 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_javascriptWithScope_det_explicit_altname": {
     "kms": "local",
@@ -2279,7 +2915,10 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$code": "x=1", "$scope": {} }
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
   },
   "local_int_rand_auto_id": {
     "kms": "local",
@@ -2288,7 +2927,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_rand_auto_altname": {
     "kms": "local",
@@ -2297,7 +2938,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_rand_explicit_id": {
     "kms": "local",
@@ -2306,7 +2949,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_rand_explicit_altname": {
     "kms": "local",
@@ -2315,7 +2960,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_det_auto_id": {
     "kms": "local",
@@ -2324,7 +2971,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_det_explicit_id": {
     "kms": "local",
@@ -2333,7 +2982,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_int_det_explicit_altname": {
     "kms": "local",
@@ -2342,7 +2993,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberInt": "123" }
+    "value": {
+      "$numberInt": "123"
+    }
   },
   "local_timestamp_rand_auto_id": {
     "kms": "local",
@@ -2351,7 +3004,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_rand_auto_altname": {
     "kms": "local",
@@ -2360,7 +3018,12 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_rand_explicit_id": {
     "kms": "local",
@@ -2369,7 +3032,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_rand_explicit_altname": {
     "kms": "local",
@@ -2378,7 +3046,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_det_auto_id": {
     "kms": "local",
@@ -2387,7 +3060,12 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_det_explicit_id": {
     "kms": "local",
@@ -2396,7 +3074,12 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_timestamp_det_explicit_altname": {
     "kms": "local",
@@ -2405,7 +3088,12 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$timestamp": { "t": 0, "i": 12345 } }
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
   },
   "local_long_rand_auto_id": {
     "kms": "local",
@@ -2414,7 +3102,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_rand_auto_altname": {
     "kms": "local",
@@ -2423,7 +3113,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_rand_explicit_id": {
     "kms": "local",
@@ -2432,7 +3124,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_rand_explicit_altname": {
     "kms": "local",
@@ -2441,7 +3135,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_det_auto_id": {
     "kms": "local",
@@ -2450,7 +3146,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_det_explicit_id": {
     "kms": "local",
@@ -2459,7 +3157,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_long_det_explicit_altname": {
     "kms": "local",
@@ -2468,7 +3168,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberLong": "456" }
+    "value": {
+      "$numberLong": "456"
+    }
   },
   "local_decimal_rand_auto_id": {
     "kms": "local",
@@ -2477,7 +3179,9 @@
     "method": "auto",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_decimal_rand_auto_altname": {
     "kms": "local",
@@ -2486,7 +3190,9 @@
     "method": "auto",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_decimal_rand_explicit_id": {
     "kms": "local",
@@ -2495,7 +3201,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_decimal_rand_explicit_altname": {
     "kms": "local",
@@ -2504,7 +3212,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": true,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_decimal_det_explicit_id": {
     "kms": "local",
@@ -2513,7 +3223,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_decimal_det_explicit_altname": {
     "kms": "local",
@@ -2522,7 +3234,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$numberDecimal": "1.234" }
+    "value": {
+      "$numberDecimal": "1.234"
+    }
   },
   "local_minKey_rand_explicit_id": {
     "kms": "local",
@@ -2531,7 +3245,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "local_minKey_rand_explicit_altname": {
     "kms": "local",
@@ -2540,7 +3256,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "local_minKey_det_explicit_id": {
     "kms": "local",
@@ -2549,7 +3267,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "local_minKey_det_explicit_altname": {
     "kms": "local",
@@ -2558,7 +3278,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$minKey": 1 }
+    "value": {
+      "$minKey": 1
+    }
   },
   "local_maxKey_rand_explicit_id": {
     "kms": "local",
@@ -2567,7 +3289,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "local_maxKey_rand_explicit_altname": {
     "kms": "local",
@@ -2576,7 +3300,9 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "local_maxKey_det_explicit_id": {
     "kms": "local",
@@ -2585,7 +3311,9 @@
     "method": "explicit",
     "identifier": "id",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
   },
   "local_maxKey_det_explicit_altname": {
     "kms": "local",
@@ -2594,7 +3322,3331 @@
     "method": "explicit",
     "identifier": "altname",
     "allowed": false,
-    "value": { "$maxKey": 1 }
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "azure_double_rand_auto_id": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_double_rand_auto_altname": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_double_rand_explicit_id": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_double_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_double_det_explicit_id": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_double_det_explicit_altname": {
+    "kms": "azure",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "azure_string_rand_auto_id": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_rand_auto_altname": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_rand_explicit_id": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_det_auto_id": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_det_explicit_id": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_string_det_explicit_altname": {
+    "kms": "azure",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "azure_object_rand_auto_id": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_object_rand_auto_altname": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_object_rand_explicit_id": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_object_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_object_det_explicit_id": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_object_det_explicit_altname": {
+    "kms": "azure",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "azure_array_rand_auto_id": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_array_rand_auto_altname": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_array_rand_explicit_id": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_array_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_array_det_explicit_id": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_array_det_explicit_altname": {
+    "kms": "azure",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "azure_binData=00_rand_auto_id": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_rand_auto_altname": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_rand_explicit_id": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_det_auto_id": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_det_explicit_id": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=00_det_explicit_altname": {
+    "kms": "azure",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "azure_binData=04_rand_auto_id": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_rand_auto_altname": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_rand_explicit_id": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_det_auto_id": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_det_explicit_id": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_binData=04_det_explicit_altname": {
+    "kms": "azure",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "azure_undefined_rand_explicit_id": {
+    "kms": "azure",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "azure_undefined_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "azure_undefined_det_explicit_id": {
+    "kms": "azure",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "azure_undefined_det_explicit_altname": {
+    "kms": "azure",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "azure_objectId_rand_auto_id": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_rand_auto_altname": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_rand_explicit_id": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_det_auto_id": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_det_explicit_id": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_objectId_det_explicit_altname": {
+    "kms": "azure",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "azure_bool_rand_auto_id": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "azure_bool_rand_auto_altname": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "azure_bool_rand_explicit_id": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "azure_bool_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "azure_bool_det_explicit_id": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": true
+  },
+  "azure_bool_det_explicit_altname": {
+    "kms": "azure",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": true
+  },
+  "azure_date_rand_auto_id": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_rand_auto_altname": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_rand_explicit_id": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_det_auto_id": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_det_explicit_id": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_date_det_explicit_altname": {
+    "kms": "azure",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "azure_null_rand_explicit_id": {
+    "kms": "azure",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "azure_null_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "azure_null_det_explicit_id": {
+    "kms": "azure",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "azure_null_det_explicit_altname": {
+    "kms": "azure",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "azure_regex_rand_auto_id": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_rand_auto_altname": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_rand_explicit_id": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_det_auto_id": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_det_explicit_id": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_regex_det_explicit_altname": {
+    "kms": "azure",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "azure_dbPointer_rand_auto_id": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_rand_auto_altname": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_rand_explicit_id": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_det_auto_id": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_det_explicit_id": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_dbPointer_det_explicit_altname": {
+    "kms": "azure",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "azure_javascript_rand_auto_id": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_rand_auto_altname": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_rand_explicit_id": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_det_auto_id": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_det_explicit_id": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_javascript_det_explicit_altname": {
+    "kms": "azure",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "azure_symbol_rand_auto_id": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_rand_auto_altname": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_rand_explicit_id": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_det_auto_id": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_det_explicit_id": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_symbol_det_explicit_altname": {
+    "kms": "azure",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "azure_javascriptWithScope_rand_auto_id": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_javascriptWithScope_rand_auto_altname": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_javascriptWithScope_rand_explicit_id": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_javascriptWithScope_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_javascriptWithScope_det_explicit_id": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_javascriptWithScope_det_explicit_altname": {
+    "kms": "azure",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "azure_int_rand_auto_id": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_rand_auto_altname": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_rand_explicit_id": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_det_auto_id": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_det_explicit_id": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_int_det_explicit_altname": {
+    "kms": "azure",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "azure_timestamp_rand_auto_id": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_rand_auto_altname": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_rand_explicit_id": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_det_auto_id": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_det_explicit_id": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_timestamp_det_explicit_altname": {
+    "kms": "azure",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "azure_long_rand_auto_id": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_rand_auto_altname": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_rand_explicit_id": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_det_auto_id": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_det_explicit_id": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_long_det_explicit_altname": {
+    "kms": "azure",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "azure_decimal_rand_auto_id": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_decimal_rand_auto_altname": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_decimal_rand_explicit_id": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_decimal_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_decimal_det_explicit_id": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_decimal_det_explicit_altname": {
+    "kms": "azure",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "azure_minKey_rand_explicit_id": {
+    "kms": "azure",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "azure_minKey_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "azure_minKey_det_explicit_id": {
+    "kms": "azure",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "azure_minKey_det_explicit_altname": {
+    "kms": "azure",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "azure_maxKey_rand_explicit_id": {
+    "kms": "azure",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "azure_maxKey_rand_explicit_altname": {
+    "kms": "azure",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "azure_maxKey_det_explicit_id": {
+    "kms": "azure",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "azure_maxKey_det_explicit_altname": {
+    "kms": "azure",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "gcp_double_rand_auto_id": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_double_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_double_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_double_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_double_det_explicit_id": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_double_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "gcp_string_rand_auto_id": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_det_auto_id": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_det_explicit_id": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_string_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "gcp_object_rand_auto_id": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_object_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_object_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_object_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_object_det_explicit_id": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_object_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "gcp_array_rand_auto_id": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_array_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_array_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_array_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_array_det_explicit_id": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_array_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "gcp_binData=00_rand_auto_id": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_det_auto_id": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_det_explicit_id": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=00_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "gcp_binData=04_rand_auto_id": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_det_auto_id": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_det_explicit_id": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_binData=04_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "gcp_undefined_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "gcp_undefined_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "gcp_undefined_det_explicit_id": {
+    "kms": "gcp",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "gcp_undefined_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "gcp_objectId_rand_auto_id": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_det_auto_id": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_det_explicit_id": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_objectId_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "gcp_bool_rand_auto_id": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "gcp_bool_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "gcp_bool_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "gcp_bool_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "gcp_bool_det_explicit_id": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": true
+  },
+  "gcp_bool_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": true
+  },
+  "gcp_date_rand_auto_id": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_det_auto_id": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_det_explicit_id": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_date_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "gcp_null_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "gcp_null_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "gcp_null_det_explicit_id": {
+    "kms": "gcp",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "gcp_null_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "gcp_regex_rand_auto_id": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_det_auto_id": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_det_explicit_id": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_regex_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "gcp_dbPointer_rand_auto_id": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_det_auto_id": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_det_explicit_id": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_dbPointer_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "gcp_javascript_rand_auto_id": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_det_auto_id": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_det_explicit_id": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_javascript_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "gcp_symbol_rand_auto_id": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_det_auto_id": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_det_explicit_id": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_symbol_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "gcp_javascriptWithScope_rand_auto_id": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_javascriptWithScope_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_javascriptWithScope_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_javascriptWithScope_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_javascriptWithScope_det_explicit_id": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_javascriptWithScope_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "gcp_int_rand_auto_id": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_det_auto_id": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_det_explicit_id": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_int_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "gcp_timestamp_rand_auto_id": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_det_auto_id": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_det_explicit_id": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_timestamp_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "gcp_long_rand_auto_id": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_det_auto_id": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_det_explicit_id": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_long_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "gcp_decimal_rand_auto_id": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_decimal_rand_auto_altname": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_decimal_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_decimal_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_decimal_det_explicit_id": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_decimal_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "gcp_minKey_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "gcp_minKey_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "gcp_minKey_det_explicit_id": {
+    "kms": "gcp",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "gcp_minKey_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "gcp_maxKey_rand_explicit_id": {
+    "kms": "gcp",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "gcp_maxKey_rand_explicit_altname": {
+    "kms": "gcp",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "gcp_maxKey_det_explicit_id": {
+    "kms": "gcp",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "gcp_maxKey_det_explicit_altname": {
+    "kms": "gcp",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
   },
   "payload=0,algo=rand": {
     "kms": "local",
