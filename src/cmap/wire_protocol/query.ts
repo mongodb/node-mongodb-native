@@ -1,12 +1,13 @@
 import { command, CommandOptions } from './command';
 import { Query } from '../commands';
 import { MongoError } from '../../error';
-import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback, decorateWithExplain } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
 import { Document, pluckBSONSerializeOptions } from '../../bson';
 import type { Server } from '../../sdam/server';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { FindOptions } from '../../operations/find';
+import { Explain } from '../../explain';
 
 /** @internal */
 export interface QueryOptions extends CommandOptions {
@@ -26,7 +27,7 @@ export function query(
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
   }
 
-  if (maxWireVersion(server) < 4) {
+  if (shouldUseLegacyQuery(server, options)) {
     const query = prepareLegacyFindQuery(server, ns, cmd, options);
     const queryOptions = applyCommonQueryOptions(
       {},
@@ -43,7 +44,14 @@ export function query(
   }
 
   const readPreference = getReadPreference(cmd, options);
-  const findCmd = prepareFindCommand(server, ns, cmd);
+  let findCmd = prepareFindCommand(server, ns, cmd);
+
+  // If we have explain, we need to rewrite the find command
+  // to wrap it in the explain command
+  const explain = Explain.fromOptions(options);
+  if (explain) {
+    findCmd = decorateWithExplain(findCmd, explain);
+  }
 
   // NOTE: This actually modifies the passed in cmd, and our code _depends_ on this
   //       side-effect. Change this ASAP
@@ -61,8 +69,15 @@ export function query(
   command(server, ns, findCmd, commandOptions, callback);
 }
 
+// Typically, a legacy find query is used for wire versions prior to 4. However, for explain with
+// find on wire versions between 3 and 4, we can't use a legacy find command.
+function shouldUseLegacyQuery(server: Server, options: FindOptions): boolean {
+  const wireVersion = maxWireVersion(server);
+  return wireVersion <= 3 || (wireVersion < 4 && options.explain === undefined);
+}
+
 function prepareFindCommand(server: Server, ns: string, cmd: Document) {
-  let findCmd: Document = {
+  const findCmd: Document = {
     find: collectionNamespace(ns)
   };
 
@@ -146,14 +161,6 @@ function prepareFindCommand(server: Server, ns: string, cmd: Document) {
   if (cmd.collation) findCmd.collation = cmd.collation;
   if (cmd.readConcern) findCmd.readConcern = cmd.readConcern;
 
-  // If we have explain, we need to rewrite the find command
-  // to wrap it in the explain command
-  if (cmd.explain) {
-    findCmd = {
-      explain: findCmd
-    };
-  }
-
   return findCmd;
 }
 
@@ -195,7 +202,7 @@ function prepareLegacyFindQuery(
   if (typeof cmd.showDiskLoc !== 'undefined') findCmd['$showDiskLoc'] = cmd.showDiskLoc;
   if (cmd.comment) findCmd['$comment'] = cmd.comment;
   if (cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS;
-  if (cmd.explain) {
+  if (options.explain !== undefined) {
     // nToReturn must be 0 (match all) or negative (match N and close cursor)
     // nToReturn > 0 will give explain results equivalent to limit(0)
     numberToReturn = -Math.abs(cmd.limit || 0);

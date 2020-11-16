@@ -5,6 +5,7 @@ import type { FindOptions } from './find';
 import { MongoError } from '../error';
 import type { Server } from '../sdam/server';
 import { CommandOperation } from './command';
+import { Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class FindOneOperation extends CommandOperation<FindOptions, Document> {
@@ -36,3 +37,5 @@ export class FindOneOperation extends CommandOperation<FindOptions, Document> {
     }
   }
 }
+
+defineAspects(FindOneOperation, [Aspect.EXPLAINABLE]);

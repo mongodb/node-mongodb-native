@@ -9,8 +9,9 @@ export const ExplainVerbosity = {
 } as const;
 
 /**
- * For backwards compatibility, true is interpreted as
- * "allPlansExecution" and false as "queryPlanner".
+ * For backwards compatibility, true is interpreted as "allPlansExecution"
+ * and false as "queryPlanner". Prior to server version 3.6, aggregate()
+ * ignores the verbosity parameter and executes in "queryPlanner".
  * @public
  */
 export type ExplainVerbosityLike = keyof typeof ExplainVerbosity | boolean;

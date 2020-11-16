@@ -212,6 +212,11 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       findCommand.allowDiskUse = options.allowDiskUse;
     }
 
+    if (this.explain) {
+      // TODO: For now, we need to manually ensure explain is in the options. This will change after cursor refactor.
+      this.options.explain = this.explain.verbosity;
+    }
+
     // TODO: use `MongoDBNamespace` through and through
     server.query(
       this.ns.toString(),
@@ -222,4 +227,4 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
   }
 }
 
-defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);

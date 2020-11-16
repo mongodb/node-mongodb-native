@@ -145,7 +145,12 @@ export abstract class CommandOperation<
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      cmd = decorateWithExplain(cmd, this.explain);
+      if (serverWireVersion < 6 && cmd.aggregate) {
+        // Prior to 3.6, with aggregate, verbosity is ignored, and we must pass in "explain: true"
+        cmd.explain = true;
+      } else {
+        cmd = decorateWithExplain(cmd, this.explain);
+      }
     }
 
     server.command(
