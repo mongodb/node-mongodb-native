@@ -362,7 +362,10 @@ export class MongoClient extends EventEmitter implements OperationParent {
         return cb();
       }
 
+      // clear out references to old topology
       const topology = this.topology;
+      this.topology = undefined;
+
       topology.close({ force }, err => {
         const autoEncrypter = topology.s.options.autoEncrypter;
         if (!autoEncrypter) {
