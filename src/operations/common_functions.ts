@@ -1,5 +1,11 @@
 import { MongoError } from '../error';
-import { applyRetryableWrites, decorateWithCollation, Callback, getTopology } from '../utils';
+import {
+  applyRetryableWrites,
+  decorateWithCollation,
+  Callback,
+  getTopology,
+  maxWireVersion
+} from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -155,6 +161,12 @@ export function removeDocuments(
     return callback ? callback(err, null) : undefined;
   }
 
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
+      : undefined;
+  }
+
   // Execute the remove
   server.remove(
     coll.s.namespace.toString(),
@@ -238,6 +250,12 @@ export function updateDocuments(
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
     return callback(err, null);
+  }
+
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on update`))
+      : undefined;
   }
 
   // Update options

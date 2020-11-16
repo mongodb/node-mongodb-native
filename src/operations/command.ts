@@ -1,7 +1,7 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback } from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import type { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -10,11 +10,15 @@ import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
+import { Explain, ExplainOptions } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @public */
-export interface CommandOperationOptions extends OperationOptions, WriteConcernOptions {
+export interface CommandOperationOptions
+  extends OperationOptions,
+    WriteConcernOptions,
+    ExplainOptions {
   /** Return the full server response for the command */
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
@@ -51,7 +55,7 @@ export abstract class CommandOperation<
   ns: MongoDBNamespace;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
-  explain: boolean;
+  explain?: Explain;
   fullResponse?: boolean;
   logger?: Logger;
 
@@ -73,7 +77,6 @@ export abstract class CommandOperation<
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
 
-    this.explain = false;
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
 
@@ -81,6 +84,19 @@ export abstract class CommandOperation<
     if (parent && parent.logger) {
       this.logger = parent.logger;
     }
+
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      this.explain = Explain.fromOptions(options);
+    } else if (options?.explain !== undefined) {
+      throw new MongoError(`explain is not supported on this command`);
+    }
+  }
+
+  get canRetryWrite(): boolean {
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      return this.explain === undefined;
+    }
+    return true;
   }
 
   abstract execute(server: Server, callback: Callback<TResult>): void;
@@ -126,6 +142,10 @@ export abstract class CommandOperation<
 
     if (this.logger && this.logger.isDebug()) {
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
+    }
+
+    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
+      cmd = decorateWithExplain(cmd, this.explain);
     }
 
     server.command(

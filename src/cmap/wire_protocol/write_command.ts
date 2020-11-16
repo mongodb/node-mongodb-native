@@ -1,9 +1,10 @@
 import { MongoError } from '../../error';
-import { collectionNamespace, Callback } from '../../utils';
+import { collectionNamespace, Callback, decorateWithExplain } from '../../utils';
 import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 import type { Document, BSONSerializeOptions } from '../../bson';
 import type { WriteConcern } from '../../write_concern';
+import { Explain, ExplainOptions } from '../../explain';
 
 /** @public */
 export interface CollationOptions {
@@ -18,7 +19,7 @@ export interface CollationOptions {
 }
 
 /** @internal */
-export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions {
+export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions, ExplainOptions {
   ordered?: boolean;
   writeConcern?: WriteConcern;
   collation?: CollationOptions;
@@ -43,7 +44,7 @@ export function writeCommand(
   options = options || {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
-  const writeCommand: Document = {};
+  let writeCommand: Document = {};
   writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -62,6 +63,13 @@ export function writeCommand(
 
   if (options.bypassDocumentValidation === true) {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+
+  // If a command is to be explained, we need to reformat the command after
+  // the other command properties are specified.
+  const explain = Explain.fromOptions(options);
+  if (explain) {
+    writeCommand = decorateWithExplain(writeCommand, explain);
   }
 
   const commandOptions = Object.assign(

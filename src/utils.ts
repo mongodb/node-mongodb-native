@@ -16,6 +16,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Document, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
+import type { Explain } from './explain';
 import type { MongoClient } from './mongo_client';
 import type { Cursor } from './cursor/cursor';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
@@ -440,6 +441,21 @@ export function decorateWithReadConcern(
   if (Object.keys(readConcern).length > 0) {
     Object.assign(command, { readConcern: readConcern });
   }
+}
+
+/**
+ * Applies an explain to a given command.
+ * @internal
+ *
+ * @param command - the command on which to apply the explain
+ * @param options - the options containing the explain verbosity
+ */
+export function decorateWithExplain(command: Document, explain: Explain): Document {
+  if (command.explain) {
+    return command;
+  }
+
+  return { explain: command, verbosity: explain.verbosity };
 }
 
 /**

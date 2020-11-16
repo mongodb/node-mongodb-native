@@ -120,5 +120,5 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
 }
 
 defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);

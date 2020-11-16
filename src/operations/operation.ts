@@ -7,7 +7,8 @@ import type { Server } from '../sdam/server';
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
-  RETRYABLE: Symbol('RETRYABLE')
+  RETRYABLE: Symbol('RETRYABLE'),
+  EXPLAINABLE: Symbol('EXPLAINABLE')
 } as const;
 
 /** @public */
@@ -21,8 +22,6 @@ export interface OperationConstructor extends Function {
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
-
-  explain?: boolean;
   willRetryWrites?: boolean;
 
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */

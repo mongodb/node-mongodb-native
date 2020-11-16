@@ -5,7 +5,8 @@ import {
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback
+  Callback,
+  maxWireVersion
 } from '../utils';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -14,8 +15,10 @@ import type { Collection } from '../collection';
 import type { Sort } from '../sort';
 import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
+import { Aspect, defineAspects } from './operation';
 
 const exclusionList = [
+  'explain',
   'readPreference',
   'readConcern',
   'session',
@@ -156,6 +159,11 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       return callback(err);
     }
 
+    if (this.explain && maxWireVersion(server) < 9) {
+      callback(new MongoError(`server ${server.name} does not support explain on mapReduce`));
+      return;
+    }
+
     // Execute command
     super.executeCommand(server, mapCommandHash, (err, result) => {
       if (err) return callback(err);
@@ -163,6 +171,9 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
       if (1 !== result.ok || result.err || result.errmsg) {
         return callback(new MongoError(result));
       }
+
+      // If an explain option was executed, don't process the server results
+      if (this.explain) return callback(undefined, result);
 
       // Create statistics value
       const stats: MapReduceStats = {};
@@ -227,3 +238,5 @@ function processScope(scope: Document | ObjectId) {
 
   return newScope;
 }
+
+defineAspects(MapReduceOperation, [Aspect.EXPLAINABLE]);

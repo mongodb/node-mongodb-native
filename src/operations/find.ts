@@ -21,8 +21,6 @@ export interface FindOptions extends QueryOptions, CommandOperationOptions {
   skip?: number;
   /** Tell the query to use specific indexes in the query. Object of indexes to use, `{'_id':1}` */
   hint?: Hint;
-  /** Explain the query instead of returning the data. */
-  explain?: boolean;
   /** Specify if the cursor can timeout. */
   timeout?: boolean;
   /** Specify if the cursor is tailable. */

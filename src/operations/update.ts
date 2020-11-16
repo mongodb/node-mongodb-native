@@ -94,6 +94,9 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);
 
+      // If an explain option was executed, don't process the server results
+      if (this.explain) return callback(undefined, r);
+
       const result: UpdateResult = {
         modifiedCount: r.nModified != null ? r.nModified : r.n,
         upsertedId:
@@ -136,6 +139,9 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);
 
+      // If an explain option was executed, don't process the server results
+      if (this.explain) return callback(undefined, r);
+
       const result: UpdateResult = {
         modifiedCount: r.nModified != null ? r.nModified : r.n,
         upsertedId:
@@ -153,5 +159,5 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
 }
 
 defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(UpdateOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(UpdateManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);

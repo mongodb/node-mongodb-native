@@ -1307,10 +1307,12 @@ export class Cursor<
   explain(callback?: Callback): Promise<unknown> | void {
     // NOTE: the next line includes a special case for operations which do not
     //       subclass `CommandOperationV2`. To be removed asap.
-    if (this.operation && this.operation.cmd == null) {
-      this.operation.options.explain = true;
-      return executeOperation(this.topology, this.operation as any, callback);
-    }
+    // TODO NODE-2853: This had to be removed during NODE-2852; fix while re-implementing
+    // cursor explain
+    // if (this.operation && this.operation.cmd == null) {
+    //   this.operation.options.explain = true;
+    //   return executeOperation(this.topology, this.operation as any, callback);
+    // }
 
     this.cmd.explain = true;
 

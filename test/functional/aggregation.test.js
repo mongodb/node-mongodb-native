@@ -386,7 +386,10 @@ describe('Aggregation', function () {
    * @example-class Collection
    * @example-method aggregate
    */
-  it('should correctly return a cursor and call explain', {
+  it.skip('should correctly return a cursor and call explain', {
+    // TODO NODE-2853: This had to be skipped during NODE-2852; un-skip while re-implementing
+    // cursor explain
+
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
