@@ -5,6 +5,7 @@ const punycode = require('punycode');
 const { MongoParseError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
+const { parseOptions } = require('../../../src/mongo_client_options');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
@@ -282,6 +283,19 @@ describe('Connection String', function () {
 
                 done();
               });
+            }
+          });
+
+          it(`${test.description} -- new MongoOptions parser`, function () {
+            if (skipTests.includes(test.description)) {
+              return this.skip();
+            }
+
+            const valid = test.valid;
+            if (valid) {
+              expect(parseOptions(test.uri), `"${test.uri}"`).to.be.ok;
+            } else {
+              expect(() => parseOptions(test.uri), `"${test.uri}"`).to.throw();
             }
           });
         });

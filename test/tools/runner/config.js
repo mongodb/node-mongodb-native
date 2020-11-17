@@ -123,6 +123,8 @@ class NativeConfiguration {
       urlOptions.auth = auth;
     }
 
+    Reflect.deleteProperty(serverOptions, 'host');
+    Reflect.deleteProperty(serverOptions, 'port');
     const connectionString = url.format(urlOptions);
     return new MongoClient(connectionString, serverOptions);
   }

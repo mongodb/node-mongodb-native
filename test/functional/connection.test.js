@@ -249,17 +249,9 @@ describe('Connection', function () {
   it('test connect bad url', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function (done) {
+    test: function () {
       const configuration = this.configuration;
-      const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
-
-      test.throws(function () {
-        client.connect(function () {
-          test.ok(false, 'Bad URL!');
-        });
-      });
-
-      done();
+      expect(() => configuration.newClient('mangodb://localhost:27017/test?safe=false')).to.throw();
     }
   });
 

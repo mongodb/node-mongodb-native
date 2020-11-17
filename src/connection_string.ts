@@ -529,9 +529,13 @@ function assertRepelOptions(options: AnyOptions, optionKeyA: string, optionKeyB:
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-function checkTLSOptions(options: AnyOptions) {
-  if (!options) return null;
-  const check = (a: any, b: any) => assertRepelOptions(options, a, b);
+export function checkTLSOptions(options: AnyOptions): void {
+  if (!options) return;
+  const check = (a: string, b: string) => {
+    if (Reflect.has(options, a) && Reflect.has(options, b)) {
+      throw new MongoParseError(`The '${a}' option cannot be used with '${b}'`);
+    }
+  };
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
   check('tlsInsecure', 'tlsAllowInvalidHostnames');
   check('tlsInsecure', 'tlsDisableCertificateRevocationCheck');

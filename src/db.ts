@@ -71,7 +71,6 @@ const legalOptionNames = [
   'pkFactory',
   'serializeFunctions',
   'raw',
-  'bufferMaxEntries',
   'authSource',
   'ignoreUndefined',
   'promoteLongs',

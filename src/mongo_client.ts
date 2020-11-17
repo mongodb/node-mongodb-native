@@ -127,6 +127,8 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   serverSelectionTryOnce?: boolean;
   /** heartbeatFrequencyMS controls when the driver checks the state of the MongoDB deployment. Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one. */
   heartbeatFrequencyMS?: number;
+  /** Sets the minimum heartbeat frequency. In the event that the driver has to frequently re-check a server's availability, it will wait at least this long since the previous check to avoid wasted effort. */
+  minHeartbeatFrequencyMS?: number;
   /** The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections */
   appName?: string;
   /** Enables retryable reads. */
@@ -195,6 +197,8 @@ export interface MongoClientOptions
 
   dbName?: string;
   useRecoveryToken?: boolean;
+  username?: string;
+  password?: string;
 }
 
 /** @public */

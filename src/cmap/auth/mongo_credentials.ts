@@ -1,6 +1,7 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
+import { MongoParseError } from '../../error';
 import { AuthMechanism, AuthMechanismEnum } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -107,5 +108,38 @@ export class MongoCredentials {
     }
 
     return this;
+  }
+
+  validate(): void {
+    if (
+      (this.mechanism === 'GSSAPI' ||
+        this.mechanism === 'MONGODB-CR' ||
+        this.mechanism === 'PLAIN' ||
+        this.mechanism === 'SCRAM-SHA-1' ||
+        this.mechanism === 'SCRAM-SHA-256') &&
+      !this.username
+    ) {
+      throw new MongoParseError(`Username required for mechanism '${this.mechanism}'`);
+    }
+
+    if (
+      this.mechanism === 'GSSAPI' ||
+      this.mechanism === 'MONGODB-AWS' ||
+      this.mechanism === 'MONGODB-X509'
+    ) {
+      if (this.source != null && this.source !== '$external') {
+        throw new MongoParseError(
+          `Invalid source '${this.source}' for mechanism '${this.mechanism}' specified.`
+        );
+      }
+    }
+
+    if (this.mechanism === 'PLAIN' && this.source == null) {
+      throw new MongoParseError('PLAIN Authentication Mechanism needs an auth source');
+    }
+
+    if (this.mechanism === 'MONGODB-X509' && this.password != null) {
+      throw new MongoParseError(`Password not allowed for mechanism MONGODB-X509`);
+    }
   }
 }

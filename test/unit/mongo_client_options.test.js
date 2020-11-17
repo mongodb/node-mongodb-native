@@ -14,22 +14,12 @@ describe('MongoOptions', function () {
 
   it('test simple', function () {
     const options = parseOptions('mongodb://localhost:27017/test?directConnection=true', {
-      directConnection: false,
-      domainsEnabled: false
+      directConnection: false
     });
     expect(options.directConnection).to.be.true;
-    expect(options.domainsEnabled).to.be.false;
     expect(options.hosts).has.length(1);
     expect(options.dbName).to.equal('test');
     expect(options.prototype).to.not.exist;
-  });
-
-  it('pool size renames', function () {
-    const options = parseOptions('mongodb://localhost:27017', { minSize: 2, poolSize: 4 });
-    expect(options).to.not.have.property('minSize');
-    expect(options).to.not.have.property('poolSize');
-    expect(options).has.property('maxPoolSize', 4);
-    expect(options).has.property('minPoolSize', 2);
   });
 
   it('tls renames', function () {
@@ -85,7 +75,6 @@ describe('MongoOptions', function () {
     connectTimeoutMS: 123,
     directConnection: true,
     dbName: 'test',
-    domainsEnabled: false,
     driverInfo: { name: 'MyDriver', platform: 'moonOS' },
     family: 6,
     fieldsAsRaw: { rawField: true },
@@ -108,7 +97,6 @@ describe('MongoOptions', function () {
     maxStalenessSeconds: 3,
     minInternalBufferSize: 0,
     minPoolSize: 1,
-    minSize: 3,
     monitorCommands: true,
     noDelay: true,
     numberOfRetries: 3,
@@ -117,7 +105,6 @@ describe('MongoOptions', function () {
         return 'very unique';
       }
     },
-    poolSize: 4,
     promiseLibrary: global.Promise,
     promoteBuffers: true,
     promoteLongs: false,
