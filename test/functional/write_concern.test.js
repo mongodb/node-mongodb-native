@@ -26,7 +26,7 @@ describe('Write Concern', function() {
     function journalOptionTest(client, events, done) {
       expect(client).to.have.nested.property('s.options');
       const clientOptions = client.s.options;
-      expect(clientOptions).to.containSubset({ j: true });
+      expect(clientOptions).to.containSubset({ writeConcern: { j: true } });
       client
         .db('test')
         .collection('test')
