@@ -7,8 +7,7 @@ const generateTopologyTests = require('../spec-runner').generateTopologyTests;
 
 describe('Client Side Encryption', function() {
   // TODO: Replace this with using the filter once the filter works on describe blocks
-  const skipTests =
-    process.env.AWS_ACCESS_KEY_ID == null || process.env.AWS_SECRET_ACCESS_KEY == null;
+  const skipTests = process.env.CSFLE_KMS_PROVIDERS == null;
   if (skipTests) {
     console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
     return;
@@ -24,7 +23,10 @@ describe('Client Side Encryption', function() {
   }
 
   const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.join(__dirname, '../../spec/client-side-encryption/tests'));
+  const testSuites = gatherTestSuites(
+    path.join(__dirname, '../../spec/client-side-encryption/tests')
+  );
+
   after(() => testContext.teardown());
   before(function() {
     return testContext.setup(this.configuration);

@@ -24,16 +24,20 @@ describe('Client Side Encryption Corpus', function() {
     return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { strict: true }));
   }
 
+  const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED';
+  const kmsProviders = EJSON.parse(CSFLE_KMS_PROVIDERS);
+  kmsProviders.local = {
+    key: Buffer.from(
+      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+      'base64'
+    )
+  };
+
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
   function toComparableExtendedJSON(value) {
     return JSON.parse(EJSON.stringify({ value }, { strict: true }));
   }
-
-  const localKey = Buffer.from(
-    'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-    'base64'
-  );
 
   // Filters out tests that have to do with dbPointer
   // TODO: fix dbpointer and get rid of this.
@@ -53,6 +57,8 @@ describe('Client Side Encryption Corpus', function() {
   const corpusSchema = loadCorpusData('corpus-schema.json');
   const corpusKeyLocal = loadCorpusData('corpus-key-local.json');
   const corpusKeyAws = loadCorpusData('corpus-key-aws.json');
+  const corpusKeyAzure = loadCorpusData('corpus-key-azure.json');
+  const corpusKeyGcp = loadCorpusData('corpus-key-gcp.json');
   const corpusAll = filterImportedObject(loadCorpusData('corpus.json'));
   const corpusEncryptedExpectedAll = filterImportedObject(loadCorpusData('corpus-encrypted.json'));
 
@@ -69,13 +75,23 @@ describe('Client Side Encryption Corpus', function() {
   ]);
   const identifierMap = new Map([
     ['local', corpusKeyLocal._id],
-    ['aws', corpusKeyAws._id]
+    ['aws', corpusKeyAws._id],
+    ['azure', corpusKeyAzure._id],
+    ['gcp', corpusKeyGcp._id]
   ]);
   const keyAltNameMap = new Map([
     ['local', 'local'],
-    ['aws', 'aws']
+    ['aws', 'aws'],
+    ['azure', 'azure'],
+    ['gcp', 'gcp']
   ]);
-  const copyOverValues = new Set(['_id', 'altname_aws', 'altname_local']);
+  const copyOverValues = new Set([
+    '_id',
+    'altname_aws',
+    'altname_local',
+    'altname_azure',
+    'altname_gcp'
+  ]);
 
   let client;
 
@@ -102,7 +118,7 @@ describe('Client Side Encryption Corpus', function() {
         break;
       }
       default: {
-        throw new Error('how did you get here?');
+        throw new Error('Unexpected algorithm: ' + expected.algo);
       }
     }
 
@@ -122,7 +138,7 @@ describe('Client Side Encryption Corpus', function() {
     } else if (expected.allowed === false) {
       expect(actualJSON).to.deep.equal(expectedJSON);
     } else {
-      throw new Error('how did you get here?');
+      throw new Error('Unexpected value for allowed: ' + expected.allowed);
     }
   }
 
@@ -142,7 +158,9 @@ describe('Client Side Encryption Corpus', function() {
           .then(() => keyDb.dropCollection(keyVaultCollName))
           .catch(() => {})
           .then(() => keyDb.collection(keyVaultCollName))
-          .then(keyColl => keyColl.insertMany([corpusKeyLocal, corpusKeyAws]));
+          .then(keyColl =>
+            keyColl.insertMany([corpusKeyLocal, corpusKeyAws, corpusKeyAzure, corpusKeyGcp])
+          );
       });
   });
 
@@ -185,7 +203,7 @@ describe('Client Side Encryption Corpus', function() {
           //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
           const autoEncryption = {
             keyVaultNamespace,
-            kmsProviders: this.configuration.kmsProviders(null, localKey)
+            kmsProviders
           };
           if (useClientSideSchema) {
             autoEncryption.schemaMap = {
@@ -204,7 +222,7 @@ describe('Client Side Encryption Corpus', function() {
           return clientEncrypted.connect().then(() => {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
               keyVaultNamespace,
-              kmsProviders: this.configuration.kmsProviders(null, localKey)
+              kmsProviders
             });
           });
         });
@@ -269,7 +287,7 @@ describe('Client Side Encryption Corpus', function() {
                 } else if (field.identifier === 'altname') {
                   encryptOptions.keyAltName = keyAltNameMap.get(field.kms);
                 } else {
-                  throw new Error('wtf how did u get here?');
+                  throw new Error('Unexpected identifier: ' + field.identifier);
                 }
 
                 return Promise.resolve()
@@ -294,7 +312,7 @@ describe('Client Side Encryption Corpus', function() {
                   );
               }
 
-              throw new Error('how did u get here?');
+              throw new Error('Unexpected method: ' + field.method);
             });
           })
           .then(() => {
