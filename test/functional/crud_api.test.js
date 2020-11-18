@@ -35,25 +35,29 @@ describe('CRUD API', function() {
           //
           // Cursor
           // --------------------------------------------------
-          var cursor = db.collection('t').find({});
-          // Possible methods on the the cursor instance
-          cursor
-            .filter({ a: 1 })
-            .addCursorFlag('noCursorTimeout', true)
-            .addQueryModifier('$comment', 'some comment')
-            .batchSize(2)
-            .comment('some comment 2')
-            .limit(2)
-            .maxTimeMs(50)
-            .project({ a: 1 })
-            .skip(0)
-            .sort({ a: 1 });
+          const makeCursor = () => {
+            // Possible methods on the the cursor instance
+            return db
+              .collection('t')
+              .find({})
+              .filter({ a: 1 })
+              .addCursorFlag('noCursorTimeout', true)
+              .addQueryModifier('$comment', 'some comment')
+              .batchSize(2)
+              .comment('some comment 2')
+              .limit(2)
+              .maxTimeMs(50)
+              .project({ a: 1 })
+              .skip(0)
+              .sort({ a: 1 });
+          };
 
           //
           // Exercise count method
           // -------------------------------------------------
           var countMethod = function() {
             // Execute the different methods supported by the cursor
+            const cursor = makeCursor();
             cursor.count(function(err, count) {
               test.equal(null, err);
               test.equal(2, count);
@@ -67,6 +71,7 @@ describe('CRUD API', function() {
           var eachMethod = function() {
             var count = 0;
 
+            const cursor = makeCursor();
             cursor.each(function(err, doc) {
               test.equal(null, err);
               if (doc) count = count + 1;
@@ -81,6 +86,7 @@ describe('CRUD API', function() {
           // Exercise toArray
           // -------------------------------------------------
           var toArrayMethod = function() {
+            const cursor = makeCursor();
             cursor.toArray(function(err, docs) {
               test.equal(null, err);
               test.equal(2, docs.length);
@@ -92,16 +98,16 @@ describe('CRUD API', function() {
           // Exercise next method
           // -------------------------------------------------
           var nextMethod = function() {
-            var clonedCursor = cursor.clone();
-            clonedCursor.next(function(err, doc) {
+            const cursor = makeCursor();
+            cursor.next(function(err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
 
-              clonedCursor.next(function(err, doc) {
+              cursor.next(function(err, doc) {
                 test.equal(null, err);
                 test.ok(doc != null);
 
-                clonedCursor.next(function(err, doc) {
+                cursor.next(function(err, doc) {
                   test.equal(null, err);
                   test.equal(null, doc);
                   streamMethod();
@@ -115,12 +121,12 @@ describe('CRUD API', function() {
           // -------------------------------------------------
           var streamMethod = function() {
             var count = 0;
-            var clonedCursor = cursor.clone();
-            clonedCursor.on('data', function() {
+            const cursor = makeCursor();
+            cursor.on('data', function() {
               count = count + 1;
             });
 
-            clonedCursor.once('end', function() {
+            cursor.once('end', function() {
               test.equal(2, count);
               explainMethod();
             });
@@ -130,8 +136,8 @@ describe('CRUD API', function() {
           // Explain method
           // -------------------------------------------------
           var explainMethod = function() {
-            var clonedCursor = cursor.clone();
-            clonedCursor.explain(function(err, result) {
+            const cursor = makeCursor();
+            cursor.explain(function(err, result) {
               test.equal(null, err);
               test.ok(result != null);
 
