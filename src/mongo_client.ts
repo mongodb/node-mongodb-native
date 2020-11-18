@@ -18,7 +18,10 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 import type { TagSet } from './sdam/server_description';
-import { MongoOptions, parseOptions } from './mongo_client_options';
+import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
+import type { TcpSocketConnectOpts as ConnectionOptions } from 'net';
+import type { MongoCredentials } from './cmap/auth/mongo_credentials';
+import { parseOptions } from './connection_string';
 
 /** @public */
 export enum LogLevel {
@@ -568,4 +571,93 @@ export class MongoClient extends EventEmitter implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     if (typeof callback === 'function') callback(undefined, true);
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
+}
+
+/**
+ * Mongo Client Options
+ * @internal
+ */
+export interface MongoOptions
+  extends Required<BSONSerializeOptions>,
+    Omit<ConnectionOptions, 'port'>,
+    Omit<TLSConnectionOptions, 'port'>,
+    Required<
+      Pick<
+        MongoClientOptions,
+        | 'autoEncryption'
+        | 'compression'
+        | 'compressors'
+        | 'connectTimeoutMS'
+        | 'dbName'
+        | 'directConnection'
+        | 'domainsEnabled'
+        | 'driverInfo'
+        | 'forceServerObjectId'
+        | 'gssapiServiceName'
+        | 'ha'
+        | 'haInterval'
+        | 'heartbeatFrequencyMS'
+        | 'keepAlive'
+        | 'keepAliveInitialDelay'
+        | 'localThresholdMS'
+        | 'logger'
+        | 'maxIdleTimeMS'
+        | 'maxPoolSize'
+        | 'minPoolSize'
+        | 'monitorCommands'
+        | 'noDelay'
+        | 'numberOfRetries'
+        | 'pkFactory'
+        | 'promiseLibrary'
+        | 'raw'
+        | 'reconnectInterval'
+        | 'reconnectTries'
+        | 'replicaSet'
+        | 'retryReads'
+        | 'retryWrites'
+        | 'serverSelectionTimeoutMS'
+        | 'serverSelectionTryOnce'
+        | 'socketTimeoutMS'
+        | 'tlsAllowInvalidCertificates'
+        | 'tlsAllowInvalidHostnames'
+        | 'tlsInsecure'
+        | 'waitQueueMultiple'
+        | 'waitQueueTimeoutMS'
+        | 'zlibCompressionLevel'
+      >
+    > {
+  hosts: { host: string; port: number }[];
+  srv: boolean;
+  credentials: MongoCredentials;
+  readPreference: ReadPreference;
+  readConcern: ReadConcern;
+  writeConcern: WriteConcern;
+
+  /**
+   * # NOTE ABOUT TLS Options
+   *
+   * If set TLS enabled, equivalent to setting the ssl option.
+   *
+   * ### Additional options:
+   *
+   * |    nodejs option     | MongoDB equivalent                                       | type                                   |
+   * |:---------------------|--------------------------------------------------------- |:---------------------------------------|
+   * | `ca`                 | `sslCA`, `tlsCAFile`                                     | `string \| Buffer \| Buffer[]`         |
+   * | `crl`                | `sslCRL`                                                 | `string \| Buffer \| Buffer[]`         |
+   * | `cert`               | `sslCert`, `tlsCertificateFile`, `tlsCertificateKeyFile` | `string \| Buffer \| Buffer[]`         |
+   * | `key`                | `sslKey`, `tlsCertificateKeyFile`                        | `string \| Buffer \| KeyObject[]`      |
+   * | `passphrase`         | `sslPass`, `tlsCertificateKeyFilePassword`               | `string`                               |
+   * | `rejectUnauthorized` | `sslValidate`                                            | `boolean`                              |
+   *
+   */
+  tls: boolean;
+
+  /**
+   * Turn these options into a reusable options dictionary
+   */
+  toJSON(): Record<string, any>;
+  /**
+   * Turn these options into a reusable connection URI
+   */
+  toURI(): string;
 }

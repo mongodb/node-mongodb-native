@@ -1,12 +1,14 @@
 import * as url from 'url';
 import * as qs from 'querystring';
 import * as dns from 'dns';
+import { URL } from 'url';
 import { ReadPreference } from './read_preference';
 import { MongoParseError } from './error';
 import type { AnyOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
+import type { MongoClientOptions, MongoOptions } from './mongo_client';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -759,4 +761,50 @@ export function parseConnectionString(
   }
 
   callback(undefined, result);
+}
+
+// NEW PARSER WORK...
+
+const HOSTS_REGEX = new RegExp(
+  '(?<protocol>mongodb(?:\\+srv|)):\\/\\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>[^\\/?]*)(?<rest>.*)'
+);
+
+function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
+  const match = uri.match(HOSTS_REGEX);
+  if (!match) {
+    throw new MongoParseError(`Invalid connection string ${uri}`);
+  }
+
+  const protocol = match.groups?.protocol;
+  const username = match.groups?.username;
+  const password = match.groups?.password;
+  const hosts = match.groups?.hosts;
+  const rest = match.groups?.rest;
+
+  if (!protocol || !hosts) {
+    throw new MongoParseError('Invalid connection string, protocol and host(s) required');
+  }
+
+  const authString = username ? (password ? `${username}:${password}` : `${username}`) : '';
+  return {
+    srv: protocol.includes('srv'),
+    url: new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`),
+    hosts: hosts.split(',')
+  };
+}
+
+export function parseOptions(
+  uri: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options: MongoClientOptions = {}
+): Readonly<MongoOptions> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { srv, url, hosts } = parseURI(uri);
+    const mongoOptions: MongoOptions = ({ srv, hosts } as unknown) as MongoOptions;
+    // TODO(NODE-2699): option parse logic
+    return Object.freeze(mongoOptions);
+  } catch {
+    return Object.freeze({} as MongoOptions);
+  }
 }
