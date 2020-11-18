@@ -11,7 +11,7 @@ import type { AnyOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { DriverInfo, MongoClientOptions, MongoOptions, PkFactory } from './mongo_client';
+import type { DriverInfo, Host, MongoClientOptions, MongoOptions, PkFactory } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevel } from './logger';
