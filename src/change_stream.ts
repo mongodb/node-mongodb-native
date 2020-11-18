@@ -31,6 +31,7 @@ import { executeOperation, ExecutionResult } from './operations/execute_operatio
 
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
+const kClosed = Symbol('closed');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
 const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
@@ -180,10 +181,10 @@ export class ChangeStream extends EventEmitter {
   namespace: MongoDBNamespace;
   type: symbol;
   cursor?: ChangeStreamCursor;
-  closed: boolean;
   streamOptions?: CursorStreamOptions;
   [kResumeQueue]: Denque;
   [kCursorStream]?: Readable;
+  [kClosed]: boolean;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -241,7 +242,7 @@ export class ChangeStream extends EventEmitter {
     // Create contained Change Stream cursor
     this.cursor = createChangeStreamCursor(this, options);
 
-    this.closed = false;
+    this[kClosed] = false;
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
@@ -296,23 +297,20 @@ export class ChangeStream extends EventEmitter {
   }
 
   /** Is the cursor closed */
-  isClosed(): boolean {
-    return this.closed || (this.cursor?.isClosed() ?? false);
+  get closed(): boolean {
+    return this[kClosed] || (this.cursor?.closed ?? false);
   }
 
   /** Close the Change Stream */
   close(callback?: Callback): Promise<void> | void {
+    this[kClosed] = true;
+
     return maybePromise(callback, cb => {
-      if (this.closed) return cb();
+      if (!this.cursor) {
+        return cb();
+      }
 
-      // flag the change stream as explicitly closed
-      this.closed = true;
-
-      if (!this.cursor) return cb();
-
-      // Tidy up the existing cursor
       const cursor = this.cursor;
-
       return cursor.close(err => {
         endStream(this);
         this.cursor = undefined;
@@ -584,7 +582,7 @@ function processNewChange(
   change: ChangeStreamDocument,
   callback?: Callback
 ) {
-  if (changeStream.closed) {
+  if (changeStream[kClosed]) {
     if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
     return;
   }
@@ -614,8 +612,8 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
   const cursor = changeStream.cursor;
 
   // If the change stream has been closed explicitly, do not process error.
-  if (changeStream.closed) {
-    if (callback) callback(new MongoError('ChangeStream is closed'));
+  if (changeStream[kClosed]) {
+    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
     return;
   }
 
@@ -674,8 +672,8 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
  * @param changeStream - the parent ChangeStream
  */
 function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCursor>) {
-  if (changeStream.isClosed()) {
-    callback(new MongoError('ChangeStream is closed.'));
+  if (changeStream[kClosed]) {
+    callback(CHANGESTREAM_CLOSED_ERROR);
     return;
   }
 
@@ -698,8 +696,8 @@ function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCu
 function processResumeQueue(changeStream: ChangeStream, err?: Error) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
-    if (changeStream.isClosed() && !err) {
-      request(new MongoError('Change Stream is not open.'));
+    if (changeStream[kClosed] && !err) {
+      request(CHANGESTREAM_CLOSED_ERROR);
       return;
     }
 

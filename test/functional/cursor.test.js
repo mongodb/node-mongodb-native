@@ -927,7 +927,7 @@ describe('Cursor', function () {
                     cursor.next((err, items) => {
                       expect(err).to.not.exist;
                       test.ok(items == null);
-                      test.ok(cursor.isClosed());
+                      test.ok(cursor.closed);
                       done();
                     });
                   });
@@ -993,7 +993,7 @@ describe('Cursor', function () {
                     cursor.next((err, items) => {
                       expect(err).to.not.exist;
                       test.ok(items == null);
-                      test.ok(cursor.isClosed());
+                      test.ok(cursor.closed);
                       done();
                     });
                   });
@@ -1050,7 +1050,7 @@ describe('Cursor', function () {
                 cursor.next((err, items) => {
                   expect(err).to.not.exist;
                   test.ok(items == null);
-                  test.ok(cursor.isClosed());
+                  test.ok(cursor.closed);
                   done();
                 });
               });
@@ -1208,7 +1208,7 @@ describe('Cursor', function () {
           const cursor = collection.find();
           cursor.close(err => {
             expect(err).to.not.exist;
-            test.equal(true, cursor.isClosed());
+            test.equal(true, cursor.closed);
             done();
           });
         });
@@ -1409,7 +1409,7 @@ describe('Cursor', function () {
 
               cursor.close(err => {
                 expect(err).to.not.exist;
-                test.equal(true, cursor.isClosed());
+                test.equal(true, cursor.closed);
                 done();
               });
             });
@@ -1623,7 +1623,7 @@ describe('Cursor', function () {
               test.equal(1, closed);
               test.equal(1, paused);
               test.equal(1, resumed);
-              test.strictEqual(cursor.isClosed(), true);
+              test.strictEqual(cursor.closed, true);
               done();
             }
           });
@@ -1679,7 +1679,7 @@ describe('Cursor', function () {
                   if (doneCalled === 1) {
                     expect(err).to.not.exist;
                     test.strictEqual(0, i);
-                    test.strictEqual(true, cursor.isClosed());
+                    test.strictEqual(true, cursor.closed);
                     done();
                   }
                 };
@@ -1722,7 +1722,7 @@ describe('Cursor', function () {
             const cursor = collection.find();
             const stream = cursor.stream();
 
-            test.strictEqual(false, cursor.isClosed());
+            test.strictEqual(false, cursor.closed);
 
             stream.on('data', function () {
               if (++i === 5) {
@@ -1740,7 +1740,7 @@ describe('Cursor', function () {
                 test.strictEqual(undefined, err);
                 test.strictEqual(5, i);
                 test.strictEqual(2, finished);
-                test.strictEqual(true, cursor.isClosed());
+                test.strictEqual(true, cursor.closed);
                 done();
               }
             }
@@ -1797,7 +1797,7 @@ describe('Cursor', function () {
                 if (finished === 2) {
                   setTimeout(function () {
                     test.equal(5, i);
-                    test.equal(true, cursor.isClosed());
+                    test.equal(true, cursor.closed);
                     client.close();
 
                     configuration.manager.start().then(function () {

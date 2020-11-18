@@ -475,14 +475,14 @@ describe('Change Streams', function () {
         const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
         this.defer(() => changeStream.close());
 
-        assert.equal(changeStream.isClosed(), false);
-        assert.equal(changeStream.cursor.isClosed(), false);
+        assert.equal(changeStream.closed, false);
+        assert.equal(changeStream.cursor.closed, false);
 
         changeStream.close(err => {
           expect(err).to.not.exist;
 
           // Check the cursor is closed
-          assert.equal(changeStream.isClosed(), true);
+          assert.equal(changeStream.closed, true);
           assert.ok(!changeStream.cursor);
           done();
         });
@@ -774,7 +774,7 @@ describe('Change Streams', function () {
               changeStream.hasNext(function (err, hasNext) {
                 expect(err).to.not.exist;
                 assert.equal(hasNext, false);
-                assert.equal(changeStream.isClosed(), true);
+                assert.equal(changeStream.closed, true);
                 done();
               });
             }
@@ -841,7 +841,7 @@ describe('Change Streams', function () {
           .then(() => changeStream.hasNext())
           .then(function (hasNext) {
             assert.equal(hasNext, false);
-            assert.equal(changeStream.isClosed(), true);
+            assert.equal(changeStream.closed, true);
             done();
           });
       });
@@ -1857,7 +1857,7 @@ describe('Change Streams', function () {
     afterEach(function () {
       return Promise.resolve()
         .then(() => {
-          if (changeStream && !changeStream.isClosed()) {
+          if (changeStream && !changeStream.closed) {
             return changeStream.close();
           }
         })

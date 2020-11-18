@@ -161,11 +161,6 @@ export abstract class AbstractCursor extends EventEmitter {
     return this[kKilled];
   }
 
-  // NOTE: should we remove these? They are currently needed by a number of tests
-  isClosed(): boolean {
-    return this.closed;
-  }
-
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this[kDocuments].length;

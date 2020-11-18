@@ -102,6 +102,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   }
 }
 
+/** @public */
 export class ListCollectionsCursor extends AbstractCursor {
   parent: Db;
   filter: Document;

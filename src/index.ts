@@ -1,5 +1,9 @@
 import { Instrumentation } from './apm';
+import { AbstractCursor } from './cursor/abstract_cursor';
 import { AggregationCursor } from './cursor/aggregation_cursor';
+import { FindCursor } from './cursor/find_cursor';
+import { ListIndexesCursor } from './operations/indexes';
+import { ListCollectionsCursor } from './operations/list_collections';
 import { PromiseProvider } from './promise_provider';
 import { Admin } from './admin';
 import { MongoClient } from './mongo_client';
@@ -69,7 +73,11 @@ export {
   Collection,
   ReadPreference,
   Logger,
+  AbstractCursor,
   AggregationCursor,
+  FindCursor,
+  ListIndexesCursor,
+  ListCollectionsCursor,
   GridFSBucket
 };
 

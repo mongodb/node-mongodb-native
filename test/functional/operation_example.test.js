@@ -5454,9 +5454,6 @@ describe('Operation Examples', function () {
 
   /**
    * A simple example showing the use of the cursor close function.
-   *
-   * @example-class Cursor
-   * @example-method isClosed
    */
   it('shouldStreamDocumentsUsingTheIsCloseFunction', {
     // Add a tag that our runner can trigger on
@@ -5505,7 +5502,7 @@ describe('Operation Examples', function () {
             // Close the cursor, this is the same as reseting the query
             cursor.close(function (err) {
               expect(err).to.not.exist;
-              test.equal(true, cursor.isClosed());
+              test.equal(true, cursor.closed);
 
               client.close(done);
             });
