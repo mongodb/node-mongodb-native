@@ -1,9 +1,8 @@
 'use strict';
 
-const withClient = require('./shared').withClient;
-const setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
-const TopologyType = require('../../lib/sdam/common').TopologyType;
+const { withClient, setupDatabase } = require('./shared');
+const { expect } = require('chai');
+const { TopologyType } = require('../../src/sdam/common');
 
 describe('Sharding (Connection)', function () {
   before(function () {

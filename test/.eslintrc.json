@@ -29,6 +29,9 @@
     "jsdoc/require-returns-type": "off",
     "jsdoc/valid-types": "off",
 
+    // Since we use ts-node we should always require the TS code
+    "no-restricted-modules": ["error", { "patterns": ["**/../lib/**"] }],
+
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "strict": ["error", "global"],
