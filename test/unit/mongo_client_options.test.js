@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { parseOptions } = require('../../src/mongo_client_options');
+const { parseOptions } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
@@ -137,7 +137,7 @@ describe('MongoOptions', function () {
     tlsCAFile: 'tls-ca',
     tlsCertificateKeyFile: 'tls-key',
     tlsCertificateKeyFilePassword: 'tls-pass',
-    tlsInsecure: true,
+    // tlsInsecure: true,
     validateOptions: true,
     w: 'majority',
     waitQueueMultiple: 3,
@@ -154,12 +154,11 @@ describe('MongoOptions', function () {
     // Check consolidated options
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 2);
-    expect(options.writeConcern).to.not.have.property('fsync');
     expect(options.writeConcern).has.property('j', true);
   });
 
   const allURIOptions =
-    'mongodb://localhost:27017/test?' +
+    'mongodb://myName@localhost:27017/test?' +
     [
       'appname=myBestApp',
       'authMechanism=scram-sha-1',
@@ -193,7 +192,7 @@ describe('MongoOptions', function () {
       'tlsCertificateKeyFilePassword=PASSWORD',
       // 'tlsDisableCertificateRevocationCheck=true', // not implemented
       // 'tlsDisableOCSPEndpointCheck=true', // not implemented
-      'tlsInsecure=true',
+      // 'tlsInsecure=true',
       'w=majority',
       'waitQueueTimeoutMS=2',
       'wTimeoutMS=2',

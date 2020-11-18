@@ -5,7 +5,7 @@ const punycode = require('punycode');
 const { MongoParseError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
-const { parseOptions } = require('../../../src/mongo_client_options');
+const { parseOptions } = require('../../../src/connection_string');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 

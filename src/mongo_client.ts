@@ -560,6 +560,11 @@ export class MongoClient extends EventEmitter implements OperationParent {
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
 }
 
+export type Host =
+  | { host: string; type: 'srv' }
+  | { host: string; port: number; type: 'tcp' }
+  | { host: string; type: 'unix' };
+
 /**
  * Mongo Client Options
  * @internal
@@ -580,6 +585,7 @@ export interface MongoOptions
         | 'driverInfo'
         | 'forceServerObjectId'
         | 'gssapiServiceName'
+        | 'minHeartbeatFrequencyMS'
         | 'heartbeatFrequencyMS'
         | 'keepAlive'
         | 'keepAliveInitialDelay'
@@ -607,7 +613,7 @@ export interface MongoOptions
         | 'zlibCompressionLevel'
       >
     > {
-  hosts: { host: string; port: number }[];
+  hosts: Host[];
   srv: boolean;
   credentials: MongoCredentials;
   readPreference: ReadPreference;

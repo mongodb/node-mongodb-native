@@ -2,6 +2,7 @@ import * as url from 'url';
 import * as qs from 'querystring';
 import * as dns from 'dns';
 import { URL } from 'url';
+import { AuthMechanismEnum } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
@@ -13,7 +14,8 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { DriverInfo, MongoClientOptions, MongoOptions, PkFactory } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
-import { Logger, LoggerLevel } from '.';
+import { Logger, LoggerLevel } from './logger';
+import { ObjectId } from 'bson';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -507,23 +509,6 @@ function checkTLSQueryString(queryString: any) {
 }
 
 /**
- * Checks options object if both options are present (any value) will throw an error.
- *
- * @param options - The options used for options parsing
- * @param optionKeyA - A options key
- * @param optionKeyB - B options key
- * @throws MongoParseError if two provided options are mutually exclusive.
- */
-function assertRepelOptions(options: AnyOptions, optionKeyA: string, optionKeyB: string) {
-  if (
-    Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
-    Object.prototype.hasOwnProperty.call(options, optionKeyB)
-  ) {
-    throw new MongoParseError(`The \`${optionKeyA}\` option cannot be used with \`${optionKeyB}\``);
-  }
-}
-
-/**
  * Checks if TLS options are valid
  *
  * @param options - The options used for options parsing
@@ -775,7 +760,7 @@ export function parseConnectionString(
 // NEW PARSER WORK...
 
 const HOSTS_REGEX = new RegExp(
-  '(?<protocol>mongodb(?:\\+srv|)):\\/\\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>[^\\/?]*)(?<rest>.*)'
+  String.raw`(?<protocol>mongodb(?:\+srv|)):\/\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>(?!:)[^\/?@]+)(?<rest>.*)`
 );
 
 function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
@@ -794,10 +779,39 @@ function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
     throw new MongoParseError('Invalid connection string, protocol and host(s) required');
   }
 
+  decodeURIComponent(username ?? '');
+  decodeURIComponent(password ?? '');
+
+  const illegalCharacters = new RegExp('[@/:]', 'gi');
+  if (username?.match(illegalCharacters)) {
+    throw new MongoParseError(`Username contains unescaped characters ${username}`);
+  }
+  if (!username || !password) {
+    const uriWithoutProtocol = uri.replace(`${protocol}://`, '');
+    if (uriWithoutProtocol.startsWith('@') || uriWithoutProtocol.startsWith(':')) {
+      throw new MongoParseError('URI contained empty userinfo section');
+    }
+  }
+
+  if (password?.match(illegalCharacters)) {
+    throw new MongoParseError('Password contains unescaped characters');
+  }
+
   const authString = username ? (password ? `${username}:${password}` : `${username}`) : '';
+  const srv = protocol.includes('srv');
+  const hostList = hosts.split(',');
+  const url = new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`);
+
+  if (srv && hostList.length !== 1) {
+    throw new MongoParseError('mongodb+srv URI cannot have multiple service names');
+  }
+  if (srv && hostList[0].includes(':')) {
+    throw new MongoParseError('mongodb+srv URI cannot have port number');
+  }
+
   return {
-    srv: protocol.includes('srv'),
-    url: new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`),
+    srv,
+    url,
     hosts: hosts.split(',')
   };
 }
@@ -841,12 +855,60 @@ function toRecord(value: string): Record<string, any> {
   return record;
 }
 
-const defaultOptions = new Map<string, unknown>([
-  ['dbName', 'test'],
-  ['socketTimeoutMS', 0],
-  ['readPreference', ReadPreference.primary]
-  // TODO: add more
-]);
+const defaultOptions = new Map<string, unknown>(
+  ([
+    ['readPreference', ReadPreference.primary],
+    ['autoEncryption', {}],
+    ['compression', 'none'],
+    ['compressors', 'none'],
+    ['connectTimeoutMS', 30000],
+    ['dbName', 'test'],
+    ['directConnection', false],
+    ['driverInfo', {}],
+    ['forceServerObjectId', false],
+    ['gssapiServiceName', undefined],
+    ['heartbeatFrequencyMS', 10000],
+    ['keepAlive', true],
+    ['keepAliveInitialDelay', 120000],
+    ['localThresholdMS', 0],
+    ['logger', new Logger('MongoClient')],
+    ['maxIdleTimeMS', 0],
+    ['maxPoolSize', 100],
+    ['minPoolSize', 0],
+    ['monitorCommands', false],
+    ['noDelay', true],
+    ['numberOfRetries', 5],
+    [
+      'pkFactory',
+      {
+        createPk() {
+          // We prefer not to rely on ObjectId having a createPk method
+          return new ObjectId();
+        }
+      }
+    ],
+    [
+      'createPk',
+      function createPk() {
+        // We prefer not to rely on ObjectId having a createPk method
+        return new ObjectId();
+      }
+    ],
+    ['promiseLibrary', undefined],
+    ['raw', false],
+    ['reconnectInterval', 0],
+    ['reconnectTries', 0],
+    ['replicaSet', undefined],
+    ['retryReads', true],
+    ['retryWrites', true],
+    ['serverSelectionTimeoutMS', 30000],
+    ['serverSelectionTryOnce', false],
+    ['socketTimeoutMS', 0],
+    ['waitQueueMultiple', 1],
+    ['waitQueueTimeoutMS', 0],
+    ['zlibCompressionLevel', 0]
+  ] as [string, any][]).map(([k, v]) => [k.toLowerCase(), v])
+);
 
 export function parseOptions(
   uri: string,
@@ -855,16 +917,29 @@ export function parseOptions(
   const { url, hosts, srv } = parseURI(uri);
 
   const mongoOptions = Object.create(null);
-  mongoOptions.hosts = hosts;
+  mongoOptions.hosts = srv ? [{ host: hosts[0], type: 'srv' }] : hosts.map(toHostArray);
   mongoOptions.srv = srv;
+  mongoOptions.dbName = decodeURIComponent(
+    url.pathname[0] === '/' ? url.pathname.slice(1) : url.pathname
+  );
 
   const urlOptions = new Map();
+
+  if (url.username) urlOptions.set('username', [url.username]);
+  if (url.password) urlOptions.set('password', [url.password]);
+
   for (const key of url.searchParams.keys()) {
     const loweredKey = key.toLowerCase();
+    const values = [...url.searchParams.getAll(key)];
+
+    if (values.includes('')) {
+      throw new MongoParseError('URI cannot contain options with no value');
+    }
+
     if (urlOptions.has(loweredKey)) {
-      urlOptions.set(loweredKey, [...urlOptions.get(loweredKey), ...url.searchParams.getAll(key)]);
+      urlOptions.get(loweredKey)?.push(...values);
     } else {
-      urlOptions.set(loweredKey, url.searchParams.getAll(key));
+      urlOptions.set(loweredKey, values);
     }
   }
 
@@ -895,51 +970,88 @@ export function parseOptions(
   }
 
   for (const [loweredKey, values] of allOptions.entries()) {
-    const descriptor = descriptorFor(loweredKey);
-    const {
-      descriptor: { rename, type, transform, deprecated },
-      key
-    } = descriptor;
-    const name = rename ?? key;
-
-    if (deprecated) {
-      console.warn(`${key} is a deprecated option`);
-    }
-
-    switch (type) {
-      case 'boolean':
-        mongoOptions[name] = getBoolean(name, values[0]);
-        break;
-      case 'int':
-        mongoOptions[name] = getInt(name, values[0]);
-        break;
-      case 'uint':
-        mongoOptions[name] = getUint(name, values[0]);
-        break;
-      case 'string':
-        mongoOptions[name] = String(values[0]);
-        break;
-      case 'record':
-        if (!isRecord(values[0])) {
-          throw new TypeError(`${name} must be an object`);
-        }
-        mongoOptions[name] = values[0];
-        break;
-      case 'asIs':
-        mongoOptions[name] = values[0];
-        break;
-      default: {
-        if (!transform) {
-          throw new MongoParseError('Descriptors missing a type must define a transform');
-        }
-        const transformValue = transform({ name, options: mongoOptions, values });
-        mongoOptions[name] = transformValue;
-        break;
-      }
-    }
+    setOption(mongoOptions, loweredKey, values);
   }
 
+  mongoOptions.credentials?.validate();
+  checkTLSOptions(mongoOptions);
+
   return Object.freeze(mongoOptions) as Readonly<MongoOptions>;
+}
+
+function setOption(mongoOptions: any, loweredKey: string, values: unknown[]) {
+  const descriptor = descriptorFor(loweredKey);
+  const {
+    descriptor: { rename, type, transform, deprecated },
+    key
+  } = descriptor;
+  const name = rename ?? key;
+
+  if (deprecated) {
+    console.warn(`${key} is a deprecated option`);
+  }
+
+  switch (type) {
+    case 'boolean':
+      mongoOptions[name] = getBoolean(name, values[0]);
+      break;
+    case 'int':
+      mongoOptions[name] = getInt(name, values[0]);
+      break;
+    case 'uint':
+      mongoOptions[name] = getUint(name, values[0]);
+      break;
+    case 'string':
+      if (values[0] === undefined) {
+        break;
+      }
+      mongoOptions[name] = String(values[0]);
+      break;
+    case 'record':
+      if (!isRecord(values[0])) {
+        throw new TypeError(`${name} must be an object`);
+      }
+      mongoOptions[name] = values[0];
+      break;
+    case 'asIs':
+      mongoOptions[name] = values[0];
+      break;
+    default: {
+      if (!transform) {
+        throw new MongoParseError('Descriptors missing a type must define a transform');
+      }
+      const transformValue = transform({ name, options: mongoOptions, values });
+      mongoOptions[name] = transformValue;
+      break;
+    }
+  }
+}
+
+function toHostArray(hostString: string) {
+  const parsedHost = new URL(`mongodb://${hostString.split(' ').join('%20')}`);
+
+  let socketPath;
+  if (hostString.match(/\.sock/)) {
+    // heuristically determine if we're working with a domain socket
+    socketPath = decodeURIComponent(hostString);
+  }
+
+  const result: Host = socketPath
+    ? {
+        host: socketPath,
+        type: 'unix'
+      }
+    : {
+        host: parsedHost.hostname,
+        port: parsedHost.port ? parseInt(parsedHost.port) : 27017,
+        type: 'tcp'
+      };
+
+  if (result.type === 'tcp' && result.port === 0) {
+    throw new MongoParseError('Invalid port (zero) with hostname');
+  }
+
+  return result;
 }
 
 interface OptionDescriptor {
@@ -983,7 +1095,16 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
       if (!mechanism) {
         throw new TypeError(`authMechanism one of ${mechanisms}, got ${value}`);
       }
-      return new MongoCredentials({ ...options.credentials, mechanism });
+      let db; // some mechanisms have '$external' as the Auth Source
+      if (
+        mechanism === 'PLAIN' ||
+        mechanism === 'GSSAPI' ||
+        mechanism === 'MONGODB-AWS' ||
+        mechanism === 'MONGODB-X509'
+      ) {
+        db = '$external';
+      }
+      return new MongoCredentials({ ...options.credentials, mechanism, db });
     }
   },
   authMechanismProperties: {
@@ -1181,9 +1302,8 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
   minPoolSize: {
     type: 'uint'
   },
-  minSize: {
-    type: 'uint',
-    rename: 'minPoolSize'
+  minHeartbeatFrequencyMS: {
+    type: 'uint'
   },
   monitorCommands: {
     type: 'boolean'
@@ -1209,6 +1329,15 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
       return new MongoCredentials({ ...options.credentials, password });
     }
   } as OptionDescriptor,
+  password: {
+    rename: 'credentials',
+    transform({ values: [password], options }) {
+      if (typeof password !== 'string') {
+        throw new TypeError('pass must be a string');
+      }
+      return new MongoCredentials({ ...options.credentials, password });
+    }
+  },
   pkFactory: {
     rename: 'createPk',
     transform({ values: [value] }): PkFactory {
@@ -1226,10 +1355,6 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
       return { ...options.driverInfo, platform: String(value) };
     }
   } as OptionDescriptor,
-  poolSize: {
-    rename: 'maxPoolSize',
-    type: 'uint'
-  },
   promiseLibrary: {
     type: 'asIs'
   },
@@ -1395,10 +1520,17 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   user: {
+    rename: 'credentials',
     transform({ values: [value], options }) {
       return new MongoCredentials({ ...options.credentials, username: String(value) });
     }
   } as OptionDescriptor,
+  username: {
+    rename: 'credentials',
+    transform({ values: [value], options }) {
+      return new MongoCredentials({ ...options.credentials, username: String(value) });
+    }
+  },
   validateOptions: {
     type: 'boolean'
   },
