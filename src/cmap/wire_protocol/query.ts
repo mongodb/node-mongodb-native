@@ -27,7 +27,7 @@ export function query(
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
   }
 
-  if (shouldUseLegacyQuery(server, options)) {
+  if (maxWireVersion(server) < 4) {
     const query = prepareLegacyFindQuery(server, ns, cmd, options);
     const queryOptions = applyCommonQueryOptions(
       {},
@@ -67,13 +67,6 @@ export function query(
   );
 
   command(server, ns, findCmd, commandOptions, callback);
-}
-
-// Typically, a legacy find query is used for wire versions prior to 4. However, for explain with
-// find on wire versions between 3 and 4, we can't use a legacy find command.
-function shouldUseLegacyQuery(server: Server, options: FindOptions): boolean {
-  const wireVersion = maxWireVersion(server);
-  return wireVersion <= 3 || (wireVersion < 4 && options.explain === undefined);
 }
 
 function prepareFindCommand(server: Server, ns: string, cmd: Document) {
