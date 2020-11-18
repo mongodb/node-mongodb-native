@@ -797,7 +797,10 @@ function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
     throw new MongoParseError('Password contains unescaped characters');
   }
 
-  const authString = username ? (password ? `${username}:${password}` : `${username}`) : '';
+  let authString = '';
+  if (typeof username === 'string') authString += username;
+  if (typeof password === 'string') authString += `:${password}`;
+
   const srv = protocol.includes('srv');
   const hostList = hosts.split(',');
   const url = new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`);
@@ -922,12 +925,14 @@ export function parseOptions(
   mongoOptions.dbName = decodeURIComponent(
     url.pathname[0] === '/' ? url.pathname.slice(1) : url.pathname
   );
+  mongoOptions.credentials = new MongoCredentials({
+    ...mongoOptions.credentials,
+    source: mongoOptions.dbName,
+    username: typeof url.username === 'string' ? decodeURIComponent(url.username) : undefined,
+    password: typeof url.password === 'string' ? decodeURIComponent(url.password) : undefined
+  });
 
   const urlOptions = new Map();
-
-  if (url.username) urlOptions.set('username', [url.username]);
-  if (url.password) urlOptions.set('password', [url.password]);
-
   for (const key of url.searchParams.keys()) {
     const loweredKey = key.toLowerCase();
     const values = [...url.searchParams.getAll(key)];
@@ -1036,13 +1041,18 @@ function toHostArray(hostString: string) {
     socketPath = decodeURIComponent(hostString);
   }
 
+  let ipv6SanitizedHostName;
+  if (parsedHost.hostname.startsWith('[') && parsedHost.hostname.endsWith(']')) {
+    ipv6SanitizedHostName = parsedHost.hostname.substring(1, parsedHost.hostname.length - 1);
+  }
+
   const result: Host = socketPath
     ? {
         host: socketPath,
         type: 'unix'
       }
     : {
-        host: parsedHost.hostname,
+        host: decodeURIComponent(ipv6SanitizedHostName ?? parsedHost.hostname),
         port: parsedHost.port ? parseInt(parsedHost.port) : 27017,
         type: 'tcp'
       };
@@ -1095,16 +1105,26 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
       if (!mechanism) {
         throw new TypeError(`authMechanism one of ${mechanisms}, got ${value}`);
       }
-      let db; // some mechanisms have '$external' as the Auth Source
+      let source = options.credentials.source; // some mechanisms have '$external' as the Auth Source
       if (
         mechanism === 'PLAIN' ||
         mechanism === 'GSSAPI' ||
         mechanism === 'MONGODB-AWS' ||
         mechanism === 'MONGODB-X509'
       ) {
-        db = '$external';
+        source = '$external';
       }
-      return new MongoCredentials({ ...options.credentials, mechanism, db });
+
+      let password: string | undefined = options.credentials.password;
+      if (mechanism === 'MONGODB-X509' && password === '') {
+        password = undefined;
+      }
+      return new MongoCredentials({
+        ...options.credentials,
+        mechanism,
+        source,
+        password: password as any
+      });
     }
   },
   authMechanismProperties: {

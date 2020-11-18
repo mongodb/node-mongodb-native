@@ -214,88 +214,118 @@ describe('Connection String', function () {
   });
 
   describe('spec tests', function () {
+    /** @type {import('../../spec/connection-string/valid-auth.json')[]} */
     const suites = loadSpecTests('connection-string').concat(loadSpecTests('auth'));
 
     suites.forEach(suite => {
       describe(suite.name, function () {
         suite.tests.forEach(test => {
-          it(test.description, {
-            metadata: { requires: { topology: 'single' } },
-            test: function (done) {
-              if (skipTests.indexOf(test.description) !== -1) {
-                return this.skip();
-              }
+          // it(test.description, {
+          //   metadata: { requires: { topology: 'single' } },
+          //   test: function (done) {
+          //     if (skipTests.indexOf(test.description) !== -1) {
+          //       return this.skip();
+          //     }
 
-              const valid = test.valid;
-              parseConnectionString(test.uri, { caseTranslate: false }, function (err, result) {
-                if (valid === false) {
-                  expect(err).to.exist;
-                  expect(err).to.be.instanceOf(MongoParseError);
-                  expect(result).to.not.exist;
-                } else {
-                  expect(err).to.not.exist;
-                  expect(result).to.exist;
+          //     const valid = test.valid;
+          //     parseConnectionString(test.uri, { caseTranslate: false }, function (err, result) {
+          //       if (valid === false) {
+          //         expect(err).to.exist;
+          //         expect(err).to.be.instanceOf(MongoParseError);
+          //         expect(result).to.not.exist;
+          //       } else {
+          //         expect(err).to.not.exist;
+          //         expect(result).to.exist;
 
-                  // remove data we don't track
-                  if (test.auth && test.auth.password === '') {
-                    test.auth.password = null;
-                  }
+          //         // remove data we don't track
+          //         if (test.auth && test.auth.password === '') {
+          //           test.auth.password = null;
+          //         }
 
-                  if (test.hosts != null) {
-                    test.hosts = test.hosts.map(host => {
-                      delete host.type;
-                      host.host = punycode.toASCII(host.host);
-                      return host;
-                    });
+          //         if (test.hosts != null) {
+          //           test.hosts = test.hosts.map(host => {
+          //             delete host.type;
+          //             host.host = punycode.toASCII(host.host);
+          //             return host;
+          //           });
 
-                    // remove values that require no validation
-                    test.hosts.forEach(host => {
-                      Object.keys(host).forEach(key => {
-                        if (host[key] == null) delete host[key];
-                      });
-                    });
+          //           // remove values that require no validation
+          //           test.hosts.forEach(host => {
+          //             Object.keys(host).forEach(key => {
+          //               if (host[key] == null) delete host[key];
+          //             });
+          //           });
 
-                    expect(result.hosts).to.containSubset(test.hosts);
-                  }
+          //           expect(result.hosts).to.containSubset(test.hosts);
+          //         }
 
-                  if (test.auth) {
-                    if (test.auth.db != null) {
-                      expect(result.auth).to.have.property('db');
-                      expect(result.auth.db).to.eql(test.auth.db);
-                    }
+          //         if (test.auth) {
+          //           if (test.auth.db != null) {
+          //             expect(result.auth).to.have.property('db');
+          //             expect(result.auth.db).to.eql(test.auth.db);
+          //           }
 
-                    if (test.auth.username != null) {
-                      expect(result.auth).to.have.property('username');
-                      expect(result.auth.username).to.eql(test.auth.username);
-                    }
+          //           if (test.auth.username != null) {
+          //             expect(result.auth).to.have.property('username');
+          //             expect(result.auth.username).to.eql(test.auth.username);
+          //           }
 
-                    if (test.auth.password != null) {
-                      expect(result.auth).to.have.property('password');
-                      expect(result.auth.password).to.eql(test.auth.password);
-                    }
-                  }
+          //           if (test.auth.password != null) {
+          //             expect(result.auth).to.have.property('password');
+          //             expect(result.auth.password).to.eql(test.auth.password);
+          //           }
+          //         }
 
-                  if (test.options != null) {
-                    // it's possible we have options which are not explicitly included in the spec test
-                    expect(result.options).to.deep.include(test.options);
-                  }
-                }
+          //         if (test.options != null) {
+          //           // it's possible we have options which are not explicitly included in the spec test
+          //           expect(result.options).to.deep.include(test.options);
+          //         }
+          //       }
 
-                done();
-              });
-            }
-          });
+          //       done();
+          //     });
+          //   }
+          // });
 
           it(`${test.description} -- new MongoOptions parser`, function () {
             if (skipTests.includes(test.description)) {
               return this.skip();
             }
 
+            const message = `"${test.uri}"`;
+
             const valid = test.valid;
             if (valid) {
-              expect(parseOptions(test.uri), `"${test.uri}"`).to.be.ok;
+              const options = parseOptions(test.uri);
+              expect(options, message).to.be.ok;
+
+              if (test.hosts) {
+                for (const [index, { host, port }] of test.hosts.entries()) {
+                  expect(options.hosts[index].host, message).to.equal(host);
+                  if (typeof port === 'number') expect(options.hosts[index].port).to.equal(port);
+                }
+              }
+
+              if (test.auth) {
+                if (test.auth.db != null) {
+                  expect(options.credentials.source, message).to.equal(test.auth.db);
+                }
+
+                if (test.auth.username != null) {
+                  expect(options.credentials.username, message).to.equal(test.auth.username);
+                }
+
+                if (test.auth.password != null) {
+                  expect(options.credentials.password, message).to.equal(test.auth.password);
+                }
+              }
+
+              // Going to have to get clever here...
+              // if (test.options) {
+              //   expect(options, message).to.deep.include(test.options);
+              // }
             } else {
-              expect(() => parseOptions(test.uri), `"${test.uri}"`).to.throw();
+              expect(() => parseOptions(test.uri), message).to.throw();
             }
           });
         });
