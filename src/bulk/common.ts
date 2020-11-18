@@ -666,38 +666,38 @@ function handleMongoWriteConcernError(
  * @category Error
  */
 export class MongoBulkWriteError extends MongoError {
-  result?: BulkWriteResult;
+  result: BulkWriteResult;
 
   /** Number of documents inserted. */
-  insertedCount?: number;
+  insertedCount: number;
   /** Number of documents matched for update. */
-  matchedCount?: number;
+  matchedCount: number;
   /** Number of documents modified. */
-  modifiedCount?: number;
+  modifiedCount: number;
   /** Number of documents deleted. */
-  deletedCount?: number;
+  deletedCount: number;
   /** Number of documents upserted. */
-  upsertedCount?: number;
+  upsertedCount: number;
   /** Inserted document generated Id's, hash key is the index of the originating operation */
-  insertedIds?: { [key: number]: ObjectId };
+  insertedIds: { [key: number]: ObjectId };
   /** Upserted document generated Id's, hash key is the index of the originating operation */
-  upsertedIds?: { [key: number]: ObjectId };
+  upsertedIds: { [key: number]: ObjectId };
 
   /** Creates a new MongoBulkWriteError */
-  constructor(error?: AnyError, result?: BulkWriteResult) {
+  constructor(error: AnyError, result: BulkWriteResult) {
     super(error as Error);
     Object.assign(this, error);
 
     this.name = 'MongoBulkWriteError';
     this.result = result;
 
-    this.insertedCount = result?.insertedCount;
-    this.matchedCount = result?.matchedCount;
-    this.modifiedCount = result?.modifiedCount || 0;
-    this.deletedCount = result?.deletedCount;
-    this.upsertedCount = result?.upsertedCount;
-    this.insertedIds = result?.insertedIds;
-    this.upsertedIds = result?.upsertedIds;
+    this.insertedCount = result.insertedCount;
+    this.matchedCount = result.matchedCount;
+    this.modifiedCount = result.modifiedCount;
+    this.deletedCount = result.deletedCount;
+    this.upsertedCount = result.upsertedCount;
+    this.insertedIds = result.insertedIds;
+    this.upsertedIds = result.upsertedIds;
   }
 }
 
