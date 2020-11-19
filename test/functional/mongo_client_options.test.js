@@ -110,6 +110,28 @@ describe('MongoClient Options', function() {
     });
   });
 
+  it('NODE-2874: connectTimeoutMS=0 causes monitoring to time out', function(done) {
+    const heartbeatFrequencyMS = 500;
+    const client = this.configuration.newClient({
+      connectTimeoutMS: 0, // no connect timeout
+      heartbeatFrequencyMS // fast 500ms heartbeat
+    });
+    client.connect(() => {
+      // success after 5 heartbeats
+      const success = setTimeout(() => client.close(done), heartbeatFrequencyMS * 5);
+
+      // fail on first error
+      const listener = ev => {
+        if (ev.newDescription.error) {
+          clearTimeout(success);
+          client.removeListener('serverDescriptionChanged', listener);
+          client.close(() => done(ev.newDescription.error));
+        }
+      };
+      client.on('serverDescriptionChanged', listener);
+    });
+  });
+
   /**
    * @ignore
    */
