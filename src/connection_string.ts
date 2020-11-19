@@ -88,7 +88,7 @@ function parseSrvConnectionString(uri: string, options: any, callback: Callback)
     // Resolve TXT record and add options from there if they exist.
     dns.resolveTxt(lookupAddress, (err?: any, record?: any) => {
       if (err) {
-        if (err.code !== 'ENODATA') {
+        if (err.code !== 'ENODATA' && err.code !== 'ENOTFOUND') {
           return callback(err);
         }
         record = null;
