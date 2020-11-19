@@ -18,6 +18,10 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
 import type { TagSet } from './sdam/server_description';
+import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
+import type { TcpSocketConnectOpts as ConnectionOptions } from 'net';
+import type { MongoCredentials } from './cmap/auth/mongo_credentials';
+import { parseOptions } from './connection_string';
 
 /** @public */
 export enum LogLevel {
@@ -80,7 +84,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
   compressors?: string;
   /** An integer that specifies the compression level if using zlib for network compression. */
-  zlibCompressionLevel?: number;
+  zlibCompressionLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /** The maximum number of connections in the connection pool. */
   maxPoolSize?: number;
   /** The minimum number of connections in the connection pool. */
@@ -269,6 +273,16 @@ export class MongoClient extends EventEmitter implements OperationParent {
   s: MongoClientPrivate;
   topology?: Topology;
 
+  /**
+   * The consolidate, parsed, transformed and merged options.
+   * @internal
+   */
+  options: MongoOptions;
+
+  // debugging
+  originalUri;
+  originalOptions;
+
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
@@ -278,16 +292,20 @@ export class MongoClient extends EventEmitter implements OperationParent {
       // NOTE: need this to prevent deprecation notice from being inherited in Db, Collection
       delete options.promiseLibrary;
     }
+    this.originalUri = url;
+    this.originalOptions = options;
+
+    this.options = parseOptions(url, options);
 
     // The internal state
     this.s = {
       url,
-      options: options || {},
+      options: options ?? {},
       dbCache: new Map(),
       sessions: new Set(),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
-      readPreference: ReadPreference.fromOptions(options) || ReadPreference.primary,
+      readPreference: ReadPreference.fromOptions(options) ?? ReadPreference.primary,
       bsonOptions: resolveBSONOptions(options),
       namespace: new MongoDBNamespace('admin'),
       logger: options?.logger ?? new Logger('MongoClient')
@@ -553,4 +571,93 @@ export class MongoClient extends EventEmitter implements OperationParent {
     if (typeof options === 'function') (callback = options), (options = {});
     if (typeof callback === 'function') callback(undefined, true);
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
+}
+
+/**
+ * Mongo Client Options
+ * @internal
+ */
+export interface MongoOptions
+  extends Required<BSONSerializeOptions>,
+    Omit<ConnectionOptions, 'port'>,
+    Omit<TLSConnectionOptions, 'port'>,
+    Required<
+      Pick<
+        MongoClientOptions,
+        | 'autoEncryption'
+        | 'compression'
+        | 'compressors'
+        | 'connectTimeoutMS'
+        | 'dbName'
+        | 'directConnection'
+        | 'domainsEnabled'
+        | 'driverInfo'
+        | 'forceServerObjectId'
+        | 'gssapiServiceName'
+        | 'ha'
+        | 'haInterval'
+        | 'heartbeatFrequencyMS'
+        | 'keepAlive'
+        | 'keepAliveInitialDelay'
+        | 'localThresholdMS'
+        | 'logger'
+        | 'maxIdleTimeMS'
+        | 'maxPoolSize'
+        | 'minPoolSize'
+        | 'monitorCommands'
+        | 'noDelay'
+        | 'numberOfRetries'
+        | 'pkFactory'
+        | 'promiseLibrary'
+        | 'raw'
+        | 'reconnectInterval'
+        | 'reconnectTries'
+        | 'replicaSet'
+        | 'retryReads'
+        | 'retryWrites'
+        | 'serverSelectionTimeoutMS'
+        | 'serverSelectionTryOnce'
+        | 'socketTimeoutMS'
+        | 'tlsAllowInvalidCertificates'
+        | 'tlsAllowInvalidHostnames'
+        | 'tlsInsecure'
+        | 'waitQueueMultiple'
+        | 'waitQueueTimeoutMS'
+        | 'zlibCompressionLevel'
+      >
+    > {
+  hosts: { host: string; port: number }[];
+  srv: boolean;
+  credentials: MongoCredentials;
+  readPreference: ReadPreference;
+  readConcern: ReadConcern;
+  writeConcern: WriteConcern;
+
+  /**
+   * # NOTE ABOUT TLS Options
+   *
+   * If set TLS enabled, equivalent to setting the ssl option.
+   *
+   * ### Additional options:
+   *
+   * |    nodejs option     | MongoDB equivalent                                       | type                                   |
+   * |:---------------------|--------------------------------------------------------- |:---------------------------------------|
+   * | `ca`                 | `sslCA`, `tlsCAFile`                                     | `string \| Buffer \| Buffer[]`         |
+   * | `crl`                | `sslCRL`                                                 | `string \| Buffer \| Buffer[]`         |
+   * | `cert`               | `sslCert`, `tlsCertificateFile`, `tlsCertificateKeyFile` | `string \| Buffer \| Buffer[]`         |
+   * | `key`                | `sslKey`, `tlsCertificateKeyFile`                        | `string \| Buffer \| KeyObject[]`      |
+   * | `passphrase`         | `sslPass`, `tlsCertificateKeyFilePassword`               | `string`                               |
+   * | `rejectUnauthorized` | `sslValidate`                                            | `boolean`                              |
+   *
+   */
+  tls: boolean;
+
+  /**
+   * Turn these options into a reusable options dictionary
+   */
+  toJSON(): Record<string, any>;
+  /**
+   * Turn these options into a reusable connection URI
+   */
+  toURI(): string;
 }
