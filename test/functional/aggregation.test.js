@@ -386,12 +386,7 @@ describe('Aggregation', function () {
    * @example-class Collection
    * @example-method aggregate
    */
-  it.skip('should correctly return a cursor and call explain', {
-    // TODO NODE-2853: This had to be skipped during NODE-2852; un-skip while re-implementing
-    // cursor explain
-
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
+  it('should correctly return a cursor and call explain', {
     metadata: {
       requires: {
         mongodb: '>2.5.3',
@@ -461,7 +456,7 @@ describe('Aggregation', function () {
           cursor.explain(function (err, result) {
             expect(err).to.not.exist;
             expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.key('$cursor');
+            expect(result.stages[0]).to.have.property('$cursor');
 
             client.close(done);
           });
@@ -928,7 +923,7 @@ describe('Aggregation', function () {
     }
   });
 
-  it('should fail if you try to use explain flag with readConcern/writeConcern', {
+  it('should fail if you try to use explain flag with writeConcern', {
     metadata: {
       requires: {
         mongodb: '>3.6.0',
@@ -938,12 +933,9 @@ describe('Aggregation', function () {
 
     test: function (done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
-      });
+      var client = this.configuration.newClient({ poolSize: 1 });
 
       const testCases = [
-        { readConcern: { level: 'local' } },
         { writeConcern: { j: true } },
         { readConcern: { level: 'local' }, writeConcern: { j: true } }
       ];

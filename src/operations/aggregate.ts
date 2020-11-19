@@ -65,10 +65,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
       this.readPreference = ReadPreference.primary;
     }
 
-    if (options?.explain && (this.readConcern || this.writeConcern)) {
-      throw new MongoError(
-        '"explain" cannot be used on an aggregate call with readConcern/writeConcern'
-      );
+    if (this.explain && this.writeConcern) {
+      throw new MongoError('"explain" cannot be used on an aggregate call with writeConcern');
     }
 
     if (options?.cursor != null && typeof options.cursor !== 'object') {
@@ -111,10 +109,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
       command.hint = options.hint;
     }
 
-    if (options.explain) {
-      command.explain = options.explain;
-    }
-
     command.cursor = options.cursor || {};
     if (options.batchSize && !this.hasWriteStage) {
       command.cursor.batchSize = options.batchSize;
@@ -124,4 +118,4 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   }
 }
 
-defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);

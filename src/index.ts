@@ -163,7 +163,7 @@ export type {
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
 export type { AnyError, ErrorDescription } from './error';
-export type { ExplainOptions, ExplainVerbosity, ExplainVerbosityLike } from './explain';
+export type { Explain, ExplainOptions, ExplainVerbosity, ExplainVerbosityLike } from './explain';
 export type {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
