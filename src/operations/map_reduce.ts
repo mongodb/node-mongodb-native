@@ -8,7 +8,7 @@ import {
   Callback,
   maxWireVersion
 } from '../utils';
-import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { ReadPreference } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
