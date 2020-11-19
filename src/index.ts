@@ -57,11 +57,7 @@ export {
   MongoParseError,
   MongoWriteConcernError
 } from './error';
-export {
-  BulkWriteError as MongoBulkWriteError,
-  BulkWriteOptions,
-  AnyBulkWriteOperation
-} from './bulk/common';
+export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {
   // Utils
   instrument,

@@ -551,7 +551,9 @@ function executeCommands(
   function resultHandler(err?: AnyError, result?: Document) {
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
-      return callback(new BulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult)));
+      return callback(
+        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult))
+      );
     }
 
     if (err instanceof MongoWriteConcernError) {
@@ -651,7 +653,10 @@ function handleMongoWriteConcernError(
   );
 
   callback(
-    new BulkWriteError(new MongoError(wrappedWriteConcernError), new BulkWriteResult(bulkResult))
+    new MongoBulkWriteError(
+      new MongoError(wrappedWriteConcernError),
+      new BulkWriteResult(bulkResult)
+    )
   );
 }
 
@@ -660,16 +665,39 @@ function handleMongoWriteConcernError(
  * @public
  * @category Error
  */
-export class BulkWriteError extends MongoError {
-  result?: BulkWriteResult;
+export class MongoBulkWriteError extends MongoError {
+  result: BulkWriteResult;
 
-  /** Creates a new BulkWriteError */
-  constructor(error?: AnyError, result?: BulkWriteResult) {
+  /** Number of documents inserted. */
+  insertedCount: number;
+  /** Number of documents matched for update. */
+  matchedCount: number;
+  /** Number of documents modified. */
+  modifiedCount: number;
+  /** Number of documents deleted. */
+  deletedCount: number;
+  /** Number of documents upserted. */
+  upsertedCount: number;
+  /** Inserted document generated Id's, hash key is the index of the originating operation */
+  insertedIds: { [key: number]: ObjectId };
+  /** Upserted document generated Id's, hash key is the index of the originating operation */
+  upsertedIds: { [key: number]: ObjectId };
+
+  /** Creates a new MongoBulkWriteError */
+  constructor(error: AnyError, result: BulkWriteResult) {
     super(error as Error);
     Object.assign(this, error);
 
-    this.name = 'BulkWriteError';
+    this.name = 'MongoBulkWriteError';
     this.result = result;
+
+    this.insertedCount = result.insertedCount;
+    this.matchedCount = result.matchedCount;
+    this.modifiedCount = result.modifiedCount;
+    this.deletedCount = result.deletedCount;
+    this.upsertedCount = result.upsertedCount;
+    this.insertedIds = result.insertedIds;
+    this.upsertedIds = result.upsertedIds;
   }
 }
 
@@ -1214,7 +1242,7 @@ export abstract class BulkOperationBase {
         : 'write operation failed';
 
       callback(
-        new BulkWriteError(
+        new MongoBulkWriteError(
           new MongoError({
             message: msg,
             code: this.s.bulkResult.writeErrors[0].code,
@@ -1229,7 +1257,7 @@ export abstract class BulkOperationBase {
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new BulkWriteError(new MongoError(writeConcernError), writeResult));
+      callback(new MongoBulkWriteError(new MongoError(writeConcernError), writeResult));
       return true;
     }
   }

@@ -6,8 +6,6 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const BulkWriteError = require('../../src/bulk/common').BulkWriteError;
-
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
@@ -111,36 +109,6 @@ describe('CRUD spec', function () {
     });
   });
 
-  function transformBulkWriteResult(result) {
-    const r = {};
-    r.insertedCount = result.nInserted;
-    r.matchedCount = result.nMatched;
-    r.modifiedCount = result.nModified || 0;
-    r.deletedCount = result.nRemoved;
-    r.upsertedCount = result.getUpsertedIds().length;
-    r.upsertedIds = {};
-    r.insertedIds = {};
-
-    // Update the n
-    r.n = r.insertedCount;
-
-    // Inserted documents
-    const inserted = result.getInsertedIds();
-    // Map inserted ids
-    for (let i = 0; i < inserted.length; i++) {
-      r.insertedIds[inserted[i].index] = inserted[i]._id;
-    }
-
-    // Upserted documents
-    const upserted = result.getUpsertedIds();
-    // Map upserted ids
-    for (let i = 0; i < upserted.length; i++) {
-      r.upsertedIds[upserted[i].index] = upserted[i]._id;
-    }
-
-    return r;
-  }
-
   function invert(promise) {
     return promise.then(
       () => {
@@ -152,11 +120,6 @@ describe('CRUD spec', function () {
 
   function assertWriteExpectations(collection, outcome) {
     return function (result) {
-      // TODO: when we fix our bulk write errors, get rid of this
-      if (result instanceof BulkWriteError) {
-        result = transformBulkWriteResult(result.result);
-      }
-
       Object.keys(outcome.result).forEach(resultName => {
         expect(result).to.have.property(resultName);
         if (resultName === 'upsertedId') {
