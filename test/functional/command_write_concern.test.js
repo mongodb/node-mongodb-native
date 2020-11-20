@@ -121,8 +121,10 @@ describe('Command Write Concern', function () {
 
           db.collection('test')
             .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-              w: 2,
-              wtimeout: 1000
+              writeConcern: {
+                w: 2,
+                wtimeout: 1000
+              }
             })
             .toArray(function (err) {
               expect(err).to.not.exist;
@@ -244,12 +246,16 @@ describe('Command Write Concern', function () {
           expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
-          db.createCollection('test_collection_methods', { w: 2, wtimeout: 1000 }, function (err) {
-            expect(err).to.not.exist;
-            test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+          db.createCollection(
+            'test_collection_methods',
+            { writeConcern: { w: 2, wtimeout: 1000 } },
+            function (err) {
+              expect(err).to.not.exist;
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-            client.close(done);
-          });
+              client.close(done);
+            }
+          );
         });
       });
     }
@@ -359,8 +365,7 @@ describe('Command Write Concern', function () {
             { a: 1 },
             {
               indexOptionDefaults: true,
-              w: 2,
-              wtimeout: 1000
+              writeConcern: { w: 2, wtimeout: 1000 }
             },
             function (err) {
               expect(err).to.not.exist;
@@ -475,8 +480,10 @@ describe('Command Write Concern', function () {
 
           db.collection('indexOptionDefault').drop(
             {
-              w: 2,
-              wtimeout: 1000
+              writeConcern: {
+                w: 2,
+                wtimeout: 1000
+              }
             },
             function (err) {
               expect(err).to.not.exist;
@@ -591,8 +598,10 @@ describe('Command Write Concern', function () {
 
           db.dropDatabase(
             {
-              w: 2,
-              wtimeout: 1000
+              writeConcern: {
+                w: 2,
+                wtimeout: 1000
+              }
             },
             function (err) {
               expect(err).to.not.exist;
@@ -707,8 +716,10 @@ describe('Command Write Concern', function () {
 
           db.collection('test').dropIndexes(
             {
-              w: 2,
-              wtimeout: 1000
+              writeConcern: {
+                w: 2,
+                wtimeout: 1000
+              }
             },
             function (err) {
               expect(err).to.not.exist;
@@ -831,8 +842,7 @@ describe('Command Write Concern', function () {
             reduce,
             {
               out: { replace: 'tempCollection' },
-              w: 2,
-              wtimeout: 1000
+              writeConcern: { w: 2, wtimeout: 1000 }
             },
             function (err) {
               expect(err).to.not.exist;
@@ -945,12 +955,17 @@ describe('Command Write Concern', function () {
           expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
-          db.admin().addUser('kay:kay', 'abc123', { w: 2, wtimeout: 1000 }, function (err) {
-            expect(err).to.not.exist;
-            test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+          db.admin().addUser(
+            'kay:kay',
+            'abc123',
+            { writeConcern: { w: 2, wtimeout: 1000 } },
+            function (err) {
+              expect(err).to.not.exist;
+              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-            client.close(done);
-          });
+              client.close(done);
+            }
+          );
         });
       });
     }
@@ -1055,7 +1070,9 @@ describe('Command Write Concern', function () {
           expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
-          db.admin().removeUser('kay:kay', { w: 2, wtimeout: 1000 }, function (err) {
+          db.admin().removeUser('kay:kay', { writeConcern: { w: 2, wtimeout: 1000 } }, function (
+            err
+          ) {
             expect(err).to.not.exist;
             test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
@@ -1170,7 +1187,7 @@ describe('Command Write Concern', function () {
             { a: 1 },
             [['a', 1]],
             { $set: { b1: 1 } },
-            { new: true, w: 2, wtimeout: 1000 },
+            { new: true, writeConcern: { w: 2, wtimeout: 1000 } },
             function (err) {
               expect(err).to.not.exist;
               test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);

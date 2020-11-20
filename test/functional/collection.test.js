@@ -668,7 +668,7 @@ describe('Collection', function () {
     let db;
     let collection;
     beforeEach(function () {
-      client = configuration.newClient({}, { w: 1 });
+      client = configuration.newClient({ w: 1 });
 
       return client.connect().then(client => {
         db = client.db(configuration.db);
@@ -852,7 +852,7 @@ describe('Collection', function () {
 
   function testCapped(testConfiguration, config, done) {
     const configuration = config.config;
-    const client = testConfiguration.newClient({}, { w: 1 });
+    const client = testConfiguration.newClient({ w: 1 });
 
     client.connect((err, client) => {
       const db = client.db(configuration.db);
@@ -938,7 +938,7 @@ describe('Collection', function () {
     metadata: { requires: { mongodb: '>=3.0.0' } },
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient({}, { w: 1 });
+      const client = configuration.newClient({ w: 1 });
 
       let finish = err => {
         finish = () => {};
