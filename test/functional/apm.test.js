@@ -358,7 +358,9 @@ describe('APM', function () {
             // Insert test documents
             return db
               .collection('apm_test_2')
-              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 });
+              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], {
+                writeConcern: { w: 1 }
+              });
           })
           .then(r => {
             expect(r).property('insertedCount').to.equal(6);
@@ -528,7 +530,9 @@ describe('APM', function () {
           .then(() =>
             db
               .collection('apm_test_2')
-              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 })
+              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], {
+                writeConcern: { w: 1 }
+              })
           )
           .then(r => {
             expect(r).property('insertedCount').to.equal(6);

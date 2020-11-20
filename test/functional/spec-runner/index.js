@@ -31,7 +31,16 @@ function escape(string) {
 
 function translateClientOptions(options) {
   Object.keys(options).forEach(key => {
-    if (key === 'readConcernLevel') {
+    if (['j', 'journal', 'fsync', 'wtimeout', 'wtimeoutms'].indexOf(key) >= 0) {
+      throw new Error(
+        `Unhandled write concern key needs to be added to options.writeConcern: ${key}`
+      );
+    }
+
+    if (key === 'w') {
+      options.writeConcern = { w: options.w };
+      delete options[key];
+    } else if (key === 'readConcernLevel') {
       options.readConcern = { level: options.readConcernLevel };
       delete options[key];
     } else if (key === 'autoEncryptOpts') {
