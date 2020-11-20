@@ -552,23 +552,26 @@ function transformUrlOptions(connStrOptions: any) {
     connStrOpts.readConcern = new ReadConcern(connStrOpts.readConcernLevel);
   }
 
+  if (connStrOpts.wTimeoutMS) {
+    connStrOpts.wtimeout = connStrOpts.wTimeoutMS;
+    connStrOpts.wTimeoutMS = undefined;
+  }
+
   if (connStrOptions.srvHost) {
     connStrOpts.srvHost = connStrOptions.srvHost;
   }
 
-  const wc_keys = ['w', 'j', 'journal', 'wtimeout', 'wtimeoutMS', 'fsync'];
-  const writeConcern = connStrOpts.writeConcern ?? {};
-  for (const key of wc_keys) {
+  // Any write concern options from the URL will be top-level, so we manually
+  // move them options under `object.writeConcern`
+  const wcKeys = ['w', 'wtimeout', 'j', 'journal', 'fsync'];
+  for (const key of wcKeys) {
     if (connStrOpts[key] !== undefined) {
-      writeConcern[key] = connStrOpts[key];
+      if (connStrOpts.writeConcern === undefined) connStrOpts.writeConcern = {};
+      connStrOpts.writeConcern[key] = connStrOpts[key];
       connStrOpts[key] = undefined;
     }
   }
-  connStrOpts.writeConcern = writeConcern;
 
-  if (connStrOpts.writeConcern.wTimeoutMS) {
-    connStrOpts.writrConcern.wtimeout = connStrOpts.writeConcern.wTimeoutMS;
-  }
   return connStrOpts;
 }
 

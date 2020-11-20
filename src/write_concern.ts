@@ -88,7 +88,6 @@ export class WriteConcern {
     ) {
       return new WriteConcern(w, wtimeout ?? wtimeoutMS, j ?? journal, fsync);
     }
-
     return undefined;
   }
 }

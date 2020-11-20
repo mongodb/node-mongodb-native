@@ -12,8 +12,9 @@ import type { WriteConcernOptions } from '../../write_concern';
 import type { WriteCommandOptions } from './write_command';
 
 /** @internal */
-// FIXME: NODE-2781
 export interface CommandOptions extends BSONSerializeOptions, WriteConcernOptions {
+  // FIXME: NODE-2781
+
   command?: boolean;
   slaveOk?: boolean;
   /** Specify read preference if command supports it */
