@@ -68,7 +68,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('aggregationExample2_with_generatorsGenerator');
 
         // Insert the docs
-        yield collection.insertMany(docs, { w: 1 });
+        yield collection.insertMany(docs, { writeConcern: { w: 1 } });
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate(
@@ -151,7 +151,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('aggregation_next_example_with_generatorsGenerator');
 
         // Insert the docs
-        yield collection.insertMany(docs, { w: 1 });
+        yield collection.insertMany(docs, { writeConcern: { w: 1 } });
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate(
@@ -218,7 +218,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('countExample1_with_generators');
         // Insert documents to perform distinct against
         yield collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], {
-          w: 1
+          writeConcern: { w: 1 }
         });
         // Perform a total count command
         var count = yield collection.count();
@@ -279,7 +279,10 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.createIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.createIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Show that duplicate records got dropped
         var items = yield collection.find({}).toArray();
@@ -550,11 +553,14 @@ describe('Operation (Generators)', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.ensureIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Drop the index
         yield collection.dropIndex('a_1_b_1');
@@ -617,7 +623,7 @@ describe('Operation (Generators)', function () {
         yield db.ensureIndex(
           'ensureIndexExample1_with_generators',
           { a: 1, b: 1 },
-          { unique: true, background: true, w: 1 }
+          { unique: true, background: true, writeConcern: { w: 1 } }
         );
 
         // Show that duplicate records got dropped
@@ -673,11 +679,14 @@ describe('Operation (Generators)', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.ensureIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Show that duplicate records got dropped
         var items = yield collection.find({}).toArray();
@@ -922,7 +931,7 @@ describe('Operation (Generators)', function () {
           { d: 1 },
           [['b', 1]],
           { d: 1, f: 1 },
-          { new: true, upsert: true, w: 1 }
+          { new: true, upsert: true, writeConcern: { w: 1 } }
         );
         test.equal(1, doc.value.d);
         test.equal(1, doc.value.f);
@@ -1081,7 +1090,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('test_map_reduce_functions_with_generators');
 
         // Insert some documents to perform map reduce over
-        yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 });
+        yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } });
 
         // Map function
         var map = function () {
@@ -1148,7 +1157,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('test_map_reduce_functions_inline_with_generators');
 
         // Insert some test documents
-        yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 });
+        yield collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } });
 
         // Map function
         var map = function () {
@@ -1217,7 +1226,7 @@ describe('Operation (Generators)', function () {
             { user_id: 1, timestamp: new Date() },
             { user_id: 2, timestamp: new Date() }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Map function
@@ -1308,7 +1317,7 @@ describe('Operation (Generators)', function () {
             { user_id: 1, timestamp: new Date() },
             { user_id: 2, timestamp: new Date() }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Map function
@@ -1511,7 +1520,10 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.ensureIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Fetch basic indexInformation for collection
         var indexInformation = yield db.indexInformation(
@@ -1579,11 +1591,14 @@ describe('Operation (Generators)', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.ensureIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Fetch basic indexInformation for collection
         var indexInformation = yield collection.indexInformation();
@@ -1804,7 +1819,7 @@ describe('Operation (Generators)', function () {
               { name: 'Sarah', title: 'Princess' },
               { name: 'Gump', title: 'Gump' }
             ],
-            { w: 1, keepGoing: true }
+            { writeConcern: { w: 1 }, keepGoing: true }
           );
         } catch (err) {} // eslint-disable-line
         // Count the number of documents left (should not include the duplicates)
@@ -1949,7 +1964,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('remove_all_documents_no_safe_with_generators');
 
         // Insert a bunch of documents
-        yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
+        yield collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
 
         // Remove all the document
         yield collection.removeMany();
@@ -1997,9 +2012,9 @@ describe('Operation (Generators)', function () {
         // Fetch a collection to insert document into
         var collection = db.collection('remove_subset_of_documents_safe_with_generators');
         // Insert a bunch of documents
-        yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
+        yield collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
         // Remove all the document
-        var r = yield collection.removeOne({ a: 1 }, { w: 1 });
+        var r = yield collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } });
         expect(r).property('deletedCount').to.equal(1);
         yield client.close();
       });
@@ -2202,7 +2217,7 @@ describe('Operation (Generators)', function () {
         var result = yield collection.updateOne(
           { a: 1 },
           { $set: { b: 2, a: 1 } },
-          { upsert: true, w: 1 }
+          { upsert: true, writeConcern: { w: 1 } }
         );
         expect(result).property('upsertedCount').to.equal(1);
 
@@ -2367,16 +2382,19 @@ describe('Operation (Generators)', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4, c: 4 }
           ],
-          { w: 1 }
+          { writeConcern: { w: 1 } }
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+        yield collection.ensureIndex(
+          { a: 1, b: 1 },
+          { unique: true, background: true, writeConcern: { w: 1 } }
+        );
 
         // Create an additional index
         yield collection.ensureIndex(
           { c: 1 },
-          { unique: true, background: true, sparse: true, w: 1 }
+          { unique: true, background: true, sparse: true, writeConcern: { w: 1 } }
         );
 
         // Drop the index
@@ -2632,7 +2650,7 @@ describe('Operation (Generators)', function () {
           capped: true,
           size: 10000,
           max: 1000,
-          w: 1
+          writeConcern: { w: 1 }
         });
 
         // Insert a document in the capped collection
@@ -2679,7 +2697,7 @@ describe('Operation (Generators)', function () {
         // Create a capped collection with a maximum of 1000 documents
         var collection = yield db.createCollection(
           'a_simple_create_drop_collection_with_generators',
-          { capped: true, size: 10000, max: 1000, w: 1 }
+          { capped: true, size: 10000, max: 1000, writeConcern: { w: 1 } }
         );
 
         // Insert a document in the capped collection
@@ -2857,7 +2875,7 @@ describe('Operation (Generators)', function () {
         yield db.createIndex(
           'more_complex_index_test_with_generators',
           { a: 1, b: 1 },
-          { unique: true, background: true, w: 1 }
+          { unique: true, background: true, writeConcern: { w: 1 } }
         );
 
         // Show that duplicate records got dropped
@@ -2922,7 +2940,7 @@ describe('Operation (Generators)', function () {
         yield db.ensureIndex(
           'more_complex_ensure_index_db_test_with_generators',
           { a: 1, b: 1 },
-          { unique: true, background: true, w: 1 }
+          { unique: true, background: true, writeConcern: { w: 1 } }
         );
 
         // Show that duplicate records got dropped
@@ -3088,8 +3106,8 @@ describe('Operation (Generators)', function () {
         var multipleColl2 = secondDb.collection('multiple_db_instances_with_generators');
 
         // Write a record into each and then count the records stored
-        yield multipleColl1.insertOne({ a: 1 }, { w: 1 });
-        yield multipleColl2.insertOne({ a: 1 }, { w: 1 });
+        yield multipleColl1.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
+        yield multipleColl2.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Count over the results ensuring only on record in each collection
         var count = yield multipleColl1.count();
@@ -3233,7 +3251,7 @@ describe('Operation (Generators)', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { w: 1 });
+        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Set the profiling level to only profile slow queries
         yield db.setProfilingLevel('slow_only');
@@ -3307,7 +3325,7 @@ describe('Operation (Generators)', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { w: 1 });
+        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Set the profiling level to all
         yield db.setProfilingLevel('all');
@@ -3368,7 +3386,7 @@ describe('Operation (Generators)', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { w: 1 });
+        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -3597,7 +3615,7 @@ describe('Operation (Generators)', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { w: 1 });
+        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -3648,7 +3666,7 @@ describe('Operation (Generators)', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { w: 1 });
+        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4391,7 +4409,7 @@ describe('Operation (Generators)', function () {
             { deleteMany: { filter: { c: 1 } } },
             { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
           ],
-          { ordered: true, w: 1 }
+          { ordered: true, writeConcern: { w: 1 } }
         );
         test.equal(1, r.nInserted);
         test.equal(2, r.nUpserted);
@@ -4445,8 +4463,8 @@ describe('Operation (Generators)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_delete_with_generators');
-        var r = yield col.insertMany([{ a: 1, b: 1 }], { w: 1 });
-        expect(r).property('insertedCount').to.equal(1);
+        var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+        test.equal(1, r.result.n);
 
         r = yield col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
         test.equal(1, r.lastErrorObject.n);
@@ -4490,8 +4508,8 @@ describe('Operation (Generators)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_replace_with_generators');
-        var r = yield col.insertMany([{ a: 1, b: 1 }], { w: 1 });
-        expect(r).property('insertedCount').to.equal(1);
+        var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+        test.equal(1, r.result.n);
 
         r = yield col.findOneAndReplace(
           { a: 1 },
@@ -4545,8 +4563,8 @@ describe('Operation (Generators)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_update_with_generators');
-        var r = yield col.insertMany([{ a: 1, b: 1 }], { w: 1 });
-        expect(r).property('insertedCount').to.equal(1);
+        var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+        test.equal(1, r.result.n);
 
         r = yield col.findOneAndUpdate(
           { a: 1 },
@@ -4603,7 +4621,7 @@ describe('Operation (Generators)', function () {
           capped: true,
           size: 100000,
           max: 10000,
-          w: 1
+          writeConcern: { w: 1 }
         });
         var docs = [];
         for (var i = 0; i < 1000; i++) docs.push({ a: i });

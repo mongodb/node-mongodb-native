@@ -67,7 +67,7 @@ describe('Unicode', function () {
         ) {
           doc['_id'] = 'felixge';
 
-          collection.insertOne(doc, { w: 1 }, function (err) {
+          collection.insertOne(doc, { writeConcern: { w: 1 } }, function (err) {
             expect(err).to.not.exist;
             collection.findOne(function (err, doc) {
               test.equal('felixge', doc._id);
@@ -92,11 +92,14 @@ describe('Unicode', function () {
         var db = client.db(configuration.db);
         db.createCollection('unicode_test_collection', function (err, collection) {
           var test_strings = ['ouooueauiOUOOUEAUI', 'öüóőúéáűíÖÜÓŐÚÉÁŰÍ', '本荘由利地域に洪水警報'];
-          collection.insert({ id: 0, text: test_strings[0] }, { w: 1 }, function (err) {
+          collection.insert({ id: 0, text: test_strings[0] }, { writeConcern: { w: 1 } }, function (
+            err
+          ) {
             expect(err).to.not.exist;
-            collection.insert({ id: 1, text: test_strings[1] }, { w: 1 }, function (err) {
-              expect(err).to.not.exist;
-              collection.insert({ id: 2, text: test_strings[2] }, { w: 1 }, function (err) {
+            collection.insert(
+              { id: 1, text: test_strings[1] },
+              { writeConcern: { w: 1 } },
+              function (err) {
                 expect(err).to.not.exist;
                 collection.find().forEach(
                   doc => {
@@ -131,7 +134,7 @@ describe('Unicode', function () {
           expect(err).to.not.exist;
           db.collection('create_object_with_chinese_object_name', function (err, collection) {
             expect(err).to.not.exist;
-            collection.insert(object, { w: 1 }, function (err) {
+            collection.insert(object, { writeConcern: { w: 1 } }, function (err) {
               expect(err).to.not.exist;
               collection.findOne(function (err, item) {
                 test.equal(object['客家话'], item['客家话']);
@@ -159,7 +162,7 @@ describe('Unicode', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('test_utf8_key_name', function (err, collection) {
-          collection.insert({ šđžčćŠĐŽČĆ: 1 }, { w: 1 }, function (err) {
+          collection.insert({ šđžčćŠĐŽČĆ: 1 }, { writeConcern: { w: 1 } }, function (err) {
             expect(err).to.not.exist;
             collection
               .find({})

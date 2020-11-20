@@ -70,7 +70,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregationExample1');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(err).to.not.exist;
           test.ok(result);
 
@@ -156,7 +156,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregationExample2');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(err).to.not.exist;
           test.ok(result);
 
@@ -242,7 +242,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_toArray_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(err).to.not.exist;
           test.ok(result);
 
@@ -330,7 +330,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_next_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, (err, result) => {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, (err, result) => {
           test.ok(result);
           expect(err).to.not.exist;
 
@@ -417,7 +417,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_each_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           test.ok(result);
           expect(err).to.not.exist;
 
@@ -505,7 +505,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_forEach_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           test.ok(result);
           expect(err).to.not.exist;
 
@@ -599,7 +599,7 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregationExample3');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           test.ok(result);
           expect(err).to.not.exist;
 
@@ -669,27 +669,28 @@ describe('Operation Examples', function () {
         // Crete the collection for the distinct example
         var collection = db.collection('countExample1');
         // Insert documents to perform distinct against
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 }, function (
-          err,
-          ids
-        ) {
-          test.ok(ids);
-          expect(err).to.not.exist;
-
-          // Perform a total count command
-          collection.count(function (err, count) {
+        collection.insertMany(
+          [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }],
+          { writeConcern: { w: 1 } },
+          function (err, ids) {
+            test.ok(ids);
             expect(err).to.not.exist;
-            test.equal(4, count);
 
-            // Perform a partial account where b=1
-            collection.count({ b: 1 }, function (err, count) {
+            // Perform a total count command
+            collection.count(function (err, count) {
               expect(err).to.not.exist;
-              test.equal(1, count);
+              test.equal(4, count);
 
-              client.close(done);
+              // Perform a partial account where b=1
+              collection.count({ b: 1 }, function (err, count) {
+                expect(err).to.not.exist;
+                test.equal(1, count);
+
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
       // END
     }
@@ -739,7 +740,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.createIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -795,26 +796,27 @@ describe('Operation Examples', function () {
         // Create a collection we want to drop later
         var collection = db.collection('createIndexExample2');
         // Insert a bunch of documents for the index
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }], { w: 1 }, function (
-          err,
-          result
-        ) {
-          test.ok(result);
-          expect(err).to.not.exist;
+        collection.insertMany(
+          [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }],
+          { writeConcern: { w: 1 } },
+          function (err, result) {
+            test.ok(result);
+            expect(err).to.not.exist;
 
-          // Create an index on the a field
-          collection.createIndex('a', { w: 1 }, function (err, indexName) {
-            test.equal('a_1', indexName);
+            // Create an index on the a field
+            collection.createIndex('a', { writeConcern: { w: 1 } }, function (err, indexName) {
+              test.equal('a_1', indexName);
 
-            // Perform a query, with explain to show we hit the query
-            collection.find({ a: 2 }).explain(function (err, explanation) {
-              expect(err).to.not.exist;
-              test.ok(explanation != null);
+              // Perform a query, with explain to show we hit the query
+              collection.find({ a: 2 }).explain(function (err, explanation) {
+                expect(err).to.not.exist;
+                test.ok(explanation != null);
 
-              client.close(done);
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
       // END
     }
@@ -856,12 +858,12 @@ describe('Operation Examples', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
 
-            var options = { unique: true, background: true, w: 1 };
+            var options = { unique: true, background: true, writeConcern: { w: 1 } };
             // Create an index on the a field
             collection.createIndex({ a: 1, b: 1 }, options, function (err, indexName) {
               test.ok(indexName);
@@ -1147,7 +1149,7 @@ describe('Operation Examples', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
@@ -1155,7 +1157,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.ensureIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -1226,7 +1228,7 @@ describe('Operation Examples', function () {
             db.ensureIndex(
               'ensureIndexExample1',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -1288,7 +1290,7 @@ describe('Operation Examples', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
@@ -1296,7 +1298,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.ensureIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -1559,7 +1561,7 @@ describe('Operation Examples', function () {
                         { d: 1 },
                         [['b', 1]],
                         { d: 1, f: 1 },
-                        { new: true, upsert: true, w: 1 },
+                        { new: true, upsert: true, writeConcern: { w: 1 } },
                         function (err, doc) {
                           expect(err).to.not.exist;
                           test.equal(1, doc.value.d);
@@ -1725,7 +1727,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_map_reduce_functions');
 
         // Insert some documents to perform map reduce over
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
+        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } }, function(err, r) {
           test.ok(r);
           expect(err).to.not.exist;
 
@@ -1798,40 +1800,44 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_map_reduce_functions_inline');
 
         // Insert some test documents
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
-          test.ok(r);
-          expect(err).to.not.exist;
+        collection.insertMany(
+          [{ user_id: 1 }, { user_id: 2 }],
+          { writeConcern: { w: 1 } },
+          function (err, r) {
+            test.ok(r);
+            expect(err).to.not.exist;
 
-          // Map function
-          var map = function () {
+            // Map function
+            var map = function () {
             emit(this.user_id, 1); // eslint-disable-line
-          };
+            };
 
-          // Reduce function
-          // eslint-disable-next-line
+            // Reduce function
+            // eslint-disable-next-line
           var reduce = function (k, vals) {
-            return 1;
-          };
+              return 1;
+            };
 
-          // Execute map reduce and return results inline
-          collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function (
-            err,
-            result
-          ) {
-            test.equal(2, result.results.length);
-            test.ok(result.stats != null);
+            // Execute map reduce and return results inline
+            collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function (
+              err,
+              result
+            ) {
+              test.equal(2, result.results.length);
+              test.ok(result.stats != null);
 
-            collection.mapReduce(
-              map,
-              reduce,
-              { out: { replace: 'mapreduce_integration_test' }, verbose: true },
-              function (err, result) {
-                test.ok(result.stats != null);
-                client.close(done);
-              }
-            );
-          });
-        });
+              collection.mapReduce(
+                map,
+                reduce,
+                { out: { replace: 'mapreduce_integration_test' }, verbose: true },
+                function (err, result) {
+                  test.ok(result.stats != null);
+                  client.close(done);
+                }
+              );
+            });
+          }
+        );
       });
       // END
     }
@@ -1872,7 +1878,7 @@ describe('Operation Examples', function () {
             { user_id: 1, timestamp: new Date() },
             { user_id: 2, timestamp: new Date() }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, r) {
             test.ok(r);
             expect(err).to.not.exist;
@@ -1969,7 +1975,7 @@ describe('Operation Examples', function () {
             { user_id: 1, timestamp: new Date() },
             { user_id: 2, timestamp: new Date() }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, r) {
             test.ok(r);
             expect(err).to.not.exist;
@@ -2190,7 +2196,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.ensureIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -2262,7 +2268,7 @@ describe('Operation Examples', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4 }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
@@ -2270,7 +2276,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.ensureIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -2511,7 +2517,7 @@ describe('Operation Examples', function () {
                   { name: 'Sarah', title: 'Princess' },
                   { name: 'Gump', title: 'Gump' }
                 ],
-                { w: 1, keepGoing: true },
+                { writeConcern: { w: 1 }, keepGoing: true },
                 function (err, result) {
                   expect(result).to.not.exist;
                   test.ok(err);
@@ -2654,7 +2660,7 @@ describe('Operation Examples', function () {
         const collection = db.collection('remove_all_documents_no_safe');
 
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, (err, result) => {
+        collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } }, (err, result) => {
           expect(err).to.not.exist;
           expect(result).to.exist;
 
@@ -2708,12 +2714,15 @@ describe('Operation Examples', function () {
         // Fetch a collection to insert document into
         var collection = db.collection('remove_subset_of_documents_safe');
         // Insert a bunch of documents
-        collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
+        collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } }, function (
+          err,
+          result
+        ) {
           test.ok(result);
           expect(err).to.not.exist;
 
           // Remove all the document
-          collection.removeOne({ a: 1 }, { w: 1 }, function (err, r) {
+          collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, r) {
             expect(err).to.not.exist;
             expect(r).property('deletedCount').to.equal(1);
             client.close(done);
@@ -2919,21 +2928,23 @@ describe('Operation Examples', function () {
         // Get a collection
         var collection = db.collection('update_a_simple_document_upsert');
         // Update the document using an upsert operation, ensuring creation if it does not exist
-        collection.updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          expect(result).property('upsertedCount').to.equal(1);
-
-          // Fetch the document that we modified and check if it got inserted correctly
-          collection.findOne({ a: 1 }, function (err, item) {
+        collection.updateOne(
+          { a: 1 },
+          { $set: { b: 2, a: 1 } },
+          { upsert: true, writeConcern: { w: 1 } },
+          function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, item.a);
-            test.equal(2, item.b);
-            client.close(done);
-          });
-        });
+            test.equal(1, result.result.n);
+
+            // Fetch the document that we modified and check if it got inserted correctly
+            collection.findOne({ a: 1 }, function (err, item) {
+              expect(err).to.not.exist;
+              test.equal(1, item.a);
+              test.equal(2, item.b);
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -3088,7 +3099,7 @@ describe('Operation Examples', function () {
             { a: 3, b: 3 },
             { a: 4, b: 4, c: 4 }
           ],
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
@@ -3096,7 +3107,7 @@ describe('Operation Examples', function () {
             // Create an index on the a field
             collection.ensureIndex(
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -3104,7 +3115,7 @@ describe('Operation Examples', function () {
                 // Create an additional index
                 collection.ensureIndex(
                   { c: 1 },
-                  { unique: true, background: true, w: 1 },
+                  { unique: true, background: true, writeConcern: { w: 1 } },
                   function () {
                     // Drop the index
                     collection.dropAllIndexes(function (err, result) {
@@ -3597,7 +3608,7 @@ describe('Operation Examples', function () {
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection',
-          { capped: true, size: 10000, max: 1000, w: 1 },
+          { capped: true, size: 10000, max: 1000, writeConcern: { w: 1 } },
           function (err, collection) {
             expect(err).to.not.exist;
 
@@ -3651,7 +3662,7 @@ describe('Operation Examples', function () {
           // Create a capped collection with a maximum of 1000 documents
           db.createCollection(
             'a_simple_create_drop_collection',
-            { capped: true, size: 10000, max: 1000, w: 1 },
+            { capped: true, size: 10000, max: 1000, writeConcern: { w: 1 } },
             function (err, collection) {
               expect(err).to.not.exist;
 
@@ -3856,7 +3867,7 @@ describe('Operation Examples', function () {
             db.createIndex(
               'more_complex_index_test',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -3928,7 +3939,7 @@ describe('Operation Examples', function () {
             db.ensureIndex(
               'more_complex_ensure_index_db_test',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
                 test.ok(indexName);
                 expect(err).to.not.exist;
@@ -4104,11 +4115,11 @@ describe('Operation Examples', function () {
         var multipleColl2 = secondDb.collection('multiple_db_instances');
 
         // Write a record into each and then count the records stored
-        multipleColl1.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
+        multipleColl1.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, result) {
           test.ok(result);
           expect(err).to.not.exist;
 
-          multipleColl2.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
+          multipleColl2.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
 
@@ -4284,7 +4295,7 @@ describe('Operation Examples', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
+        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
           test.ok(doc);
           expect(err).to.not.exist;
 
@@ -4335,7 +4346,7 @@ describe('Operation Examples', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
+        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
           test.ok(doc);
           expect(err).to.not.exist;
 
@@ -4404,7 +4415,7 @@ describe('Operation Examples', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
+        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
           test.ok(doc);
           expect(err).to.not.exist;
 
@@ -4657,7 +4668,7 @@ describe('Operation Examples', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
+        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
           test.ok(doc);
           expect(err).to.not.exist;
 
@@ -4706,7 +4717,7 @@ describe('Operation Examples', function () {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
+        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
           test.ok(doc);
           expect(err).to.not.exist;
 
@@ -5613,7 +5624,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_cursorstream_pause');
 
         // Insert documents into collection
-        collection.insertMany(docs, { w: 1 }, function (err, ids) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, ids) {
           test.ok(ids);
           expect(err).to.not.exist;
 
@@ -5680,7 +5691,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_cursorstream_destroy');
 
         // Insert documents into collection
-        collection.insertMany(docs, { w: 1 }, function (err, ids) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, ids) {
           test.ok(ids);
           expect(err).to.not.exist;
 
@@ -6483,7 +6494,7 @@ describe('Operation Examples', function () {
             { deleteMany: { filter: { c: 1 } } },
             { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
           ],
-          { ordered: true, w: 1 },
+          { ordered: true, writeConcern: { w: 1 } },
           function (err, r) {
             expect(err).to.not.exist;
             test.equal(1, r.nInserted);
@@ -6536,7 +6547,7 @@ describe('Operation Examples', function () {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_delete');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
 
@@ -6584,7 +6595,7 @@ describe('Operation Examples', function () {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_replace');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
 
@@ -6640,7 +6651,7 @@ describe('Operation Examples', function () {
         var db = client.db(configuration.db);
         // Get the collection
         var col = db.collection('find_one_and_update');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
 
@@ -6699,7 +6710,7 @@ describe('Operation Examples', function () {
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection_2',
-          { capped: true, size: 100000, max: 10000, w: 1 },
+          { capped: true, size: 100000, max: 10000, writeConcern: { w: 1 } },
           function (err, collection) {
             expect(err).to.not.exist;
 

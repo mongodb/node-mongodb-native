@@ -70,7 +70,7 @@ describe('Operation (Promises)', function () {
 
         // Insert the docs
         return collection
-          .insertMany(docs, { w: 1 })
+          .insertMany(docs, { writeConcern: { w: 1 } })
           .then(function (result) {
             test.ok(result);
 
@@ -152,7 +152,7 @@ describe('Operation (Promises)', function () {
         let cursor;
         // Insert the docs
         return collection
-          .insertMany(docs, { w: 1 })
+          .insertMany(docs, { writeConcern: { w: 1 } })
           .then(function (result) {
             test.ok(result);
 
@@ -220,7 +220,7 @@ describe('Operation (Promises)', function () {
 
         // Insert documents to perform distinct against
         return collection
-          .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 })
+          .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (ids) {
             test.ok(ids);
 
@@ -285,7 +285,10 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.createIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.createIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -556,13 +559,16 @@ describe('Operation (Promises)', function () {
               { a: 3, b: 3 },
               { a: 4, b: 4 }
             ],
-            { w: 1 }
+            { writeConcern: { w: 1 } }
           )
           .then(function (result) {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.ensureIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -630,7 +636,7 @@ describe('Operation (Promises)', function () {
             return db.ensureIndex(
               'ensureIndexExample1_with_promise',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 }
+              { unique: true, background: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (indexName) {
@@ -688,13 +694,16 @@ describe('Operation (Promises)', function () {
               { a: 3, b: 3 },
               { a: 4, b: 4 }
             ],
-            { w: 1 }
+            { writeConcern: { w: 1 } }
           )
           .then(function (result) {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.ensureIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -941,7 +950,7 @@ describe('Operation (Promises)', function () {
               { d: 1 },
               [['b', 1]],
               { d: 1, f: 1 },
-              { new: true, upsert: true, w: 1 }
+              { new: true, upsert: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (doc) {
@@ -1095,7 +1104,7 @@ describe('Operation (Promises)', function () {
 
         // Insert some documents to perform map reduce over
         return collection
-          .insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 })
+          .insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 }})
           .then(function () {
             // Map function
             var map = function () {
@@ -1174,7 +1183,7 @@ describe('Operation (Promises)', function () {
 
         // Insert some test documents
         return collection
-          .insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 })
+          .insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } })
           .then(function () {
             // Execute map reduce and return results inline
             return collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true });
@@ -1258,7 +1267,7 @@ describe('Operation (Promises)', function () {
               { user_id: 1, timestamp: new Date() },
               { user_id: 2, timestamp: new Date() }
             ],
-            { w: 1 }
+            { writeConcern: { w: 1 } }
           )
           .then(function () {
             return collection.mapReduce(map, reduce, o);
@@ -1351,7 +1360,7 @@ describe('Operation (Promises)', function () {
               { user_id: 1, timestamp: new Date() },
               { user_id: 2, timestamp: new Date() }
             ],
-            { w: 1 }
+            { writeConcern: { w: 1 } }
           )
           .then(function () {
             return collection.mapReduce(map, reduce, o);
@@ -1539,7 +1548,10 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.ensureIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -1606,13 +1618,16 @@ describe('Operation (Promises)', function () {
               { a: 3, b: 3 },
               { a: 4, b: 4 }
             ],
-            { w: 1 }
+            { writeConcern: { w: 1 } }
           )
           .then(function (result) {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.ensureIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -1841,7 +1856,7 @@ describe('Operation (Promises)', function () {
                 { name: 'Sarah', title: 'Princess' },
                 { name: 'Gump', title: 'Gump' }
               ],
-              { w: 1, keepGoing: true }
+              { writeConcern: { w: 1 }, keepGoing: true }
             );
           })
           .catch(function () {
@@ -1971,7 +1986,7 @@ describe('Operation (Promises)', function () {
 
         // Insert a bunch of documents
         return collection
-          .insertMany([{ a: 1 }, { b: 2 }], { w: 1 })
+          .insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } })
           .then(function (result) {
             test.ok(result);
 
@@ -2243,7 +2258,7 @@ describe('Operation (Promises)', function () {
 
         // Update the document using an upsert operation, ensuring creation if it does not exist
         return collection
-          .updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 })
+          .updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, writeConcern: { w: 1 } })
           .then(function (result) {
             expect(result).property('upsertedCount').to.equal(1);
 
@@ -2400,21 +2415,24 @@ describe('Operation (Promises)', function () {
               { a: 4, b: 4, c: 4 }
             ],
             {
-              w: 1
+              writeConcern: { w: 1 }
             }
           )
           .then(function (result) {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 });
+            return collection.ensureIndex(
+              { a: 1, b: 1 },
+              { unique: true, background: true, writeConcern: { w: 1 } }
+            );
           })
           .then(function (indexName) {
             test.ok(indexName);
             // Create an additional index
             return collection.ensureIndex(
               { c: 1 },
-              { unique: true, background: true, sparse: true, w: 1 }
+              { unique: true, background: true, sparse: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (indexName) {
@@ -2807,7 +2825,7 @@ describe('Operation (Promises)', function () {
             capped: true,
             size: 10000,
             max: 1000,
-            w: 1
+            writeConcern: { w: 1 }
           })
           .then(function (collection) {
             // Insert a document in the capped collection
@@ -2857,7 +2875,7 @@ describe('Operation (Promises)', function () {
               capped: true,
               size: 10000,
               max: 1000,
-              w: 1
+              writeConcern: { w: 1 }
             });
           })
           .then(function (collection) {
@@ -3046,7 +3064,7 @@ describe('Operation (Promises)', function () {
             return db.createIndex(
               'more_complex_index_test_with_promise',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 }
+              { unique: true, background: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (indexName) {
@@ -3115,7 +3133,7 @@ describe('Operation (Promises)', function () {
             return db.ensureIndex(
               'more_complex_ensure_index_db_test_with_promise',
               { a: 1, b: 1 },
-              { unique: true, background: true, w: 1 }
+              { unique: true, background: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (indexName) {
@@ -3277,10 +3295,10 @@ describe('Operation (Promises)', function () {
 
         // Write a record into each and then count the records stored
         return multipleColl1
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (result) {
             test.ok(result);
-            return multipleColl2.insertOne({ a: 1 }, { w: 1 });
+            return multipleColl2.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
           })
           .then(function (result) {
             test.ok(result);
@@ -3414,7 +3432,7 @@ describe('Operation (Promises)', function () {
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (doc) {
             test.ok(doc);
             // Use the admin database for the operation
@@ -3465,7 +3483,7 @@ describe('Operation (Promises)', function () {
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (doc) {
             test.ok(doc);
             // Set the profiling level to only profile slow queries
@@ -3546,7 +3564,7 @@ describe('Operation (Promises)', function () {
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (doc) {
             test.ok(doc);
             // Use the admin database for the operation
@@ -3613,7 +3631,7 @@ describe('Operation (Promises)', function () {
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (doc) {
             test.ok(doc);
             // Use the admin database for the operation
@@ -3830,7 +3848,7 @@ describe('Operation (Promises)', function () {
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
-          .insertOne({ a: 1 }, { w: 1 })
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
           .then(function (doc) {
             test.ok(doc);
             // Add the new user to the admin database
@@ -4688,7 +4706,7 @@ describe('Operation (Promises)', function () {
               { deleteMany: { filter: { c: 1 } } },
               { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
             ],
-            { ordered: true, w: 1 }
+            { ordered: true, writeConcern: { w: 1 } }
           )
           .then(function (r) {
             test.equal(1, r.nInserted);
@@ -4730,7 +4748,7 @@ describe('Operation (Promises)', function () {
         return col
           .bulkWrite(
             [{ insertOne: { document: { _id: 1 } } }, { insertOne: { document: { _id: 1 } } }],
-            { ordered: true, w: 1 }
+            { ordered: true, writeConcern: { w: 1 } }
           )
           .catch(function (err) {
             test.equal(true, err.result.hasWriteErrors());
@@ -4769,7 +4787,7 @@ describe('Operation (Promises)', function () {
         // Get the collection
         var col = db.collection('find_one_and_delete_with_promise');
         return col
-          .insertMany([{ a: 1, b: 1 }], { w: 1 })
+          .insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (r) {
             expect(r).property('insertedCount').to.equal(1);
             return col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
@@ -4812,8 +4830,8 @@ describe('Operation (Promises)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_replace_with_promise');
-        return col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
-          expect(r).property('insertedCount').to.equal(1);
+        return col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
+          test.equal(1, r.result.n);
 
           return col
             .findOneAndReplace(
@@ -4867,7 +4885,7 @@ describe('Operation (Promises)', function () {
         // Get the collection
         var col = db.collection('find_one_and_update_with_promise');
         return col
-          .insertMany([{ a: 1, b: 1 }], { w: 1 })
+          .insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (r) {
             expect(r).property('insertedCount').to.equal(1);
 
@@ -4926,7 +4944,7 @@ describe('Operation (Promises)', function () {
           capped: true,
           size: 100000,
           max: 10000,
-          w: 1
+          writeConcern: { w: 1 }
         })
           .then(function (_collection) {
             collection = _collection;

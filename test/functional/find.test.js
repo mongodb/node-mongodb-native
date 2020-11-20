@@ -666,17 +666,18 @@ describe('Find', function () {
 
           collection.insert(doc, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
-            collection.findOne({ _id: doc._id }, { w: 1, projection: undefined }, function (
-              err,
-              doc
-            ) {
-              expect(err).to.not.exist;
-              test.equal(2, doc.comments.length);
-              test.equal('number 1', doc.comments[0].title);
-              test.equal('number 2', doc.comments[1].title);
+            collection.findOne(
+              { _id: doc._id },
+              { writeConcern: { w: 1 }, projection: undefined },
+              function (err, doc) {
+                expect(err).to.not.exist;
+                test.equal(2, doc.comments.length);
+                test.equal('number 1', doc.comments[0].title);
+                test.equal('number 2', doc.comments[1].title);
 
-              client.close(done);
-            });
+                client.close(done);
+              }
+            );
           });
         });
       });
@@ -995,7 +996,9 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('FindAndModifyDuplicateKeyError', function (err, collection) {
           expect(err).to.not.exist;
-          collection.ensureIndex(['name', 1], { unique: true, w: 1 }, function (err) {
+          collection.ensureIndex(['name', 1], { unique: true, writeConcern: { w: 1 } }, function (
+            err
+          ) {
             expect(err).to.not.exist;
             // Test return new document on change
             collection.insert(
@@ -1201,33 +1204,37 @@ describe('Find', function () {
         ) {
           expect(err).to.not.exist;
           // Set up an index to force duplicate index erro
-          collection.ensureIndex([['failIndex', 1]], { unique: true, w: 1 }, function (err) {
-            expect(err).to.not.exist;
+          collection.ensureIndex(
+            [['failIndex', 1]],
+            { unique: true, writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
 
-            // Setup a new document
-            collection.insert(
-              { a: 2, b: 2, failIndex: 2 },
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
+              // Setup a new document
+              collection.insert(
+                { a: 2, b: 2, failIndex: 2 },
+                configuration.writeConcernMax(),
+                function (err) {
+                  expect(err).to.not.exist;
 
-                // Let's attempt to upsert with a duplicate key error
-                collection.findAndModify(
-                  { c: 2 },
-                  [['a', 1]],
-                  { a: 10, b: 10, failIndex: 2 },
-                  { w: 1, upsert: true },
-                  function (err, result) {
-                    expect(result).to.not.exist;
-                    expect(err)
-                      .property('errmsg')
-                      .to.match(/duplicate key/);
-                    client.close(done);
-                  }
-                );
-              }
-            );
-          });
+                  // Let's attempt to upsert with a duplicate key error
+                  collection.findAndModify(
+                    { c: 2 },
+                    [['a', 1]],
+                    { a: 10, b: 10, failIndex: 2 },
+                    { writeConcern: { w: 1 }, upsert: true },
+                    function (err, result) {
+                      expect(result).to.not.exist;
+                      expect(err)
+                        .property('errmsg')
+                        .to.match(/duplicate key/);
+                      client.close(done);
+                    }
+                  );
+                }
+              );
+            }
+          );
         });
       });
     }
@@ -1735,7 +1742,9 @@ describe('Find', function () {
               expect(err).to.not.exist;
               var id = r.insertedIds[1];
               // Set an index
-              collection.ensureIndex('login', { unique: true, w: 1 }, function (err) {
+              collection.ensureIndex('login', { unique: true, writeConcern: { w: 1 } }, function (
+                err
+              ) {
                 expect(err).to.not.exist;
 
                 // Attemp to modify document

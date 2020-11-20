@@ -23,7 +23,7 @@ describe('ObjectId', function () {
 
         var collection = db.collection('test_object_id_generation.data');
         // Insert test documents (creates collections and test fetch by query)
-        collection.insert({ name: 'Fred', age: 42 }, { w: 1 }, function (err, r) {
+        collection.insert({ name: 'Fred', age: 42 }, { writeConcern: { w: 1 } }, function (err, r) {
           expect(r).property('insertedCount').to.equal(1);
 
           const id = r.insertedIds[0];
@@ -37,7 +37,7 @@ describe('ObjectId', function () {
         });
 
         // Insert another test document and collect using ObjectId
-        collection.insert({ name: 'Pat', age: 21 }, { w: 1 }, function (err, r) {
+        collection.insert({ name: 'Pat', age: 21 }, { writeConcern: { w: 1 } }, function (err, r) {
           expect(r).property('insertedCount').to.equal(1);
 
           const id = r.insertedIds[0];
@@ -54,22 +54,26 @@ describe('ObjectId', function () {
         // Manually created id
         var objectId = new ObjectId(null);
         // Insert a manually created document with generated oid
-        collection.insert({ _id: objectId, name: 'Donald', age: 95 }, { w: 1 }, function (err, r) {
-          expect(err).to.not.exist;
-          expect(r).property('insertedCount').to.equal(1);
-
-          const id = r.insertedIds[0];
-          expect(id.toHexString().length).to.equal(24);
-          expect(id.toHexString()).to.equal(objectId.toHexString());
-
-          // Locate the first document inserted
-          collection.findOne(id, function (err, document) {
+        collection.insert(
+          { _id: objectId, name: 'Donald', age: 95 },
+          { writeConcern: { w: 1 } },
+          function (err, r) {
             expect(err).to.not.exist;
-            expect(id.toHexString()).to.equal(document._id.toHexString());
-            expect(objectId.toHexString()).to.equal(document._id.toHexString());
-            number_of_tests_done++;
-          });
-        });
+            expect(r).property('insertedCount').to.equal(1);
+
+            const id = r.insertedIds[0];
+            expect(id.toHexString().length).to.equal(24);
+            expect(id.toHexString()).to.equal(objectId.toHexString());
+
+            // Locate the first document inserted
+            collection.findOne(id, function (err, document) {
+              expect(err).to.not.exist;
+              expect(id.toHexString()).to.equal(document._id.toHexString());
+              expect(objectId.toHexString()).to.equal(document._id.toHexString());
+              number_of_tests_done++;
+            });
+          }
+        );
 
         var intervalId = setInterval(function () {
           if (number_of_tests_done === 3) {
@@ -128,7 +132,7 @@ describe('ObjectId', function () {
         date.setUTCMinutes(0);
         date.setUTCSeconds(30);
 
-        collection.insert({ _id: date }, { w: 1 }, function (err) {
+        collection.insert({ _id: date }, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
           collection.find({ _id: date }).toArray(function (err, items) {
             test.equal('' + date, '' + items[0]._id);
@@ -192,12 +196,12 @@ describe('ObjectId', function () {
 
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertWithObjectId');
-        collection.insert({}, { w: 1 }, function (err) {
+        collection.insert({}, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
           const firstCompareDate = new Date();
 
           setTimeout(function () {
-            collection.insert({}, { w: 1 }, function (err) {
+            collection.insert({}, { writeConcern: { w: 1 } }, function (err) {
               expect(err).to.not.exist;
               const secondCompareDate = new Date();
 
