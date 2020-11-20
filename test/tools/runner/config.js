@@ -33,7 +33,7 @@ class NativeConfiguration {
     );
 
     this.writeConcern = function () {
-      return { writeConcern: { w: 1 } }; //TODO HANA
+      return { writeConcern: { w: 1 } };
     };
   }
 
