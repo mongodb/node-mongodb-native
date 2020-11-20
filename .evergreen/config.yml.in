@@ -424,7 +424,7 @@ functions:
           UNIFIED=${UNIFIED} \
           CA_FILE="$DRIVERS_TOOLS/.evergreen/ocsp/rsa/ca.pem" \
           OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
-          sh ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
 
   run-valid-ocsp-server:
     - command: shell.exec
@@ -464,7 +464,10 @@ functions:
             -v \
             --fault revoked
 
-
+  upload test results:
+    - command: attach.xunit_results
+      params:
+        file: src/xunit.xml
 pre:
   - func: "fetch source"
   - func: "prepare resources"
@@ -473,4 +476,5 @@ pre:
   - func: "make files executable"
 
 post:
+  - func: "upload test results"
   - func: "cleanup"
