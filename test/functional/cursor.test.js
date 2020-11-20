@@ -2103,47 +2103,51 @@ describe('Cursor', function () {
           var count = 100;
           // Just hammer the server
           for (var i = 0; i < 100; i++) {
-            collection.insert({ id: i }, { w: 'majority', wtimeout: 5000 }, err => {
-              expect(err).to.not.exist;
-              count = count - 1;
+            collection.insert(
+              { id: i },
+              { writeConcern: { w: 'majority', wtimeout: 5000 } },
+              err => {
+                expect(err).to.not.exist;
+                count = count - 1;
 
-              if (count === 0) {
-                const cursor = collection.find({}, { tailable: true, awaitData: true });
-                const stream = cursor.stream();
-                // let index = 0;
-                stream.resume();
+                if (count === 0) {
+                  const cursor = collection.find({}, { tailable: true, awaitData: true });
+                  const stream = cursor.stream();
+                  // let index = 0;
+                  stream.resume();
 
-                stream.on('error', err => {
-                  expect(err).to.exist;
-                  errorOccurred = true;
-                });
-
-                var validator = () => {
-                  closeCount++;
-                  if (closeCount === 2) {
-                    expect(errorOccurred).to.equal(true);
-                    done();
-                  }
-                };
-
-                stream.on('end', validator);
-                cursor.on('close', validator);
-
-                // Just hammer the server
-                for (var i = 0; i < 100; i++) {
-                  const id = i;
-                  process.nextTick(function () {
-                    collection.insert({ id }, err => {
-                      expect(err).to.not.exist;
-
-                      if (id === 99) {
-                        setTimeout(() => client.close());
-                      }
-                    });
+                  stream.on('error', err => {
+                    expect(err).to.exist;
+                    errorOccurred = true;
                   });
+
+                  var validator = () => {
+                    closeCount++;
+                    if (closeCount === 2) {
+                      expect(errorOccurred).to.equal(true);
+                      done();
+                    }
+                  };
+
+                  stream.on('end', validator);
+                  cursor.on('close', validator);
+
+                  // Just hammer the server
+                  for (var i = 0; i < 100; i++) {
+                    const id = i;
+                    process.nextTick(function () {
+                      collection.insert({ id }, err => {
+                        expect(err).to.not.exist;
+
+                        if (id === 99) {
+                          setTimeout(() => client.close());
+                        }
+                      });
+                    });
+                  }
                 }
               }
-            });
+            );
           }
         });
       });

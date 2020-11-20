@@ -493,23 +493,28 @@ describe('Collection', function () {
         expect(err).to.not.exist;
 
         // Index name happens to be the same as collection name
-        db.createIndex(testCollection, 'collection_124', { w: 1 }, (err, indexName) => {
-          expect(err).to.not.exist;
-          expect(indexName).to.equal('collection_124_1');
-
-          db.listCollections().toArray((err, documents) => {
+        db.createIndex(
+          testCollection,
+          'collection_124',
+          { writeConcern: { w: 1 } },
+          (err, indexName) => {
             expect(err).to.not.exist;
-            expect(documents.length > 1).to.be.true;
-            let found = false;
+            expect(indexName).to.equal('collection_124_1');
 
-            documents.forEach(document => {
-              if (document.name === testCollection) found = true;
+            db.listCollections().toArray((err, documents) => {
+              expect(err).to.not.exist;
+              expect(documents.length > 1).to.be.true;
+              let found = false;
+
+              documents.forEach(document => {
+                if (document.name === testCollection) found = true;
+              });
+
+              expect(found).to.be.true;
+              done();
             });
-
-            expect(found).to.be.true;
-            done();
-          });
-        });
+          }
+        );
       });
     });
 
@@ -630,7 +635,7 @@ describe('Collection', function () {
           ) {
             collection.createIndex(
               { createdAt: 1 },
-              { expireAfterSeconds: 1, w: 1 },
+              { expireAfterSeconds: 1, writeConcern: { w: 1 } },
               errorCallBack
             );
           } else if (
@@ -638,7 +643,7 @@ describe('Collection', function () {
           ) {
             collection.ensureIndex(
               { createdAt: 1 },
-              { expireAfterSeconds: 1, w: 1 },
+              { expireAfterSeconds: 1, writeConcern: { w: 1 } },
               errorCallBack
             );
           }
