@@ -3,6 +3,12 @@ export type W = number | 'majority';
 
 /** @public */
 export interface WriteConcernOptions {
+  /** Write Concern as an object */
+  writeConcern?: WriteConcern | WriteConcernSettings;
+}
+
+/** @public */
+export interface WriteConcernSettings {
   /** The write concern */
   w?: W;
   /** The write concern timeout */
@@ -15,11 +21,7 @@ export interface WriteConcernOptions {
   journal?: boolean;
   /** The file sync write concern */
   fsync?: boolean | 1;
-  /** Write Concern as an object */
-  writeConcern?: WriteConcernOptions | WriteConcern | W;
 }
-
-export const writeConcernKeys = ['w', 'j', 'wtimeout', 'fsync'];
 
 /**
  * A MongoDB WriteConcern, which describes the level of acknowledgement
@@ -65,19 +67,17 @@ export class WriteConcern {
 
   /** Construct a WriteConcern given an options object. */
   static fromOptions(
-    options?: WriteConcernOptions | WriteConcern | W,
+    options?: WriteConcernOptions | WriteConcern,
     inherit?: WriteConcernOptions | WriteConcern
   ): WriteConcern | undefined {
-    const { fromOptions } = WriteConcern;
     if (typeof options === 'undefined') return undefined;
-    if (typeof options === 'number') return fromOptions({ ...inherit, w: options });
-    if (typeof options === 'string') return fromOptions({ ...inherit, w: options });
-    if (options instanceof WriteConcern) return fromOptions({ ...inherit, ...options });
-    if (options.writeConcern) {
-      const { writeConcern, ...viable } = { ...inherit, ...options };
-      return fromOptions(writeConcern, viable);
-    }
-    const { w, wtimeout, j, fsync, journal, wtimeoutMS } = { ...inherit, ...options };
+    inherit = inherit ?? {};
+    const opts: WriteConcern | WriteConcernSettings | undefined =
+      options instanceof WriteConcern ? options : options.writeConcern;
+    const parentOpts: WriteConcern | WriteConcernSettings | undefined =
+      inherit instanceof WriteConcern ? inherit : inherit.writeConcern;
+
+    const { w, wtimeout, j, fsync, journal, wtimeoutMS } = { ...parentOpts, ...opts };
     if (
       w != null ||
       wtimeout != null ||
@@ -88,6 +88,7 @@ export class WriteConcern {
     ) {
       return new WriteConcern(w, wtimeout ?? wtimeoutMS, j ?? journal, fsync);
     }
+
     return undefined;
   }
 }

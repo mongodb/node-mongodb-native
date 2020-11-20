@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError, AnyError } from './error';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { W, WriteConcern, WriteConcernOptions } from './write_concern';
 import { maybePromise, MongoDBNamespace, Callback } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
@@ -54,7 +54,7 @@ type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Prom
  * @public
  * @see https://docs.mongodb.com/manual/reference/connection-string
  */
-export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
+export interface MongoURIOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /** Enables or disables TLS/SSL for the connection. */
@@ -127,6 +127,13 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   retryWrites?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
+  // TODO: but now mongo client options accept these at the top level...
+  /** The journal write concern */
+  journal?: boolean;
+  /** The write concern */
+  w?: W;
+  /** The write concern timeout */
+  wtimeoutMS?: number;
 }
 
 /** @public */

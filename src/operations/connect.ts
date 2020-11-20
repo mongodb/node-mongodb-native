@@ -51,9 +51,7 @@ const validOptionNames = [
   'acceptableLatencyMS',
   'connectWithNoPrimary',
   'authSource',
-  'w',
-  'wtimeout',
-  'j',
+  'writeConcern',
   'forceServerObjectId',
   'serializeFunctions',
   'ignoreUndefined',
@@ -78,7 +76,6 @@ const validOptionNames = [
   'password',
   'authMechanism',
   'compression',
-  'fsync',
   'readPreferenceTags',
   'numberOfRetries',
   'auto_reconnect',
@@ -224,12 +221,6 @@ export function connect(
 
     if (finalOptions.db_options && finalOptions.db_options.auth) {
       delete finalOptions.db_options.auth;
-    }
-
-    // `journal` should be translated to `j` for the driver
-    if (finalOptions.journal != null) {
-      finalOptions.j = finalOptions.journal;
-      finalOptions.journal = undefined;
     }
 
     // resolve tls options if needed
@@ -422,7 +413,9 @@ function createUnifiedOptions(finalOptions: any, options: any) {
   const noMerge = ['readconcern', 'compression', 'autoencryption'];
 
   for (const name in options) {
-    if (noMerge.indexOf(name.toLowerCase()) !== -1) {
+    if (name === 'writeConcern') {
+      finalOptions[name] = { ...finalOptions[name], ...options[name] };
+    } else if (noMerge.indexOf(name.toLowerCase()) !== -1) {
       finalOptions[name] = options[name];
     } else if (childOptions.indexOf(name.toLowerCase()) !== -1) {
       finalOptions = mergeOptions(finalOptions, options[name], false);
@@ -559,14 +552,23 @@ function transformUrlOptions(connStrOptions: any) {
     connStrOpts.readConcern = new ReadConcern(connStrOpts.readConcernLevel);
   }
 
-  if (connStrOpts.wTimeoutMS) {
-    connStrOpts.wtimeout = connStrOpts.wTimeoutMS;
-  }
-
   if (connStrOptions.srvHost) {
     connStrOpts.srvHost = connStrOptions.srvHost;
   }
 
+  const wc_keys = ['w', 'j', 'journal', 'wtimeout', 'wtimeoutMS', 'fsync'];
+  const writeConcern = connStrOpts.writeConcern ?? {};
+  for (const key of wc_keys) {
+    if (connStrOpts[key] !== undefined) {
+      writeConcern[key] = connStrOpts[key];
+      connStrOpts[key] = undefined;
+    }
+  }
+  connStrOpts.writeConcern = writeConcern;
+
+  if (connStrOpts.writeConcern.wTimeoutMS) {
+    connStrOpts.writrConcern.wtimeout = connStrOpts.writeConcern.wTimeoutMS;
+  }
   return connStrOpts;
 }
 
