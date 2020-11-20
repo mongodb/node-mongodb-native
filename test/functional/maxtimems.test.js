@@ -30,7 +30,7 @@ describe('Unicode', function () {
         var docs_1 = [{ agg_pipe: 1 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function (err) {
+        col.insert(docs_1, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
 
           // Execute a find command
@@ -68,7 +68,7 @@ describe('Unicode', function () {
         var docs_1 = [{ agg_pipe: 1 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function (err) {
+        col.insert(docs_1, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
 
           // Execute a find command
@@ -105,7 +105,7 @@ describe('Unicode', function () {
         var docs_1 = [{ agg_pipe: 10 }];
 
         // Simple insert
-        col.insert(docs_1, { w: 1 }, function (err) {
+        col.insert(docs_1, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
 
           db.admin().command(

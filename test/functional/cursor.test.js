@@ -2918,7 +2918,7 @@ describe('Cursor', function () {
         const db = client.db(configuration.db);
         var col = db.collection('count_hint');
 
-        col.insert([{ i: 1 }, { i: 2 }], { w: 1 }, err => {
+        col.insert([{ i: 1 }, { i: 2 }], { writeConcern: { w: 1 } }, err => {
           expect(err).to.not.exist;
 
           col.ensureIndex({ i: 1 }, err => {
@@ -3482,7 +3482,7 @@ describe('Cursor', function () {
           ordered.insert({ a: i });
         }
 
-        ordered.execute({ w: 1 }, err => {
+        ordered.execute({ writeConcern: { w: 1 } }, err => {
           expect(err).to.not.exist;
 
           // Let's attempt to skip and limit
@@ -3572,7 +3572,7 @@ describe('Cursor', function () {
           ordered.insert({ a: i });
         }
 
-        ordered.execute({ w: 1 }, err => {
+        ordered.execute({ writeConcern: { w: 1 } }, err => {
           expect(err).to.not.exist;
 
           // Let's attempt to skip and limit

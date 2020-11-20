@@ -30,14 +30,14 @@ describe('Errors', function () {
           unique: true
         }
       ],
-      { w: 1 },
+      { writeConcern: { w: 1 } },
       err => {
         expect(err).to.not.exist;
 
-        collection.insertOne({ a: 2 }, { w: 1 }, err => {
+        collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
           expect(err).to.not.exist;
 
-          collection.insertOne({ a: 2 }, { w: 1 }, err => {
+          collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
             expect(err.code).to.equal(11000);
             done();
           });
@@ -60,13 +60,13 @@ describe('Errors', function () {
                 unique: true
               }
             ],
-            { w: 1 },
+            { writeConcern: { w: 1 } },
             err => {
               expect(err).to.not.exist;
-              collection.insertOne({ a: 2 }, { w: 1 }, err => {
+              collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
                 expect(err).to.not.exist;
 
-                collection.insertOne({ a: 2 }, { w: 1 }, err => {
+                collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
                   expect(err.code).to.equal(11000);
                   done();
                 });
@@ -88,7 +88,7 @@ describe('Errors', function () {
     test: function (done) {
       const db = client.db(this.configuration.db);
       const c = db.collection('test_error_object_should_include_message');
-      c.insertOne({ a: 2, b: 5 }, { w: 1 }, err => {
+      c.insertOne({ a: 2, b: 5 }, { writeConcern: { w: 1 } }, err => {
         expect(err).to.not.exist;
         c.findOne({ a: 2 }, { projection: { a: 1, b: 0 } }, err => {
           expect(PROJECTION_ERRORS).to.include(err.errmsg);

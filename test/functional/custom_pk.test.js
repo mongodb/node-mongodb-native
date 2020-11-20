@@ -37,7 +37,7 @@ describe('Custom PK', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('test_custom_key');
 
-        collection.insert({ a: 1 }, { w: 1 }, function (err) {
+        collection.insert({ a: 1 }, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
           collection.find({ _id: new ObjectId('aaaaaaaaaaaa') }).toArray(function (err, items) {
             expect(items.length).to.equal(1);

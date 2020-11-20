@@ -529,18 +529,19 @@ describe('Insert', function () {
           return 1;
         };
         // Insert the update
-        collection.insert({ i: 1, z: func }, { w: 1, serializeFunctions: true }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
+        collection.insert(
+          { i: 1, z: func },
+          { writeConcern: { w: 1 }, serializeFunctions: true },
+          function (err, result) {
+            expect(err).to.not.exist;
 
-          collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
-            test.equal(normalizedFunctionString(func), object.z.code);
-            test.equal(1, object.i);
-            client.close(done);
-          });
-        });
+            collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
+              test.equal(normalizedFunctionString(func), object.z.code);
+              test.equal(1, object.i);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -564,7 +565,7 @@ describe('Insert', function () {
         // Insert the update
         collection.insert(
           { i: 1, z: func },
-          { w: 1, serializeFunctions: true, ordered: false },
+          { writeConcern: { w: 1 }, serializeFunctions: true, ordered: false },
           function (err, result) {
             expect(err).to.not.exist;
 
@@ -963,7 +964,7 @@ describe('Insert', function () {
           collection.update(
             { str: 'String' },
             { $set: { c: 1, d: function () {} } },
-            { w: 1, serializeFunctions: false },
+            { writeConcern: { w: 1 }, serializeFunctions: false },
             function (err, result) {
               test.equal(1, result.result.n);
 
@@ -1210,25 +1211,29 @@ describe('Insert', function () {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
-          test.equal(1, result.result.n);
-          test.ok(result.result.upserted != null);
-
-          // Upsert an existing doc
-          collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
-            err,
-            result
-          ) {
-            if (result.updatedExisting) test.equal(true, result.updatedExisting);
+        collection.update(
+          { a: 1 },
+          { $set: { a: 1 } },
+          { upsert: true, writeConcern: { w: 1 } },
+          function (err, result) {
+            expect(err).to.not.exist;
+            if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
             test.equal(1, result.result.n);
-            client.close(done);
-          });
-        });
+            test.ok(result.result.upserted != null);
+
+            // Upsert an existing doc
+            collection.update(
+              { a: 1 },
+              { $set: { a: 1 } },
+              { upsert: true, writeConcern: { w: 1 } },
+              function (err, result) {
+                if (result.updatedExisting) test.equal(true, result.updatedExisting);
+                test.equal(1, result.result.n);
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1428,7 +1433,7 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely2');
-        collection.insert({ a: 1 }, { w: 0 }, cb);
+        collection.insert({ a: 1 }, { writeConcern: { w: 0 } }, cb);
       });
     }
   });
@@ -1474,7 +1479,7 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely1');
-        collection.remove({ a: 1 }, { w: 0 }, cb);
+        collection.remove({ a: 1 }, { writeConcern: { w: 0 } }, cb);
       });
     }
   });

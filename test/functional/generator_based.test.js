@@ -24,7 +24,7 @@ describe('Generators', function () {
 
         var docs = [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }];
         var collection = db.collection('batchSizeContinue');
-        yield collection.insertMany(docs, { w: 1 });
+        yield collection.insertMany(docs, { writeConcern: { w: 1 } });
         var cursor = collection.aggregate([{ $match: { a: 1 } }, { $limit: 6 }], {
           cursor: { batchSize: 2 }
         });

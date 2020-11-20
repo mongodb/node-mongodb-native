@@ -145,7 +145,7 @@ describe('Indexes', function () {
                     db.createIndex(
                       collection.collectionName,
                       'hello',
-                      { unique: true, w: 1 },
+                      { unique: true, writeConcern: { w: 1 } },
                       function (err) {
                         expect(err).to.not.exist;
                         // Insert some docs
@@ -193,7 +193,7 @@ describe('Indexes', function () {
                 db.createIndex(
                   collection.collectionName,
                   'hello_a',
-                  { w: 1, unique: true },
+                  { writeConcern: { w: 1 }, unique: true },
                   function (err) {
                     expect(err).to.not.exist;
 
@@ -359,30 +359,34 @@ describe('Indexes', function () {
           expect(err).to.not.exist;
           db.collection('create_and_use_sparse_index_test', function (err, collection) {
             expect(err).to.not.exist;
-            collection.ensureIndex({ title: 1 }, { sparse: true, w: 1 }, function (err) {
-              expect(err).to.not.exist;
-              collection.insert(
-                [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  collection
-                    .find({ title: { $ne: null } })
-                    .sort({ title: 1 })
-                    .toArray(function (err, items) {
-                      test.equal(1, items.length);
-                      test.equal('Sarah', items[0].name);
+            collection.ensureIndex(
+              { title: 1 },
+              { sparse: true, writeConcern: { w: 1 } },
+              function (err) {
+                expect(err).to.not.exist;
+                collection.insert(
+                  [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
+                  configuration.writeConcernMax(),
+                  function (err) {
+                    expect(err).to.not.exist;
+                    collection
+                      .find({ title: { $ne: null } })
+                      .sort({ title: 1 })
+                      .toArray(function (err, items) {
+                        test.equal(1, items.length);
+                        test.equal('Sarah', items[0].name);
 
-                      // Fetch the info for the indexes
-                      collection.indexInformation({ full: true }, function (err, indexInfo) {
-                        expect(err).to.not.exist;
-                        test.equal(2, indexInfo.length);
-                        client.close(done);
+                        // Fetch the info for the indexes
+                        collection.indexInformation({ full: true }, function (err, indexInfo) {
+                          expect(err).to.not.exist;
+                          test.equal(2, indexInfo.length);
+                          client.close(done);
+                        });
                       });
-                    });
-                }
-              );
-            });
+                  }
+                );
+              }
+            );
           });
         });
       });
@@ -448,29 +452,33 @@ describe('Indexes', function () {
         db.createCollection('geospatial_index_altered_test', function (err) {
           expect(err).to.not.exist;
           db.collection('geospatial_index_altered_test', function (err, collection) {
-            collection.ensureIndex({ loc: '2d' }, { min: 0, max: 1024, w: 1 }, function (err) {
-              expect(err).to.not.exist;
-              collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (
-                err
-              ) {
+            collection.ensureIndex(
+              { loc: '2d' },
+              { min: 0, max: 1024, writeConcern: { w: 1 } },
+              function (err) {
                 expect(err).to.not.exist;
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
+                collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (
                   err
                 ) {
                   expect(err).to.not.exist;
-                  collection.insert(
-                    { loc: [-200, -200] },
-                    configuration.writeConcernMax(),
-                    function (err) {
-                      test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                      test.ok(err.errmsg.indexOf('0') !== -1);
-                      test.ok(err.errmsg.indexOf('1024') !== -1);
-                      client.close(done);
-                    }
-                  );
+                  collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
+                    err
+                  ) {
+                    expect(err).to.not.exist;
+                    collection.insert(
+                      { loc: [-200, -200] },
+                      configuration.writeConcernMax(),
+                      function (err) {
+                        test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                        test.ok(err.errmsg.indexOf('0') !== -1);
+                        test.ok(err.errmsg.indexOf('1024') !== -1);
+                        client.close(done);
+                      }
+                    );
+                  });
                 });
-              });
-            });
+              }
+            );
           });
         });
       });
@@ -494,7 +502,9 @@ describe('Indexes', function () {
           collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function (err) {
+            collection.ensureIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
+              err
+            ) {
               test.ok(err != null);
               client.close(done);
             });
@@ -521,7 +531,9 @@ describe('Indexes', function () {
           collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { unique: true, w: 1 }, function (err) {
+            collection.ensureIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
+              err
+            ) {
               test.ok(err != null);
               client.close(done);
             });
@@ -548,14 +560,20 @@ describe('Indexes', function () {
         ) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex({ loc: '2d' }, { min: 200, max: 1400, w: 1 }, function (err) {
-            expect(err).to.not.exist;
-
-            collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function (err) {
+          collection.ensureIndex(
+            { loc: '2d' },
+            { min: 200, max: 1400, writeConcern: { w: 1 } },
+            function (err) {
               expect(err).to.not.exist;
-              client.close(done);
-            });
-          });
+
+              collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function (
+                err
+              ) {
+                expect(err).to.not.exist;
+                client.close(done);
+              });
+            }
+          );
         });
       });
     }
@@ -636,7 +654,9 @@ describe('Indexes', function () {
           function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { w: 1, unique: true }, function (err) {
+            collection.ensureIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true }, function (
+              err
+            ) {
               test.ok(err != null);
               client.close(done);
             });
@@ -1273,19 +1293,28 @@ describe('Indexes', function () {
     it(
       'should run command with commitQuorum if specified on db.createIndex',
       commitQuorumTest((db, collection, cb) =>
-        db.createIndex(collection.collectionName, 'a', { w: 'majority', commitQuorum: 0 }, cb)
+        db.createIndex(
+          collection.collectionName,
+          'a',
+          { writeConcern: { w: 'majority' }, commitQuorum: 0 },
+          cb
+        )
       )
     );
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection, cb) =>
-        collection.createIndex('a', { w: 'majority', commitQuorum: 0 }, cb)
+        collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 }, cb)
       )
     );
     it(
       'should run command with commitQuorum if specified on collection.createIndexes',
       commitQuorumTest((db, collection, cb) =>
-        collection.createIndexes([{ key: { a: 1 } }], { w: 'majority', commitQuorum: 0 }, cb)
+        collection.createIndexes(
+          [{ key: { a: 1 } }],
+          { writeConcern: { w: 'majority' }, commitQuorum: 0 },
+          cb
+        )
       )
     );
   });
