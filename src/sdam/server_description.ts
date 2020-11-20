@@ -1,8 +1,8 @@
-import { arrayStrictEqual, errorStrictEqual } from '../utils';
 import { ServerType } from './common';
+import { arrayStrictEqual, errorStrictEqual } from '../utils';
 import { now } from '../utils';
-import type { ObjectId, Long, Document } from '../bson';
 import type { ClusterTime } from './common';
+import type { Document, Long, ObjectId } from '../bson';
 
 const WRITABLE_SERVER_TYPES = new Set([
   ServerType.RSPrimary,

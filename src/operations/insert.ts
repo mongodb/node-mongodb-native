@@ -1,14 +1,14 @@
-import { MongoError } from '../error';
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { Aspect, OperationBase, defineAspects } from './operation';
+import { Callback, MongoDBNamespace, applyRetryableWrites } from '../utils';
 import { CommandOperation } from './command';
-import { applyRetryableWrites, Callback, MongoDBNamespace } from '../utils';
+import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
-import type { Connection } from '../cmap/connection';
+import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
+import type { Collection } from '../collection';
+import type { Connection } from '../cmap/connection';
+import type { Server } from '../sdam/server';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { WriteConcernOptions } from '../write_concern';
 
 /** @internal */

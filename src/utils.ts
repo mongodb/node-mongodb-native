@@ -1,26 +1,26 @@
-import * as os from 'os';
 import * as crypto from 'crypto';
+import * as os from 'os';
+import { AnyError, MongoError } from './error';
+import { Document, resolveBSONOptions } from './bson';
 import { PromiseProvider } from './promise_provider';
-import { MongoError, AnyError } from './error';
-import { WriteConcern, WriteConcernOptions, W } from './write_concern';
-import type { Server } from './sdam/server';
-import type { Topology } from './sdam/topology';
-import type { EventEmitter } from 'events';
-import type { Db } from './db';
-import type { Collection } from './collection';
-import type { OperationOptions, OperationBase, Hint } from './operations/operation';
-import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
-import type { Connection } from './cmap/connection';
+import { ReadPreference } from './read_preference';
+import { W, WriteConcern, WriteConcernOptions } from './write_concern';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { Document, resolveBSONOptions } from './bson';
-import type { IndexSpecification, IndexDirection } from './operations/indexes';
-import type { Explain } from './explain';
-import type { MongoClient } from './mongo_client';
-import type { Cursor } from './cursor/cursor';
+import type { ClientSession } from './sessions';
+import type { Collection } from './collection';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
-import { ReadPreference } from './read_preference';
+import type { Connection } from './cmap/connection';
+import type { Cursor } from './cursor/cursor';
+import type { Db } from './db';
+import type { EventEmitter } from 'events';
+import type { Explain } from './explain';
+import type { Hint, OperationOptions } from './operations/operation';
+import type { IndexDirection, IndexSpecification } from './operations/indexes';
+import type { MongoClient } from './mongo_client';
+import type { Server } from './sdam/server';
+import type { Topology } from './sdam/topology';
 
 /**
  * MongoDB Driver style callback
@@ -233,7 +233,7 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
  * @param args - Arguments to apply the provided operation
  * @param options - Options that modify the behavior of the method
  */
-export function executeLegacyOperation<T extends OperationBase>(
+export function executeLegacyOperation(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
@@ -624,7 +624,8 @@ export function maybePromise<T>(
     result = new Promise((resolve, reject) => {
       callback = (err, res) => {
         if (err) return reject(err);
-        resolve(res);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        resolve(res!);
       };
     });
   }

@@ -1,6 +1,6 @@
-import type { TopologyVersion } from './sdam/server_description';
 import type { Document } from './bson';
 import type { TopologyDescription } from './sdam/topology_description';
+import type { TopologyVersion } from './sdam/server_description';
 
 /** @public */
 export type AnyError = MongoError | Error;

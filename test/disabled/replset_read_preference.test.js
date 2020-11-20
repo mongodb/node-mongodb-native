@@ -114,12 +114,12 @@ describe.skip('ReplSet (ReadPreference)', function () {
                       test.equal(null, err);
 
                       // Pick the server
-                      client.topology.replset.once('pickedServer', function (
-                        readPreference,
-                        server
-                      ) {
-                        test.equal('localhost:31000', server.name);
-                      });
+                      client.topology.replset.once(
+                        'pickedServer',
+                        function (readPreference, server) {
+                          test.equal('localhost:31000', server.name);
+                        }
+                      );
 
                       // Attempt to perform a read
                       db.collection('somecollection').findOne(

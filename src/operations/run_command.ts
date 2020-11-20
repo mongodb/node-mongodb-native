@@ -1,7 +1,7 @@
+import { Callback, MongoDBNamespace } from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
-import { MongoDBNamespace, Callback } from '../utils';
-import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
 
 /** @public */
 export type RunCommandOptions = CommandOperationOptions;

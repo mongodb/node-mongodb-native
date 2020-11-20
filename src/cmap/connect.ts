@@ -1,21 +1,21 @@
 import * as net from 'net';
 import * as tls from 'tls';
-import { Connection, ConnectionOptions } from './connection';
-import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
-import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
+import { AnyError, MongoError, MongoNetworkError, MongoNetworkTimeoutError } from '../error';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType } from '../utils';
+import { AuthMechanism, defaultAuthProviders } from './auth/defaultAuthProviders';
+import { Callback, CallbackWithType, ClientMetadata, makeClientMetadata } from '../utils';
+import { Connection, ConnectionOptions } from './connection';
 import {
-  MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
-  MIN_SUPPORTED_WIRE_VERSION,
-  MIN_SUPPORTED_SERVER_VERSION
+  MAX_SUPPORTED_WIRE_VERSION,
+  MIN_SUPPORTED_SERVER_VERSION,
+  MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
 import type { Document } from '../bson';
 import type { EventEmitter } from 'events';
 
 import type { Socket, SocketConnectOpts } from 'net';
-import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
+import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
 
 /** @public */
 export type Stream = Socket | TLSSocket;

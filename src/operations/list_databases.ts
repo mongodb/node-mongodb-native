@@ -1,9 +1,9 @@
-import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { MongoDBNamespace, Callback } from '../utils';
+import { Callback, MongoDBNamespace } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Db } from '../db';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Db } from '../db';
 
 /** @public */
 export type ListDatabasesResult = string[] | Document[];

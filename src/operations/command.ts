@@ -1,16 +1,16 @@
 import { Aspect, OperationBase, OperationOptions } from './operation';
+import { Callback, MongoDBNamespace, decorateWithExplain, maxWireVersion } from '../utils';
+import { Explain, ExplainOptions } from '../explain';
+import { MongoError } from '../error';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
-import type { ReadPreference } from '../read_preference';
 import { commandSupportsReadConcern } from '../sessions';
-import { MongoError } from '../error';
-import type { Logger } from '../logger';
-import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { Logger } from '../logger';
 import type { ReadConcernLike } from './../read_concern';
-import { Explain, ExplainOptions } from '../explain';
+import type { ReadPreference } from '../read_preference';
+import type { Server } from '../sdam/server';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 

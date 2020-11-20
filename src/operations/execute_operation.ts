@@ -1,11 +1,11 @@
-import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError, AnyError } from '../error';
+import { AnyError, MongoError, isRetryableError } from '../error';
 import { Aspect, OperationBase, OperationOptions } from './operation';
-import { maxWireVersion, maybePromise, Callback } from '../utils';
+import { Callback, maxWireVersion, maybePromise } from '../utils';
+import { ReadPreference } from '../read_preference';
 import { ServerType } from '../sdam/common';
+import type { ClientSession } from '../sessions';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
-import type { ClientSession } from '../sessions';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =

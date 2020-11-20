@@ -1,9 +1,9 @@
-import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoError } from '../../error';
+import { AuthContext, AuthProvider } from './auth_provider';
 import { Kerberos, KerberosClient } from '../../deps';
+import { MongoError } from '../../error';
 import type { Callback } from '../../utils';
-import type { HandshakeDocument } from '../connect';
 import type { Document } from '../../bson';
+import type { HandshakeDocument } from '../connect';
 
 const kGssapiClient = Symbol('GSSAPI_CLIENT');
 

@@ -1,8 +1,8 @@
-import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
+import { OP_GETMORE, OP_KILL_CURSORS, OP_MSG, OP_QUERY } from './wire_protocol/constants';
+import { ReadPreference } from '../read_preference';
 import { databaseNamespace } from '../utils';
-import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
-import type { Long, Document, BSONSerializeOptions } from '../bson';
+import type { BSONSerializeOptions, Document, Long } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './wire_protocol/command';
 

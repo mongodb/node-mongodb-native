@@ -8,7 +8,8 @@
     "@typescript-eslint",
     "prettier",
     "promise",
-    "eslint-plugin-tsdoc"
+    "eslint-plugin-tsdoc",
+    "sort-imports-es6-autofix"
   ],
   "extends": [
     "eslint:recommended",
@@ -26,6 +27,8 @@
     "prettier/prettier": "error",
 
     "tsdoc/syntax": "warn",
+    "sort-imports": "off",
+    "sort-imports-es6-autofix/sort-imports-es6": "error",
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],

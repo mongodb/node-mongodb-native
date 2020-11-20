@@ -1,26 +1,26 @@
-import { PromiseProvider } from '../promise_provider';
-import { Long, ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
-import { MongoError, MongoWriteConcernError, AnyError } from '../error';
+import { AnyError, MongoError, MongoWriteConcernError } from '../error';
+import { BSONSerializeOptions, Document, Long, ObjectId, resolveBSONOptions } from '../bson';
 import {
-  applyRetryableWrites,
-  executeLegacyOperation,
-  hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion,
+  applyRetryableWrites,
+  executeLegacyOperation,
   getTopology,
+  hasAtomicOperators,
+  maxWireVersion,
   resolveOptions
 } from '../utils';
-import { executeOperation } from '../operations/execute_operation';
-import { InsertOperation } from '../operations/insert';
-import { UpdateOperation } from '../operations/update';
 import { DeleteOperation } from '../operations/delete';
+import { InsertOperation } from '../operations/insert';
+import { PromiseProvider } from '../promise_provider';
+import { UpdateOperation } from '../operations/update';
 import { WriteConcern } from '../write_concern';
-import type { Collection } from '../collection';
-import type { Topology } from '../sdam/topology';
-import type { CommandOperationOptions } from '../operations/command';
+import { executeOperation } from '../operations/execute_operation';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { Collection } from '../collection';
+import type { CommandOperationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
+import type { Topology } from '../sdam/topology';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;

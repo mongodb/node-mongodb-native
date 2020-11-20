@@ -1,8 +1,8 @@
 import { CommandOperation, CommandOperationOptions } from './command';
+import type { Admin } from '../admin';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Admin } from '../admin';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {

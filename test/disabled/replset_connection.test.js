@@ -521,15 +521,16 @@ describe.skip('ReplSet (Connection)', function () {
         client.topology.on('left', function (t) {
           if (t === 'primary') {
             // Attempt an insert
-            db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({ a: 1 }, function (
-              err
-            ) {
-              test.ok(err != null);
-              test.ok(err.message.indexOf('0') !== -1);
-              client.close();
+            db.collection('_should_fail_due_to_bufferMaxEntries_0').insert(
+              { a: 1 },
+              function (err) {
+                test.ok(err != null);
+                test.ok(err.message.indexOf('0') !== -1);
+                client.close();
 
-              restartAndDone(configuration, done);
-            });
+                restartAndDone(configuration, done);
+              }
+            );
           }
         });
 

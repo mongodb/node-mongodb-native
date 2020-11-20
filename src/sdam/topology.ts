@@ -1,62 +1,62 @@
 import Denque = require('denque');
-import { EventEmitter } from 'events';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { ServerDescription } from './server_description';
-import { TopologyDescription } from './topology_description';
-import { Server, ServerOptions } from './server';
-import { Cursor } from '../cursor';
-import {
-  ClientSession,
-  ServerSessionPool,
-  ServerSessionId,
-  ClientSessionOptions
-} from '../sessions';
-import { SrvPoller, SrvPollingEvent } from './srv_polling';
+import { AnyError, MongoError, MongoServerSelectionError } from '../error';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
-import { MongoError, MongoServerSelectionError, AnyError } from '../error';
-import { readPreferenceServerSelector, ServerSelector } from './server_selection';
-import { deprecate } from 'util';
 import {
-  relayEvents,
-  makeStateMachine,
-  eachAsync,
-  makeClientMetadata,
-  emitDeprecatedOptionWarning,
+  Callback,
   ClientMetadata,
   MongoDBNamespace,
-  Callback
+  eachAsync,
+  emitDeprecatedOptionWarning,
+  makeClientMetadata,
+  makeStateMachine,
+  relayEvents
 } from '../utils';
 import {
-  TopologyType,
-  ServerType,
+  ClientSession,
+  ClientSessionOptions,
+  ServerSessionId,
+  ServerSessionPool
+} from '../sessions';
+import {
   ClusterTime,
-  TimerQueue,
-  resolveClusterTime,
-  drainTimerQueue,
-  clearAndRemoveTimerFrom,
   STATE_CLOSED,
   STATE_CLOSING,
-  STATE_CONNECTING,
   STATE_CONNECTED,
-  TOPOLOGY_DEFAULTS
+  STATE_CONNECTING,
+  ServerType,
+  TOPOLOGY_DEFAULTS,
+  TimerQueue,
+  TopologyType,
+  clearAndRemoveTimerFrom,
+  drainTimerQueue,
+  resolveClusterTime
 } from './common';
+import { Connection, DestroyOptions } from '../cmap/connection';
+import { Cursor } from '../cursor';
+import { EventEmitter } from 'events';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { RunCommandOperation } from '../operations/run_command';
+import { Server, ServerOptions } from './server';
 import {
-  ServerOpeningEvent,
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
-  TopologyOpeningEvent,
+  ServerOpeningEvent,
   TopologyClosedEvent,
-  TopologyDescriptionChangedEvent
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
 } from './events';
-import type { Document, BSONSerializeOptions } from '../bson';
+import { ServerDescription } from './server_description';
+import { ServerSelector, readPreferenceServerSelector } from './server_selection';
+import { SrvPoller, SrvPollingEvent } from './srv_polling';
+import { TopologyDescription } from './topology_description';
+import { deprecate } from 'util';
+import type { BSONSerializeOptions, Document } from '../bson';
+import type { CloseOptions } from '../cmap/connection_pool';
+import type { CursorOptions } from '../cursor/cursor';
+import type { LoggerOptions } from '../logger';
+import type { MongoClientOptions } from '../mongo_client';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
-import type { CloseOptions } from '../cmap/connection_pool';
-import type { LoggerOptions } from '../logger';
-import { DestroyOptions, Connection } from '../cmap/connection';
-import { RunCommandOperation } from '../operations/run_command';
-import type { CursorOptions } from '../cursor/cursor';
-import type { MongoClientOptions } from '../mongo_client';
 
 // Global state
 let globalTopologyCounter = 0;

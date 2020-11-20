@@ -1,13 +1,13 @@
-import * as url from 'url';
-import * as qs from 'querystring';
 import * as dns from 'dns';
-import { URL } from 'url';
-import { ReadPreference } from './read_preference';
+import * as qs from 'querystring';
+import * as url from 'url';
 import { MongoParseError } from './error';
+import { ReadPreference } from './read_preference';
+import { URL } from 'url';
 import type { AnyOptions, Callback } from './utils';
+import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
-import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { MongoClientOptions, MongoOptions } from './mongo_client';
 
 /**

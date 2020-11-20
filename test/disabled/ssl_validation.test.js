@@ -278,28 +278,28 @@ describe('SSL Validation', function () {
           }, 1000);
 
           // Create a collection
-          db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet1', function (
-            err,
-            collection
-          ) {
-            collection.remove({}, configuration.writeConcernMax(), function () {
-              collection.insert(
-                [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
-                configuration.writeConcernMax(),
-                function (err) {
-                  test.equal(null, err);
-                  collection.find({}).toArray(function (err, items) {
-                    test.equal(3, items.length);
-                    client.close();
+          db.createCollection(
+            'shouldCorrectlyValidateAndPresentCertificateReplSet1',
+            function (err, collection) {
+              collection.remove({}, configuration.writeConcernMax(), function () {
+                collection.insert(
+                  [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
+                  configuration.writeConcernMax(),
+                  function (err) {
+                    test.equal(null, err);
+                    collection.find({}).toArray(function (err, items) {
+                      test.equal(3, items.length);
+                      client.close();
 
-                    replicasetManager.stop().then(function () {
-                      done();
+                      replicasetManager.stop().then(function () {
+                        done();
+                      });
                     });
-                  });
-                }
-              );
-            });
-          });
+                  }
+                );
+              });
+            }
+          );
         });
       });
     }
@@ -518,28 +518,28 @@ describe('SSL Validation', function () {
             var db = client.db(configuration.db);
 
             // Create a collection
-            db.createCollection('shouldCorrectlyValidateAndPresentCertificate2', function (
-              err,
-              collection
-            ) {
-              collection.remove({}, configuration.writeConcernMax(), function () {
-                collection.insert(
-                  [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
-                  configuration.writeConcernMax(),
-                  function (err) {
-                    test.equal(null, err);
-                    collection.find({}).toArray(function (err, items) {
-                      test.equal(3, items.length);
-                      client.close();
+            db.createCollection(
+              'shouldCorrectlyValidateAndPresentCertificate2',
+              function (err, collection) {
+                collection.remove({}, configuration.writeConcernMax(), function () {
+                  collection.insert(
+                    [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
+                    configuration.writeConcernMax(),
+                    function (err) {
+                      test.equal(null, err);
+                      collection.find({}).toArray(function (err, items) {
+                        test.equal(3, items.length);
+                        client.close();
 
-                      replicasetManager.stop().then(function () {
-                        done();
+                        replicasetManager.stop().then(function () {
+                          done();
+                        });
                       });
-                    });
-                  }
-                );
-              });
-            });
+                    }
+                  );
+                });
+              }
+            );
           });
         }
       );
@@ -596,28 +596,28 @@ describe('SSL Validation', function () {
             var db = client.db(configuration.db);
 
             // Create a collection
-            db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function (
-              err,
-              collection
-            ) {
-              collection.remove({}, configuration.writeConcernMax(), function () {
-                collection.insert(
-                  [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
-                  configuration.writeConcernMax(),
-                  function (err) {
-                    test.equal(null, err);
-                    collection.find({}).toArray(function (err, items) {
-                      test.equal(3, items.length);
-                      client.close();
+            db.createCollection(
+              'shouldCorrectlyCommunicateUsingSSLSocket',
+              function (err, collection) {
+                collection.remove({}, configuration.writeConcernMax(), function () {
+                  collection.insert(
+                    [{ a: 1 }, { b: 2 }, { c: 'hello world' }],
+                    configuration.writeConcernMax(),
+                    function (err) {
+                      test.equal(null, err);
+                      collection.find({}).toArray(function (err, items) {
+                        test.equal(3, items.length);
+                        client.close();
 
-                      replicasetManager.stop().then(function () {
-                        done();
+                        replicasetManager.stop().then(function () {
+                          done();
+                        });
                       });
-                    });
-                  }
-                );
-              });
-            });
+                    }
+                  );
+                });
+              }
+            );
           });
         }
       );

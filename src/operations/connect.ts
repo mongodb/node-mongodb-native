@@ -1,19 +1,19 @@
-import * as fs from 'fs';
-import { Logger } from '../logger';
-import { ReadPreference } from '../read_preference';
-import { MongoError, AnyError } from '../error';
-import { Topology, TopologyOptions, ServerAddress } from '../sdam/topology';
-import { parseConnectionString } from '../connection_string';
-import { ReadConcern } from '../read_concern';
-import { emitDeprecationWarning, Callback } from '../utils';
-import { CMAP_EVENT_NAMES } from '../cmap/events';
-import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
+import * as fs from 'fs';
+import { AnyError, MongoError } from '../error';
+import { CMAP_EVENT_NAMES } from '../cmap/events';
+import { Callback, emitDeprecationWarning } from '../utils';
+import { Connection, ConnectionOptions } from '../cmap/connection';
+import { Logger } from '../logger';
+import { MongoCredentials } from '../cmap/auth/mongo_credentials';
+import { ReadConcern } from '../read_concern';
+import { ReadPreference } from '../read_preference';
+import { Server } from '../sdam/server';
+import { ServerAddress, Topology, TopologyOptions } from '../sdam/topology';
+import { parseConnectionString } from '../connection_string';
+import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
 import type { Document } from '../bson';
 import type { MongoClient } from '../mongo_client';
-import { ConnectionOptions, Connection } from '../cmap/connection';
-import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
-import { Server } from '../sdam/server';
 
 const VALID_AUTH_MECHANISMS = new Set([
   'DEFAULT',

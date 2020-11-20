@@ -1,15 +1,15 @@
-import * as http from 'http';
-import * as crypto from 'crypto';
-import * as url from 'url';
 import * as BSON from '../../bson';
-import { AuthProvider, AuthContext } from './auth_provider';
+import * as crypto from 'crypto';
+import * as http from 'http';
+import * as url from 'url';
+import { AuthContext, AuthProvider } from './auth_provider';
+import { Callback, maxWireVersion } from '../../utils';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
-import { maxWireVersion, Callback } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
-import { aws4 } from '../../deps';
 import { AuthMechanism } from './defaultAuthProviders';
+import { aws4 } from '../../deps';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';

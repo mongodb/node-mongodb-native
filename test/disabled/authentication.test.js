@@ -1149,26 +1149,28 @@ describe('Authentication', function () {
 
                     var userconfirm = result;
                     var ensureIndexOptions = { unique: true, w: 0, background: true };
-                    userconfirm.ensureIndex([['confirmcode', 1]], ensureIndexOptions, function (
-                      err
-                    ) {
-                      test.equal(null, err);
-
-                      db_p.collection('session', function (err, result) {
+                    userconfirm.ensureIndex(
+                      [['confirmcode', 1]],
+                      ensureIndexOptions,
+                      function (err) {
                         test.equal(null, err);
 
-                        var session = result;
-                        session.ensureIndex([['sid', 1]], ensureIndexOptions, function (err) {
+                        db_p.collection('session', function (err, result) {
                           test.equal(null, err);
 
-                          client.close();
+                          var session = result;
+                          session.ensureIndex([['sid', 1]], ensureIndexOptions, function (err) {
+                            test.equal(null, err);
 
-                          replicasetManager.stop().then(function () {
-                            done();
+                            client.close();
+
+                            replicasetManager.stop().then(function () {
+                              done();
+                            });
                           });
                         });
-                      });
-                    });
+                      }
+                    );
                   });
                 });
               });

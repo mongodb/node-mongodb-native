@@ -1,7 +1,7 @@
-import { ServerDescription } from './server_description';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { TopologyType, ServerType } from './common';
-import type { ObjectId, Document } from '../bson';
+import { ServerDescription } from './server_description';
+import { ServerType, TopologyType } from './common';
+import type { Document, ObjectId } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
 
 // constants related to compatibility checks

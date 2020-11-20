@@ -1,7 +1,7 @@
 // Resolves the default auth mechanism according to
 
-import type { Document } from '../../bson';
 import { AuthMechanism } from './defaultAuthProviders';
+import type { Document } from '../../bson';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
 function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {

@@ -1,11 +1,11 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
+import { Callback, getTopology } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { MongoError } from '../error';
-import { Callback, getTopology } from '../utils';
+import type { Db } from '../db';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Db } from '../db';
 
 /** @public */
 export interface AddUserOptions extends CommandOperationOptions {

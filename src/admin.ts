@@ -1,20 +1,20 @@
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
-import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
-import {
-  ValidateCollectionOperation,
-  ValidateCollectionOptions
-} from './operations/validate_collection';
+import { Callback, getTopology } from './utils';
 import {
   ListDatabasesOperation,
   ListDatabasesOptions,
   ListDatabasesResult
 } from './operations/list_databases';
-import { executeOperation } from './operations/execute_operation';
+import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
-import { Callback, getTopology } from './utils';
-import type { Document } from './bson';
+import {
+  ValidateCollectionOperation,
+  ValidateCollectionOptions
+} from './operations/validate_collection';
+import { executeOperation } from './operations/execute_operation';
 import type { CommandOperationOptions } from './operations/command';
 import type { Db } from './db';
+import type { Document } from './bson';
 
 /** @internal */
 export interface AdminPrivate {

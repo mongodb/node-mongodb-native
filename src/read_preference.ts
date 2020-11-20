@@ -1,6 +1,6 @@
-import type { TagSet } from './sdam/server_description';
-import type { Document } from './bson';
 import type { ClientSession } from './sessions';
+import type { Document } from './bson';
+import type { TagSet } from './sdam/server_description';
 
 /** @public */
 export type ReadPreferenceLike =

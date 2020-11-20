@@ -1,8 +1,8 @@
+import { MongoError } from '..';
+import { OperationBase, OperationOptions } from './operation';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import { OperationOptions, OperationBase } from './operation';
 import type { Server } from '../sdam/server';
-import { MongoError } from '..';
 
 /** @internal */
 export class IsCappedOperation extends OperationBase<OperationOptions, boolean> {

@@ -1,5 +1,5 @@
+import { AuthContext, AuthProvider } from './auth_provider';
 import { Binary } from '../../bson';
-import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
 import type { Callback } from '../../utils';
 

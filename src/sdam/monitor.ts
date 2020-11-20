@@ -1,25 +1,25 @@
-import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
-import {
-  now,
-  makeStateMachine,
-  calculateDurationInMs,
-  makeInterruptableAsyncInterval
-} from '../utils';
-import { EventEmitter } from 'events';
-import { connect } from '../cmap/connect';
+import { AnyError, MongoNetworkError } from '../error';
 import { Connection } from '../cmap/connection';
-import { MongoNetworkError, AnyError } from '../error';
-import { Long, Document } from '../bson';
+import { Document, Long } from '../bson';
+import { EventEmitter } from 'events';
+import { STATE_CLOSED, STATE_CLOSING, ServerType } from './common';
 import {
+  ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerHeartbeatFailedEvent
+  ServerHeartbeatSucceededEvent
 } from './events';
+import {
+  calculateDurationInMs,
+  makeInterruptableAsyncInterval,
+  makeStateMachine,
+  now
+} from '../utils';
+import { connect } from '../cmap/connect';
 
 import { Server } from './server';
-import type { InterruptableAsyncInterval, Callback } from '../utils';
-import type { TopologyVersion } from './server_description';
+import type { Callback, InterruptableAsyncInterval } from '../utils';
 import type { ConnectionOptions } from '../cmap/connection';
+import type { TopologyVersion } from './server_description';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');

@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../utils';
-import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 /** @public */

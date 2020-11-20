@@ -114,25 +114,26 @@ describe('Single Compression (mocks)', function () {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
-              _err,
-              _r
-            ) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+            _server.update(
+              'test.test',
+              { q: { a: 1 }, u: { $set: { b: 1 } } },
+              function (_err, _r) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy(done);
+                    client.destroy(done);
+                  });
                 });
-              });
-            });
+              }
+            );
           });
         });
 
@@ -211,25 +212,26 @@ describe('Single Compression (mocks)', function () {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
-              _err,
-              _r
-            ) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+            _server.update(
+              'test.test',
+              { q: { a: 1 }, u: { $set: { b: 1 } } },
+              function (_err, _r) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy(done);
+                    client.destroy(done);
+                  });
                 });
-              });
-            });
+              }
+            );
           });
         });
 
@@ -310,25 +312,26 @@ describe('Single Compression (mocks)', function () {
             expect(err).to.be.null;
             expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function (
-              _err,
-              _r
-            ) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+            _server.update(
+              'test.test',
+              { q: { a: 1 }, u: { $set: { b: 1 } } },
+              function (_err, _r) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function (__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function (___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy(done);
+                    client.destroy(done);
+                  });
                 });
-              });
-            });
+              }
+            );
           });
         });
 

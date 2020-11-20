@@ -98,16 +98,18 @@ describe('Server tests', function () {
           expect(insertOneErr).to.be.null;
           expect(insertOneR.result.n).to.equal(1);
 
-          server.insert('integration_tests.inserts', { a: 1 }, { ordered: false }, function (
-            insertTwoErr,
-            insertTwoR
-          ) {
-            expect(insertTwoErr).to.be.null;
-            expect(insertTwoR.result.n).to.equal(1);
+          server.insert(
+            'integration_tests.inserts',
+            { a: 1 },
+            { ordered: false },
+            function (insertTwoErr, insertTwoR) {
+              expect(insertTwoErr).to.be.null;
+              expect(insertTwoR.result.n).to.equal(1);
 
-            server.destroy();
-            done();
-          });
+              server.destroy();
+              done();
+            }
+          );
         });
       });
 
@@ -161,26 +163,27 @@ describe('Server tests', function () {
 
       // Add event listeners
       server.on('connect', function () {
-        server.insert('integration_tests.inserts', [{ a: 1 }, { b: 1 }], function (
-          insertOneErr,
-          insertOneR
-        ) {
-          expect(insertOneErr).to.be.null;
-          expect(insertOneR.result.n).to.equal(2);
+        server.insert(
+          'integration_tests.inserts',
+          [{ a: 1 }, { b: 1 }],
+          function (insertOneErr, insertOneR) {
+            expect(insertOneErr).to.be.null;
+            expect(insertOneR.result.n).to.equal(2);
 
-          server.insert(
-            'integration_tests.inserts',
-            [{ a: 1 }, { b: 1 }],
-            { ordered: false },
-            function (insertTwoErr, insertTwoR) {
-              expect(insertTwoErr).to.be.null;
-              expect(insertTwoR.result.n).to.equal(2);
+            server.insert(
+              'integration_tests.inserts',
+              [{ a: 1 }, { b: 1 }],
+              { ordered: false },
+              function (insertTwoErr, insertTwoR) {
+                expect(insertTwoErr).to.be.null;
+                expect(insertTwoR.result.n).to.equal(2);
 
-              server.destroy();
-              done();
-            }
-          );
-        });
+                server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -197,26 +200,28 @@ describe('Server tests', function () {
 
       // Add event listeners
       server.on('connect', function () {
-        server.insert('integration_tests.inserts', { a: 1 }, { writeConcern: { w: 0 } }, function (
-          insertOneErr,
-          insertOneR
-        ) {
-          expect(insertOneErr).to.be.null;
-          expect(insertOneR.result.ok).to.equal(1);
+        server.insert(
+          'integration_tests.inserts',
+          { a: 1 },
+          { writeConcern: { w: 0 } },
+          function (insertOneErr, insertOneR) {
+            expect(insertOneErr).to.be.null;
+            expect(insertOneR.result.ok).to.equal(1);
 
-          server.insert(
-            'integration_tests.inserts',
-            { a: 1 },
-            { ordered: false, writeConcern: { w: 0 } },
-            function (insertTwoErr, insertTwoR) {
-              expect(insertTwoErr).to.be.null;
-              expect(insertTwoR.result.ok).to.equal(1);
+            server.insert(
+              'integration_tests.inserts',
+              { a: 1 },
+              { ordered: false, writeConcern: { w: 0 } },
+              function (insertTwoErr, insertTwoR) {
+                expect(insertTwoErr).to.be.null;
+                expect(insertTwoR.result.ok).to.equal(1);
 
-              server.destroy();
-              done();
-            }
-          );
-        });
+                server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -609,27 +614,28 @@ describe('Server tests', function () {
 
                 // Add event listeners
                 server.on('connect', function () {
-                  server.insert('integration_tests.inserts', { a: 1 }, function (
-                    insertOneErr,
-                    insertOneRes
-                  ) {
-                    expect(insertOneErr).to.be.null;
-                    expect(insertOneRes.result.n).to.equal(1);
+                  server.insert(
+                    'integration_tests.inserts',
+                    { a: 1 },
+                    function (insertOneErr, insertOneRes) {
+                      expect(insertOneErr).to.be.null;
+                      expect(insertOneRes.result.n).to.equal(1);
 
-                    server.insert(
-                      'integration_tests.inserts',
-                      { a: 1 },
-                      { ordered: false },
-                      function (insertTwoErr, insertTwoR) {
-                        expect(insertTwoErr).to.be.null;
-                        expect(insertTwoR.result.n).to.equal(1);
+                      server.insert(
+                        'integration_tests.inserts',
+                        { a: 1 },
+                        { ordered: false },
+                        function (insertTwoErr, insertTwoR) {
+                          expect(insertTwoErr).to.be.null;
+                          expect(insertTwoR.result.n).to.equal(1);
 
-                        server.destroy();
-                        Connection.disableConnectionAccounting();
-                        done();
-                      }
-                    );
-                  });
+                          server.destroy();
+                          Connection.disableConnectionAccounting();
+                          done();
+                        }
+                      );
+                    }
+                  );
                 });
 
                 server.connect({ credentials });

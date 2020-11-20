@@ -1,7 +1,7 @@
 import { MongoError } from './error';
-import type { MongoClient } from './mongo_client';
-import type { Document } from './bson';
 import type { Callback } from './utils';
+import type { Document } from './bson';
+import type { MongoClient } from './mongo_client';
 
 function makeErrorModule(error: any) {
   const props = error ? { kModuleError: error } : {};

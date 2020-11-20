@@ -1,62 +1,62 @@
-import { deprecate } from 'util';
-import {
-  emitDeprecatedOptionWarning,
-  Callback,
-  resolveOptions,
-  filterOptions,
-  deprecateOptions,
-  MongoDBNamespace,
-  getTopology
-} from './utils';
-import { loadAdmin } from './dynamic_loaders';
-import { AggregationCursor, CommandCursor } from './cursor';
-import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { MongoError } from './error';
-import { Collection, CollectionOptions } from './collection';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern } from './read_concern';
-import { Logger, LoggerOptions } from './logger';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
-import { CollectionsOperation } from './operations/collections';
-import { DbStatsOperation, DbStatsOptions } from './operations/stats';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import { AggregationCursor, CommandCursor } from './cursor';
+import { BSONSerializeOptions, Code, Document, ObjectId, resolveBSONOptions } from './bson';
 import {
-  RunCommandOperation,
-  RunAdminCommandOperation,
-  RunCommandOptions
-} from './operations/run_command';
+  Callback,
+  MongoDBNamespace,
+  deprecateOptions,
+  emitDeprecatedOptionWarning,
+  filterOptions,
+  getTopology,
+  resolveOptions
+} from './utils';
+import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { Collection, CollectionOptions } from './collection';
+import { CollectionsOperation } from './operations/collections';
 import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
 import {
   CreateIndexOperation,
+  CreateIndexesOptions,
   EnsureIndexOperation,
   IndexInformationOperation,
-  CreateIndexesOptions,
   IndexSpecification
 } from './operations/indexes';
+import { DbStatsOperation, DbStatsOptions } from './operations/stats';
 import {
   DropCollectionOperation,
+  DropCollectionOptions,
   DropDatabaseOperation,
-  DropDatabaseOptions,
-  DropCollectionOptions
+  DropDatabaseOptions
 } from './operations/drop';
+import { EvalOperation, EvalOptions } from './operations/eval';
 import { ListCollectionsOperation, ListCollectionsOptions } from './operations/list_collections';
+import { Logger, LoggerOptions } from './logger';
+import { MongoError } from './error';
+import {
+  ProfilingLevel,
+  SetProfilingLevelOperation,
+  SetProfilingLevelOptions
+} from './operations/set_profiling_level';
 import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
+import { ReadConcern } from './read_concern';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { RenameOperation, RenameOptions } from './operations/rename';
 import {
-  SetProfilingLevelOperation,
-  ProfilingLevel,
-  SetProfilingLevelOptions
-} from './operations/set_profiling_level';
+  RunAdminCommandOperation,
+  RunCommandOperation,
+  RunCommandOptions
+} from './operations/run_command';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { deprecate } from 'util';
 import { executeOperation } from './operations/execute_operation';
-import { EvalOperation, EvalOptions } from './operations/eval';
+import { loadAdmin } from './dynamic_loaders';
+import type { Admin } from './admin';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { OperationParent } from './operations/command';
-import type { Admin } from './admin';
 
 // Allowed parameters
 const legalOptionNames = [

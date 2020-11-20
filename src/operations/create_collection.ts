@@ -1,11 +1,11 @@
-import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { loadCollection } from '../dynamic_loaders';
 import type { Callback } from '../utils';
-import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { Document } from '../bson';
 import type { PkFactory } from '../mongo_client';
+import type { Server } from '../sdam/server';
 
 // eslint-disable-next-line
 import type { Collection } from '../collection';

@@ -1,9 +1,9 @@
-import { MongoCR } from './mongocr';
-import { X509 } from './x509';
-import { Plain } from './plain';
 import { GSSAPI } from './gssapi';
-import { ScramSHA1, ScramSHA256 } from './scram';
+import { MongoCR } from './mongocr';
 import { MongoDBAWS } from './mongodb_aws';
+import { Plain } from './plain';
+import { ScramSHA1, ScramSHA256 } from './scram';
+import { X509 } from './x509';
 import type { AuthProvider } from './auth_provider';
 
 /** @public */

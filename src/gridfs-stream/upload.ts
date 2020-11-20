@@ -1,9 +1,9 @@
 import * as crypto from 'crypto';
-import { Writable } from 'stream';
-import { MongoError, AnyError } from '../error';
-import { WriteConcern } from './../write_concern';
-import { PromiseProvider } from '../promise_provider';
+import { AnyError, MongoError } from '../error';
 import { ObjectId } from '../bson';
+import { PromiseProvider } from '../promise_provider';
+import { Writable } from 'stream';
+import { WriteConcern } from './../write_concern';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { Document } from '../bson';

@@ -1,15 +1,15 @@
-import { indexInformation, IndexInformationOptions } from './common_functions';
-import { OperationBase, Aspect, defineAspects } from './operation';
-import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, MongoDBNamespace, Callback } from '../utils';
+import { Aspect, OperationBase, defineAspects } from './operation';
+import { Callback, MongoDBNamespace, maxWireVersion, parseIndexOptions } from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
+import { IndexInformationOptions, indexInformation } from './common_functions';
+import { MongoError } from '../error';
 import { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
-import type { Document } from '../bson';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { Document } from '../bson';
 import type { FindOptions } from './find';
+import type { Server } from '../sdam/server';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([

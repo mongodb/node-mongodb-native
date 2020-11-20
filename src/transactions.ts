@@ -1,10 +1,10 @@
-import { ReadPreference } from './read_preference';
 import { MongoError } from './error';
 import { ReadConcern } from './read_concern';
+import { ReadPreference } from './read_preference';
 import { WriteConcern } from './write_concern';
-import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
 import type { Document } from './bson';
+import type { Server } from './sdam/server';
 
 /** @internal */
 export enum TxnState {

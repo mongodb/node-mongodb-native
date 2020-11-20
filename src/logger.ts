@@ -1,5 +1,5 @@
-import { format as f } from 'util';
 import { MongoError } from './error';
+import { format as f } from 'util';
 
 // Filters for classes
 const classFilters: any = {};

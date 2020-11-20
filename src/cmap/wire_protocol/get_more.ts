@@ -1,9 +1,9 @@
+import { Callback, collectionNamespace, maxWireVersion } from '../../utils';
+import { CommandOptions, command } from './command';
+import { Document, Long, pluckBSONSerializeOptions } from '../../bson';
 import { GetMore } from '../commands';
-import { Long, Document, pluckBSONSerializeOptions } from '../../bson';
 import { MongoError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
-import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
-import { command, CommandOptions } from './command';
 import type { Server } from '../../sdam/server';
 
 /** @internal */

@@ -5,9 +5,9 @@ export { getMore } from './get_more';
 export { query } from './query';
 export { command } from './command';
 
-import { writeCommand, WriteCommandOptions } from './write_command';
-import type { Document } from '../../bson';
+import { WriteCommandOptions, writeCommand } from './write_command';
 import type { Callback } from '../../utils';
+import type { Document } from '../../bson';
 
 export { writeCommand };
 

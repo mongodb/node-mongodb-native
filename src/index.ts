@@ -1,13 +1,13 @@
-import { Instrumentation } from './apm';
-import { Cursor, AggregationCursor, CommandCursor } from './cursor';
-import { PromiseProvider } from './promise_provider';
 import { Admin } from './admin';
-import { MongoClient } from './mongo_client';
-import { Db } from './db';
+import { AggregationCursor, CommandCursor, Cursor } from './cursor';
 import { Collection } from './collection';
-import { ReadPreference } from './read_preference';
-import { Logger } from './logger';
+import { Db } from './db';
 import { GridFSBucket } from './gridfs-stream';
+import { Instrumentation } from './apm';
+import { Logger } from './logger';
+import { MongoClient } from './mongo_client';
+import { PromiseProvider } from './promise_provider';
+import { ReadPreference } from './read_preference';
 import type { Callback } from './utils';
 
 // Set up the instrumentation method

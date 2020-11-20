@@ -1,20 +1,20 @@
-import { MongoError } from '../error';
 import {
+  Callback,
   applyRetryableWrites,
   decorateWithCollation,
-  Callback,
   getTopology,
   maxWireVersion
 } from '../utils';
-import type { Document } from '../bson';
-import type { Db } from '../db';
+import { MongoError } from '../error';
 import type { ClientSession } from '../sessions';
-import type { Server } from '../sdam/server';
-import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
+import type { Db } from '../db';
+import type { DeleteOptions } from './delete';
+import type { Document } from '../bson';
+import type { ReadPreference } from '../read_preference';
+import type { Server } from '../sdam/server';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { DeleteOptions } from './delete';
 
 /** @internal */
 export interface IndexInformationOptions {

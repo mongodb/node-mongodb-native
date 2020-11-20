@@ -1,14 +1,14 @@
-import { Query, Msg } from '../commands';
+import { Callback, databaseNamespace, maxWireVersion } from '../../utils';
+import { ClientSession, applySession } from '../../sessions';
+import { MongoError, MongoNetworkError } from '../../error';
+import { Msg, Query } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';
-import { applySession, ClientSession } from '../../sessions';
-import { maxWireVersion, databaseNamespace, Callback } from '../../utils';
-import { MongoError, MongoNetworkError } from '../../error';
-import type { Document, BSONSerializeOptions } from '../../bson';
+import type { BSONSerializeOptions, Document } from '../../bson';
+import type { ReadPreferenceLike } from '../../read_preference';
 import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
-import type { ReadPreferenceLike } from '../../read_preference';
-import type { WriteConcernOptions, WriteConcern, W } from '../../write_concern';
+import type { W, WriteConcern, WriteConcernOptions } from '../../write_concern';
 import type { WriteCommandOptions } from './write_command';
 
 /** @internal */

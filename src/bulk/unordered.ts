@@ -1,16 +1,16 @@
 import * as BSON from '../bson';
 import {
-  BulkOperationBase,
   Batch,
   BatchType,
+  BulkOperationBase,
   BulkWriteOptions,
-  UpdateStatement,
+  BulkWriteResult,
   DeleteStatement,
-  BulkWriteResult
+  UpdateStatement
 } from './common';
 import type { Callback } from '../utils';
-import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import type { Document } from '../bson';
 
 export class UnorderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {

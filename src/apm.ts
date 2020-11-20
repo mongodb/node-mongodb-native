@@ -1,6 +1,6 @@
+import { Connection } from './cmap/connection';
 import { EventEmitter } from 'events';
 import type { Callback } from './utils';
-import { Connection } from './cmap/connection';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { MongoClient } from './mongo_client';

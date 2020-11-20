@@ -1,11 +1,11 @@
-import { CommandOperation, CommandOperationOptions } from './command';
 import { Code, Document } from '../bson';
-import { ReadPreference } from '../read_preference';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { MongoError } from '../error';
+import { ReadPreference } from '../read_preference';
 import type { Callback } from '../utils';
-import type { Server } from '../sdam/server';
-import type { Db } from '../db';
 import type { Collection } from '..';
+import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {

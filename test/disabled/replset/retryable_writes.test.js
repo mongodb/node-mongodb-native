@@ -44,16 +44,19 @@ describe('Retryable Writes (ReplSet)', function () {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
+        replset.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
 
-          replset.destroy();
-          done();
-        });
+            replset.destroy();
+            done();
+          }
+        );
       });
 
       replset.on('error', done);
@@ -99,17 +102,20 @@ describe('Retryable Writes (ReplSet)', function () {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          if (err) console.dir(err);
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
+        replset.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            if (err) console.dir(err);
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
 
-          replset.destroy();
-          done();
-        });
+            replset.destroy();
+            done();
+          }
+        );
       });
 
       replset.on('error', done);
@@ -155,16 +161,19 @@ describe('Retryable Writes (ReplSet)', function () {
       });
 
       replset.on('all', () => {
-        replset.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
+        replset.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
 
-          replset.destroy();
-          done();
-        });
+            replset.destroy();
+            done();
+          }
+        );
       });
 
       replset.on('error', done);

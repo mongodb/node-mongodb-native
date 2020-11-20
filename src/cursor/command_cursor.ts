@@ -1,8 +1,8 @@
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { MongoError } from '../error';
 import { Cursor, CursorOptions, CursorState } from './cursor';
-import type { Topology } from '../sdam/topology';
+import { MongoError } from '../error';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { CommandOperation } from '../operations/command';
+import type { Topology } from '../sdam/topology';
 
 /** @public */
 export type CommandCursorOptions = CursorOptions;

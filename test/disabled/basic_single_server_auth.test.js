@@ -374,14 +374,15 @@ describe('Basic single server auth tests', function () {
                     });
 
                     var executeIsMaster = function () {
-                      _server.command('admin.$cmd', { ismaster: true }, function (
-                        adminErr,
-                        adminRes
-                      ) {
-                        expect(adminRes).to.exist;
-                        expect(adminErr).to.not.exist;
-                        if (adminErr) error = adminErr;
-                      });
+                      _server.command(
+                        'admin.$cmd',
+                        { ismaster: true },
+                        function (adminErr, adminRes) {
+                          expect(adminRes).to.exist;
+                          expect(adminErr).to.not.exist;
+                          if (adminErr) error = adminErr;
+                        }
+                      );
                     };
 
                     for (var i = 0; i < 100; i++) {
@@ -463,20 +464,21 @@ describe('Basic single server auth tests', function () {
                       _server.logout('test', function (logoutErr) {
                         expect(logoutErr).to.be.null;
 
-                        _server.insert('test.test', [{ a: 1 }], function (
-                          secondInsertErr,
-                          secondInsertRes
-                        ) {
-                          expect(secondInsertRes).to.exist;
-                          expect(secondInsertErr).to.not.be.null;
+                        _server.insert(
+                          'test.test',
+                          [{ a: 1 }],
+                          function (secondInsertErr, secondInsertRes) {
+                            expect(secondInsertRes).to.exist;
+                            expect(secondInsertErr).to.not.be.null;
 
-                          _server.destroy({ force: true });
-                          // console.log('=================== ' + Object.keys(Connection.connections()).length)
-                          expect(Object.keys(Connection.connections()).length).to.equal(0);
-                          // console.log('============================ 5')
-                          Connection.disableConnectionAccounting();
-                          done();
-                        });
+                            _server.destroy({ force: true });
+                            // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                            expect(Object.keys(Connection.connections()).length).to.equal(0);
+                            // console.log('============================ 5')
+                            Connection.disableConnectionAccounting();
+                            done();
+                          }
+                        );
                       });
                     });
                   });
@@ -558,18 +560,19 @@ describe('Basic single server auth tests', function () {
                         expect(authRes).to.exist;
                         expect(authErr).to.be.null;
 
-                        _server.insert('test.test', [{ a: 1 }], function (
-                          secondInsertErr,
-                          secondInsertRes
-                        ) {
-                          expect(secondInsertRes).to.exist;
-                          expect(secondInsertErr).to.be.null;
+                        _server.insert(
+                          'test.test',
+                          [{ a: 1 }],
+                          function (secondInsertErr, secondInsertRes) {
+                            expect(secondInsertRes).to.exist;
+                            expect(secondInsertErr).to.be.null;
 
-                          _server.destroy({ force: true });
-                          expect(Object.keys(Connection.connections()).length).to.equal(0);
-                          Connection.disableConnectionAccounting();
-                          done();
-                        });
+                            _server.destroy({ force: true });
+                            expect(Object.keys(Connection.connections()).length).to.equal(0);
+                            Connection.disableConnectionAccounting();
+                            done();
+                          }
+                        );
                       });
                     });
                   });

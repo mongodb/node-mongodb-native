@@ -1,4 +1,4 @@
-import { MongoError } from '../error';
+import { Callback, executeLegacyOperation, getTopology } from '../utils';
 import { EventEmitter } from 'events';
 import {
   GridFSBucketReadStream,
@@ -6,16 +6,16 @@ import {
   GridFSBucketReadStreamOptionsWithRevision
 } from './download';
 import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
-import { executeLegacyOperation, Callback, getTopology } from '../utils';
-import { WriteConcernOptions, WriteConcern } from '../write_concern';
-import type { Document } from '../bson';
-import type { Db } from '../db';
-import type { ReadPreference } from '../read_preference';
+import { MongoError } from '../error';
+import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { Collection } from '../collection';
 import type { Cursor } from './../cursor/cursor';
+import type { Db } from '../db';
+import type { Document } from '../bson';
 import type { FindOptions } from './../operations/find';
-import type { Sort } from '../sort';
 import type { Logger } from '../logger';
+import type { ReadPreference } from '../read_preference';
+import type { Sort } from '../sort';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;

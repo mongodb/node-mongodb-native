@@ -1,26 +1,26 @@
 import Denque = require('denque');
-import { EventEmitter } from 'events';
-import { MongoError, AnyError, isResumableError } from './error';
-import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import { AnyError, MongoError, isResumableError } from './error';
 import {
-  relayEvents,
-  maxWireVersion,
-  calculateDurationInMs,
-  now,
-  maybePromise,
-  MongoDBNamespace,
   Callback,
-  getTopology
+  MongoDBNamespace,
+  calculateDurationInMs,
+  getTopology,
+  maxWireVersion,
+  maybePromise,
+  now,
+  relayEvents
 } from './utils';
-import type { ReadPreference } from './read_preference';
-import type { Timestamp, Document } from './bson';
-import type { Topology } from './sdam/topology';
-import type { OperationParent } from './operations/command';
-import type { CollationOptions } from './cmap/wire_protocol/write_command';
-import { MongoClient } from './mongo_client';
-import { Db } from './db';
 import { Collection } from './collection';
+import { Cursor, CursorOptions, CursorStream, CursorStreamOptions } from './cursor/cursor';
+import { Db } from './db';
+import { EventEmitter } from 'events';
+import { MongoClient } from './mongo_client';
+import type { CollationOptions } from './cmap/wire_protocol/write_command';
+import type { Document, Timestamp } from './bson';
+import type { OperationParent } from './operations/command';
+import type { ReadPreference } from './read_preference';
+import type { Topology } from './sdam/topology';
 
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');

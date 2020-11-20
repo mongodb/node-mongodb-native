@@ -1,13 +1,13 @@
 import { Readable } from 'stream';
 import type { AnyError } from '../error';
-import type { Document } from '../bson';
-import type { FindOptions } from '../operations/find';
-import type { Sort } from '../sort';
-import type { Cursor } from './../cursor/cursor';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import type { ReadPreference } from '../read_preference';
+import type { Cursor } from './../cursor/cursor';
+import type { Document } from '../bson';
+import type { FindOptions } from '../operations/find';
 import type { GridFSBucketWriteStream } from './upload';
+import type { ReadPreference } from '../read_preference';
+import type { Sort } from '../sort';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {

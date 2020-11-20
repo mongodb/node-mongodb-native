@@ -1,11 +1,11 @@
-import { Aspect, defineAspects, OperationBase } from './operation';
+import { Aspect, OperationBase, defineAspects } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
+import type { BulkWriteOptions, BulkWriteResult } from '../bulk/common';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import type { ObjectId, Document } from '../bson';
-import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
+import type { Document, ObjectId } from '../bson';
 import type { Server } from '../sdam/server';
 
 /** @public */

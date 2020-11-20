@@ -1,8 +1,8 @@
 import { AggregateOperation, AggregateOptions } from './aggregate';
 import type { Callback } from '../utils';
+import type { Collection } from '../collection';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
 
 /** @public */
 export interface CountDocumentsOptions extends AggregateOptions {

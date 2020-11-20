@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../utils';
-import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;

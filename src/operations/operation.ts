@@ -1,7 +1,7 @@
+import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { Callback, MongoDBNamespace } from '../utils';
 import type { ClientSession } from '../sessions';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
-import type { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
 
 export const Aspect = {

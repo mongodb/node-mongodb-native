@@ -1,21 +1,21 @@
-import { Code, Document } from '../bson';
-import { loadDb } from '../dynamic_loaders';
+import { Aspect, defineAspects } from './operation';
 import {
+  Callback,
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback,
   maxWireVersion
 } from '../utils';
-import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { Code, Document } from '../bson';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { Sort } from '../sort';
 import { MongoError } from '../error';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { loadDb } from '../dynamic_loaders';
+import type { Collection } from '../collection';
 import type { ObjectId } from '../bson';
-import { Aspect, defineAspects } from './operation';
+import type { Server } from '../sdam/server';
+import type { Sort } from '../sort';
 
 const exclusionList = [
   'explain',

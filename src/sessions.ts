@@ -1,26 +1,26 @@
-import { PromiseProvider } from './promise_provider';
-import { EventEmitter } from 'events';
-import { Binary, Long, Timestamp, Document } from './bson';
-import { ReadPreference } from './read_preference';
-import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { resolveClusterTime, ClusterTime } from './sdam/common';
-import { isSharded } from './cmap/wire_protocol/shared';
-import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
+import { Binary, Document, Long, Timestamp } from './bson';
 import {
-  now,
-  calculateDurationInMs,
   Callback,
+  calculateDurationInMs,
   isPromiseLike,
-  uuidV4,
   maxWireVersion,
-  maybePromise
+  maybePromise,
+  now,
+  uuidV4
 } from './utils';
-import type { Topology } from './sdam/topology';
-import type { MongoClientOptions } from './mongo_client';
-import type { Cursor } from './cursor/cursor';
-import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
-import { executeOperation } from './operations/execute_operation';
+import { ClusterTime, resolveClusterTime } from './sdam/common';
+import { EventEmitter } from 'events';
+import { MongoError, MongoNetworkError, MongoWriteConcernError, isRetryableError } from './error';
+import { PromiseProvider } from './promise_provider';
+import { ReadPreference } from './read_preference';
 import { RunAdminCommandOperation } from './operations/run_command';
+import { Transaction, TransactionOptions, TxnState, isTransactionCommand } from './transactions';
+import { executeOperation } from './operations/execute_operation';
+import { isSharded } from './cmap/wire_protocol/shared';
+import type { Cursor } from './cursor/cursor';
+import type { MongoClientOptions } from './mongo_client';
+import type { Topology } from './sdam/topology';
+import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
 
 const minWireVersionForShardedTransactions = 8;
 

@@ -1,16 +1,16 @@
 import BufferList = require('bl');
-import { Duplex, DuplexOptions } from 'stream';
-import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
-import { MongoError, MongoParseError } from '../error';
-import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
+import { BinMsg, MessageHeader, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import {
+  Compressor,
+  CompressorName,
   compress,
   decompress,
-  uncompressibleCommands,
-  Compressor,
-  CompressorName
+  uncompressibleCommands
 } from './wire_protocol/compression';
-import type { Document, BSONSerializeOptions } from '../bson';
+import { Duplex, DuplexOptions } from 'stream';
+import { MongoError, MongoParseError } from '../error';
+import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
+import type { BSONSerializeOptions, Document } from '../bson';
 import type { Callback } from '../utils';
 import type { ClientSession } from '../sessions';
 

@@ -1,9 +1,9 @@
+import { Callback, collectionNamespace, maxWireVersion } from '../../utils';
+import { CommandOptions, command } from './command';
 import { KillCursor } from '../commands';
-import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
-import { command, CommandOptions } from './command';
 import { MongoError, MongoNetworkError } from '../../error';
-import type { Server } from '../../sdam/server';
 import type { Long } from '../../bson';
+import type { Server } from '../../sdam/server';
 
 export function killCursors(
   server: Server,

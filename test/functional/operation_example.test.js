@@ -669,27 +669,28 @@ describe('Operation Examples', function () {
         // Crete the collection for the distinct example
         var collection = db.collection('countExample1');
         // Insert documents to perform distinct against
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 }, function (
-          err,
-          ids
-        ) {
-          test.ok(ids);
-          expect(err).to.not.exist;
-
-          // Perform a total count command
-          collection.count(function (err, count) {
+        collection.insertMany(
+          [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }],
+          { w: 1 },
+          function (err, ids) {
+            test.ok(ids);
             expect(err).to.not.exist;
-            test.equal(4, count);
 
-            // Perform a partial account where b=1
-            collection.count({ b: 1 }, function (err, count) {
+            // Perform a total count command
+            collection.count(function (err, count) {
               expect(err).to.not.exist;
-              test.equal(1, count);
+              test.equal(4, count);
 
-              client.close(done);
+              // Perform a partial account where b=1
+              collection.count({ b: 1 }, function (err, count) {
+                expect(err).to.not.exist;
+                test.equal(1, count);
+
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
       // END
     }
@@ -795,26 +796,27 @@ describe('Operation Examples', function () {
         // Create a collection we want to drop later
         var collection = db.collection('createIndexExample2');
         // Insert a bunch of documents for the index
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }], { w: 1 }, function (
-          err,
-          result
-        ) {
-          test.ok(result);
-          expect(err).to.not.exist;
+        collection.insertMany(
+          [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }],
+          { w: 1 },
+          function (err, result) {
+            test.ok(result);
+            expect(err).to.not.exist;
 
-          // Create an index on the a field
-          collection.createIndex('a', { w: 1 }, function (err, indexName) {
-            test.equal('a_1', indexName);
+            // Create an index on the a field
+            collection.createIndex('a', { w: 1 }, function (err, indexName) {
+              test.equal('a_1', indexName);
 
-            // Perform a query, with explain to show we hit the query
-            collection.find({ a: 2 }).explain(function (err, explanation) {
-              expect(err).to.not.exist;
-              test.ok(explanation != null);
+              // Perform a query, with explain to show we hit the query
+              collection.find({ a: 2 }).explain(function (err, explanation) {
+                expect(err).to.not.exist;
+                test.ok(explanation != null);
 
-              client.close(done);
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
       // END
     }
@@ -1814,23 +1816,25 @@ describe('Operation Examples', function () {
           };
 
           // Execute map reduce and return results inline
-          collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function (
-            err,
-            result
-          ) {
-            test.equal(2, result.results.length);
-            test.ok(result.stats != null);
+          collection.mapReduce(
+            map,
+            reduce,
+            { out: { inline: 1 }, verbose: true },
+            function (err, result) {
+              test.equal(2, result.results.length);
+              test.ok(result.stats != null);
 
-            collection.mapReduce(
-              map,
-              reduce,
-              { out: { replace: 'mapreduce_integration_test' }, verbose: true },
-              function (err, result) {
-                test.ok(result.stats != null);
-                client.close(done);
-              }
-            );
-          });
+              collection.mapReduce(
+                map,
+                reduce,
+                { out: { replace: 'mapreduce_integration_test' }, verbose: true },
+                function (err, result) {
+                  test.ok(result.stats != null);
+                  client.close(done);
+                }
+              );
+            }
+          );
         });
       });
       // END
@@ -2059,28 +2063,33 @@ describe('Operation Examples', function () {
         // Crete the collection for the distinct example
         var collection = db.collection('simple_key_based_distinct');
         // Create a geo 2d index
-        collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (
-          err,
-          result
-        ) {
-          test.ok(result);
-          expect(err).to.not.exist;
-
-          // Create a simple single field index
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
+        collection.ensureIndex(
+          { loc: '2d' },
+          configuration.writeConcernMax(),
+          function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
 
-            setTimeout(function () {
-              // List all of the indexes on the collection
-              collection.indexes(function (err, indexes) {
-                test.equal(3, indexes.length);
+            // Create a simple single field index
+            collection.ensureIndex(
+              { a: 1 },
+              configuration.writeConcernMax(),
+              function (err, result) {
+                test.ok(result);
+                expect(err).to.not.exist;
 
-                client.close(done);
-              });
-            }, 1000);
-          });
-        });
+                setTimeout(function () {
+                  // List all of the indexes on the collection
+                  collection.indexes(function (err, indexes) {
+                    test.equal(3, indexes.length);
+
+                    client.close(done);
+                  });
+                }, 1000);
+              }
+            );
+          }
+        );
       });
       // END
     }
@@ -2196,27 +2205,27 @@ describe('Operation Examples', function () {
                 expect(err).to.not.exist;
 
                 // Fetch basic indexInformation for collection
-                db.indexInformation('more_index_information_test_2', function (
-                  err,
-                  indexInformation
-                ) {
-                  test.deepEqual([['_id', 1]], indexInformation._id_);
-                  test.deepEqual(
-                    [
-                      ['a', 1],
-                      ['b', 1]
-                    ],
-                    indexInformation.a_1_b_1
-                  );
+                db.indexInformation(
+                  'more_index_information_test_2',
+                  function (err, indexInformation) {
+                    test.deepEqual([['_id', 1]], indexInformation._id_);
+                    test.deepEqual(
+                      [
+                        ['a', 1],
+                        ['b', 1]
+                      ],
+                      indexInformation.a_1_b_1
+                    );
 
-                  // Fetch full index information
-                  collection.indexInformation({ full: true }, function (err, indexInformation) {
-                    test.deepEqual({ _id: 1 }, indexInformation[0].key);
-                    test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+                    // Fetch full index information
+                    collection.indexInformation({ full: true }, function (err, indexInformation) {
+                      test.deepEqual({ _id: 1 }, indexInformation[0].key);
+                      test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-                    client.close(done);
-                  });
-                });
+                      client.close(done);
+                    });
+                  }
+                );
               }
             );
           }
@@ -2559,19 +2568,20 @@ describe('Operation Examples', function () {
         // BEGIN
         var db = client.db(configuration.db);
         // Create a test collection that we are getting the options back from
-        db.createCollection('test_collection_is_capped', { capped: true, size: 1024 }, function (
-          err,
-          collection
-        ) {
-          test.equal('test_collection_is_capped', collection.collectionName);
+        db.createCollection(
+          'test_collection_is_capped',
+          { capped: true, size: 1024 },
+          function (err, collection) {
+            test.equal('test_collection_is_capped', collection.collectionName);
 
-          // Let's fetch the collection options
-          collection.isCapped(function (err, capped) {
-            test.equal(true, capped);
+            // Let's fetch the collection options
+            collection.isCapped(function (err, capped) {
+              test.equal(true, capped);
 
-            client.close(done);
-          });
-        });
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -2604,20 +2614,21 @@ describe('Operation Examples', function () {
         // BEGIN
         var db = client.db(configuration.db);
         // Create a test collection that we are getting the options back from
-        db.createCollection('test_collection_options', { capped: true, size: 1024 }, function (
-          err,
-          collection
-        ) {
-          test.equal('test_collection_options', collection.collectionName);
+        db.createCollection(
+          'test_collection_options',
+          { capped: true, size: 1024 },
+          function (err, collection) {
+            test.equal('test_collection_options', collection.collectionName);
 
-          // Let's fetch the collection options
-          collection.options(function (err, options) {
-            test.equal(true, options.capped);
-            test.ok(options.size >= 1024);
+            // Let's fetch the collection options
+            collection.options(function (err, options) {
+              test.equal(true, options.capped);
+              test.ok(options.size >= 1024);
 
-            client.close(done);
-          });
-        });
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -2804,32 +2815,33 @@ describe('Operation Examples', function () {
             }
 
             // Insert a couple of documents
-            collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax(), function (
-              err,
-              docs
-            ) {
-              test.ok(docs);
-              expect(err).to.not.exist;
+            collection1.insertMany(
+              [{ x: 1 }, { x: 2 }],
+              configuration.writeConcernMax(),
+              function (err, docs) {
+                test.ok(docs);
+                expect(err).to.not.exist;
 
-              // Attemp to rename the first collection to the second one, this will fail
-              collection1.rename('test_rename_collection2', function (err, collection) {
-                expect(collection).to.not.exist;
-                test.ok(err instanceof Error);
-                test.ok(err.message.length > 0);
+                // Attemp to rename the first collection to the second one, this will fail
+                collection1.rename('test_rename_collection2', function (err, collection) {
+                  expect(collection).to.not.exist;
+                  test.ok(err instanceof Error);
+                  test.ok(err.message.length > 0);
 
-                // Attemp to rename the first collection to a name that does not exist
-                // this will be successful
-                collection1.rename('test_rename_collection3', function (err, collection2) {
-                  test.equal('test_rename_collection3', collection2.collectionName);
+                  // Attemp to rename the first collection to a name that does not exist
+                  // this will be successful
+                  collection1.rename('test_rename_collection3', function (err, collection2) {
+                    test.equal('test_rename_collection3', collection2.collectionName);
 
-                  // Ensure that the collection is pointing to the new one
-                  collection2.count(function (err, count) {
-                    test.equal(2, count);
-                    client.close(done);
+                    // Ensure that the collection is pointing to the new one
+                    collection2.count(function (err, count) {
+                      test.equal(2, count);
+                      client.close(done);
+                    });
                   });
                 });
-              });
-            });
+              }
+            );
           });
         });
       });
@@ -2919,21 +2931,23 @@ describe('Operation Examples', function () {
         // Get a collection
         var collection = db.collection('update_a_simple_document_upsert');
         // Update the document using an upsert operation, ensuring creation if it does not exist
-        collection.updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          test.equal(1, result.result.n);
-
-          // Fetch the document that we modified and check if it got inserted correctly
-          collection.findOne({ a: 1 }, function (err, item) {
+        collection.updateOne(
+          { a: 1 },
+          { $set: { b: 2, a: 1 } },
+          { upsert: true, w: 1 },
+          function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, item.a);
-            test.equal(2, item.b);
-            client.close(done);
-          });
-        });
+            test.equal(1, result.result.n);
+
+            // Fetch the document that we modified and check if it got inserted correctly
+            collection.findOne({ a: 1 }, function (err, item) {
+              expect(err).to.not.exist;
+              test.equal(1, item.a);
+              test.equal(2, item.b);
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -3381,30 +3395,32 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-          db.collection('test_correctly_access_collections', { strict: true }, function (
-            err,
-            col3
-          ) {
-            expect(col3).to.not.exist;
-            test.ok(err != null);
+          db.collection(
+            'test_correctly_access_collections',
+            { strict: true },
+            function (err, col3) {
+              expect(col3).to.not.exist;
+              test.ok(err != null);
 
-            // Create the collection
-            db.createCollection('test_correctly_access_collections', function (err, result) {
-              test.ok(result);
-              expect(err).to.not.exist;
-
-              // Retry to get the collection, should work as it's now created
-              db.collection('test_correctly_access_collections', { strict: true }, function (
-                err,
-                col3
-              ) {
-                test.ok(col3);
+              // Create the collection
+              db.createCollection('test_correctly_access_collections', function (err, result) {
+                test.ok(result);
                 expect(err).to.not.exist;
 
-                client.close(done);
+                // Retry to get the collection, should work as it's now created
+                db.collection(
+                  'test_correctly_access_collections',
+                  { strict: true },
+                  function (err, col3) {
+                    test.ok(col3);
+                    expect(err).to.not.exist;
+
+                    client.close(done);
+                  }
+                );
               });
-            });
-          });
+            }
+          );
         });
       });
       // END
@@ -3656,29 +3672,29 @@ describe('Operation Examples', function () {
               expect(err).to.not.exist;
 
               // Insert a document in the capped collection
-              collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (
-                err,
-                result
-              ) {
-                test.ok(result);
-                expect(err).to.not.exist;
-
-                // Drop the collection from this world
-                db.dropCollection('a_simple_create_drop_collection', function (err, result) {
+              collection.insertOne(
+                { a: 1 },
+                configuration.writeConcernMax(),
+                function (err, result) {
                   test.ok(result);
                   expect(err).to.not.exist;
 
-                  // Verify that the collection is gone
-                  db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(function (
-                    err,
-                    names
-                  ) {
-                    test.equal(0, names.length);
+                  // Drop the collection from this world
+                  db.dropCollection('a_simple_create_drop_collection', function (err, result) {
+                    test.ok(result);
+                    expect(err).to.not.exist;
 
-                    client.close(done);
+                    // Verify that the collection is gone
+                    db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(
+                      function (err, names) {
+                        test.equal(0, names.length);
+
+                        client.close(done);
+                      }
+                    );
                   });
-                });
-              });
+                }
+              );
             }
           );
         });
@@ -3756,55 +3772,55 @@ describe('Operation Examples', function () {
         expect(err).to.not.exist;
 
         // Create a collection
-        db.createCollection('simple_rename_collection', configuration.writeConcernMax(), function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          // Insert a document in the collection
-          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
-            test.ok(result);
+        db.createCollection(
+          'simple_rename_collection',
+          configuration.writeConcernMax(),
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Retrieve the number of documents from the collection
-            collection.count(function (err, count) {
-              test.equal(1, count);
+            // Insert a document in the collection
+            collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
+              test.ok(result);
+              expect(err).to.not.exist;
 
-              // Rename the collection
-              db.renameCollection(
-                'simple_rename_collection',
-                'simple_rename_collection_2',
-                function (err, collection2) {
-                  expect(err).to.not.exist;
+              // Retrieve the number of documents from the collection
+              collection.count(function (err, count) {
+                test.equal(1, count);
 
-                  // Retrieve the number of documents from the collection
-                  collection2.count(function (err, count) {
-                    test.equal(1, count);
+                // Rename the collection
+                db.renameCollection(
+                  'simple_rename_collection',
+                  'simple_rename_collection_2',
+                  function (err, collection2) {
+                    expect(err).to.not.exist;
 
-                    // Verify that the collection is gone
-                    db.listCollections({ name: 'simple_rename_collection' }).toArray(function (
-                      err,
-                      names
-                    ) {
-                      test.equal(0, names.length);
+                    // Retrieve the number of documents from the collection
+                    collection2.count(function (err, count) {
+                      test.equal(1, count);
 
-                      // Verify that the new collection exists
-                      db.listCollections({ name: 'simple_rename_collection_2' }).toArray(function (
+                      // Verify that the collection is gone
+                      db.listCollections({ name: 'simple_rename_collection' }).toArray(function (
                         err,
                         names
                       ) {
-                        test.equal(1, names.length);
+                        test.equal(0, names.length);
 
-                        client.close(done);
+                        // Verify that the new collection exists
+                        db.listCollections({ name: 'simple_rename_collection_2' }).toArray(
+                          function (err, names) {
+                            test.equal(1, names.length);
+
+                            client.close(done);
+                          }
+                        );
                       });
                     });
-                  });
-                }
-              );
+                  }
+                );
+              });
             });
-          });
-        });
+          }
+        );
       });
       // END
     }
@@ -4764,21 +4780,22 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_array');
 
         // Insert a test document
-        collection.insertOne({ b: [1, 2, 3] }, configuration.writeConcernMax(), function (
-          err,
-          ids
-        ) {
-          test.ok(ids);
-          expect(err).to.not.exist;
+        collection.insertOne(
+          { b: [1, 2, 3] },
+          configuration.writeConcernMax(),
+          function (err, ids) {
+            test.ok(ids);
+            expect(err).to.not.exist;
 
-          // Retrieve all the documents in the collection
-          collection.find().toArray(function (err, documents) {
-            test.equal(1, documents.length);
-            test.deepEqual([1, 2, 3], documents[0].b);
+            // Retrieve all the documents in the collection
+            collection.find().toArray(function (err, documents) {
+              test.equal(1, documents.length);
+              test.deepEqual([1, 2, 3], documents[0].b);
 
-            client.close(done);
-          });
-        });
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -4997,21 +5014,22 @@ describe('Operation Examples', function () {
         var collection = db.collection('cursor_count_collection');
 
         // Insert some docs
-        collection.insertMany([{ a: 1 }, { a: 2 }], configuration.writeConcernMax(), function (
-          err,
-          docs
-        ) {
-          test.ok(docs);
-          expect(err).to.not.exist;
-
-          // Do a find and get the cursor count
-          collection.find().count(function (err, count) {
+        collection.insertMany(
+          [{ a: 1 }, { a: 2 }],
+          configuration.writeConcernMax(),
+          function (err, docs) {
+            test.ok(docs);
             expect(err).to.not.exist;
-            test.equal(2, count);
 
-            client.close(done);
-          });
-        });
+            // Do a find and get the cursor count
+            collection.find().count(function (err, count) {
+              expect(err).to.not.exist;
+              test.equal(2, count);
+
+              client.close(done);
+            });
+          }
+        );
       });
       // END
     }
@@ -6544,16 +6562,17 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
           test.equal(1, r.result.n);
 
-          col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }, function (
-            err,
-            r
-          ) {
-            expect(err).to.not.exist;
-            test.equal(1, r.lastErrorObject.n);
-            test.equal(1, r.value.b);
+          col.findOneAndDelete(
+            { a: 1 },
+            { projection: { b: 1 }, sort: { a: 1 } },
+            function (err, r) {
+              expect(err).to.not.exist;
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
 
-            client.close(done);
-          });
+              client.close(done);
+            }
+          );
         });
       });
       // END

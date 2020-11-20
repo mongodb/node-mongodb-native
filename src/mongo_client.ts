@@ -1,27 +1,27 @@
+import { AnyError, MongoError } from './error';
+import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
+import { Callback, MongoDBNamespace, maybePromise } from './utils';
+import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { MongoError, AnyError } from './error';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { maybePromise, MongoDBNamespace, Callback } from './utils';
-import { deprecate } from 'util';
-import { connect, validOptions } from './operations/connect';
-import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
+import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevelLike, ReadConcernLike } from './read_concern';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import type { AutoEncryptionOptions } from './deps';
-import type { CompressorName } from './cmap/wire_protocol/compression';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { connect, validOptions } from './operations/connect';
+import { deprecate } from 'util';
+import { parseOptions } from './connection_string';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
-import type { Topology } from './sdam/topology';
+import type { AutoEncryptionOptions } from './deps';
 import type { ClientSession, ClientSessionOptions } from './sessions';
-import type { OperationParent } from './operations/command';
-import type { TagSet } from './sdam/server_description';
-import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
+import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { TcpSocketConnectOpts as ConnectionOptions } from 'net';
 import type { MongoCredentials } from './cmap/auth/mongo_credentials';
-import { parseOptions } from './connection_string';
+import type { OperationParent } from './operations/command';
+import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
+import type { TagSet } from './sdam/server_description';
+import type { Topology } from './sdam/topology';
 
 /** @public */
 export enum LogLevel {

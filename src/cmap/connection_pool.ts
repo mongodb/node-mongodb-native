@@ -1,23 +1,23 @@
 import Denque = require('denque');
+import { Callback, eachAsync, makeCounter, relayEvents } from '../utils';
+import { Connection, ConnectionOptions } from './connection';
+import {
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionReadyEvent
+} from './events';
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { Connection, ConnectionOptions } from './connection';
-import { connect } from './connect';
-import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
-import {
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionReadyEvent,
-  ConnectionClosedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckedInEvent,
-  ConnectionPoolClearedEvent
-} from './events';
+import { connect } from './connect';
 import type { CommandOptions } from './wire_protocol/command';
 import type { Document } from '../bson';
 

@@ -49,16 +49,19 @@ describe('Retryable Writes (Mongos)', function () {
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
 
       topology.once('fullsetup', function () {
-        topology.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
+        topology.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
 
-          topology.destroy();
-          done();
-        });
+            topology.destroy();
+            done();
+          }
+        );
       });
 
       topology.on('error', done);
@@ -107,15 +110,18 @@ describe('Retryable Writes (Mongos)', function () {
       test.servers[0].setMessageHandler(messageHandler('MONGOS1'));
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
       mongos.once('fullsetup', function () {
-        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          if (err) console.dir(err);
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
-          mongos.destroy(done);
-        });
+        mongos.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            if (err) console.dir(err);
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
+            mongos.destroy(done);
+          }
+        );
       });
 
       mongos.on('error', done);
@@ -164,17 +170,20 @@ describe('Retryable Writes (Mongos)', function () {
       test.servers[0].setMessageHandler(messageHandler('MONGOS1'));
       test.servers[1].setMessageHandler(messageHandler('MONGOS2'));
       mongos.once('fullsetup', function () {
-        mongos.insert('test.test', [{ a: 1 }], { retryWrites: true, session: session }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
-          expect(command).to.have.property('txnNumber');
-          expect(command.txnNumber).to.eql(1);
+        mongos.insert(
+          'test.test',
+          [{ a: 1 }],
+          { retryWrites: true, session: session },
+          function (err) {
+            expect(err).to.not.exist;
+            expect(command).to.have.property('txnNumber');
+            expect(command.txnNumber).to.eql(1);
 
-          session.endSession(() => {
-            mongos.destroy(done);
-          });
-        });
+            session.endSession(() => {
+              mongos.destroy(done);
+            });
+          }
+        );
       });
 
       mongos.on('error', done);

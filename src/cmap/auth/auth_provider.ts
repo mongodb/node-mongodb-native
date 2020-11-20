@@ -1,8 +1,8 @@
-import type { Document } from '../../bson';
+import type { Callback, ClientMetadataOptions } from '../../utils';
 import type { Connection, ConnectionOptions } from '../connection';
-import type { MongoCredentials } from './mongo_credentials';
+import type { Document } from '../../bson';
 import type { HandshakeDocument } from '../connect';
-import type { ClientMetadataOptions, Callback } from '../../utils';
+import type { MongoCredentials } from './mongo_credentials';
 
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 

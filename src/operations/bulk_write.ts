@@ -1,12 +1,12 @@
-import { applyRetryableWrites, Callback } from '../utils';
-import { Aspect, defineAspects, OperationBase } from './operation';
-import type { Collection } from '../collection';
+import { Aspect, OperationBase, defineAspects } from './operation';
+import { Callback, applyRetryableWrites } from '../utils';
 import type {
+  AnyBulkWriteOperation,
   BulkOperationBase,
-  BulkWriteResult,
   BulkWriteOptions,
-  AnyBulkWriteOperation
+  BulkWriteResult
 } from '../bulk/common';
+import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 
 /** @internal */

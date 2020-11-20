@@ -1,11 +1,11 @@
-import { CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects } from './operation';
-import { maxWireVersion, Callback } from '../utils';
 import * as CONSTANTS from '../constants';
-import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
+import { Aspect, defineAspects } from './operation';
+import { Callback, maxWireVersion } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
 import type { Db } from '../db';
+import type { Document } from '../bson';
 import type { DocumentTransforms } from '../cursor/cursor';
+import type { Server } from '../sdam/server';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 

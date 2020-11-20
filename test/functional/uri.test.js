@@ -22,20 +22,22 @@ describe('URI', function () {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
-        db.collection('mongoclient_test').update({ a: 1 }, { b: 1 }, { upsert: true }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
+        db.collection('mongoclient_test').update(
+          { a: 1 },
+          { b: 1 },
+          { upsert: true },
+          function (err, result) {
+            expect(err).to.not.exist;
 
-          if (result) {
-            expect(result.result.ok).to.equal(1);
-          } else {
-            expect(result).to.not.exist;
+            if (result) {
+              expect(result.result.ok).to.equal(1);
+            } else {
+              expect(result).to.not.exist;
+            }
+
+            client.close(done);
           }
-
-          client.close(done);
-        });
+        );
       });
     }
   });

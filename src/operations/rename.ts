@@ -1,11 +1,11 @@
-import { checkCollectionName, Callback } from '../utils';
-import { loadCollection } from '../dynamic_loaders';
+import { Aspect, defineAspects } from './operation';
+import { Callback, checkCollectionName } from '../utils';
+import { MongoError } from '../error';
 import { RunAdminCommandOperation } from './run_command';
-import { defineAspects, Aspect } from './operation';
-import type { Server } from '../sdam/server';
+import { loadCollection } from '../dynamic_loaders';
 import type { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
-import { MongoError } from '../error';
+import type { Server } from '../sdam/server';
 
 /** @public */
 export interface RenameOptions extends CommandOperationOptions {

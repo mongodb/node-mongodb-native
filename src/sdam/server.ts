@@ -1,50 +1,50 @@
-import { EventEmitter } from 'events';
-import { Logger } from '../logger';
-import { ReadPreference } from '../read_preference';
-import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
-import { ServerDescription, compareTopologyVersion } from './server_description';
-import { Monitor } from './monitor';
-import { isTransactionCommand } from '../transactions';
 import {
-  relayEvents,
+  Callback,
+  CallbackWithType,
+  ClientMetadataOptions,
   collationNotSupported,
   debugOptions,
   makeStateMachine,
   maxWireVersion,
-  ClientMetadataOptions,
-  Callback,
-  CallbackWithType
+  relayEvents
 } from '../utils';
 import {
-  ServerType,
+  ClusterTime,
   STATE_CLOSED,
   STATE_CLOSING,
-  STATE_CONNECTING,
   STATE_CONNECTED,
-  ClusterTime
+  STATE_CONNECTING,
+  ServerType
 } from './common';
+import { Connection, DestroyOptions } from '../cmap/connection';
+import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
+import { EventEmitter } from 'events';
+import { Logger } from '../logger';
 import {
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  isSDAMUnrecoverableError,
-  isRetryableWriteError,
+  isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
-  isNetworkErrorBeforeHandshake
+  isRetryableWriteError,
+  isSDAMUnrecoverableError
 } from '../error';
-import { Connection, DestroyOptions } from '../cmap/connection';
-import type { Topology } from './topology';
-import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import type { ServerHeartbeatSucceededEvent } from './events';
+import { Monitor } from './monitor';
+import { ReadPreference } from '../read_preference';
+import { ServerDescription, compareTopologyVersion } from './server_description';
+import { isTransactionCommand } from '../transactions';
+import type { AutoEncrypter } from '../deps';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
-import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document, Long } from '../bson';
-import type { AutoEncrypter } from '../deps';
 import type { FindOptions } from '../operations/find';
+import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
+import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
+import type { QueryOptions } from '../cmap/wire_protocol/query';
+import type { ServerHeartbeatSucceededEvent } from './events';
+import type { Topology } from './topology';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [

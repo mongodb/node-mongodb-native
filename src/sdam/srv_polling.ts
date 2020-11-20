@@ -1,6 +1,6 @@
 import * as dns from 'dns';
-import { Logger, LoggerOptions } from '../logger';
 import { EventEmitter } from 'events';
+import { Logger, LoggerOptions } from '../logger';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order

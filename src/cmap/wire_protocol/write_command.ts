@@ -1,10 +1,10 @@
-import { MongoError } from '../../error';
-import { collectionNamespace, Callback, decorateWithExplain } from '../../utils';
-import { command, CommandOptions } from './command';
-import type { Server } from '../../sdam/server';
-import type { Document, BSONSerializeOptions } from '../../bson';
-import type { WriteConcern } from '../../write_concern';
+import { Callback, collectionNamespace, decorateWithExplain } from '../../utils';
+import { CommandOptions, command } from './command';
 import { Explain, ExplainOptions } from '../../explain';
+import { MongoError } from '../../error';
+import type { BSONSerializeOptions, Document } from '../../bson';
+import type { Server } from '../../sdam/server';
+import type { WriteConcern } from '../../write_concern';
 
 /** @public */
 export interface CollationOptions {

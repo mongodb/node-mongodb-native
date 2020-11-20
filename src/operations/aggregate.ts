@@ -1,12 +1,12 @@
+import { Aspect, Hint, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
-import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
+import { ReadPreference } from '../read_preference';
 import { maxWireVersion } from '../utils';
-import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;

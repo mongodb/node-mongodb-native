@@ -1,90 +1,90 @@
-import { emitDeprecatedOptionWarning, resolveOptions } from './utils';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { deprecate } from 'util';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import { AggregationCursor, CommandCursor, Cursor } from './cursor';
+import { BSONSerializeOptions, Document, ObjectId, resolveBSONOptions } from './bson';
+import { BulkWriteOperation } from './operations/bulk_write';
 import {
-  normalizeHintField,
+  Callback,
+  MongoDBNamespace,
   checkCollectionName,
   deprecateOptions,
-  MongoDBNamespace,
-  Callback,
-  getTopology
+  getTopology,
+  normalizeHintField
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { MongoError } from './error';
-import { UnorderedBulkOperation } from './bulk/unordered';
-import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern, ReadConcernLike } from './read_concern';
-import { AggregationCursor, CommandCursor, Cursor } from './cursor';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation } from './operations/bulk_write';
+import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
-  CreateIndexesOperation,
   CreateIndexOperation,
+  CreateIndexesOperation,
+  CreateIndexesOptions,
   DropIndexOperation,
   DropIndexesOperation,
+  DropIndexesOptions,
   EnsureIndexOperation,
-  IndexesOperation,
+  IndexDescription,
   IndexExistsOperation,
   IndexInformationOperation,
-  ListIndexesOperation,
-  CreateIndexesOptions,
-  DropIndexesOptions,
-  ListIndexesOptions,
   IndexSpecification,
-  IndexDescription
+  IndexesOperation,
+  ListIndexesOperation,
+  ListIndexesOptions
 } from './operations/indexes';
+import {
+  DeleteManyOperation,
+  DeleteOneOperation,
+  DeleteOptions,
+  DeleteResult
+} from './operations/delete';
 import { DistinctOperation, DistinctOptions } from './operations/distinct';
 import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
 import {
   EstimatedDocumentCountOperation,
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { FindOperation, FindOptions } from './operations/find';
-import { FindOneOperation } from './operations/find_one';
 import {
   FindAndModifyOperation,
+  FindAndModifyOptions,
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation,
-  FindAndModifyOptions
+  FindOneAndUpdateOperation
 } from './operations/find_and_modify';
+import { FindOneOperation } from './operations/find_one';
+import { FindOperation, FindOptions } from './operations/find';
 import { InsertManyOperation, InsertManyResult } from './operations/insert_many';
 import { InsertOneOperation, InsertOneOptions, InsertOneResult } from './operations/insert';
+import { IsCappedOperation } from './operations/is_capped';
 import {
-  UpdateOneOperation,
+  MapFunction,
+  MapReduceOperation,
+  MapReduceOptions,
+  ReduceFunction
+} from './operations/map_reduce';
+import { MongoError } from './error';
+import { OptionsOperation } from './operations/options_operation';
+import { OrderedBulkOperation } from './bulk/ordered';
+import { ReadConcern, ReadConcernLike } from './read_concern';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
+import { RenameOperation, RenameOptions } from './operations/rename';
+import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
+import { UnorderedBulkOperation } from './bulk/unordered';
+import {
   UpdateManyOperation,
+  UpdateOneOperation,
   UpdateOptions,
   UpdateResult
 } from './operations/update';
-import {
-  DeleteOneOperation,
-  DeleteManyOperation,
-  DeleteOptions,
-  DeleteResult
-} from './operations/delete';
-import { IsCappedOperation } from './operations/is_capped';
-import {
-  MapReduceOperation,
-  MapFunction,
-  ReduceFunction,
-  MapReduceOptions
-} from './operations/map_reduce';
-import { OptionsOperation } from './operations/options_operation';
-import { RenameOperation, RenameOptions } from './operations/rename';
-import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
-import { CollStatsOperation, CollStatsOptions } from './operations/stats';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { deprecate } from 'util';
+import { emitDeprecatedOptionWarning, resolveOptions } from './utils';
 import { executeOperation } from './operations/execute_operation';
-import type { Db } from './db';
-import type { OperationOptions, Hint } from './operations/operation';
-import type { IndexInformationOptions } from './operations/common_functions';
+import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import type { CountOptions } from './operations/count';
-import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
-import type { PkFactory } from './mongo_client';
+import type { Db } from './db';
+import type { Hint, OperationOptions } from './operations/operation';
+import type { IndexInformationOptions } from './operations/common_functions';
 import type { Logger, LoggerOptions } from './logger';
 import type { OperationParent } from './operations/command';
+import type { PkFactory } from './mongo_client';
 import type { Sort } from './sort';
 
 /** @public */

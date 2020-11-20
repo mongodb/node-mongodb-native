@@ -1,14 +1,14 @@
-import { ServerType } from '../../sdam/common';
-import { TopologyDescription } from '../../sdam/topology_description';
 import { MongoError } from '../../error';
 import { ReadPreference } from '../../read_preference';
+import { ServerType } from '../../sdam/common';
+import { TopologyDescription } from '../../sdam/topology_description';
+import type { CommandOptions } from './command';
 import type { Document } from '../../bson';
 import type { OpQueryOptions } from '../commands';
-import type { Topology } from '../../sdam/topology';
+import type { ReadPreferenceLike } from '../../read_preference';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
-import type { ReadPreferenceLike } from '../../read_preference';
-import type { CommandOptions } from './command';
+import type { Topology } from '../../sdam/topology';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;

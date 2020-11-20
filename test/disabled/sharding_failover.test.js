@@ -211,13 +211,14 @@ describe.skip('Sharding (Failover)', function () {
             proxies[0].start().then(function () {
               // Kill the mongos proxy
               proxies[1].start().then(function () {
-                db.collection('replicaset_mongo_client_collection').insert({ c: 1 }, function (
-                  err
-                ) {
-                  test.equal(null, err);
-                  test.ok(reconnectCalled);
-                  client.close(done);
-                });
+                db.collection('replicaset_mongo_client_collection').insert(
+                  { c: 1 },
+                  function (err) {
+                    test.equal(null, err);
+                    test.ok(reconnectCalled);
+                    client.close(done);
+                  }
+                );
               });
             });
           });

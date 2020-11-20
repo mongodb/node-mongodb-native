@@ -1,8 +1,8 @@
-import { OperationBase, OperationOptions } from './operation';
 import { MongoError } from '../error';
+import { OperationBase, OperationOptions } from './operation';
 import type { Callback } from '../utils';
-import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 
 /** @internal */

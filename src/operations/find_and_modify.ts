@@ -1,18 +1,18 @@
-import { ReadPreference } from '../read_preference';
+import { Aspect, defineAspects } from './operation';
 import {
-  maxWireVersion,
+  Callback,
   applyRetryableWrites,
   decorateWithCollation,
   hasAtomicOperators,
-  Callback
+  maxWireVersion
 } from '../utils';
-import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { defineAspects, Aspect } from './operation';
+import { MongoError } from '../error';
+import { ReadPreference } from '../read_preference';
+import { Sort, formatSort } from '../sort';
+import type { Collection } from '../collection';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import { Sort, formatSort } from '../sort';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {

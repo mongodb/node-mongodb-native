@@ -1,11 +1,11 @@
-import type { Callback } from '../utils';
-import type { Document } from '../bson';
-import type { Collection } from '../collection';
-import type { FindOptions } from './find';
-import { MongoError } from '../error';
-import type { Server } from '../sdam/server';
-import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
+import { CommandOperation } from './command';
+import { MongoError } from '../error';
+import type { Callback } from '../utils';
+import type { Collection } from '../collection';
+import type { Document } from '../bson';
+import type { FindOptions } from './find';
+import type { Server } from '../sdam/server';
 
 /** @internal */
 export class FindOneOperation extends CommandOperation<FindOptions, Document> {

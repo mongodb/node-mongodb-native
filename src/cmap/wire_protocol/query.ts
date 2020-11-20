@@ -1,13 +1,13 @@
-import { command, CommandOptions } from './command';
-import { Query } from '../commands';
-import { MongoError } from '../../error';
-import { maxWireVersion, collectionNamespace, Callback, decorateWithExplain } from '../../utils';
-import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
+import { Callback, collectionNamespace, decorateWithExplain, maxWireVersion } from '../../utils';
+import { CommandOptions, command } from './command';
 import { Document, pluckBSONSerializeOptions } from '../../bson';
-import type { Server } from '../../sdam/server';
-import type { ReadPreferenceLike } from '../../read_preference';
-import type { FindOptions } from '../../operations/find';
 import { Explain } from '../../explain';
+import { MongoError } from '../../error';
+import { Query } from '../commands';
+import { applyCommonQueryOptions, getReadPreference, isSharded } from './shared';
+import type { FindOptions } from '../../operations/find';
+import type { ReadPreferenceLike } from '../../read_preference';
+import type { Server } from '../../sdam/server';
 
 /** @internal */
 export interface QueryOptions extends CommandOptions {

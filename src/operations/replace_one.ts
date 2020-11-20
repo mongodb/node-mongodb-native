@@ -1,11 +1,11 @@
-import { defineAspects, Aspect } from './operation';
-import { updateDocuments } from './common_functions';
-import { hasAtomicOperators, Callback } from '../utils';
+import { Aspect, defineAspects } from './operation';
+import { Callback, hasAtomicOperators } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
+import { updateDocuments } from './common_functions';
+import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { Collection } from '../collection';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { UpdateResult } from './update';
 
 /** @public */

@@ -1,29 +1,29 @@
+import * as wp from './wire_protocol';
+import { Callback, ClientMetadata, calculateDurationInMs, now, uuidV4 } from '../utils';
+import { CommandFailedEvent, CommandStartedEvent, CommandSucceededEvent } from './events';
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
-import { StreamDescription, StreamDescriptionOptions } from './stream_description';
-import * as wp from './wire_protocol';
-import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
-import { updateSessionFromResponse } from '../sessions';
-import { uuidV4, ClientMetadata, now, calculateDurationInMs, Callback } from '../utils';
 import {
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoWriteConcernError
 } from '../error';
-import type { BinMsg, WriteProtocolMessageType, Response } from './commands';
-import type { Document, Long } from '../bson';
+import { StreamDescription, StreamDescriptionOptions } from './stream_description';
+import { updateSessionFromResponse } from '../sessions';
 import type { AutoEncrypter } from '../deps';
-import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
-import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
-import type { Server } from '../sdam/server';
-import type { MongoCredentials } from './auth/mongo_credentials';
+import type { BinMsg, Response, WriteProtocolMessageType } from './commands';
 import type { CommandOptions } from './wire_protocol/command';
-import type { GetMoreOptions } from './wire_protocol/get_more';
-import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
-import type { Stream } from './connect';
-import type { LoggerOptions } from '../logger';
+import type { Document, Long } from '../bson';
 import type { FindOptions } from '../operations/find';
+import type { GetMoreOptions } from './wire_protocol/get_more';
+import type { InsertOptions, RemoveOptions, UpdateOptions } from './wire_protocol/index';
+import type { IpcNetConnectOpts, TcpNetConnectOpts } from 'net';
+import type { LoggerOptions } from '../logger';
+import type { MongoCredentials } from './auth/mongo_credentials';
+import type { Server } from '../sdam/server';
+import type { Stream } from './connect';
+import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
