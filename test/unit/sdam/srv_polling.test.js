@@ -123,7 +123,6 @@ describe('Mongos SRV Polling', function() {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         context.sinon.stub(dns, 'resolveSrv');
-        stubPoller(poller);
 
         poller._poll();
 
