@@ -2020,12 +2020,12 @@ describe('Operation (Promises)', function () {
 
         // Insert a bunch of documents
         return collection
-          .insertMany([{ a: 1 }, { b: 2 }], { w: 1 })
+          .insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } })
           .then(function (result) {
             test.ok(result);
 
             // Remove all the document
-            return collection.removeOne({ a: 1 }, { w: 1 });
+            return collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } });
           })
           .then(function (r) {
             expect(r).property('deletedCount').to.equal(1);

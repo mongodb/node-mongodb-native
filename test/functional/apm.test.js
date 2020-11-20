@@ -971,13 +971,8 @@ describe('APM', function () {
           }
 
           if (args.writeConcern) {
-            if (options == null) {
-              options = args.writeConcern;
-            } else {
-              for (let name in args.writeConcern) {
-                options[name] = args.writeConcern[name];
-              }
-            }
+            options = options || {};
+            options.writeConcern = args.writeConcern;
           }
 
           if (typeof args.ordered === 'boolean') {

@@ -180,7 +180,7 @@ function prepareDatabaseForSuite(suite, context) {
 
   const coll = db.collection(context.collectionName);
   return setupPromise
-    .then(() => coll.drop({ writeConcern: 'majority' }))
+    .then(() => coll.drop({ writeConcern: { w: 'majority' } }))
     .catch(err => {
       if (!err.message.match(/ns not found/)) throw err;
     })
@@ -188,7 +188,7 @@ function prepareDatabaseForSuite(suite, context) {
       if (suite.key_vault_data) {
         const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
         return dataKeysCollection
-          .drop({ w: 'majority' })
+          .drop({ writeConcern: { w: 'majority' } })
           .catch(err => {
             if (!err.message.match(/ns not found/)) {
               throw err;
@@ -196,13 +196,15 @@ function prepareDatabaseForSuite(suite, context) {
           })
           .then(() => {
             if (suite.key_vault_data.length) {
-              return dataKeysCollection.insertMany(suite.key_vault_data, { w: 'majority' });
+              return dataKeysCollection.insertMany(suite.key_vault_data, {
+                writeConcern: { w: 'majority' }
+              });
             }
           });
       }
     })
     .then(() => {
-      const options = { w: 'majority' };
+      const options = { writeConcern: { w: 'majority' } };
       if (suite.json_schema) {
         options.validator = { $jsonSchema: suite.json_schema };
       }
@@ -211,7 +213,7 @@ function prepareDatabaseForSuite(suite, context) {
     })
     .then(() => {
       if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
-        return coll.insertMany(suite.data, { w: 'majority' });
+        return coll.insertMany(suite.data, { writeConcern: { w: 'majority' } });
       }
     })
     .then(() => {
