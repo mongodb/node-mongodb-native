@@ -21,7 +21,7 @@ case $DRIVER_VERSION in
     ;;
   '3.3')
     VERSION_DESC="v3.3"
-    TEST_COMMAND="./node_modules/.bin/mongodb-test-runner -s -l -e $LEGACY_ENVIRONMENT test/core test/unit test/functional"
+    TEST_COMMAND='npm run test-nolint'
     ;;
   '3.1')
     VERSION_DESC="v3.1"
