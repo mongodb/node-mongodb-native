@@ -2,7 +2,7 @@
 # set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
-echo "in .evergreen/install-dependencies.sh..."
+echo "in .evergreen/install-dependencies.sh - SKIP_INSTALL=$SKIP_INSTALL"
 
 NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip"
 NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"

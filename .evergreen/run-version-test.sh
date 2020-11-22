@@ -24,6 +24,7 @@ esac
 
 export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
 export NODE_LTS_NAME=dubnium
+export SKIP_INSTALL=1
 
 if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
   export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
@@ -34,10 +35,12 @@ echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
 cd $PROJECT_DIRECTORY
 
 # todo - move below git checkout when merged into 3.6
-SKIP_INSTALL=1 bash .evergreen/install-dependencies.sh
-echo "Dependencies installed, running test suite"
+bash .evergreen/install-dependencies.sh
+echo "Driver dependencies installed, running test suite"
 
 git checkout $DRIVER_VERSION
 echo "Checked out version branch, running dependency installation"
 
+npm install --unsafe-perm
+echo "Library dependencies installed, running test suite"
 npm run test-nolint && echo "Tests complete"
