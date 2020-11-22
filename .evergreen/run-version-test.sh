@@ -1,4 +1,5 @@
 set -o errexit
+set -o xtrace
 
 DRIVER_VERSION=$1
 echo "MONGODB_URI=$MONGODB_URI PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
@@ -15,7 +16,13 @@ if [[ $OS == "Windows_NT"|| $PLATFORM == "windows-64" ]]; then
   export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
 fi
 
+echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_VERSION=$NODE_LTS_VERSION"
+
 cd $PROJECT_DIRECTORY
 git checkout $DRIVER_VERSION
+echo "Checked out version branch, running dependency installation"
+
 bash .evergreen/install-dependencies.sh
-npm run test-nolint
+echo "Dependencies installed, running test suite"
+
+npm run test-nolint && echo "Tests complete"
