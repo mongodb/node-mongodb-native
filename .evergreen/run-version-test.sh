@@ -10,6 +10,11 @@ fi
 
 export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
 export NODE_LTS_VERSION=dubnium
+
+if [[ $OS == "Windows_NT"|| $PLATFORM == "windows-64" ]]; then
+  export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
+fi
+
 cd $PROJECT_DIRECTORY
 git checkout $DRIVER_VERSION
 bash .evergreen/install-dependencies.sh

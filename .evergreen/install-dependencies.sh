@@ -50,7 +50,8 @@ node_lts_version () {
 }
 
 # install Node.js on Windows
-if [ "Windows_NT" == "$OS" ]; then
+if [[ $OS == "Windows_NT"|| $PLATFORM == "windows-64" ]]; then
+  echo "--- Installing nvm on Windows ---"
   node_lts_version $NODE_LTS_NAME
   echo "NODE_VERSION=${NODE_VERSION}"
 
@@ -74,6 +75,7 @@ EOT
 
 # install Node.js on Linux/MacOS
 else
+  echo "--- Installing nvm on Linux/MacOS ---"
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
   nvm install --no-progress --lts=${NODE_LTS_NAME}
