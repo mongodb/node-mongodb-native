@@ -3,11 +3,23 @@ set -o errexit
 
 DRIVER_VERSION=$1
 echo "MONGODB_URI=$MONGODB_URI PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
-
-if [[ $DRIVER_VERSION != '3.6' ]]; then
-  echo "Unsupported driver version: ${DRIVER_VERSION}"
-  exit 1
-fi
+case $DRIVER_VERSION in
+  '3.6')
+    echo "Running latest tests"
+    ;;
+  '3.3')
+    echo "Testing NodeJS driver v3.3 not yet implemented"
+    exit 0
+    ;;
+  '3.1')
+    echo "Testing NodeJS driver v3.1 not yet implemented"
+    exit 0
+    ;;
+  *)
+    echo "Unsupported driver version: $DRIVER_VERSION"
+    exit 1
+    ;;
+esac
 
 export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
 export NODE_LTS_NAME=dubnium
