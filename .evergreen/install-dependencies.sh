@@ -52,7 +52,6 @@ node_lts_version () {
 }
 
 # install Node.js on Windows
-echo "OS=$OS PLATFORM=$PLATFORM"
 if [[ "$OS" == "Windows_NT" || "$PLATFORM" == "windows-64" ]]; then
   echo "--- Installing nvm on Windows ---"
   node_lts_version $NODE_LTS_NAME

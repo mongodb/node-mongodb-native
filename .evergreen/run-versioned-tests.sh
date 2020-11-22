@@ -3,7 +3,9 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 DRIVER_VERSION=$1
-echo "MONGODB_URI=$MONGODB_URI TOPOLOGY=$TOPOLOGY PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
+echo "MONGODB_URI=$MONGODB_URI VERSION=$VERSION TOPOLOGY=$TOPOLOGY AUTH=$AUTH SSL=$SSL"
+echo "PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
+
 if [[ $TOPOLOGY == "server" ]]; then
   LEGACY_ENVIRONMENT='single'
 else
@@ -25,7 +27,8 @@ case $DRIVER_VERSION in
     ;;
   '3.1')
     VERSION_DESC="v3.1"
-    TEST_COMMAND="./node_modules/.bin/mongodb-test-runner -s -l -e $LEGACY_ENVIRONMENT test/unit test/functional"
+    MONGODB_VERSION=$VERSION
+    TEST_COMMAND="./node_modules/.bin/mongodb-test-runner -s -l test/unit test/functional"
     ;;
   *)
     echo "Unsupported driver version: $DRIVER_VERSION"
@@ -48,13 +51,13 @@ echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
 
 cd $PROJECT_DIRECTORY
 
-# todo - move below git checkout when merged into 3.6
+echo "1. Installing driver depenencies"
 bash .evergreen/install-dependencies.sh
-echo "Driver dependencies installed, running test suite"
+echo "2. Driver dependencies installed, running test suite"
 
 git checkout $DRIVER_VERSION
-echo "Checked out version branch, running dependency installation"
+echo "3. Checked out version branch, running dependency installation"
 
 npm install --unsafe-perm
-echo "Library dependencies installed, running test suite"
+echo "4. Library dependencies installed, running test suite"
 $TEST_COMMAND
