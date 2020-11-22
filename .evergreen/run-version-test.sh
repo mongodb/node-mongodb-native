@@ -8,6 +8,9 @@ case $DRIVER_VERSION in
   '3.6')
     echo "Running latest tests"
     ;;
+  'fix-srv-test-timeout')
+    echo "Running latest tests (debug branch)"
+    ;;
   '3.3')
     echo "Testing NodeJS driver v3.3 not yet implemented"
     exit 0
