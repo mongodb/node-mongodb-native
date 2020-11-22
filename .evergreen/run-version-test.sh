@@ -9,10 +9,8 @@ if [[ $DRIVER_VERSION != '3.6' ]]; then
 fi
 
 export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
-echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY"
-
-NODE_LTS_VERSION=dubnium bash $PROJECT_DIRECTORY/.evergreen/install-dependencies.sh
-cd ..
+export NODE_LTS_VERSION=dubnium
+cd $PROJECT_DIRECTORY
 git checkout $DRIVER_VERSION
-npm install
+bash .evergreen/install-dependencies.sh
 npm run test-nolint
