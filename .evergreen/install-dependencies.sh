@@ -52,7 +52,8 @@ node_lts_version () {
 }
 
 # install Node.js on Windows
-if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
+echo "OS=$OS PLATFORM=$PLATFORM"
+if [[ "$OS" == "Windows_NT" || "$PLATFORM" == "windows-64" ]]; then
   echo "--- Installing nvm on Windows ---"
   node_lts_version $NODE_LTS_NAME
   echo "NODE_VERSION=$NODE_VERSION"
@@ -77,6 +78,7 @@ EOT
   nvm use $NODE_VERSION
 
   npm config set msvs_version 2017
+  echo "Windows install done"
 
 # install Node.js on Linux/MacOS
 else
@@ -94,14 +96,17 @@ tmp=${NPM_TMP_DIR}
 registry=https://registry.npmjs.org
 EOT
 
+echo "Linux/MacOS install done"
+
 fi
 
 # NOTE: registry was overridden to not use artifactory, remove the `registry` line when
 #       BUILD-6774 is resolved.
 
 # install node dependencies
-if [[ -z "$SKIP_INSTALL" ]]; then
+if [[ "$SKIP_INSTALL" == "1" ]]; then
   echo "Skipping npm install"
 else
+  echo "Running npm install"
   npm install --unsafe-perm
 fi
