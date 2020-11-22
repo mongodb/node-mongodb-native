@@ -62,7 +62,7 @@ describe('Connection', function() {
   });
 
   it('should support socket timeouts', {
-    metadata: { requires: { os: '!win' } },
+    metadata: { requires: { os: '!win32' } },
     test: function(done) {
       const connectOptions = Object.assign({
         host: '240.0.0.1',

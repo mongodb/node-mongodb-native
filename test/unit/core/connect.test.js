@@ -101,7 +101,7 @@ describe('Connect Tests', function() {
   });
 
   it('should allow a cancellaton token', {
-    metadata: { requires: { os: '!win' } },
+    metadata: { requires: { os: '!win32' } },
     test: function(done) {
       const cancellationToken = new EventEmitter();
       setTimeout(() => cancellationToken.emit('cancel'), 500);

@@ -268,7 +268,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       requires: {
         generators: true,
         topology: 'single',
-        os: '!win'
+        os: '!win32'
       }
     },
 
@@ -377,7 +377,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       requires: {
         generators: true,
         topology: 'single',
-        os: '!win'
+        os: '!win32'
       }
     },
 

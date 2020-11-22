@@ -2218,7 +2218,7 @@ describe('Cursor', function() {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        os: '!win'
+        os: '!win32'
       }
     },
 
