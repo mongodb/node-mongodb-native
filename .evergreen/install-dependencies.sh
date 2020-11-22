@@ -1,6 +1,8 @@
 #!/bin/bash
-# set -o xtrace   # Write all commands first to stderr
+set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
+
+echo "in .evergreen/install-dependencies.sh..."
 
 NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip"
 NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"
@@ -50,13 +52,14 @@ node_lts_version () {
 }
 
 # install Node.js on Windows
-if [[ $OS == "Windows_NT"|| $PLATFORM == "windows-64" ]]; then
+if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
   echo "--- Installing nvm on Windows ---"
   node_lts_version $NODE_LTS_NAME
-  echo "NODE_VERSION=${NODE_VERSION}"
+  echo "NODE_VERSION=$NODE_VERSION"
 
   export NVM_HOME=`cygpath -w "$NVM_DIR"`
   export NVM_SYMLINK=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
+  export NVM_ARTIFACTS_PATH=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
   export PATH=`cygpath $NVM_SYMLINK`:`cygpath $NVM_HOME`:$PATH
 
   curl -L $NVM_WINDOWS_URL -o nvm.zip
