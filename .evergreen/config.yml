@@ -412,12 +412,17 @@ functions:
             -p 8100 \
             -v \
             --fault revoked
+  upload test results:
+    - command: attach.xunit_results
+      params:
+        file: src/xunit.xml
 pre:
   - func: fetch source
   - func: prepare resources
   - func: fix absolute paths
   - func: make files executable
 post:
+  - func: upload test results
   - func: cleanup
 tasks:
   - name: test-latest-server
