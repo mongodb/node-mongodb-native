@@ -1,5 +1,5 @@
 #!/bin/bash
-set -o xtrace   # Write all commands first to stderr
+# set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
 echo "in .evergreen/install-dependencies.sh..."
@@ -75,6 +75,8 @@ path: $NVM_SYMLINK
 EOT
   nvm install $NODE_VERSION
   nvm use $NODE_VERSION
+
+  npm config set msvs_version 2017
 
 # install Node.js on Linux/MacOS
 else

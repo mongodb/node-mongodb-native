@@ -1,5 +1,5 @@
 set -o errexit
-set -o xtrace
+# set -o xtrace
 
 DRIVER_VERSION=$1
 echo "MONGODB_URI=$MONGODB_URI PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
@@ -10,13 +10,13 @@ if [[ $DRIVER_VERSION != '3.6' ]]; then
 fi
 
 export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
-export NODE_LTS_VERSION=dubnium
+export NODE_LTS_NAME=dubnium
 
 if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
   export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
 fi
 
-echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_VERSION=$NODE_LTS_VERSION"
+echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
 
 cd $PROJECT_DIRECTORY
 
