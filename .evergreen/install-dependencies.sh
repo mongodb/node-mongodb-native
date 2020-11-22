@@ -23,22 +23,22 @@ mkdir -p "${NPM_TMP_DIR}"
 
 node_lts_version () {
   case $1 in
-    argon)
+    "argon")
       VERSION=4
       ;;
-    boron)
+    "boron")
       VERSION=6
       ;;
-    carbon)
+    "carbon")
       VERSION=8
       ;;
-    dubnium)
+    "dubnium")
       VERSION=10
       ;;
-    erbium)
+    "erbium")
       VERSION=12
       ;;
-    fermium)
+    "fermium")
       VERSION=14
       ;;
     *)
@@ -100,4 +100,8 @@ fi
 #       BUILD-6774 is resolved.
 
 # install node dependencies
-npm install --unsafe-perm
+if [[ -z "$SKIP_INSTALL" ]]; then
+  echo "Skipping npm install"
+else
+  npm install --unsafe-perm
+fi

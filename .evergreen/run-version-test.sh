@@ -1,5 +1,6 @@
-set -o errexit
-# set -o xtrace
+#!/bin/bash
+# set -o xtrace   # Write all commands first to stderr
+set -o errexit  # Exit the script with error if any of the commands fail
 
 DRIVER_VERSION=$1
 echo "MONGODB_URI=$MONGODB_URI PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
@@ -33,7 +34,7 @@ echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
 cd $PROJECT_DIRECTORY
 
 # todo - move below git checkout when merged into 3.6
-bash .evergreen/install-dependencies.sh
+SKIP_INSTALL=1 bash .evergreen/install-dependencies.sh
 echo "Dependencies installed, running test suite"
 
 git checkout $DRIVER_VERSION
