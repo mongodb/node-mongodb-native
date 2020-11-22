@@ -19,10 +19,12 @@ fi
 echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_VERSION=$NODE_LTS_VERSION"
 
 cd $PROJECT_DIRECTORY
-git checkout $DRIVER_VERSION
-echo "Checked out version branch, running dependency installation"
 
+# todo - move below git checkout when merged into 3.6
 bash .evergreen/install-dependencies.sh
 echo "Dependencies installed, running test suite"
+
+git checkout $DRIVER_VERSION
+echo "Checked out version branch, running dependency installation"
 
 npm run test-nolint && echo "Tests complete"
