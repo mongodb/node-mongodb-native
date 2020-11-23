@@ -212,6 +212,7 @@ export interface MongoClientOptions
   servername?: string;
 
   dbName?: string;
+  useRecoveryToken?: boolean;
 }
 
 /** @public */
