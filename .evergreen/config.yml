@@ -24,7 +24,7 @@ functions:
           fi
 
           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
-          if [ "Windows_NT" = "$OS" ];
+          if [ "Windows_NT" = "$OS" ]; then
             export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
           fi
           export PROJECT_DIRECTORY="$(pwd)"
