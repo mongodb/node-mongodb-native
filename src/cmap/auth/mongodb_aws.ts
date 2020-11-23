@@ -9,7 +9,7 @@ import { maxWireVersion, Callback } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
-import { AuthMechanismEnum } from './defaultAuthProviders';
+import { AuthMechanism } from './defaultAuthProviders';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
@@ -155,7 +155,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
         username: creds.AccessKeyId,
         password: creds.SecretAccessKey,
         source: credentials.source,
-        mechanism: AuthMechanismEnum.MONGODB_AWS,
+        mechanism: AuthMechanism.MONGODB_AWS,
         mechanismProperties: {
           AWS_SESSION_TOKEN: creds.Token
         }

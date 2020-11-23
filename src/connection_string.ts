@@ -2,9 +2,9 @@ import * as url from 'url';
 import * as qs from 'querystring';
 import * as dns from 'dns';
 import { URL } from 'url';
-import { AuthMechanismEnum } from './cmap/auth/defaultAuthProviders';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { ReadConcern, ReadConcernLevel } from './read_concern';
+import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import { ReadPreference, ReadPreferenceModeId } from './read_preference';
+import { ReadConcern, ReadConcernLevelId } from './read_concern';
 import { W, WriteConcern } from './write_concern';
 import { MongoParseError } from './error';
 import type { AnyOptions, Callback } from './utils';
@@ -1100,7 +1100,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
   authMechanism: {
     rename: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
-      const mechanisms = Object.values(AuthMechanismEnum);
+      const mechanisms = Object.values(AuthMechanism);
       const [mechanism] = mechanisms.filter(m => m.match(RegExp(String.raw`\b${value}\b`, 'i')));
       if (!mechanism) {
         throw new TypeError(`authMechanism one of ${mechanisms}, got ${value}`);
@@ -1403,7 +1403,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     transform({ values: [level], options }) {
       return ReadConcern.fromOptions({
         ...options.readConcern,
-        level: level as ReadConcernLevel
+        level: level as ReadConcernLevelId
       });
     }
   },
@@ -1423,7 +1423,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
           maxStalenessSeconds: options.readPreference?.maxStalenessSeconds
         };
         return new ReadPreference(
-          value as ReadPreferenceMode,
+          value as ReadPreferenceModeId,
           options.readPreference?.tags,
           rpOpts
         );

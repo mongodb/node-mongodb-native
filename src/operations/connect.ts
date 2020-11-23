@@ -12,7 +12,7 @@ import * as BSON from '../bson';
 import type { Document } from '../bson';
 import type { MongoClient } from '../mongo_client';
 import { ConnectionOptions, Connection } from '../cmap/connection';
-import type { AuthMechanism } from '../cmap/auth/defaultAuthProviders';
+import type { AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
 import { Server } from '../sdam/server';
 
 const VALID_AUTH_MECHANISMS = new Set([
@@ -444,7 +444,7 @@ export interface GenerateCredentialsOptions {
   authSource: string;
   authdb: string;
   dbName: string;
-  authMechanism: AuthMechanism;
+  authMechanism: AuthMechanismId;
   authMechanismProperties: Document;
 }
 
@@ -462,15 +462,15 @@ function generateCredentials(
 
   // authMechanism
   const authMechanismRaw = options.authMechanism || 'DEFAULT';
-  const authMechanism = authMechanismRaw.toUpperCase();
+  const mechanism = authMechanismRaw.toUpperCase() as AuthMechanismId;
   const mechanismProperties = options.authMechanismProperties;
 
-  if (!VALID_AUTH_MECHANISMS.has(authMechanism)) {
-    throw new MongoError(`authentication mechanism ${authMechanism} not supported`);
+  if (!VALID_AUTH_MECHANISMS.has(mechanism)) {
+    throw new MongoError(`authentication mechanism ${mechanism} not supported`);
   }
 
   return new MongoCredentials({
-    mechanism: authMechanism as AuthMechanism,
+    mechanism,
     mechanismProperties,
     source,
     username,

@@ -1,7 +1,7 @@
 import type { Document } from './bson';
 
 /** @public */
-export const ReadConcernLevelEnum = {
+export const ReadConcernLevel = {
   local: 'local',
   majority: 'majority',
   linearizable: 'linearizable',
@@ -10,10 +10,10 @@ export const ReadConcernLevelEnum = {
 } as const;
 
 /** @public */
-export type ReadConcernLevel = keyof typeof ReadConcernLevelEnum;
+export type ReadConcernLevelId = keyof typeof ReadConcernLevel;
 
 /** @public */
-export type ReadConcernLike = ReadConcern | { level: ReadConcernLevel } | ReadConcernLevel;
+export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelId } | ReadConcernLevelId;
 
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
@@ -23,17 +23,17 @@ export type ReadConcernLike = ReadConcern | { level: ReadConcernLevel } | ReadCo
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level: ReadConcernLevel | string;
+  level: ReadConcernLevelId | string;
 
   /** Constructs a ReadConcern from the read concern level.*/
-  constructor(level: ReadConcernLevel) {
+  constructor(level: ReadConcernLevelId) {
     /**
      * A spec test exists that allows level to be any string.
      * "invalid readConcern with out stage"
      * @see ./test/spec/crud/v2/aggregate-out-readConcern.json
      * @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#unknown-levels-and-additional-options-for-string-based-readconcerns
      */
-    this.level = ReadConcernLevelEnum[level] || level;
+    this.level = ReadConcernLevel[level] ?? level;
   }
 
   /**
@@ -43,7 +43,7 @@ export class ReadConcern {
    */
   static fromOptions(options?: {
     readConcern?: ReadConcernLike;
-    level?: ReadConcernLevel;
+    level?: ReadConcernLevelId;
   }): ReadConcern | undefined {
     if (options == null) {
       return;
@@ -66,19 +66,19 @@ export class ReadConcern {
   }
 
   static get MAJORITY(): 'majority' {
-    return ReadConcernLevelEnum.majority;
+    return ReadConcernLevel.majority;
   }
 
   static get AVAILABLE(): 'available' {
-    return ReadConcernLevelEnum.available;
+    return ReadConcernLevel.available;
   }
 
   static get LINEARIZABLE(): 'linearizable' {
-    return ReadConcernLevelEnum.linearizable;
+    return ReadConcernLevel.linearizable;
   }
 
   static get SNAPSHOT(): 'snapshot' {
-    return ReadConcernLevelEnum.snapshot;
+    return ReadConcernLevel.snapshot;
   }
 
   toJSON(): Document {

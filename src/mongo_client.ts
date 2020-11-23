@@ -1,7 +1,7 @@
 import { Db, DbOptions } from './db';
 import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadPreference, ReadPreferenceModeId } from './read_preference';
 import { MongoError, AnyError } from './error';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 import { maybePromise, MongoDBNamespace, Callback, resolveOptions } from './utils';
@@ -9,11 +9,11 @@ import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import { Logger } from './logger';
-import { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
+import { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncryptionOptions } from './deps';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { OperationParent } from './operations/command';
@@ -24,7 +24,7 @@ import type { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { parseOptions } from './connection_string';
 
 /** @public */
-export const LogLevelEnum = {
+export const LogLevel = {
   error: 'error',
   warn: 'warn',
   info: 'info',
@@ -32,7 +32,7 @@ export const LogLevelEnum = {
 } as const;
 
 /** @public */
-export type LogLevel = typeof LogLevelEnum[keyof typeof LogLevelEnum];
+export type LogLevelId = typeof LogLevel[keyof typeof LogLevel];
 
 /** @public */
 export interface DriverInfo {
@@ -99,9 +99,9 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevel;
+  readConcernLevel?: ReadConcernLevelId;
   /** Specifies the read preferences for this connection */
-  readPreference?: ReadPreferenceMode | ReadPreference;
+  readPreference?: ReadPreferenceModeId | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
   maxStalenessSeconds?: number;
   /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
@@ -109,7 +109,7 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   /** Specify the database name associated with the user’s credentials. */
   authSource?: string;
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
-  authMechanism?: AuthMechanism;
+  authMechanism?: AuthMechanismId;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
   authMechanismProperties?: {
     SERVICE_NAME?: string;
@@ -177,7 +177,7 @@ export interface MongoClientOptions
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The logging level */
-  loggerLevel?: LogLevel;
+  loggerLevel?: LogLevelId;
   /** Custom logger object */
   logger?: Logger;
   /** The auth settings for when connection to server. */
