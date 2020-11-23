@@ -12,6 +12,8 @@ else
   LEGACY_ENVIRONMENT=$TOPOLOGY
 fi
 
+ADDITIONAL_DEPS=:
+
 case $DRIVER_VERSION in
   '3.6')
     VERSION_DESC="v3.6"
@@ -28,6 +30,7 @@ case $DRIVER_VERSION in
   '3.1')
     VERSION_DESC="v3.1"
     MONGODB_VERSION=$VERSION
+    ADDITIONAL_DEPS="npm install emadum/mongodb-test-runner#continuous-matrix-testing"
     TEST_COMMAND="./node_modules/.bin/mongodb-test-runner -s -l test/unit test/functional"
     ;;
   *)
@@ -60,4 +63,5 @@ echo "3. Checked out version branch, running dependency installation"
 
 npm install --unsafe-perm
 echo "4. Library dependencies installed, running test suite"
+$ADDITIONAL_DEPS
 $TEST_COMMAND
