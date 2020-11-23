@@ -182,17 +182,7 @@ const BOOLEAN_OPTIONS = new Set([
 const STRING_OPTIONS = new Set(['authsource', 'replicaset']);
 
 // Supported text representations of auth mechanisms
-// NOTE: this list exists in native already, if it is merged here we should deduplicate
-const AUTH_MECHANISMS = new Set([
-  'GSSAPI',
-  'MONGODB-AWS',
-  'MONGODB-X509',
-  'MONGODB-CR',
-  'DEFAULT',
-  'SCRAM-SHA-1',
-  'SCRAM-SHA-256',
-  'PLAIN'
-]);
+export const AUTH_MECHANISMS = new Set([...Object.values(AuthMechanism)]);
 
 // Lookup table used to translate normalized (lower-cased) forms of connection string
 // options to their expected camelCase version
@@ -1107,16 +1097,16 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
       }
       let source = options.credentials.source; // some mechanisms have '$external' as the Auth Source
       if (
-        mechanism === 'PLAIN' ||
-        mechanism === 'GSSAPI' ||
-        mechanism === 'MONGODB-AWS' ||
-        mechanism === 'MONGODB-X509'
+        mechanism === AuthMechanism.MONGODB_PLAIN ||
+        mechanism === AuthMechanism.MONGODB_GSSAPI ||
+        mechanism === AuthMechanism.MONGODB_AWS ||
+        mechanism === AuthMechanism.MONGODB_X509
       ) {
         source = '$external';
       }
 
       let password: string | undefined = options.credentials.password;
-      if (mechanism === 'MONGODB-X509' && password === '') {
+      if (mechanism === AuthMechanism.MONGODB_X509 && password === '') {
         password = undefined;
       }
       return new MongoCredentials({

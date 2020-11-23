@@ -3,7 +3,7 @@ import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoError, AnyError } from '../error';
 import { Topology, TopologyOptions, ServerAddress } from '../sdam/topology';
-import { parseConnectionString } from '../connection_string';
+import { AUTH_MECHANISMS, parseConnectionString } from '../connection_string';
 import { ReadConcern } from '../read_concern';
 import { emitDeprecationWarning, Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
@@ -12,19 +12,8 @@ import * as BSON from '../bson';
 import type { Document } from '../bson';
 import type { MongoClient } from '../mongo_client';
 import { ConnectionOptions, Connection } from '../cmap/connection';
-import type { AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
+import { AuthMechanism, AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
 import { Server } from '../sdam/server';
-
-const VALID_AUTH_MECHANISMS = new Set([
-  'DEFAULT',
-  'PLAIN',
-  'GSSAPI',
-  'MONGODB-CR',
-  'MONGODB-X509',
-  'MONGODB-AWS',
-  'SCRAM-SHA-1',
-  'SCRAM-SHA-256'
-]);
 
 const validOptionNames = [
   'poolSize',
@@ -461,11 +450,11 @@ function generateCredentials(
   const source = options.authSource || options.authdb || options.dbName;
 
   // authMechanism
-  const authMechanismRaw = options.authMechanism || 'DEFAULT';
+  const authMechanismRaw = options.authMechanism || AuthMechanism.MONGODB_DEFAULT;
   const mechanism = authMechanismRaw.toUpperCase() as AuthMechanismId;
   const mechanismProperties = options.authMechanismProperties;
 
-  if (!VALID_AUTH_MECHANISMS.has(mechanism)) {
+  if (!AUTH_MECHANISMS.has(mechanism)) {
     throw new MongoError(`authentication mechanism ${mechanism} not supported`);
   }
 
