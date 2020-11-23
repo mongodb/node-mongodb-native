@@ -21,7 +21,7 @@ describe('Causal Consistency', function () {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
     });
 
-    test.client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    test.client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     return test.client.connect();
   });
 

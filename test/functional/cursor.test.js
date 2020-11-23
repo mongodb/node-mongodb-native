@@ -28,7 +28,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -76,7 +76,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -115,7 +115,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -151,7 +151,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -183,7 +183,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -267,7 +267,7 @@ describe('Cursor', function () {
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         monitorCommands: true
       });
 
@@ -302,7 +302,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -385,7 +385,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -485,7 +485,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -532,7 +532,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -581,7 +581,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -631,7 +631,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -681,7 +681,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -717,7 +717,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -758,7 +758,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -798,7 +798,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -869,7 +869,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -923,7 +923,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -985,7 +985,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1076,7 +1076,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1148,7 +1148,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1214,7 +1214,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1269,7 +1269,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1331,7 +1331,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1395,7 +1395,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1425,7 +1425,7 @@ describe('Cursor', function () {
       var COUNT = 1000;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1504,7 +1504,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1584,7 +1584,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1621,7 +1621,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1658,7 +1658,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1699,7 +1699,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1757,7 +1757,7 @@ describe('Cursor', function () {
       var count = 0;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1837,7 +1837,7 @@ describe('Cursor', function () {
         doneCalled = 0;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1892,7 +1892,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1950,7 +1950,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2014,7 +2014,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2084,7 +2084,7 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2161,7 +2161,7 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2211,7 +2211,7 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2254,7 +2254,7 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2287,33 +2287,6 @@ describe('Cursor', function () {
     }
   });
 
-  /*
-  it('shouldNotAwaitDataWhenFalse = {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-        test: function(done) {
-      // NODE-98
-      var db = configuration.newClient(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-      db.open(function(err, db) {
-        var options = { capped: true, size: 8};
-        db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
-          collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
-            // should not timeout
-            collection.find({}, {tailable:true, awaitData:false}).each(function(err, result) {
-              test.ok(err != null);
-            });
-
-            done();
-          });
-        });
-      });
-    }
-  }
-  */
-
   it('Should correctly retry tailable cursor connection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2325,7 +2298,7 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2540,7 +2513,7 @@ describe('Cursor', function () {
       };
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2588,7 +2561,7 @@ describe('Cursor', function () {
       var doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2621,7 +2594,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2652,7 +2625,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2709,7 +2682,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2769,7 +2742,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2814,7 +2787,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2850,7 +2823,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -2902,7 +2875,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -2965,7 +2938,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3013,7 +2986,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3049,7 +3022,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3084,7 +3057,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3115,7 +3088,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3171,7 +3144,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3216,7 +3189,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3268,7 +3241,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3316,7 +3289,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3367,7 +3340,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3421,7 +3394,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3463,7 +3436,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3504,7 +3477,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3553,7 +3526,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3602,7 +3575,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3655,7 +3628,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3710,7 +3683,7 @@ describe('Cursor', function () {
         docs[i] = { a: i, createdAt: new Date(d) };
       }
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3758,7 +3731,7 @@ describe('Cursor', function () {
       });
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3805,7 +3778,7 @@ describe('Cursor', function () {
       });
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3857,7 +3830,7 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       let cleanup = () => {};
       let caughtError = undefined;
@@ -3933,7 +3906,7 @@ describe('Cursor', function () {
     },
     test: function (done) {
       const configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3968,7 +3941,7 @@ describe('Cursor', function () {
       },
       test: function (done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+        const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
@@ -4002,7 +3975,7 @@ describe('Cursor', function () {
       },
       test: function (done) {
         const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+        const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
         client.connect((err, client) => {
           expect(err).to.not.exist;
@@ -4043,7 +4016,7 @@ describe('Cursor', function () {
 
   it('should return a promise when no callback supplied to forEach method', function () {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     return client.connect().then(() => {
       this.defer(() => client.close());
@@ -4061,7 +4034,7 @@ describe('Cursor', function () {
 
   it('should return false when exhausted and hasNext called more than once', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     client.connect((err, client) => {
       expect(err).to.not.exist;
@@ -4136,7 +4109,7 @@ describe('Cursor', function () {
 
   it('stream should apply the supplied transformation function to each document in the stream', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
       { _id: 0, b: 1, c: 0 },
       { _id: 1, b: 1, c: 0 },
@@ -4155,7 +4128,7 @@ describe('Cursor', function () {
 
   it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
       { _id: 0, a: { b: 1, c: 0 } },
       { _id: 1, a: { b: 1, c: 0 } },
@@ -4179,7 +4152,7 @@ describe('Cursor', function () {
     const configuration = this.configuration;
     const client = configuration.newClient(
       { w: 1, readPreference: ReadPreference.SECONDARY },
-      { poolSize: 1, auto_reconnect: false, connectWithNoPrimary: true }
+      { maxPoolSize: 1, connectWithNoPrimary: true }
     );
 
     client.connect((err, client) => {
@@ -4210,7 +4183,7 @@ describe('Cursor', function () {
 
   it('should not consume first document on hasNext when streaming', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     client.connect(err => {
       expect(err).to.not.exist;

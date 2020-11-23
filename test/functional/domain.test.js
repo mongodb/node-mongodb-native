@@ -17,7 +17,7 @@ describe('Domains', function () {
       var domainInstance = Domain.create();
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         domainsEnabled: true
       });
       client.connect(function (err, client) {
@@ -73,10 +73,7 @@ describe('Domains', function () {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
-      var client = configuration.newClient(
-        { w: 1 },
-        { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
-      );
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1, domainsEnabled: true });
 
       client.connect(function (err, client) {
         test.ok(!err);

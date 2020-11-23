@@ -33,7 +33,7 @@ describe('Find and Modify', function () {
       });
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -95,7 +95,7 @@ describe('Find and Modify', function () {
       });
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -207,7 +207,7 @@ describe('Find and Modify', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient({ readPreference: 'secondary' }, { poolSize: 1 });
+      const client = configuration.newClient({ readPreference: 'secondary' }, { maxPoolSize: 1 });
       client.connect((err, client) => {
         const db = client.db(configuration.db);
         expect(err).to.not.exist;

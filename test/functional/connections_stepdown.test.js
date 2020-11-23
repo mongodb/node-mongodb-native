@@ -33,7 +33,7 @@ describe('Connections survive primary step down', function () {
 
   beforeEach(function () {
     const clientOptions = {
-      poolSize: 1,
+      maxPoolSize: 1,
       retryWrites: false,
       heartbeatFrequencyMS: 100
     };

@@ -64,7 +64,7 @@ describe('ReadConcern', function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           { w: 1 },
-          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+          { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
 
         client.connect((err, client) => {
@@ -197,7 +197,7 @@ describe('ReadConcern', function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           { w: 1 },
-          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+          { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
 
         client.connect((err, client) => {
@@ -258,7 +258,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -306,7 +306,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client
@@ -354,7 +354,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -395,7 +395,10 @@ describe('ReadConcern', function () {
     test: function (done) {
       // Get a new instance
       const configuration = this.configuration;
-      client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: { level: 'local' } });
+      client = configuration.newClient(
+        { w: 1 },
+        { maxPoolSize: 1, readConcern: { level: 'local' } }
+      );
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);

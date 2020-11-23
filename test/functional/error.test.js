@@ -12,7 +12,7 @@ describe('Errors', function () {
 
   let client;
   beforeEach(function () {
-    client = this.configuration.newClient(this.configuration.writeConcernMax(), { poolSize: 1 });
+    client = this.configuration.newClient(this.configuration.writeConcernMax(), { maxPoolSize: 1 });
     return client.connect();
   });
   afterEach(function () {

@@ -84,9 +84,7 @@ describe('URI', function () {
     test: function (done) {
       var self = this;
       const configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
-        native_parser: true
-      });
+      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;
@@ -103,11 +101,10 @@ describe('URI', function () {
             encodeURIComponent(pass) +
             '@localhost:27017/integration_tests';
 
-          const aclient = configuration.newClient(uri, { native_parser: true });
-          aclient.connect(function (err, aclient) {
+          configuration.newClient(uri).connect(function (err, client) {
             expect(err).to.not.exist;
 
-            client.close(() => aclient.close(done));
+            client.close(() => client.close(done));
           });
         });
       });

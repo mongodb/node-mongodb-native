@@ -26,7 +26,7 @@ describe('Custom PK', function () {
       var client = configuration.newClient(
         {
           w: 1,
-          poolSize: 1
+          maxPoolSize: 1
         },
         {
           pkFactory: CustomPKFactory

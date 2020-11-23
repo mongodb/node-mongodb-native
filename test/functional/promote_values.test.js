@@ -19,7 +19,7 @@ describe('Promote Values', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         promoteValues: false
       });
 

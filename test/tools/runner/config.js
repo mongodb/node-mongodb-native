@@ -71,7 +71,7 @@ class NativeConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
-    // support MongoClient contructor form (url, options) for `newClient`
+    // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
         dbOptions,
@@ -80,11 +80,7 @@ class NativeConfiguration {
     }
 
     dbOptions = dbOptions || {};
-    serverOptions = Object.assign(
-      {},
-      { haInterval: 100, minHeartbeatFrequencyMS: 100 },
-      serverOptions
-    );
+    serverOptions = Object.assign({}, { minHeartbeatFrequencyMS: 100 }, serverOptions);
 
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
@@ -106,7 +102,7 @@ class NativeConfiguration {
     }
 
     if (this.options.replicaSet) {
-      Object.assign(dbOptions, { replicaSet: this.options.replicaSet, auto_reconnect: false });
+      Object.assign(dbOptions, { replicaSet: this.options.replicaSet });
     }
 
     const urlOptions = {
@@ -148,7 +144,7 @@ class NativeConfiguration {
 
     const query = {};
     if (this.options.replicaSet) {
-      Object.assign(query, { replicaSet: this.options.replicaSet, auto_reconnect: false });
+      Object.assign(query, { replicaSet: this.options.replicaSet });
     }
 
     let multipleHosts;

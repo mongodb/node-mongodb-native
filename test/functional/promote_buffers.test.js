@@ -18,7 +18,7 @@ describe('Promote Buffers', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         promoteBuffers: true
       });
 

@@ -13,7 +13,7 @@ describe('Logger', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {

@@ -18,7 +18,7 @@ describe('Optional PromiseLibrary / maybePromise', function () {
 
   it('should have cursor return native promise', function (done) {
     const configuration = this.configuration;
-    const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+    const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     client.connect((err, client) => {
       expect(err).to.not.exist;
       const db = client.db(configuration.db);
@@ -35,7 +35,7 @@ describe('Optional PromiseLibrary / maybePromise', function () {
     const configuration = this.configuration;
     const client = this.configuration.newClient(
       { w: 1 },
-      { poolSize: 1, promiseLibrary: CustomPromise }
+      { maxPoolSize: 1, promiseLibrary: CustomPromise }
     );
     client.connect((err, client) => {
       const db = client.db(configuration.db);

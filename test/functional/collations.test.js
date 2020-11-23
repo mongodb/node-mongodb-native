@@ -721,7 +721,7 @@ describe('Collation', function () {
     metadata: { requires: { mongodb: '>=3.4.0' } },
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect().then(() => {
         const db = client.db(configuration.db);

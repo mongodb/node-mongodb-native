@@ -18,7 +18,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -106,7 +106,7 @@ describe('Bulk', function () {
 
     test: function () {
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       return client
@@ -136,7 +136,7 @@ describe('Bulk', function () {
 
     test: function () {
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       return client.connect().then(client => {
@@ -267,7 +267,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -332,7 +332,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -368,7 +368,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -414,7 +414,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -470,7 +470,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -539,7 +539,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -581,7 +581,7 @@ describe('Bulk', function () {
 
     test: function (done) {
       var self = this;
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
@@ -605,7 +605,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -641,7 +641,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -705,7 +705,7 @@ describe('Bulk', function () {
   it('should correctly handle multiple unordered batch API', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
-      poolSize: 1
+      maxPoolSize: 1
     });
 
     client.connect((err, client) => {
@@ -754,7 +754,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -788,7 +788,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -830,7 +830,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -883,7 +883,7 @@ describe('Bulk', function () {
   it('should provide descriptive error message for unordered batch with duplicate key errors on inserts', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
-      poolSize: 1
+      maxPoolSize: 1
     });
 
     client.connect((err, client) => {
@@ -941,7 +941,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -1011,7 +1011,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1052,7 +1052,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1088,7 +1088,7 @@ describe('Bulk', function () {
 
     test: function (done) {
       var self = this;
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
@@ -1112,7 +1112,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1152,7 +1152,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1186,7 +1186,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1223,7 +1223,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1250,7 +1250,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1283,7 +1283,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1343,7 +1343,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1410,7 +1410,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1442,7 +1442,7 @@ describe('Bulk', function () {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function (done) {
         var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], function (err) {
@@ -1461,7 +1461,7 @@ describe('Bulk', function () {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function (done) {
         var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
@@ -1477,7 +1477,7 @@ describe('Bulk', function () {
 
   it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function () {
     var self = this;
-    var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+    var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     return client
       .connect()

@@ -72,7 +72,7 @@ describe('Retryable Writes (ReplSet)', function () {
           socketTimeout: 0,
           haInterval: 100,
           size: 5,
-          minSize: 1
+          minPoolSize: 1
         }
       );
 
@@ -128,7 +128,7 @@ describe('Retryable Writes (ReplSet)', function () {
           socketTimeout: 0,
           haInterval: 100,
           size: 5,
-          minSize: 1
+          minPoolSize: 1
         }
       );
 

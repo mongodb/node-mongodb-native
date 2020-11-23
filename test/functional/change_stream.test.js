@@ -1600,10 +1600,7 @@ describe('Change Streams', function () {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.url(), {
-        poolSize: 1,
-        autoReconnect: false
-      });
+      const client = configuration.newClient(configuration.url(), { maxPoolSize: 1 });
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
@@ -2858,9 +2855,7 @@ context('NODE-2626 - handle null changes without error', function () {
       }
       req.reply({ ok: 1 });
     });
-    const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
-      useUnifiedTopology: true
-    });
+    const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`);
     client.connect(err => {
       expect(err).to.not.exist;
       const collection = client.db('cs').collection('test');

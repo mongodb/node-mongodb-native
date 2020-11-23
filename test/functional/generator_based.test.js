@@ -18,7 +18,7 @@ describe('Generators', function () {
       var configuration = this.configuration;
 
       co(function* () {
-        var instance = configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var instance = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
         var client = yield instance.connect();
         var db = client.db(configuration.db);
 

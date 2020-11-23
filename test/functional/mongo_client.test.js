@@ -31,7 +31,6 @@ describe('MongoClient', function () {
           j: true,
           readPreference: 'nearest',
           readPreferenceTags: { loc: 'ny' },
-          native_parser: false,
           forceServerObjectId: true,
           pkFactory: {
             createPk() {
@@ -40,8 +39,7 @@ describe('MongoClient', function () {
           },
           serializeFunctions: true,
           raw: true,
-          numberOfRetries: 10,
-          bufferMaxEntries: 0
+          numberOfRetries: 10
         }
       );
 
@@ -61,7 +59,6 @@ describe('MongoClient', function () {
         test.equal(true, db.bsonOptions.serializeFunctions);
         test.equal(true, db.bsonOptions.raw);
         test.equal(10, db.s.options.numberOfRetries);
-        test.equal(0, db.s.options.bufferMaxEntries);
 
         client.close(done);
       });

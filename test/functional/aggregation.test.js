@@ -22,7 +22,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -99,7 +99,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+      const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;
@@ -139,7 +139,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -227,7 +227,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -315,7 +315,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -395,7 +395,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -483,7 +483,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -573,7 +573,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -658,7 +658,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -746,7 +746,7 @@ describe('Aggregation', function () {
     test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -799,7 +799,7 @@ describe('Aggregation', function () {
     test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -859,7 +859,7 @@ describe('Aggregation', function () {
     test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -933,7 +933,7 @@ describe('Aggregation', function () {
 
     test: function (done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient({ poolSize: 1 });
+      var client = this.configuration.newClient({ maxPoolSize: 1 });
 
       const testCases = [
         { writeConcern: { j: true } },
@@ -997,7 +997,7 @@ describe('Aggregation', function () {
       },
 
       test: function (done) {
-        const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+        const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
           databaseName = this.configuration.db;
 
         // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
@@ -1125,7 +1125,7 @@ describe('Aggregation', function () {
       }
     },
     test: function (done) {
-      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+      const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       const databaseName = this.configuration.db;
 
       const comment = 'Darmok and Jalad at Tanagra';
@@ -1168,7 +1168,7 @@ describe('Aggregation', function () {
     test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
@@ -1235,7 +1235,7 @@ describe('Aggregation', function () {
     test: function (done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
@@ -1276,7 +1276,7 @@ describe('Aggregation', function () {
     test: function (done) {
       const databaseName = this.configuration.db;
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         monitorCommands: true
       });
 

@@ -49,7 +49,7 @@ function executeScenarioSetup(scenario, test, config, ctx) {
     haInterval: 100,
     heartbeatFrequencyMS: 100,
     monitorCommands: true,
-    minSize: 10
+    minPoolSize: 10
   });
 
   ctx.failPointName = test.failPoint && test.failPoint.configureFailPoint;

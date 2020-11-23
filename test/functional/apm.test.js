@@ -31,7 +31,7 @@ describe('APM', function () {
 
         let client = this.configuration.newClient(
           { w: 1 },
-          { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+          { maxPoolSize: 1, monitorCommands: true }
         );
 
         return client
@@ -53,7 +53,7 @@ describe('APM', function () {
             succeeded = [];
             client = this.configuration.newClient(
               { w: 1 },
-              { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+              { maxPoolSize: 1, monitorCommands: true }
             );
 
             return client.connect();
@@ -125,7 +125,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = this.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       client.on('commandStarted', filterForCommands('insert', started));
@@ -154,7 +154,7 @@ describe('APM', function () {
       const self = this;
       const client = this.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       client.on('commandStarted', filterForCommands('insert', started));
@@ -184,7 +184,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       client.on('commandStarted', filterForCommands('listCollections', started));
@@ -222,7 +222,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['listIndexes', 'find'];
@@ -302,7 +302,7 @@ describe('APM', function () {
 
         const client = self.configuration.newClient(
           { w: 1 },
-          { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+          { maxPoolSize: 1, monitorCommands: true }
         );
 
         return client.connect().then(client => {
@@ -338,7 +338,7 @@ describe('APM', function () {
       const failed = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['find', 'getMore', 'killCursors'];
@@ -411,7 +411,7 @@ describe('APM', function () {
       const failed = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['find', 'getMore', 'killCursors'];
@@ -469,7 +469,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['insert', 'update', 'delete'];
@@ -511,7 +511,7 @@ describe('APM', function () {
       const failed = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['find', 'getMore', 'killCursors', 'explain'];
@@ -559,7 +559,7 @@ describe('APM', function () {
       const failed = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['getnonce'];
@@ -591,7 +591,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['update'];
@@ -626,7 +626,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['update'];
@@ -661,7 +661,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['delete'];
@@ -691,7 +691,7 @@ describe('APM', function () {
       const self = this;
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       return client.connect().then(client => {
@@ -741,7 +741,7 @@ describe('APM', function () {
 
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['aggregate', 'getMore'];
@@ -787,7 +787,7 @@ describe('APM', function () {
       const succeeded = [];
       const client = self.configuration.newClient(
         { w: 1 },
-        { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+        { maxPoolSize: 1, monitorCommands: true }
       );
 
       const desiredEvents = ['listCollections'];

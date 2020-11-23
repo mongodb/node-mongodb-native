@@ -15,7 +15,7 @@ describe('Remove', function () {
     test: function (done) {
       const self = this;
       const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -68,7 +68,7 @@ describe('Remove', function () {
     test: function (done) {
       const self = this;
       const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -111,7 +111,7 @@ describe('Remove', function () {
     test: function (done) {
       const self = this;
       const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -151,7 +151,7 @@ describe('Remove', function () {
     test: function (done) {
       const self = this;
       const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
