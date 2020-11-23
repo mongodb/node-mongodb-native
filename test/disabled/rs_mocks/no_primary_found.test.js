@@ -124,7 +124,7 @@ describe('ReplSet No Primary Found (mocks)', function () {
           setName: 'rs',
           connectionTimeout: 2000,
           socketTimeout: 4000,
-          haInterval: 2000,
+
           size: 1
         });
 

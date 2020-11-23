@@ -33,7 +33,7 @@ describe('Compression (ReplSet)', function () {
       [test.primaryServer.address(), test.firstSecondaryServer.address()],
       {
         setName: 'rs',
-        haInterval: 10000,
+
         connectionTimeout: 3000,
         secondaryOnlyConnectionAllowed: true,
         size: 1

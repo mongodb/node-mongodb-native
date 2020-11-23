@@ -180,8 +180,7 @@ describe.skip('Buffering Proxy', function () {
         const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
-            socketTimeoutMS: 2000,
-            haInterval: 1000
+            socketTimeoutMS: 2000
           }
         );
 
@@ -402,8 +401,7 @@ describe.skip('Buffering Proxy', function () {
         const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
-            socketTimeoutMS: 2000,
-            haInterval: 1000
+            socketTimeoutMS: 2000
           }
         );
 

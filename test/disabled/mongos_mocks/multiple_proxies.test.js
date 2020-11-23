@@ -56,7 +56,7 @@ describe('Mongos Multiple Proxies (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1000,
-          haInterval: 1000,
+
           localThresholdMS: 500,
           size: 1
         });
@@ -144,7 +144,7 @@ describe('Mongos Multiple Proxies (mocks)', function () {
           connectionTimeout: 3000,
           localThresholdMS: 50,
           socketTimeout: 1000,
-          haInterval: 1000,
+
           size: 1
         });
 
@@ -164,7 +164,7 @@ describe('Mongos Multiple Proxies (mocks)', function () {
                 connectionTimeout: 3000,
                 localThresholdMS: 1000,
                 socketTimeout: 1000,
-                haInterval: 1000,
+
                 size: 1
               });
 

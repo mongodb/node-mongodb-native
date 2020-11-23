@@ -35,7 +35,7 @@ describe('Authentication', function () {
           return admin
             .addUser(username, password)
             .then(() => {
-              const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
+              const client = configuration.newClient(AUTH_URL);
 
               const removeUser = tap(() => admin.removeUser(username));
               const clientCleanup = tap(() => client.close());

@@ -28,7 +28,7 @@ describe('ReadPreference (ReplSet)', function () {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 100,
+
           size: 1
         }
       );

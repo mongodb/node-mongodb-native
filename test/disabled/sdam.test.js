@@ -72,7 +72,7 @@ describe.skip('SDAM', function () {
         topologyClosed: []
       };
 
-      var client = configuration.newClient({}, { haInterval: 500 });
+      var client = configuration.newClient();
       var events = [
         'serverDescriptionChanged',
         'serverHeartbeatStarted',

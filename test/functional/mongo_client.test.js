@@ -88,9 +88,7 @@ describe('MongoClient', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('user:password@localhost:27017/test', {
-        useNewUrlParser: true
-      });
+      const client = configuration.newClient('user:password@localhost:27017/test');
 
       client.connect(function (err) {
         test.equal(err.message, 'Invalid connection string');

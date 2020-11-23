@@ -23,7 +23,7 @@ describe('Retryable Writes (ReplSet)', function () {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 100,
+
           size: 1
         }
       );
@@ -70,7 +70,7 @@ describe('Retryable Writes (ReplSet)', function () {
           setName: 'rs',
           connectionTimeout: 100,
           socketTimeout: 0,
-          haInterval: 100,
+
           size: 5,
           minPoolSize: 1
         }
@@ -126,7 +126,7 @@ describe('Retryable Writes (ReplSet)', function () {
           setName: 'rs',
           connectionTimeout: 100,
           socketTimeout: 0,
-          haInterval: 100,
+
           size: 5,
           minPoolSize: 1
         }

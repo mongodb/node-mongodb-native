@@ -35,7 +35,7 @@ describe('Sessions (Mongos)', function () {
       const mongos = new Mongos([test.server.address()], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
-        haInterval: 500,
+
         size: 1
       });
 
@@ -66,7 +66,7 @@ describe('Sessions (Mongos)', function () {
       const mongos = new Mongos([test.server.address()], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
-        haInterval: 500,
+
         size: 1
       });
 
@@ -153,7 +153,7 @@ describe('Sessions (Mongos)', function () {
       var mongos = new Mongos([test.server.address()], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
-        haInterval: 500,
+
         size: 1
       });
 
@@ -202,7 +202,7 @@ describe('Sessions (Mongos)', function () {
         const mongos = new Mongos([test.server.address()], {
           connectionTimeout: 30000,
           socketTimeout: 30000,
-          haInterval: 500,
+
           size: 1
         });
 

@@ -101,23 +101,23 @@ describe('URI', function () {
             encodeURIComponent(pass) +
             '@localhost:27017/integration_tests';
 
-          configuration.newClient(uri).connect(function (err, client) {
+          configuration.newClient(uri).connect(function (err, c) {
             expect(err).to.not.exist;
 
-            client.close(() => client.close(done));
+            c.close(() => client.close(done));
           });
         });
       });
     }
   });
 
-  it('should correctly translate uri options using new parser', {
+  it('should correctly translate uri options', {
     metadata: { requires: { topology: 'replicaset' } },
     test: function (done) {
       const config = this.configuration;
       const uri = `mongodb://${config.host}:${config.port}/${config.db}?replicaSet=${config.replicasetName}`;
 
-      const client = this.configuration.newClient(uri, { useNewUrlParser: true });
+      const client = this.configuration.newClient(uri);
       client.connect((err, client) => {
         expect(err).to.not.exist;
         expect(client).to.exist;
@@ -127,10 +127,10 @@ describe('URI', function () {
     }
   });
 
-  it('should generate valid credentials with X509 and the new parser', {
+  it('should generate valid credentials with X509', {
     metadata: { requires: { topology: 'single' } },
     test: function (done) {
-      function validateConnect(options /*, callback */) {
+      function validateConnect(options) {
         expect(options).to.have.property('credentials');
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
@@ -141,7 +141,7 @@ describe('URI', function () {
       const topologyPrototype = Topology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
-      const client = this.configuration.newClient(uri, { useNewUrlParser: true });
+      const client = this.configuration.newClient(uri);
       client.connect();
     }
   });

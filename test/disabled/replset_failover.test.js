@@ -444,7 +444,7 @@ describe.skip('ReplSet (Failover)', function () {
       const client = configuration.newClient(url, {
         replSet: {
           //set replset check interval to be much smaller than our querying interval
-          haInterval: 50,
+
           socketOptions: {
             connectTimeoutMS: 500
           }

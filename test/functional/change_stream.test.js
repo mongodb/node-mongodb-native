@@ -1006,8 +1006,7 @@ describe('Change Streams', function () {
       });
 
       const client = configuration.newClient('mongodb://localhost:32000/', {
-        socketTimeoutMS: 500,
-        validateOptions: true
+        socketTimeoutMS: 500
       });
 
       client.connect((err, client) => {
@@ -1129,8 +1128,7 @@ describe('Change Streams', function () {
 
       let finalError = undefined;
       const client = configuration.newClient('mongodb://localhost:32000/', {
-        socketTimeoutMS: 500,
-        validateOptions: true
+        socketTimeoutMS: 500
       });
 
       client
@@ -1564,8 +1562,7 @@ describe('Change Streams', function () {
         });
 
         const client = configuration.newClient(`mongodb://${primaryServer.uri()}/`, {
-          socketTimeoutMS: 500,
-          validateOptions: true
+          socketTimeoutMS: 500
         });
 
         client.connect((err, client) => {
@@ -1755,10 +1752,7 @@ describe('Change Streams', function () {
 
       const dbName = 'integration_tests';
       const collectionName = 'resumeWithStartAtOperationTime';
-      const connectOptions = {
-        validateOptions: true,
-        monitorCommands: true
-      };
+      const connectOptions = { monitorCommands: true };
 
       let getMoreCounter = 0;
       let changeStream;

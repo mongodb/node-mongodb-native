@@ -81,7 +81,7 @@ describe.skip('Sharding (Failover)', function () {
           new Server(configuration.host, configuration.port),
           new Server(configuration.host, configuration.port + 1)
         ],
-        { ha: true, haInterval: 500, maxPoolSize: 1 }
+        { maxPoolSize: 1 }
       );
 
       // Counters to track emitting of events
