@@ -274,7 +274,6 @@ function runTestSuiteTest(configuration, spec, context) {
       {
         heartbeatFrequencyMS: 100,
         minHeartbeatFrequencyMS: 100,
-        useRecoveryToken: true,
         monitorCommands: true
       },
       spec.clientOptions
