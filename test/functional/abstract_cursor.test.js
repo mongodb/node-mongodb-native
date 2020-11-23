@@ -50,7 +50,7 @@ describe('AbstractCursor', function () {
 
   context('#close', function () {
     it(
-      'should a killCursors command when closed before completely iterated',
+      'should send a killCursors command when closed before completely iterated',
       withClientV2(function (client, done) {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
