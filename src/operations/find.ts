@@ -239,7 +239,17 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       this.ns.toString(),
       findCommand,
       { fullResult: !!this.fullResponse, ...this.options, ...this.bsonOptions },
-      callback
+      (err, result) => {
+        if (err) return callback(err);
+        if (this.explain) {
+          // TODO: NODE-2900
+          if (result.documents && result.documents[0]) {
+            return callback(undefined, result.documents[0]);
+          }
+        }
+
+        callback(undefined, result);
+      }
     );
   }
 }
