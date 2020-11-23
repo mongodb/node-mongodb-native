@@ -23,12 +23,13 @@ case $DRIVER_VERSION in
     ;;
   '3.1')
     VERSION_DESC="v3.1"
-    MONGODB_VERSION=$VERSION
     if [[ $TOPOLOGY == "server" ]]; then
       MONGODB_ENVIRONMENT='single'
     else
       MONGODB_ENVIRONMENT=$TOPOLOGY
     fi
+    export MONGODB_ENVIRONMENT
+    export MONGODB_VERSION=$VERSION
     ADDITIONAL_DEPS="npm install emadum/mongodb-test-runner#continuous-matrix-testing"
     TEST_COMMAND="./node_modules/.bin/mongodb-test-runner -s -l test/unit test/functional"
     ;;
