@@ -13,7 +13,7 @@ case $DRIVER_VERSION in
     VERSION_DESC="v3.6"
     TEST_COMMAND='npm run test-nolint'
     ;;
-  'fix-srv-test-timeout')
+  'NODE-1458/3.6/support-windows-evergreen')
     VERSION_DESC="v3.6 (debug branch)"
     TEST_COMMAND='npm run test-nolint'
     ;;
