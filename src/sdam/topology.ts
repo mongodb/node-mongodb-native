@@ -753,8 +753,7 @@ function destroyServer(
 function parseStringSeedlist(seedlist: string): ServerAddress[] {
   return seedlist.split(',').map((seed: string) => ({
     host: seed.split(':')[0],
-    port: parseInt(seed.split(':')[1], 10) || 27017,
-    type: 'tcp'
+    port: parseInt(seed.split(':')[1], 10) || 27017
   }));
 }
 

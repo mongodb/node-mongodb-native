@@ -841,8 +841,33 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
-function isRecord(value: unknown): value is Record<string, any> {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
+function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]) {
+  set = Array.isArray(set) ? new Set(set) : set;
+  subset = Array.isArray(subset) ? new Set(subset) : subset;
+  for (const elem of subset) {
+    if (!set.has(elem)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isRecord<T extends readonly string[]>(
+  value: unknown,
+  requiredKeys: T
+): value is Record<T[number], any>;
+function isRecord(value: unknown): value is Record<string, any>;
+function isRecord(
+  value: unknown,
+  requiredKeys: string[] | undefined = undefined
+): value is Record<string, any> {
+  const isRecord = !!value && typeof value === 'object' && !Array.isArray(value);
+  if (isRecord && requiredKeys) {
+    const keys = Object.keys(value as Record<string, any>);
+    return isSuperset(keys, requiredKeys);
+  }
+
+  return isRecord;
 }
 
 function toRecord(value: string): Record<string, any> {
@@ -905,6 +930,11 @@ export function parseOptions(
   options: MongoClientOptions = {}
 ): Readonly<MongoOptions> {
   const { url, hosts, srv } = parseURI(uri);
+
+  // TODO(NODE-2704): Move back to test/tools/runner/config.js
+  options = { ...options };
+  Reflect.deleteProperty(options, 'host');
+  Reflect.deleteProperty(options, 'port');
 
   const mongoOptions = Object.create(null);
   mongoOptions.hosts = srv ? [{ host: hosts[0], type: 'srv' }] : hosts.map(toHostArray);
@@ -1074,13 +1104,13 @@ export const OPTIONS = {
   auth: {
     target: 'credentials',
     transform({ name, options, values: [value] }): MongoCredentials {
-      if (!isRecord(value)) {
-        throw new TypeError(`${name} must be an object with 'user' and 'pass' properties`);
+      if (!isRecord(value, ['username', 'password'] as const)) {
+        throw new TypeError(`${name} must be an object with 'username' and 'password' properties`);
       }
       return new MongoCredentials({
         ...options.credentials,
-        username: value.user,
-        password: value.pass
+        username: value.username,
+        password: value.password
       });
     }
   },
@@ -1309,15 +1339,6 @@ export const OPTIONS = {
   numberOfRetries: {
     type: 'int'
   },
-  pass: {
-    target: 'credentials',
-    transform({ values: [password], options }) {
-      if (typeof password !== 'string') {
-        throw new TypeError('pass must be a string');
-      }
-      return new MongoCredentials({ ...options.credentials, password });
-    }
-  } as OptionDescriptor,
   password: {
     target: 'credentials',
     transform({ values: [password], options }) {
@@ -1330,7 +1351,7 @@ export const OPTIONS = {
   pkFactory: {
     target: 'createPk',
     transform({ values: [value] }): PkFactory {
-      if (isRecord(value) && 'createPk' in value && typeof value.createPk === 'function') {
+      if (isRecord(value, ['createPk'] as const) && typeof value.createPk === 'function') {
         return value as PkFactory;
       }
       throw new TypeError(
@@ -1361,7 +1382,7 @@ export const OPTIONS = {
   },
   readConcern: {
     transform({ values: [value], options }) {
-      if (value instanceof ReadConcern || isRecord(value)) {
+      if (value instanceof ReadConcern || isRecord(value, ['level'] as const)) {
         return ReadConcern.fromOptions({ ...options.readConcern, ...value } as any);
       }
       throw new MongoParseError(`ReadConcern must be an object, got ${JSON.stringify(value)}`);
@@ -1381,7 +1402,7 @@ export const OPTIONS = {
       if (value instanceof ReadPreference) {
         return ReadPreference.fromOptions({ ...options.readPreference, ...value });
       }
-      if (isRecord(value)) {
+      if (isRecord(value, ['mode'] as const)) {
         const rp = ReadPreference.fromOptions({ ...options.readPreference, ...value });
         if (rp) return rp;
         else throw new MongoParseError(`Cannot make read preference from ${JSON.stringify(value)}`);
@@ -1505,12 +1526,6 @@ export const OPTIONS = {
   useRecoveryToken: {
     type: 'boolean'
   },
-  user: {
-    target: 'credentials',
-    transform({ values: [value], options }) {
-      return new MongoCredentials({ ...options.credentials, username: String(value) });
-    }
-  } as OptionDescriptor,
   username: {
     target: 'credentials',
     transform({ values: [value], options }) {

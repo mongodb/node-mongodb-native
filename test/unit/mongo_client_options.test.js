@@ -63,7 +63,7 @@ describe('MongoOptions', function () {
 
   const ALL_OPTIONS = {
     appName: 'cats',
-    auth: { user: 'username', pass: 'password' },
+    auth: { username: 'username', password: 'password' },
     authMechanism: 'SCRAM-SHA-1',
     authMechanismProperties: { SERVICE_NAME: 'service name here' },
     authSource: 'refer to dbName',

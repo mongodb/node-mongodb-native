@@ -63,6 +63,8 @@ const validOptionNames = [
   'appname',
   'auth',
   'user',
+  'username',
+  'host',
   'password',
   'authMechanism',
   'compression',

@@ -44,9 +44,9 @@ export interface DriverInfo {
 /** @public */
 export interface Auth {
   /** The username for auth */
-  user?: string;
+  username?: string;
   /** The password for auth */
-  pass?: string;
+  password?: string;
 }
 
 /** @public */
@@ -135,6 +135,10 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   retryWrites?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
+
+  // username and password in Authority section not query string.
+  username?: string;
+  password?: string;
 }
 
 /** @public */
@@ -195,8 +199,6 @@ export interface MongoClientOptions
 
   dbName?: string;
   useRecoveryToken?: boolean;
-  username?: string;
-  password?: string;
 }
 
 /** @public */

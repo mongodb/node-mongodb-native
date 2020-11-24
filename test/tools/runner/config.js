@@ -123,8 +123,9 @@ class NativeConfiguration {
       urlOptions.auth = auth;
     }
 
-    Reflect.deleteProperty(serverOptions, 'host');
-    Reflect.deleteProperty(serverOptions, 'port');
+    // TODO(NODE-2704): Uncomment this, unix socket related issues
+    // Reflect.deleteProperty(serverOptions, 'host');
+    // Reflect.deleteProperty(serverOptions, 'port');
     const connectionString = url.format(urlOptions);
     return new MongoClient(connectionString, serverOptions);
   }
