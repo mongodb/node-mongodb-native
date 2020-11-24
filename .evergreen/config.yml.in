@@ -121,6 +121,7 @@ functions:
       type: test
       params:
         working_dir: "src"
+        timeout_secs: 60
         script: |
           ${PREPARE_SHELL}
 
