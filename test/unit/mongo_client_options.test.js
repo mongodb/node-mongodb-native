@@ -135,7 +135,6 @@ describe('MongoOptions', function () {
     tlsCertificateKeyFilePassword: 'tls-pass',
     // tlsInsecure: true,
     w: 'majority',
-    waitQueueMultiple: 3,
     waitQueueTimeoutMS: 3,
     writeConcern: new WriteConcern(2),
     wtimeout: 5,

@@ -558,7 +558,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
 }
 
-export type ServerAddress =
+export type HostAddress =
   | { host: string; type: 'srv' }
   | { host: string; port: number; type: 'tcp' }
   | { host: string; type: 'unix' };
@@ -611,7 +611,7 @@ export interface MongoOptions
         | 'zlibCompressionLevel'
       >
     > {
-  hosts: ServerAddress[];
+  hosts: HostAddress[];
   srv: boolean;
   credentials: MongoCredentials;
   readPreference: ReadPreference;

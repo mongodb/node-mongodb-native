@@ -13,7 +13,7 @@ import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type {
   DriverInfo,
-  ServerAddress,
+  HostAddress,
   MongoClientOptions,
   MongoOptions,
   PkFactory
@@ -1033,7 +1033,7 @@ function toHostArray(hostString: string) {
     ipv6SanitizedHostName = parsedHost.hostname.substring(1, parsedHost.hostname.length - 1);
   }
 
-  const result: ServerAddress = socketPath
+  const result: HostAddress = socketPath
     ? {
         host: socketPath,
         type: 'unix'

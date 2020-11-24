@@ -217,6 +217,54 @@ describe('Connection String', function () {
     /** @type {import('../../spec/connection-string/valid-auth.json')[]} */
     const suites = loadSpecTests('connection-string').concat(loadSpecTests('auth'));
 
+    for (const suite of suites) {
+      describe(suite.name, function () {
+        for (const test of suite.tests) {
+          it(`${test.description} -- new MongoOptions parser`, function () {
+            if (skipTests.includes(test.description)) {
+              return this.skip();
+            }
+
+            const message = `"${test.uri}"`;
+
+            const valid = test.valid;
+            if (valid) {
+              const options = parseOptions(test.uri);
+              expect(options, message).to.be.ok;
+
+              if (test.hosts) {
+                for (const [index, { host, port }] of test.hosts.entries()) {
+                  expect(options.hosts[index].host, message).to.equal(host);
+                  if (typeof port === 'number') expect(options.hosts[index].port).to.equal(port);
+                }
+              }
+
+              if (test.auth) {
+                if (test.auth.db != null) {
+                  expect(options.credentials.source, message).to.equal(test.auth.db);
+                }
+
+                if (test.auth.username != null) {
+                  expect(options.credentials.username, message).to.equal(test.auth.username);
+                }
+
+                if (test.auth.password != null) {
+                  expect(options.credentials.password, message).to.equal(test.auth.password);
+                }
+              }
+
+              // TODO
+              // if (test.options) {
+              //   expect(options, message).to.deep.include(test.options);
+              // }
+            } else {
+              expect(() => parseOptions(test.uri), message).to.throw();
+            }
+          });
+        }
+      });
+    }
+
     suites.forEach(suite => {
       describe(suite.name, function () {
         suite.tests.forEach(test => {
@@ -284,48 +332,6 @@ describe('Connection String', function () {
 
                 done();
               });
-            }
-          });
-
-          it(`${test.description} -- new MongoOptions parser`, function () {
-            if (skipTests.includes(test.description)) {
-              return this.skip();
-            }
-
-            const message = `"${test.uri}"`;
-
-            const valid = test.valid;
-            if (valid) {
-              const options = parseOptions(test.uri);
-              expect(options, message).to.be.ok;
-
-              if (test.hosts) {
-                for (const [index, { host, port }] of test.hosts.entries()) {
-                  expect(options.hosts[index].host, message).to.equal(decodeURI(host));
-                  if (typeof port === 'number') expect(options.hosts[index].port).to.equal(port);
-                }
-              }
-
-              if (test.auth) {
-                if (test.auth.db != null) {
-                  expect(options.credentials.source, message).to.equal(test.auth.db);
-                }
-
-                if (test.auth.username != null) {
-                  expect(options.credentials.username, message).to.equal(test.auth.username);
-                }
-
-                if (test.auth.password != null) {
-                  expect(options.credentials.password, message).to.equal(test.auth.password);
-                }
-              }
-
-              // Going to have to get clever here...
-              // if (test.options) {
-              //   expect(options, message).to.deep.include(test.options);
-              // }
-            } else {
-              expect(() => parseOptions(test.uri), message).to.throw();
             }
           });
         });
