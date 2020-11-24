@@ -1475,7 +1475,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('should resume piping of Change Streams when a resumable error is encountered', {
+  it('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
