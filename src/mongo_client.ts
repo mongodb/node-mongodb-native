@@ -94,8 +94,6 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   minPoolSize?: number;
   /** The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. */
   maxIdleTimeMS?: number;
-  /** A number that the driver multiples the maxPoolSize value to, to provide the maximum number of threads allowed to wait for a connection to become available from the pool. */
-  waitQueueMultiple?: number;
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
   /** The level of isolation */
@@ -264,7 +262,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
    * The consolidate, parsed, transformed and merged options.
    * @internal
    */
-  options?: MongoOptions;
+  options;
 
   // debugging
   originalUri;
@@ -560,7 +558,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
 }
 
-export type Host =
+export type ServerAddress =
   | { host: string; type: 'srv' }
   | { host: string; port: number; type: 'tcp' }
   | { host: string; type: 'unix' };
@@ -613,7 +611,7 @@ export interface MongoOptions
         | 'zlibCompressionLevel'
       >
     > {
-  hosts: Host[];
+  hosts: ServerAddress[];
   srv: boolean;
   credentials: MongoCredentials;
   readPreference: ReadPreference;

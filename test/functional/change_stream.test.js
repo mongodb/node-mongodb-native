@@ -1585,7 +1585,6 @@ describe('Change Streams', function () {
             const fileContents = fs.readFileSync(filename, 'utf8');
             const parsedFileContents = JSON.parse(fileContents);
             expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
-
             done();
           });
         });

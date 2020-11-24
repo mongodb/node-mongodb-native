@@ -8,7 +8,7 @@ import {
   Callback,
   maxWireVersion
 } from '../utils';
-import { ReadPreference } from '../read_preference';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -134,7 +134,7 @@ export class MapReduceOperation extends CommandOperation<MapReduceOptions, Docum
 
     // If we have a read preference and inline is not set as output fail hard
     if (
-      this.readPreference.mode === ReadPreference.PRIMARY &&
+      this.readPreference.mode === ReadPreferenceMode.primary &&
       options.out &&
       (options.out as any).inline !== 1 &&
       options.out !== 'inline'

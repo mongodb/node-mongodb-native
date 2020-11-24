@@ -301,7 +301,7 @@ describe('Connection String', function () {
 
               if (test.hosts) {
                 for (const [index, { host, port }] of test.hosts.entries()) {
-                  expect(options.hosts[index].host, message).to.equal(host);
+                  expect(options.hosts[index].host, message).to.equal(decodeURI(host));
                   if (typeof port === 'number') expect(options.hosts[index].port).to.equal(port);
                 }
               }

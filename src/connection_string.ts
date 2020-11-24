@@ -11,7 +11,13 @@ import type { AnyOptions, Callback } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { DriverInfo, Host, MongoClientOptions, MongoOptions, PkFactory } from './mongo_client';
+import type {
+  DriverInfo,
+  ServerAddress,
+  MongoClientOptions,
+  MongoOptions,
+  PkFactory
+} from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevel } from './logger';
@@ -772,7 +778,8 @@ function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
   decodeURIComponent(username ?? '');
   decodeURIComponent(password ?? '');
 
-  const illegalCharacters = new RegExp('[@/:]', 'gi');
+  // characters not permitted in username nor password Set([':', '/', '?', '#', '[', ']', '@'])
+  const illegalCharacters = new RegExp(String.raw`[:/?#\[\]@]`, 'gi');
   if (username?.match(illegalCharacters)) {
     throw new MongoParseError(`Username contains unescaped characters ${username}`);
   }
@@ -809,13 +816,13 @@ function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
   };
 }
 
+const TRUTHS = new Set(['true', 't', '1', 'y', 'yes']);
+const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
 function getBoolean(name: string, value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   const valueString = String(value).toLowerCase();
-  const truths = ['true', 't', '1', 'y', 'yes'];
-  const lies = ['false', 'f', '0', 'n', 'no', '-1'];
-  if (truths.includes(valueString)) return true;
-  if (lies.includes(valueString)) return false;
+  if (TRUTHS.has(valueString)) return true;
+  if (FALSEHOODS.has(valueString)) return false;
   throw new TypeError(`For ${name} Expected stringified boolean value, got: ${value}`);
 }
 
@@ -835,7 +842,7 @@ function getUint(name: string, value: unknown): number {
 }
 
 function isRecord(value: unknown): value is Record<string, any> {
-  return !!value && typeof value === 'object';
+  return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
 function toRecord(value: string): Record<string, any> {
@@ -880,24 +887,14 @@ const defaultOptions = new Map<string, unknown>(
         }
       }
     ],
-    [
-      'createPk',
-      function createPk() {
-        // We prefer not to rely on ObjectId having a createPk method
-        return new ObjectId();
-      }
-    ],
     ['promiseLibrary', undefined],
     ['raw', false],
-    ['reconnectInterval', 0],
-    ['reconnectTries', 0],
     ['replicaSet', undefined],
     ['retryReads', true],
     ['retryWrites', true],
     ['serverSelectionTimeoutMS', 30000],
     ['serverSelectionTryOnce', false],
     ['socketTimeoutMS', 0],
-    ['waitQueueMultiple', 1],
     ['waitQueueTimeoutMS', 0],
     ['zlibCompressionLevel', 0]
   ] as [string, any][]).map(([k, v]) => [k.toLowerCase(), v])
@@ -977,10 +974,10 @@ export function parseOptions(
 function setOption(mongoOptions: any, loweredKey: string, values: unknown[]) {
   const descriptor = descriptorFor(loweredKey);
   const {
-    descriptor: { rename, type, transform, deprecated },
+    descriptor: { target, type, transform, deprecated },
     key
   } = descriptor;
-  const name = rename ?? key;
+  const name = target ?? key;
 
   if (deprecated) {
     console.warn(`${key} is a deprecated option`);
@@ -1008,7 +1005,7 @@ function setOption(mongoOptions: any, loweredKey: string, values: unknown[]) {
       }
       mongoOptions[name] = values[0];
       break;
-    case 'asIs':
+    case 'any':
       mongoOptions[name] = values[0];
       break;
     default: {
@@ -1036,7 +1033,7 @@ function toHostArray(hostString: string) {
     ipv6SanitizedHostName = parsedHost.hostname.substring(1, parsedHost.hostname.length - 1);
   }
 
-  const result: Host = socketPath
+  const result: ServerAddress = socketPath
     ? {
         host: socketPath,
         type: 'unix'
@@ -1055,8 +1052,8 @@ function toHostArray(hostString: string) {
 }
 
 interface OptionDescriptor {
-  rename?: string;
-  type?: 'boolean' | 'int' | 'uint' | 'record' | 'string' | 'asIs';
+  target?: string;
+  type?: 'boolean' | 'int' | 'uint' | 'record' | 'string' | 'any';
 
   deprecated?: boolean;
   /**
@@ -1067,15 +1064,15 @@ interface OptionDescriptor {
   transform?: (args: { name: string; options: MongoOptions; values: unknown[] }) => unknown;
 }
 
-export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
+export const OPTIONS = {
   appName: {
-    rename: 'driverInfo',
+    target: 'driverInfo',
     transform({ options, values: [value] }): DriverInfo {
       return { ...options.driverInfo, name: String(value) };
     }
   },
   auth: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ name, options, values: [value] }): MongoCredentials {
       if (!isRecord(value)) {
         throw new TypeError(`${name} must be an object with 'user' and 'pass' properties`);
@@ -1088,7 +1085,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   authMechanism: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       const mechanisms = Object.values(AuthMechanism);
       const [mechanism] = mechanisms.filter(m => m.match(RegExp(String.raw`\b${value}\b`, 'i')));
@@ -1118,7 +1115,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   authMechanismProperties: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       if (typeof value === 'string') {
         value = toRecord(value);
@@ -1130,7 +1127,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   authSource: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       return new MongoCredentials({ ...options.credentials, source: String(value) });
     }
@@ -1142,7 +1139,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   checkServerIdentity: {
-    rename: 'checkServerIdentity',
+    target: 'checkServerIdentity',
     transform({
       values: [value]
     }): boolean | ((hostname: string, cert: Document) => Error | undefined) {
@@ -1152,7 +1149,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   compression: {
-    rename: 'compressors',
+    target: 'compressors',
     transform({ values }) {
       const compressionList = new Set();
       for (const c of values) {
@@ -1166,7 +1163,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   compressors: {
-    rename: 'compressors',
+    target: 'compressors',
     transform({ values }) {
       const compressionList = new Set();
       for (const compVal of values as string[]) {
@@ -1184,17 +1181,6 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
   connectTimeoutMS: {
     type: 'uint'
   },
-  createPk: {
-    rename: 'pkFactory',
-    transform({ values: [value] }): PkFactory {
-      if (typeof value === 'function') {
-        return { createPk: value } as PkFactory;
-      }
-      throw new TypeError(
-        `Option pkFactory must be an object with a createPk function, got ${value}`
-      );
-    }
-  } as OptionDescriptor,
   dbName: {
     type: 'string'
   },
@@ -1208,7 +1194,6 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'record'
   },
   family: {
-    rename: 'family',
     transform({ name, values: [value] }): 4 | 6 {
       const transformValue = getInt(name, value);
       if (transformValue === 4 || transformValue === 6) {
@@ -1224,7 +1209,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   fsync: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
       const wc = WriteConcern.fromOptions({
         ...options.writeConcern,
@@ -1237,12 +1222,6 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
   gssapiServiceName: {
     type: 'string'
   },
-  ha: {
-    type: 'boolean'
-  },
-  haInterval: {
-    type: 'uint'
-  },
   heartbeatFrequencyMS: {
     type: 'uint'
   },
@@ -1250,7 +1229,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   j: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
       console.warn('j is deprecated');
       const wc = WriteConcern.fromOptions({
@@ -1262,7 +1241,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   journal: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
       const wc = WriteConcern.fromOptions({
         ...options.writeConcern,
@@ -1292,7 +1271,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   loggerLevel: {
-    rename: 'logger',
+    target: 'logger',
     transform({ values: [value] }) {
       return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
     }
@@ -1319,7 +1298,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   name: {
-    // DriverInfo
+    target: 'driverInfo',
     transform({ values: [value], options }) {
       return { ...options.driverInfo, name: String(value) };
     }
@@ -1331,7 +1310,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'int'
   },
   pass: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ values: [password], options }) {
       if (typeof password !== 'string') {
         throw new TypeError('pass must be a string');
@@ -1340,7 +1319,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   } as OptionDescriptor,
   password: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ values: [password], options }) {
       if (typeof password !== 'string') {
         throw new TypeError('pass must be a string');
@@ -1349,7 +1328,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   pkFactory: {
-    rename: 'createPk',
+    target: 'createPk',
     transform({ values: [value] }): PkFactory {
       if (isRecord(value) && 'createPk' in value && typeof value.createPk === 'function') {
         return value as PkFactory;
@@ -1360,13 +1339,13 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   platform: {
-    rename: 'driverInfo',
+    target: 'driverInfo',
     transform({ values: [value], options }) {
       return { ...options.driverInfo, platform: String(value) };
     }
   } as OptionDescriptor,
   promiseLibrary: {
-    type: 'asIs'
+    type: 'any'
   },
   promoteBuffers: {
     type: 'boolean'
@@ -1389,7 +1368,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   readConcernLevel: {
-    rename: 'readConcern',
+    target: 'readConcern',
     transform({ values: [level], options }) {
       return ReadConcern.fromOptions({
         ...options.readConcern,
@@ -1422,27 +1401,21 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
   },
   readPreferenceTags: {
     transform({ values }) {
-      // TODO!!!!!!!
-      const finalTags: TagSet = Object.create(null);
+      const tags: TagSet = Object.create(null);
       for (const tag of values) {
         if (typeof tag === 'string') {
           for (const [k, v] of Object.entries(toRecord(tag))) {
-            finalTags[k] = v;
+            tags[k] = v;
           }
         }
         if (isRecord(tag)) {
           for (const [k, v] of Object.entries(tag)) {
-            finalTags[k] = v;
+            tags[k] = v;
           }
         }
       }
+      return tags;
     }
-  },
-  reconnectInterval: {
-    type: 'uint'
-  },
-  reconnectTries: {
-    type: 'uint'
   },
   replicaSet: {
     type: 'string'
@@ -1469,36 +1442,36 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'uint'
   },
   ssl: {
-    rename: 'tls',
+    target: 'tls',
     deprecated: true,
     type: 'boolean'
   },
   sslCA: {
     deprecated: true,
-    rename: 'ca',
-    type: 'asIs'
+    target: 'ca',
+    type: 'any'
   },
   sslCRL: {
-    rename: 'crl',
-    type: 'asIs'
+    target: 'crl',
+    type: 'any'
   },
   sslCert: {
     deprecated: true,
-    rename: 'cert',
-    type: 'asIs'
+    target: 'cert',
+    type: 'any'
   },
   sslKey: {
     deprecated: true,
-    rename: 'key',
-    type: 'asIs'
+    target: 'key',
+    type: 'any'
   },
   sslPass: {
     deprecated: true,
-    rename: 'passphrase',
+    target: 'passphrase',
     type: 'string'
   },
   sslValidate: {
-    rename: 'rejectUnauthorized',
+    target: 'rejectUnauthorized',
     type: 'boolean'
   },
   tls: {
@@ -1511,58 +1484,56 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     type: 'boolean'
   },
   tlsCAFile: {
-    rename: 'ca',
-    type: 'asIs'
+    target: 'ca',
+    type: 'any'
   },
   tlsCertificateFile: {
-    rename: 'cert',
-    type: 'asIs'
+    target: 'cert',
+    type: 'any'
   },
   tlsCertificateKeyFile: {
-    rename: 'key',
-    type: 'asIs'
+    target: 'key',
+    type: 'any'
   },
   tlsCertificateKeyFilePassword: {
-    rename: 'passphrase',
-    type: 'asIs'
+    target: 'passphrase',
+    type: 'any'
   },
   tlsInsecure: {
     type: 'boolean'
   },
+  useRecoveryToken: {
+    type: 'boolean'
+  },
   user: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ values: [value], options }) {
       return new MongoCredentials({ ...options.credentials, username: String(value) });
     }
   } as OptionDescriptor,
   username: {
-    rename: 'credentials',
+    target: 'credentials',
     transform({ values: [value], options }) {
       return new MongoCredentials({ ...options.credentials, username: String(value) });
     }
   },
-  validateOptions: {
-    type: 'boolean'
-  },
   version: {
+    target: 'driverInfo',
     transform({ values: [value], options }) {
       return { ...options.driverInfo, version: String(value) };
     }
   } as OptionDescriptor,
   w: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ values: [value], options }) {
       return WriteConcern.fromOptions({ ...options.writeConcern, w: value as W });
     }
-  },
-  waitQueueMultiple: {
-    type: 'uint'
   },
   waitQueueTimeoutMS: {
     type: 'uint'
   },
   writeConcern: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ values: [value], options }) {
       if (isRecord(value)) {
         return WriteConcern.fromOptions({
@@ -1574,7 +1545,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   wtimeout: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ values: [value], options }) {
       const wc = WriteConcern.fromOptions({
         ...options.writeConcern,
@@ -1585,7 +1556,7 @@ export const OPTIONS: Record<keyof MongoClientOptions, OptionDescriptor> = {
     }
   },
   wtimeoutMS: {
-    rename: 'writeConcern',
+    target: 'writeConcern',
     transform({ values: [value], options }) {
       const wc = WriteConcern.fromOptions({
         ...options.writeConcern,

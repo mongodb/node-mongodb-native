@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { Logger } from '../logger';
 import { ReadPreference } from '../read_preference';
 import { MongoError, AnyError } from '../error';
-import { Topology, TopologyOptions, ServerAddress } from '../sdam/topology';
+import { Topology, TopologyOptions } from '../sdam/topology';
 import { AUTH_MECHANISMS, parseConnectionString } from '../connection_string';
 import { ReadConcern } from '../read_concern';
 import { emitDeprecationWarning, Callback } from '../utils';
@@ -10,7 +10,7 @@ import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import * as BSON from '../bson';
 import type { Document } from '../bson';
-import type { MongoClient } from '../mongo_client';
+import type { MongoClient, ServerAddress } from '../mongo_client';
 import { ConnectionOptions, Connection } from '../cmap/connection';
 import { AuthMechanism, AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
 import { Server } from '../sdam/server';
@@ -76,6 +76,7 @@ const validOptionNames = [
   'retryReads',
   'useNewUrlParser',
   'serverSelectionTimeoutMS',
+  'useRecoveryToken',
   'autoEncryption',
   'driverInfo',
   'tls',
@@ -206,6 +207,7 @@ export function connect(
     if (finalOptions.socketTimeoutMS == null) finalOptions.socketTimeoutMS = 0;
     if (finalOptions.connectTimeoutMS == null) finalOptions.connectTimeoutMS = 10000;
     if (finalOptions.retryWrites == null) finalOptions.retryWrites = true;
+    if (finalOptions.useRecoveryToken == null) finalOptions.useRecoveryToken = true;
     if (finalOptions.readPreference == null) finalOptions.readPreference = 'primary';
 
     if (finalOptions.db_options && finalOptions.db_options.auth) {

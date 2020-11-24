@@ -268,7 +268,6 @@ export type {
   Topology,
   TopologyPrivate,
   ServerSelectionRequest,
-  ServerAddress,
   TopologyOptions,
   ServerCapabilities,
   ConnectOptions,
