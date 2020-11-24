@@ -42,7 +42,12 @@ functions:
            fi
 
            export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+
            export PROJECT_DIRECTORY="$(pwd)"
+           if [ "Windows_NT" = "$OS" ]; then
+             export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
+           fi
+
            export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
            export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
            export UPLOAD_BUCKET="${project}"
