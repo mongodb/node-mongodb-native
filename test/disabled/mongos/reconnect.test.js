@@ -50,7 +50,7 @@ describe.skip('Reconnect (Mongos)', function () {
       socketTimeout,
       reconnectTries,
       reconnect: true,
-      poolSize: 500
+      maxPoolSize: 500
     };
 
     const mongos = new Mongos([fixture.server.address()], connectOptions);

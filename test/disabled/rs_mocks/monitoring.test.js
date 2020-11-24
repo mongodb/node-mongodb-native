@@ -176,7 +176,7 @@ describe('ReplSet Monitoring (mocks)', function () {
               setName: 'rs',
               connectionTimeout: 5000,
               socketTimeout: 3000,
-              haInterval: 100,
+
               size: 1
             }
           );
@@ -333,7 +333,7 @@ describe('ReplSet Monitoring (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 5000,
             socketTimeout: 60000,
-            haInterval: 100,
+
             size: 1
           }
         );

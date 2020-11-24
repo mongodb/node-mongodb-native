@@ -26,7 +26,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -106,7 +106,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -187,7 +187,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -249,7 +249,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -286,7 +286,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -335,7 +335,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -393,7 +393,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
@@ -432,7 +432,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -488,7 +488,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -545,7 +545,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -605,7 +605,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -673,7 +673,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -722,7 +722,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -763,7 +763,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -820,7 +820,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -875,7 +875,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -917,7 +917,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -954,7 +954,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'fs' });
@@ -993,7 +993,7 @@ describe('GridFS Stream', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         const db = client.db(configuration.db);
         const bucket = new GridFSBucket(db, { bucketName: 'gridfs' });
@@ -1030,7 +1030,7 @@ describe('GridFS Stream', function () {
 
         test: function (done) {
           var configuration = this.configuration;
-          var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+          var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
           client.connect(function (err, client) {
             var db = client.db(configuration.db);
             db.dropDatabase(function (error) {
@@ -1085,7 +1085,7 @@ describe('GridFS Stream', function () {
 
         test: function (done) {
           var configuration = this.configuration;
-          var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+          var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
           client.connect(function (err, client) {
             var db = client.db(configuration.db);
             db.dropDatabase(function (err) {
@@ -1265,7 +1265,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1329,7 +1329,7 @@ describe('GridFS Stream', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
       // LINE const client = new MongoClient('mongodb://localhost:27017/test');

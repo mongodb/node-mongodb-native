@@ -37,7 +37,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -119,7 +119,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -203,7 +203,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -254,8 +254,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -320,7 +319,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -377,7 +376,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -433,7 +432,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -492,7 +491,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -534,7 +533,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -598,8 +597,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -667,7 +665,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -731,8 +729,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -779,8 +776,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -827,8 +823,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -888,8 +883,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -972,8 +966,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -1028,8 +1021,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -1083,7 +1075,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       /* eslint-disable */
 
@@ -1152,7 +1144,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1216,7 +1208,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1309,7 +1301,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1402,7 +1394,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1455,7 +1447,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1516,10 +1508,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(
-        { w: 0, native_parser: false },
-        { poolSize: 1, auto_reconnect: false }
-      );
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1592,7 +1581,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1666,7 +1655,7 @@ describe('Operation (Promises)', function () {
     metadata: { requires: { topology: ['single'] } },
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1708,7 +1697,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1756,7 +1745,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1810,7 +1799,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1879,7 +1868,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1921,7 +1910,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1964,7 +1953,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2013,7 +2002,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2061,8 +2050,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       /* eslint-disable */
@@ -2188,7 +2176,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2237,7 +2225,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2283,7 +2271,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2343,7 +2331,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2387,7 +2375,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2468,8 +2456,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2503,8 +2490,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2552,8 +2538,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2598,8 +2583,7 @@ describe('Operation (Promises)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       client.connect().then(function (client) {
@@ -2657,8 +2641,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2693,8 +2676,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2806,8 +2788,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2853,8 +2834,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2917,8 +2897,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -2953,8 +2932,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -3034,8 +3012,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -3104,8 +3081,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -3174,8 +3150,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -3248,7 +3223,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3280,7 +3255,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3343,7 +3318,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3381,7 +3356,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3419,7 +3394,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3469,7 +3444,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3551,7 +3526,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3618,7 +3593,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3666,7 +3641,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3704,7 +3679,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3748,7 +3723,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3794,7 +3769,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3832,7 +3807,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -3900,8 +3875,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -3951,8 +3925,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4001,8 +3974,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4051,8 +4023,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4101,8 +4072,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4257,9 +4227,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
-        native_parser: true
-      });
+      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
 
       // DOC_START
       // Connect using the connection string
@@ -4304,8 +4272,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4371,8 +4338,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4444,8 +4410,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4482,8 +4447,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4520,8 +4484,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4559,8 +4522,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4611,8 +4573,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4656,8 +4617,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4703,8 +4663,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4761,8 +4720,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4795,8 +4753,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4841,8 +4798,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4896,8 +4852,7 @@ describe('Operation (Promises)', function () {
     test: function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       return client.connect().then(function (client) {
@@ -4952,8 +4907,7 @@ describe('Operation (Promises)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       client.connect().then(function (client) {

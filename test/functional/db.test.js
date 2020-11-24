@@ -41,8 +41,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: true
+        maxPoolSize: 1
       });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
@@ -78,8 +77,7 @@ describe('Db', function () {
     test: function (done) {
       let configuration = this.configuration;
       let client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: true
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -109,7 +107,6 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
       var fs_client = configuration.newClient('mongodb://127.0.0.1:25117/test', {
-        auto_reconnect: false,
         serverSelectionTimeoutMS: 10
       });
 
@@ -127,7 +124,7 @@ describe('Db', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var _db = client.db('nonexistingdb');
 
@@ -148,7 +145,7 @@ describe('Db', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(err => {
         expect(err).to.not.exist;
 
@@ -170,8 +167,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(`mongodb://127.0.0.1:27088/test`, {
-        auto_reconnect: false,
-        poolSize: 4,
+        maxPoolSize: 4,
         serverSelectionTimeoutMS: 10
       });
 
@@ -194,7 +190,7 @@ describe('Db', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -223,7 +219,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -260,7 +256,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -297,7 +293,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -344,7 +340,7 @@ describe('Db', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 

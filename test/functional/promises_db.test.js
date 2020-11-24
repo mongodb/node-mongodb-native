@@ -40,7 +40,7 @@ describe('Promises (Db)', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       client.connect().then(function (client) {
         client.close(done);
       });

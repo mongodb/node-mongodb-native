@@ -56,7 +56,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
         var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
-          haInterval: 1000,
+
           size: 1
         });
 
@@ -135,7 +135,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
         var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
-          haInterval: 1000,
+
           size: 1
         });
 
@@ -207,7 +207,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
         var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
-          haInterval: 1000,
+
           size: 1
         });
 

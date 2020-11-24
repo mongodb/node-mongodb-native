@@ -78,10 +78,10 @@ describe.skip('Sharding (Failover)', function () {
       // Set up mongos connection
       var mongos = new Mongos(
         [
-          new Server(configuration.host, configuration.port, { auto_reconnect: true }),
-          new Server(configuration.host, configuration.port + 1, { auto_reconnect: true })
+          new Server(configuration.host, configuration.port),
+          new Server(configuration.host, configuration.port + 1)
         ],
-        { ha: true, haInterval: 500, poolSize: 1 }
+        { maxPoolSize: 1 }
       );
 
       // Counters to track emitting of events

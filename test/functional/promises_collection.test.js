@@ -49,8 +49,7 @@ describe('Promises (Collection)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       client.connect().then(function (client) {
@@ -96,8 +95,7 @@ describe('Promises (Collection)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
 
       client.connect().then(function (client) {
@@ -145,8 +143,7 @@ describe('Promises (Collection)', function () {
       test: function (done) {
         var configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), {
-          poolSize: 1,
-          auto_reconnect: false
+          maxPoolSize: 1
         });
 
         client.connect().then(function (client) {
@@ -193,8 +190,7 @@ describe('Promises (Collection)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        auto_reconnect: false
+        maxPoolSize: 1
       });
       var error = null;
       var result = null;

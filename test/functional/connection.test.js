@@ -15,7 +15,7 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
       );
 
       client.connect(function (err, client) {
@@ -35,7 +35,7 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
       client.connect(function (err, client) {
@@ -65,7 +65,7 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.on('open', function () {
         client.close(done);
@@ -83,7 +83,7 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 2000 });
       client.on('open', function () {
         client.close(done);
       });
@@ -99,7 +99,7 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
       );
 
       client.connect(function (err, client) {
@@ -268,7 +268,7 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       test.equal(false, client.isConnected());
       done();
     }

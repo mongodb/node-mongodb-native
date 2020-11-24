@@ -34,7 +34,7 @@ describe.skip('ReplSet (Failover)', function () {
         var manager = configuration.manager;
 
         // Get a new instance
-        var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+        var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
         client.connect(function (err, client) {
           test.equal(null, err);
 
@@ -85,7 +85,7 @@ describe.skip('ReplSet (Failover)', function () {
       // The state
       var state = 0;
 
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // Wait for close event due to primary stepdown
         client.topology.on('joined', function (t) {
@@ -122,7 +122,7 @@ describe.skip('ReplSet (Failover)', function () {
       var ReadPreference = configuration.require.ReadPreference;
 
       // Get a new instance
-      var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
       // Managers
       var managers = null;
 
@@ -199,7 +199,7 @@ describe.skip('ReplSet (Failover)', function () {
         var leftServer = null;
 
         // Get a new instance
-        var client = configuration.newClient({ w: 0 }, { poolSize: 1 });
+        var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
         client.connect(function (err, client) {
           test.equal(null, err);
 
@@ -265,7 +265,7 @@ describe.skip('ReplSet (Failover)', function () {
     test: function (done) {
       var configuration = this.configuration;
       var manager = configuration.manager;
-      const client = configuration.newClient({}, { w: 1, tag: 'Application', poolSize: 1 });
+      const client = configuration.newClient({}, { w: 1, tag: 'Application', maxPoolSize: 1 });
 
       client.on('fullsetup', function (client) {
         var db = client.db(configuration.db);
@@ -381,7 +381,7 @@ describe.skip('ReplSet (Failover)', function () {
           w: 0,
           readPreference: ReadPreference.PRIMARY_PREFERRED,
           tag: 'Application',
-          poolSize: 1
+          maxPoolSize: 1
         }
       );
 
@@ -444,7 +444,7 @@ describe.skip('ReplSet (Failover)', function () {
       const client = configuration.newClient(url, {
         replSet: {
           //set replset check interval to be much smaller than our querying interval
-          haInterval: 50,
+
           socketOptions: {
             connectTimeoutMS: 500
           }
@@ -550,7 +550,7 @@ describe.skip('ReplSet (Failover)', function () {
       // The state
       var manager = configuration.manager;
 
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       client.open(function(err, client) {
         var db = client.db(configuration.db);
 

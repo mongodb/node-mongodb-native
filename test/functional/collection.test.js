@@ -18,7 +18,7 @@ describe('Collection', function () {
     let db;
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
       return client.connect().then(client => {
         db = client.db(configuration.db);
@@ -972,7 +972,7 @@ describe('Collection', function () {
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect((err, client) => {

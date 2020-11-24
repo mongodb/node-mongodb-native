@@ -81,7 +81,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -117,7 +117,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -166,7 +166,7 @@ describe('ReadPreference', function () {
 
       test: function (done) {
         var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
           var db = client.db(configuration.db);
           expect(err).to.not.exist;
@@ -212,7 +212,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -244,7 +244,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -295,7 +295,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -330,7 +330,10 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1, readPreference: 'secondary' }, { poolSize: 1 });
+      var client = configuration.newClient(
+        { w: 1, readPreference: 'secondary' },
+        { maxPoolSize: 1 }
+      );
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Save checkout function
@@ -372,7 +375,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -391,7 +394,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -410,7 +413,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -430,7 +433,7 @@ describe('ReadPreference', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -556,7 +559,6 @@ describe('ReadPreference', function () {
     beforeEach(function () {
       const configuration = this.configuration;
       const client = this.configuration.newClient(configuration.writeConcernMax(), {
-        useUnifiedTopology: true,
         readPreference: 'primaryPreferred'
       });
       return withClient(client, (client, done) => {
@@ -589,7 +591,6 @@ describe('ReadPreference', function () {
         test: function () {
           const configuration = this.configuration;
           const client = this.configuration.newClient(configuration.writeConcernMax(), {
-            useUnifiedTopology: true,
             readPreference: 'primaryPreferred'
           });
           return withClient(client, (client, done) => {

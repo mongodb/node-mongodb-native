@@ -46,10 +46,9 @@ describe('Retryable Writes', function () {
 function executeScenarioSetup(scenario, test, config, ctx) {
   const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
-    haInterval: 100,
     heartbeatFrequencyMS: 100,
     monitorCommands: true,
-    minSize: 10
+    minPoolSize: 10
   });
 
   ctx.failPointName = test.failPoint && test.failPoint.configureFailPoint;

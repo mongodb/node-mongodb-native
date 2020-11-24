@@ -174,7 +174,7 @@ describe('ReplSet Failover (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 100,
+
             size: 1
           }
         );
@@ -381,7 +381,7 @@ describe('ReplSet Failover (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 100,
+
             size: 1
           }
         );

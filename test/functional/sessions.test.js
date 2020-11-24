@@ -12,10 +12,7 @@ const test = {
   commands: { started: [], succeeded: [] },
   setup: function (config) {
     this.commands = { started: [], succeeded: [] };
-    this.client = config.newClient(
-      { w: 1 },
-      { poolSize: 1, auto_reconnect: false, monitorCommands: true }
-    );
+    this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
 
     this.client.on('commandStarted', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) {

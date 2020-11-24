@@ -16,7 +16,7 @@ describe('Ignore Undefined', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         ignoreUndefined: true
       });
 
@@ -49,7 +49,6 @@ describe('Ignore Undefined', function () {
         const client = configuration.newClient(
           {},
           {
-            bufferMaxEntries: 0,
             ignoreUndefined: true,
             sslValidate: false
           }
@@ -96,7 +95,7 @@ describe('Ignore Undefined', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         ignoreUndefined: true
       });
 
@@ -153,7 +152,7 @@ describe('Ignore Undefined', function () {
   it('Should correctly inherit ignore undefined field from db during insert', function () {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
-      poolSize: 1,
+      maxPoolSize: 1,
       ignoreUndefined: false
     });
 

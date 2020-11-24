@@ -3,7 +3,7 @@
 // Disabled for now b/c it conflicts with session leak tests
 
 // before(function() {
-//   this.client = this.configuration.newClient({}, { poolSize: 1 });
+//   this.client = this.configuration.newClient({}, { maxPoolSize: 1 });
 
 //   return Promise.resolve()
 //     .then(() => this.client.connect())

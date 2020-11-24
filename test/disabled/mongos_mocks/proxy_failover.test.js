@@ -53,7 +53,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
-          haInterval: 1000,
+
           size: 1
         });
 
@@ -128,7 +128,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1500,
-          haInterval: 1000,
+
           size: 1
         });
 
@@ -225,7 +225,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 500,
-          haInterval: 1000,
+
           size: 1
         });
 

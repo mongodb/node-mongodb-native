@@ -67,7 +67,7 @@ describe('Mongos Single Proxy Connection (mocks)', function () {
         var mongos = new Mongos([server.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1000,
-          haInterval: 500,
+
           size: 1
         });
 
@@ -151,7 +151,7 @@ describe('Mongos Single Proxy Connection (mocks)', function () {
         var mongos = new Mongos([server.address()], {
           connectionTimeout: 30000,
           socketTimeout: 30000,
-          haInterval: 500,
+
           size: 1
         });
 
