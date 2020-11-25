@@ -110,7 +110,7 @@ describe('JIRA bugs', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 

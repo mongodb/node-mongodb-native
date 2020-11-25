@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 const { Code } = require('../../src');
+const { expect } = require('chai');
 
 /**************************************************************************
  *
@@ -11,7 +12,7 @@ const { Code } = require('../../src');
 
 describe('Operation (Generators)', function () {
   before(function () {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['integration_tests_2']);
   });
 
   /**
@@ -32,7 +33,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -116,7 +117,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -176,7 +177,7 @@ describe('Operation (Generators)', function () {
 
         // Closing cursor to close implicit session,
         // since the cursor is not exhausted
-        cursor.close();
+        yield cursor.close();
         yield client.close();
       });
       // END
@@ -199,7 +200,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -250,7 +251,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -310,7 +311,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -367,7 +368,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -425,7 +426,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -486,7 +487,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -526,7 +527,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -561,7 +562,7 @@ describe('Operation (Generators)', function () {
         // Verify that the index is gone
         var indexInformation = yield collection.indexInformation();
         test.deepEqual([['_id', 1]], indexInformation._id_);
-        test.equal(undefined, indexInformation.a_1_b_1);
+        expect(indexInformation.a_1_b_1).to.not.exist;
 
         // Close db
         yield client.close();
@@ -586,7 +587,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -649,7 +650,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -709,7 +710,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -760,7 +761,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -809,7 +810,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -840,7 +841,7 @@ describe('Operation (Generators)', function () {
         var docs = yield collection.find({}).skip(1).limit(1).project({ b: 1 }).toArray();
 
         test.equal(1, docs.length);
-        test.equal(undefined, docs[0].a);
+        expect(docs[0].a).to.not.exist;
         test.equal(2, docs[0].b);
 
         // Close db
@@ -870,7 +871,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -913,7 +914,7 @@ describe('Operation (Generators)', function () {
 
         // Verify that the document is gone
         var item = yield collection.findOne({ b: 1 });
-        test.equal(null, item);
+        expect(item).to.not.exist;
 
         // Simple findAndModify command performing an upsert and returning the new document
         // executing the command safely
@@ -949,7 +950,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -980,7 +981,7 @@ describe('Operation (Generators)', function () {
 
         // Verify that the document is gone
         var item = yield collection.findOne({ b: 1 });
-        test.equal(null, item);
+        expect(item).to.not.exist;
 
         // Db close
         yield client.close();
@@ -1005,7 +1006,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1034,8 +1035,8 @@ describe('Operation (Generators)', function () {
         );
 
         // Perform a simple find and return all the documents
-        var doc = yield collection.findOne({ a: 2 }, { fields: { b: 1 } });
-        test.equal(undefined, doc.a);
+        var doc = yield collection.findOne({ a: 2 }, { projection: { b: 1 } });
+        expect(doc.a).to.not.exist;
         test.equal(2, doc.b);
 
         // Db close
@@ -1061,7 +1062,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1128,7 +1129,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1192,7 +1193,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1283,7 +1284,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1374,7 +1375,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1423,7 +1424,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1481,7 +1482,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1553,7 +1554,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1623,7 +1624,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1667,7 +1668,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1717,7 +1718,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1768,7 +1769,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1832,7 +1833,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1880,7 +1881,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1929,7 +1930,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1951,7 +1952,7 @@ describe('Operation (Generators)', function () {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
 
         // Remove all the document
-        collection.removeMany();
+        yield collection.removeMany();
 
         // Fetch all results
         var items = yield collection.find().toArray();
@@ -1978,7 +1979,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1999,7 +2000,7 @@ describe('Operation (Generators)', function () {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
         // Remove all the document
         var r = yield collection.removeOne({ a: 1 }, { w: 1 });
-        test.equal(1, r.result.n);
+        expect(r).property('deletedCount').to.equal(1);
         yield client.close();
       });
       // END
@@ -2024,7 +2025,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2129,7 +2130,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2180,7 +2181,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2231,7 +2232,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2291,7 +2292,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2341,7 +2342,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2384,8 +2385,8 @@ describe('Operation (Generators)', function () {
         // Verify that the index is gone
         var indexInformation = yield collection.indexInformation();
         test.deepEqual([['_id', 1]], indexInformation._id_);
-        test.equal(undefined, indexInformation.a_1_b_1);
-        test.equal(undefined, indexInformation.c_1);
+        expect(indexInformation.a_1_b_1).to.not.exist;
+        expect(indexInformation.c_1).to.not.exist;
 
         yield client.close();
       });
@@ -2417,7 +2418,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
 
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2470,7 +2471,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2510,7 +2511,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2551,7 +2552,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2612,7 +2613,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2658,7 +2659,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2715,7 +2716,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2753,7 +2754,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2824,7 +2825,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2889,7 +2890,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2954,7 +2955,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3025,7 +3026,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3064,7 +3065,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3125,7 +3126,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3168,7 +3169,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3212,7 +3213,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3286,7 +3287,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3347,7 +3348,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3397,7 +3398,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3440,7 +3441,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3485,7 +3486,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3532,7 +3533,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3576,7 +3577,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3627,7 +3628,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3686,7 +3687,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3736,7 +3737,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3785,7 +3786,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3846,7 +3847,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3896,7 +3897,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3958,7 +3959,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4028,7 +4029,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4104,7 +4105,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4145,7 +4146,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4186,7 +4187,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4228,7 +4229,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4275,7 +4276,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4319,7 +4320,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4365,7 +4366,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4428,7 +4429,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4473,7 +4474,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4528,7 +4529,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4583,7 +4584,7 @@ describe('Operation (Generators)', function () {
       return co(function* () {
         // Connect
         var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
+          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4617,16 +4618,17 @@ describe('Operation (Generators)', function () {
             .find({})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true);
+          const stream = cursor.stream();
 
-          cursor.on('data', function () {
+          stream.on('data', function () {
             total = total + 1;
 
             if (total === 1000) {
-              cursor.kill();
+              cursor.close();
             }
           });
 
-          cursor.on('end', function () {
+          cursor.on('close', function () {
             // TODO: forced because the cursor is still open/active
             client.close(true, err => {
               if (err) return reject(err);
@@ -4659,7 +4661,7 @@ describe('Operation (Generators)', function () {
       var co = require('co');
 
       return co(function* () {
-        var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
         client = yield client.connect();
         var db = client.db(configuration.db);
         var string = new Array(6000000).join('x');

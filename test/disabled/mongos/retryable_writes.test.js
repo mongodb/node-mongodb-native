@@ -22,7 +22,7 @@ describe('Retryable Writes (Mongos)', function () {
         {
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 10000,
+
           localThresholdMS: 500,
           size: 1
         }
@@ -74,7 +74,7 @@ describe('Retryable Writes (Mongos)', function () {
         {
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 10000,
+
           localThresholdMS: 500,
           size: 1
         }
@@ -131,7 +131,7 @@ describe('Retryable Writes (Mongos)', function () {
         {
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 10000,
+
           localThresholdMS: 500,
           size: 1
         }

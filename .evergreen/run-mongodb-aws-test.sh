@@ -21,4 +21,5 @@ shopt -s expand_aliases # needed for `urlencode` alias
 # revert to show test output
 set -x
 
+npm install aws4
 MONGODB_UNIFIED_TOPOLOGY=1 npx mocha test/functional/mongodb_aws.test.js

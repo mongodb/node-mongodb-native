@@ -1,22 +1,40 @@
-import command = require('./command');
+import { command, CommandOptions } from './command';
 import { Query } from '../commands';
 import { MongoError } from '../../error';
-import { maxWireVersion, collectionNamespace } from '../../utils';
+import { maxWireVersion, collectionNamespace, Callback, decorateWithExplain } from '../../utils';
 import { getReadPreference, isSharded, applyCommonQueryOptions } from './shared';
+import { Document, pluckBSONSerializeOptions } from '../../bson';
+import type { Server } from '../../sdam/server';
+import type { ReadPreferenceLike } from '../../read_preference';
+import type { FindOptions } from '../../operations/find';
+import { Explain } from '../../explain';
 
-function query(server: any, ns: any, cmd: any, cursorState: any, options: any, callback: Function) {
+/** @internal */
+export interface QueryOptions extends CommandOptions {
+  readPreference?: ReadPreferenceLike;
+}
+
+export function query(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: FindOptions,
+  callback: Callback
+): void {
   options = options || {};
-  if (cursorState.cursorId != null) {
-    return callback();
-  }
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
   }
 
   if (maxWireVersion(server) < 4) {
-    const query = prepareLegacyFindQuery(server, ns, cmd, cursorState, options);
-    const queryOptions = applyCommonQueryOptions({}, cursorState);
+    const query = prepareLegacyFindQuery(server, ns, cmd, options);
+    const queryOptions = applyCommonQueryOptions(
+      {},
+      Object.assign(options, { ...pluckBSONSerializeOptions(options) })
+    );
+
+    queryOptions.fullResult = true;
     if (typeof query.documentsReturnedIn === 'string') {
       queryOptions.documentsReturnedIn = query.documentsReturnedIn;
     }
@@ -26,7 +44,14 @@ function query(server: any, ns: any, cmd: any, cursorState: any, options: any, c
   }
 
   const readPreference = getReadPreference(cmd, options);
-  const findCmd = prepareFindCommand(server, ns, cmd, cursorState);
+  let findCmd = prepareFindCommand(server, ns, cmd);
+
+  // If we have explain, we need to rewrite the find command
+  // to wrap it in the explain command
+  const explain = Explain.fromOptions(options);
+  if (explain) {
+    findCmd = decorateWithExplain(findCmd, explain);
+  }
 
   // NOTE: This actually modifies the passed in cmd, and our code _depends_ on this
   //       side-effect. Change this ASAP
@@ -41,22 +66,13 @@ function query(server: any, ns: any, cmd: any, cursorState: any, options: any, c
     options
   );
 
-  if (cmd.readPreference) {
-    commandOptions.readPreference = readPreference;
-  }
-
-  if (cursorState.session) {
-    commandOptions.session = cursorState.session;
-  }
-
   command(server, ns, findCmd, commandOptions, callback);
 }
 
-function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
-  cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
-  let findCmd = {
+function prepareFindCommand(server: Server, ns: string, cmd: Document) {
+  const findCmd: Document = {
     find: collectionNamespace(ns)
-  } as any;
+  };
 
   if (cmd.query) {
     if (cmd.query['$query']) {
@@ -68,7 +84,7 @@ function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
 
   let sortValue = cmd.sort;
   if (Array.isArray(sortValue)) {
-    const sortObject: any = {};
+    const sortObject: Document = {};
 
     if (sortValue.length > 0 && !Array.isArray(sortValue[0])) {
       let sortDirection = sortValue[1];
@@ -138,42 +154,33 @@ function prepareFindCommand(server: any, ns: any, cmd: any, cursorState: any) {
   if (cmd.collation) findCmd.collation = cmd.collation;
   if (cmd.readConcern) findCmd.readConcern = cmd.readConcern;
 
-  // If we have explain, we need to rewrite the find command
-  // to wrap it in the explain command
-  if (cmd.explain) {
-    findCmd = {
-      explain: findCmd
-    };
-  }
-
   return findCmd;
 }
 
 function prepareLegacyFindQuery(
-  server: any,
-  ns: any,
-  cmd: any,
-  cursorState: any,
-  options: any
-): any {
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: FindOptions
+): Query {
   options = options || {};
+
   const readPreference = getReadPreference(cmd, options);
-  cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
+  const batchSize = cmd.batchSize || options.batchSize || 0;
+  const limit = cmd.limit || options.limit;
+  const numberToSkip = cmd.skip || options.skip || 0;
 
   let numberToReturn = 0;
   if (
-    cursorState.limit < 0 ||
-    (cursorState.limit !== 0 && cursorState.limit < cursorState.batchSize) ||
-    (cursorState.limit > 0 && cursorState.batchSize === 0)
+    limit &&
+    (limit < 0 || (limit !== 0 && limit < batchSize) || (limit > 0 && batchSize === 0))
   ) {
-    numberToReturn = cursorState.limit;
+    numberToReturn = limit;
   } else {
-    numberToReturn = cursorState.batchSize;
+    numberToReturn = batchSize;
   }
 
-  const numberToSkip = cursorState.skip || 0;
-
-  const findCmd: any = {};
+  const findCmd: Document = {};
   if (isSharded(server) && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
   }
@@ -185,10 +192,15 @@ function prepareLegacyFindQuery(
   if (cmd.maxScan) findCmd['$maxScan'] = cmd.maxScan;
   if (cmd.min) findCmd['$min'] = cmd.min;
   if (cmd.max) findCmd['$max'] = cmd.max;
-  if (typeof cmd.showDiskLoc !== 'undefined') findCmd['$showDiskLoc'] = cmd.showDiskLoc;
+  if (typeof cmd.showDiskLoc !== 'undefined') {
+    findCmd['$showDiskLoc'] = cmd.showDiskLoc;
+  } else if (typeof cmd.showRecordId !== 'undefined') {
+    findCmd['$showDiskLoc'] = cmd.showRecordId;
+  }
+
   if (cmd.comment) findCmd['$comment'] = cmd.comment;
   if (cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS;
-  if (cmd.explain) {
+  if (options.explain) {
     // nToReturn must be 0 (match all) or negative (match N and close cursor)
     // nToReturn > 0 will give explain results equivalent to limit(0)
     numberToReturn = -Math.abs(cmd.limit || 0);
@@ -213,13 +225,13 @@ function prepareLegacyFindQuery(
     typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   const query = new Query(ns, findCmd, {
-    numberToSkip: numberToSkip,
-    numberToReturn: numberToReturn,
-    pre32Limit: typeof cmd.limit !== 'undefined' ? cmd.limit : undefined,
+    numberToSkip,
+    numberToReturn,
+    pre32Limit: typeof limit === 'number' ? limit : undefined,
     checkKeys: false,
     returnFieldSelector: cmd.fields,
-    serializeFunctions: serializeFunctions,
-    ignoreUndefined: ignoreUndefined
+    serializeFunctions,
+    ignoreUndefined
   });
 
   if (typeof cmd.tailable === 'boolean') query.tailable = cmd.tailable;
@@ -231,5 +243,3 @@ function prepareLegacyFindQuery(
   query.slaveOk = readPreference.slaveOk();
   return query;
 }
-
-export = query;

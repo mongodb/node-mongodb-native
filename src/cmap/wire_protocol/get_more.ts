@@ -1,80 +1,64 @@
 import { GetMore } from '../commands';
-import { Long } from '../../bson';
-import { MongoError, MongoNetworkError } from '../../error';
+import { Long, Document, pluckBSONSerializeOptions } from '../../bson';
+import { MongoError } from '../../error';
 import { applyCommonQueryOptions } from './shared';
-import { maxWireVersion, collectionNamespace } from '../../utils';
-import command = require('./command');
+import { maxWireVersion, collectionNamespace, Callback } from '../../utils';
+import { command, CommandOptions } from './command';
+import type { Server } from '../../sdam/server';
 
-function getMore(
-  server: any,
-  ns: any,
-  cursorState: any,
-  batchSize: any,
-  options: any,
-  callback: Function
-) {
+/** @internal */
+export interface GetMoreOptions extends CommandOptions {
+  batchSize?: number;
+  maxTimeMS?: number;
+  maxAwaitTimeMS?: number;
+  comment?: Document | string;
+}
+
+export function getMore(
+  server: Server,
+  ns: string,
+  cursorId: Long,
+  options: GetMoreOptions,
+  callback: Callback<Document>
+): void {
   options = options || {};
 
+  const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
   const wireVersion = maxWireVersion(server);
-  function queryCallback(err?: any, result?: any) {
-    if (err) return callback(err);
-    const response = result.message;
-
-    // If we have a timed out query or a cursor that was killed
-    if (response.cursorNotFound) {
-      return callback(new MongoNetworkError('cursor killed or timed out'), null);
-    }
-
-    if (wireVersion < 4) {
-      const cursorId =
-        typeof response.cursorId === 'number'
-          ? Long.fromNumber(response.cursorId)
-          : response.cursorId;
-
-      cursorState.documents = response.documents;
-      cursorState.cursorId = cursorId;
-
-      callback(null, null, response.connection);
-      return;
-    }
-
-    // We have an error detected
-    if (response.documents[0].ok === 0) {
-      return callback(new MongoError(response.documents[0]));
-    }
-
-    // Ensure we have a Long valid cursor id
-    const cursorId =
-      typeof response.documents[0].cursor.id === 'number'
-        ? Long.fromNumber(response.documents[0].cursor.id)
-        : response.documents[0].cursor.id;
-
-    cursorState.documents = response.documents[0].cursor.nextBatch;
-    cursorState.cursorId = cursorId;
-
-    callback(null, response.documents[0], response.connection);
-  }
-
-  if (wireVersion < 4) {
-    const getMoreOp = new GetMore(ns, cursorState.cursorId, { numberToReturn: batchSize });
-    const queryOptions = applyCommonQueryOptions({}, cursorState);
-    server.s.pool.write(getMoreOp, queryOptions, queryCallback);
+  if (!cursorId) {
+    callback(new MongoError('Invalid internal cursor state, no known cursor id'));
     return;
   }
 
-  const cursorId =
-    cursorState.cursorId instanceof Long
-      ? cursorState.cursorId
-      : Long.fromNumber(cursorState.cursorId);
+  if (wireVersion < 4) {
+    const getMoreOp = new GetMore(ns, cursorId, { numberToReturn: options.batchSize });
+    const queryOptions = applyCommonQueryOptions(
+      {},
+      Object.assign(options, { ...pluckBSONSerializeOptions(options) })
+    );
 
-  const getMoreCmd = {
+    queryOptions.fullResult = true;
+    queryOptions.command = true;
+    server.s.pool.write(getMoreOp, queryOptions, (err, response) => {
+      if (fullResult) return callback(err, response);
+      if (err) return callback(err);
+      callback(undefined, { cursor: { id: response.cursorId, nextBatch: response.documents } });
+    });
+
+    return;
+  }
+
+  const getMoreCmd: Document = {
     getMore: cursorId,
-    collection: collectionNamespace(ns),
-    batchSize: Math.abs(batchSize)
-  } as any;
+    collection: collectionNamespace(ns)
+  };
 
-  if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
-    getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
+  if (typeof options.batchSize === 'number') {
+    getMoreCmd.batchSize = Math.abs(options.batchSize);
+  }
+
+  if (typeof options.maxAwaitTimeMS === 'number') {
+    getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
   }
 
   const commandOptions = Object.assign(
@@ -85,11 +69,5 @@ function getMore(
     options
   );
 
-  if (cursorState.session) {
-    commandOptions.session = cursorState.session;
-  }
-
-  command(server, ns, getMoreCmd, commandOptions, queryCallback);
+  command(server, ns, getMoreCmd, commandOptions, callback);
 }
-
-export = getMore;

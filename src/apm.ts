@@ -1,32 +1,56 @@
 import { EventEmitter } from 'events';
-class Instrumentation extends EventEmitter {
-  $MongoClient: any;
-  $prototypeConnect: any;
+import type { Callback } from './utils';
+import { Connection } from './cmap/connection';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { MongoClient } from './mongo_client';
+
+/** @public */
+export class Instrumentation extends EventEmitter {
+  $MongoClient?: typeof MongoClient;
+  $prototypeConnect?: typeof MongoClient.prototype['connect'];
+
+  /** @event */
+  static readonly STARTED = 'started' as const;
+  /** @event */
+  static readonly SUCCEEDED = 'succeeded' as const;
+  /** @event */
+  static readonly FAILED = 'failed' as const;
 
   constructor() {
     super();
   }
 
-  instrument(MongoClient: any, callback: Function) {
+  instrument(mongoClientClass: typeof MongoClient, callback?: Callback): void {
     // store a reference to the original functions
-    this.$MongoClient = MongoClient;
-    const $prototypeConnect = (this.$prototypeConnect = MongoClient.prototype.connect);
+    this.$MongoClient = mongoClientClass;
+    const $prototypeConnect = (this.$prototypeConnect = mongoClientClass.prototype.connect);
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const instrumentation = this;
-    MongoClient.prototype.connect = function (callback: Function) {
-      this.s.options.monitorCommands = true;
-      this.on('commandStarted', (event: any) => instrumentation.emit('started', event));
-      this.on('commandSucceeded', (event: any) => instrumentation.emit('succeeded', event));
-      this.on('commandFailed', (event: any) => instrumentation.emit('failed', event));
-      return $prototypeConnect.call(this, callback);
-    };
+    mongoClientClass.prototype.connect = function (this: MongoClient, callback: Callback) {
+      // override monitorCommands to be switched on
+      this.s.options = { ...(this.s.options ?? {}), monitorCommands: true };
 
-    if (typeof callback === 'function') callback(null, this);
+      this.on(Connection.COMMAND_STARTED, event =>
+        instrumentation.emit(Instrumentation.STARTED, event)
+      );
+      this.on(Connection.COMMAND_SUCCEEDED, event =>
+        instrumentation.emit(Instrumentation.SUCCEEDED, event)
+      );
+      this.on(Connection.COMMAND_FAILED, event =>
+        instrumentation.emit(Instrumentation.FAILED, event)
+      );
+
+      return $prototypeConnect.call(this, callback);
+    } as MongoClient['connect'];
+
+    if (typeof callback === 'function') callback(undefined, this);
   }
 
-  uninstrument() {
-    this.$MongoClient.prototype.connect = this.$prototypeConnect;
+  uninstrument(): void {
+    if (this.$MongoClient && this.$prototypeConnect) {
+      this.$MongoClient.prototype.connect = this.$prototypeConnect;
+    }
   }
 }
-
-export = Instrumentation;

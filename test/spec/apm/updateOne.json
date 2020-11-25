@@ -131,6 +131,7 @@
     },
     {
       "description": "A successful update one command with write errors",
+      "ignore_if_server_version_greater_than": "4.5",
       "operation": {
         "name": "updateOne",
         "arguments": {

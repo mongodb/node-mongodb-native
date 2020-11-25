@@ -35,7 +35,7 @@ describe('Authentication', function () {
           return admin
             .addUser(username, password)
             .then(() => {
-              const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
+              const client = configuration.newClient(AUTH_URL);
 
               const removeUser = tap(() => admin.removeUser(username));
               const clientCleanup = tap(() => client.close());
@@ -65,10 +65,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(
-          new Server(configuration.host, configuration.port, { auto_reconnect: true }),
-          { w: 1 }
-        );
+        var client = new MongoClient(new Server(configuration.host, configuration.port), { w: 1 });
         client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
@@ -77,10 +74,12 @@ describe('Authentication', function () {
             test.equal(null, err);
             client.close();
 
-            var client1 = new MongoClient(
-              new Server(configuration.host, configuration.port, { auto_reconnect: true }),
-              { w: 1, user: 'admin', password: 'admin', authMechanism: 'SCRAM-SHA-1' }
-            );
+            var client1 = new MongoClient(new Server(configuration.host, configuration.port), {
+              w: 1,
+              user: 'admin',
+              password: 'admin',
+              authMechanism: 'SCRAM-SHA-1'
+            });
 
             client1.connect(function (err) {
               test.ok(err);
@@ -107,10 +106,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(
-          new Server(configuration.host, configuration.port, { auto_reconnect: true }),
-          { w: 1 }
-        );
+        var client = new MongoClient(new Server(configuration.host, configuration.port), { w: 1 });
         client.connect(function (err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
@@ -143,7 +139,7 @@ describe('Authentication', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
@@ -189,7 +185,7 @@ describe('Authentication', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -245,7 +241,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+        var client = new MongoClient(new Server('127.0.0.1', 27017), {
           w: 1
         });
         client.connect(function (err, client) {
@@ -257,7 +253,7 @@ describe('Authentication', function () {
             test.equal(null, err);
             client.close();
 
-            new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+            new MongoClient(new Server('127.0.0.1', 27017), {
               w: 1,
               user: 'admin',
               password: 'admin',
@@ -278,7 +274,7 @@ describe('Authentication', function () {
                     test.ok(err != null);
 
                     // // Login the user
-                    new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+                    new MongoClient(new Server('127.0.0.1', 27017), {
                       w: 1,
                       user: 'user',
                       password: 'user',
@@ -328,7 +324,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(new Server('localhost', 27017, { auto_reconnect: true }), {
+        var client = new MongoClient(new Server('localhost', 27017), {
           w: 1
         });
         client.connect(function (err, client) {
@@ -344,7 +340,7 @@ describe('Authentication', function () {
               client.close();
 
               // Login the user
-              new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+              new MongoClient(new Server('127.0.0.1', 27017), {
                 w: 1,
                 user: 'admin',
                 password: 'admin',
@@ -403,7 +399,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+        var client = new MongoClient(new Server('127.0.0.1', 27017), {
           w: 1
         });
 
@@ -456,7 +452,7 @@ describe('Authentication', function () {
 
       // restart server
       configuration.manager.restart(true).then(function () {
-        var client = new MongoClient(new Server('127.0.0.1', 27017, { auto_reconnect: true }), {
+        var client = new MongoClient(new Server('127.0.0.1', 27017), {
           w: 1
         });
         client.connect(function (err, client) {
@@ -600,7 +596,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -618,7 +614,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { user: 'root', password: 'root', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -674,7 +670,7 @@ describe('Authentication', function () {
             [new Server('localhost', 31000), new Server('localhost', 31001)],
             {
               rs_name: 'rs',
-              poolSize: 1
+              maxPoolSize: 1
             }
           );
 
@@ -747,7 +743,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -819,7 +815,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -837,7 +833,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'admin', password: 'admin', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -895,7 +891,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -912,7 +908,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'admin', password: 'admin', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -969,7 +965,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -986,7 +982,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'admin', password: 'admin', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -1107,7 +1103,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1123,7 +1119,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'me', password: 'secret', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -1137,7 +1133,7 @@ describe('Authentication', function () {
                 new MongoClient(
                   new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                     rs_name: 'rs',
-                    poolSize: 1
+                    maxPoolSize: 1
                   }),
                   { w: 1, user: 'test', password: 'test', authSource: configuration.db }
                 ).connect(function (err, client) {
@@ -1193,7 +1189,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1209,7 +1205,7 @@ describe('Authentication', function () {
               new MongoClient(
                 new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                   rs_name: 'rs',
-                  poolSize: 1
+                  maxPoolSize: 1
                 }),
                 { w: 1, user: 'me', password: 'secret', authSource: 'admin' }
               ).connect(function (err, client) {
@@ -1223,7 +1219,7 @@ describe('Authentication', function () {
                   new MongoClient(
                     new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                       rs_name: 'rs',
-                      poolSize: 1
+                      maxPoolSize: 1
                     }),
                     { w: 1, user: 'test', password: 'test', authSource: configuration.db }
                   ).connect(function (err, client) {
@@ -1267,7 +1263,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1285,7 +1281,7 @@ describe('Authentication', function () {
               new MongoClient(
                 new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                   rs_name: 'rs',
-                  poolSize: 1
+                  maxPoolSize: 1
                 }),
                 { w: 1, user: 'me', password: 'secret', authSource: 'admin' }
               ).connect(function (err, client) {
@@ -1377,7 +1373,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1394,7 +1390,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'admin', password: 'admin', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -1411,7 +1407,7 @@ describe('Authentication', function () {
                   new MongoClient(
                     new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                       rs_name: 'rs',
-                      poolSize: 1
+                      maxPoolSize: 1
                     }),
                     { w: 1, user: 'test', password: 'test', authSource: configuration.db }
                   ).connect(function (err, client) {
@@ -1474,7 +1470,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1546,7 +1542,7 @@ describe('Authentication', function () {
           [new Server('localhost', 31000), new Server('localhost', 31001)],
           {
             rs_name: 'rs',
-            poolSize: 1
+            maxPoolSize: 1
           }
         );
 
@@ -1561,7 +1557,7 @@ describe('Authentication', function () {
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
                 rs_name: 'rs',
-                poolSize: 1
+                maxPoolSize: 1
               }),
               { w: 1, user: 'admin', password: 'admin', authSource: 'admin' }
             ).connect(function (err, client) {
@@ -1677,7 +1673,7 @@ describe('Authentication', function () {
         Mongos = configuration.require.Mongos;
 
       setUpSharded(configuration, function (err, manager) {
-        var mongos = new Mongos([new Server('localhost', 51000)], { poolSize: 1 });
+        var mongos = new Mongos([new Server('localhost', 51000)], { maxPoolSize: 1 });
 
         var client = new MongoClient(mongos, { w: 1 });
         client.connect(function (err, client) {
@@ -1689,7 +1685,7 @@ describe('Authentication', function () {
             test.equal(null, err);
             client.close();
 
-            new MongoClient(new Mongos([new Server('localhost', 51000)], { poolSize: 1 }), {
+            new MongoClient(new Mongos([new Server('localhost', 51000)], { maxPoolSize: 1 }), {
               w: 1,
               user: 'admin',
               password: 'admin',
@@ -1741,7 +1737,7 @@ describe('Authentication', function () {
         Mongos = configuration.require.Mongos;
 
       setUpSharded(configuration, function (err, manager) {
-        var mongos = new Mongos([new Server('localhost', 51000)], { poolSize: 1 });
+        var mongos = new Mongos([new Server('localhost', 51000)], { maxPoolSize: 1 });
 
         var client = new MongoClient(mongos, { w: 1 });
         client.connect(function (err, client) {
@@ -1753,7 +1749,7 @@ describe('Authentication', function () {
             test.equal(null, err);
             client.close();
 
-            new MongoClient(new Mongos([new Server('localhost', 51000)], { poolSize: 1 }), {
+            new MongoClient(new Mongos([new Server('localhost', 51000)], { maxPoolSize: 1 }), {
               w: 1,
               user: 'admin',
               password: 'admin',

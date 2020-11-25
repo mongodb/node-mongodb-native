@@ -1,31 +1,47 @@
-import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { Aspect, defineAspects, Hint } from './operation';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
-class EstimatedDocumentCountOperation extends CommandOperation {
+/** @public */
+export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
+  skip?: number;
+  limit?: number;
+  hint?: Hint;
+}
+
+/** @internal */
+export class EstimatedDocumentCountOperation extends CommandOperation<
+  EstimatedDocumentCountOptions,
+  number
+> {
   collectionName: string;
-  query?: any;
+  query?: Document;
 
-  /**
-   * @param {Collection} collection
-   * @param {object} [query]
-   * @param {object} [options]
-   */
-  constructor(collection: any, query?: object, options?: object) {
+  constructor(collection: Collection, options: EstimatedDocumentCountOptions);
+  constructor(collection: Collection, query: Document, options: EstimatedDocumentCountOptions);
+  constructor(
+    collection: Collection,
+    query?: Document | EstimatedDocumentCountOptions,
+    options?: EstimatedDocumentCountOptions
+  ) {
     if (typeof options === 'undefined') {
-      options = query;
+      options = query as EstimatedDocumentCountOptions;
       query = undefined;
     }
 
     super(collection, options);
-    this.collectionName = collection.s.namespace.collection;
+    this.collectionName = collection.collectionName;
     if (query) {
       this.query = query;
     }
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<number>): void {
     const options = this.options;
-    const cmd = { count: this.collectionName } as any;
+    const cmd: Document = { count: this.collectionName };
 
     if (this.query) {
       cmd.query = this.query;
@@ -43,21 +59,15 @@ class EstimatedDocumentCountOperation extends CommandOperation {
       cmd.hint = options.hint;
     }
 
-    super.executeCommand(server, cmd, (err?: any, response?: any) => {
+    super.executeCommand(server, cmd, (err, response) => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(null, response.n);
+      callback(undefined, response.n || 0);
     });
   }
 }
 
-defineAspects(EstimatedDocumentCountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export = EstimatedDocumentCountOperation;
+defineAspects(EstimatedDocumentCountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

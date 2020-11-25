@@ -3,8 +3,10 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const Db = require('../../src/db');
+const { ReadPreference } = require('../../src');
+const { Db } = require('../../src/db');
 const expect = require('chai').expect;
+const { getTopology } = require('../../src/utils');
 
 describe('MongoClient', function () {
   before(function () {
@@ -29,15 +31,15 @@ describe('MongoClient', function () {
           j: true,
           readPreference: 'nearest',
           readPreferenceTags: { loc: 'ny' },
-          native_parser: false,
           forceServerObjectId: true,
-          pkFactory: function () {
-            return 1;
+          pkFactory: {
+            createPk() {
+              return 1;
+            }
           },
           serializeFunctions: true,
           raw: true,
-          numberOfRetries: 10,
-          bufferMaxEntries: 0
+          numberOfRetries: 10
         }
       );
 
@@ -53,11 +55,10 @@ describe('MongoClient', function () {
         test.deepEqual({ loc: 'ny' }, db.s.readPreference.tags);
 
         test.equal(true, db.s.options.forceServerObjectId);
-        test.equal(1, db.s.pkFactory());
-        test.equal(true, db.s.options.serializeFunctions);
-        test.equal(true, db.s.options.raw);
+        test.equal(1, db.s.pkFactory.createPk());
+        test.equal(true, db.bsonOptions.serializeFunctions);
+        test.equal(true, db.bsonOptions.raw);
         test.equal(10, db.s.options.numberOfRetries);
-        test.equal(0, db.s.options.bufferMaxEntries);
 
         client.close(done);
       });
@@ -87,9 +88,7 @@ describe('MongoClient', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('user:password@localhost:27017/test', {
-        useNewUrlParser: true
-      });
+      const client = configuration.newClient('user:password@localhost:27017/test');
 
       client.connect(function (err) {
         test.equal(err.message, 'Invalid connection string');
@@ -124,7 +123,7 @@ describe('MongoClient', function () {
       var configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
       client.connect(function (err) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         client.close(done);
       });
     }
@@ -168,7 +167,7 @@ describe('MongoClient', function () {
 
       const client = configuration.newClient(url);
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
@@ -189,7 +188,7 @@ describe('MongoClient', function () {
 
       const client = configuration.newClient(url, { appname: 'hello world' });
       client.connect(err => {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         test.equal('hello world', client.topology.clientMetadata.application.name);
 
         client.close(done);
@@ -215,10 +214,10 @@ describe('MongoClient', function () {
       );
 
       client.connect(function (err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-        expect(db).nested.property('s.topology.s.options.connectTimeoutMS').to.equal(0);
-        expect(db).nested.property('s.topology.s.options.socketTimeoutMS').to.equal(0);
+        expect(err).to.not.exist;
+        const topology = getTopology(client.db(configuration.db));
+        expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
+        expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
 
         client.close(done);
       });
@@ -241,13 +240,13 @@ describe('MongoClient', function () {
       var configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(function (err, mongoclient) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         mongoclient
           .db('integration_tests')
           .collection('new_mongo_client_collection')
           .insertOne({ a: 1 }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r);
 
             mongoclient.close(done);
@@ -298,5 +297,11 @@ describe('MongoClient', function () {
           throw err;
         }
       });
+  });
+
+  it('should cache a resolved readPreference from options', function () {
+    const client = this.configuration.newClient({}, { readPreference: ReadPreference.SECONDARY });
+    expect(client.readPreference).to.be.instanceOf(ReadPreference);
+    expect(client.readPreference).to.have.property('mode', ReadPreference.SECONDARY);
   });
 });

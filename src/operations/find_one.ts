@@ -1,29 +1,36 @@
-import { handleCallback, toError } from '../utils';
-import { OperationBase } from './operation';
+import type { Callback } from '../utils';
+import type { Document } from '../bson';
+import type { Collection } from '../collection';
+import type { FindOptions } from './find';
+import { MongoError } from '../error';
+import type { Server } from '../sdam/server';
+import { CommandOperation } from './command';
+import { Aspect, defineAspects } from './operation';
 
-class FindOneOperation extends OperationBase {
-  collection: any;
-  query: any;
+/** @internal */
+export class FindOneOperation extends CommandOperation<FindOptions, Document> {
+  collection: Collection;
+  query: Document;
 
-  constructor(collection: any, query: any, options: any) {
-    super(options);
+  constructor(collection: Collection, query: Document, options: FindOptions) {
+    super(collection, options);
 
     this.collection = collection;
     this.query = query;
   }
 
-  execute(callback: Function) {
+  execute(server: Server, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     try {
       const cursor = coll.find(query, options).limit(-1).batchSize(1);
 
       // Return the item
-      cursor.next((err?: any, item?: any) => {
-        if (err != null) return handleCallback(callback, toError(err), null);
-        handleCallback(callback, null, item);
+      cursor.next((err, item) => {
+        if (err != null) return callback(new MongoError(err));
+        callback(undefined, item || undefined);
       });
     } catch (e) {
       callback(e);
@@ -31,4 +38,4 @@ class FindOneOperation extends OperationBase {
   }
 }
 
-export = FindOneOperation;
+defineAspects(FindOneOperation, [Aspect.EXPLAINABLE]);

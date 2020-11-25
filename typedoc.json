@@ -1,0 +1,75 @@
+{
+  "entryPoint": "types/mongodb.d.ts",
+  "mode": "file",
+  "out": "docs/public",
+  "theme": "pages-plugin",
+  "excludeNotExported": true,
+  "stripInternal": true,
+  "pages": {
+    "enableSearch": true,
+    "listInvalidSymbolLinks": true,
+    "output": "pages",
+    "groups": [
+      {
+        "title": "Documentation",
+        "pages": [
+          {
+            "title": "FAQ",
+            "source": "docs/reference/content/reference/faq/index.md"
+          }
+        ]
+      },
+      {
+        "title": "Tutorials",
+        "pages": [
+          {
+            "title": "Quick Start",
+            "source": "docs/reference/content/quick-start/quick-start.md",
+            "children": [
+              {
+                "title": "aggregation",
+                "source": "docs/reference/content/tutorials/aggregation.md"
+              },
+              {
+                "title": "collations",
+                "source": "docs/reference/content/tutorials/collations.md"
+              },
+              {
+                "title": "collections",
+                "source": "docs/reference/content/tutorials/collections.md"
+              },
+              {
+                "title": "commands",
+                "source": "docs/reference/content/tutorials/commands.md"
+              },
+              {
+                "title": "create-indexes",
+                "source": "docs/reference/content/tutorials/create-indexes.md"
+              },
+              {
+                "title": "crud",
+                "source": "docs/reference/content/tutorials/crud.md"
+              },
+              {
+                "title": "geospatial-search",
+                "source": "docs/reference/content/tutorials/geospatial-search.md"
+              },
+              {
+                "title": "main",
+                "source": "docs/reference/content/tutorials/main.md"
+              },
+              {
+                "title": "projections",
+                "source": "docs/reference/content/tutorials/projections.md"
+              },
+              {
+                "title": "text-search",
+                "source": "docs/reference/content/tutorials/text-search.md"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

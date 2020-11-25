@@ -1,5 +1,6 @@
 'use strict';
 const test = require('./shared').assert;
+const { expect } = require('chai');
 const setupDatabase = require('./shared').setupDatabase;
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
@@ -21,37 +22,41 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         db.collection('t').insert([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           //
           // Cursor
           // --------------------------------------------------
-          var cursor = db.collection('t').find({});
-          // Possible methods on the the cursor instance
-          cursor
-            .filter({ a: 1 })
-            .addCursorFlag('noCursorTimeout', true)
-            .addQueryModifier('$comment', 'some comment')
-            .batchSize(2)
-            .comment('some comment 2')
-            .limit(2)
-            .maxTimeMS(50)
-            .project({ a: 1 })
-            .skip(0)
-            .sort({ a: 1 });
+          const makeCursor = () => {
+            // Possible methods on the the cursor instance
+            return db
+              .collection('t')
+              .find({})
+              .filter({ a: 1 })
+              .addCursorFlag('noCursorTimeout', true)
+              .addQueryModifier('$comment', 'some comment')
+              .batchSize(2)
+              .comment('some comment 2')
+              .limit(2)
+              .maxTimeMS(50)
+              .project({ a: 1 })
+              .skip(0)
+              .sort({ a: 1 });
+          };
 
           //
           // Exercise count method
           // -------------------------------------------------
           var countMethod = function () {
             // Execute the different methods supported by the cursor
+            const cursor = makeCursor();
             cursor.count(function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2, count);
               eachMethod();
             });
@@ -63,22 +68,26 @@ describe('CRUD API', function () {
           var eachMethod = function () {
             var count = 0;
 
-            cursor.each(function (err, doc) {
-              test.equal(null, err);
-              if (doc) count = count + 1;
-              if (doc == null) {
+            const cursor = makeCursor();
+            cursor.forEach(
+              () => {
+                count = count + 1;
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(2, count);
                 toArrayMethod();
               }
-            });
+            );
           };
 
           //
           // Exercise toArray
           // -------------------------------------------------
           var toArrayMethod = function () {
+            const cursor = makeCursor();
             cursor.toArray(function (err, docs) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2, docs.length);
               nextMethod();
             });
@@ -88,18 +97,18 @@ describe('CRUD API', function () {
           // Exercise next method
           // -------------------------------------------------
           var nextMethod = function () {
-            var clonedCursor = cursor.clone();
-            clonedCursor.next(function (err, doc) {
-              test.equal(null, err);
+            const cursor = makeCursor();
+            cursor.next(function (err, doc) {
+              expect(err).to.not.exist;
               test.ok(doc != null);
 
-              clonedCursor.next(function (err, doc) {
-                test.equal(null, err);
+              cursor.next(function (err, doc) {
+                expect(err).to.not.exist;
                 test.ok(doc != null);
 
-                clonedCursor.next(function (err, doc) {
-                  test.equal(null, err);
-                  test.equal(null, doc);
+                cursor.next(function (err, doc) {
+                  expect(err).to.not.exist;
+                  expect(doc).to.not.exist;
                   streamMethod();
                 });
               });
@@ -111,12 +120,13 @@ describe('CRUD API', function () {
           // -------------------------------------------------
           var streamMethod = function () {
             var count = 0;
-            var clonedCursor = cursor.clone();
-            clonedCursor.on('data', function () {
+            const cursor = makeCursor();
+            const stream = cursor.stream();
+            stream.on('data', function () {
               count = count + 1;
             });
 
-            clonedCursor.once('end', function () {
+            cursor.once('close', function () {
               test.equal(2, count);
               explainMethod();
             });
@@ -126,9 +136,9 @@ describe('CRUD API', function () {
           // Explain method
           // -------------------------------------------------
           var explainMethod = function () {
-            var clonedCursor = cursor.clone();
-            clonedCursor.explain(function (err, result) {
-              test.equal(null, err);
+            const cursor = makeCursor();
+            cursor.explain(function (err, result) {
+              expect(err).to.not.exist;
               test.ok(result != null);
 
               client.close(done);
@@ -151,17 +161,16 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
         db.collection('t1').insert([{ a: 1 }, { a: 1 }, { a: 2 }, { a: 1 }], function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           var testAllMethods = function () {
             // Get the cursor
-            var cursor = db.collection('t1').aggregate({
-              pipeline: [{ $match: {} }],
+            var cursor = db.collection('t1').aggregate([{ $match: {} }], {
               allowDiskUse: true,
               batchSize: 2,
               maxTimeMS: 50
@@ -197,7 +206,7 @@ describe('CRUD API', function () {
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
             cursor.toArray(function (err, docs) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(3, docs.length);
               testNext();
             });
@@ -210,7 +219,7 @@ describe('CRUD API', function () {
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
             cursor.next(function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               testEach();
             });
           };
@@ -222,14 +231,16 @@ describe('CRUD API', function () {
             var count = 0;
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
-            cursor.each(function (err, doc) {
-              test.equal(null, err);
-              if (doc) count = count + 1;
-              if (doc == null) {
+            cursor.forEach(
+              () => {
+                count = count + 1;
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(3, count);
                 testStream();
               }
-            });
+            );
           };
 
           //
@@ -239,11 +250,12 @@ describe('CRUD API', function () {
             var cursor = db.collection('t1').aggregate();
             var count = 0;
             cursor.match({ a: 1 });
-            cursor.on('data', function () {
+            const stream = cursor.stream();
+            stream.on('data', function () {
               count = count + 1;
             });
 
-            cursor.once('end', function () {
+            stream.once('end', function () {
               test.equal(3, count);
               testExplain();
             });
@@ -255,7 +267,7 @@ describe('CRUD API', function () {
           var testExplain = function () {
             var cursor = db.collection('t1').aggregate();
             cursor.explain(function (err, result) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(result != null);
 
               client.close(done);
@@ -277,7 +289,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
@@ -286,7 +298,7 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var legacyInsert = function () {
           db.collection('t2_1').insert([{ a: 1 }, { a: 2 }], function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, r.result.n);
 
             bulkAPIInsert();
@@ -301,7 +313,7 @@ describe('CRUD API', function () {
           bulk.insert({ a: 1 });
           bulk.insert({ a: 1 });
           bulk.execute(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             insertOne();
           });
@@ -312,8 +324,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var insertOne = function () {
           db.collection('t2_3').insertOne({ a: 1 }, { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
             test.equal(1, r.insertedCount);
             test.ok(r.insertedId != null);
 
@@ -327,7 +339,7 @@ describe('CRUD API', function () {
         var insertMany = function () {
           var docs = [{ a: 1 }, { a: 1 }];
           db.collection('t2_4').insertMany(docs, { w: 1 }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, r.result.n);
             test.equal(2, r.insertedCount);
             test.equal(2, Object.keys(r.insertedIds).length);
@@ -342,8 +354,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var bulkWriteUnOrdered = function () {
           db.collection('t2_5').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_5').bulkWrite(
               [
@@ -356,7 +368,8 @@ describe('CRUD API', function () {
               ],
               { ordered: false, w: 1 },
               function (err, r) {
-                test.equal(null, err);
+                if (err) console.dir(err);
+                expect(err).to.not.exist;
                 test.equal(3, r.nInserted);
                 test.equal(1, r.nUpserted);
                 test.equal(1, r.nRemoved);
@@ -384,7 +397,7 @@ describe('CRUD API', function () {
             err,
             r
           ) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(3, r.result.n);
 
             db.collection('t2_6').bulkWrite(
@@ -398,7 +411,7 @@ describe('CRUD API', function () {
               ],
               { ordered: false, w: 1 },
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.nInserted);
                 test.equal(2, r.nUpserted);
                 test.equal(2, r.nRemoved);
@@ -423,8 +436,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var bulkWriteOrdered = function () {
           db.collection('t2_7').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_7').bulkWrite(
               [
@@ -437,7 +450,7 @@ describe('CRUD API', function () {
               ],
               { ordered: true, w: 1 },
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(3, r.nInserted);
                 test.equal(1, r.nUpserted);
                 test.equal(1, r.nRemoved);
@@ -461,8 +474,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var bulkWriteOrderedCrudSpec = function () {
           db.collection('t2_8').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t2_8').bulkWrite(
               [
@@ -475,7 +488,7 @@ describe('CRUD API', function () {
               ],
               { ordered: true, w: 1 },
               function (err, r) {
-                // test.equal(null, err);
+                // expect(err).to.not.exist;
                 test.equal(1, r.nInserted);
                 test.equal(2, r.nUpserted);
                 test.equal(1, r.nRemoved);
@@ -508,7 +521,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
@@ -520,8 +533,8 @@ describe('CRUD API', function () {
             err,
             r
           ) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('upsertedCount').to.equal(1);
 
             updateOne();
           });
@@ -532,22 +545,22 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var updateOne = function () {
           db.collection('t3_2').insertMany([{ c: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t3_2').updateOne(
               { a: 1 },
               { $set: { a: 1 } },
               { upsert: true },
               function (err, r) {
-                test.equal(null, err);
-                test.equal(1, r.result.n);
+                expect(err).to.not.exist;
+                expect(r).property('upsertedCount').to.equal(1);
                 test.equal(0, r.matchedCount);
                 test.ok(r.upsertedId != null);
 
                 db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } }, function (err, r) {
-                  test.equal(null, err);
-                  test.equal(1, r.result.n);
+                  expect(err).to.not.exist;
+                  expect(r).property('modifiedCount').to.equal(1);
                   test.equal(1, r.matchedCount);
                   test.ok(r.upsertedId == null);
 
@@ -563,20 +576,18 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var replaceOne = function () {
           db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('upsertedCount').to.equal(1);
             test.equal(0, r.matchedCount);
-            test.equal(1, r.ops.length);
             test.ok(r.upsertedId != null);
 
             db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true }, function (
               err,
               r
             ) {
-              test.equal(null, err);
-              test.equal(1, r.result.n);
+              expect(err).to.not.exist;
+              expect(r).property('modifiedCount').to.equal(1);
               test.ok(r.result.upserted == null);
-              test.equal(1, r.ops.length);
 
               test.equal(1, r.matchedCount);
               test.ok(r.upsertedId == null);
@@ -591,16 +602,16 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var updateMany = function () {
           db.collection('t3_4').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(2, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(2);
 
             db.collection('t3_4').updateMany(
               { a: 1 },
               { $set: { a: 2 } },
               { upsert: true, w: 1 },
               function (err, r) {
-                test.equal(null, err);
-                test.equal(2, r.result.n);
+                expect(err).to.not.exist;
+                expect(r).property('modifiedCount').to.equal(2);
                 test.equal(2, r.matchedCount);
                 test.ok(r.upsertedId == null);
 
@@ -609,7 +620,7 @@ describe('CRUD API', function () {
                   { $set: { d: 2 } },
                   { upsert: true, w: 1 },
                   function (err, r) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(0, r.matchedCount);
                     test.ok(r.upsertedId != null);
 
@@ -635,7 +646,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
@@ -644,12 +655,12 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var legacyRemove = function () {
           db.collection('t4_1').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(2, r.result.n);
+            expect(err).to.not.exist;
+            test.equal(2, r.insertedCount);
 
             db.collection('t4_1').remove({ a: 1 }, { single: true }, function (err, r) {
-              test.equal(null, err);
-              test.equal(1, r.result.n);
+              expect(err).to.not.exist;
+              test.equal(1, r.deletedCount);
 
               deleteOne();
             });
@@ -660,14 +671,13 @@ describe('CRUD API', function () {
         // Update one method
         // -------------------------------------------------
         var deleteOne = function () {
-          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(2, r.result.n);
+          db.collection('t4_2').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, (err, r) => {
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(2);
 
-            db.collection('t4_2').deleteOne({ a: 1 }, function (err, r) {
-              test.equal(null, err);
-              test.equal(1, r.result.n);
-              test.equal(1, r.deletedCount);
+            db.collection('t4_2').deleteOne({ a: 1 }, (err, r) => {
+              expect(err).to.not.exist;
+              expect(r).property('deletedCount').to.equal(1);
 
               deleteMany();
             });
@@ -678,14 +688,13 @@ describe('CRUD API', function () {
         // Update many method
         // -------------------------------------------------
         var deleteMany = function () {
-          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(2, r.result.n);
+          db.collection('t4_3').insertMany([{ a: 1 }, { a: 1 }], { w: 1 }, (err, r) => {
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(2);
 
-            db.collection('t4_3').deleteMany({ a: 1 }, function (err, r) {
-              test.equal(null, err);
-              test.equal(2, r.result.n);
-              test.equal(2, r.deletedCount);
+            db.collection('t4_3').deleteMany({ a: 1 }, (err, r) => {
+              expect(err).to.not.exist;
+              expect(r).property('deletedCount').to.equal(2);
 
               client.close(done);
             });
@@ -706,7 +715,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
@@ -715,14 +724,14 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var findOneAndRemove = function () {
           db.collection('t5_1').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_1').findOneAndDelete(
               { a: 1 },
               { projection: { b: 1 }, sort: { a: 1 } },
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
 
@@ -737,8 +746,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var findOneAndReplace = function () {
           db.collection('t5_2').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_2').findOneAndReplace(
               { a: 1 },
@@ -750,7 +759,7 @@ describe('CRUD API', function () {
                 upsert: true
               },
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
                 test.equal(1, r.value.c);
@@ -766,8 +775,8 @@ describe('CRUD API', function () {
         // -------------------------------------------------
         var findOneAndUpdate = function () {
           db.collection('t5_3').insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('insertedCount').to.equal(1);
 
             db.collection('t5_3').findOneAndUpdate(
               { a: 1 },
@@ -779,7 +788,7 @@ describe('CRUD API', function () {
                 upsert: true
               },
               function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.lastErrorObject.n);
                 test.equal(1, r.value.b);
                 test.equal(1, r.value.d);
@@ -804,14 +813,14 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Delete all items with no selector
         db.collection('t6_1').deleteMany({}, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           client.close(done);
         });
@@ -828,35 +837,35 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
         col.insertOne({ a: 1 }, { w: 0 }, function (err, result) {
-          test.equal(null, err);
-          test.equal(1, result.result.ok);
+          expect(err).to.not.exist;
+          test.equal(1, result.ok);
 
           col.insertMany([{ a: 1 }], { w: 0 }, function (err, result) {
-            test.equal(null, err);
-            test.equal(1, result.result.ok);
+            expect(err).to.not.exist;
+            expect(result).to.exist;
 
             col.updateOne({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
-              test.equal(null, err);
-              test.equal(1, result.result.ok);
+              expect(err).to.not.exist;
+              expect(result).to.exist;
 
               col.updateMany({ a: 1 }, { $set: { b: 1 } }, { w: 0 }, function (err, result) {
-                test.equal(null, err);
-                test.equal(1, result.result.ok);
+                expect(err).to.not.exist;
+                expect(result).to.exist;
 
                 col.deleteOne({ a: 1 }, { w: 0 }, function (err, result) {
-                  test.equal(null, err);
-                  test.equal(1, result.result.ok);
+                  expect(err).to.not.exist;
+                  expect(result).to.exist;
 
                   col.deleteMany({ a: 1 }, { w: 0 }, function (err, result) {
-                    test.equal(null, err);
-                    test.equal(1, result.result.ok);
+                    expect(err).to.not.exist;
+                    expect(result).to.exist;
 
                     client.close(done);
                   });
@@ -878,17 +887,17 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('try').updateOne(
           { _id: 1 },
           { $set: { x: 1 } },
           { upsert: true, w: 0 },
           function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(r != null);
 
             client.close(done);
@@ -907,14 +916,14 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         var collection = db.collection('w0crudoperations');
         collection.insertOne({}, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           client.close(done);
         });
 
@@ -923,7 +932,7 @@ describe('CRUD API', function () {
         // collection.updateOne({c:1}, {$set:{a:1}}, {upsert:true});
 
         // db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
-        //   test.equal(null, err);
+        //   expect(err).to.not.exist;
         //   test.ok(r != null);
 
         //   client.close();
@@ -942,7 +951,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       var ops = [];
       // Create a set of operations that go over the 1000 limit causing two messages
@@ -954,7 +963,7 @@ describe('CRUD API', function () {
 
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('t20_1').bulkWrite(ops, { ordered: false, w: 1 }, function (err) {
           test.ok(err !== null);
@@ -973,7 +982,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       var ops = [];
       // Create a set of operations that go over the 1000 limit causing two messages
@@ -985,7 +994,7 @@ describe('CRUD API', function () {
 
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('t20_1').bulkWrite(ops, { ordered: true, w: 1 }, function (err) {
           test.ok(err !== null);

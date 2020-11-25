@@ -121,7 +121,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );
@@ -255,7 +255,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );
@@ -389,7 +389,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );
@@ -552,7 +552,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
           ],
           {
             setName: 'rs',
-            haInterval: 10000,
+
             disconnectHandler: mockDisconnectHandler,
             size: 1
           }
@@ -709,7 +709,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );
@@ -879,7 +879,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 1000,
+
             size: 1
           }
         );
@@ -1019,7 +1019,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 1000,
+
             size: 1
           }
         );
@@ -1114,7 +1114,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           });
 
@@ -1248,7 +1248,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );

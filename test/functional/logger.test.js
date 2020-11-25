@@ -1,7 +1,7 @@
 'use strict';
 const expect = require('chai').expect;
 const { withClient } = require('./shared');
-const Logger = require('../../src/logger');
+const { Logger } = require('../../src/logger');
 
 describe('Logger', function () {
   /**
@@ -13,7 +13,7 @@ describe('Logger', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {

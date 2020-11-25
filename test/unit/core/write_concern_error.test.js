@@ -54,10 +54,6 @@ describe('WriteConcernError', function () {
 
   function makeAndConnectReplSet(cb) {
     let invoked = false;
-
-    console.log({
-      uri: `mongodb://${test.primaryServer.uri()},${test.firstSecondaryServer.uri()}/?replicaSet=rs`
-    });
     const replSet = new Topology(
       [test.primaryServer.address(), test.firstSecondaryServer.address()],
       { replicaSet: 'rs' }
@@ -93,29 +89,33 @@ describe('WriteConcernError', function () {
       }
     });
 
-    makeAndConnectReplSet((err, replSet) => {
+    makeAndConnectReplSet((err, topology) => {
       // cleanup the server before calling done
-      const cleanup = err => replSet.close({ force: true }, err2 => done(err || err2));
+      const cleanup = err => topology.close({ force: true }, err2 => done(err || err2));
 
       if (err) {
         return cleanup(err);
       }
 
-      replSet.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
-        let _err;
-        try {
-          expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-          expect(err.result).to.exist;
-          expect(err.result).to.have.property('ok', 1);
-          expect(err.result).to.not.have.property('errmsg');
-          expect(err.result).to.not.have.property('code');
-          expect(err.result).to.not.have.property('codeName');
-          expect(err.result).to.have.property('writeConcernError');
-        } catch (e) {
-          _err = e;
-        } finally {
-          cleanup(_err);
-        }
+      topology.selectServer('primary', (err, server) => {
+        expect(err).to.not.exist;
+
+        server.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+          let _err;
+          try {
+            expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+            expect(err.result).to.exist;
+            expect(err.result).to.have.property('ok', 1);
+            expect(err.result).to.not.have.property('errmsg');
+            expect(err.result).to.not.have.property('code');
+            expect(err.result).to.not.have.property('codeName');
+            expect(err.result).to.have.property('writeConcernError');
+          } catch (e) {
+            _err = e;
+          } finally {
+            cleanup(_err);
+          }
+        });
       });
     });
   });
@@ -130,27 +130,31 @@ describe('WriteConcernError', function () {
       }
     });
 
-    makeAndConnectReplSet((err, replSet) => {
+    makeAndConnectReplSet((err, topology) => {
       // cleanup the server before calling done
-      const cleanup = err => replSet.destroy(err2 => done(err || err2));
+      const cleanup = err => topology.close(err2 => done(err || err2));
 
       if (err) {
         return cleanup(err);
       }
 
-      replSet.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
-        let _err;
-        try {
-          expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-          expect(err.result).to.exist;
-          expect(err.result.writeConcernError).to.deep.equal(
-            RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
-          );
-        } catch (e) {
-          _err = e;
-        } finally {
-          cleanup(_err);
-        }
+      topology.selectServer('primary', (err, server) => {
+        expect(err).to.not.exist;
+
+        server.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+          let _err;
+          try {
+            expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+            expect(err.result).to.exist;
+            expect(err.result.writeConcernError).to.deep.equal(
+              RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
+            );
+          } catch (e) {
+            _err = e;
+          } finally {
+            cleanup(_err);
+          }
+        });
       });
     });
   });

@@ -28,7 +28,7 @@ describe('EventEmitters (Mongos)', function () {
       const mongos = new Mongos([test.server.address()], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
-        haInterval: 500,
+
         size: 1
       });
 

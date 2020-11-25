@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var co = require('co');
 var mock = require('mongodb-mock-server');
 const { ReadPreference, ObjectId } = require('../../src');
+const { expect } = require('chai');
 
 var extend = function (template, fields) {
   var object = {};
@@ -179,13 +180,12 @@ describe.skip('Buffering Proxy', function () {
         const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
-            socketTimeoutMS: 2000,
-            haInterval: 1000
+            socketTimeoutMS: 2000
           }
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
           var results = [];
 
@@ -195,7 +195,7 @@ describe.skip('Buffering Proxy', function () {
 
             setTimeout(function () {
               db.collection('test').insertOne({ a: 1 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 results.push('insertOne');
               });
 
@@ -203,7 +203,7 @@ describe.skip('Buffering Proxy', function () {
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('count');
                 }
               );
@@ -211,7 +211,7 @@ describe.skip('Buffering Proxy', function () {
               db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('aggregate');
                 });
 
@@ -219,7 +219,7 @@ describe.skip('Buffering Proxy', function () {
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('find');
                 });
 
@@ -401,13 +401,12 @@ describe.skip('Buffering Proxy', function () {
         const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
-            socketTimeoutMS: 2000,
-            haInterval: 1000
+            socketTimeoutMS: 2000
           }
         );
 
         client.connect(function (err, client) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
           setTimeout(function () {
@@ -418,7 +417,7 @@ describe.skip('Buffering Proxy', function () {
               var results = [];
 
               db.collection('test').insertOne({ a: 1 }, function (err) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 results.push('insertOne');
               });
 
@@ -426,7 +425,7 @@ describe.skip('Buffering Proxy', function () {
                 { count: 'test', query: {} },
                 { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
                 function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('count');
                 }
               );
@@ -434,7 +433,7 @@ describe.skip('Buffering Proxy', function () {
               db.collection('test')
                 .aggregate([{ $match: {} }])
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('aggregate');
                 });
 
@@ -442,7 +441,7 @@ describe.skip('Buffering Proxy', function () {
                 .find({})
                 .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   results.push('find');
                 });
 

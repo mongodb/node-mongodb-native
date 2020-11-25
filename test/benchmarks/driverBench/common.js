@@ -2,8 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const MongoClient = require('../../../src/mongo_client');
-const GridFsBucket = require('../../../src/gridfs-stream');
+const { MongoClient } = require('../../../src/mongo_client');
+const { GridFsBucket } = require('../../../src/gridfs-stream');
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';

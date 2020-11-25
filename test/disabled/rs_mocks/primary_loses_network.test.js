@@ -135,7 +135,7 @@ describe('ReplSet Primary Loses Network (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 3000,
             socketTimeout: 0,
-            haInterval: 2000,
+
             size: 1
           }
         );

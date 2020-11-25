@@ -3,11 +3,13 @@
 const { expect } = require('chai');
 const { format: f } = require('util');
 const { ObjectId } = require('bson');
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { MongoDBNamespace } = require('../../../src/utils');
 
 describe('A server', function () {
   it('should correctly execute insert culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -36,17 +38,18 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(1);
+                expect(results.n).to.eql(1);
 
                 // Execute find
-                var cursor = topology.cursor(ns, {
-                  find: f('%s.insert1', self.configuration.db),
-                  query: { _id: objectId },
-                  batchSize: 2
-                });
+                const cursor = new FindCursor(
+                  topology,
+                  MongoDBNamespace.fromString(ns),
+                  { _id: objectId },
+                  { batchSize: 2 }
+                );
 
                 // Execute next
-                cursor._next((nextErr, d) => {
+                cursor.next((nextErr, d) => {
                   expect(nextErr).to.not.exist;
                   expect(d.b).to.be.undefined;
 
@@ -63,7 +66,7 @@ describe('A server', function () {
 
   it('should correctly execute update culling undefined', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -96,17 +99,18 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(1);
+                expect(results.n).to.eql(1);
 
                 // Execute find
-                const cursor = topology.cursor(ns, {
-                  find: f('%s.update1', self.configuration.db),
-                  query: { _id: objectId },
-                  batchSize: 2
-                });
+                const cursor = new FindCursor(
+                  topology,
+                  MongoDBNamespace.fromString(ns),
+                  { _id: objectId },
+                  { batchSize: 2 }
+                );
 
                 // Execute next
-                cursor._next((nextErr, d) => {
+                cursor.next((nextErr, d) => {
                   expect(nextErr).to.not.exist;
                   expect(d.b).to.be.undefined;
 
@@ -153,7 +157,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(2);
+                expect(results.n).to.eql(2);
 
                 // Execute the write
                 server.remove(
@@ -171,7 +175,7 @@ describe('A server', function () {
                   },
                   (removeErr, removeResults) => {
                     expect(removeErr).to.not.exist;
-                    expect(removeResults.result.n).to.eql(2);
+                    expect(removeResults.n).to.eql(2);
 
                     // Destroy the connection
                     server.destroy(done);
@@ -217,7 +221,7 @@ describe('A server', function () {
               },
               (insertErr, results) => {
                 expect(insertErr).to.not.exist;
-                expect(results.result.n).to.eql(2);
+                expect(results.n).to.eql(2);
 
                 // Execute the write
                 server.remove(
@@ -234,7 +238,7 @@ describe('A server', function () {
                   },
                   (removeErr, removeResults) => {
                     expect(removeErr).to.not.exist;
-                    expect(removeResults.result.n).to.eql(1);
+                    expect(removeResults.n).to.eql(1);
 
                     // Destroy the connection
                     server.destroy();

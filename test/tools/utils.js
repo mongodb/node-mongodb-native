@@ -1,6 +1,6 @@
 'use strict';
 
-const Logger = require('../../src/logger');
+const { Logger } = require('../../src/logger');
 const { deprecateOptions, arrayStrictEqual, errorStrictEqual } = require('../../src/utils');
 const chalk = require('chalk');
 const util = require('util');

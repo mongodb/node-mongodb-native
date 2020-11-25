@@ -1,10 +1,9 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
-
-const MongoError = require('../../src/error').MongoError;
-const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
+const { withClient, setupDatabase, ignoreNsNotFound } = require('./shared');
+const test = require('./shared').assert;
+const { expect } = require('chai');
+const { MongoError } = require('../../src/error');
+const { Long } = require('../../src');
 
 describe('Bulk', function () {
   before(function () {
@@ -19,7 +18,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -28,7 +27,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -107,7 +106,7 @@ describe('Bulk', function () {
 
     test: function () {
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       return client
@@ -137,7 +136,7 @@ describe('Bulk', function () {
 
     test: function () {
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       return client.connect().then(client => {
@@ -158,6 +157,108 @@ describe('Bulk', function () {
     }
   });
 
+  it('should inherit promote long false from db during unordered bulk operation', function () {
+    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      promoteLongs: true
+    });
+
+    return withClient.call(this, client, (client, done) => {
+      const db = client.db('shouldInheritPromoteLongFalseFromDb1', { promoteLongs: false });
+      const coll = db.collection('test');
+
+      const batch = coll.initializeUnorderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    });
+  });
+
+  it(
+    'should inherit promote long false from collection during unordered bulk operation',
+    withClient(function (client, done) {
+      const db = client.db('shouldInheritPromoteLongFalseFromColl1', { promoteLongs: true });
+      const coll = db.collection('test', { promoteLongs: false });
+
+      const batch = coll.initializeUnorderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    })
+  );
+
+  it('should inherit promote long false from db during ordered bulk operation', function () {
+    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      promoteLongs: true
+    });
+
+    return withClient.call(this, client, (client, done) => {
+      const db = client.db('shouldInheritPromoteLongFalseFromDb2', { promoteLongs: false });
+      const coll = db.collection('test');
+
+      const batch = coll.initializeOrderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    });
+  });
+
+  it(
+    'should inherit promote long false from collection during ordered bulk operation',
+    withClient(function (client, done) {
+      const db = client.db('shouldInheritPromoteLongFalseFromColl2', { promoteLongs: true });
+      const coll = db.collection('test', { promoteLongs: false });
+
+      const batch = coll.initializeOrderedBulkOp();
+      batch.insert({ a: Long.fromNumber(10) });
+      batch.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        coll.findOne((err, item) => {
+          expect(err).to.not.exist;
+          expect(item.a).to.not.be.a('number');
+          expect(item.a).to.have.property('_bsontype');
+          expect(item.a._bsontype).to.be.equal('Long');
+
+          done();
+        });
+      });
+    })
+  );
+
   it('should correctly handle ordered multiple batch api write command errors', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -166,7 +267,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -175,7 +276,7 @@ describe('Bulk', function () {
 
         // Add unique index on field `a` causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
@@ -231,7 +332,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -267,7 +368,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -313,7 +414,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -322,7 +423,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
 
@@ -369,7 +470,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -378,7 +479,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
             batch.insert({ a: 1 });
@@ -438,7 +539,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -480,7 +581,7 @@ describe('Bulk', function () {
 
     test: function (done) {
       var self = this;
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
@@ -504,7 +605,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -520,7 +621,7 @@ describe('Bulk', function () {
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
@@ -540,7 +641,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -549,7 +650,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -604,7 +705,7 @@ describe('Bulk', function () {
   it('should correctly handle multiple unordered batch API', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
-      poolSize: 1
+      maxPoolSize: 1
     });
 
     client.connect((err, client) => {
@@ -653,7 +754,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -687,7 +788,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -729,7 +830,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -743,7 +844,7 @@ describe('Bulk', function () {
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ b: 1 }, writeConcern, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -782,7 +883,7 @@ describe('Bulk', function () {
   it('should provide descriptive error message for unordered batch with duplicate key errors on inserts', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), {
-      poolSize: 1
+      maxPoolSize: 1
     });
 
     client.connect((err, client) => {
@@ -840,7 +941,7 @@ describe('Bulk', function () {
       test: function (done) {
         var self = this;
         var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
+          maxPoolSize: 1
         });
 
         client.connect(function (err, client) {
@@ -849,7 +950,7 @@ describe('Bulk', function () {
 
           // Add unique index on b field causing all updates to fail
           col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
 
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
@@ -910,7 +1011,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -951,10 +1052,12 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_unordered_ops_legacy_9');
 
@@ -965,14 +1068,14 @@ describe('Bulk', function () {
           unorderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         try {
           orderedBatch.find();
           test.ok(false);
         } catch (e) {
-          test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
+          expect(e).to.match(/Bulk find operation must specify a selector/);
         }
 
         client.close(done);
@@ -985,7 +1088,7 @@ describe('Bulk', function () {
 
     test: function (done) {
       var self = this;
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
@@ -1009,7 +1112,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1024,7 +1127,7 @@ describe('Bulk', function () {
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
@@ -1049,7 +1152,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1083,7 +1186,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1096,10 +1199,10 @@ describe('Bulk', function () {
         }
 
         db.collection('bigdocs_ordered').insertMany(docs, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('bigdocs_ordered').count(function (err, c) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(5, c);
 
             client.close(done);
@@ -1120,7 +1223,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1147,7 +1250,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1180,7 +1283,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1198,7 +1301,7 @@ describe('Bulk', function () {
         }
 
         operation.execute(function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           operation = collection.initializeUnorderedBulkOp();
 
@@ -1213,7 +1316,7 @@ describe('Bulk', function () {
           }
 
           operation.execute(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -1240,7 +1343,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1258,7 +1361,7 @@ describe('Bulk', function () {
         }
 
         operation.execute(function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           operation = collection.initializeOrderedBulkOp();
 
@@ -1273,7 +1376,7 @@ describe('Bulk', function () {
           }
 
           operation.execute(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -1307,7 +1410,7 @@ describe('Bulk', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -1320,10 +1423,10 @@ describe('Bulk', function () {
         }
 
         db.collection('bigdocs_unordered').insertMany(docs, { ordered: false }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('bigdocs_unordered').count(function (err, c) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(5, c);
 
             client.close(done);
@@ -1339,7 +1442,7 @@ describe('Bulk', function () {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function (done) {
         var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], function (err) {
@@ -1358,7 +1461,7 @@ describe('Bulk', function () {
       metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function (done) {
         var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+        var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
@@ -1374,7 +1477,7 @@ describe('Bulk', function () {
 
   it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function () {
     var self = this;
-    var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+    var client = self.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     return client
       .connect()
@@ -1458,10 +1561,7 @@ describe('Bulk', function () {
         expect(err).to.be.an.instanceOf(MongoError);
       },
       err => {
-        expect(err).to.be.an.instanceOf(MongoError);
-        expect(err).to.not.be.an.instanceOf(TypeError);
-        expect(err.driver).to.equal(true);
-        expect(err.name).to.equal('MongoError');
+        expect(err).to.be.an.instanceOf(TypeError);
       }
     );
   }

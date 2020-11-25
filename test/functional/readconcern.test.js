@@ -64,7 +64,7 @@ describe('ReadConcern', function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           { w: 1 },
-          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+          { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
 
         client.connect((err, client) => {
@@ -183,12 +183,6 @@ describe('ReadConcern', function () {
       commandName: 'count',
       mongodbVersion: '>= 3.2',
       readConcern: { level: 'majority' }
-    },
-    {
-      description: 'Should set majority readConcern group command',
-      commandName: 'group',
-      mongodbVersion: '>= 3.2 <=4.1.0',
-      readConcern: { level: 'majority' }
     }
   ];
 
@@ -203,7 +197,7 @@ describe('ReadConcern', function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           { w: 1 },
-          { poolSize: 1, readConcern: test.readConcern, monitorCommands: true }
+          { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
 
         client.connect((err, client) => {
@@ -246,23 +240,6 @@ describe('ReadConcern', function () {
                   validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
                   done();
                 });
-              } else if (test.commandName === 'group') {
-                collection.group(
-                  [],
-                  {},
-                  { count: 0 },
-                  'function (obj, prev) { prev.count++; }',
-                  err => {
-                    expect(err).to.not.exist;
-                    validateTestResults(
-                      started,
-                      succeeded,
-                      test.commandName,
-                      test.readConcern.level
-                    );
-                    done();
-                  }
-                );
               }
             }
           );
@@ -281,7 +258,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -329,7 +306,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client
@@ -377,7 +354,7 @@ describe('ReadConcern', function () {
       const configuration = this.configuration;
       client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
+        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
 
       client.connect((err, client) => {
@@ -418,7 +395,10 @@ describe('ReadConcern', function () {
     test: function (done) {
       // Get a new instance
       const configuration = this.configuration;
-      client = configuration.newClient({ w: 1 }, { poolSize: 1, readConcern: { level: 'local' } });
+      client = configuration.newClient(
+        { w: 1 },
+        { maxPoolSize: 1, readConcern: { level: 'local' } }
+      );
       client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);

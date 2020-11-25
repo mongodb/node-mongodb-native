@@ -73,7 +73,7 @@ function setupDatabase(configuration, dbsToClean) {
   dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
   var configDbName = configuration.db;
   var client = configuration.newClient(configuration.writeConcernMax(), {
-    poolSize: 1
+    maxPoolSize: 1
   });
 
   dbsToClean.push(configDbName);

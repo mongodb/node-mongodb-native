@@ -1,103 +1,64 @@
-import { applyRetryableWrites, applyWriteConcern } from '../utils';
-import { MongoError } from '../error';
-import { OperationBase } from './operation';
-class BulkWriteOperation extends OperationBase {
-  collection: any;
-  operations: any;
+import { applyRetryableWrites, Callback } from '../utils';
+import { Aspect, defineAspects, OperationBase } from './operation';
+import type { Collection } from '../collection';
+import type {
+  BulkOperationBase,
+  BulkWriteResult,
+  BulkWriteOptions,
+  AnyBulkWriteOperation
+} from '../bulk/common';
+import type { Server } from '../sdam/server';
 
-  constructor(collection: any, operations: any, options: any) {
+/** @internal */
+export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
+  collection: Collection;
+  operations: AnyBulkWriteOperation[];
+
+  constructor(
+    collection: Collection,
+    operations: AnyBulkWriteOperation[],
+    options: BulkWriteOptions
+  ) {
     super(options);
 
     this.collection = collection;
     this.operations = operations;
   }
 
-  execute(callback: Function) {
+  execute(server: Server, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    let options = this.options;
-
-    // Add ignoreUndfined
-    if (coll.s.options.ignoreUndefined) {
-      options = Object.assign({}, options);
-      options.ignoreUndefined = coll.s.options.ignoreUndefined;
-    }
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Create the bulk operation
-    const bulk =
+    const bulk: BulkOperationBase =
       options.ordered === true || options.ordered == null
         ? coll.initializeOrderedBulkOp(options)
         : coll.initializeUnorderedBulkOp(options);
 
-    // Do we have a collation
-    let collation = false;
-
     // for each op go through and add to the bulk
     try {
       for (let i = 0; i < operations.length; i++) {
-        // Get the operation type
-        const key = Object.keys(operations[i])[0];
-        // Check if we have a collation
-        if (operations[i][key].collation) {
-          collation = true;
-        }
-
-        // Pass to the raw bulk
         bulk.raw(operations[i]);
       }
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
     }
 
-    // Final options for retryable writes and write concern
     let finalOptions = Object.assign({}, options);
     finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-    finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
-    const writeCon = finalOptions.writeConcern ? finalOptions.writeConcern : {};
-    const capabilities = coll.s.topology.capabilities();
-
-    // Did the user pass in a collation, check if our write server supports it
-    if (collation && capabilities && !capabilities.commandsTakeCollation) {
-      return callback(new MongoError('server/primary/mongos does not support collation'));
-    }
 
     // Execute the bulk
-    bulk.execute(writeCon, finalOptions, (err?: any, r?: any) => {
+    bulk.execute(finalOptions, (err, r) => {
       // We have connection level error
       if (!r && err) {
-        return callback(err, null);
-      }
-
-      r.insertedCount = r.nInserted;
-      r.matchedCount = r.nMatched;
-      r.modifiedCount = r.nModified || 0;
-      r.deletedCount = r.nRemoved;
-      r.upsertedCount = r.getUpsertedIds().length;
-      r.upsertedIds = {};
-      r.insertedIds = {};
-
-      // Update the n
-      r.n = r.insertedCount;
-
-      // Inserted documents
-      const inserted = r.getInsertedIds();
-      // Map inserted ids
-      for (let i = 0; i < inserted.length; i++) {
-        r.insertedIds[inserted[i].index] = inserted[i]._id;
-      }
-
-      // Upserted documents
-      const upserted = r.getUpsertedIds();
-      // Map upserted ids
-      for (let i = 0; i < upserted.length; i++) {
-        r.upsertedIds[upserted[i].index] = upserted[i]._id;
+        return callback(err);
       }
 
       // Return the results
-      callback(null, r);
+      callback(undefined, r);
     });
   }
 }
 
-export = BulkWriteOperation;
+defineAspects(BulkWriteOperation, [Aspect.WRITE_OPERATION]);

@@ -1,15 +1,19 @@
 'use strict';
+
+const { MongoDBNamespace } = require('../../../src/utils');
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+
 const expect = require('chai').expect;
-const setupDatabase = require('./shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 
 describe('Tailable cursor tests', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should correctly perform awaitdata', {
+  it('should correctly perform awaitData', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -42,24 +46,23 @@ describe('Tailable cursor tests', function () {
                 },
                 (insertErr, results) => {
                   expect(insertErr).to.not.exist;
-                  expect(results.result.n).to.equal(1);
+                  expect(results.n).to.equal(1);
 
                   // Execute find
-                  const cursor = topology.cursor(ns, {
-                    find: ns,
-                    query: {},
-                    batchSize: 2,
-                    tailable: true,
-                    awaitData: true
-                  });
+                  const cursor = new FindCursor(
+                    topology,
+                    MongoDBNamespace.fromString(ns),
+                    {},
+                    { batchSize: 2, tailable: true, awaitData: true }
+                  );
 
                   // Execute next
-                  cursor._next((cursorErr, cursorD) => {
+                  cursor.next((cursorErr, cursorD) => {
                     expect(cursorErr).to.not.exist;
                     expect(cursorD).to.exist;
 
                     const s = new Date();
-                    cursor._next(() => {
+                    cursor.next(() => {
                       const e = new Date();
                       expect(e.getTime() - s.getTime()).to.be.at.least(300);
 
@@ -67,7 +70,7 @@ describe('Tailable cursor tests', function () {
                       server.destroy(done);
                     });
 
-                    setTimeout(() => cursor.kill(), 300);
+                    setTimeout(() => cursor.close(), 300);
                   });
                 }
               );

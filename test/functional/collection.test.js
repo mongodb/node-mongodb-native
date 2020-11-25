@@ -18,7 +18,7 @@ describe('Collection', function () {
     let db;
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
       return client.connect().then(client => {
         db = client.db(configuration.db);
@@ -49,29 +49,29 @@ describe('Collection', function () {
             db.dropCollection('test_collection_methods2', (err, result) => {
               expect(result).to.be.true;
             });
-          });
 
-          db.createCollection('test_collection_methods3', (err, collection) => {
-            // Verify that all the result are correct coming back (should contain the value ok)
-            expect(collection.collectionName).to.equal('test_collection_methods3');
-
-            db.createCollection('test_collection_methods4', (err, collection) => {
+            db.createCollection('test_collection_methods3', (err, collection) => {
               // Verify that all the result are correct coming back (should contain the value ok)
-              expect(collection.collectionName).to.equal('test_collection_methods4');
-              // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-              db.renameCollection(
-                'test_collection_methods4',
-                'test_collection_methods3',
-                { dropTarget: true },
-                err => {
-                  expect(err).to.not.exist;
+              expect(collection.collectionName).to.equal('test_collection_methods3');
 
-                  db.dropCollection('test_collection_methods3', (err, result) => {
-                    expect(result).to.be.true;
-                    done();
-                  });
-                }
-              );
+              db.createCollection('test_collection_methods4', (err, collection) => {
+                // Verify that all the result are correct coming back (should contain the value ok)
+                expect(collection.collectionName).to.equal('test_collection_methods4');
+                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+                db.renameCollection(
+                  'test_collection_methods4',
+                  'test_collection_methods3',
+                  { dropTarget: true },
+                  err => {
+                    expect(err).to.not.exist;
+
+                    db.dropCollection('test_collection_methods3', (err, result) => {
+                      expect(result).to.be.true;
+                      done();
+                    });
+                  }
+                );
+              });
             });
           });
         });
@@ -91,6 +91,8 @@ describe('Collection', function () {
                   expect(err).to.not.exist;
                   // Assert collections
                   db.collections((err, collections) => {
+                    expect(err).to.not.exist;
+
                     let found_spiderman = false;
                     let found_mario = false;
                     let found_does_not_exist = false;
@@ -177,23 +179,6 @@ describe('Collection', function () {
             // Let's close the db
             done();
           });
-        });
-      });
-    });
-
-    it('should perform strict create collection', function (done) {
-      db.createCollection('test_strict_create_collection', (err, collection) => {
-        expect(err).to.not.exist;
-        expect(collection.collectionName).to.equal('test_strict_create_collection');
-
-        // Creating an existing collection should fail
-        db.createCollection('test_strict_create_collection', { strict: true }, err => {
-          expect(err).to.be.an.instanceof(Error);
-          expect(err.message).to.equal(
-            'Collection test_strict_create_collection already exists. Currently in strict mode.'
-          );
-
-          done();
         });
       });
     });
@@ -311,17 +296,6 @@ describe('Collection', function () {
       });
     });
 
-    it('should return invalid collection name error by callback for createCollection', function (done) {
-      db.dropDatabase(err => {
-        expect(err).to.not.exist;
-
-        db.createCollection('test/../', err => {
-          expect(err).to.be.instanceof(Error);
-          expect(err.message).to.equal('collection names cannot be empty');
-          done();
-        });
-      });
-    });
     it('should correctly count on non-existent collection', function (done) {
       db.collection('test_multiple_insert_2', (err, collection) => {
         collection.countDocuments((err, count) => {
@@ -351,7 +325,7 @@ describe('Collection', function () {
               configuration.writeConcernMax(),
               err => {
                 expect(err).to.not.exist;
-                expect(r.result.n).to.equal(1);
+                expect(r.n).to.equal(1);
 
                 // Remove safely
                 collection.deleteOne({}, configuration.writeConcernMax(), err => {
@@ -456,7 +430,7 @@ describe('Collection', function () {
       },
       {
         title: 'should correctly update with pipeline',
-        collectionName: 'test_should_correctly_do_update_with_pipeline',
+        collectionName: 'test_should_correctly_do_update_with_atomic_modifier',
         filterObject: {},
         updateObject: { $set: { a: 1, b: 1, d: 1 } }
       }
@@ -465,6 +439,8 @@ describe('Collection', function () {
     updateTests.forEach(test => {
       it(test.title, function (done) {
         db.createCollection(test.collectionName, (err, collection) => {
+          expect(err).to.not.exist;
+
           collection.updateOne(
             test.filterObject,
             test.updateObject,
@@ -476,21 +452,6 @@ describe('Collection', function () {
               done();
             }
           );
-        });
-      });
-    });
-
-    it('should fail due to existing collection', function (done) {
-      db.createCollection('shouldFailDueToExistingCollection', { strict: true }, (err, coll) => {
-        expect(err).to.not.exist;
-        expect(coll).to.exist;
-
-        db.createCollection('shouldFailDueToExistingCollection', { strict: true }, err => {
-          expect(err).to.exist;
-          expect(err.message).to.equal(
-            'Collection shouldFailDueToExistingCollection already exists. Currently in strict mode.'
-          );
-          done();
         });
       });
     });
@@ -985,13 +946,13 @@ describe('Collection', function () {
       };
 
       client.connect((err, client) => {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
         const db = client.db(configuration.db);
         const collection = db.collection('find_one_and_replace');
 
         collection.insertOne({ a: 1 }, err => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           try {
             collection.findOneAndReplace({ a: 1 }, {}, finish);
@@ -1011,7 +972,7 @@ describe('Collection', function () {
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect((err, client) => {

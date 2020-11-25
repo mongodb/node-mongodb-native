@@ -1,6 +1,7 @@
 'use strict';
 const { assert: test, setupDatabase } = require('./shared');
 const { Buffer } = require('buffer');
+const { expect } = require('chai');
 
 const BSON = require('bson');
 
@@ -16,17 +17,17 @@ describe('Raw', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           // Insert some documents
           collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             // You have to pass at least query + fields before passing options
             collection.find({}, { raw: true, batchSize: 2 }).toArray(function (err, items) {
               var objects = [];
@@ -61,7 +62,7 @@ describe('Raw', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection(
@@ -70,7 +71,7 @@ describe('Raw', function () {
           function (err, collection) {
             // Insert some documents
             collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               collection.find({}, { batchSize: 2 }).toArray(function (err, items) {
                 var objects = [];

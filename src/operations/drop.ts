@@ -1,34 +1,43 @@
 import { Aspect, defineAspects } from './operation';
-import { handleCallback } from '../utils';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
-class DropCollectionOperation extends CommandOperation {
-  name: any;
+/** @public */
+export type DropCollectionOptions = CommandOperationOptions;
 
-  constructor(db: any, name: any, options: any) {
+/** @internal */
+export class DropCollectionOperation extends CommandOperation<DropCollectionOptions, boolean> {
+  name: string;
+
+  constructor(db: Db, name: string, options: DropCollectionOptions) {
     super(db, options);
     this.name = name;
   }
 
-  execute(server: any, callback: Function) {
-    super.executeCommand(server, { drop: this.name }, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback, err);
-      if (result.ok) return handleCallback(callback, null, true);
-      handleCallback(callback, null, false);
+  execute(server: Server, callback: Callback<boolean>): void {
+    super.executeCommand(server, { drop: this.name }, (err, result) => {
+      if (err) return callback(err);
+      if (result.ok) return callback(undefined, true);
+      callback(undefined, false);
     });
   }
 }
 
-class DropDatabaseOperation extends CommandOperation {
-  execute(server: any, callback: Function) {
-    super.executeCommand(server, { dropDatabase: 1 }, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback, err);
-      if (result.ok) return handleCallback(callback, null, true);
-      handleCallback(callback, null, false);
+/** @public */
+export type DropDatabaseOptions = CommandOperationOptions;
+
+/** @internal */
+export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions, boolean> {
+  execute(server: Server, callback: Callback<boolean>): void {
+    super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
+      if (err) return callback(err);
+      if (result.ok) return callback(undefined, true);
+      callback(undefined, false);
     });
   }
 }
 
-defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export { DropCollectionOperation, DropDatabaseOperation };
+defineAspects(DropCollectionOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(DropDatabaseOperation, [Aspect.WRITE_OPERATION]);

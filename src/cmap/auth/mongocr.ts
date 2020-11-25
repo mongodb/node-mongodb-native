@@ -1,19 +1,23 @@
-import crypto = require('crypto');
-import { AuthProvider } from './auth_provider';
+import * as crypto from 'crypto';
+import { AuthProvider, AuthContext } from './auth_provider';
+import type { Callback } from '../../utils';
+import { MongoError } from '../../error';
 
-class MongoCR extends AuthProvider {
-  auth(authContext: any, callback: Function) {
+export class MongoCR extends AuthProvider {
+  auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
+    if (!credentials) {
+      return callback(new MongoError('AuthContext must provide credentials.'));
+    }
     const username = credentials.username;
     const password = credentials.password;
     const source = credentials.source;
-    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err?: any, result?: any) => {
+    connection.command(`${source}.$cmd`, { getnonce: 1 }, (err, r) => {
       let nonce = null;
       let key = null;
 
       // Get nonce
       if (err == null) {
-        const r = result.result;
         nonce = r.nonce;
 
         // Use node md5 generator
@@ -40,5 +44,3 @@ class MongoCR extends AuthProvider {
     });
   }
 }
-
-export = MongoCR;

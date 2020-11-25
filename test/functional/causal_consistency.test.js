@@ -12,7 +12,7 @@ describe('Causal Consistency', function () {
 
   beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
-    test.listener = mongo.instrument(err => expect(err).to.be.null);
+    test.listener = mongo.instrument(err => expect(err).to.not.exist);
     test.listener.on('started', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.started.push(event);
     });
@@ -21,7 +21,7 @@ describe('Causal Consistency', function () {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
     });
 
-    test.client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    test.client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     return test.client.connect();
   });
 
@@ -64,7 +64,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       return db
         .collection('causal_test')
@@ -74,7 +74,8 @@ describe('Causal Consistency', function () {
           expect(test.commands.succeeded).to.have.length(1);
 
           const lastReply = test.commands.succeeded[0].reply;
-          expect(session.operationTime).to.equal(lastReply.operationTime);
+          const maybeLong = val => (typeof val.equals === 'function' ? val.toNumber() : val);
+          expect(maybeLong(session.operationTime)).to.equal(maybeLong(lastReply.operationTime));
         });
     }
   });
@@ -90,7 +91,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       let firstOperationTime;
       return db
@@ -149,7 +150,7 @@ describe('Causal Consistency', function () {
     test: function () {
       const session = test.client.startSession({ causalConsistency: true });
       const db = test.client.db(this.configuration.db);
-      expect(session.operationTime).to.be.null;
+      expect(session.operationTime).to.not.exist;
 
       let firstOperationTime;
       return db

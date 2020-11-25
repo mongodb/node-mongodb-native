@@ -68,7 +68,7 @@ describe('Mongos Mixed Seed List (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1000,
-          haInterval: 1000,
+
           localThresholdMS: 500,
           size: 1
         });
@@ -144,7 +144,7 @@ describe('Mongos Mixed Seed List (mocks)', function () {
         var server = new Mongos([mongos1.address(), mongos2.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1000,
-          haInterval: 1000,
+
           localThresholdMS: 500,
           size: 1
         });

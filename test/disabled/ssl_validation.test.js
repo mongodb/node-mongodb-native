@@ -109,22 +109,16 @@ describe('SSL Validation', function () {
         var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
 
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            poolSize: 5,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            sslKey: key,
-            sslCert: cert,
-            sslPass: '10gen'
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          maxPoolSize: 5,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          sslKey: key,
+          sslCert: cert,
+          sslPass: '10gen'
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -155,20 +149,14 @@ describe('SSL Validation', function () {
         var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            sslKey: key,
-            sslCert: cert
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          sslKey: key,
+          sslCert: cert
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -209,19 +197,13 @@ describe('SSL Validation', function () {
       // Startup replicaset
       setUp(configuration, function (e, replicasetManager) {
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            poolSize: 1
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          maxPoolSize: 1
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -252,20 +234,14 @@ describe('SSL Validation', function () {
         var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            sslKey: key,
-            sslCert: cert
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          sslKey: key,
+          sslCert: cert
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -340,18 +316,12 @@ describe('SSL Validation', function () {
           // Read the ca
           var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
           // Create new
-          var replSet = new ReplSet(
-            [
-              new Server('server', 31001, { auto_reconnect: true }),
-              new Server('server', 31000, { auto_reconnect: true })
-            ],
-            {
-              rs_name: configuration.replicasetName,
-              ssl: true,
-              sslValidate: true,
-              sslCA: ca
-            }
-          );
+          var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+            rs_name: configuration.replicasetName,
+            ssl: true,
+            sslValidate: true,
+            sslCA: ca
+          });
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -386,19 +356,13 @@ describe('SSL Validation', function () {
         // Read the ca
         var ca = [fs.readFileSync(__dirname + '/ssl/mycert.pem')];
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            poolSize: 5
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          maxPoolSize: 5
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -428,20 +392,14 @@ describe('SSL Validation', function () {
         var ca = [fs.readFileSync(__dirname + '/ssl/mycert.pem')];
         var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
         // Create new
-        var replSet = new ReplSet(
-          [
-            new Server('server', 31001, { auto_reconnect: true }),
-            new Server('server', 31000, { auto_reconnect: true })
-          ],
-          {
-            rs_name: configuration.replicasetName,
-            ssl: true,
-            sslValidate: true,
-            sslCA: ca,
-            sslCert: cert,
-            poolSize: 1
-          }
-        );
+        var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+          rs_name: configuration.replicasetName,
+          ssl: true,
+          sslValidate: true,
+          sslCA: ca,
+          sslCert: cert,
+          maxPoolSize: 1
+        });
 
         // Connect to the replicaset
         var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -494,22 +452,16 @@ describe('SSL Validation', function () {
         },
         function (e, replicasetManager) {
           // Create new
-          var replSet = new ReplSet(
-            [
-              new Server('server', 31001, { auto_reconnect: true }),
-              new Server('server', 31000, { auto_reconnect: true })
-            ],
-            {
-              rs_name: configuration.replicasetName,
-              ssl: true,
-              sslValidate: true,
-              sslCA: ca,
-              sslKey: key,
-              sslCert: cert,
-              sslPass: 'qwerty',
-              poolSize: 1
-            }
-          );
+          var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+            rs_name: configuration.replicasetName,
+            ssl: true,
+            sslValidate: true,
+            sslCA: ca,
+            sslKey: key,
+            sslCert: cert,
+            sslPass: 'qwerty',
+            maxPoolSize: 1
+          });
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());
@@ -575,19 +527,13 @@ describe('SSL Validation', function () {
         },
         function (e, replicasetManager) {
           // Create new
-          var replSet = new ReplSet(
-            [
-              new Server('server', 31001, { auto_reconnect: true }),
-              new Server('server', 31000, { auto_reconnect: true })
-            ],
-            {
-              rs_name: configuration.replicasetName,
-              ssl: true,
-              sslValidate: true,
-              sslCA: ca,
-              poolSize: 1
-            }
-          );
+          var replSet = new ReplSet([new Server('server', 31001), new Server('server', 31000)], {
+            rs_name: configuration.replicasetName,
+            ssl: true,
+            sslValidate: true,
+            sslCA: ca,
+            maxPoolSize: 1
+          });
 
           // Connect to the replicaset
           var client = new MongoClient(replSet, configuration.writeConcernMax());

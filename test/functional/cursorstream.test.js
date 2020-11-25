@@ -28,7 +28,7 @@ describe('Cursor Streams', function () {
       }
 
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -103,7 +103,7 @@ describe('Cursor Streams', function () {
       }
 
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -172,7 +172,7 @@ describe('Cursor Streams', function () {
       }
 
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -215,7 +215,7 @@ describe('Cursor Streams', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -278,33 +278,27 @@ describe('Cursor Streams', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
-      client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
-        var cursor = db.collection('myCollection').find({
+      client.connect((err, client) => {
+        const db = client.db(self.configuration.db);
+        const cursor = db.collection('myCollection').find({
           timestamp: { $ltx: '1111' } // Error in query.
         });
 
-        var error, streamIsClosed;
-
-        cursor.on('error', function (err) {
-          error = err;
-        });
-
+        let error;
+        const stream = cursor.stream();
+        stream.on('error', err => (error = err));
         cursor.on('close', function () {
-          expect(error).to.exist;
-          streamIsClosed = true;
+          // NOTE: use `setImmediate` here because the stream implementation uses `nextTick` to emit the error
+          setImmediate(() => {
+            expect(error).to.exist;
+            client.close(done);
+          });
         });
 
-        cursor.on('end', function () {
-          expect(error).to.exist;
-          expect(streamIsClosed).to.be.true;
-          client.close(done);
-        });
-
-        cursor.pipe(process.stdout);
+        stream.pipe(process.stdout);
       });
     }
   });
@@ -317,7 +311,7 @@ describe('Cursor Streams', function () {
     test: function (done) {
       var self = this;
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
+        maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
@@ -337,14 +331,15 @@ describe('Cursor Streams', function () {
             .find({})
             .project({ a: 1 })
             .sort({ a: -1 });
+          const stream = cursor.stream();
 
-          cursor.on('end', function () {
+          stream.on('end', function () {
             expect(received).to.have.length(1000);
 
             client.close(done);
           });
 
-          cursor.on('data', function (d) {
+          stream.on('data', function (d) {
             received.push(d);
           });
         });

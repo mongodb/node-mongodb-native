@@ -1,51 +1,104 @@
-import { Code } from '../bson';
+import { Code, Document } from '../bson';
 import { loadDb } from '../dynamic_loaders';
 import {
   applyWriteConcern,
   decorateWithCollation,
   decorateWithReadConcern,
-  handleCallback,
   isObject,
-  toError
+  Callback,
+  maxWireVersion
 } from '../utils';
-import ReadPreference = require('../read_preference');
-import CommandOperation = require('./command');
-import { defineAspects, Aspect } from './operation';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
+import type { Sort } from '../sort';
+import { MongoError } from '../error';
+import type { ObjectId } from '../bson';
+import { Aspect, defineAspects } from './operation';
 
 const exclusionList = [
+  'explain',
   'readPreference',
+  'readConcern',
   'session',
   'bypassDocumentValidation',
   'w',
   'wtimeout',
   'j',
   'writeConcern',
+  'raw',
+  'fieldsAsRaw',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'serializeFunctions',
+  'ignoreUndefined',
   'scope' // this option is reformatted thus exclude the original
 ];
 
+/** @public */
+export type MapFunction = () => void;
+/** @public */
+export type ReduceFunction = (key: string, values: Document[]) => Document;
+/** @public */
+export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
+
+/** @public */
+export interface MapReduceOptions extends CommandOperationOptions {
+  /** Sets the output target for the map reduce job. */
+  out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
+  /** Query filter object. */
+  query?: Document;
+  /** Sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces. */
+  sort?: Sort;
+  /** Number of objects to return from collection. */
+  limit?: number;
+  /** Keep temporary data. */
+  keeptemp?: boolean;
+  /** Finalize function. */
+  finalize?: FinalizeFunction | string;
+  /** Can pass in variables that can be access from map/reduce/finalize. */
+  scope?: Document;
+  /** It is possible to make the execution stay in JS. Provided in MongoDB \> 2.0.X. */
+  jsMode?: boolean;
+  /** Provide statistics on job execution time. */
+  verbose?: boolean;
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+}
+
+interface MapReduceStats {
+  processtime?: number;
+  counts?: number;
+  timing?: number;
+}
+
 /**
  * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
- *
- * @class
- * @property {Collection} collection Collection instance.
- * @property {(Function|string)} map The mapping function.
- * @property {(Function|string)} reduce The reduce function.
- * @property {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
+ * @internal
  */
-class MapReduceOperation extends CommandOperation {
-  collection: any;
-  map: any;
-  reduce: any;
+export class MapReduceOperation extends CommandOperation<MapReduceOptions, Document | Document[]> {
+  collection: Collection;
+  /** The mapping function. */
+  map: MapFunction | string;
+  /** The reduce function. */
+  reduce: ReduceFunction | string;
 
   /**
    * Constructs a MapReduce operation.
    *
-   * @param {Collection} collection Collection instance.
-   * @param {(Function|string)} map The mapping function.
-   * @param {(Function|string)} reduce The reduce function.
-   * @param {object} [options] Optional settings. See Collection.prototype.mapReduce for a list of options.
+   * @param collection - Collection instance.
+   * @param map - The mapping function.
+   * @param reduce - The reduce function.
+   * @param options - Optional settings. See Collection.prototype.mapReduce for a list of options.
    */
-  constructor(collection: any, map: any, reduce: any, options?: object) {
+  constructor(
+    collection: Collection,
+    map: MapFunction | string,
+    reduce: ReduceFunction | string,
+    options?: MapReduceOptions
+  ) {
     super(collection, options);
 
     this.collection = collection;
@@ -53,45 +106,41 @@ class MapReduceOperation extends CommandOperation {
     this.reduce = reduce;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<Document | Document[]>): void {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;
     let options = this.options;
 
-    const mapCommandHash: any = {
+    const mapCommandHash: Document = {
       mapReduce: coll.collectionName,
       map: map,
       reduce: reduce
-    } as any;
+    };
 
     if (options.scope) {
       mapCommandHash.scope = processScope(options.scope);
     }
 
     // Add any other options passed in
-    for (let n in options) {
+    for (const n in options) {
       // Only include if not in exclusion list
       if (exclusionList.indexOf(n) === -1) {
-        mapCommandHash[n] = options[n];
+        mapCommandHash[n] = (options as any)[n];
       }
     }
 
     options = Object.assign({}, options);
 
-    // Ensure we have the right read preference inheritance
-    options.readPreference = ReadPreference.resolve(coll, options);
-
     // If we have a read preference and inline is not set as output fail hard
     if (
-      options.readPreference !== false &&
-      options.readPreference !== 'primary' &&
-      options['out'] &&
-      options['out'].inline !== 1 &&
-      options['out'] !== 'inline'
+      this.readPreference.mode === ReadPreferenceMode.primary &&
+      options.out &&
+      (options.out as any).inline !== 1 &&
+      options.out !== 'inline'
     ) {
       // Force readPreference to primary
-      options.readPreference = 'primary';
+      options.readPreference = ReadPreference.primary;
       // Decorate command with writeConcern if supported
       applyWriteConcern(mapCommandHash, { db: coll.s.db, collection: coll }, options);
     } else {
@@ -107,19 +156,27 @@ class MapReduceOperation extends CommandOperation {
     try {
       decorateWithCollation(mapCommandHash, coll, options);
     } catch (err) {
-      return callback(err, null);
+      return callback(err);
+    }
+
+    if (this.explain && maxWireVersion(server) < 9) {
+      callback(new MongoError(`server ${server.name} does not support explain on mapReduce`));
+      return;
     }
 
     // Execute command
-    super.executeCommand(server, mapCommandHash, (err?: any, result?: any) => {
-      if (err) return handleCallback(callback, err);
+    super.executeCommand(server, mapCommandHash, (err, result) => {
+      if (err) return callback(err);
       // Check if we have an error
       if (1 !== result.ok || result.err || result.errmsg) {
-        return handleCallback(callback, toError(result));
+        return callback(new MongoError(result));
       }
 
+      // If an explain option was executed, don't process the server results
+      if (this.explain) return callback(undefined, result);
+
       // Create statistics value
-      const stats: any = {};
+      const stats: MapReduceStats = {};
       if (result.timeMillis) stats['processtime'] = result.timeMillis;
       if (result.counts) stats['counts'] = result.counts;
       if (result.timing) stats['timing'] = result.timing;
@@ -128,10 +185,10 @@ class MapReduceOperation extends CommandOperation {
       if (result.results) {
         // If we wish for no verbosity
         if (options['verbose'] == null || !options['verbose']) {
-          return handleCallback(callback, null, result.results);
+          return callback(undefined, result.results);
         }
 
-        return handleCallback(callback, null, { results: result.results, stats: stats });
+        return callback(undefined, { results: result.results, stats: stats });
       }
 
       // The returned collection
@@ -141,8 +198,8 @@ class MapReduceOperation extends CommandOperation {
       if (result.result != null && typeof result.result === 'object') {
         const doc = result.result;
         // Return a collection from another db
-        let Db = loadDb();
-        collection = new Db(doc.db, coll.s.db.s.topology, coll.s.db.s.options).collection(
+        const Db = loadDb();
+        collection = new Db(coll.s.db.s.client, doc.db, coll.s.db.s.options).collection(
           doc.collection
         );
       } else {
@@ -152,40 +209,34 @@ class MapReduceOperation extends CommandOperation {
 
       // If we wish for no verbosity
       if (options['verbose'] == null || !options['verbose']) {
-        return handleCallback(callback, err, collection);
+        return callback(err, collection);
       }
 
       // Return stats as third set of values
-      handleCallback(callback, err, { collection: collection, stats: stats });
+      callback(err, { collection, stats });
     });
   }
 }
 
-/**
- * Functions that are passed as scope args must
- * be converted to Code instances.
- *
- * @param {any} scope
- */
-function processScope(scope: any) {
-  if (!isObject(scope) || scope._bsontype === 'ObjectID') {
+/** Functions that are passed as scope args must be converted to Code instances. */
+function processScope(scope: Document | ObjectId) {
+  if (!isObject(scope) || (scope as any)._bsontype === 'ObjectID') {
     return scope;
   }
 
-  const newScope: any = {};
+  const newScope: Document = {};
 
   for (const key of Object.keys(scope)) {
-    if ('function' === typeof scope[key]) {
-      newScope[key] = new Code(String(scope[key]));
-    } else if (scope[key]._bsontype === 'Code') {
-      newScope[key] = scope[key];
+    if ('function' === typeof (scope as Document)[key]) {
+      newScope[key] = new Code(String((scope as Document)[key]));
+    } else if ((scope as Document)[key]._bsontype === 'Code') {
+      newScope[key] = (scope as Document)[key];
     } else {
-      newScope[key] = processScope(scope[key]);
+      newScope[key] = processScope((scope as Document)[key]);
     }
   }
 
   return newScope;
 }
 
-defineAspects(MapReduceOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = MapReduceOperation;
+defineAspects(MapReduceOperation, [Aspect.EXPLAINABLE]);

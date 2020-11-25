@@ -17,8 +17,7 @@ describe('MongoClient Options', function () {
       MongoClient.connect(
         configuration.url(),
         {
-          autoReconnect: true,
-          poolSize: 4,
+          maxPoolSize: 4,
           notlegal: {},
           validateOptions: true
         },

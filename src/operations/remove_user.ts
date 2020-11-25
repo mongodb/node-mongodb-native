@@ -1,20 +1,26 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 
-class RemoveUserOperation extends CommandOperation {
-  username: any;
+/** @public */
+export type RemoveUserOptions = CommandOperationOptions;
 
-  constructor(db: any, username: any, options: any) {
+/** @internal */
+export class RemoveUserOperation extends CommandOperation<RemoveUserOptions, boolean> {
+  username: string;
+
+  constructor(db: Db, username: string, options: RemoveUserOptions) {
     super(db, options);
     this.username = username;
   }
 
-  execute(server: any, callback: Function) {
-    super.executeCommand(server, { dropUser: this.username }, (err?: any) => {
+  execute(server: Server, callback: Callback<boolean>): void {
+    super.executeCommand(server, { dropUser: this.username }, err => {
       callback(err, err ? false : true);
     });
   }
 }
 
-defineAspects(RemoveUserOperation, [Aspect.WRITE_OPERATION, Aspect.EXECUTE_WITH_SELECTION]);
-export = RemoveUserOperation;
+defineAspects(RemoveUserOperation, [Aspect.WRITE_OPERATION]);

@@ -1,7 +1,7 @@
 'use strict';
 
 const mock = require('mongodb-mock-server');
-const connect = require('../../../src/cmap/connect');
+const { connect } = require('../../../src/cmap/connect');
 const Connection = require('../../../src/cmap/connection').Connection;
 const expect = require('chai').expect;
 

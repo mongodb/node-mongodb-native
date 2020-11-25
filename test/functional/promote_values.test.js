@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { Long, Int32, Double } = require('../../src');
 
@@ -18,7 +19,7 @@ describe('Promote Values', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
+        maxPoolSize: 1,
         promoteValues: false
       });
 
@@ -33,10 +34,10 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.deepEqual(Long.fromNumber(10), doc.doc);
               test.deepEqual(new Int32(10), doc.int);
@@ -70,10 +71,10 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.deepEqual(Long.fromNumber(10), doc.doc);
               test.deepEqual(new Int32(10), doc.int);
@@ -107,12 +108,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues')
               .find()
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);
@@ -146,12 +147,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues')
               .find({}, { promoteValues: false })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);
@@ -185,12 +186,12 @@ describe('Promote Values', function () {
             array: [[Long.fromNumber(10)]]
           },
           function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             db.collection('shouldCorrectlyHonorPromoteValues2')
               .aggregate([{ $match: {} }], { promoteValues: false })
               .next(function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 test.deepEqual(Long.fromNumber(10), doc.doc);
                 test.deepEqual(new Int32(10), doc.int);
@@ -227,13 +228,14 @@ describe('Promote Values', function () {
 
         var db = client.db(configuration.db);
 
-        db.collection('haystack').insert(docs, function (errInsert) {
+        db.collection('haystack').insertMany(docs, function (errInsert) {
           if (errInsert) throw errInsert;
           // change limit from 102 to 101 and this test passes.
           // seems to indicate that the promoteValues flag is used for the
           // initial find, but not for subsequent getMores
           db.collection('haystack')
             .find({}, { limit: 102, promoteValues: false })
+            .stream()
             .on('data', function (doc) {
               test.equal(typeof doc.int, 'object');
               test.equal(doc.int._bsontype, 'Int32');

@@ -127,15 +127,13 @@ function generateTopologyTests(testSuites, testContext, filter) {
         test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
-
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
               if (
                 spec.skipReason ||
                 (filter && typeof filter === 'function' && !filter(spec, this.configuration))
               ) {
-                this.skip();
-                return;
+                return this.skip();
               }
 
               let testPromise = Promise.resolve();
@@ -151,7 +149,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
               }
-
               return testPromise.then(() => validateOutcome(spec, testContext));
             });
           });
@@ -167,6 +164,9 @@ function prepareDatabaseForSuite(suite, context) {
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
+
+  if (context.skipPrepareDatabase) return Promise.resolve();
+
   const setupPromise = db
     .admin()
     .command({ killAllSessions: [] })
@@ -281,12 +281,21 @@ function runTestSuiteTest(configuration, spec, context) {
     )
   );
 
-  const url = resolveConnectionString(configuration, spec);
+  const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
+
+  let skippedInitialPing = false;
   client.on('commandStarted', event => {
     if (IGNORED_COMMANDS.has(event.commandName)) {
+      return;
+    }
+
+    // If credentials were provided, then the Topology sends an initial `ping` command
+    // that we want to skip
+    if (event.commandName === 'ping' && client.topology.s.credentials && !skippedInitialPing) {
+      skippedInitialPing = true;
       return;
     }
 
@@ -307,22 +316,24 @@ function runTestSuiteTest(configuration, spec, context) {
 
     let session0, session1;
     let savedSessionData;
-    try {
-      session0 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-      );
-      session1 = client.startSession(
-        Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-      );
 
-      savedSessionData = {
-        session0: JSON.parse(EJSON.stringify(session0.id)),
-        session1: JSON.parse(EJSON.stringify(session1.id))
-      };
-    } catch (err) {
-      // ignore
+    if (context.useSessions) {
+      try {
+        session0 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+        );
+        session1 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+        );
+
+        savedSessionData = {
+          session0: JSON.parse(EJSON.stringify(session0.id)),
+          session1: JSON.parse(EJSON.stringify(session1.id))
+        };
+      } catch (err) {
+        // ignore
+      }
     }
-
     // enable to see useful APM debug information at the time of actual test run
     // displayCommands = true;
 
@@ -344,11 +355,12 @@ function runTestSuiteTest(configuration, spec, context) {
         throw err;
       })
       .then(() => {
-        if (session0) session0.endSession();
-        if (session1) session1.endSession();
-
-        return validateExpectations(context.commandEvents, spec, savedSessionData);
-      });
+        const promises = [];
+        if (session0) promises.push(session0.endSession());
+        if (session1) promises.push(session1.endSession());
+        return Promise.all(promises);
+      })
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
   });
 }
 
@@ -400,13 +412,13 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
 }
 
 function normalizeCommandShapes(commands) {
-  return commands.map(command =>
+  return commands.map(def =>
     JSON.parse(
       EJSON.stringify(
         {
-          command: command.command,
-          commandName: command.command_name ? command.command_name : command.commandName,
-          databaseName: command.database_name ? command.database_name : command.databaseName
+          command: def.command,
+          commandName: def.command_name || def.commandName || Object.keys(def.command)[0],
+          databaseName: def.database_name ? def.database_name : def.databaseName
         },
         { relaxed: true }
       )

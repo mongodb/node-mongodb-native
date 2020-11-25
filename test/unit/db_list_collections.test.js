@@ -42,11 +42,6 @@ describe('db.listCollections', function () {
       listCollectionsValue: true
     },
     {
-      description: 'should send nameOnly: true for db.createCollection',
-      command: db => db.createCollection('foo', { strict: true }, () => {}),
-      listCollectionsValue: true
-    },
-    {
       description: 'should send nameOnly: true for db.collections',
       command: db => db.collections(() => {}),
       listCollectionsValue: true

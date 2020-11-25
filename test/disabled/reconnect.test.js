@@ -17,8 +17,8 @@ describe('Reconnect', function () {
       var client = configuration.newClient(
         { w: 1 },
         {
-          poolSize: 1,
-          auto_reconnect: true,
+          maxPoolSize: 1,
+
           reconnectTries: 2,
           reconnectInterval: 100
         }
@@ -42,16 +42,15 @@ describe('Reconnect', function () {
   });
 
   // NOTE: skipped for use of topology manager
-  it.skip('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
+  it.skip('Should correctly recover on multiple restarts', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient('mongodb://localhost:27017/test', {
-        db: { native_parser: true, bufferMaxEntries: -1 },
         server: {
-          poolSize: 20,
-          socketOptions: { autoReconnect: true, keepAlive: true, keepAliveInitialDelay: 50 },
+          maxPoolSize: 20,
+          socketOptions: { keepAlive: true, keepAliveInitialDelay: 50 },
           reconnectTries: 1000,
           reconnectInterval: 1000
         }

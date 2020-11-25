@@ -1,7 +1,7 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const { withClient, setupDatabase } = require('./shared');
+const test = require('./shared').assert;
+const { expect } = require('chai');
 
 describe('Connection', function () {
   before(function () {
@@ -15,11 +15,11 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
       );
 
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         client.topology.once('monitoring', function () {
           client.close(done);
@@ -35,20 +35,20 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        test.equal(null, err);
 
         db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('domainSocketCollection0')
             .find({ a: 1 })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
 
               client.close(done);
@@ -65,7 +65,7 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
       client.on('open', function () {
         client.close(done);
@@ -83,7 +83,7 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 2000 });
       client.on('open', function () {
         client.close(done);
       });
@@ -99,20 +99,20 @@ describe('Connection', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(
         { w: 1 },
-        { poolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
+        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
       );
 
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        test.equal(null, err);
 
         db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function (err) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           db.collection('domainSocketCollection1')
             .find({ x: 1 })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
 
               client.close(done);
@@ -130,16 +130,16 @@ describe('Connection', function () {
   function connectionTester(configuration, testName, callback) {
     return function (err, client) {
       var db = client.db(configuration.db);
-      test.equal(err, null);
+      expect(err).to.not.exist;
 
       db.collection(testName, function (err, collection) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
 
         collection.insert({ foo: 123 }, { w: 1 }, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
 
           db.dropDatabase(function (err, dropped) {
-            test.equal(err, null);
+            expect(err).to.not.exist;
             test.ok(dropped);
             if (callback) return callback(client);
           });
@@ -175,11 +175,11 @@ describe('Connection', function () {
 
       // First add a user.
       setupClient.connect(function (err, client) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(user, password, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
@@ -206,11 +206,11 @@ describe('Connection', function () {
       // First add a user.
       const setupClient = configuration.newClient();
       setupClient.connect(function (err, client) {
-        test.equal(err, null);
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(user, password, function (err) {
-          test.equal(err, null);
+          expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
@@ -268,9 +268,63 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       test.equal(false, client.isConnected());
       done();
     }
   });
+
+  it(
+    'should be able to connect again after close',
+    withClient(function (client, done) {
+      expect(client.isConnected()).to.be.true;
+
+      const collection = client.db('shouldConnectAfterClose').collection('test');
+      collection.insertOne({ a: 1, b: 2 }, (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        client.close(err => {
+          expect(err).to.not.exist;
+          expect(client.isConnected()).to.be.false;
+
+          client.connect(err => {
+            expect(err).to.not.exist;
+            expect(client.isConnected()).to.be.true;
+
+            collection.findOne({ a: 1 }, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+              expect(result).to.have.property('a', 1);
+              expect(result).to.have.property('b', 2);
+              expect(client.topology.isDestroyed()).to.be.false;
+              done();
+            });
+          });
+        });
+      });
+    })
+  );
+
+  it(
+    'should correctly fail on retry when client has been closed',
+    withClient(function (client, done) {
+      expect(client.isConnected()).to.be.true;
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      collection.insertOne({ a: 1 }, (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        client.close(true, function (err) {
+          expect(err).to.not.exist;
+          expect(client.isConnected()).to.be.false;
+
+          expect(() => {
+            collection.insertOne({ a: 2 });
+          }).to.throw(/must be connected/);
+          done();
+        });
+      });
+    })
+  );
 });

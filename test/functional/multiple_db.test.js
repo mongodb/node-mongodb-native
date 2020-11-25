@@ -18,8 +18,8 @@ describe('Multiple Databases', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
-      var second_test_database_client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+      var second_test_database_client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
       // Just create second database
       client.connect(function (err, client) {
         second_test_database_client.connect(function (err, second_test_database) {
@@ -31,7 +31,7 @@ describe('Multiple Databases', function () {
           secondDb.createCollection('same_connection_two_dbs', function (err, collection) {
             // Insert a dummy document
             collection.insert({ a: 20 }, { safe: true }, function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Query it
               collection.findOne({}, function (err, item) {
@@ -43,13 +43,13 @@ describe('Multiple Databases', function () {
 
                   // Insert a dummy document
                   collection.insert({ b: 20 }, { safe: true }, function (err) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // Query it
                     collection.findOne({}, function (err, item) {
                       test.equal(20, item.b);
 
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       second_test_database.close(() => client.close(done));
                     });
                   });
@@ -69,7 +69,7 @@ describe('Multiple Databases', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db_instance = client.db('site1');
@@ -79,7 +79,7 @@ describe('Multiple Databases', function () {
         db_instance.collection('counters', function (err, collection) {
           expect(err).to.not.exist;
           collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             client.close(done);
           });
         });

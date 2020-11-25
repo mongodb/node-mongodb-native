@@ -3,7 +3,7 @@
 const ReplSet = require('../../../../src/core/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
-const ReadPreference = require('../../../../src/core/topologies/read_preference');
+const { ReadPreference } = require('../../../../src/core/topologies/read_preference');
 const MongoCredentials = require('../../../../src/core/auth/mongo_credentials').MongoCredentials;
 
 describe('Auth (ReplSet)', function () {
@@ -56,7 +56,7 @@ describe('Auth (ReplSet)', function () {
       [test.primaryServer.address(), test.firstSecondaryServer.address()],
       {
         setName: 'rs',
-        haInterval: 10000,
+
         connectionTimeout: 3000,
         disconnectHandler: mockDisconnectHandler,
         secondaryOnlyConnectionAllowed: true,

@@ -1,14 +1,16 @@
 import { MongoError } from '../error';
+import type { Connection } from './connection';
+import type { ConnectionPool } from './connection_pool';
 
 /**
  * An error indicating a connection pool is closed
- *
- * @property {string} address The address of the connection pool
- * @extends MongoError
+ * @category Error
  */
-class PoolClosedError extends MongoError {
-  address: any;
-  constructor(pool: any) {
+export class PoolClosedError extends MongoError {
+  /** The address of the connection pool */
+  address: string;
+
+  constructor(pool: ConnectionPool) {
     super('Attempted to check out a connection from closed connection pool');
     this.name = 'MongoPoolClosedError';
     this.address = pool.address;
@@ -17,18 +19,15 @@ class PoolClosedError extends MongoError {
 
 /**
  * An error thrown when a request to check out a connection times out
- *
- * @property {string} address The address of the connection pool
- * @extends MongoError
+ * @category Error
  */
-class WaitQueueTimeoutError extends MongoError {
-  address: any;
+export class WaitQueueTimeoutError extends MongoError {
+  /** The address of the connection pool */
+  address: string;
 
-  constructor(pool: any) {
+  constructor(pool: Connection | ConnectionPool) {
     super('Timed out while checking out a connection from connection pool');
     this.name = 'MongoWaitQueueTimeoutError';
     this.address = pool.address;
   }
 }
-
-export { PoolClosedError, WaitQueueTimeoutError };

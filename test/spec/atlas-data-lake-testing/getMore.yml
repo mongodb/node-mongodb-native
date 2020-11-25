@@ -1,0 +1,35 @@
+collection_name: &collection_name "driverdata"
+database_name: &database_name "test"
+
+tests:
+  -
+    description: "A successful find event with getMore"
+    operations:
+      -
+        object: collection
+        name: find
+        arguments:
+          filter: { a: { $gte: 2 }}
+          sort: { a: 1 }
+          batchSize: 3
+          limit: 4
+    expectations:
+      -
+        command_started_event:
+          command:
+            find: *collection_name
+            filter: { a: { $gte : 2 }}
+            sort: { a: 1 }
+            batchSize: 3
+            limit: 4
+          command_name: "find"
+          database_name: *database_name
+      -
+        command_started_event:
+          command:
+            # Assertions for "getMore" and "collection" fields are omitted, as they will have arbitrary values
+            # TODO: Those assertions can be added after wildcard matchers are available via SPEC-1215
+            batchSize: 1
+          command_name: "getMore"
+          # mongohoused always expects getMores on the "cursors" database
+          database_name: "cursors"

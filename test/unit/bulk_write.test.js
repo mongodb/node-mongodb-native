@@ -48,7 +48,7 @@ describe('Bulk Writes', function () {
     });
 
     client.connect(function (err) {
-      expect(err).to.be.null;
+      expect(err).to.not.exist;
 
       const coll = client.db('foo').collection('bar');
 

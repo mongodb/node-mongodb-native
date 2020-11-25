@@ -627,7 +627,7 @@ describe.skip('ReplSet (ReadPreference)', function () {
       var mongo = configuration.require,
         ReadPreference = mongo.ReadPreference;
 
-      const client = configuration.newClient({}, { w: 0, debug: true, haInterval: 100 });
+      const client = configuration.newClient({}, { w: 0, debug: true });
 
       // Connect to the db
       client.on('fullsetup', function (client) {

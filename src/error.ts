@@ -1,7 +1,14 @@
+import type { TopologyVersion } from './sdam/server_description';
+import type { Document } from './bson';
+import type { TopologyDescription } from './sdam/topology_description';
+
+/** @public */
+export type AnyError = MongoError | Error;
+
 const kErrorLabels = Symbol('errorLabels');
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
-const GET_MORE_RESUMABLE_CODES = new Set([
+export const GET_MORE_RESUMABLE_CODES = new Set([
   6, // HostUnreachable
   7, // HostNotFound
   89, // NetworkTimeout
@@ -22,19 +29,27 @@ const GET_MORE_RESUMABLE_CODES = new Set([
   43 // CursorNotFound
 ]);
 
-/**
- * Creates a new MongoError
- *
- * @extends Error
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @property {string} stack The error call stack
- */
-class MongoError extends Error {
-  [kErrorLabels]: any;
-  code?: number;
+/** @public */
+export interface ErrorDescription {
+  message?: string;
+  errmsg?: string;
+  $err?: string;
+  errorLabels?: string[];
+  [key: string]: any;
+}
 
-  constructor(message: any) {
+/**
+ * @public
+ * @category Error
+ */
+export class MongoError extends Error {
+  [kErrorLabels]: Set<string>;
+  code?: number;
+  codeName?: string;
+  writeConcernError?: Document;
+  topologyVersion?: TopologyVersion;
+
+  constructor(message: string | Error | ErrorDescription) {
     if (message instanceof Error) {
       super(message.message);
       this.stack = message.stack;
@@ -47,7 +62,7 @@ class MongoError extends Error {
           this[kErrorLabels] = new Set(message.errorLabels);
         }
 
-        for (let name in message) {
+        for (const name in message) {
           if (name === 'errorLabels' || name === 'errmsg') {
             continue;
           }
@@ -62,29 +77,26 @@ class MongoError extends Error {
     this.name = 'MongoError';
   }
 
-  /**
-   * Legacy name for server error responses
-   */
-  get errmsg() {
+  /** Legacy name for server error responses */
+  get errmsg(): string {
     return this.message;
   }
 
   /**
    * Creates a new MongoError object
    *
-   * @param {Error|string|object} options The options used to create the error.
-   * @returns {MongoError} A MongoError instance
+   * @param options - The options used to create the error.
    * @deprecated Use `new MongoError()` instead.
    */
-  static create(options: any): MongoError {
+  static create(options: string | Error | ErrorDescription): MongoError {
     return new MongoError(options);
   }
 
   /**
    * Checks the error to see if it has an error label
    *
-   * @param {string} label The error label to check for
-   * @returns {boolean} returns true if the error has the provided error label
+   * @param label - The error label to check for
+   * @returns returns true if the error has the provided error label
    */
   hasErrorLabel(label: string): boolean {
     if (this[kErrorLabels] == null) {
@@ -94,7 +106,7 @@ class MongoError extends Error {
     return this[kErrorLabels].has(label);
   }
 
-  addErrorLabel(label: any) {
+  addErrorLabel(label: string): void {
     if (this[kErrorLabels] == null) {
       this[kErrorLabels] = new Set();
     }
@@ -102,35 +114,25 @@ class MongoError extends Error {
     this[kErrorLabels].add(label);
   }
 
-  get errorLabels() {
+  get errorLabels(): string[] {
     return this[kErrorLabels] ? Array.from(this[kErrorLabels]) : [];
   }
 }
 
 const kBeforeHandshake = Symbol('beforeHandshake');
-function isNetworkErrorBeforeHandshake(err: any) {
+export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
   return err[kBeforeHandshake] === true;
 }
 
 /**
- * An error indicating an issue with the network, including TCP
- * errors and timeouts.
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @property {string} stack The error call stack
- * @extends MongoError
+ * An error indicating an issue with the network, including TCP errors and timeouts.
+ * @public
+ * @category Error
  */
-class MongoNetworkError extends MongoError {
+export class MongoNetworkError extends MongoError {
   [kBeforeHandshake]?: boolean;
 
-  /**
-   * Create a network error
-   *
-   * @param {any} message
-   * @param {any} [options]
-   */
-  constructor(message: any, options?: any) {
+  constructor(message: string | Error, options?: { beforeHandshake?: boolean }) {
     super(message);
     this.name = 'MongoNetworkError';
 
@@ -140,23 +142,18 @@ class MongoNetworkError extends MongoError {
   }
 }
 
+interface MongoNetworkTimeoutErrorOptions {
+  /** Indicates the timeout happened before a connection handshake completed */
+  beforeHandshake: boolean;
+}
+
 /**
  * An error indicating a network timeout occurred
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @property {any} [options] Optional details of the error
- * @property {boolean} [options.beforeHandshake] Indicates the timeout happened before a connection handshake completed
- * @extends MongoError
+ * @public
+ * @category Error
  */
-class MongoNetworkTimeoutError extends MongoNetworkError {
-  /**
-   * Create a network timeout error
-   *
-   * @param {any} message
-   * @param {object} [options]
-   */
-  constructor(message: any, options?: object) {
+export class MongoNetworkTimeoutError extends MongoNetworkError {
+  constructor(message: string, options?: MongoNetworkTimeoutErrorOptions) {
     super(message, options);
     this.name = 'MongoNetworkTimeoutError';
   }
@@ -164,13 +161,11 @@ class MongoNetworkTimeoutError extends MongoNetworkError {
 
 /**
  * An error used when attempting to parse a value (like a connection string)
- *
- * @param {Error|string|object} message The error message
- * @property {string} message The error message
- * @extends MongoError
+ * @public
+ * @category Error
  */
-class MongoParseError extends MongoError {
-  constructor(message: any) {
+export class MongoParseError extends MongoError {
+  constructor(message: string) {
     super(message);
     this.name = 'MongoParseError';
   }
@@ -178,17 +173,15 @@ class MongoParseError extends MongoError {
 
 /**
  * An error signifying a client-side timeout event
- *
- * @param {Error|string|object} message The error message
- * @param {string|object} [reason] The reason the timeout occured
- * @property {string} message The error message
- * @property {string} [reason] An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers
- * @extends MongoError
+ * @public
+ * @category Error
  */
-class MongoTimeoutError extends MongoError {
-  reason?: string;
+export class MongoTimeoutError extends MongoError {
+  /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
+  reason?: TopologyDescription;
 
-  constructor(message: any, reason: any) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
     } else {
@@ -204,15 +197,11 @@ class MongoTimeoutError extends MongoError {
 
 /**
  * An error signifying a client-side server selection error
- *
- * @param {Error|string|object} message The error message
- * @param {string|object} [reason] The reason the timeout occured
- * @property {string} message The error message
- * @property {string} [reason] An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers
- * @extends MongoError
+ * @public
+ * @category Error
  */
-class MongoServerSelectionError extends MongoTimeoutError {
-  constructor(message: any, reason: any) {
+export class MongoServerSelectionError extends MongoTimeoutError {
+  constructor(message: string, reason: TopologyDescription) {
     super(message, reason);
     this.name = 'MongoServerSelectionError';
   }
@@ -233,17 +222,14 @@ function makeWriteConcernResultObject(input: any) {
 
 /**
  * An error thrown when the server reports a writeConcernError
- *
- * @param {Error|string|object} message The error message
- * @param {object} result The result document (provided if ok: 1)
- * @property {string} message The error message
- * @property {object} [result] The result document (provided if ok: 1)
- * @extends MongoError
+ * @public
+ * @category Error
  */
-class MongoWriteConcernError extends MongoError {
-  result?: any;
+export class MongoWriteConcernError extends MongoError {
+  /** The result document (provided if ok: 1) */
+  result?: Document;
 
-  constructor(message: any, result: any) {
+  constructor(message: string, result: Document) {
     super(message);
     this.name = 'MongoWriteConcernError';
 
@@ -287,25 +273,21 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set([
   262 // ExceededTimeLimit
 ]);
 
-function isRetryableWriteError(error: any) {
+export function isRetryableWriteError(error: MongoError): boolean {
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code);
+    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
-
-  return RETRYABLE_WRITE_ERROR_CODES.has(error.code);
+  return RETRYABLE_WRITE_ERROR_CODES.has(error.code ?? 0);
 }
 
-/**
- * Determines whether an error is something the driver should attempt to retry
- *
- * @param {MongoError|Error} error
- */
-function isRetryableError(error: any) {
+/** Determines whether an error is something the driver should attempt to retry */
+export function isRetryableError(error: MongoError): boolean {
   return (
-    RETRYABLE_ERROR_CODES.has(error.code) ||
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    RETRYABLE_ERROR_CODES.has(error.code!) ||
     error instanceof MongoNetworkError ||
-    error.message.match(/not master/) ||
-    error.message.match(/node is recovering/)
+    !!error.message.match(/not master/) ||
+    !!error.message.match(/node is recovering/)
   );
 }
 
@@ -327,7 +309,7 @@ const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set([
   91 // ShutdownInProgress
 ]);
 
-function isRecoveringError(err: any) {
+function isRecoveringError(err: MongoError) {
   if (err.code && SDAM_RECOVERING_CODES.has(err.code)) {
     return true;
   }
@@ -335,7 +317,7 @@ function isRecoveringError(err: any) {
   return err.message.match(/not master or secondary/) || err.message.match(/node is recovering/);
 }
 
-function isNotMasterError(err: any) {
+function isNotMasterError(err: MongoError) {
   if (err.code && SDAM_NOTMASTER_CODES.has(err.code)) {
     return true;
   }
@@ -347,8 +329,8 @@ function isNotMasterError(err: any) {
   return err.message.match(/not master/);
 }
 
-function isNodeShuttingDownError(err: any) {
-  return err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code);
+export function isNodeShuttingDownError(err: MongoError): boolean {
+  return !!(err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code));
 }
 
 /**
@@ -357,9 +339,8 @@ function isNodeShuttingDownError(err: any) {
  * locally.
  *
  * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering
- * @param {MongoError|Error} error
  */
-function isSDAMUnrecoverableError(error: any) {
+export function isSDAMUnrecoverableError(error: MongoError): boolean {
   // NOTE: null check is here for a strictly pre-CMAP world, a timeout or
   //       close event are considered unrecoverable
   if (error instanceof MongoParseError || error == null) {
@@ -373,8 +354,8 @@ function isSDAMUnrecoverableError(error: any) {
   return false;
 }
 
-function isNetworkTimeoutError(err: any) {
-  return err instanceof MongoNetworkError && err.message.match(/timed out/);
+export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError {
+  return !!(err instanceof MongoNetworkError && err.message.match(/timed out/));
 }
 
 // From spec@https://github.com/mongodb/specifications/blob/7a2e93d85935ee4b1046a8d2ad3514c657dc74fa/source/change-streams/change-streams.rst#resumable-error:
@@ -389,36 +370,21 @@ function isNetworkTimeoutError(err: any) {
 //
 // An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable errors.
 
-function isResumableError(error?: any, wireVersion?: any) {
+export function isResumableError(error?: MongoError, wireVersion?: number): boolean {
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
-  if (wireVersion >= 9) {
+  if (typeof wireVersion !== 'undefined' && wireVersion >= 9) {
     // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
-    if (error.code === 43) {
+    if (error && error instanceof MongoError && error.code === 43) {
       return true;
     }
-    return error.hasErrorLabel('ResumableChangeStreamError');
+    return error instanceof MongoError && error.hasErrorLabel('ResumableChangeStreamError');
   }
 
-  return GET_MORE_RESUMABLE_CODES.has(error.code);
+  if (error && typeof error.code === 'number') {
+    return GET_MORE_RESUMABLE_CODES.has(error.code);
+  }
+  return false;
 }
-
-export {
-  GET_MORE_RESUMABLE_CODES,
-  MongoError,
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
-  MongoParseError,
-  MongoTimeoutError,
-  MongoServerSelectionError,
-  MongoWriteConcernError,
-  isRetryableError,
-  isSDAMUnrecoverableError,
-  isNodeShuttingDownError,
-  isNetworkTimeoutError,
-  isRetryableWriteError,
-  isResumableError,
-  isNetworkErrorBeforeHandshake
-};

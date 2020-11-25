@@ -1,34 +1,33 @@
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion } from '../utils';
-import CONSTANTS = require('../constants');
+import { maxWireVersion, Callback, getTopology } from '../utils';
+import * as CONSTANTS from '../constants';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
+import { AbstractCursor } from '../cursor/abstract_cursor';
+import type { ClientSession } from '../sessions';
+import { executeOperation, ExecutionResult } from './execute_operation';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
-function listCollectionsTransforms(databaseName: any) {
-  const matching = `${databaseName}.`;
-
-  return {
-    doc: (doc: any) => {
-      const index = doc.name.indexOf(matching);
-      // Remove database name if available
-      if (doc.name && index === 0) {
-        doc.name = doc.name.substr(index + matching.length);
-      }
-
-      return doc;
-    }
-  };
+/** @public */
+export interface ListCollectionsOptions extends CommandOperationOptions {
+  /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
+  nameOnly?: boolean;
+  /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
+  batchSize?: number;
 }
 
-class ListCollectionsOperation extends CommandOperation {
-  db: any;
-  filter: any;
+/** @internal */
+export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
+  db: Db;
+  filter: Document;
   nameOnly: boolean;
   batchSize?: number;
 
-  constructor(db: any, filter: any, options: any) {
-    super(db, options, { fullResponse: true });
+  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
+    super(db, options);
 
     this.db = db;
     this.filter = filter;
@@ -39,7 +38,7 @@ class ListCollectionsOperation extends CommandOperation {
     }
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -55,7 +54,7 @@ class ListCollectionsOperation extends CommandOperation {
 
       // No filter, filter by current database
       if (filter == null) {
-        filter.name = `/${databaseName}/`;
+        filter = { name: `/${databaseName}/` };
       }
 
       // Rewrite the filter to use $and to filter out indexes
@@ -65,20 +64,24 @@ class ListCollectionsOperation extends CommandOperation {
         filter = { name: /^((?!\$).)*$/ };
       }
 
-      const transforms = listCollectionsTransforms(databaseName);
+      const documentTransform = (doc: Document) => {
+        const matching = `${databaseName}.`;
+        const index = doc.name.indexOf(matching);
+        // Remove database name if available
+        if (doc.name && index === 0) {
+          doc.name = doc.name.substr(index + matching.length);
+        }
+
+        return doc;
+      };
+
       server.query(
         `${databaseName}.${CONSTANTS.SYSTEM_NAMESPACE_COLLECTION}`,
         { query: filter },
         { batchSize: this.batchSize || 1000 },
-        {},
-        (err?: any, result?: any) => {
-          if (
-            result &&
-            result.message &&
-            result.message.documents &&
-            Array.isArray(result.message.documents)
-          ) {
-            result.message.documents = result.message.documents.map(transforms.doc);
+        (err, result) => {
+          if (result && result.documents && Array.isArray(result.documents)) {
+            result.documents = result.documents.map(documentTransform);
           }
 
           callback(err, result);
@@ -99,10 +102,33 @@ class ListCollectionsOperation extends CommandOperation {
   }
 }
 
-defineAspects(ListCollectionsOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
+/** @public */
+export class ListCollectionsCursor extends AbstractCursor {
+  parent: Db;
+  filter: Document;
+  options?: ListCollectionsOptions;
 
-export = ListCollectionsOperation;
+  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
+    super(getTopology(db), db.s.namespace, options);
+    this.parent = db;
+    this.filter = filter;
+    this.options = options;
+  }
+
+  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+    const operation = new ListCollectionsOperation(this.parent, this.filter, {
+      ...this.cursorOptions,
+      ...this.options,
+      session
+    });
+
+    executeOperation(getTopology(this.parent), operation, (err, response) => {
+      if (err || response == null) return callback(err);
+
+      // TODO: NODE-2882
+      callback(undefined, { server: operation.server, session, response });
+    });
+  }
+}
+
+defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

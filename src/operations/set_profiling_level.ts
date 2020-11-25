@@ -1,41 +1,57 @@
-import { defineAspects, Aspect } from './operation';
-import CommandOperation = require('./command');
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback } from '../utils';
+import type { Server } from '../sdam/server';
+import type { Db } from '../db';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
-class SetProfilingLevelOperation extends CommandOperation {
-  level: any;
-  profile: any;
+/** @public */
+export enum ProfilingLevel {
+  off = 'off',
+  slowOnly = 'slow_only',
+  all = 'all'
+}
 
-  constructor(db: any, level: any, options: any) {
-    let profile = 0;
-    if (level === 'off') {
-      profile = 0;
-    } else if (level === 'slow_only') {
-      profile = 1;
-    } else if (level === 'all') {
-      profile = 2;
+/** @public */
+export type SetProfilingLevelOptions = CommandOperationOptions;
+
+/** @internal */
+export class SetProfilingLevelOperation extends CommandOperation<
+  SetProfilingLevelOptions,
+  ProfilingLevel
+> {
+  level: ProfilingLevel;
+  profile: 0 | 1 | 2;
+
+  constructor(db: Db, level: ProfilingLevel, options: SetProfilingLevelOptions) {
+    super(db, options);
+    switch (level) {
+      case ProfilingLevel.off:
+        this.profile = 0;
+        break;
+      case ProfilingLevel.slowOnly:
+        this.profile = 1;
+        break;
+      case ProfilingLevel.all:
+        this.profile = 2;
+        break;
+      default:
+        this.profile = 0;
+        break;
     }
 
-    super(db, options);
     this.level = level;
-    this.profile = profile;
   }
 
-  execute(server: any, callback: Function) {
+  execute(server: Server, callback: Callback<ProfilingLevel>): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {
       return callback(new Error('Error: illegal profiling level value ' + level));
     }
 
-    super.executeCommand(server, { profile: this.profile }, (err?: any, doc?: any) => {
-      if (err == null && doc.ok === 1) return callback(null, level);
-      return err != null
-        ? callback(err, null)
-        : callback(new Error('Error with profile command'), null);
+    super.executeCommand(server, { profile: this.profile }, (err, doc) => {
+      if (err == null && doc.ok === 1) return callback(undefined, level);
+      return err != null ? callback(err) : callback(new Error('Error with profile command'));
     });
   }
 }
-
-defineAspects(SetProfilingLevelOperation, [Aspect.EXECUTE_WITH_SELECTION]);
-export = SetProfilingLevelOperation;

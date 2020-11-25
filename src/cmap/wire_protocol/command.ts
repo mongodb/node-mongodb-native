@@ -1,18 +1,68 @@
 import { Query, Msg } from '../commands';
 import { getReadPreference, isSharded } from './shared';
 import { isTransactionCommand } from '../../transactions';
-import { applySession } from '../../sessions';
-import { maxWireVersion, databaseNamespace } from '../../utils';
+import { applySession, ClientSession } from '../../sessions';
+import { maxWireVersion, databaseNamespace, Callback } from '../../utils';
 import { MongoError, MongoNetworkError } from '../../error';
+import type { Document, BSONSerializeOptions } from '../../bson';
+import type { Server } from '../../sdam/server';
+import type { Topology } from '../../sdam/topology';
+import type { ReadPreferenceLike } from '../../read_preference';
+import type { WriteConcernOptions, WriteConcern, W } from '../../write_concern';
+import type { WriteCommandOptions } from './write_command';
 
-function isClientEncryptionEnabled(server: any) {
+/** @internal */
+export interface CommandOptions extends BSONSerializeOptions {
+  command?: boolean;
+  slaveOk?: boolean;
+  /** Specify read preference if command supports it */
+  readPreference?: ReadPreferenceLike;
+  raw?: boolean;
+  monitoring?: boolean;
+  fullResult?: boolean;
+  socketTimeout?: number;
+  /** Session to use for the operation */
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+  noResponse?: boolean;
+
+  // FIXME: NODE-2802
+  willRetryWrite?: boolean;
+
+  // FIXME: NODE-2781
+  writeConcern?: WriteConcernOptions | WriteConcern | W;
+}
+
+function isClientEncryptionEnabled(server: Server) {
   const wireVersion = maxWireVersion(server);
   return wireVersion && server.autoEncrypter;
 }
 
-function command(server: any, ns: any, cmd: any, options: any, callback: Function) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  callback: Callback<Document>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback?: Callback<Document>
+): void;
+export function command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  _options: Callback | CommandOptions,
+  _callback?: Callback<Document>
+): void {
+  let options = _options as CommandOptions;
+  const callback = (_callback ?? _options) as Callback<Document>;
+  if ('function' === typeof options) {
+    options = {};
+  }
 
   if (cmd == null) {
     return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
@@ -32,7 +82,13 @@ function command(server: any, ns: any, cmd: any, options: any, callback: Functio
   _cryptCommand(server, ns, cmd, options, callback);
 }
 
-function _command(server: any, ns: any, cmd: any, options: any, callback: Function) {
+function _command(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback: Callback<Document>
+) {
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
   const shouldUseOpMsg = supportsOpMsg(server);
@@ -43,12 +99,13 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
   if (hasSessionSupport(server) && session) {
     if (
       session.clusterTime &&
+      clusterTime &&
       session.clusterTime.clusterTime.greaterThan(clusterTime.clusterTime)
     ) {
       clusterTime = session.clusterTime;
     }
 
-    const err = applySession(session, finalCmd, options);
+    const err = applySession(session, finalCmd, options as WriteCommandOptions);
     if (err) {
       return callback(err);
     }
@@ -66,7 +123,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
     };
   }
 
-  const commandOptions = Object.assign(
+  const commandOptions: Document = Object.assign(
     {
       command: true,
       numberToSkip: 0,
@@ -78,7 +135,6 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
 
   // This value is not overridable
   commandOptions.slaveOk = readPreference.slaveOk();
-
   const cmdNs = `${databaseNamespace(ns)}.$cmd`;
   const message = shouldUseOpMsg
     ? new Msg(cmdNs, finalCmd, commandOptions)
@@ -86,7 +142,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
 
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
-    ? function (err: any) {
+    ? (err: MongoError, ...args: Document[]) => {
         // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
         if (
           err &&
@@ -97,6 +153,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
         }
 
         if (
+          session &&
           !cmd.commitTransaction &&
           err &&
           err instanceof MongoError &&
@@ -105,7 +162,7 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
           session.transaction.unpinServer();
         }
 
-        return callback.apply(null, arguments);
+        return callback(err, ...args);
       }
     : callback;
 
@@ -116,16 +173,11 @@ function _command(server: any, ns: any, cmd: any, options: any, callback: Functi
   }
 }
 
-function hasSessionSupport(topology: any) {
-  if (topology == null) return false;
-  if (topology.description) {
-    return topology.description.maxWireVersion >= 6;
-  }
-
-  return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
+function hasSessionSupport(server: Server) {
+  return server.description.logicalSessionTimeoutMinutes != null;
 }
 
-function supportsOpMsg(topologyOrServer: any) {
+function supportsOpMsg(topologyOrServer: Server | Topology) {
   const description = topologyOrServer.ismaster
     ? topologyOrServer.ismaster
     : topologyOrServer.description;
@@ -134,31 +186,32 @@ function supportsOpMsg(topologyOrServer: any) {
     return false;
   }
 
-  return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
+  return description.maxWireVersion >= 6 && !description.__nodejs_mock_server__;
 }
 
-function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: Function) {
+function _cryptCommand(
+  server: Server,
+  ns: string,
+  cmd: Document,
+  options: CommandOptions,
+  callback: Callback
+) {
   const autoEncrypter = server.autoEncrypter;
-  function commandResponseHandler(err?: any, response?: any) {
+  if (!autoEncrypter) {
+    return callback(new MongoError('no AutoEncrypter available for encryption'));
+  }
+
+  const commandResponseHandler: Callback<Document> = function (err, response) {
     if (err || response == null) {
       callback(err, response);
       return;
     }
 
-    autoEncrypter.decrypt(response.result, options, (err?: any, decrypted?: any) => {
-      if (err) {
-        callback(err, null);
-        return;
-      }
+    autoEncrypter.decrypt(response, options, callback);
+  };
 
-      response.result = decrypted;
-      response.message.documents = [decrypted];
-      callback(null, response);
-    });
-  }
-
-  autoEncrypter.encrypt(ns, cmd, options, (err?: any, encrypted?: any) => {
-    if (err) {
+  autoEncrypter.encrypt(ns, cmd, options, (err, encrypted) => {
+    if (err || encrypted == null) {
       callback(err, null);
       return;
     }
@@ -166,5 +219,3 @@ function _cryptCommand(server: any, ns: any, cmd: any, options: any, callback: F
     _command(server, ns, encrypted, options, commandResponseHandler);
   });
 }
-
-export = command;

@@ -1,0 +1,20 @@
+database_name: &database_name "test"
+
+tests:
+  -
+    description: "ping succeeds using runCommand"
+    operations:
+      -
+        name: runCommand
+        object: database
+        command_name: ping
+        arguments:
+          command:
+            ping: 1
+    expectations:
+      -
+        command_started_event:
+          command_name: ping
+          database_name: *database_name
+          command:
+            ping: 1

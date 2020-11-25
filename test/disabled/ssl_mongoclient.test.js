@@ -848,8 +848,7 @@ describe.skip('SSL (MongoClient)', function () {
                   servername: 'server',
                   sslCA: ca,
                   sslKey: key,
-                  sslCert: cert,
-                  haInterval: 2000
+                  sslCert: cert
                 },
                 function (err, client) {
                   test.equal(null, err);

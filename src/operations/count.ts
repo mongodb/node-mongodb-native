@@ -1,107 +1,61 @@
 import { Aspect, defineAspects } from './operation';
-import CommandOperation = require('./command');
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import type { Callback, MongoDBNamespace } from '../utils';
+import type { Document } from '../bson';
+import type { Server } from '../sdam/server';
+import type { Collection } from '../collection';
 
-class CountOperation extends CommandOperation {
-  cursor: any;
-  applySkipLimit: any;
+/** @public */
+export interface CountOptions extends CommandOperationOptions {
+  /** The number of documents to skip. */
+  skip?: number;
+  /** The maximum amounts to count before aborting. */
+  limit?: number;
+  /** Number of milliseconds to wait before aborting the query. */
+  maxTimeMS?: number;
+  /** An index name hint for the query. */
+  hint?: string | Document;
+}
 
-  constructor(cursor: any, applySkipLimit: any, options: any) {
-    super({ s: cursor }, options);
+/** @internal */
+export class CountOperation extends CommandOperation<CountOptions, number> {
+  collectionName?: string;
+  query: Document;
 
-    this.cursor = cursor;
-    this.applySkipLimit = applySkipLimit;
+  constructor(namespace: MongoDBNamespace, filter: Document, options: CountOptions) {
+    super(({ s: { namespace: namespace } } as unknown) as Collection, options);
+
+    this.collectionName = namespace.collection;
+    this.query = filter;
   }
 
-  execute(server: any, callback: Function) {
-    const cursor = this.cursor;
-    const applySkipLimit = this.applySkipLimit;
+  execute(server: Server, callback: Callback<number>): void {
     const options = this.options;
+    const cmd: Document = {
+      count: this.collectionName,
+      query: this.query
+    };
 
-    if (applySkipLimit) {
-      if (typeof cursor.cursorSkip() === 'number') options.skip = cursor.cursorSkip();
-      if (typeof cursor.cursorLimit() === 'number') options.limit = cursor.cursorLimit();
+    if (typeof options.limit === 'number') {
+      cmd.limit = options.limit;
     }
 
-    if (
-      typeof options.maxTimeMS !== 'number' &&
-      cursor.cmd &&
-      typeof cursor.cmd.maxTimeMS === 'number'
-    ) {
-      options.maxTimeMS = cursor.cmd.maxTimeMS;
+    if (typeof options.skip === 'number') {
+      cmd.skip = options.skip;
     }
 
-    let finalOptions = {} as any;
-    finalOptions.skip = options.skip;
-    finalOptions.limit = options.limit;
-    finalOptions.hint = options.hint;
-    finalOptions.maxTimeMS = options.maxTimeMS;
-
-    // Command
-    finalOptions.collectionName = cursor.namespace.collection;
-
-    let command;
-    try {
-      command = buildCountCommand(cursor, cursor.cmd.query, finalOptions);
-    } catch (err) {
-      return callback(err);
+    if (typeof options.hint !== 'undefined') {
+      cmd.hint = options.hint;
     }
 
-    super.executeCommand(server, command, (err?: any, result?: any) => {
-      callback(err, result ? result.n : null);
+    if (typeof options.maxTimeMS === 'number') {
+      cmd.maxTimeMS = options.maxTimeMS;
+    }
+
+    super.executeCommand(server, cmd, (err, result) => {
+      callback(err, result ? result.n : 0);
     });
   }
 }
 
-/**
- * Build the count command.
- *
- * @function
- * @param {Collection|Cursor} collectionOrCursor an instance of a collection or cursor
- * @param {any} query The query for the count.
- * @param {any} [options] Optional settings. See Collection.prototype.count and Cursor.prototype.count for a list of options.
- */
-function buildCountCommand(collectionOrCursor: any, query: any, options?: any) {
-  const skip = options.skip;
-  const limit = options.limit;
-  let hint = options.hint;
-  const maxTimeMS = options.maxTimeMS;
-  query = query || {};
-
-  // Final query
-  const cmd = {
-    count: options.collectionName,
-    query: query
-  } as any;
-
-  if (collectionOrCursor.s.numberOfRetries) {
-    // collectionOrCursor is a cursor
-    if (collectionOrCursor.options.hint) {
-      hint = collectionOrCursor.options.hint;
-    } else if (collectionOrCursor.cmd.hint) {
-      hint = collectionOrCursor.cmd.hint;
-    }
-    decorateWithCollation(cmd, collectionOrCursor, collectionOrCursor.cmd);
-  } else {
-    decorateWithCollation(cmd, collectionOrCursor, options);
-  }
-
-  // Add limit, skip and maxTimeMS if defined
-  if (typeof skip === 'number') cmd.skip = skip;
-  if (typeof limit === 'number') cmd.limit = limit;
-  if (typeof maxTimeMS === 'number') cmd.maxTimeMS = maxTimeMS;
-  if (hint) cmd.hint = hint;
-
-  // Do we have a readConcern specified
-  decorateWithReadConcern(cmd, collectionOrCursor);
-
-  return cmd;
-}
-
-defineAspects(CountOperation, [
-  Aspect.READ_OPERATION,
-  Aspect.RETRYABLE,
-  Aspect.EXECUTE_WITH_SELECTION
-]);
-
-export = CountOperation;
+defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

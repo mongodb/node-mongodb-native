@@ -1,48 +1,67 @@
 import { MongoError } from '../error';
-import { CursorState } from '../cursor';
 import {
   applyRetryableWrites,
-  applyWriteConcern,
   decorateWithCollation,
-  formattedOrderClause,
-  handleCallback,
-  toError
+  Callback,
+  getTopology,
+  maxWireVersion
 } from '../utils';
+import type { Document } from '../bson';
+import type { Db } from '../db';
+import type { ClientSession } from '../sessions';
+import type { Server } from '../sdam/server';
+import type { ReadPreference } from '../read_preference';
+import type { Collection } from '../collection';
+import type { UpdateOptions } from './update';
+import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { DeleteOptions } from './delete';
 
-function deleteCallback(err: any, r: any, callback: Function) {
-  if (callback == null) return;
-  if (err && callback) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
-  r.deletedCount = r.result.n;
-  if (callback) callback(null, r);
+/** @internal */
+export interface IndexInformationOptions {
+  full?: boolean;
+  readPreference?: ReadPreference;
+  session?: ClientSession;
 }
-
 /**
  * Retrieves this collections index info.
  *
- * @function
- * @param {Db} db The Db instance on which to retrieve the index info.
- * @param {string} name The name of the collection.
- * @param {object} [options] Optional settings. See Db.prototype.indexInformation for a list of options.
- * @param {Db~resultCallback} [callback] The command result callback
+ * @param db - The Db instance on which to retrieve the index info.
+ * @param name - The name of the collection.
  */
-function indexInformation(db: any, name: string, options?: any, callback?: Function) {
+export function indexInformation(db: Db, name: string, callback: Callback): void;
+export function indexInformation(
+  db: Db,
+  name: string,
+  options: IndexInformationOptions,
+  callback?: Callback
+): void;
+export function indexInformation(
+  db: Db,
+  name: string,
+  _optionsOrCallback: IndexInformationOptions | Callback,
+  _callback?: Callback
+): void {
+  let options = _optionsOrCallback as IndexInformationOptions;
+  let callback = _callback as Callback;
+  if ('function' === typeof _optionsOrCallback) {
+    callback = _optionsOrCallback as Callback;
+    options = {};
+  }
   // If we specified full information
-  const full = options['full'] == null ? false : options['full'];
+  const full = options.full == null ? false : options.full;
 
   // Did the user destroy the topology
-  if (db.serverConfig && db.serverConfig.isDestroyed())
-    return callback!(new MongoError('topology was destroyed'));
+  if (getTopology(db).isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information
-    let info: any = {};
+    const info: any = {};
     // Process all the indexes
     for (let i = 0; i < indexes.length; i++) {
       const index = indexes[i];
       // Let's unpack the object
       info[index.name] = [];
-      for (let name in index.key) {
+      for (const name in index.key) {
         info[index.name].push([name, index.key[name]]);
       }
     }
@@ -54,26 +73,30 @@ function indexInformation(db: any, name: string, options?: any, callback?: Funct
   db.collection(name)
     .listIndexes(options)
     .toArray((err?: any, indexes?: any) => {
-      if (err) return callback!(toError(err));
-      if (!Array.isArray(indexes)) return handleCallback(callback!, null, []);
-      if (full) return handleCallback(callback!, null, indexes);
-      handleCallback(callback!, null, processResults(indexes));
+      if (err) return callback(new MongoError(err));
+      if (!Array.isArray(indexes)) return callback(undefined, []);
+      if (full) return callback(undefined, indexes);
+      callback(undefined, processResults(indexes));
     });
 }
 
-function prepareDocs(coll: any, docs: any, options: any) {
+export function prepareDocs(
+  coll: Collection,
+  docs: Document[],
+  options: { forceServerObjectId?: boolean }
+): Document[] {
   const forceServerObjectId =
     typeof options.forceServerObjectId === 'boolean'
       ? options.forceServerObjectId
-      : coll.s.db.options.forceServerObjectId;
+      : coll.s.db.options?.forceServerObjectId;
 
   // no need to modify the docs if server sets the ObjectId
   if (forceServerObjectId === true) {
     return docs;
   }
 
-  return docs.map((doc: any) => {
-    if (forceServerObjectId !== true && doc._id == null) {
+  return docs.map(doc => {
+    if (doc._id == null) {
       doc._id = coll.s.pkFactory.createPk();
     }
 
@@ -81,36 +104,31 @@ function prepareDocs(coll: any, docs: any, options: any) {
   });
 }
 
-// Get the next available document from the cursor, returns null if no more documents are available.
-function nextObject(cursor: any, callback: Function) {
-  if (cursor.s.state === CursorState.CLOSED || (cursor.isDead && cursor.isDead())) {
-    return handleCallback(
-      callback,
-      MongoError.create({ message: 'Cursor is closed', driver: true })
-    );
-  }
-
-  if (cursor.s.state === CursorState.INIT && cursor.cmd && cursor.cmd.sort) {
-    try {
-      cursor.cmd.sort = formattedOrderClause(cursor.cmd.sort);
-    } catch (err) {
-      return handleCallback(callback, err);
-    }
-  }
-
-  // Get the next object
-  cursor._next((err?: any, doc?: any) => {
-    cursor.s.state = CursorState.OPEN;
-    if (err) return handleCallback(callback, err);
-    handleCallback(callback, null, doc);
-  });
-}
-
-function removeDocuments(server: any, coll: any, selector: any, options: any, callback: Function) {
+export function removeDocuments(server: Server, coll: Collection, callback?: Callback): void;
+export function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector?: Document,
+  callback?: Callback
+): void;
+export function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector?: Document,
+  options?: DeleteOptions,
+  callback?: Callback
+): void;
+export function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector?: Document,
+  options?: DeleteOptions | Document,
+  callback?: Callback
+): void {
   if (typeof options === 'function') {
-    (callback = options), (options = {});
+    (callback = options as Callback), (options = {});
   } else if (typeof selector === 'function') {
-    callback = selector;
+    callback = selector as Callback;
     options = {};
     selector = {};
   }
@@ -118,10 +136,9 @@ function removeDocuments(server: any, coll: any, selector: any, options: any, ca
   // Create an empty options object if the provided one is null
   options = options || {};
 
-  // Final options for retryable writes and write concern
+  // Final options for retryable writes
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
 
   // If selector is null set empty
   if (selector == null) selector = {};
@@ -141,54 +158,77 @@ function removeDocuments(server: any, coll: any, selector: any, options: any, ca
   try {
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
-    return callback(err, null);
+    return callback ? callback(err, null) : undefined;
+  }
+
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
+      : undefined;
   }
 
   // Execute the remove
-  server.remove(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err, null);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors) {
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    }
+  server.remove(
+    coll.s.namespace.toString(),
+    [op],
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return callback(err);
+      if (result == null) return callback();
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) {
+        return callback(new MongoError(result.writeErrors[0]));
+      }
 
-    // Return the results
-    handleCallback(callback, null, result);
-  });
+      // Return the results
+      callback(undefined, result);
+    }
+  );
 }
 
-function updateDocuments(
-  server: any,
-  coll: any,
-  selector: any,
-  document: any,
-  options: any,
-  callback?: Function
-) {
-  if ('function' === typeof options) (callback = options), (options = null);
-  if (options == null) options = {};
-  if (!('function' === typeof callback)) callback = undefined;
+export function updateDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  callback: Callback
+): void;
+export function updateDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  options: UpdateOptions,
+  callback: Callback
+): void;
+export function updateDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  document: Document,
+  _options: UpdateOptions | Callback,
+  _callback?: Callback
+): void {
+  let options = _options as UpdateOptions;
+  let callback = _callback as Callback;
+  if ('function' === typeof options) {
+    callback = options;
+    options = {};
+  }
 
   // If we are not providing a selector or document throw
   if (selector == null || typeof selector !== 'object')
-    return callback!(toError('selector must be a valid JavaScript object'));
+    return callback(new TypeError('selector must be a valid JavaScript object'));
   if (document == null || typeof document !== 'object')
-    return callback!(toError('document must be a valid JavaScript object'));
+    return callback(new TypeError('document must be a valid JavaScript object'));
 
-  // Final options for retryable writes and write concern
+  // Final options for retryable writes
   let finalOptions = Object.assign({}, options);
   finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-  finalOptions = applyWriteConcern(finalOptions, { db: coll.s.db, collection: coll }, options);
-
-  // Do we return the actual result document
-  // Either use override on the function, or go back to default on either the collection
-  // level or db
-  finalOptions.serializeFunctions = options.serializeFunctions || coll.s.serializeFunctions;
 
   // Execute the operation
-  const op = { q: selector, u: document } as any;
+  const op: Document = { q: selector, u: document };
   op.upsert = options.upsert !== void 0 ? !!options.upsert : false;
   op.multi = options.multi !== void 0 ? !!options.multi : false;
 
@@ -209,44 +249,28 @@ function updateDocuments(
   try {
     decorateWithCollation(finalOptions, coll, options);
   } catch (err) {
-    return callback!(err, null);
+    return callback(err, null);
+  }
+
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on update`))
+      : undefined;
   }
 
   // Update options
-  server.update(coll.s.namespace.toString(), [op], finalOptions, (err?: any, result?: any) => {
-    if (callback == null) return;
-    if (err) return handleCallback(callback, err, null);
-    if (result == null) return handleCallback(callback, null, null);
-    if (result.result.code) return handleCallback(callback, toError(result.result));
-    if (result.result.writeErrors)
-      return handleCallback(callback, toError(result.result.writeErrors[0]));
-    // Return the results
-    handleCallback(callback, null, result);
-  });
+  server.update(
+    coll.s.namespace.toString(),
+    [op],
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (callback == null) return;
+      if (err) return callback(err);
+      if (result == null) return callback();
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
+      // Return the results
+      callback(undefined, result);
+    }
+  );
 }
-
-function updateCallback(err: any, r: any, callback: Function) {
-  if (callback == null) return;
-  if (err) return callback(err);
-  if (r == null) return callback(null, { result: { ok: 1 } });
-  r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
-  r.upsertedId =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0
-      ? r.result.upserted[0] // FIXME(major): should be `r.result.upserted[0]._id`
-      : null;
-  r.upsertedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length ? r.result.upserted.length : 0;
-  r.matchedCount =
-    Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? 0 : r.result.n;
-  callback(null, r);
-}
-
-export {
-  deleteCallback,
-  indexInformation,
-  nextObject,
-  prepareDocs,
-  removeDocuments,
-  updateDocuments,
-  updateCallback
-};

@@ -132,7 +132,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
             setName: 'rs',
             connectionTimeout: 2000,
             socketTimeout: 2000,
-            haInterval: 100,
+
             size: 500
           }
         );
@@ -272,7 +272,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
               setName: 'rs',
               connectionTimeout: 5000,
               socketTimeout: 5000,
-              haInterval: 100,
+
               size: 1
             }
           );

@@ -38,7 +38,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -71,7 +71,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('aggregationExample1');
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -92,7 +92,7 @@ describe('Operation Examples', function () {
             { $sort: { _id: -1 } }
           ]);
           cursor.toArray(function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal('good', result[0]._id.tags);
             test.deepEqual(['bob'], result[0].authors);
             test.equal('fun', result[1]._id.tags);
@@ -124,7 +124,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -157,7 +157,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('aggregationExample2');
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -182,7 +182,7 @@ describe('Operation Examples', function () {
 
           // Get all the aggregation results
           cursor.toArray(function (err, docs) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, docs.length);
             client.close(done);
           });
@@ -210,7 +210,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -243,7 +243,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('aggregation_toArray_example');
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(result);
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -268,7 +268,7 @@ describe('Operation Examples', function () {
 
           // Get all the aggregation results
           cursor.toArray(function (err, docs) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, docs.length);
             client.close(done);
           });
@@ -296,8 +296,10 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -328,9 +330,9 @@ describe('Operation Examples', function () {
         // Create a collection
         var collection = db.collection('aggregation_next_example');
         // Insert the docs
-        collection.insertMany(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, (err, result) => {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -351,16 +353,13 @@ describe('Operation Examples', function () {
             ],
             { cursor: { batchSize: 1 } }
           );
+          this.defer(() => cursor.close());
 
           // Get all the aggregation results
-          cursor.next(function (err, docs) {
+          cursor.next((err, docs) => {
             test.ok(docs);
-            test.equal(null, err);
-
-            // Need to close cursor since cursor is not
-            // exhausted, and implicit session is still open
-            cursor.close();
-            client.close(done);
+            expect(err).to.not.exist;
+            done();
           });
         });
       });
@@ -386,7 +385,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -420,7 +419,7 @@ describe('Operation Examples', function () {
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -443,13 +442,13 @@ describe('Operation Examples', function () {
           );
 
           // Get all the aggregation results
-          cursor.each(function (err, docs) {
-            test.equal(null, err);
-
-            if (docs == null) {
+          cursor.forEach(
+            () => {},
+            err => {
+              expect(err).to.not.exist;
               client.close(done);
             }
-          });
+          );
         });
       });
       // END
@@ -474,7 +473,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -508,7 +507,7 @@ describe('Operation Examples', function () {
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -538,7 +537,7 @@ describe('Operation Examples', function () {
               count = count + 1;
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2, count);
 
               client.close(done);
@@ -568,7 +567,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -602,7 +601,7 @@ describe('Operation Examples', function () {
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate(
@@ -623,14 +622,15 @@ describe('Operation Examples', function () {
             ],
             { cursor: { batchSize: 1 } }
           );
+          const stream = cursor.stream();
 
           var count = 0;
           // Get all the aggregation results
-          cursor.on('data', function () {
+          stream.on('data', function () {
             count = count + 1;
           });
 
-          cursor.once('end', function () {
+          stream.once('end', function () {
             test.equal(2, count);
             client.close(done);
           });
@@ -653,7 +653,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -674,16 +674,16 @@ describe('Operation Examples', function () {
           ids
         ) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a total count command
           collection.count(function (err, count) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(4, count);
 
             // Perform a partial account where b=1
             collection.count({ b: 1 }, function (err, count) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, count);
 
               client.close(done);
@@ -708,7 +708,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -734,7 +734,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.createIndex(
@@ -742,16 +742,16 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Show that duplicate records got dropped
                 collection.find({}).toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
                   collection.find({ a: 2 }).explain(function (err, explanation) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(explanation != null);
 
                     client.close(done);
@@ -779,7 +779,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -800,7 +800,7 @@ describe('Operation Examples', function () {
           result
         ) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create an index on the a field
           collection.createIndex('a', { w: 1 }, function (err, indexName) {
@@ -808,7 +808,7 @@ describe('Operation Examples', function () {
 
             // Perform a query, with explain to show we hit the query
             collection.find({ a: 2 }).explain(function (err, explanation) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(explanation != null);
 
               client.close(done);
@@ -833,7 +833,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -859,23 +859,23 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var options = { unique: true, background: true, w: 1 };
             // Create an index on the a field
             collection.createIndex({ a: 1, b: 1 }, options, function (err, indexName) {
               test.ok(indexName);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               test.ok(!options.readPreference);
               // Show that duplicate records got dropped
               collection.find({}).toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(4, items.length);
 
                 // Perform a query, with explain to show we hit the query
                 collection.find({ a: 2 }).explain(function (err, explanation) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.ok(explanation != null);
 
                   client.close(done);
@@ -902,7 +902,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -931,7 +931,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, ids) {
             test.ok(ids);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a distinct query against the a field
             collection.distinct('a', function (err, docs) {
@@ -964,7 +964,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -994,7 +994,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, ids) {
             test.ok(ids);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a distinct query with a filter against the documents
             collection.distinct('a', { c: 1 }, function (err, docs) {
@@ -1022,7 +1022,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1081,7 +1081,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1096,12 +1096,12 @@ describe('Operation Examples', function () {
         var db = client.db(configuration.db);
         db.createCollection('dropExample1', function (err, r) {
           test.ok(r);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Drop the collection
           db.collection('dropExample1').dropAllIndexes(function (err, reply) {
             test.ok(reply);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's close the db
             client.close(done);
@@ -1125,7 +1125,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1150,7 +1150,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.ensureIndex(
@@ -1158,17 +1158,17 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Drop the index
                 collection.dropIndex('a_1_b_1', function (err, result) {
                   test.ok(result);
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Verify that the index is gone
                   collection.indexInformation(function (err, indexInformation) {
                     test.deepEqual([['_id', 1]], indexInformation._id_);
-                    test.equal(undefined, indexInformation.a_1_b_1);
+                    expect(indexInformation.a_1_b_1).to.not.exist;
 
                     client.close(done);
                   });
@@ -1195,7 +1195,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1220,7 +1220,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             db.ensureIndex(
@@ -1229,16 +1229,16 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Show that duplicate records got dropped
                 collection.find({}).toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
                   collection.find({ a: 2 }).explain(function (err, explanation) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(explanation != null);
 
                     client.close(done);
@@ -1266,7 +1266,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1291,7 +1291,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.ensureIndex(
@@ -1299,16 +1299,16 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Show that duplicate records got dropped
                 collection.find({}).toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
                   collection.find({ a: 2 }).explain(function (err, explanation) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(explanation != null);
 
                     client.close(done);
@@ -1336,7 +1336,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1358,11 +1358,11 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
             collection.find().toArray(function (err, docs) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(3, docs.length);
 
               client.close(done);
@@ -1387,7 +1387,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1408,11 +1408,11 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
             collection.find({}).explain(function (err, explain) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(explain != null);
 
               client.close(done);
@@ -1437,7 +1437,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1462,7 +1462,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
             collection
@@ -1471,9 +1471,9 @@ describe('Operation Examples', function () {
               .limit(1)
               .project({ b: 1 })
               .toArray(function (err, docs) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, docs.length);
-                test.equal(undefined, docs[0].a);
+                expect(docs[0].a).to.not.exist;
                 test.equal(2, docs[0].b);
 
                 client.close(done);
@@ -1502,7 +1502,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1524,7 +1524,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Simple findAndModify command returning the new document
             collection.findAndModify(
@@ -1533,7 +1533,7 @@ describe('Operation Examples', function () {
               { $set: { b1: 1 } },
               { new: true },
               function (err, doc) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, doc.value.a);
                 test.equal(1, doc.value.b1);
 
@@ -1546,12 +1546,12 @@ describe('Operation Examples', function () {
                   { remove: true },
                   function (err, doc) {
                     test.ok(doc);
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
 
                     // Verify that the document is gone
                     collection.findOne({ b: 1 }, function (err, item) {
-                      test.equal(null, err);
-                      test.equal(null, item);
+                      expect(err).to.not.exist;
+                      expect(item).to.not.exist;
 
                       // Simple findAndModify command performing an upsert and returning the new document
                       // executing the command safely
@@ -1561,7 +1561,7 @@ describe('Operation Examples', function () {
                         { d: 1, f: 1 },
                         { new: true, upsert: true, w: 1 },
                         function (err, doc) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           test.equal(1, doc.value.d);
                           test.equal(1, doc.value.f);
 
@@ -1593,7 +1593,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1614,19 +1614,19 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Simple findAndModify command returning the old document and
             // removing it at the same time
             collection.findAndRemove({ b: 1 }, [['b', 1]], function (err, doc) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, doc.value.b);
               test.equal(1, doc.value.d);
 
               // Verify that the document is gone
               collection.findOne({ b: 1 }, function (err, item) {
-                test.equal(null, err);
-                test.equal(null, item);
+                expect(err).to.not.exist;
+                expect(item).to.not.exist;
 
                 client.close(done);
               });
@@ -1651,7 +1651,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1676,12 +1676,12 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Perform a simple find and return all the documents
-            collection.findOne({ a: 2 }, { fields: { b: 1 } }, function (err, doc) {
-              test.equal(null, err);
-              test.equal(undefined, doc.a);
+            collection.findOne({ a: 2 }, { projection: { b: 1 } }, function (err, doc) {
+              expect(err).to.not.exist;
+              expect(doc.a).to.not.exist;
               test.equal(2, doc.b);
 
               client.close(done);
@@ -1706,10 +1706,10 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       /* eslint-disable */
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1725,31 +1725,31 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_map_reduce_functions');
 
         // Insert some documents to perform map reduce over
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function(err, r) {
+        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
           test.ok(r);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Map function
-          var map = function() {
+          var map = function () {
             emit(this.user_id, 1);
           };
           // Reduce function
-          var reduce = function(k, vals) {
+          var reduce = function (k, vals) {
             return 1;
           };
 
           // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
+          collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
             err,
             collection
           ) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Mapreduce returns the temporary collection with the results
-            collection.findOne({ _id: 1 }, function(err, result) {
+            collection.findOne({ _id: 1 }, function (err, result) {
               test.equal(1, result.value);
 
-              collection.findOne({ _id: 2 }, function(err, result) {
+              collection.findOne({ _id: 2 }, function (err, result) {
                 test.equal(1, result.value);
 
                 client.close(done);
@@ -1781,7 +1781,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1800,7 +1800,7 @@ describe('Operation Examples', function () {
         // Insert some test documents
         collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
           test.ok(r);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Map function
           var map = function () {
@@ -1809,7 +1809,7 @@ describe('Operation Examples', function () {
 
           // Reduce function
           // eslint-disable-next-line
-          var reduce = function(k, vals) {
+          var reduce = function (k, vals) {
             return 1;
           };
 
@@ -1850,7 +1850,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1875,7 +1875,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, r) {
             test.ok(r);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Map function
             var map = function () {
@@ -1906,7 +1906,7 @@ describe('Operation Examples', function () {
 
               // Find all entries in the map-reduce collection
               outCollection.find().toArray(function (err, results) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(2, results[0].value);
 
                 // mapReduce with scope containing plain function
@@ -1915,7 +1915,7 @@ describe('Operation Examples', function () {
                 o.out = { replace: 'replacethiscollection' };
 
                 collection.mapReduce(map, reduce, o, function (err, outCollection) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Find all entries in the map-reduce collection
                   outCollection.find().toArray(function (err, results) {
@@ -1947,7 +1947,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1972,7 +1972,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, r) {
             test.ok(r);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Map function
             var map = function () {
@@ -2000,11 +2000,11 @@ describe('Operation Examples', function () {
             o.out = { replace: 'replacethiscollection' };
 
             collection.mapReduce(map, reduce, o, function (err, outCollection) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Find all entries in the map-reduce collection
               outCollection.find().toArray(function (err, results) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(2, results[0].value);
 
                 // mapReduce with scope containing plain function
@@ -2013,7 +2013,7 @@ describe('Operation Examples', function () {
                 o.out = { replace: 'replacethiscollection' };
 
                 collection.mapReduce(map, reduce, o, function (err, outCollection) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Find all entries in the map-reduce collection
                   outCollection.find().toArray(function (err, results) {
@@ -2043,7 +2043,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2064,12 +2064,12 @@ describe('Operation Examples', function () {
           result
         ) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a simple single field index
           collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             setTimeout(function () {
               // List all of the indexes on the collection
@@ -2099,7 +2099,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2117,12 +2117,12 @@ describe('Operation Examples', function () {
           'test_collection_index_exists',
           configuration.writeConcernMax()
         );
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Create an index on the collection
         collection.createIndex('a', configuration.writeConcernMax(), function (err, indexName) {
           test.ok(indexName);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Let's test to check if a single index exists
           collection.indexExists('a_1', function (err, result) {
@@ -2159,7 +2159,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2185,7 +2185,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.ensureIndex(
@@ -2193,7 +2193,7 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Fetch basic indexInformation for collection
                 db.indexInformation('more_index_information_test_2', function (
@@ -2239,7 +2239,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2265,7 +2265,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.ensureIndex(
@@ -2273,7 +2273,7 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Fetch basic indexInformation for collection
                 collection.indexInformation(function (err, indexInformation) {
@@ -2317,7 +2317,7 @@ describe('Operation Examples', function () {
     },
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2332,17 +2332,18 @@ describe('Operation Examples', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('simple_document_insert_collection_no_safe');
         // Insert a single document
-        collection.insertOne({ hello: 'world_no_safe' });
-
-        // Wait for a second before finishing up, to ensure we have written the item to disk
-        setTimeout(function () {
-          // Fetch the document
-          collection.findOne({ hello: 'world_no_safe' }, function (err, item) {
-            test.equal(null, err);
-            test.equal('world_no_safe', item.hello);
-            client.close(done);
-          });
-        }, 100);
+        collection.insertOne({ hello: 'world_no_safe' }, err => {
+          expect(err).to.not.exist;
+          // Wait for a second before finishing up, to ensure we have written the item to disk
+          setTimeout(function () {
+            // Fetch the document
+            collection.findOne({ hello: 'world_no_safe' }, function (err, item) {
+              expect(err).to.not.exist;
+              test.equal('world_no_safe', item.hello);
+              client.close(done);
+            });
+          }, 100);
+        });
       });
       // END
     }
@@ -2363,7 +2364,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2384,11 +2385,11 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Fetch the document
             collection.findOne({ hello: 'world_safe2' }, function (err, item) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal('world_safe2', item.hello);
               client.close(done);
             });
@@ -2414,7 +2415,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2441,11 +2442,11 @@ describe('Operation Examples', function () {
           o,
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Fetch the document
             collection.findOne({ hello: 'world' }, function (err, item) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok('function() {}', item.code);
               client.close(done);
             });
@@ -2474,7 +2475,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2493,7 +2494,7 @@ describe('Operation Examples', function () {
         // Add an unique index to title to force errors in the batch insert
         collection.ensureIndex({ title: 1 }, { unique: true }, function (err, indexName) {
           test.ok(indexName);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert some intial data into the collection
           collection.insertMany(
@@ -2501,7 +2502,7 @@ describe('Operation Examples', function () {
             configuration.writeConcernMax(),
             function (err, result) {
               test.ok(result);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Force keep going flag, ignoring unique index issue
               collection.insert(
@@ -2512,7 +2513,7 @@ describe('Operation Examples', function () {
                 ],
                 { w: 1, keepGoing: true },
                 function (err, result) {
-                  test.equal(result, null);
+                  expect(result).to.not.exist;
                   test.ok(err);
                   test.ok(err.result);
 
@@ -2544,7 +2545,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2589,7 +2590,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2635,7 +2636,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -2689,7 +2690,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2702,19 +2703,19 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Fetch a collection to insert document into
         var collection = db.collection('remove_subset_of_documents_safe');
         // Insert a bunch of documents
         collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Remove all the document
           collection.removeOne({ a: 1 }, { w: 1 }, function (err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
+            expect(err).to.not.exist;
+            expect(r).property('deletedCount').to.equal(1);
             client.close(done);
           });
         });
@@ -2736,7 +2737,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2753,11 +2754,11 @@ describe('Operation Examples', function () {
         db.createCollection('test_rename_collection', function (err, collection1) {
           db.createCollection('test_rename_collection2', function (err, collection2) {
             test.ok(collection2);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Attemp to rename a collection to a number
             try {
-              collection1.rename(5, function(err, collection) {}); // eslint-disable-line
+              collection1.rename(5, function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection name must be a String', err.message);
@@ -2765,7 +2766,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an empty string
             try {
-              collection1.rename('', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection names cannot be empty', err.message);
@@ -2773,7 +2774,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name including the character $
             try {
-              collection1.rename('te$t', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('te$t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not contain '$'", err.message);
@@ -2781,7 +2782,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name starting with the character .
             try {
-              collection1.rename('.test', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('.test', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2789,7 +2790,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name ending with the character .
             try {
-              collection1.rename('test.', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('test.', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2797,7 +2798,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name with an empty middle name
             try {
-              collection1.rename('tes..t', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('tes..t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.equal('collection names cannot be empty', err.message);
             }
@@ -2808,11 +2809,11 @@ describe('Operation Examples', function () {
               docs
             ) {
               test.ok(docs);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Attemp to rename the first collection to the second one, this will fail
               collection1.rename('test_rename_collection2', function (err, collection) {
-                test.equal(null, collection);
+                expect(collection).to.not.exist;
                 test.ok(err instanceof Error);
                 test.ok(err.message.length > 0);
 
@@ -2849,7 +2850,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2868,7 +2869,7 @@ describe('Operation Examples', function () {
         // Insert a document, then update it
         collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Update the document with an atomic operator
           collection.updateOne({ a: 1 }, { $set: { b: 2 } });
@@ -2877,7 +2878,7 @@ describe('Operation Examples', function () {
           setTimeout(function () {
             // Fetch the document that we modified
             collection.findOne({ a: 1 }, function (err, item) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, item.a);
               test.equal(2, item.b);
               client.close(done);
@@ -2902,7 +2903,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2922,12 +2923,12 @@ describe('Operation Examples', function () {
           err,
           result
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(1, result.result.n);
 
           // Fetch the document that we modified and check if it got inserted correctly
           collection.findOne({ a: 1 }, function (err, item) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, item.a);
             test.equal(2, item.b);
             client.close(done);
@@ -2951,7 +2952,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -2976,16 +2977,16 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var o = configuration.writeConcernMax();
             collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o, function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(2, r.result.n);
 
               // Fetch all the documents and verify that we have changed the b value
               collection.find().toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, items[0].a);
                 test.equal(0, items[0].b);
                 test.equal(1, items[1].a);
@@ -3014,7 +3015,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3036,7 +3037,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Retrieve the statistics for the collection
             collection.stats(function (err, stats) {
@@ -3064,7 +3065,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3090,7 +3091,7 @@ describe('Operation Examples', function () {
           { w: 1 },
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             collection.ensureIndex(
@@ -3098,7 +3099,7 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Create an additional index
                 collection.ensureIndex(
@@ -3108,13 +3109,13 @@ describe('Operation Examples', function () {
                     // Drop the index
                     collection.dropAllIndexes(function (err, result) {
                       test.ok(result);
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
 
                       // Verify that the index is gone
                       collection.indexInformation(function (err, indexInformation) {
                         test.deepEqual([['_id', 1]], indexInformation._id_);
-                        test.equal(undefined, indexInformation.a_1_b_1);
-                        test.equal(undefined, indexInformation.c_1);
+                        expect(indexInformation.a_1_b_1).to.not.exist;
+                        expect(indexInformation.c_1).to.not.exist;
 
                         client.close(done);
                       });
@@ -3149,7 +3150,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3185,7 +3186,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       // NODE-2484: investigate double close event in Unified Topology environment
       // client.on('close', function() {
       //   done();
@@ -3201,7 +3202,7 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         client.close(done);
       });
@@ -3222,7 +3223,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -3257,9 +3258,9 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3278,18 +3279,18 @@ describe('Operation Examples', function () {
         // Ensure the collection was created
         collection.insertOne({ a: 1 }, function (err, r) {
           test.ok(r);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Return the information of a single collection name
           db1
             .listCollections({ name: 'shouldCorrectlyRetrievelistCollections' })
             .toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, items.length);
 
               // Return the information of a all collections, using the callback format
               db1.listCollections().toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.ok(items.length >= 1);
 
                 client.close(done);
@@ -3306,9 +3307,9 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        test.equal(null, err);
+        expect(err).to.not.exist;
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -3326,7 +3327,7 @@ describe('Operation Examples', function () {
         // Ensure the collection was created
         collection.insertOne({ a: 1 }, function (err, r) {
           test.ok(r);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Return the information of a single collection name
           db1
@@ -3359,7 +3360,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3372,25 +3373,25 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Grab a collection with a callback but no safe operation
         db.collection('test_correctly_access_collections', function (err, col2) {
           test.ok(col2);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
           db.collection('test_correctly_access_collections', { strict: true }, function (
             err,
             col3
           ) {
-            test.equal(null, col3);
+            expect(col3).to.not.exist;
             test.ok(err != null);
 
             // Create the collection
             db.createCollection('test_correctly_access_collections', function (err, result) {
               test.ok(result);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Retry to get the collection, should work as it's now created
               db.collection('test_correctly_access_collections', { strict: true }, function (
@@ -3398,7 +3399,7 @@ describe('Operation Examples', function () {
                 col3
               ) {
                 test.ok(col3);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 client.close(done);
               });
@@ -3423,7 +3424,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3436,11 +3437,11 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Retry to get the collection, should work as it's now created
         db.collections(function (err, collections) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(collections.length > 0);
 
           client.close(done);
@@ -3461,7 +3462,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3474,17 +3475,17 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Add a user to the database
         db.addUser('user', 'name', function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Remove the user from the db
           db.removeUser('user', function (err, result) {
+            expect(err).to.not.exist;
             test.ok(result);
-            test.equal(null, err);
 
             client.close(done);
           });
@@ -3506,7 +3507,7 @@ describe('Operation Examples', function () {
     test: function (done) {
       var configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3519,12 +3520,12 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Add a user to the database
         db.addUser('user', 'name', function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
           client.close();
 
           const secondClient = configuration.newClient(
@@ -3532,7 +3533,7 @@ describe('Operation Examples', function () {
           );
 
           secondClient.connect(function (err) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             var db = secondClient.db(configuration.db);
 
             // Logout the db
@@ -3542,7 +3543,7 @@ describe('Operation Examples', function () {
               // Remove the user from the db
               db.removeUser('user', function (err, result) {
                 test.ok(result);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 const oldClient = secondClient;
                 const thirdClient = configuration.newClient(
@@ -3578,7 +3579,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3591,19 +3592,19 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection',
           { capped: true, size: 10000, max: 1000, w: 1 },
           function (err, collection) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Insert a document in the capped collection
             collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
               test.ok(result);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               client.close(done);
             });
@@ -3627,7 +3628,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3640,19 +3641,19 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Execute ping against the server
         db.command({ ping: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Create a capped collection with a maximum of 1000 documents
           db.createCollection(
             'a_simple_create_drop_collection',
             { capped: true, size: 10000, max: 1000, w: 1 },
             function (err, collection) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Insert a document in the capped collection
               collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (
@@ -3660,12 +3661,12 @@ describe('Operation Examples', function () {
                 result
               ) {
                 test.ok(result);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Drop the collection from this world
                 db.dropCollection('a_simple_create_drop_collection', function (err, result) {
                   test.ok(result);
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Verify that the collection is gone
                   db.listCollections({ name: 'a_simple_create_drop_collection' }).toArray(function (
@@ -3699,7 +3700,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3712,12 +3713,12 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Execute ping against the server
         db.command({ ping: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           client.close(done);
         });
@@ -3739,7 +3740,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3752,19 +3753,19 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Create a collection
         db.createCollection('simple_rename_collection', configuration.writeConcernMax(), function (
           err,
           collection
         ) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Insert a document in the collection
           collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Retrieve the number of documents from the collection
             collection.count(function (err, count) {
@@ -3775,7 +3776,7 @@ describe('Operation Examples', function () {
                 'simple_rename_collection',
                 'simple_rename_collection_2',
                 function (err, collection2) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
 
                   // Retrieve the number of documents from the collection
                   collection2.count(function (err, count) {
@@ -3822,7 +3823,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3848,7 +3849,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             db.createIndex(
@@ -3857,16 +3858,16 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Show that duplicate records got dropped
                 collection.find({}).toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
                   collection.find({ a: 2 }).explain(function (err, explanation) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(explanation != null);
 
                     client.close(done);
@@ -3894,7 +3895,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3920,7 +3921,7 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Create an index on the a field
             db.ensureIndex(
@@ -3929,16 +3930,16 @@ describe('Operation Examples', function () {
               { unique: true, background: true, w: 1 },
               function (err, indexName) {
                 test.ok(indexName);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Show that duplicate records got dropped
                 collection.find({}).toArray(function (err, items) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.equal(4, items.length);
 
                   // Perform a query, with explain to show we hit the query
                   collection.find({ a: 2 }).explain(function (err, explanation) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.ok(explanation != null);
 
                     client.close(done);
@@ -3964,7 +3965,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -3991,12 +3992,12 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Let's drop the database
             db.dropDatabase(function (err, result) {
               test.ok(result);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Wait two seconds to let it replicate across
               setTimeout(function () {
@@ -4039,7 +4040,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4052,10 +4053,10 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.stats(function (err, stats) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(stats != null);
 
           client.close(done);
@@ -4078,7 +4079,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4091,7 +4092,7 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Reference a different database sharing the same connections
         // for the data transfer
@@ -4104,11 +4105,11 @@ describe('Operation Examples', function () {
         // Write a record into each and then count the records stored
         multipleColl1.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           multipleColl2.insertOne({ a: 1 }, { w: 1 }, function (err, result) {
             test.ok(result);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Count over the results ensuring only on record in each collection
             multipleColl1.count(function (err, count) {
@@ -4184,7 +4185,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4204,7 +4205,7 @@ describe('Operation Examples', function () {
         // Retrieve the build information for the MongoDB instance
         adminDb.buildInfo(function (err, info) {
           test.ok(info);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           client.close(done);
         });
@@ -4224,7 +4225,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4243,7 +4244,7 @@ describe('Operation Examples', function () {
         // Retrieve the build information using the admin command
         adminDb.command({ buildInfo: 1 }, function (err, info) {
           test.ok(info);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           client.close(done);
         });
@@ -4263,7 +4264,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4284,7 +4285,7 @@ describe('Operation Examples', function () {
         // Collections are not created until the first document is inserted
         collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Use the admin database for the operation
           var adminDb = client.db('admin');
@@ -4292,7 +4293,7 @@ describe('Operation Examples', function () {
           // Retrieve the profiling level
           adminDb.profilingLevel(function (err, level) {
             test.ok(level);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -4314,7 +4315,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4335,27 +4336,27 @@ describe('Operation Examples', function () {
         // Collections are not created until the first document is inserted
         collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Use the admin database for the operation
           // Set the profiling level to all
           db.setProfilingLevel('all', function (err, level) {
             test.ok(level);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Execute a query command
             collection.find().toArray(function (err, items) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(items.length > 0);
 
               // Turn off profiling
               db.setProfilingLevel('off', function (err, level) {
                 test.ok(level);
-                test.equal(null, err);
+                expect(err).to.not.exist;
 
                 // Retrieve the profiling information
                 db.profilingInfo(function (err, infos) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.ok(infos.constructor === Array);
                   test.ok(infos.length >= 1);
                   test.ok(infos[0].ts.constructor === Date);
@@ -4384,7 +4385,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4404,7 +4405,7 @@ describe('Operation Examples', function () {
         // Collections are not created until the first document is inserted
         collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Use the admin database for the operation
           var adminDb = db.admin();
@@ -4412,7 +4413,7 @@ describe('Operation Examples', function () {
           // Validate the 'test' collection
           adminDb.validateCollection('test', function (err, doc) {
             test.ok(doc);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -4432,7 +4433,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4451,7 +4452,7 @@ describe('Operation Examples', function () {
         // Ping the server
         adminDb.ping(function (err, pingResult) {
           test.ok(pingResult);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           client.close(done);
         });
@@ -4471,7 +4472,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4489,9 +4490,11 @@ describe('Operation Examples', function () {
 
         // Add the new user to the admin database
         adminDb.addUser('admin11', 'admin11', function (err, result) {
+          expect(err).to.not.exist;
           test.ok(result);
 
           adminDb.removeUser('admin11', function (err, result) {
+            expect(err).to.not.exist;
             test.ok(result);
 
             client.close(done);
@@ -4512,7 +4515,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4534,7 +4537,7 @@ describe('Operation Examples', function () {
 
           // Remove the user
           adminDb.removeUser('admin12', function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(true, result);
 
             client.close(done);
@@ -4558,7 +4561,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4576,7 +4579,7 @@ describe('Operation Examples', function () {
 
         // List all the available databases
         adminDb.listDatabases(function (err, dbs) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.ok(dbs.databases.length > 0);
 
           client.close(done);
@@ -4596,7 +4599,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4635,7 +4638,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4655,14 +4658,14 @@ describe('Operation Examples', function () {
         // Collections are not created until the first document is inserted
         collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Use the admin database for the operation
           var adminDb = db.admin();
 
           // Retrieve the server Info
           adminDb.serverStatus(function (err, info) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.ok(info != null);
 
             client.close(done);
@@ -4684,7 +4687,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4704,7 +4707,7 @@ describe('Operation Examples', function () {
         // Collections are not created until the first document is inserted
         collection.insertOne({ a: 1 }, { w: 1 }, function (err, doc) {
           test.ok(doc);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Use the admin database for the operation
           var adminDb = db.admin();
@@ -4713,7 +4716,7 @@ describe('Operation Examples', function () {
           // running a replicaset
           adminDb.replSetGetStatus(function (err, info) {
             test.ok(info);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             client.close(done);
           });
@@ -4744,7 +4747,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4766,7 +4769,7 @@ describe('Operation Examples', function () {
           ids
         ) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Retrieve all the documents in the collection
           collection.find().toArray(function (err, documents) {
@@ -4796,7 +4799,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4815,24 +4818,26 @@ describe('Operation Examples', function () {
         // Insert a document in the collection
         collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Grab a cursor
           var cursor = collection.find();
           // Execute the each command, triggers for each document
-          cursor.each(function (err, item) {
-            // If the item is null then the cursor is exhausted/empty and closed
-            if (item == null) {
+          cursor.forEach(
+            () => {},
+            err => {
+              expect(err).to.not.exist;
+
               // Show that the cursor is closed
-              cursor.toArray(function (err, items) {
-                test.ok(items);
-                test.equal(null, err);
+              cursor.toArray((err, docs) => {
+                expect(err).to.not.exist;
+                expect(docs).to.exist;
 
                 // Let's close the db
                 client.close(done);
               });
             }
-          });
+          );
         });
       });
       // END
@@ -4854,7 +4859,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4873,7 +4878,7 @@ describe('Operation Examples', function () {
         // Insert a document in the collection
         collection.insertOne({ a: 1 }, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Count of documents returned
           var count = 0;
@@ -4886,7 +4891,7 @@ describe('Operation Examples', function () {
               count = count + 1;
             },
             function (err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, count);
               client.close(done);
             }
@@ -4903,7 +4908,8 @@ describe('Operation Examples', function () {
    * @example-class Cursor
    * @example-method rewind
    */
-  it('Should correctly rewind and restart cursor', {
+  // NOTE: unclear whether we should continue to support `rewind`
+  it.skip('Should correctly rewind and restart cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -4912,7 +4918,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4939,7 +4945,7 @@ describe('Operation Examples', function () {
         // insert all docs
         collection.insertMany(docs, configuration.writeConcernMax(), function (err, result) {
           test.ok(result);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Grab a cursor using the find
           var cursor = collection.find({});
@@ -4977,7 +4983,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -4999,11 +5005,11 @@ describe('Operation Examples', function () {
           docs
         ) {
           test.ok(docs);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Do a find and get the cursor count
           collection.find().count(function (err, count) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, count);
 
             client.close(done);
@@ -5029,7 +5035,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5051,14 +5057,14 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, docs) {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Do normal ascending sort
             collection
               .find()
               .sort({ a: 1 })
               .next(function (err, item) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, item.a);
 
                 // Do normal descending sort, with new syntax that enforces ordering of sort keys
@@ -5066,7 +5072,7 @@ describe('Operation Examples', function () {
                   .find()
                   .sort([['a', -1]])
                   .next(function (err, item) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(3, item.a);
 
                     client.close(done);
@@ -5094,7 +5100,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5116,14 +5122,14 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, docs) {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Limit to only one document returned
             collection
               .find()
               .limit(1)
               .toArray(function (err, items) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, items.length);
 
                 client.close(done);
@@ -5150,7 +5156,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5172,14 +5178,14 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, docs) {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Skip one document
             collection
               .find()
               .skip(1)
               .next(function (err, item) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(2, item.a);
 
                 client.close(done);
@@ -5207,8 +5213,11 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function (err, client) {
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -5219,28 +5228,25 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         // Create a collection
-        var collection = db.collection('simple_batch_size_collection');
+        const collection = db.collection('simple_batch_size_collection');
 
         // Insert some documents we can sort on
         collection.insertMany(
           [{ a: 1 }, { a: 2 }, { a: 3 }],
           configuration.writeConcernMax(),
-          function (err, docs) {
+          (err, docs) => {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Do normal ascending sort
             const cursor = collection.find().batchSize(1);
-            cursor.next(function (err, item) {
-              test.equal(null, err);
+            this.defer(() => cursor.close());
+            cursor.next((err, item) => {
+              expect(err).to.not.exist;
               test.equal(1, item.a);
-
-              // Need to close cursor, since it was not exhausted,
-              // and implicit session is still open
-              cursor.close();
-              client.close(done);
+              done();
             });
           }
         );
@@ -5264,7 +5270,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5286,37 +5292,37 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, docs) {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Do normal ascending sort
             var cursor = collection.find();
             // Perform hasNext check
             cursor.hasNext(function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.ok(r);
 
               cursor.next(function (err, r) {
-                test.equal(null, err);
+                expect(err).to.not.exist;
                 test.equal(1, r.a);
 
                 cursor.hasNext(function (err, r) {
-                  test.equal(null, err);
+                  expect(err).to.not.exist;
                   test.ok(r);
 
                   cursor.next(function (err, r) {
-                    test.equal(null, err);
+                    expect(err).to.not.exist;
                     test.equal(2, r.a);
 
                     cursor.hasNext(function (err, r) {
-                      test.equal(null, err);
+                      expect(err).to.not.exist;
                       test.ok(r);
 
                       cursor.next(function (err, r) {
-                        test.equal(null, err);
+                        expect(err).to.not.exist;
                         test.equal(3, r.a);
 
                         cursor.hasNext(function (err, r) {
-                          test.equal(null, err);
+                          expect(err).to.not.exist;
                           test.ok(!r);
 
                           client.close(done);
@@ -5349,7 +5355,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5371,12 +5377,12 @@ describe('Operation Examples', function () {
           configuration.writeConcernMax(),
           function (err, docs) {
             test.ok(docs);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Do normal ascending sort
             collection.find().explain(function (err, explanation) {
               test.ok(explanation);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               client.close(done);
             });
@@ -5402,7 +5408,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5427,7 +5433,7 @@ describe('Operation Examples', function () {
         // Insert documents into collection
         collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a find to get a cursor
           var stream = collection.find().stream();
@@ -5448,9 +5454,6 @@ describe('Operation Examples', function () {
 
   /**
    * A simple example showing the use of the cursor close function.
-   *
-   * @example-class Cursor
-   * @example-method isClosed
    */
   it('shouldStreamDocumentsUsingTheIsCloseFunction', {
     // Add a tag that our runner can trigger on
@@ -5461,7 +5464,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5486,7 +5489,7 @@ describe('Operation Examples', function () {
         // Insert documents into collection
         collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a find to get a cursor
           var cursor = collection.find();
@@ -5494,13 +5497,12 @@ describe('Operation Examples', function () {
           // Fetch the first object
           cursor.next(function (err, object) {
             test.ok(object);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function (err, result) {
-              test.ok(result);
-              test.equal(null, err);
-              test.equal(true, cursor.isClosed());
+            cursor.close(function (err) {
+              expect(err).to.not.exist;
+              test.equal(true, cursor.closed);
 
               client.close(done);
             });
@@ -5526,7 +5528,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5551,7 +5553,7 @@ describe('Operation Examples', function () {
         // Insert documents into collection
         collection.insertMany(docs, configuration.writeConcernMax(), function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a find to get a cursor
           var cursor = collection.find();
@@ -5559,12 +5561,11 @@ describe('Operation Examples', function () {
           // Fetch the first object
           cursor.next(function (err, object) {
             test.ok(object);
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function (err, result) {
-              test.ok(result);
-              test.equal(null, err);
+            cursor.close(function (err) {
+              expect(err).to.not.exist;
 
               client.close(done);
             });
@@ -5588,7 +5589,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5614,7 +5615,7 @@ describe('Operation Examples', function () {
         // Insert documents into collection
         collection.insertMany(docs, { w: 1 }, function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a find to get a cursor
           var stream = collection.find().stream();
@@ -5634,7 +5635,7 @@ describe('Operation Examples', function () {
 
           // When the stream is done
           stream.on('end', function () {
-            test.equal(null, fetchedDocs[1]);
+            expect(fetchedDocs[1]).to.not.exist;
             client.close(done);
           });
         });
@@ -5656,7 +5657,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5681,10 +5682,11 @@ describe('Operation Examples', function () {
         // Insert documents into collection
         collection.insertMany(docs, { w: 1 }, function (err, ids) {
           test.ok(ids);
-          test.equal(null, err);
+          expect(err).to.not.exist;
 
           // Perform a find to get a cursor
-          var stream = collection.find().stream();
+          const cursor = collection.find();
+          const stream = cursor.stream();
 
           // For each data item
           stream.on('data', function () {
@@ -5693,7 +5695,7 @@ describe('Operation Examples', function () {
           });
 
           // When the stream is done
-          stream.on('close', function () {
+          cursor.on('close', function () {
             client.close(done);
           });
         });
@@ -5731,6 +5733,7 @@ describe('Operation Examples', function () {
 
       const client = configuration.newClient(url);
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -5742,7 +5745,6 @@ describe('Operation Examples', function () {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        test.equal(null, err);
         test.ok(db != null);
 
         db.collection('replicaset_mongo_client_collection').updateOne(
@@ -5750,7 +5752,7 @@ describe('Operation Examples', function () {
           { $set: { b: 1 } },
           { upsert: true },
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, result.result.n);
 
             client.close(done);
@@ -5792,7 +5794,7 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
         test.ok(db != null);
 
         db.collection('replicaset_mongo_client_collection').updateOne(
@@ -5800,7 +5802,7 @@ describe('Operation Examples', function () {
           { $set: { b: 1 } },
           { upsert: true },
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, result.upsertedCount);
 
             client.close(done);
@@ -5823,9 +5825,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
-        native_parser: true
-      });
+      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
 
       // DOC_START
       // Connect using the connection string
@@ -5841,14 +5841,14 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         db.collection('mongoclient_test').updateOne(
           { a: 1 },
           { $set: { b: 1 } },
           { upsert: true },
           function (err, result) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, result.result.n);
 
             client.close(done);
@@ -6066,7 +6066,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6131,7 +6131,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6204,7 +6204,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6220,7 +6220,7 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('insert_one');
         col.insertOne({ a: 1 }, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(1, r.insertedCount);
           // Finish up test
           client.close(done);
@@ -6243,7 +6243,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6259,7 +6259,7 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('insert_many');
         col.insertMany([{ a: 1 }, { a: 2 }], function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(2, r.insertedCount);
           // Finish up test
           client.close(done);
@@ -6282,7 +6282,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6298,7 +6298,7 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('update_one');
         col.updateOne({ a: 1 }, { $set: { a: 2 } }, { upsert: true }, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(0, r.matchedCount);
           test.equal(1, r.upsertedCount);
           // Finish up test
@@ -6322,7 +6322,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6338,12 +6338,12 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('update_many');
         col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(2, r.insertedCount);
 
           // Update all documents
           col.updateMany({ a: 1 }, { $set: { b: 1 } }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, r.matchedCount);
             test.equal(2, r.modifiedCount);
 
@@ -6369,7 +6369,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6385,11 +6385,11 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('remove_one');
         col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(2, r.insertedCount);
 
           col.removeOne({ a: 1 }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, r.deletedCount);
             // Finish up test
             client.close(done);
@@ -6413,7 +6413,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6429,12 +6429,12 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('remove_many');
         col.insertMany([{ a: 1 }, { a: 1 }], function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(2, r.insertedCount);
 
           // Update all documents
           col.removeMany({ a: 1 }, function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(2, r.deletedCount);
 
             // Finish up test
@@ -6459,7 +6459,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6485,7 +6485,7 @@ describe('Operation Examples', function () {
           ],
           { ordered: true, w: 1 },
           function (err, r) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, r.nInserted);
             test.equal(2, r.nUpserted);
             test.equal(0, r.nRemoved);
@@ -6521,7 +6521,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6537,14 +6537,14 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('find_one_and_delete');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(1, r.result.n);
 
           col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }, function (
             err,
             r
           ) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
 
@@ -6569,7 +6569,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6585,7 +6585,7 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('find_one_and_replace');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(1, r.result.n);
 
           col.findOneAndReplace(
@@ -6598,7 +6598,7 @@ describe('Operation Examples', function () {
               upsert: true
             },
             function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
               test.equal(1, r.value.c);
@@ -6625,7 +6625,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6641,7 +6641,7 @@ describe('Operation Examples', function () {
         // Get the collection
         var col = db.collection('find_one_and_update');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
-          test.equal(null, err);
+          expect(err).to.not.exist;
           test.equal(1, r.result.n);
 
           col.findOneAndUpdate(
@@ -6654,7 +6654,7 @@ describe('Operation Examples', function () {
               upsert: true
             },
             function (err, r) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
               test.equal(1, r.value.d);
@@ -6681,7 +6681,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -6694,14 +6694,14 @@ describe('Operation Examples', function () {
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        expect(err).to.not.exist;
 
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection_2',
           { capped: true, size: 100000, max: 10000, w: 1 },
           function (err, collection) {
-            test.equal(null, err);
+            expect(err).to.not.exist;
 
             var docs = [];
             for (var i = 0; i < 1000; i++) docs.push({ a: i });
@@ -6709,7 +6709,7 @@ describe('Operation Examples', function () {
             // Insert a document in the capped collection
             collection.insertMany(docs, configuration.writeConcernMax(), function (err, result) {
               test.ok(result);
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               var total = 0;
 
@@ -6718,18 +6718,17 @@ describe('Operation Examples', function () {
                 .find({})
                 .addCursorFlag('tailable', true)
                 .addCursorFlag('awaitData', true);
+              const stream = cursor.stream();
 
-              cursor.on('data', function () {
+              stream.on('data', function () {
                 total = total + 1;
-
                 if (total === 1000) {
-                  cursor.kill();
+                  cursor.close();
                 }
               });
 
-              cursor.on('end', function () {
-                // TODO: forced because the cursor is still open/active
-                client.close(true, done);
+              cursor.on('close', function () {
+                client.close(done);
               });
             });
           }

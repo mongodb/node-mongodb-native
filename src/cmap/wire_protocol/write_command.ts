@@ -1,16 +1,40 @@
 import { MongoError } from '../../error';
-import { collectionNamespace } from '../../utils';
-import command = require('./command');
+import { collectionNamespace, Callback, decorateWithExplain } from '../../utils';
+import { command, CommandOptions } from './command';
+import type { Server } from '../../sdam/server';
+import type { Document, BSONSerializeOptions } from '../../bson';
+import type { WriteConcern } from '../../write_concern';
+import { Explain, ExplainOptions } from '../../explain';
 
-function writeCommand(
-  server: any,
-  type: any,
-  opsField: any,
-  ns: any,
-  ops: any,
-  options: any,
-  callback: Function
-) {
+/** @public */
+export interface CollationOptions {
+  locale: string;
+  caseLevel: boolean;
+  caseFirst: string;
+  strength: number;
+  numericOrdering: boolean;
+  alternate: string;
+  maxVariable: string;
+  backwards: boolean;
+}
+
+/** @internal */
+export interface WriteCommandOptions extends BSONSerializeOptions, CommandOptions, ExplainOptions {
+  ordered?: boolean;
+  writeConcern?: WriteConcern;
+  collation?: CollationOptions;
+  bypassDocumentValidation?: boolean;
+}
+
+export function writeCommand(
+  server: Server,
+  type: string,
+  opsField: string,
+  ns: string,
+  ops: Document[],
+  options: WriteCommandOptions,
+  callback: Callback
+): void {
   if (ops.length === 0) throw new MongoError(`${type} must contain at least one document`);
   if (typeof options === 'function') {
     callback = options;
@@ -20,7 +44,7 @@ function writeCommand(
   options = options || {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
-  const writeCommand: any = {} as any;
+  let writeCommand: Document = {};
   writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -41,6 +65,13 @@ function writeCommand(
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
+  // If a command is to be explained, we need to reformat the command after
+  // the other command properties are specified.
+  const explain = Explain.fromOptions(options);
+  if (explain) {
+    writeCommand = decorateWithExplain(writeCommand, explain);
+  }
+
   const commandOptions = Object.assign(
     {
       checkKeys: type === 'insert',
@@ -51,5 +82,3 @@ function writeCommand(
 
   command(server, ns, writeCommand, commandOptions, callback);
 }
-
-export = writeCommand;

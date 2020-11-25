@@ -2,7 +2,9 @@
 
 const expect = require('chai').expect;
 const f = require('util').format;
-const setupDatabase = require('./shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { MongoDBNamespace } = require('../../../src/utils');
 
 describe('Cursor tests', function () {
   before(function () {
@@ -11,7 +13,7 @@ describe('Cursor tests', function () {
 
   it('Should iterate cursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -34,23 +36,24 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
-              var cursor = topology.cursor(ns, {
-                find: ns,
-                query: {},
-                batchSize: 2
-              });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
                 expect(cursor.bufferedCount()).to.equal(1);
 
                 // Kill the cursor
-                cursor._next((killCursorErr, killCursorD) => {
+                cursor.next((killCursorErr, killCursorD) => {
                   expect(killCursorErr).to.not.exist;
                   expect(killCursorD.a).to.equal(2);
                   expect(cursor.bufferedCount()).to.equal(0);
@@ -67,7 +70,7 @@ describe('Cursor tests', function () {
 
   it('Should iterate cursor but readBuffered', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -91,17 +94,18 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(5);
+              expect(results.n).to.equal(5);
 
               // Execute find
-              const cursor = topology.cursor(ns, {
-                find: ns,
-                query: {},
-                batchSize: 5
-              });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 5 }
+              );
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
                 expect(cursor.bufferedCount()).to.equal(4);
@@ -110,7 +114,7 @@ describe('Cursor tests', function () {
                 cursor.readBufferedDocuments(cursor.bufferedCount());
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
 
@@ -127,7 +131,7 @@ describe('Cursor tests', function () {
 
   it('Should callback exhausted cursor with error', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -151,24 +155,29 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(1);
+              expect(results.n).to.equal(1);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 5 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD).to.not.exist;
 
-                  cursor._next((thirdCursorErr, thirdCursorD) => {
-                    expect(thirdCursorErr).to.be.ok;
-                    expect(thirdCursorD).to.be.undefined;
+                  cursor.next((thirdCursorErr, thirdCursorD) => {
+                    expect(thirdCursorErr).to.not.exist;
+                    expect(thirdCursorD).to.be.null;
                     // Destroy the server connection
                     server.destroy(done);
                   });
@@ -183,7 +192,7 @@ describe('Cursor tests', function () {
 
   it('Should force a getMore call to happen', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -207,22 +216,27 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD.a).to.equal(2);
 
-                  cursor._next((thirdCursorErr, thirdCursorD) => {
+                  cursor.next((thirdCursorErr, thirdCursorD) => {
                     expect(thirdCursorErr).to.not.exist;
                     expect(thirdCursorD.a).to.equal(3);
                     // Destroy the server connection
@@ -239,7 +253,7 @@ describe('Cursor tests', function () {
 
   it('Should force a getMore call to happen then call killCursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -263,27 +277,32 @@ describe('Cursor tests', function () {
             },
             (err, results) => {
               expect(err).to.not.exist;
-              expect(results.result.n).to.equal(3);
+              expect(results.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
-              cursor._next((nextCursorErr, nextCursorD) => {
+              cursor.next((nextCursorErr, nextCursorD) => {
                 expect(nextCursorErr).to.not.exist;
                 expect(nextCursorD.a).to.equal(1);
 
                 // Get the next item
-                cursor._next((secondCursorErr, secondCursorD) => {
+                cursor.next((secondCursorErr, secondCursorD) => {
                   expect(secondCursorErr).to.not.exist;
                   expect(secondCursorD.a).to.equal(2);
 
                   // Kill cursor
-                  cursor.kill(() => {
+                  cursor.close(() => {
                     // Should error out
-                    cursor._next((thirdCursorErr, thirdCursorD) => {
+                    cursor.next((thirdCursorErr, thirdCursorD) => {
                       expect(thirdCursorErr).to.not.exist;
-                      expect(thirdCursorD).to.not.exist;
+                      expect(thirdCursorD).to.be.null;
 
                       // Destroy the server connection
                       server.destroy(done);
@@ -301,7 +320,7 @@ describe('Cursor tests', function () {
   // Skipped due to usage of the topology manager
   it.skip('Should fail cursor correctly after server restart', {
     metadata: {
-      requires: { topology: ['single'] }
+      requires: { topology: ['single'], mongodb: '>=3.2' }
     },
 
     test: function (done) {
@@ -320,24 +339,29 @@ describe('Cursor tests', function () {
           },
           function (err, results) {
             expect(err).to.not.exist;
-            expect(results.result.n).to.equal(3);
+            expect(results.n).to.equal(3);
 
             // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+            const cursor = new FindCursor(
+              _server,
+              MongoDBNamespace.fromString(ns),
+              {},
+              { batchSize: 2 }
+            );
 
             // Execute next
-            cursor._next(function (nextCursorErr, nextCursorD) {
+            cursor.next(function (nextCursorErr, nextCursorD) {
               expect(nextCursorErr).to.not.exist;
               expect(nextCursorD.a).to.equal(1);
 
               // Get the next item
-              cursor._next(function (secondCursorErr, secondCursorD) {
+              cursor.next(function (secondCursorErr, secondCursorD) {
                 expect(secondCursorErr).to.not.exist;
                 expect(secondCursorD.a).to.equal(2);
 
                 self.configuration.manager.restart(false).then(function () {
                   // Should error out
-                  cursor._next(function (thirdCursorErr, thirdCursorD) {
+                  cursor.next(function (thirdCursorErr, thirdCursorD) {
                     expect(thirdCursorErr).to.be.ok;
                     expect(thirdCursorD).to.be.undefined;
 
@@ -355,66 +379,4 @@ describe('Cursor tests', function () {
       server.connect();
     }
   });
-
-  // NOTE: a notoriously flakey test, needs rewriting
-  // Commented out to stop before task from running and breaking auth tests
-  // it.skip('should not hang if autoReconnect=false and pools sockets all timed out', {
-  //   metadata: { requires: { topology: ['single'] } },
-  //   test: function(done) {
-  //     var configuration = this.configuration,
-  //       Server = require('../../../src/core/topologies/server'),
-  //     // Attempt to connect
-  //     var server = new Server({
-  //       host: configuration.host,
-  //       port: configuration.port,
-  //       // Nasty edge case: small timeout, small pool, no auto reconnect
-  //       socketTimeout: 250,
-  //       size: 1,
-  //       reconnect: false
-  //     });
-
-  //     var ns = f('%s.cursor7', configuration.db);
-  //     server.on('connect', function() {
-  //       // Execute the write
-  //       server.insert(
-  //         ns,
-  //         [{ a: 1 }],
-  //         {
-  //           writeConcern: { w: 1 },
-  //           ordered: true
-  //         },
-  //         function(err, results) {
-  //           expect(err).to.not.exist;
-  //           expect(results.result.n).to.equal(1);
-
-  //           // Execute slow find
-  //           var cursor = server.cursor(ns, {
-  //             find: ns,
-  //             query: { $where: 'sleep(250) || true' },
-  //             batchSize: 1
-  //           });
-
-  //           // Execute next
-  //           cursor._next(function(err) {
-  //             expect(err).to.exist;
-
-  //             cursor = server.cursor(ns, {
-  //               find: ns,
-  //               query: {},
-  //               batchSize: 1
-  //             });
-
-  //             cursor._next(function(err) {
-  //               expect(err).to.exist;
-  //               done();
-  //             });
-  //           });
-  //         }
-  //       );
-  //     });
-
-  //     // Start connection
-  //     server.connect();
-  //   }
-  // });
 });

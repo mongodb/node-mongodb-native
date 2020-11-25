@@ -1,23 +1,41 @@
-import { OperationBase } from './operation';
-import BulkWriteOperation = require('./bulk_write');
+import { Aspect, defineAspects, OperationBase } from './operation';
+import { BulkWriteOperation } from './bulk_write';
 import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
+import type { Callback } from '../utils';
+import type { Collection } from '../collection';
+import type { ObjectId, Document } from '../bson';
+import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
+import type { Server } from '../sdam/server';
 
-class InsertManyOperation extends OperationBase {
-  collection: any;
-  docs: any;
+/** @public */
+export interface InsertManyResult {
+  /** The total amount of documents inserted. */
+  insertedCount: number;
+  /** Map of the index of the inserted document to the id of the inserted document. */
+  insertedIds: { [key: number]: ObjectId };
+  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
+  ops: Document[];
+  /** The raw command result object returned from MongoDB (content might vary by server version). */
+  result: Document;
+}
 
-  constructor(collection: any, docs: any, options: any) {
+/** @internal */
+export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertManyResult> {
+  collection: Collection;
+  docs: Document[];
+
+  constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
     super(options);
 
     this.collection = collection;
     this.docs = docs;
   }
 
-  execute(callback: Function) {
+  execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
     let docs = this.docs;
-    const options = this.options;
+    const options = { ...this.options, ...this.bsonOptions };
 
     if (!Array.isArray(docs)) {
       return callback(
@@ -25,34 +43,26 @@ class InsertManyOperation extends OperationBase {
       );
     }
 
-    // If keep going set unordered
-    options['serializeFunctions'] = options['serializeFunctions'] || coll.s.serializeFunctions;
-
     docs = prepareDocs(coll, docs, options);
 
     // Generate the bulk write operations
-    const operations = [
-      {
-        insertMany: docs
-      }
-    ];
-
+    const operations = [{ insertMany: docs }];
     const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
 
-    bulkWriteOperation.execute((err?: any, result?: any) => {
-      if (err) return callback(err, null);
-      callback(null, mapInsertManyResults(docs, result));
+    bulkWriteOperation.execute(server, (err, result) => {
+      if (err || !result) return callback(err);
+      callback(undefined, mapInsertManyResults(docs, result));
     });
   }
 }
 
-function mapInsertManyResults(docs: any, r: any) {
-  const finalResult = {
+function mapInsertManyResults(docs: Document[], r: BulkWriteResult): InsertManyResult {
+  const finalResult: InsertManyResult = {
     result: { ok: 1, n: r.insertedCount },
     ops: docs,
     insertedCount: r.insertedCount,
     insertedIds: r.insertedIds
-  } as any;
+  };
 
   if (r.getLastOp()) {
     finalResult.result.opTime = r.getLastOp();
@@ -61,4 +71,4 @@ function mapInsertManyResults(docs: any, r: any) {
   return finalResult;
 }
 
-export = InsertManyOperation;
+defineAspects(InsertManyOperation, [Aspect.WRITE_OPERATION]);

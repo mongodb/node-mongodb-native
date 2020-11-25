@@ -1,41 +1,61 @@
+/** @public */
+export enum ReadConcernLevel {
+  local = 'local',
+  majority = 'majority',
+  linearizable = 'linearizable',
+  available = 'available',
+  snapshot = 'snapshot'
+}
+
+/** @public */
+export type ReadConcernLevelLike = ReadConcernLevel | keyof typeof ReadConcernLevel;
+
+/** @public */
+export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelLike } | ReadConcernLevelLike;
+
 /**
- * The **ReadConcern** class is a class that represents a MongoDB ReadConcern.
+ * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
+ * of the data read from replica sets and replica set shards.
+ * @public
  *
- * @class
- * @property {string} level The read concern level
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
-class ReadConcern {
-  level?: string;
+export class ReadConcern {
+  level: ReadConcernLevel | string;
 
-  /**
-   * Constructs a ReadConcern from the read concern properties.
-   *
-   * @param {string} [level] The read concern level ({'local'|'available'|'majority'|'linearizable'|'snapshot'})
-   */
-  constructor(level?: string) {
-    if (level != null) {
-      this.level = level;
-    }
+  /** Constructs a ReadConcern from the read concern level.*/
+  constructor(level: ReadConcernLevelLike) {
+    /**
+     * A spec test exists that allows level to be any string.
+     * "invalid readConcern with out stage"
+     * @see ./test/spec/crud/v2/aggregate-out-readConcern.json
+     * @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#unknown-levels-and-additional-options-for-string-based-readconcerns
+     */
+    this.level = ReadConcernLevel[level] || level;
   }
 
   /**
    * Construct a ReadConcern given an options object.
    *
-   * @param {any} options The options object from which to extract the write concern.
-   * @returns {ReadConcern|undefined}
+   * @param options - The options object from which to extract the write concern.
    */
-  static fromOptions(options: any): ReadConcern | undefined {
+  static fromOptions(options?: {
+    readConcern?: ReadConcernLike;
+    level?: ReadConcernLevelLike;
+  }): ReadConcern | undefined {
     if (options == null) {
       return;
     }
 
     if (options.readConcern) {
-      if (options.readConcern instanceof ReadConcern) {
-        return options.readConcern;
+      const { readConcern } = options;
+      if (readConcern instanceof ReadConcern) {
+        return readConcern;
+      } else if (typeof readConcern === 'string') {
+        return new ReadConcern(readConcern);
+      } else if ('level' in readConcern && readConcern.level) {
+        return new ReadConcern(readConcern.level);
       }
-
-      return new ReadConcern(options.readConcern.level);
     }
 
     if (options.level) {
@@ -43,21 +63,19 @@ class ReadConcern {
     }
   }
 
-  static get MAJORITY() {
-    return 'majority';
+  static get MAJORITY(): string {
+    return ReadConcernLevel.majority;
   }
 
-  static get AVAILABLE() {
-    return 'available';
+  static get AVAILABLE(): string {
+    return ReadConcernLevel.available;
   }
 
-  static get LINEARIZABLE() {
-    return 'linearizable';
+  static get LINEARIZABLE(): string {
+    return ReadConcernLevel.linearizable;
   }
 
-  static get SNAPSHOT() {
-    return 'snapshot';
+  static get SNAPSHOT(): string {
+    return ReadConcernLevel.snapshot;
   }
 }
-
-export = ReadConcern;
