@@ -23,7 +23,8 @@ describe('AbstractCursor', function () {
     withClientV2((client, done) => {
       const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];
       const coll = client.db().collection('find_cursor');
-      coll.drop(() => coll.insertMany(docs, done));
+      const tryNextColl = client.db().collection('try_next');
+      coll.drop(() => tryNextColl.drop(() => coll.insertMany(docs, done)));
     })
   );
 
@@ -121,6 +122,40 @@ describe('AbstractCursor', function () {
             done();
           }
         );
+      })
+    );
+  });
+
+  context('#tryNext', function () {
+    it(
+      'should return control to the user if an empty batch is returned',
+      withClientV2(function (client, done) {
+        const db = client.db();
+        db.createCollection('try_next', { capped: true, size: 10000000 }, () => {
+          const coll = db.collection('try_next');
+          coll.insertMany([{}, {}], err => {
+            expect(err).to.not.exist;
+
+            const cursor = coll.find({}, { tailable: true, awaitData: true });
+            this.defer(() => cursor.close());
+
+            cursor.tryNext((err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.exist;
+
+              cursor.tryNext((err, doc) => {
+                expect(err).to.not.exist;
+                expect(doc).to.exist;
+
+                cursor.tryNext((err, doc) => {
+                  expect(err).to.not.exist;
+                  expect(doc).to.be.null;
+                  done();
+                });
+              });
+            });
+          });
+        });
       })
     );
   });

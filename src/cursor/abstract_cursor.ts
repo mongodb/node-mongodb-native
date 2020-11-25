@@ -213,7 +213,7 @@ export abstract class AbstractCursor extends EventEmitter {
         return done(undefined, true);
       }
 
-      next(this, (err, doc) => {
+      next(this, true, (err, doc) => {
         if (err) return done(err);
 
         if (doc) {
@@ -236,7 +236,23 @@ export abstract class AbstractCursor extends EventEmitter {
         return done(new MongoError('Cursor is exhausted'));
       }
 
-      next(this, done);
+      next(this, true, done);
+    });
+  }
+
+  /**
+   * Try to get the next available document from the cursor or `null` if an empty batch is returned
+   * @internal
+   */
+  tryNext(): Promise<Document | null>;
+  tryNext(callback: Callback<Document | null>): void;
+  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    return maybePromise(callback, done => {
+      if (this[kId] === Long.ZERO) {
+        return done(new MongoError('Cursor is exhausted'));
+      }
+
+      next(this, false, done);
     });
   }
 
@@ -259,7 +275,7 @@ export abstract class AbstractCursor extends EventEmitter {
     return maybePromise(callback, done => {
       const transform = this[kTransform];
       const fetchDocs = () => {
-        next(this, (err, doc) => {
+        next(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
           if (doc == null) return done();
 
@@ -350,7 +366,7 @@ export abstract class AbstractCursor extends EventEmitter {
       const transform = this[kTransform];
       const fetchDocs = () => {
         // NOTE: if we add a `nextBatch` then we should use it here
-        next(this, (err, doc) => {
+        next(this, true, (err, doc) => {
           if (err) return done(err);
           if (doc == null) return done(undefined, docs);
 
@@ -518,7 +534,11 @@ function nextDocument(cursor: AbstractCursor): Document | null | undefined {
   return null;
 }
 
-function next(cursor: AbstractCursor, callback: Callback<Document | null>): void {
+function next(
+  cursor: AbstractCursor,
+  blocking: boolean,
+  callback: Callback<Document | null>
+): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
@@ -577,7 +597,7 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
         return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
       }
 
-      next(cursor, callback);
+      next(cursor, blocking, callback);
     });
 
     return;
@@ -604,7 +624,11 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
       return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
     }
 
-    next(cursor, callback);
+    if (cursor[kDocuments].length === 0 && blocking === false) {
+      return callback(undefined, null);
+    }
+
+    next(cursor, blocking, callback);
   });
 }
 
@@ -666,7 +690,7 @@ function makeCursorStream(cursor: AbstractCursor) {
 
   function readNext() {
     needToClose = false;
-    next(cursor, (err, result) => {
+    next(cursor, true, (err, result) => {
       needToClose = err ? !cursor.closed : result !== null;
 
       if (err) {
