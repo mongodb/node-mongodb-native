@@ -3,6 +3,8 @@
 const expect = require('chai').expect;
 const f = require('util').format;
 const setupDatabase = require('../shared').setupDatabase;
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { MongoDBNamespace } = require('../../../src/utils');
 
 describe('Cursor tests', function () {
   before(function () {
@@ -37,11 +39,12 @@ describe('Cursor tests', function () {
               expect(results.n).to.equal(3);
 
               // Execute find
-              var cursor = topology.cursor(ns, {
-                find: 'cursor1',
-                filter: {},
-                batchSize: 2
-              });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
               cursor.next((nextCursorErr, nextCursorD) => {
@@ -94,11 +97,12 @@ describe('Cursor tests', function () {
               expect(results.n).to.equal(5);
 
               // Execute find
-              const cursor = topology.cursor(ns, {
-                find: 'cursor2',
-                filter: {},
-                batchSize: 5
-              });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 5 }
+              );
 
               // Execute next
               cursor.next((nextCursorErr, nextCursorD) => {
@@ -154,7 +158,12 @@ describe('Cursor tests', function () {
               expect(results.n).to.equal(1);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: 'cursor3', filter: {}, batchSize: 5 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
               cursor.next((nextCursorErr, nextCursorD) => {
@@ -167,8 +176,8 @@ describe('Cursor tests', function () {
                   expect(secondCursorD).to.not.exist;
 
                   cursor.next((thirdCursorErr, thirdCursorD) => {
-                    expect(thirdCursorErr).to.be.ok;
-                    expect(thirdCursorD).to.be.undefined;
+                    expect(thirdCursorErr).to.not.exist;
+                    expect(thirdCursorD).to.be.null;
                     // Destroy the server connection
                     server.destroy(done);
                   });
@@ -210,7 +219,12 @@ describe('Cursor tests', function () {
               expect(results.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
               cursor.next((nextCursorErr, nextCursorD) => {
@@ -266,7 +280,12 @@ describe('Cursor tests', function () {
               expect(results.n).to.equal(3);
 
               // Execute find
-              const cursor = topology.cursor(ns, { find: 'cursor4', filter: {}, batchSize: 2 });
+              const cursor = new FindCursor(
+                topology,
+                MongoDBNamespace.fromString(ns),
+                {},
+                { batchSize: 2 }
+              );
 
               // Execute next
               cursor.next((nextCursorErr, nextCursorD) => {
@@ -279,12 +298,11 @@ describe('Cursor tests', function () {
                   expect(secondCursorD.a).to.equal(2);
 
                   // Kill cursor
-                  cursor.kill(() => {
+                  cursor.close(() => {
                     // Should error out
                     cursor.next((thirdCursorErr, thirdCursorD) => {
-                      expect(thirdCursorErr).to.exist;
-                      expect(thirdCursorErr.message).to.equal('Cursor is closed');
-                      expect(thirdCursorD).to.not.exist;
+                      expect(thirdCursorErr).to.not.exist;
+                      expect(thirdCursorD).to.be.null;
 
                       // Destroy the server connection
                       server.destroy(done);
@@ -324,7 +342,12 @@ describe('Cursor tests', function () {
             expect(results.n).to.equal(3);
 
             // Execute find
-            var cursor = _server.cursor(ns, { find: 'cursor5', filter: {}, batchSize: 2 });
+            const cursor = new FindCursor(
+              _server,
+              MongoDBNamespace.fromString(ns),
+              {},
+              { batchSize: 2 }
+            );
 
             // Execute next
             cursor.next(function (nextCursorErr, nextCursorD) {

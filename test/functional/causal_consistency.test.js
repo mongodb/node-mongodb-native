@@ -74,7 +74,8 @@ describe('Causal Consistency', function () {
           expect(test.commands.succeeded).to.have.length(1);
 
           const lastReply = test.commands.succeeded[0].reply;
-          expect(session.operationTime).to.equal(lastReply.operationTime);
+          const maybeLong = val => (typeof val.equals === 'function' ? val.toNumber() : val);
+          expect(maybeLong(session.operationTime)).to.equal(maybeLong(lastReply.operationTime));
         });
     }
   });

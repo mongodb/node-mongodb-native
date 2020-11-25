@@ -166,7 +166,7 @@ function prepareLegacyFindQuery(
   options = options || {};
 
   const readPreference = getReadPreference(cmd, options);
-  const batchSize = cmd.batchSize || options.batchSize;
+  const batchSize = cmd.batchSize || options.batchSize || 0;
   const limit = cmd.limit || options.limit;
   const numberToSkip = cmd.skip || options.skip || 0;
 
@@ -192,10 +192,15 @@ function prepareLegacyFindQuery(
   if (cmd.maxScan) findCmd['$maxScan'] = cmd.maxScan;
   if (cmd.min) findCmd['$min'] = cmd.min;
   if (cmd.max) findCmd['$max'] = cmd.max;
-  if (typeof cmd.showDiskLoc !== 'undefined') findCmd['$showDiskLoc'] = cmd.showDiskLoc;
+  if (typeof cmd.showDiskLoc !== 'undefined') {
+    findCmd['$showDiskLoc'] = cmd.showDiskLoc;
+  } else if (typeof cmd.showRecordId !== 'undefined') {
+    findCmd['$showDiskLoc'] = cmd.showRecordId;
+  }
+
   if (cmd.comment) findCmd['$comment'] = cmd.comment;
   if (cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS;
-  if (options.explain !== undefined) {
+  if (options.explain) {
     // nToReturn must be 0 (match all) or negative (match N and close cursor)
     // nToReturn > 0 will give explain results equivalent to limit(0)
     numberToReturn = -Math.abs(cmd.limit || 0);

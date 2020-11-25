@@ -475,14 +475,14 @@ describe('Change Streams', function () {
         const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
         this.defer(() => changeStream.close());
 
-        assert.equal(changeStream.isClosed(), false);
-        assert.equal(changeStream.cursor.isClosed(), false);
+        assert.equal(changeStream.closed, false);
+        assert.equal(changeStream.cursor.closed, false);
 
         changeStream.close(err => {
           expect(err).to.not.exist;
 
           // Check the cursor is closed
-          assert.equal(changeStream.isClosed(), true);
+          assert.equal(changeStream.closed, true);
           assert.ok(!changeStream.cursor);
           done();
         });
@@ -774,7 +774,7 @@ describe('Change Streams', function () {
               changeStream.hasNext(function (err, hasNext) {
                 expect(err).to.not.exist;
                 assert.equal(hasNext, false);
-                assert.equal(changeStream.isClosed(), true);
+                assert.equal(changeStream.closed, true);
                 done();
               });
             }
@@ -841,7 +841,7 @@ describe('Change Streams', function () {
           .then(() => changeStream.hasNext())
           .then(function (hasNext) {
             assert.equal(hasNext, false);
-            assert.equal(changeStream.isClosed(), true);
+            assert.equal(changeStream.closed, true);
             done();
           });
       });
@@ -1832,45 +1832,6 @@ describe('Change Streams', function () {
     }
   });
 
-  it('should emit close event after error event', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db('integration_tests');
-        const coll = db.collection('event_test');
-
-        // This will cause an error because the _id will be projected out, which causes the following error:
-        // "A change stream document has been received that lacks a resume token (_id)."
-        const changeStream = coll.watch([{ $project: { _id: false } }]);
-        changeStream.on('change', changeDoc => {
-          expect(changeDoc).to.be.null;
-        });
-
-        let errored = false;
-        changeStream.on('error', err => {
-          expect(err).to.exist;
-          errored = true;
-        });
-
-        changeStream.once('close', () => {
-          expect(errored).to.be.true;
-          done();
-        });
-
-        // Trigger the first database event
-        waitForStarted(changeStream, () => {
-          this.defer(coll.insertOne({ a: 1 }));
-        });
-      });
-    }
-  });
-
   describe('should properly handle a changeStream event being processed mid-close', function () {
     let client, coll, changeStream;
 
@@ -1896,7 +1857,7 @@ describe('Change Streams', function () {
     afterEach(function () {
       return Promise.resolve()
         .then(() => {
-          if (changeStream && !changeStream.isClosed()) {
+          if (changeStream && !changeStream.closed) {
             return changeStream.close();
           }
         })
@@ -1938,25 +1899,28 @@ describe('Change Streams', function () {
     it('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function (done) {
+        const ops = [];
         changeStream.next(() => {
           changeStream.next(() => {
-            this.defer(lastWrite());
+            ops.push(lastWrite());
+
+            // explicitly close the change stream after the write has begun
+            ops.push(changeStream.close());
 
             changeStream.next(err => {
               try {
-                expect(err).property('message').to.equal('ChangeStream is closed');
-                done();
+                expect(err)
+                  .property('message')
+                  .to.match(/ChangeStream is closed/);
+                Promise.all(ops).then(() => done(), done);
               } catch (e) {
                 done(e);
               }
             });
-
-            // explicitly close the change stream after the write has begun
-            this.defer(changeStream.close());
           });
         });
 
-        this.defer(write().catch(() => {}));
+        ops.push(write().catch(() => {}));
       }
     });
 
@@ -2192,10 +2156,10 @@ describe('Change Streams', function () {
       it('must return the postBatchResumeToken from the current command response', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: true };
+            yield { numDocuments: 0, postBatchResumeToken: true, cursor: { firstBatch: [] } };
           })(),
           getMore: (function* () {
-            yield { numDocuments: 1, postBatchResumeToken: true };
+            yield { numDocuments: 1, postBatchResumeToken: true, cursor: { nextBatch: [{}] } };
           })()
         });
 
@@ -2795,7 +2759,6 @@ describe('Change Stream Resume Error Tests', function () {
       const bucket = [];
       d.on('data', data => {
         bucket.push(data.fullDocument.x);
-        console.log({ bucket });
         if (bucket.length === 2) {
           expect(bucket[0]).to.be(1);
           expect(bucket[0]).to.be(2);
@@ -2808,7 +2771,6 @@ describe('Change Stream Resume Error Tests', function () {
           expect(err).to.not.exist;
           expect(result).to.exist;
           triggerResumableError(changeStream, 250, () => {
-            console.log('triggered error');
             collection.insertOne({ x: 2 }, (err, result) => {
               expect(err).to.not.exist;
               expect(result).to.exist;

@@ -871,7 +871,7 @@ describe('APM', function () {
         }
 
         // otherwise compare the values
-        expect(maybeLong(actual[key])).to.deep.equal(expected[key]);
+        expect(maybeLong(actual[key]), key).to.deep.equal(expected[key]);
       });
     }
 

@@ -440,7 +440,7 @@ describe('ReadPreference', function () {
         var cursor = db
           .collection('test', { readPreference: ReadPreference.SECONDARY_PREFERRED })
           .listIndexes();
-        test.equal(cursor.options.readPreference.mode, 'secondaryPreferred');
+        test.equal(cursor.readPreference.mode, 'secondaryPreferred');
         client.close(done);
       });
     }

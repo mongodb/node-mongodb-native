@@ -76,7 +76,6 @@ export abstract class CommandOperation<
 
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
-
     this.fullResponse =
       options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
 

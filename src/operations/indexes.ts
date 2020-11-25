@@ -1,7 +1,13 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { OperationBase, Aspect, defineAspects } from './operation';
 import { MongoError } from '../error';
-import { maxWireVersion, parseIndexOptions, MongoDBNamespace, Callback } from '../utils';
+import {
+  maxWireVersion,
+  parseIndexOptions,
+  MongoDBNamespace,
+  Callback,
+  getTopology
+} from '../utils';
 import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -10,6 +16,9 @@ import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { FindOptions } from './find';
+import { AbstractCursor } from '../cursor/abstract_cursor';
+import type { ClientSession } from '../sessions';
+import { executeOperation, ExecutionResult } from './execute_operation';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -346,6 +355,34 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
       { listIndexes: this.collectionNamespace.collection, cursor },
       callback
     );
+  }
+}
+
+/** @public */
+export class ListIndexesCursor extends AbstractCursor {
+  parent: Collection;
+  options?: ListIndexesOptions;
+
+  constructor(collection: Collection, options?: ListIndexesOptions) {
+    super(getTopology(collection), collection.s.namespace, options);
+    this.parent = collection;
+    this.options = options;
+  }
+
+  /** @internal */
+  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+    const operation = new ListIndexesOperation(this.parent, {
+      ...this.cursorOptions,
+      ...this.options,
+      session
+    });
+
+    executeOperation(getTopology(this.parent), operation, (err, response) => {
+      if (err || response == null) return callback(err);
+
+      // TODO: NODE-2882
+      callback(undefined, { server: operation.server, session, response });
+    });
   }
 }
 

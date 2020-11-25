@@ -86,7 +86,7 @@ describe('Command Write Concern', function () {
             request.reply(primary[0]);
           } else if (doc.aggregate) {
             commandResult = doc;
-            request.reply({ ok: 1 });
+            request.reply({ ok: 1, cursor: { id: 0, firstBatch: [], ns: configuration.db } });
           } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }

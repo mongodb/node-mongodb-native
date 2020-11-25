@@ -64,6 +64,7 @@ export class Monitor extends EventEmitter {
   [kServer]: Server;
   [kConnection]?: Connection;
   [kCancellationToken]: EventEmitter;
+  /** @internal */
   [kMonitorId]?: InterruptableAsyncInterval;
   [kRTTPinger]?: RTTPinger;
 

@@ -32,25 +32,29 @@ describe('CRUD API', function () {
           //
           // Cursor
           // --------------------------------------------------
-          var cursor = db.collection('t').find({});
-          // Possible methods on the the cursor instance
-          cursor
-            .filter({ a: 1 })
-            .addCursorFlag('noCursorTimeout', true)
-            .addQueryModifier('$comment', 'some comment')
-            .batchSize(2)
-            .comment('some comment 2')
-            .limit(2)
-            .maxTimeMS(50)
-            .project({ a: 1 })
-            .skip(0)
-            .sort({ a: 1 });
+          const makeCursor = () => {
+            // Possible methods on the the cursor instance
+            return db
+              .collection('t')
+              .find({})
+              .filter({ a: 1 })
+              .addCursorFlag('noCursorTimeout', true)
+              .addQueryModifier('$comment', 'some comment')
+              .batchSize(2)
+              .comment('some comment 2')
+              .limit(2)
+              .maxTimeMS(50)
+              .project({ a: 1 })
+              .skip(0)
+              .sort({ a: 1 });
+          };
 
           //
           // Exercise count method
           // -------------------------------------------------
           var countMethod = function () {
             // Execute the different methods supported by the cursor
+            const cursor = makeCursor();
             cursor.count(function (err, count) {
               expect(err).to.not.exist;
               test.equal(2, count);
@@ -64,20 +68,24 @@ describe('CRUD API', function () {
           var eachMethod = function () {
             var count = 0;
 
-            cursor.each(function (err, doc) {
-              expect(err).to.not.exist;
-              if (doc) count = count + 1;
-              if (doc == null) {
+            const cursor = makeCursor();
+            cursor.forEach(
+              () => {
+                count = count + 1;
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(2, count);
                 toArrayMethod();
               }
-            });
+            );
           };
 
           //
           // Exercise toArray
           // -------------------------------------------------
           var toArrayMethod = function () {
+            const cursor = makeCursor();
             cursor.toArray(function (err, docs) {
               expect(err).to.not.exist;
               test.equal(2, docs.length);
@@ -89,16 +97,16 @@ describe('CRUD API', function () {
           // Exercise next method
           // -------------------------------------------------
           var nextMethod = function () {
-            var clonedCursor = cursor.clone();
-            clonedCursor.next(function (err, doc) {
+            const cursor = makeCursor();
+            cursor.next(function (err, doc) {
               expect(err).to.not.exist;
               test.ok(doc != null);
 
-              clonedCursor.next(function (err, doc) {
+              cursor.next(function (err, doc) {
                 expect(err).to.not.exist;
                 test.ok(doc != null);
 
-                clonedCursor.next(function (err, doc) {
+                cursor.next(function (err, doc) {
                   expect(err).to.not.exist;
                   expect(doc).to.not.exist;
                   streamMethod();
@@ -112,13 +120,13 @@ describe('CRUD API', function () {
           // -------------------------------------------------
           var streamMethod = function () {
             var count = 0;
-            var clonedCursor = cursor.clone();
-            const stream = clonedCursor.stream();
+            const cursor = makeCursor();
+            const stream = cursor.stream();
             stream.on('data', function () {
               count = count + 1;
             });
 
-            stream.once('end', function () {
+            cursor.once('close', function () {
               test.equal(2, count);
               explainMethod();
             });
@@ -128,8 +136,8 @@ describe('CRUD API', function () {
           // Explain method
           // -------------------------------------------------
           var explainMethod = function () {
-            var clonedCursor = cursor.clone();
-            clonedCursor.explain(function (err, result) {
+            const cursor = makeCursor();
+            cursor.explain(function (err, result) {
               expect(err).to.not.exist;
               test.ok(result != null);
 
@@ -153,7 +161,7 @@ describe('CRUD API', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
@@ -223,14 +231,16 @@ describe('CRUD API', function () {
             var count = 0;
             var cursor = db.collection('t1').aggregate();
             cursor.match({ a: 1 });
-            cursor.each(function (err, doc) {
-              expect(err).to.not.exist;
-              if (doc) count = count + 1;
-              if (doc == null) {
+            cursor.forEach(
+              () => {
+                count = count + 1;
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(3, count);
                 testStream();
               }
-            });
+            );
           };
 
           //

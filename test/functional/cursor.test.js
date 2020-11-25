@@ -9,6 +9,7 @@ const { Writable } = require('stream');
 const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 const { formatSort } = require('../../src/sort');
+const { FindCursor } = require('../../src/cursor/find_cursor');
 
 describe('Cursor', function () {
   before(function () {
@@ -51,14 +52,13 @@ describe('Cursor', function () {
                 expect(err).to.not.exist;
 
                 // Should fail if called again (cursor should be closed)
-                cursor.each((err, item) => {
-                  expect(err).to.not.exist;
-
-                  // Let's close the db
-                  if (!item) {
+                cursor.forEach(
+                  () => {},
+                  err => {
+                    expect(err).to.not.exist;
                     done();
                   }
-                });
+                );
               });
             });
           });
@@ -230,17 +230,18 @@ describe('Cursor', function () {
                         expect(err).to.not.exist;
                         test.equal(10, count);
 
-                        cursor.each((err, item) => {
-                          expect(err).to.not.exist;
-                          if (item == null) {
-                            cursor.count(function (err, count2) {
+                        cursor.forEach(
+                          () => {},
+                          err => {
+                            expect(err).to.not.exist;
+                            cursor.count((err, count2) => {
                               expect(err).to.not.exist;
-                              test.equal(10, count2);
-                              test.equal(count, count2);
+                              expect(count2).to.equal(10);
+                              expect(count2).to.equal(count);
                               done();
                             });
                           }
-                        });
+                        );
                       });
                     });
                   });
@@ -280,7 +281,7 @@ describe('Cursor', function () {
 
         const db = client.db(configuration.db);
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
-        cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
+        cursor.count({ readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.not.exist;
 
           const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
@@ -349,17 +350,18 @@ describe('Cursor', function () {
                         expect(err).to.not.exist;
                         test.equal(10, count);
 
-                        cursor.each((err, item) => {
-                          expect(err).to.not.exist;
-                          if (item == null) {
-                            cursor.count(function (err, count2) {
+                        cursor.forEach(
+                          () => {},
+                          err => {
+                            expect(err).to.not.exist;
+                            cursor.count((err, count2) => {
                               expect(err).to.not.exist;
-                              test.equal(10, count2);
-                              test.equal(count, count2);
+                              expect(count2).to.equal(10);
+                              expect(count2).to.equal(count);
                               done();
                             });
                           }
-                        });
+                        );
                       });
                     });
                   });
@@ -370,106 +372,6 @@ describe('Cursor', function () {
             insert(function () {
               finished();
             });
-          });
-        });
-      });
-    }
-  });
-
-  it('shouldCorrectlyExecuteSortOnCursor', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        db.createCollection('test_sort', (err, collection) => {
-          expect(err).to.not.exist;
-          function insert(callback) {
-            var total = 10;
-
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
-
-          function f() {
-            var number_of_functions = 7;
-            var finished = function (cursor) {
-              number_of_functions = number_of_functions - 1;
-              if (number_of_functions === 0) {
-                cursor.close(done);
-              } else {
-                cursor.close();
-              }
-            };
-
-            var cursor = collection.find().sort(['a', 1]);
-            test.deepEqual({ a: 1 }, cursor.sortValue);
-            finished(cursor);
-
-            cursor = collection.find().sort('a', 1);
-            test.deepEqual({ a: 1 }, cursor.sortValue);
-            finished(cursor);
-
-            cursor = collection.find().sort('a', -1);
-            test.deepEqual({ a: -1 }, cursor.sortValue);
-            finished(cursor);
-
-            cursor = collection.find().sort('a', 'asc');
-            test.deepEqual({ a: 1 }, cursor.sortValue);
-            finished(cursor);
-
-            cursor = collection.find().sort('a', 1).sort('a', -1);
-            test.deepEqual({ a: -1 }, cursor.sortValue);
-            finished(cursor);
-
-            cursor = collection.find();
-            cursor.next(err => {
-              expect(err).to.not.exist;
-              try {
-                cursor.sort(['a']);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-                finished(cursor);
-              }
-            });
-
-            cursor = collection.find();
-            try {
-              cursor.sort('a', 25);
-            } catch (err) {
-              test.equal('Invalid sort direction: 25', err.message);
-            }
-            cursor.next(() => {
-              finished(cursor);
-            });
-
-            cursor = collection.find();
-            try {
-              cursor.sort(25);
-            } catch (err) {
-              test.equal('Invalid sort format: 25', err.message);
-            }
-            cursor.next(() => {
-              finished(cursor);
-            });
-          }
-
-          insert(function () {
-            f();
           });
         });
       });
@@ -509,7 +411,7 @@ describe('Cursor', function () {
             const cursor = collection.find();
 
             test.throws(function () {
-              cursor.each();
+              cursor.forEach();
             });
 
             done();
@@ -734,12 +636,9 @@ describe('Cursor', function () {
 
             cursor.next(err => {
               expect(err).to.not.exist;
-
-              try {
+              expect(() => {
                 cursor.limit(1);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-              }
+              }).to.throw(/Cursor is already initialized/);
 
               done();
             });
@@ -749,7 +648,8 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
+  // NOTE: who cares what you set when the cursor is closed?
+  it.skip('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -771,15 +671,11 @@ describe('Cursor', function () {
             expect(err).to.not.exist;
 
             const cursor = collection.find();
-
-            cursor.close((err, cursor) => {
+            cursor.close(err => {
               expect(err).to.not.exist;
-              try {
+              expect(() => {
                 cursor.limit(1);
-                test.ok(false);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-              }
+              }).to.throw(/not extensible/);
 
               done();
             });
@@ -890,20 +786,19 @@ describe('Cursor', function () {
             cursor.next(err => {
               expect(err).to.not.exist;
 
-              try {
-                cursor.skip(1);
-              } catch (err) {
-                test.equal('Cursor is closed', err.message);
-              }
+              // NOTE: who cares what you set when closed, if not initialized
+              // expect(() => {
+              //   cursor.skip(1);
+              // }).to.throw(/not extensible/);
 
               const cursor2 = collection.find();
               cursor2.close(err => {
                 expect(err).to.not.exist;
-                try {
-                  cursor2.skip(1);
-                } catch (err) {
-                  test.equal('Cursor is closed', err.message);
-                }
+
+                // NOTE: who cares what you set when closed, if not initialized
+                // expect(() => {
+                //   cursor2.skip(1);
+                // }).to.throw(/not extensible/);
 
                 done();
               });
@@ -949,115 +844,21 @@ describe('Cursor', function () {
               cursor.next(err => {
                 expect(err).to.not.exist;
 
-                try {
-                  cursor.batchSize(1);
-                  test.ok(false);
-                } catch (err) {
-                  test.equal('Cursor is closed', err.message);
-                }
+                // NOTE: who cares what you set when closed, if not initialized
+                // expect(() => {
+                //   cursor.batchSize(1);
+                // }).to.throw(/not extensible/);
 
                 const cursor2 = collection.find();
                 cursor2.close(err => {
                   expect(err).to.not.exist;
-                  try {
-                    cursor2.batchSize(1);
-                    test.ok(false);
-                  } catch (err) {
-                    test.equal('Cursor is closed', err.message);
-                  }
+
+                  // NOTE: who cares what you set when closed, if not initialized
+                  // expect(() => {
+                  //   cursor2.batchSize(1);
+                  // }).to.throw(/not extensible/);
 
                   done();
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  it('shouldCorrectlyHandleChangesInBatchSizes', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        db.createCollection('test_not_multiple_batch_size', (err, collection) => {
-          expect(err).to.not.exist;
-
-          var records = 6;
-          var batchSize = 2;
-          var docs = [];
-          for (var i = 0; i < records; i++) {
-            docs.push({ a: i });
-          }
-
-          collection.insert(docs, configuration.writeConcernMax(), () => {
-            expect(err).to.not.exist;
-
-            const cursor = collection.find({}, { batchSize: batchSize });
-            this.defer(() => cursor.close());
-
-            //1st
-            cursor.next((err, items) => {
-              expect(err).to.not.exist;
-              //cursor.items should contain 1 since nextObject already popped one
-              test.equal(1, cursor.bufferedCount());
-              test.ok(items != null);
-
-              //2nd
-              cursor.next((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(0, cursor.bufferedCount());
-                test.ok(items != null);
-
-                //test batch size modification on the fly
-                batchSize = 3;
-                cursor.batchSize(batchSize);
-
-                //3rd
-                cursor.next((err, items) => {
-                  expect(err).to.not.exist;
-                  test.equal(2, cursor.bufferedCount());
-                  test.ok(items != null);
-
-                  //4th
-                  cursor.next((err, items) => {
-                    expect(err).to.not.exist;
-                    test.equal(1, cursor.bufferedCount());
-                    test.ok(items != null);
-
-                    //5th
-                    cursor.next((err, items) => {
-                      expect(err).to.not.exist;
-                      test.equal(0, cursor.bufferedCount());
-                      test.ok(items != null);
-
-                      //6th
-                      cursor.next((err, items) => {
-                        expect(err).to.not.exist;
-                        test.equal(0, cursor.bufferedCount());
-                        test.ok(items != null);
-
-                        //No more
-                        cursor.next((err, items) => {
-                          expect(err).to.not.exist;
-                          test.ok(items == null);
-                          test.ok(cursor.isClosed());
-                          done();
-                        });
-                      });
-                    });
-                  });
                 });
               });
             });
@@ -1126,7 +927,7 @@ describe('Cursor', function () {
                     cursor.next((err, items) => {
                       expect(err).to.not.exist;
                       test.ok(items == null);
-                      test.ok(cursor.isClosed());
+                      test.ok(cursor.closed);
                       done();
                     });
                   });
@@ -1192,7 +993,7 @@ describe('Cursor', function () {
                     cursor.next((err, items) => {
                       expect(err).to.not.exist;
                       test.ok(items == null);
-                      test.ok(cursor.isClosed());
+                      test.ok(cursor.closed);
                       done();
                     });
                   });
@@ -1249,7 +1050,7 @@ describe('Cursor', function () {
                 cursor.next((err, items) => {
                   expect(err).to.not.exist;
                   test.ok(items == null);
-                  test.ok(cursor.isClosed());
+                  test.ok(cursor.closed);
                   done();
                 });
               });
@@ -1404,9 +1205,10 @@ describe('Cursor', function () {
         db.createCollection('test_close_no_query_sent', (err, collection) => {
           expect(err).to.not.exist;
 
-          collection.find().close((err, cursor) => {
+          const cursor = collection.find();
+          cursor.close(err => {
             expect(err).to.not.exist;
-            test.equal(true, cursor.isClosed());
+            test.equal(true, cursor.closed);
             done();
           });
         });
@@ -1451,11 +1253,12 @@ describe('Cursor', function () {
             });
 
             var total = 0;
-            collection.find({}, {}).each((err, item) => {
-              expect(err).to.not.exist;
-              if (item != null) {
+            collection.find({}, {}).forEach(
+              item => {
                 total = total + item.a;
-              } else {
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(499500, total);
 
                 collection.count((err, count) => {
@@ -1468,11 +1271,12 @@ describe('Cursor', function () {
                   test.equal(COUNT, count);
 
                   var total2 = 0;
-                  collection.find().each((err, item) => {
-                    expect(err).to.not.exist;
-                    if (item != null) {
+                  collection.find().forEach(
+                    item => {
                       total2 = total2 + item.a;
-                    } else {
+                    },
+                    err => {
+                      expect(err).to.not.exist;
                       test.equal(499500, total2);
                       collection.count((err, count) => {
                         expect(err).to.not.exist;
@@ -1481,10 +1285,10 @@ describe('Cursor', function () {
                         done();
                       });
                     }
-                  });
+                  );
                 });
               }
-            });
+            );
           }
 
           insert(function () {
@@ -1531,11 +1335,12 @@ describe('Cursor', function () {
             });
 
             var total = 0;
-            collection.find().each((err, item) => {
-              expect(err).to.not.exist;
-              if (item != null) {
-                total = total + item.a;
-              } else {
+            collection.find().forEach(
+              doc => {
+                total = total + doc.a;
+              },
+              err => {
+                expect(err).to.not.exist;
                 test.equal(499500, total);
 
                 collection.count((err, count) => {
@@ -1548,23 +1353,25 @@ describe('Cursor', function () {
                   test.equal(1000, count);
 
                   var total2 = 0;
-                  collection.find().each((err, item) => {
-                    expect(err).to.not.exist;
-                    if (item != null) {
-                      total2 = total2 + item.a;
-                    } else {
-                      test.equal(499500, total2);
+                  collection.find().forEach(
+                    doc => {
+                      total2 = total2 + doc.a;
+                    },
+                    err => {
+                      expect(err).to.not.exist;
+                      expect(total2).to.equal(499500);
+
                       collection.count((err, count) => {
                         expect(err).to.not.exist;
-                        test.equal(1000, count);
-                        test.equal(total, total2);
+                        expect(count).to.equal(1000);
+                        expect(total2).to.equal(total);
                         done();
                       });
                     }
-                  });
+                  );
                 });
               }
-            });
+            );
           }
 
           insert(function () {
@@ -1600,9 +1407,9 @@ describe('Cursor', function () {
             cursor.next(err => {
               expect(err).to.not.exist;
 
-              cursor.close(function (err, cursor) {
+              cursor.close(err => {
                 expect(err).to.not.exist;
-                test.equal(true, cursor.isClosed());
+                test.equal(true, cursor.closed);
                 done();
               });
             });
@@ -1720,19 +1527,20 @@ describe('Cursor', function () {
             cursor.count(err => {
               expect(err).to.not.exist;
               // Ensure each returns all documents
-              cursor.each((err, item) => {
-                expect(err).to.not.exist;
-                if (item != null) {
+              cursor.forEach(
+                () => {
                   total++;
-                } else {
-                  cursor.count(function (err, c) {
+                },
+                err => {
+                  expect(err).to.not.exist;
+                  cursor.count((err, c) => {
                     expect(err).to.not.exist;
-                    test.equal(1000, c);
-                    test.equal(1000, total);
+                    expect(c).to.equal(1000);
+                    expect(total).to.equal(1000);
                     done();
                   });
                 }
-              });
+              );
             });
           });
         });
@@ -1815,7 +1623,7 @@ describe('Cursor', function () {
               test.equal(1, closed);
               test.equal(1, paused);
               test.equal(1, resumed);
-              test.strictEqual(cursor.isClosed(), true);
+              test.strictEqual(cursor.closed, true);
               done();
             }
           });
@@ -1849,7 +1657,7 @@ describe('Cursor', function () {
             expect(err).to.not.exist;
 
             // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
+            collection.insertMany(docs, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
               const cursor = collection.find();
@@ -1871,7 +1679,7 @@ describe('Cursor', function () {
                   if (doneCalled === 1) {
                     expect(err).to.not.exist;
                     test.strictEqual(0, i);
-                    test.strictEqual(true, cursor.isClosed());
+                    test.strictEqual(true, cursor.closed);
                     done();
                   }
                 };
@@ -1914,7 +1722,7 @@ describe('Cursor', function () {
             const cursor = collection.find();
             const stream = cursor.stream();
 
-            test.strictEqual(false, cursor.isClosed());
+            test.strictEqual(false, cursor.closed);
 
             stream.on('data', function () {
               if (++i === 5) {
@@ -1928,13 +1736,13 @@ describe('Cursor', function () {
 
             function testDone(err) {
               ++finished;
-              setTimeout(function () {
+              if (finished === 2) {
                 test.strictEqual(undefined, err);
                 test.strictEqual(5, i);
-                test.strictEqual(1, finished);
-                test.strictEqual(true, cursor.isClosed());
+                test.strictEqual(2, finished);
+                test.strictEqual(true, cursor.closed);
                 done();
-              }, 150);
+              }
             }
           });
         });
@@ -1989,7 +1797,7 @@ describe('Cursor', function () {
                 if (finished === 2) {
                   setTimeout(function () {
                     test.equal(5, i);
-                    test.equal(true, cursor.isClosed());
+                    test.equal(true, cursor.closed);
                     client.close();
 
                     configuration.manager.start().then(function () {
@@ -2029,24 +1837,13 @@ describe('Cursor', function () {
           });
 
           // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
+          collection.insertMany(docs, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            var filename = '/tmp/_nodemongodbnative_stream_out.txt',
-              out = fs.createWriteStream(filename);
-
-            // hack so we don't need to create a stream filter just to
-            // stringify the objects (otherwise the created file would
-            // just contain a bunch of [object Object])
-            // var toString = Object.prototype.toString;
-            // Object.prototype.toString = function () {
-            //   return JSON.stringify(this);
-            // }
-
-            var stream = collection.find().stream({
-              transform: function (doc) {
-                return JSON.stringify(doc);
-              }
+            const filename = '/tmp/_nodemongodbnative_stream_out.txt';
+            const out = fs.createWriteStream(filename);
+            const stream = collection.find().stream({
+              transform: doc => JSON.stringify(doc)
             });
 
             stream.pipe(out);
@@ -2090,61 +1887,43 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        var options = { capped: true, size: 10000000 };
+        const options = { capped: true, size: 10000000 };
         db.createCollection('test_if_dead_tailable_cursors_close', options, function (
           err,
           collection
         ) {
           expect(err).to.not.exist;
 
-          var closeCount = 0;
-          var errorOccurred = false;
+          let closeCount = 0;
+          const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
+          collection.insertMany(docs, { w: 'majority', wtimeout: 5000 }, err => {
+            expect(err).to.not.exist;
 
-          var count = 100;
-          // Just hammer the server
-          for (var i = 0; i < 100; i++) {
-            collection.insert({ id: i }, { w: 'majority', wtimeout: 5000 }, err => {
-              expect(err).to.not.exist;
-              count = count - 1;
+            const cursor = collection.find({}, { tailable: true, awaitData: true });
+            const stream = cursor.stream();
 
-              if (count === 0) {
-                const cursor = collection.find({}, { tailable: true, awaitData: true });
-                const stream = cursor.stream();
-                // let index = 0;
-                stream.resume();
+            stream.resume();
 
-                stream.on('error', err => {
-                  expect(err).to.exist;
-                  errorOccurred = true;
-                });
-
-                var validator = () => {
-                  closeCount++;
-                  if (closeCount === 2) {
-                    expect(errorOccurred).to.equal(true);
-                    done();
-                  }
-                };
-
-                stream.on('end', validator);
-                cursor.on('close', validator);
-
-                // Just hammer the server
-                for (var i = 0; i < 100; i++) {
-                  const id = i;
-                  process.nextTick(function () {
-                    collection.insert({ id }, err => {
-                      expect(err).to.not.exist;
-
-                      if (id === 99) {
-                        setTimeout(() => client.close());
-                      }
-                    });
-                  });
-                }
+            var validator = () => {
+              closeCount++;
+              if (closeCount === 2) {
+                done();
               }
+            };
+
+            // we validate that the stream "ends" either cleanly or with an error
+            stream.on('end', validator);
+            stream.on('error', validator);
+
+            cursor.on('close', validator);
+
+            const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
+            collection.insertMany(docs, err => {
+              expect(err).to.not.exist;
+
+              setTimeout(() => client.close());
             });
-          }
+          });
         });
       });
     }
@@ -2182,17 +1961,14 @@ describe('Cursor', function () {
               this.defer(() => cursor.close());
 
               // Execute each
-              cursor.each((err, result) => {
-                if (result) {
-                  cursor.kill();
-                }
-
-                if (err != null) {
+              cursor.forEach(
+                () => cursor.close(),
+                () => {
                   // Even though cursor is exhausted, should not close session
                   // unless cursor is manually closed, due to awaitData / tailable
                   done();
                 }
-              });
+              );
             });
           }
         );
@@ -2200,94 +1976,37 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldAwaitDataWithDocumentsAvailable', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('shouldAwaitDataWithDocumentsAvailable', function (done) {
+    // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
-    test: function (done) {
-      // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+    const configuration = this.configuration;
+    const client = configuration.newClient({ maxPoolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
 
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      const options = { capped: true, size: 8 };
+      db.createCollection('should_await_data_no_docs', options, (err, collection) => {
         expect(err).to.not.exist;
-        this.defer(() => client.close());
 
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_no_docs', options, (err, collection) => {
-          expect(err).to.not.exist;
+        // Create cursor with awaitData, and timeout after the period specified
+        const cursor = collection.find({}, { tailable: true, awaitData: true });
+        this.defer(() => cursor.close());
 
-          // Create cursor with awaitData, and timeout after the period specified
-          const cursor = collection.find({}, { tailable: true, awaitData: true });
-          this.defer(() => cursor.close());
-
-          const rewind = cursor.rewind;
-          let called = false;
-          cursor.rewind = function () {
-            called = true;
-          };
-
-          cursor.each(err => {
-            if (err != null) {
-              test.ok(called);
-              cursor.rewind = rewind;
-              done();
-            }
-          });
-        });
-      });
-    }
-  });
-
-  it('shouldAwaitDataUsingCursorFlag', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_cursor_flag', options, (err, collection) => {
-          expect(err).to.not.exist;
-
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
+        cursor.forEach(
+          () => {},
+          err => {
             expect(err).to.not.exist;
-            // Create cursor with awaitData, and timeout after the period specified
-            const cursor = collection.find({}, {});
-            this.defer(() => cursor.close());
-
-            cursor.addCursorFlag('tailable', true);
-            cursor.addCursorFlag('awaitData', true);
-            cursor.each(err => {
-              if (err != null) {
-                // Even though cursor is exhausted, should not close session
-                // unless cursor is manually closed, due to awaitData / tailable
-                done();
-              } else {
-                cursor.kill();
-              }
-            });
-          });
-        });
+            done();
+          }
+        );
       });
-    }
+    });
   });
 
-  it('Should correctly retry tailable cursor connection', {
+  // NOTE: should we continue to let users explicitly `kill` a cursor?
+  it.skip('Should correctly retry tailable cursor connection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -2313,14 +2032,13 @@ describe('Cursor', function () {
 
             // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection.find({}, { tailable: true, awaitData: true });
-            cursor.each(err => {
-              if (err != null) {
+            cursor.forEach(
+              () => cursor.kill(),
+              () => {
                 // kill cursor b/c cursor is tailable / awaitable
                 cursor.close(done);
-              } else {
-                cursor.kill();
               }
-            });
+            );
           });
         });
       });
@@ -2656,15 +2374,16 @@ describe('Cursor', function () {
               totalI = totalI + d.length;
 
               if (left === 0) {
-                collection.find({}).each((err, item) => {
-                  expect(err).to.not.exist;
-                  if (item == null) {
-                    test.equal(30000, total);
-                    done();
-                  } else {
+                collection.find({}).forEach(
+                  () => {
                     total++;
+                  },
+                  err => {
+                    expect(err).to.not.exist;
+                    expect(total).to.equal(30000);
+                    done();
                   }
-                });
+                );
               }
             });
           }
@@ -2767,7 +2486,7 @@ describe('Cursor', function () {
                 .find({}, { OrderNumber: 1 })
                 .skip(10)
                 .limit(10)
-                .count(true, (err, count) => {
+                .count((err, count) => {
                   expect(err).to.not.exist;
                   test.equal(10, count);
                   done();
@@ -2801,14 +2520,17 @@ describe('Cursor', function () {
           expect(err).to.not.exist;
 
           const cursor = collection.find({}, { tailable: true });
-          cursor.each(err => {
-            test.ok(err instanceof Error);
-            test.ok(typeof err.code === 'number');
+          cursor.forEach(
+            () => {},
+            err => {
+              test.ok(err instanceof Error);
+              test.ok(typeof err.code === 'number');
 
-            // Close cursor b/c we did not exhaust cursor
-            cursor.close();
-            done();
-          });
+              // Close cursor b/c we did not exhaust cursor
+              cursor.close();
+              done();
+            }
+          );
         });
       });
     }
@@ -2960,17 +2682,19 @@ describe('Cursor', function () {
             expect(err).to.not.exist;
             var finished = false;
 
-            collection.find({}).each(function (err, doc) {
-              expect(err).to.not.exist;
-
-              if (doc) {
+            collection.find({}).forEach(
+              doc => {
+                expect(doc).to.exist;
                 test.equal(finished, false);
                 finished = true;
 
                 done();
                 return false;
+              },
+              err => {
+                expect(err).to.not.exist;
               }
-            });
+            );
           });
         });
       });
@@ -3108,7 +2832,7 @@ describe('Cursor', function () {
             var cursor = collection.find({});
             cursor.limit(100);
             cursor.skip(10);
-            cursor.count(true, { maxTimeMS: 1000 }, err => {
+            cursor.count({ maxTimeMS: 1000 }, err => {
               expect(err).to.not.exist;
 
               // Create a cursor for the content
@@ -3116,9 +2840,9 @@ describe('Cursor', function () {
               cursor.limit(100);
               cursor.skip(10);
               cursor.maxTimeMS(100);
+
               cursor.count(err => {
                 expect(err).to.not.exist;
-
                 done();
               });
             });
@@ -3215,8 +2939,8 @@ describe('Cursor', function () {
             test.equal(10, docs.length);
 
             // Ensure all docs where mapped
-            docs.forEach(function (x) {
-              test.equal(1, x.a);
+            docs.forEach(doc => {
+              expect(doc).property('a').to.equal(1);
             });
 
             done();
@@ -3310,15 +3034,15 @@ describe('Cursor', function () {
             .batchSize(5)
             .limit(10);
 
-          cursor.each(function (err, doc) {
-            expect(err).to.not.exist;
-
-            if (doc) {
+          cursor.forEach(
+            doc => {
               test.equal(1, doc.a);
-            } else {
+            },
+            err => {
+              expect(err).to.not.exist;
               done();
             }
-          });
+          );
         });
       });
     }
@@ -3365,7 +3089,7 @@ describe('Cursor', function () {
             .limit(10);
 
           cursor.forEach(
-            function (doc) {
+            doc => {
               test.equal(4, doc.a);
             },
             err => {
@@ -3416,8 +3140,8 @@ describe('Cursor', function () {
             .limit(10);
 
           cursor.forEach(
-            function (doc) {
-              test.equal(1, doc.a);
+            doc => {
+              expect(doc).property('a').to.equal(1);
             },
             err => {
               expect(err).to.not.exist;
@@ -3477,7 +3201,7 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient();
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3493,7 +3217,6 @@ describe('Cursor', function () {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            var s = new Date();
             // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection
               .find({})
@@ -3501,18 +3224,16 @@ describe('Cursor', function () {
               .addCursorFlag('awaitData', true)
               .maxAwaitTimeMS(500);
 
-            cursor.each(function (err, result) {
-              if (result) {
-                setTimeout(function () {
-                  cursor.kill();
-                }, 300);
-              } else {
+            const s = new Date();
+            cursor.forEach(
+              () => {
+                setTimeout(() => cursor.close(), 300);
+              },
+              () => {
                 test.ok(new Date().getTime() - s.getTime() >= 500);
-
-                // TODO: forced because the cursor is still open/active
-                client.close(true, done);
+                done();
               }
-            });
+            );
           });
         });
       });
@@ -3742,7 +3463,7 @@ describe('Cursor', function () {
           .limit(5)
           .skip(5)
           .hint({ project: 1 })
-          .count(true, err => {
+          .count(err => {
             expect(err).to.not.exist;
             test.equal(1, started.length);
             if (started[0].command.readConcern)
@@ -3812,7 +3533,8 @@ describe('Cursor', function () {
     }
   });
 
-  it('Should properly kill a cursor', {
+  // NOTE: should we allow users to explicitly `kill` a cursor anymore?
+  it.skip('Should properly kill a cursor', {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
@@ -3912,15 +3634,13 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        var findCommand = {
-          find: 'integration_tests.has_next_error_callback',
-          limit: 0,
-          skip: 0,
-          query: {},
-          slaveOk: false
-        };
+        const cursor = new FindCursor(
+          db.s.topology,
+          db.s.namespace,
+          {},
+          { limit: 0, skip: 0, slaveOk: false, readPreference: 42 }
+        );
 
-        var cursor = db.s.topology.cursor(db.namespace, findCommand, { readPreference: 42 });
         cursor.hasNext(err => {
           test.ok(err !== null);
           test.equal(err.message, 'readPreference must be a ReadPreference instance');
@@ -4286,7 +4006,6 @@ describe('Cursor', function () {
         db.collection('test_sort_dos', (err, collection) => {
           expect(err).to.not.exist;
           const cursor = collection.find({}, { sort: input });
-          expect(cursor.sortValue).to.deep.equal(output);
           cursor.next(err => {
             expect(err).to.not.exist;
             expect(events[0].command.sort).to.deep.equal(output);
@@ -4301,7 +4020,6 @@ describe('Cursor', function () {
         db.collection('test_sort_dos', (err, collection) => {
           expect(err).to.not.exist;
           const cursor = collection.find({}).sort(input);
-          expect(cursor.sortValue).to.deep.equal(output);
           cursor.next(err => {
             expect(err).to.not.exist;
             expect(events[0].command.sort).to.deep.equal(output);

@@ -1,5 +1,9 @@
 import { Instrumentation } from './apm';
-import { Cursor, AggregationCursor, CommandCursor } from './cursor';
+import { AbstractCursor } from './cursor/abstract_cursor';
+import { AggregationCursor } from './cursor/aggregation_cursor';
+import { FindCursor } from './cursor/find_cursor';
+import { ListIndexesCursor } from './operations/indexes';
+import { ListCollectionsCursor } from './operations/list_collections';
 import { PromiseProvider } from './promise_provider';
 import { Admin } from './admin';
 import { MongoClient } from './mongo_client';
@@ -69,9 +73,11 @@ export {
   Collection,
   ReadPreference,
   Logger,
+  AbstractCursor,
   AggregationCursor,
-  CommandCursor,
-  Cursor,
+  FindCursor,
+  ListIndexesCursor,
+  ListCollectionsCursor,
   GridFSBucket
 };
 
@@ -95,7 +101,6 @@ export type {
 } from './bulk/common';
 export type {
   ChangeStream,
-  ChangeStreamStream,
   ChangeStreamOptions,
   ChangeStreamCursor,
   ResumeToken,
@@ -142,20 +147,13 @@ export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
-export type { CommandCursorOptions } from './cursor/command_cursor';
 export type {
   CursorCloseOptions,
-  DocumentTransforms,
   CursorStreamOptions,
-  CursorStream,
-  CursorState,
-  CursorOptions,
-  FIELDS as CURSOR_FIELDS,
-  FLAGS as CURSOR_FLAGS,
-  CursorFlag,
-  EachCallback,
-  CursorPrivate
-} from './cursor/cursor';
+  AbstractCursorOptions,
+  CURSOR_FLAGS,
+  CursorFlag
+} from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
 export type { AnyError, ErrorDescription } from './error';
@@ -288,11 +286,5 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { TransactionOptions, Transaction, TxnState } from './transactions';
-export type {
-  Callback,
-  MongoDBNamespace,
-  ClientMetadata,
-  InterruptableAsyncInterval,
-  ClientMetadataOptions
-} from './utils';
+export type { Callback, ClientMetadata, ClientMetadataOptions } from './utils';
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
