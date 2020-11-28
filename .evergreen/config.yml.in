@@ -146,6 +146,7 @@ functions:
   "cleanup":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           rm -rf $DRIVERS_TOOLS || true
@@ -153,6 +154,7 @@ functions:
   "fix absolute paths":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
@@ -162,6 +164,7 @@ functions:
   "windows fix":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -174,6 +177,7 @@ functions:
   "make files executable":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -270,7 +274,7 @@ functions:
           }
           EOF
 
-  run aws auth test with regular aws credentials:
+  "run aws auth test with regular aws credentials":
     - command: shell.exec
       type: test
       params:
@@ -299,7 +303,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with assume role credentials:
+  "run aws auth test with assume role credentials":
     - command: shell.exec
       type: test
       params:
@@ -332,7 +336,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws EC2 credentials:
+  "run aws auth test with aws EC2 credentials":
     - command: shell.exec
       type: test
       params:
@@ -349,7 +353,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws credentials as environment variables:
+  "run aws auth test with aws credentials as environment variables":
     - command: shell.exec
       type: test
       params:
@@ -369,7 +373,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws auth test with aws credentials and session token as environment variables:
+  "run aws auth test with aws credentials and session token as environment variables":
     - command: shell.exec
       type: test
       params:
@@ -390,7 +394,7 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  run aws ECS auth test:
+  "run aws ECS auth test":
     - command: shell.exec
       type: test
       params:
@@ -417,7 +421,7 @@ functions:
           cat setup.js
           mongo --nodb setup.js aws_e2e_ecs.js
 
-  run-ocsp-test:
+  "run-ocsp-test":
     - command: shell.exec
       type: test
       params:
@@ -430,7 +434,7 @@ functions:
           OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
 
-  run-valid-ocsp-server:
+  "run-valid-ocsp-server":
     - command: shell.exec
       params:
         script: |
@@ -448,7 +452,7 @@ functions:
             --ocsp_responder_key rsa/ca.key \
             -p 8100 -v
 
-  run-revoked-ocsp-server:
+  "run-revoked-ocsp-server":
     - command: shell.exec
       params:
         script: |
@@ -468,7 +472,7 @@ functions:
             -v \
             --fault revoked
 
-  upload test results:
+  "upload test results":
     - command: attach.xunit_results
       params:
         file: src/xunit.xml
@@ -482,3 +486,6 @@ pre:
 post:
   - func: "upload test results"
   - func: "cleanup"
+
+ignore:
+  - '*.md'
