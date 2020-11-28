@@ -3,6 +3,7 @@ const { assert: test, filterForCommands, withMonitoredClient } = require('./shar
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
 const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
@@ -2033,8 +2034,8 @@ describe('Cursor', function () {
           collection.insert(docs, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            var filename = `${os.tmpdir()}/_nodemongodbnative_stream_out.txt`,
-              out = fs.createWriteStream(filename);
+            const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
+            const out = fs.createWriteStream(filename);
 
             // hack so we don't need to create a stream filter just to
             // stringify the objects (otherwise the created file would
@@ -2073,7 +2074,7 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldCloseDeadTailableCursors', {
+  it('should close dead tailable cursors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -2138,7 +2139,7 @@ describe('Cursor', function () {
                       expect(err).to.not.exist;
 
                       if (id === 99) {
-                        setTimeout(() => client.close());
+                        setTimeout(() => client.close(validator));
                       }
                     });
                   });

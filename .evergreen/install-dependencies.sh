@@ -20,37 +20,35 @@ mkdir -p ${NODE_ARTIFACTS_PATH}
 mkdir -p ${NPM_CACHE_DIR}
 mkdir -p "${NPM_TMP_DIR}"
 
-node_lts_version () {
-  case $1 in
-    "argon")
-      VERSION=4
-      ;;
-    "boron")
-      VERSION=6
-      ;;
-    "carbon")
-      VERSION=8
-      ;;
-    "dubnium")
-      VERSION=10
-      ;;
-    "erbium")
-      VERSION=12
-      ;;
-    "fermium")
-      VERSION=14
-      ;;
-    *)
-      echo "Unsupported Node LTS version $1"
-      exit 1
-      ;;
-  esac
-  NODE_VERSION=$(curl -s -o- https://nodejs.org/download/release/latest-v${VERSION}.x/SHASUMS256.txt \
-  | head -n 1 | awk '{print $2};' | cut -d- -f2)
-  export NODE_VERSION=${NODE_VERSION:1}
-}
+case $NODE_LTS_NAME in
+  "argon")
+    VERSION=4
+    ;;
+  "boron")
+    VERSION=6
+    ;;
+  "carbon")
+    VERSION=8
+    ;;
+  "dubnium")
+    VERSION=10
+    ;;
+  "erbium")
+    VERSION=12
+    ;;
+  "fermium")
+    VERSION=14
+    ;;
+  *)
+    echo "Unsupported Node LTS version $1"
+    exit 1
+    ;;
+esac
+NODE_VERSION=$(curl --retry 8 --retry-delay 5  --max-time 50 -s -o- \
+  https://nodejs.org/download/release/latest-v${VERSION}.x/SHASUMS256.txt \
+| head -n 1 | awk '{print $2};' | cut -d- -f2)
+export NODE_VERSION=${NODE_VERSION:1}
 
-node_lts_version $NODE_LTS_NAME
 # output node version to expansions file for use in subsequent scripts
 cat <<EOT > deps-expansion.yml
   NODE_VERSION: "$NODE_VERSION"
@@ -58,7 +56,6 @@ EOT
 
 # install Node.js on Windows
 if [[ "$OS" == "Windows_NT" ]]; then
-  echo "--- Installing nvm on Windows ---"
   # Delete pre-existing node to avoid version conflicts
   rm -rf "/cygdrive/c/Program Files/nodejs"
 
@@ -80,12 +77,13 @@ path: $NVM_SYMLINK
 EOT
   nvm install $NODE_VERSION
   nvm use $NODE_VERSION
+  which node
+  which npm
   npm config set msvs_version ${MSVS_VERSION}
-  echo "Windows install done (MSVS_VERSION=${MSVS_VERSION})"
+  npm config set scripts-prepend-node-path true
 
 # install Node.js on Linux/MacOS
 else
-  echo "--- Installing nvm on Linux/MacOS ---"
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
   nvm install --no-progress --lts=${NODE_LTS_NAME}
@@ -98,8 +96,6 @@ cache=${NPM_CACHE_DIR}
 tmp=${NPM_TMP_DIR}
 registry=https://registry.npmjs.org
 EOT
-
-  echo "Linux/MacOS install done"
 fi
 
 # NOTE: registry was overridden to not use artifactory, remove the `registry` line when

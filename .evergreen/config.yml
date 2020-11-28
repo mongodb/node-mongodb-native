@@ -139,12 +139,14 @@ functions:
   cleanup:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           rm -rf $DRIVERS_TOOLS || true
   fix absolute paths:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
@@ -153,6 +155,7 @@ functions:
   windows fix:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -164,6 +167,7 @@ functions:
   make files executable:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -463,6 +467,8 @@ pre:
 post:
   - func: upload test results
   - func: cleanup
+ignore:
+  - '*.md'
 tasks:
   - name: test-latest-server
     tags:

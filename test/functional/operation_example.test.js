@@ -3572,7 +3572,7 @@ describe('Operation Examples', function () {
    * @example-class Db
    * @example-method createCollection
    */
-  it('shouldCorrectlyCreateACollection', {
+  it('should correctly create a collection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -6701,7 +6701,7 @@ describe('Operation Examples', function () {
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection_2',
-          { capped: true, size: 100000, max: 10000, w: 1 },
+          { capped: true, size: 100000, max: 1000, w: 1 },
           function (err, collection) {
             expect(err).to.not.exist;
 
