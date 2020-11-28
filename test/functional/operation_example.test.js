@@ -442,13 +442,13 @@ describe('Operation Examples', function () {
           );
 
           // Get all the aggregation results
-          cursor.each(function (err, docs) {
-            expect(err).to.not.exist;
-
-            if (docs == null) {
+          cursor.forEach(
+            () => {},
+            err => {
+              expect(err).to.not.exist;
               client.close(done);
             }
-          });
+          );
         });
       });
       // END
@@ -1709,7 +1709,7 @@ describe('Operation Examples', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       /* eslint-disable */
-      client.connect(function(err, client) {
+      client.connect(function (err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
         // LINE const client = new MongoClient('mongodb://localhost:27017/test');
@@ -1725,31 +1725,31 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_map_reduce_functions');
 
         // Insert some documents to perform map reduce over
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function(err, r) {
+        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }, function (err, r) {
           test.ok(r);
           expect(err).to.not.exist;
 
           // Map function
-          var map = function() {
+          var map = function () {
             emit(this.user_id, 1);
           };
           // Reduce function
-          var reduce = function(k, vals) {
+          var reduce = function (k, vals) {
             return 1;
           };
 
           // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function(
+          collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
             err,
             collection
           ) {
             expect(err).to.not.exist;
 
             // Mapreduce returns the temporary collection with the results
-            collection.findOne({ _id: 1 }, function(err, result) {
+            collection.findOne({ _id: 1 }, function (err, result) {
               test.equal(1, result.value);
 
-              collection.findOne({ _id: 2 }, function(err, result) {
+              collection.findOne({ _id: 2 }, function (err, result) {
                 test.equal(1, result.value);
 
                 client.close(done);
@@ -1809,7 +1809,7 @@ describe('Operation Examples', function () {
 
           // Reduce function
           // eslint-disable-next-line
-          var reduce = function(k, vals) {
+          var reduce = function (k, vals) {
             return 1;
           };
 
@@ -2758,7 +2758,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to a number
             try {
-              collection1.rename(5, function(err, collection) {}); // eslint-disable-line
+              collection1.rename(5, function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection name must be a String', err.message);
@@ -2766,7 +2766,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an empty string
             try {
-              collection1.rename('', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal('collection names cannot be empty', err.message);
@@ -2774,7 +2774,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name including the character $
             try {
-              collection1.rename('te$t', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('te$t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not contain '$'", err.message);
@@ -2782,7 +2782,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name starting with the character .
             try {
-              collection1.rename('.test', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('.test', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2790,7 +2790,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name ending with the character .
             try {
-              collection1.rename('test.', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('test.', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
@@ -2798,7 +2798,7 @@ describe('Operation Examples', function () {
 
             // Attemp to rename a collection to an illegal name with an empty middle name
             try {
-              collection1.rename('tes..t', function(err, collection) {}); // eslint-disable-line
+              collection1.rename('tes..t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.equal('collection names cannot be empty', err.message);
             }
@@ -4823,19 +4823,21 @@ describe('Operation Examples', function () {
           // Grab a cursor
           var cursor = collection.find();
           // Execute the each command, triggers for each document
-          cursor.each(function (err, item) {
-            // If the item is null then the cursor is exhausted/empty and closed
-            if (item == null) {
+          cursor.forEach(
+            () => {},
+            err => {
+              expect(err).to.not.exist;
+
               // Show that the cursor is closed
-              cursor.toArray(function (err, items) {
-                test.ok(items);
+              cursor.toArray((err, docs) => {
                 expect(err).to.not.exist;
+                expect(docs).to.exist;
 
                 // Let's close the db
                 client.close(done);
               });
             }
-          });
+          );
         });
       });
       // END
@@ -4906,7 +4908,8 @@ describe('Operation Examples', function () {
    * @example-class Cursor
    * @example-method rewind
    */
-  it('Should correctly rewind and restart cursor', {
+  // NOTE: unclear whether we should continue to support `rewind`
+  it.skip('Should correctly rewind and restart cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -5451,9 +5454,6 @@ describe('Operation Examples', function () {
 
   /**
    * A simple example showing the use of the cursor close function.
-   *
-   * @example-class Cursor
-   * @example-method isClosed
    */
   it('shouldStreamDocumentsUsingTheIsCloseFunction', {
     // Add a tag that our runner can trigger on
@@ -5500,10 +5500,9 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function (err, result) {
-              test.ok(result);
+            cursor.close(function (err) {
               expect(err).to.not.exist;
-              test.equal(true, cursor.isClosed());
+              test.equal(true, cursor.closed);
 
               client.close(done);
             });
@@ -5565,8 +5564,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Close the cursor, this is the same as reseting the query
-            cursor.close(function (err, result) {
-              test.ok(result);
+            cursor.close(function (err) {
               expect(err).to.not.exist;
 
               client.close(done);
@@ -6725,11 +6723,11 @@ describe('Operation Examples', function () {
               stream.on('data', function () {
                 total = total + 1;
                 if (total === 1000) {
-                  cursor.kill();
+                  cursor.close();
                 }
               });
 
-              stream.on('end', function () {
+              cursor.on('close', function () {
                 client.close(done);
               });
             });

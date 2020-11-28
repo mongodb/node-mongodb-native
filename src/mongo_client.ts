@@ -4,7 +4,7 @@ import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError, AnyError } from './error';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { maybePromise, MongoDBNamespace, Callback } from './utils';
+import { maybePromise, MongoDBNamespace, Callback, resolveOptions } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
@@ -535,7 +535,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
       pipeline = [];
     }
 
-    return new ChangeStream(this, pipeline, options);
+    return new ChangeStream(this, pipeline, resolveOptions(this, options));
   }
 
   /** Return the mongo client logger */

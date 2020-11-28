@@ -30,7 +30,7 @@ export class FindOneOperation extends CommandOperation<FindOptions, Document> {
       // Return the item
       cursor.next((err, item) => {
         if (err != null) return callback(new MongoError(err));
-        callback(undefined, item);
+        callback(undefined, item || undefined);
       });
     } catch (e) {
       callback(e);

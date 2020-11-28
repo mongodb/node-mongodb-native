@@ -3,6 +3,8 @@
 const { expect } = require('chai');
 const { format: f } = require('util');
 const { ObjectId } = require('bson');
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { MongoDBNamespace } = require('../../../src/utils');
 
 describe('A server', function () {
   it('should correctly execute insert culling undefined', {
@@ -39,11 +41,12 @@ describe('A server', function () {
                 expect(results.n).to.eql(1);
 
                 // Execute find
-                var cursor = topology.cursor(ns, {
-                  find: 'insert1',
-                  filter: { _id: objectId },
-                  batchSize: 2
-                });
+                const cursor = new FindCursor(
+                  topology,
+                  MongoDBNamespace.fromString(ns),
+                  { _id: objectId },
+                  { batchSize: 2 }
+                );
 
                 // Execute next
                 cursor.next((nextErr, d) => {
@@ -99,11 +102,12 @@ describe('A server', function () {
                 expect(results.n).to.eql(1);
 
                 // Execute find
-                const cursor = topology.cursor(ns, {
-                  find: 'update1',
-                  filter: { _id: objectId },
-                  batchSize: 2
-                });
+                const cursor = new FindCursor(
+                  topology,
+                  MongoDBNamespace.fromString(ns),
+                  { _id: objectId },
+                  { batchSize: 2 }
+                );
 
                 // Execute next
                 cursor.next((nextErr, d) => {

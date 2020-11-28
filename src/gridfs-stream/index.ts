@@ -12,10 +12,10 @@ import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
-import type { Cursor } from './../cursor/cursor';
 import type { FindOptions } from './../operations/find';
 import type { Sort } from '../sort';
 import type { Logger } from '../logger';
+import type { FindCursor } from '../cursor/find_cursor';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;
@@ -140,7 +140,7 @@ export class GridFSBucket extends EventEmitter {
   }
 
   /** Convenience wrapper around find on the files collection */
-  find(filter: Document, options?: FindOptions): Cursor {
+  find(filter: Document, options?: FindOptions): FindCursor {
     filter = filter || {};
     options = options || {};
     return this.s._filesCollection.find(filter, options);

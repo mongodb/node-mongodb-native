@@ -533,7 +533,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -665,7 +665,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1208,7 +1208,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1508,7 +1508,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1581,7 +1581,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -1953,7 +1953,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -2375,7 +2375,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
+      var client = configuration.newClient({ maxPoolSize: 1 });
 
       return client.connect().then(function (client) {
         var db = client.db(configuration.db);
@@ -4955,10 +4955,11 @@ describe('Operation (Promises)', function () {
               total = total + 1;
 
               if (total === 1000) {
-                cursor.kill();
+                cursor.close();
               }
             });
-            stream.on('end', function () {
+
+            cursor.on('close', function () {
               // TODO: forced because the cursor is still open/active
               client.close(true, done);
             });

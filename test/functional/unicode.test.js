@@ -88,6 +88,7 @@ describe('Unicode', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         db.createCollection('unicode_test_collection', function (err, collection) {
           var test_strings = ['ouooueauiOUOOUEAUI', 'öüóőúéáűíÖÜÓŐÚÉÁŰÍ', '本荘由利地域に洪水警報'];
@@ -97,13 +98,15 @@ describe('Unicode', function () {
               expect(err).to.not.exist;
               collection.insert({ id: 2, text: test_strings[2] }, { w: 1 }, function (err) {
                 expect(err).to.not.exist;
-                collection.find().each(function (err, item) {
-                  if (item != null) {
-                    test.equal(test_strings[item.id], item.text);
-                  } else {
+                collection.find().forEach(
+                  doc => {
+                    expect(doc).property('text').to.equal(test_strings[doc.id]);
+                  },
+                  err => {
+                    expect(err).to.not.exist;
                     client.close(done);
                   }
-                });
+                );
               });
             });
           });

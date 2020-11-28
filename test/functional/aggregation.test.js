@@ -395,7 +395,7 @@ describe('Aggregation', function () {
     },
 
     test: function (done) {
-      var client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
+      var client = this.configuration.newClient({ maxPoolSize: 1 }),
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
@@ -891,7 +891,7 @@ describe('Aggregation', function () {
 
           try {
             // Execute aggregate, notice the pipeline is expressed as an Array
-            collection.aggregate(
+            const cursor = collection.aggregate(
               [
                 {
                   $project: {
@@ -911,6 +911,8 @@ describe('Aggregation', function () {
                 cursor: 1
               }
             );
+
+            cursor.next();
           } catch (err) {
             client.close(done);
             return;

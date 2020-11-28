@@ -6,6 +6,7 @@ import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import type { Document } from '../bson';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -20,6 +21,16 @@ type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<
 type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K, unknown>
   ? K
   : never;
+
+/* @internal */
+export interface ExecutionResult {
+  /** The server selected for the operation */
+  server: Server;
+  /** The session used for this operation, may be implicitly created */
+  session?: ClientSession;
+  /** The raw server response for the operation */
+  response: Document;
+}
 
 /**
  * Executes the given operation with provided arguments.

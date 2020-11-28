@@ -281,28 +281,21 @@ describe('Cursor Streams', function () {
         maxPoolSize: 1
       });
 
-      client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
-        var cursor = db.collection('myCollection').find({
+      client.connect((err, client) => {
+        const db = client.db(self.configuration.db);
+        const cursor = db.collection('myCollection').find({
           timestamp: { $ltx: '1111' } // Error in query.
         });
 
-        var error, streamIsClosed;
+        let error;
         const stream = cursor.stream();
-
-        stream.on('error', function (err) {
-          error = err;
-        });
-
+        stream.on('error', err => (error = err));
         cursor.on('close', function () {
-          expect(error).to.exist;
-          streamIsClosed = true;
-        });
-
-        stream.on('end', function () {
-          expect(error).to.exist;
-          expect(streamIsClosed).to.be.true;
-          client.close(done);
+          // NOTE: use `setImmediate` here because the stream implementation uses `nextTick` to emit the error
+          setImmediate(() => {
+            expect(error).to.exist;
+            client.close(done);
+          });
         });
 
         stream.pipe(process.stdout);

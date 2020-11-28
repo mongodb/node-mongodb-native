@@ -412,13 +412,13 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
 }
 
 function normalizeCommandShapes(commands) {
-  return commands.map(command =>
+  return commands.map(def =>
     JSON.parse(
       EJSON.stringify(
         {
-          command: command.command,
-          commandName: command.command_name ? command.command_name : command.commandName,
-          databaseName: command.database_name ? command.database_name : command.databaseName
+          command: def.command,
+          commandName: def.command_name || def.commandName || Object.keys(def.command)[0],
+          databaseName: def.database_name ? def.database_name : def.databaseName
         },
         { relaxed: true }
       )

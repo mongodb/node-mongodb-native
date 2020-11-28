@@ -1,4 +1,8 @@
 'use strict';
+
+const { MongoDBNamespace } = require('../../../src/utils');
+const { FindCursor } = require('../../../src/cursor/find_cursor');
+
 const expect = require('chai').expect;
 const setupDatabase = require('../shared').setupDatabase;
 
@@ -45,13 +49,12 @@ describe('Tailable cursor tests', function () {
                   expect(results.n).to.equal(1);
 
                   // Execute find
-                  const cursor = topology.cursor(ns, {
-                    find: 'cursor_tailable',
-                    filter: {},
-                    batchSize: 2,
-                    tailable: true,
-                    awaitData: true
-                  });
+                  const cursor = new FindCursor(
+                    topology,
+                    MongoDBNamespace.fromString(ns),
+                    {},
+                    { batchSize: 2, tailable: true, awaitData: true }
+                  );
 
                   // Execute next
                   cursor.next((cursorErr, cursorD) => {
@@ -67,7 +70,7 @@ describe('Tailable cursor tests', function () {
                       server.destroy(done);
                     });
 
-                    setTimeout(() => cursor.kill(), 300);
+                    setTimeout(() => cursor.close(), 300);
                   });
                 }
               );
