@@ -2,12 +2,11 @@
 # set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
-echo "in .evergreen/install-dependencies.sh - SKIP_INSTALL=$SKIP_INSTALL"
-
 NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip"
 NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"
 
 NODE_LTS_NAME=${NODE_LTS_NAME:-carbon}
+MSVS_VERSION=${MSVS_VERSION:-2017}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 NPM_CACHE_DIR="${NODE_ARTIFACTS_PATH}/npm"
 NPM_TMP_DIR="${NODE_ARTIFACTS_PATH}/tmp"
@@ -51,11 +50,17 @@ node_lts_version () {
   export NODE_VERSION=${NODE_VERSION:1}
 }
 
+node_lts_version $NODE_LTS_NAME
+# output node version to expansions file for use in subsequent scripts
+cat <<EOT > deps-expansion.yml
+  NODE_VERSION: "$NODE_VERSION"
+EOT
+
 # install Node.js on Windows
-if [[ "$OS" == "Windows_NT" || "$PLATFORM" == "windows-64" ]]; then
+if [[ "$OS" == "Windows_NT" ]]; then
   echo "--- Installing nvm on Windows ---"
-  node_lts_version $NODE_LTS_NAME
-  echo "NODE_VERSION=$NODE_VERSION"
+  # Delete pre-existing node to avoid version conflicts
+  rm -rf "/cygdrive/c/Program Files/nodejs"
 
   export NVM_HOME=`cygpath -w "$NVM_DIR"`
   export NVM_SYMLINK=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
@@ -75,9 +80,8 @@ path: $NVM_SYMLINK
 EOT
   nvm install $NODE_VERSION
   nvm use $NODE_VERSION
-
-  npm config set msvs_version 2017
-  echo "Windows install done"
+  npm config set msvs_version ${MSVS_VERSION}
+  echo "Windows install done (MSVS_VERSION=${MSVS_VERSION})"
 
 # install Node.js on Linux/MacOS
 else
@@ -95,8 +99,7 @@ tmp=${NPM_TMP_DIR}
 registry=https://registry.npmjs.org
 EOT
 
-echo "Linux/MacOS install done"
-
+  echo "Linux/MacOS install done"
 fi
 
 # NOTE: registry was overridden to not use artifactory, remove the `registry` line when

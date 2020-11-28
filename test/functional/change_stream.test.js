@@ -1458,7 +1458,8 @@ describe('Change Streams', function () {
       requires: {
         generators: true,
         topology: 'single',
-        mongodb: '>=3.6'
+        mongodb: '>=3.6',
+        os: '!win32'
       }
     },
     test: function (done) {

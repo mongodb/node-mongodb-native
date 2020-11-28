@@ -105,7 +105,7 @@ describe('Connect Tests', function () {
 
     connect({ host: '240.0.0.1' }, cancellationToken, (err, conn) => {
       expect(err).to.exist;
-      expect(err).to.match(/connection establishment was cancelled/);
+      expect(err).to.match(/(connection establishment was cancelled|connect ENETUNREACH)/);
       expect(conn).to.not.exist;
       done();
     });

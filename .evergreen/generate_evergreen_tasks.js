@@ -1,5 +1,3 @@
-'use strict';
-
 const semver = require('semver');
 const fs = require('fs');
 const yaml = require('js-yaml');
@@ -26,33 +24,30 @@ const OPERATING_SYSTEMS = [
   {
     name: 'ubuntu-14.04',
     display_name: 'Ubuntu 14.04',
-    run_on: 'ubuntu1404-test',
+    run_on: 'ubuntu1404-large',
     mongoVersion: '<4.2'
   },
   {
     name: 'ubuntu-18.04',
     display_name: 'Ubuntu 18.04',
-    run_on: 'ubuntu1804-test',
+    run_on: 'ubuntu1804-large',
     mongoVersion: '>=3.2',
     clientEncryption: true
   },
-
-  // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
-  // {
-  //   name: 'windows-64-vs2010-test',
-  //   display_name: 'Windows (VS2010)',
-  //   run_on: 'windows-64-vs2010-test'
-  // },
-  // {
-  //   name: 'windows-64-vs2013-test',
-  //   display_name: 'Windows (VS2013)',
-  //   run_on: 'windows-64-vs2013-test'
-  // },
-  // {
-  //   name: 'windows-64-vs2015-test',
-  //   display_name: 'Windows (VS2015)',
-  //   run_on: 'windows-64-vs2015-test'
-  // }
+  {
+    name: 'windows-64-vs2015',
+    display_name: 'Windows (VS2015)',
+    run_on: 'windows-64-vs2015-large',
+    msvsVersion: 2015,
+    mongoVersion: '<4.4'
+  },
+  {
+    name: 'windows-64-vs2017',
+    display_name: 'Windows (VS2017)',
+    run_on: 'windows-64-vs2017-large',
+    msvsVersion: 2017,
+    mongoVersion: '<4.4'
+  }
 ].map(osConfig =>
   Object.assign(
     {
@@ -67,10 +62,10 @@ const OPERATING_SYSTEMS = [
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function makeTask({ mongoVersion, topology }) {
+function makeTask({ mongoVersion, topology, tags = [] }) {
   return {
     name: `test-${mongoVersion}-${topology}`,
-    tags: [mongoVersion, topology],
+    tags: [mongoVersion, topology, ...tags],
     commands: [
       { func: 'install dependencies' },
       {
@@ -87,7 +82,7 @@ function makeTask({ mongoVersion, topology }) {
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology =>
-    TASKS.push(makeTask({ mongoVersion, topology }))
+    TASKS.push(makeTask({ mongoVersion, topology, tags: ['full-suite'] }))
   );
 });
 
@@ -96,13 +91,10 @@ Array.prototype.push.apply(TASKS, [
   {
     name: 'test-atlas-connectivity',
     tags: ['atlas-connect'],
-    commands: [
-      { func: 'install dependencies' },
-      { func: 'run atlas tests' }
-    ]
+    commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
   },
   {
-    name: "test-atlas-data-lake",
+    name: 'test-atlas-data-lake',
     commands: [
       { func: 'install dependencies' },
       { func: 'bootstrap mongohoused' },
@@ -112,18 +104,12 @@ Array.prototype.push.apply(TASKS, [
   {
     name: 'test-auth-kerberos',
     tags: ['auth', 'kerberos'],
-    commands: [
-      { func: 'install dependencies' },
-      { func: 'run kerberos tests' }
-    ]
+    commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
   },
   {
     name: 'test-auth-ldap',
     tags: ['auth', 'ldap'],
-    commands: [
-      { func: 'install dependencies' },
-      { func: 'run ldap tests' }
-    ]
+    commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
   },
   {
     name: 'test-tls-support',
@@ -381,7 +367,7 @@ OCSP_VERSIONS.forEach(VERSION => {
       ]
     }
   ]);
-})
+});
 
 const AWS_AUTH_TASKS = [];
 
@@ -410,21 +396,21 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
       { func: 'run aws ECS auth test' }
     ]
   });
-})
-
+});
 
 const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
   const memo = {};
-  return function(mongoVersion) {
-    const key = mongoVersion;
+  return function (mongoVersion, onlyFullSuite = false) {
+    const key = mongoVersion + (onlyFullSuite ? 'F' : '');
 
     if (memo[key]) {
       return memo[key];
     }
 
     const ret = TASKS.filter(task => {
+      if (onlyFullSuite && (!task.tags || !task.tags.includes('full-suite'))) return false;
       const tasksWithVars = task.commands.filter(task => !!task.vars);
       if (task.name.match(/^aws/)) return false;
 
@@ -452,10 +438,11 @@ OPERATING_SYSTEMS.forEach(
     run_on,
     mongoVersion = '>=2.6',
     nodeVersions = NODE_VERSIONS,
-    clientEncryption
+    clientEncryption,
+    msvsVersion
   }) => {
     const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
-    const tasks = getTaskList(mongoVersion);
+    const tasks = getTaskList(mongoVersion, !!msvsVersion);
 
     testedNodeVersions.forEach(NODE_LTS_NAME => {
       const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.substr(1)}`;
@@ -465,6 +452,9 @@ OPERATING_SYSTEMS.forEach(
 
       if (clientEncryption) {
         expansions.CLIENT_ENCRYPTION = true;
+      }
+      if (msvsVersion) {
+        expansions.MSVS_VERSION = msvsVersion;
       }
 
       BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });

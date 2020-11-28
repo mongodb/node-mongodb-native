@@ -63,7 +63,7 @@ describe('Connection', function () {
 
     connect(connectOptions, err => {
       expect(err).to.exist;
-      expect(err).to.match(/timed out/);
+      expect(err).to.match(/(timed out|connect ENETUNREACH)/);
       done();
     });
   });

@@ -2,6 +2,7 @@
 const { assert: test, filterForCommands, withMonitoredClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
+const os = require('os');
 const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
@@ -2032,7 +2033,7 @@ describe('Cursor', function () {
           collection.insert(docs, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            var filename = '/tmp/_nodemongodbnative_stream_out.txt',
+            var filename = `${os.tmpdir()}/_nodemongodbnative_stream_out.txt`,
               out = fs.createWriteStream(filename);
 
             // hack so we don't need to create a stream filter just to
