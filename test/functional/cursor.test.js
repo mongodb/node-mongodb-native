@@ -1923,17 +1923,7 @@ describe('Cursor', function () {
             collection.insertMany(docs, err => {
               expect(err).to.not.exist;
 
-<<<<<<< HEAD
-                      if (id === 99) {
-                        setTimeout(() => client.close(validator));
-                      }
-                    });
-                  });
-                }
-              }
-=======
-              setTimeout(() => client.close());
->>>>>>> origin/master
+              setTimeout(() => client.close(validator));
             });
           });
         });
