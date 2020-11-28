@@ -2,6 +2,7 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const fs = require('fs');
+const os = require('os');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
@@ -2242,8 +2243,8 @@ describe('Cursor', function() {
           collection.insert(docs, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            var filename = '/tmp/_nodemongodbnative_stream_out.txt',
-              out = fs.createWriteStream(filename);
+            const filename = `${os.tmpdir()}/_nodemongodbnative_stream_out.txt`;
+            const out = fs.createWriteStream(filename);
 
             // hack so we don't need to create a stream filter just to
             // stringify the objects (otherwise the created file would

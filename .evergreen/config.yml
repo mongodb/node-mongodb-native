@@ -11,7 +11,6 @@ functions:
     - command: git.get_project
       params:
         directory: src
-    - command: git.apply_patch
     - command: shell.exec
       params:
         working_dir: src
@@ -28,6 +27,14 @@ functions:
           export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
           export UPLOAD_BUCKET="${project}"
+
+          # fix paths on windows
+          if [ "Windows_NT" = "$OS" ]; then
+            export DRIVERS_TOOLS=$(cygpath -m -a $DRIVERS_TOOLS)
+            export MONGO_ORCHESTRATION_HOME=$(cygpath -m -a $MONGO_ORCHESTRATION_HOME)
+            export MONGODB_BINARIES=$(cygpath -m -a $MONGODB_BINARIES)
+            export PROJECT_DIRECTORY=$(cygpath -m -a $PROJECT_DIRECTORY)
+          fi
 
           cat <<EOT > expansion.yml
           CURRENT_VERSION: "$CURRENT_VERSION"
@@ -60,14 +67,7 @@ functions:
         script: >
           ${PREPARE_SHELL}
 
-          rm -rf $DRIVERS_TOOLS
-
-          if [ "${project}" = "drivers-tools" ]; then
-            # If this was a patch build, doing a fresh clone would not actually test the patch
-            cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
-          else
-            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-          fi
+          git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
 
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" >
           $MONGO_ORCHESTRATION_HOME/orchestration.config
@@ -113,7 +113,7 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -136,6 +136,17 @@ functions:
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
+  windows fix:
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+          #   cat $i | tr -d '\r' > $i.new
+          #   mv $i.new $i
+          # done
+          # Copy client certificate because symlinks do not work on Windows.
+          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
   make files executable:
     - command: shell.exec
       params:
@@ -151,7 +162,11 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+    - command: expansions.update
+      params:
+        file: src/deps-expansion.yml
   run atlas tests:
     - command: shell.exec
       type: test
@@ -420,6 +435,7 @@ functions:
 pre:
   - func: fetch source
   - func: prepare resources
+  - func: windows fix
   - func: fix absolute paths
   - func: make files executable
 post:
@@ -430,6 +446,7 @@ tasks:
     tags:
       - latest
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -441,6 +458,7 @@ tasks:
     tags:
       - latest
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -452,6 +470,7 @@ tasks:
     tags:
       - latest
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -463,6 +482,7 @@ tasks:
     tags:
       - latest
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -476,6 +496,7 @@ tasks:
     tags:
       - latest
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -489,6 +510,7 @@ tasks:
     tags:
       - latest
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -502,6 +524,7 @@ tasks:
     tags:
       - '4.4'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -513,6 +536,7 @@ tasks:
     tags:
       - '4.4'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -524,6 +548,7 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -535,6 +560,7 @@ tasks:
     tags:
       - '4.4'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -548,6 +574,7 @@ tasks:
     tags:
       - '4.4'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -561,6 +588,7 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -574,6 +602,7 @@ tasks:
     tags:
       - '4.2'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -585,6 +614,7 @@ tasks:
     tags:
       - '4.2'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -596,6 +626,7 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -607,6 +638,7 @@ tasks:
     tags:
       - '4.2'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -620,6 +652,7 @@ tasks:
     tags:
       - '4.2'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -633,6 +666,7 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -646,6 +680,7 @@ tasks:
     tags:
       - '4.0'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -657,6 +692,7 @@ tasks:
     tags:
       - '4.0'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -668,6 +704,7 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -679,6 +716,7 @@ tasks:
     tags:
       - '4.0'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -692,6 +730,7 @@ tasks:
     tags:
       - '4.0'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -705,6 +744,7 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -718,6 +758,7 @@ tasks:
     tags:
       - '3.6'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -729,6 +770,7 @@ tasks:
     tags:
       - '3.6'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -740,6 +782,7 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -751,6 +794,7 @@ tasks:
     tags:
       - '3.6'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -764,6 +808,7 @@ tasks:
     tags:
       - '3.6'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -777,6 +822,7 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -790,6 +836,7 @@ tasks:
     tags:
       - '3.4'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -801,6 +848,7 @@ tasks:
     tags:
       - '3.4'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -812,6 +860,7 @@ tasks:
     tags:
       - '3.4'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -823,6 +872,7 @@ tasks:
     tags:
       - '3.4'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -836,6 +886,7 @@ tasks:
     tags:
       - '3.4'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -849,6 +900,7 @@ tasks:
     tags:
       - '3.4'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -862,6 +914,7 @@ tasks:
     tags:
       - '3.2'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -873,6 +926,7 @@ tasks:
     tags:
       - '3.2'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -884,6 +938,7 @@ tasks:
     tags:
       - '3.2'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -895,6 +950,7 @@ tasks:
     tags:
       - '3.2'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -908,6 +964,7 @@ tasks:
     tags:
       - '3.2'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -921,6 +978,7 @@ tasks:
     tags:
       - '3.2'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -934,6 +992,7 @@ tasks:
     tags:
       - '3.0'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -945,6 +1004,7 @@ tasks:
     tags:
       - '3.0'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -956,6 +1016,7 @@ tasks:
     tags:
       - '3.0'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -967,6 +1028,7 @@ tasks:
     tags:
       - '3.0'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -980,6 +1042,7 @@ tasks:
     tags:
       - '3.0'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -993,6 +1056,7 @@ tasks:
     tags:
       - '3.0'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1006,6 +1070,7 @@ tasks:
     tags:
       - '2.6'
       - server
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1017,6 +1082,7 @@ tasks:
     tags:
       - '2.6'
       - replica_set
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1028,6 +1094,7 @@ tasks:
     tags:
       - '2.6'
       - sharded_cluster
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1039,6 +1106,7 @@ tasks:
     tags:
       - '2.6'
       - server-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1052,6 +1120,7 @@ tasks:
     tags:
       - '2.6'
       - replica_set-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1065,6 +1134,7 @@ tasks:
     tags:
       - '2.6'
       - sharded_cluster-unified
+      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1650,6 +1720,188 @@ buildvariants:
       NODE_LTS_NAME: argon
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
+  - name: windows-64-vs2010-erbium
+    display_name: Windows (VS2010) Node Erbium
+    run_on: windows-64-vs2010-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2010
+    tasks: &ref_3
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.2-server-unified
+      - test-4.2-replica_set-unified
+      - test-4.2-sharded_cluster-unified
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-4.0-server-unified
+      - test-4.0-replica_set-unified
+      - test-4.0-sharded_cluster-unified
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.6-server-unified
+      - test-3.6-replica_set-unified
+      - test-3.6-sharded_cluster-unified
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.4-server-unified
+      - test-3.4-replica_set-unified
+      - test-3.4-sharded_cluster-unified
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.2-server-unified
+      - test-3.2-replica_set-unified
+      - test-3.2-sharded_cluster-unified
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-3.0-server-unified
+      - test-3.0-replica_set-unified
+      - test-3.0-sharded_cluster-unified
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-2.6-server-unified
+      - test-2.6-replica_set-unified
+      - test-2.6-sharded_cluster-unified
+  - name: windows-64-vs2010-dubnium
+    display_name: Windows (VS2010) Node Dubnium
+    run_on: windows-64-vs2010-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2010
+    tasks: *ref_3
+  - name: windows-64-vs2010-carbon
+    display_name: Windows (VS2010) Node Carbon
+    run_on: windows-64-vs2010-large
+    expansions:
+      NODE_LTS_NAME: carbon
+      MSVS_VERSION: 2010
+    tasks: *ref_3
+  - name: windows-64-vs2010-boron
+    display_name: Windows (VS2010) Node Boron
+    run_on: windows-64-vs2010-large
+    expansions:
+      NODE_LTS_NAME: boron
+      MSVS_VERSION: 2010
+    tasks: *ref_3
+  - name: windows-64-vs2010-argon
+    display_name: Windows (VS2010) Node Argon
+    run_on: windows-64-vs2010-large
+    expansions:
+      NODE_LTS_NAME: argon
+      MSVS_VERSION: 2010
+    tasks: *ref_3
+  - name: windows-64-vs2013-erbium
+    display_name: Windows (VS2013) Node Erbium
+    run_on: windows-64-vs2013-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2013
+    tasks: *ref_3
+  - name: windows-64-vs2013-dubnium
+    display_name: Windows (VS2013) Node Dubnium
+    run_on: windows-64-vs2013-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2013
+    tasks: *ref_3
+  - name: windows-64-vs2013-carbon
+    display_name: Windows (VS2013) Node Carbon
+    run_on: windows-64-vs2013-large
+    expansions:
+      NODE_LTS_NAME: carbon
+      MSVS_VERSION: 2013
+    tasks: *ref_3
+  - name: windows-64-vs2013-boron
+    display_name: Windows (VS2013) Node Boron
+    run_on: windows-64-vs2013-large
+    expansions:
+      NODE_LTS_NAME: boron
+      MSVS_VERSION: 2013
+    tasks: *ref_3
+  - name: windows-64-vs2013-argon
+    display_name: Windows (VS2013) Node Argon
+    run_on: windows-64-vs2013-large
+    expansions:
+      NODE_LTS_NAME: argon
+      MSVS_VERSION: 2013
+    tasks: *ref_3
+  - name: windows-64-vs2015-erbium
+    display_name: Windows (VS2015) Node Erbium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2015-dubnium
+    display_name: Windows (VS2015) Node Dubnium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2015-carbon
+    display_name: Windows (VS2015) Node Carbon
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: carbon
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2015-boron
+    display_name: Windows (VS2015) Node Boron
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: boron
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2015-argon
+    display_name: Windows (VS2015) Node Argon
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: argon
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2017-erbium
+    display_name: Windows (VS2017) Node Erbium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2017
+    tasks: *ref_3
+  - name: windows-64-vs2017-dubnium
+    display_name: Windows (VS2017) Node Dubnium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2017
+    tasks: *ref_3
+  - name: windows-64-vs2017-carbon
+    display_name: Windows (VS2017) Node Carbon
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: carbon
+      MSVS_VERSION: 2017
+    tasks: *ref_3
+  - name: windows-64-vs2017-boron
+    display_name: Windows (VS2017) Node Boron
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: boron
+      MSVS_VERSION: 2017
+    tasks: *ref_3
+  - name: windows-64-vs2017-argon
+    display_name: Windows (VS2017) Node Argon
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: argon
+      MSVS_VERSION: 2017
+    tasks: *ref_3
   - name: lint
     display_name: lint
     run_on: rhel70
