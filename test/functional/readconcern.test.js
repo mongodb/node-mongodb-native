@@ -59,9 +59,12 @@ describe('ReadConcern', function() {
   ];
 
   tests.forEach(test => {
+    const metadata = { requires: { topology: 'replicaset', mongodb: '>= 3.2' } };
+    if (test.commandName === 'geoSearch') {
+      metadata.requires.mongodb += ' <=4.4';
+    }
     it(test.description, {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-
+      metadata,
       test: function(done) {
         const started = [];
         const succeeded = [];
