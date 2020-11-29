@@ -8,25 +8,36 @@ echo "PLATFORM=$PLATFORM DRIVER_VERSION=$DRIVER_VERSION"
 
 ADDITIONAL_DEPS=:
 
+export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
+export NODE_LTS_NAME=dubnium
+export SKIP_INSTALL=1
+
+if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
+  export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
+fi
+
+echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
+
+cd $PROJECT_DIRECTORY
+
+echo "1. Installing driver dependencies"
+bash .evergreen/install-dependencies.sh
+
+echo "2. Driver dependencies installed, running test suite"
 case $DRIVER_VERSION in
   '3.6')
-    VERSION_DESC="v3.6"
     TEST_COMMAND='npm run test-nolint'
     ;;
   'NODE-1458/3.6/support-windows-evergreen')
-    VERSION_DESC="v3.6 (debug branch)"
-    TEST_COMMAND='npm run test-nolint'
+    TEST_COMMAND='npm run test-nolint -- --exit'
     ;;
   '3.3')
-    VERSION_DESC="v3.3"
     TEST_COMMAND='npm run test-nolint'
     ;;
   'NODE-1458/3.3/support-windows-evergreen')
-    VERSION_DESC="v3.3"
-    TEST_COMMAND='npm run test-nolint'
+    TEST_COMMAND='npm run test-nolint -- --exit'
     ;;
   '3.1')
-    VERSION_DESC="v3.1"
     if [[ $TOPOLOGY == "server" ]]; then
       MONGODB_ENVIRONMENT='single'
     else
@@ -43,24 +54,8 @@ case $DRIVER_VERSION in
     ;;
 esac
 
-echo "Testing NodeJS driver $VERSION_DESC"
+echo "Testing NodeJS driver $DRIVER_VERSION"
 echo "TEST_COMMAND=$TEST_COMMAND"
-
-export PROJECT_DIRECTORY=$(cd $(dirname ${BASH_SOURCE[0]}) && cd .. && pwd)
-export NODE_LTS_NAME=dubnium
-export SKIP_INSTALL=1
-
-if [[ $OS == "Windows_NT" || $PLATFORM == "windows-64" ]]; then
-  export PROJECT_DIRECTORY=`cygpath -w "$PROJECT_DIRECTORY"`
-fi
-
-echo "PROJECT_DIRECTORY=$PROJECT_DIRECTORY NODE_LTS_NAME=$NODE_LTS_NAME"
-
-cd $PROJECT_DIRECTORY
-
-echo "1. Installing driver depenencies"
-bash .evergreen/install-dependencies.sh
-echo "2. Driver dependencies installed, running test suite"
 
 git checkout $DRIVER_VERSION
 echo "3. Checked out version branch, running dependency installation"
