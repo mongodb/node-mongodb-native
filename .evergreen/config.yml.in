@@ -255,3 +255,6 @@ pre:
 post:
   - func: "upload test results"
   - func: "cleanup"
+
+ignore:
+  - '*.md'
