@@ -21,6 +21,10 @@ case $DRIVER_VERSION in
     VERSION_DESC="v3.3"
     TEST_COMMAND='npm run test-nolint'
     ;;
+  'NODE-1458/3.3/support-windows-evergreen')
+    VERSION_DESC="v3.3"
+    TEST_COMMAND='npm run test-nolint'
+    ;;
   '3.1')
     VERSION_DESC="v3.1"
     if [[ $TOPOLOGY == "server" ]]; then
