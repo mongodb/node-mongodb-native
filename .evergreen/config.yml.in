@@ -240,6 +240,11 @@ functions:
           SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
+  "upload test results":
+    - command: attach.xunit_results
+      params:
+        file: src/xunit.xml
+
 pre:
   - func: "fetch source"
   - func: "prepare resources"
@@ -248,4 +253,5 @@ pre:
   - func: "make files executable"
 
 post:
+  - func: "upload test results"
   - func: "cleanup"
