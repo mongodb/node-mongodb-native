@@ -45,7 +45,6 @@ export interface ReadPreferenceLikeOptions extends ReadPreferenceOptions {
 
 /** @public */
 export interface ReadPreferenceFromOptions extends ReadPreferenceLikeOptions {
-  mode: ReadPreferenceModeId;
   session?: ClientSession;
   readPreferenceTags?: TagSet[];
   hedge?: HedgeOptions;
