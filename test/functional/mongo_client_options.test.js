@@ -116,6 +116,10 @@ describe('MongoClient Options', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
     test: function(done) {
       if (!this.configuration.usingUnifiedTopology()) return done();
+      const client = this.configuration.newClient({
+        connectTimeoutMS: 0,
+        heartbeatFrequencyMS: 500
+      });
       const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
         const args = Array.prototype.slice.call(arguments);
         const ns = args[0];
@@ -126,15 +130,10 @@ describe('MongoClient Options', function() {
           expect(options)
             .property('socketTimeout')
             .to.equal(0);
-          done();
+          client.close(done);
         }
         stub.wrappedMethod.apply(this, args);
       });
-      const client = this.configuration.newClient({
-        connectTimeoutMS: 0,
-        heartbeatFrequencyMS: 500
-      });
-      this.defer(() => client.close());
       client.connect(err => expect(err).to.not.exist);
     }
   });
@@ -143,6 +142,10 @@ describe('MongoClient Options', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
     test: function(done) {
       if (!this.configuration.usingUnifiedTopology()) return done();
+      const client = this.configuration.newClient({
+        connectTimeoutMS: 10,
+        heartbeatFrequencyMS: 500
+      });
       const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
         const args = Array.prototype.slice.call(arguments);
         const ns = args[0];
@@ -153,15 +156,10 @@ describe('MongoClient Options', function() {
           expect(options)
             .property('socketTimeout')
             .to.equal(510);
-          done();
+          client.close(done);
         }
         stub.wrappedMethod.apply(this, args);
       });
-      const client = this.configuration.newClient({
-        connectTimeoutMS: 10,
-        heartbeatFrequencyMS: 500
-      });
-      this.defer(() => client.close());
       client.connect(err => expect(err).to.not.exist);
     }
   });
