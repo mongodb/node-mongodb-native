@@ -110,25 +110,25 @@ describe('MongoClient Options', function() {
     });
   });
 
-  it('NODE-2874: connectTimeoutMS=0 causes monitoring to time out', function(done) {
-    const heartbeatFrequencyMS = 500;
+  it('monitoring should not time out when connectTimeoutMS=0', function(done) {
     const client = this.configuration.newClient({
       connectTimeoutMS: 0, // no connect timeout
-      heartbeatFrequencyMS // fast 500ms heartbeat
+      heartbeatFrequencyMS: 500 // fast heartbeat
     });
+    const heartbeats = {};
+    let isDone = false;
+    function _done(err) {
+      if (isDone) return;
+      isDone = true;
+      client.close(closeErr => done(err || closeErr));
+    }
     client.connect(() => {
-      // success after 5 heartbeats
-      const success = setTimeout(() => client.close(done), heartbeatFrequencyMS * 5);
-
-      // fail on first error
-      const listener = ev => {
-        if (ev.newDescription.error) {
-          clearTimeout(success);
-          client.removeListener('serverDescriptionChanged', listener);
-          client.close(() => done(ev.newDescription.error));
-        }
-      };
-      client.on('serverDescriptionChanged', listener);
+      // success after 3 successful heartbeats on a given connection
+      client.on('serverHeartbeatSucceeded', ev => {
+        if (!heartbeats[ev.connectionId]) heartbeats[ev.connectionId] = 0;
+        if (++heartbeats[ev.connectionId] >= 3) _done();
+      });
+      client.on('serverHeartbeatFailed', ev => _done(ev.failure));
     });
   });
 
