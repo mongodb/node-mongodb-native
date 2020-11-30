@@ -3,7 +3,6 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const LegacyConnection = require('../../lib/core/connection/connection');
 const Connection = require('../../lib/cmap/connection').Connection;
 
 describe('MongoClient Options', function() {
