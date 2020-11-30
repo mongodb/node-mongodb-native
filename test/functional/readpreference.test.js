@@ -478,7 +478,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & empty hedge] ', {
+    it('should set hedge using [.withReadPreference & empty hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
@@ -486,7 +486,7 @@ describe('ReadPreference', function () {
           .db(this.configuration.db)
           .collection('test')
           .find({})
-          .setReadPreference(rp)
+          .withReadPreference(rp)
           .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: {} };
@@ -496,7 +496,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & enabled hedge] ', {
+    it('should set hedge using [.withReadPreference & enabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
@@ -504,7 +504,7 @@ describe('ReadPreference', function () {
           .db(this.configuration.db)
           .collection('test')
           .find({})
-          .setReadPreference(rp)
+          .withReadPreference(rp)
           .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: true } };
@@ -514,7 +514,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & disabled hedge] ', {
+    it('should set hedge using [.withReadPreference & disabled hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
@@ -524,7 +524,7 @@ describe('ReadPreference', function () {
           .db(this.configuration.db)
           .collection('test')
           .find({})
-          .setReadPreference(rp)
+          .withReadPreference(rp)
           .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY, hedge: { enabled: false } };
@@ -534,7 +534,7 @@ describe('ReadPreference', function () {
       })
     });
 
-    it('should set hedge using [.setReadPreference & undefined hedge] ', {
+    it('should set hedge using [.withReadPreference & undefined hedge] ', {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: withMonitoredClient(['find'], function (client, events, done) {
         const rp = new ReadPreference(ReadPreference.SECONDARY, null);
@@ -542,7 +542,7 @@ describe('ReadPreference', function () {
           .db(this.configuration.db)
           .collection('test')
           .find({})
-          .setReadPreference(rp)
+          .withReadPreference(rp)
           .toArray(err => {
             expect(err).to.not.exist;
             const expected = { mode: ReadPreference.SECONDARY };

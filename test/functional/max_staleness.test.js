@@ -166,7 +166,7 @@ describe('Max Staleness', function () {
         // Get a db with a new readPreference
         db.collection('test')
           .find({})
-          .setReadPreference(readPreference)
+          .withReadPreference(readPreference)
           .toArray(function (err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({

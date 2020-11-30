@@ -173,8 +173,8 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
       findCommand.maxTimeMS = options.maxTimeMS;
     }
 
-    if (this.readConcern && (!this.session || !this.session.inTransaction())) {
-      findCommand.readConcern = this.readConcern;
+    if (this.readConcern) {
+      findCommand.readConcern = this.readConcern.toJSON();
     }
 
     if (options.max) {

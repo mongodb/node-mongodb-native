@@ -1,3 +1,5 @@
+import type { Document } from './bson';
+
 /** @public */
 export enum ReadConcernLevel {
   local = 'local',
@@ -77,5 +79,9 @@ export class ReadConcern {
 
   static get SNAPSHOT(): string {
     return ReadConcernLevel.snapshot;
+  }
+
+  toJSON(): Document {
+    return { level: this.level };
   }
 }

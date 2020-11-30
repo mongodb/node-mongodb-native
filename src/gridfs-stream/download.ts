@@ -349,7 +349,7 @@ function init(stream: GridFSBucketReadStream): void {
     stream.s.cursor = stream.s.chunks.find(filter).sort({ n: 1 });
 
     if (stream.s.readPreference) {
-      stream.s.cursor.setReadPreference(stream.s.readPreference);
+      stream.s.cursor.withReadPreference(stream.s.readPreference);
     }
 
     stream.s.expectedEnd = Math.ceil(doc.length / doc.chunkSize);

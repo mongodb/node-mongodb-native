@@ -373,7 +373,7 @@ describe('APM', function () {
               .batchSize(2)
               .comment('some comment')
               .maxTimeMS(5000)
-              .setReadPreference(ReadPreference.PRIMARY)
+              .withReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
               .toArray();
           })
@@ -445,7 +445,7 @@ describe('APM', function () {
               .batchSize(2)
               .comment('some comment')
               .maxTimeMS(5000)
-              .setReadPreference(ReadPreference.PRIMARY)
+              .withReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
               .toArray();
           })

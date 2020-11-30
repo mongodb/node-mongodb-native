@@ -699,7 +699,8 @@ collection.find({}).max(10)                                    // Set the cursor
 collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
 collection.find({}).min(100)                                   // Set the cursor min
 collection.find({}).returnKey(10)                              // Set the cursor returnKey
-collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+collection.find({}).withReadPreference(ReadPreference.PRIMARY) // Set the cursor readPreference
+collection.find({}).withReadConcern('majority')                // Set the cursor readConcern
 collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
 collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
 collection.find({}).hint('a_1')                                // Set the cursor hint
