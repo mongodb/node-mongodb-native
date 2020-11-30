@@ -120,21 +120,23 @@ describe('MongoClient Options', function() {
         connectTimeoutMS: 0,
         heartbeatFrequencyMS: 500
       });
-      const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
-        const args = Array.prototype.slice.call(arguments);
-        const ns = args[0];
-        const command = args[1];
-        const options = args[2];
-        if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
-          stub.restore();
-          expect(options)
-            .property('socketTimeout')
-            .to.equal(0);
-          client.close(done);
-        }
-        stub.wrappedMethod.apply(this, args);
+      client.connect(err => {
+        expect(err).to.not.exist;
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+          const args = Array.prototype.slice.call(arguments);
+          const ns = args[0];
+          const command = args[1];
+          const options = args[2];
+          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+            stub.restore();
+            expect(options)
+              .property('socketTimeout')
+              .to.equal(0);
+            client.close(done);
+          }
+          stub.wrappedMethod.apply(this, args);
+        });
       });
-      client.connect(err => expect(err).to.not.exist);
     }
   });
 
@@ -146,21 +148,23 @@ describe('MongoClient Options', function() {
         connectTimeoutMS: 10,
         heartbeatFrequencyMS: 500
       });
-      const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
-        const args = Array.prototype.slice.call(arguments);
-        const ns = args[0];
-        const command = args[1];
-        const options = args[2];
-        if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
-          stub.restore();
-          expect(options)
-            .property('socketTimeout')
-            .to.equal(510);
-          client.close(done);
-        }
-        stub.wrappedMethod.apply(this, args);
+      client.connect(err => {
+        expect(err).to.not.exist;
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+          const args = Array.prototype.slice.call(arguments);
+          const ns = args[0];
+          const command = args[1];
+          const options = args[2];
+          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+            stub.restore();
+            expect(options)
+              .property('socketTimeout')
+              .to.equal(510);
+            client.close(done);
+          }
+          stub.wrappedMethod.apply(this, args);
+        });
       });
-      client.connect(err => expect(err).to.not.exist);
     }
   });
 
