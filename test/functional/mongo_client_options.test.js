@@ -119,8 +119,9 @@ describe('MongoClient Options', function() {
       const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
         const args = Array.prototype.slice.call(arguments);
         const ns = args[0];
+        const command = args[1];
         const options = args[2];
-        if (ns === 'admin.$cmd' && options.exhaustAllowed) {
+        if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
           expect(options)
             .property('socketTimeout')
             .to.equal(0);
@@ -145,8 +146,9 @@ describe('MongoClient Options', function() {
       const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
         const args = Array.prototype.slice.call(arguments);
         const ns = args[0];
+        const command = args[1];
         const options = args[2];
-        if (ns === 'admin.$cmd' && options.exhaustAllowed) {
+        if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
           expect(options)
             .property('socketTimeout')
             .to.equal(510);
