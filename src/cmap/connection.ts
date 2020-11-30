@@ -4,7 +4,14 @@ import { StreamDescription, StreamDescriptionOptions } from './stream_descriptio
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
 import { updateSessionFromResponse } from '../sessions';
-import { uuidV4, ClientMetadata, now, calculateDurationInMs, Callback } from '../utils';
+import {
+  uuidV4,
+  ClientMetadata,
+  now,
+  calculateDurationInMs,
+  Callback,
+  MongoDBNamespace
+} from '../utils';
 import {
   MongoError,
   MongoNetworkError,
@@ -23,7 +30,7 @@ import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
-import type { FindOptions } from '../operations/find';
+import type { QueryOptions } from './wire_protocol/query';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -246,7 +253,7 @@ export class Connection extends EventEmitter {
     wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
   }
 
-  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
+  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     wp.query(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
