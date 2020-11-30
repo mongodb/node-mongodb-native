@@ -2,6 +2,9 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const sinon = require('sinon');
+const LegacyConnection = require('../../lib/core/connection/connection');
+const Connection = require('../../lib/cmap/connection').Connection;
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -110,30 +113,55 @@ describe('MongoClient Options', function() {
     });
   });
 
-  it('monitoring should not time out when connectTimeoutMS=0', {
+  it('must respect an infinite connectTimeoutMS for the streaming protocol', {
     metadata: { requires: { topology: 'replicaset' } },
     test: function(done) {
+      if (!this.configuration.usingUnifiedTopology()) return done();
+      const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+        const args = Array.prototype.slice.call(arguments);
+        const ns = args[0];
+        const options = args[2];
+        if (ns === 'admin.$cmd' && options.exhaustAllowed) {
+          expect(options)
+            .property('socketTimeout')
+            .to.equal(0);
+          done();
+        }
+        stub.wrappedMethod.apply(this, args);
+      });
+      this.defer(() => stub.restore());
       const client = this.configuration.newClient({
-        connectTimeoutMS: 0, // no connect timeout
-        heartbeatFrequencyMS: 500 // fast heartbeat
+        connectTimeoutMS: 0,
+        heartbeatFrequencyMS: 500
       });
-      const heartbeats = {};
-      let isDone = false;
-      function _done(err) {
-        if (isDone) return;
-        isDone = true;
-        client.close(closeErr => done(err || closeErr));
-      }
-      client.connect(() => {
-        // succeed after 3 successful heartbeats on any connection
-        client.on('serverHeartbeatSucceeded', ev => {
-          if (!heartbeats[ev.connectionId]) heartbeats[ev.connectionId] = 0;
-          if (++heartbeats[ev.connectionId] >= 3) _done();
-        });
+      this.defer(() => client.close());
+      client.connect(err => expect(err).to.not.exist);
+    }
+  });
 
-        // fail on first failed heartbeat
-        client.on('serverHeartbeatFailed', ev => _done(ev.failure));
+  it('must respect a non-infinite connectTimeoutMS for the streaming protocol', {
+    metadata: { requires: { topology: 'replicaset' } },
+    test: function(done) {
+      if (!this.configuration.usingUnifiedTopology()) return done();
+      const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+        const args = Array.prototype.slice.call(arguments);
+        const ns = args[0];
+        const options = args[2];
+        if (ns === 'admin.$cmd' && options.exhaustAllowed) {
+          expect(options)
+            .property('socketTimeout')
+            .to.equal(510);
+          done();
+        }
+        stub.wrappedMethod.apply(this, args);
       });
+      this.defer(() => stub.restore());
+      const client = this.configuration.newClient({
+        connectTimeoutMS: 10,
+        heartbeatFrequencyMS: 500
+      });
+      this.defer(() => client.close());
+      client.connect(err => expect(err).to.not.exist);
     }
   });
 
