@@ -135,8 +135,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              server.destroy();
-              done();
+              server.destroy(done);
             }
           }
         });
@@ -251,8 +250,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
                 expect(server.s.replicaSetState.primary).to.not.be.null;
                 expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-                server.destroy();
-                done();
+                server.destroy(done);
               }
             }
           });
@@ -351,8 +349,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           expect(server.s.replicaSetState.primary).to.not.be.null;
           expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-          server.destroy();
-          done();
+          server.destroy(done);
         }
 
         // Joined
@@ -428,8 +425,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         );
 
         server.on('error', function() {
-          server.destroy();
-          done();
+          server.destroy(done);
         });
 
         server.connect();
@@ -528,8 +524,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
               expect(server.s.replicaSetState.primary).to.be.null;
 
-              server.destroy();
-              done();
+              server.destroy(done);
             }
           });
 
@@ -652,8 +647,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
                 expect(server.s.replicaSetState.primary).to.not.be.null;
                 expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-                server.destroy();
-                done();
+                server.destroy(done);
               }
             }
           });
@@ -759,8 +753,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         );
 
         server.on('error', function() {
-          server.destroy();
-          done();
+          server.destroy(done);
         });
 
         // Gives proxies a chance to boot up
@@ -857,8 +850,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              server.destroy();
-              done();
+              server.destroy(done);
             }
           }
         });
@@ -979,8 +971,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
                 expect(server.s.replicaSetState.primary).to.not.be.null;
                 expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-                server.destroy();
-                done();
+                server.destroy(done);
               }
             }
           });
@@ -1070,8 +1061,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              server.destroy();
-              done();
+              server.destroy(done);
             }
           }
         });
@@ -1182,8 +1172,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.__connected).to.be.true;
             expect(server.__fullsetup).to.be.true;
 
-            server.destroy();
-            done();
+            server.destroy(done);
           });
 
           server.connect();
@@ -1274,8 +1263,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
             var result = server.lastIsMaster();
             expect(result).to.exist;
 
-            server.destroy();
-            done();
+            server.destroy(done);
           });
 
           server.connect();
