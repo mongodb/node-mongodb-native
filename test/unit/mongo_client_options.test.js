@@ -6,6 +6,7 @@ const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
+const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
 
 describe('MongoOptions', function () {
   it('parseOptions should always return frozen object', function () {
@@ -204,5 +205,108 @@ describe('MongoOptions', function () {
   it('srv', function () {
     const options = parseOptions('mongodb+srv://server.example.com/');
     expect(options).has.property('srv', true);
+  });
+
+  it('supports ReadPreference option in url', function () {
+    const options = parseOptions('mongodb://localhost/?readPreference=nearest');
+    expect(options.readPreference).to.be.an.instanceof(ReadPreference);
+    expect(options.readPreference.mode).to.equal('nearest');
+  });
+
+  it('supports ReadPreference option in object plain', function () {
+    const options = parseOptions('mongodb://localhost', {
+      readPreference: { mode: 'nearest', hedge: { enabled: true } }
+    });
+    expect(options.readPreference).to.be.an.instanceof(ReadPreference);
+    expect(options.readPreference.mode).to.equal('nearest');
+    expect(options.readPreference.hedge).to.include({ enabled: true });
+  });
+
+  it('supports ReadPreference option in object proper class', function () {
+    const tag = { rack: 1 };
+    const options = parseOptions('mongodb://localhost', {
+      readPreference: new ReadPreference('nearest', [tag], { maxStalenessSeconds: 20 })
+    });
+    expect(options.readPreference).to.be.an.instanceof(ReadPreference);
+    expect(options.readPreference.mode).to.equal('nearest');
+    expect(options.readPreference.tags).to.be.an('array').that.includes(tag);
+    expect(options.readPreference.maxStalenessSeconds).to.equal(20);
+    // maxStalenessSeconds sets the minWireVersion
+    expect(options.readPreference.minWireVersion).to.be.at.least(5);
+  });
+
+  it('supports WriteConcern option in url', function () {
+    const options = parseOptions('mongodb://localhost/?w=3');
+    expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
+    expect(options.writeConcern.w).to.equal(3);
+  });
+
+  it('supports WriteConcern option in object plain', function () {
+    const options = parseOptions('mongodb://localhost', {
+      writeConcern: { w: 'majority', wtimeoutMS: 300 }
+    });
+    expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
+    expect(options.writeConcern.w).to.equal('majority');
+    expect(options.writeConcern.wtimeout).to.equal(300);
+  });
+
+  it('supports WriteConcern option in object proper class', function () {
+    const options = parseOptions('mongodb://localhost', {
+      writeConcern: new WriteConcern(5, 200, true)
+    });
+    expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
+    expect(options.writeConcern.w).to.equal(5);
+    expect(options.writeConcern.wtimeout).to.equal(200);
+    expect(options.writeConcern.j).to.equal(true);
+  });
+
+  it('supports ReadConcern option in url', function () {
+    const options = parseOptions('mongodb://localhost/?readConcernLevel=available');
+    expect(options.readConcern).to.be.an.instanceof(ReadConcern);
+    expect(options.readConcern.level).to.equal('available');
+  });
+
+  it('supports ReadConcern option in object plain', function () {
+    const options = parseOptions('mongodb://localhost', {
+      readConcern: { level: 'linearizable' }
+    });
+    expect(options.readConcern).to.be.an.instanceof(ReadConcern);
+    expect(options.readConcern.level).to.equal('linearizable');
+  });
+
+  it('supports ReadConcern option in object proper class', function () {
+    const options = parseOptions('mongodb://localhost', {
+      readConcern: new ReadConcern('snapshot')
+    });
+    expect(options.readConcern).to.be.an.instanceof(ReadConcern);
+    expect(options.readConcern.level).to.equal('snapshot');
+  });
+
+  it('supports Credentials option in url', function () {
+    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/');
+    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
+    expect(options.credentials.username).to.equal('USERNAME');
+    expect(options.credentials.password).to.equal('PASSWORD');
+  });
+
+  it('supports Credentials option in auth object plain', function () {
+    const options = parseOptions('mongodb://localhost/', {
+      auth: { username: 'USERNAME', password: 'PASSWORD' }
+    });
+    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
+    expect(options.credentials.username).to.equal('USERNAME');
+    expect(options.credentials.password).to.equal('PASSWORD');
+  });
+
+  it('supports Credentials option in object plain', function () {
+    // top-level username and password are supported because
+    // they represent the authority section of connection string
+    const options = parseOptions('mongodb://localhost/', {
+      username: 'USERNAME',
+      password: 'PASSWORD'
+    });
+    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
+    expect(options.credentials.username).to.equal('USERNAME');
+    expect(options.credentials.password).to.equal('PASSWORD');
   });
 });

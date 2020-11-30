@@ -1364,10 +1364,16 @@ export const OPTIONS = {
   readPreference: {
     transform({ values: [value], options }) {
       if (value instanceof ReadPreference) {
-        return ReadPreference.fromOptions({ ...options.readPreference, ...value });
+        return ReadPreference.fromOptions({
+          readPreference: { ...options.readPreference, ...value },
+          ...value
+        } as any);
       }
       if (isRecord(value, ['mode'] as const)) {
-        const rp = ReadPreference.fromOptions({ ...options.readPreference, ...value });
+        const rp = ReadPreference.fromOptions({
+          readPreference: { ...options.readPreference, ...value },
+          ...value
+        } as any);
         if (rp) return rp;
         else throw new MongoParseError(`Cannot make read preference from ${JSON.stringify(value)}`);
       }

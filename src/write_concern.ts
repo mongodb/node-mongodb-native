@@ -27,28 +27,29 @@ export interface WriteConcernOptions {
  * @see https://docs.mongodb.com/manual/reference/write-concern/
  */
 export class WriteConcern {
-  /** The write concern */
+  /** request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags. */
   w?: W;
-  /** The write concern timeout */
+  /** specify a time limit to prevent write operations from blocking indefinitely */
   wtimeout?: number;
-  /** The journal write concern */
+  /** request acknowledgment that the write operation has been written to the on-disk journal */
   j?: boolean;
-  /** The file sync write concern */
+  /** equivalent to the j option */
   fsync?: boolean | 1;
 
-  /** Constructs a WriteConcern from the write concern properties. */
-  constructor(
-    /** The write concern */
-    w?: W,
-    /** The write concern timeout */
-    wtimeout?: number,
-    /** The journal write concern */
-    j?: boolean,
-    /** The file sync write concern */
-    fsync?: boolean | 1
-  ) {
+  /**
+   * Constructs a WriteConcern from the write concern properties.
+   * @param w - request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags.
+   * @param wtimeout - specify a time limit to prevent write operations from blocking indefinitely
+   * @param j - request acknowledgment that the write operation has been written to the on-disk journal
+   * @param fsync - equivalent to the j option
+   */
+  constructor(w?: W, wtimeout?: number, j?: boolean, fsync?: boolean | 1) {
     if (w != null) {
-      this.w = w;
+      if (!Number.isNaN(Number(w))) {
+        this.w = Number(w);
+      } else {
+        this.w = w;
+      }
     }
     if (wtimeout != null) {
       this.wtimeout = wtimeout;

@@ -38,15 +38,15 @@ export interface ReadPreferenceLikeOptions extends ReadPreferenceOptions {
     | {
         mode?: ReadPreferenceModeId;
         preference?: ReadPreferenceModeId;
-        tags: TagSet[];
-        maxStalenessSeconds: number;
+        tags?: TagSet[];
+        maxStalenessSeconds?: number;
       };
 }
 
 /** @public */
-export interface ReadPreferenceFromOptions {
+export interface ReadPreferenceFromOptions extends ReadPreferenceLikeOptions {
+  mode: ReadPreferenceModeId;
   session?: ClientSession;
-  readPreference?: ReadPreferenceLikeOptions['readPreference'];
   readPreferenceTags?: TagSet[];
   hedge?: HedgeOptions;
 }
@@ -96,6 +96,8 @@ export class ReadPreference {
     this.mode = mode;
     this.tags = tags;
     this.hedge = options?.hedge;
+    this.maxStalenessSeconds = undefined;
+    this.minWireVersion = undefined;
 
     options = options || {};
     if (options.maxStalenessSeconds != null) {
