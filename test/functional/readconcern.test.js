@@ -44,7 +44,8 @@ describe('ReadConcern', function() {
     {
       description: 'Should set majority readConcern geoSearch command',
       commandName: 'geoSearch',
-      readConcern: { level: 'majority' }
+      readConcern: { level: 'majority' },
+      serverVersion: '>=3.2 <=4.4'
     },
     {
       description: 'Should set local readConcern at collection level',
@@ -59,10 +60,9 @@ describe('ReadConcern', function() {
   ];
 
   tests.forEach(test => {
-    const metadata = { requires: { topology: 'replicaset', mongodb: '>= 3.2' } };
-    if (test.commandName === 'geoSearch') {
-      metadata.requires.mongodb += ' <=4.4';
-    }
+    const metadata = {
+      requires: { topology: 'replicaset', mongodb: test.serverVersion || '>= 3.2' }
+    };
     it(test.description, {
       metadata,
       test: function(done) {
