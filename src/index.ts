@@ -178,7 +178,8 @@ export type {
   LogLevelId,
   Auth,
   DriverInfo,
-  MongoOptions
+  MongoOptions,
+  HostAddress
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {
@@ -272,7 +273,8 @@ export type {
   ServerCapabilities,
   ConnectOptions,
   SelectServerOptions,
-  ServerSelectionCallback
+  ServerSelectionCallback,
+  ServerAddress
 } from './sdam/topology';
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {

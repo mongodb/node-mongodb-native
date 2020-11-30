@@ -115,8 +115,6 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
     SERVICE_REALM?: string;
     [key: string]: any;
   };
-  /** Set the Kerberos service name when connecting to Kerberized MongoDB instances. This value must match the service name set on MongoDB instances to which you are connecting. */
-  gssapiServiceName?: string;
   /** The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances. */
   localThresholdMS?: number;
   /** Specifies how long (in milliseconds) to block for server selection before throwing an exception.  */
@@ -560,6 +558,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
 }
 
+/** @public */
 export type HostAddress =
   | { host: string; type: 'srv' }
   | { host: string; port: number; type: 'tcp' }
@@ -567,7 +566,7 @@ export type HostAddress =
 
 /**
  * Mongo Client Options
- * @internal
+ * @public
  */
 export interface MongoOptions
   extends Required<BSONSerializeOptions>,
@@ -584,7 +583,6 @@ export interface MongoOptions
         | 'directConnection'
         | 'driverInfo'
         | 'forceServerObjectId'
-        | 'gssapiServiceName'
         | 'minHeartbeatFrequencyMS'
         | 'heartbeatFrequencyMS'
         | 'keepAlive'

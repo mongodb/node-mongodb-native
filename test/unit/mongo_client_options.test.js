@@ -80,7 +80,6 @@ describe('MongoOptions', function () {
     fieldsAsRaw: { rawField: true },
     forceServerObjectId: true,
     fsync: true,
-    gssapiServiceName: 'gssapiService',
     heartbeatFrequencyMS: 3,
     ignoreUndefined: false,
     j: true,

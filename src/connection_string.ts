@@ -7,7 +7,7 @@ import { ReadPreference, ReadPreferenceModeId } from './read_preference';
 import { ReadConcern, ReadConcernLevelId } from './read_concern';
 import { W, WriteConcern } from './write_concern';
 import { MongoParseError } from './error';
-import type { AnyOptions, Callback } from './utils';
+import { AnyOptions, Callback, isRecord } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -841,35 +841,6 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
-function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]) {
-  set = Array.isArray(set) ? new Set(set) : set;
-  subset = Array.isArray(subset) ? new Set(subset) : subset;
-  for (const elem of subset) {
-    if (!set.has(elem)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function isRecord<T extends readonly string[]>(
-  value: unknown,
-  requiredKeys: T
-): value is Record<T[number], any>;
-function isRecord(value: unknown): value is Record<string, any>;
-function isRecord(
-  value: unknown,
-  requiredKeys: string[] | undefined = undefined
-): value is Record<string, any> {
-  const isRecord = !!value && typeof value === 'object' && !Array.isArray(value);
-  if (isRecord && requiredKeys) {
-    const keys = Object.keys(value as Record<string, any>);
-    return isSuperset(keys, requiredKeys);
-  }
-
-  return isRecord;
-}
-
 function toRecord(value: string): Record<string, any> {
   const record = Object.create(null);
   const keyValuePairs = value.split(',');
@@ -879,6 +850,13 @@ function toRecord(value: string): Record<string, any> {
   }
   return record;
 }
+
+const DEFAULT_PK_FACTORY = {
+  createPk(): ObjectId {
+    // We prefer not to rely on ObjectId having a createPk method
+    return new ObjectId();
+  }
+};
 
 const defaultOptions = new Map<string, unknown>(
   ([
@@ -891,7 +869,6 @@ const defaultOptions = new Map<string, unknown>(
     ['directConnection', false],
     ['driverInfo', {}],
     ['forceServerObjectId', false],
-    ['gssapiServiceName', undefined],
     ['heartbeatFrequencyMS', 10000],
     ['keepAlive', true],
     ['keepAliveInitialDelay', 120000],
@@ -903,18 +880,8 @@ const defaultOptions = new Map<string, unknown>(
     ['monitorCommands', false],
     ['noDelay', true],
     ['numberOfRetries', 5],
-    [
-      'pkFactory',
-      {
-        createPk() {
-          // We prefer not to rely on ObjectId having a createPk method
-          return new ObjectId();
-        }
-      }
-    ],
-    ['promiseLibrary', undefined],
+    ['pkFactory', DEFAULT_PK_FACTORY],
     ['raw', false],
-    ['replicaSet', undefined],
     ['retryReads', true],
     ['retryWrites', true],
     ['serverSelectionTimeoutMS', 30000],
@@ -1248,9 +1215,6 @@ export const OPTIONS = {
       if (!wc) throw new TypeError(`Unable to make a writeConcern from fsync=${value}`);
       return wc;
     }
-  },
-  gssapiServiceName: {
-    type: 'string'
   },
   heartbeatFrequencyMS: {
     type: 'uint'
