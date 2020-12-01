@@ -1,13 +1,18 @@
 import { defineAspects, Aspect, OperationBase, Hint } from './operation';
-import { removeDocuments } from './common_functions';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
-import type { Callback, MongoDBNamespace } from '../utils';
+import {
+  applyRetryableWrites,
+  Callback,
+  decorateWithCollation,
+  maxWireVersion,
+  MongoDBNamespace
+} from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { Connection } from '../cmap/connection';
+import { MongoError } from '../error';
 
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions {
@@ -17,14 +22,10 @@ export interface DeleteOptions extends CommandOperationOptions {
 
 /** @public */
 export interface DeleteResult {
-  /** Indicates whether this write result was acknowledged */
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined. */
   acknowledged: boolean;
   /** The number of documents that were deleted */
   deletedCount: number;
-  /** The raw result returned from MongoDB. Will vary depending on server version */
-  result: Document;
-  /** The connection object used for the operation */
-  connection?: Connection;
 }
 
 /** @internal */
@@ -68,15 +69,13 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
     const options = { ...this.options, ...this.bsonOptions };
 
     options.single = true;
-    removeDocuments(server, coll, filter, options, (err, r) => {
-      if (callback == null) return;
-      if (err && callback) return callback(err);
-      if (r == null) {
-        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
-      }
-
-      r.deletedCount = r.n;
-      if (callback) callback(undefined, r);
+    removeDocuments(server, coll, filter, options, (err, res) => {
+      if (err || res == null) return callback(err);
+      if (typeof options.explain !== 'undefined') return callback(undefined, res);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
+        deletedCount: res.n
+      });
     });
   }
 }
@@ -106,17 +105,82 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
       options.single = false;
     }
 
-    removeDocuments(server, coll, filter, options, (err, r) => {
-      if (callback == null) return;
-      if (err && callback) return callback(err);
-      if (r == null) {
-        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
-      }
-
-      r.deletedCount = r.n;
-      if (callback) callback(undefined, r);
+    removeDocuments(server, coll, filter, options, (err, res) => {
+      if (err || res == null) return callback(err);
+      if (typeof options.explain !== 'undefined') return callback(undefined, res);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
+        deletedCount: res.n
+      });
     });
   }
+}
+
+function removeDocuments(
+  server: Server,
+  coll: Collection,
+  selector: Document,
+  options: DeleteOptions | Document,
+  callback: Callback
+): void {
+  if (typeof options === 'function') {
+    (callback = options as Callback), (options = {});
+  } else if (typeof selector === 'function') {
+    callback = selector as Callback;
+    options = {};
+    selector = {};
+  }
+
+  // Create an empty options object if the provided one is null
+  options = options || {};
+
+  // Final options for retryable writes
+  let finalOptions = Object.assign({}, options);
+  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
+
+  // If selector is null set empty
+  if (selector == null) selector = {};
+
+  // Build the op
+  const op = { q: selector, limit: 0 } as any;
+  if (options.single) {
+    op.limit = 1;
+  } else if (finalOptions.retryWrites) {
+    finalOptions.retryWrites = false;
+  }
+  if (options.hint) {
+    op.hint = options.hint;
+  }
+
+  // Have we specified collation
+  try {
+    decorateWithCollation(finalOptions, coll, options);
+  } catch (err) {
+    return callback ? callback(err, null) : undefined;
+  }
+
+  if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    return callback
+      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
+      : undefined;
+  }
+
+  // Execute the remove
+  server.remove(
+    coll.s.namespace.toString(),
+    [op],
+    finalOptions as WriteCommandOptions,
+    (err, result) => {
+      if (err || result == null) return callback(err);
+      if (result.code) return callback(new MongoError(result));
+      if (result.writeErrors) {
+        return callback(new MongoError(result.writeErrors[0]));
+      }
+
+      // Return the results
+      callback(undefined, result);
+    }
+  );
 }
 
 defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

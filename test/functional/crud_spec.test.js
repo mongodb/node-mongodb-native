@@ -122,11 +122,7 @@ describe('CRUD spec', function () {
     return function (result) {
       Object.keys(outcome.result).forEach(resultName => {
         expect(result).to.have.property(resultName);
-        if (resultName === 'upsertedId') {
-          expect(result[resultName]._id).to.containSubset(outcome.result[resultName]);
-        } else {
-          expect(result[resultName]).to.containSubset(outcome.result[resultName]);
-        }
+        expect(result[resultName]).to.containSubset(outcome.result[resultName]);
       });
 
       if (collection && outcome.collection && outcome.collection.data) {

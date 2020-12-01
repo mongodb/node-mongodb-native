@@ -101,7 +101,7 @@ function executeScenarioTest(test, ctx) {
             if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
           });
       } else if (test.outcome.result) {
-        const expected = transformToFixUpsertedId(test.outcome.result);
+        const expected = test.outcome.result;
         result = result.then(transformToResultValue).then(r => expect(r).to.deep.include(expected));
       }
 
@@ -168,33 +168,6 @@ function convertBulkWriteOperation(op) {
  */
 function transformToResultValue(result) {
   return result && result.value ? result.value : result;
-}
-
-/**
- * Transforms expected values from the proper test format to
- * our (improper) actual output for upsertedId.
- *
- * @param {any} result
- */
-function transformToFixUpsertedId(result) {
-  if (Array.isArray(result)) {
-    return result.map(transformToFixUpsertedId);
-  }
-
-  if (typeof result === 'object') {
-    const ret = {};
-    for (let key in result) {
-      const value = result[key];
-      if (key === 'upsertedId') {
-        ret[key] = { index: 0, _id: value };
-      } else {
-        ret[key] = transformToFixUpsertedId(value);
-      }
-    }
-    return ret;
-  }
-
-  return result;
 }
 
 /**

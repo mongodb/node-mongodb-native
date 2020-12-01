@@ -315,22 +315,22 @@ describe('Collection', function () {
           );
 
           collection.insertOne({ i: 1 }, configuration.writeConcernMax(), (err, r) => {
-            expect(r.ops.length).to.equal(1);
-            expect(r.ops[0]._id.toHexString().length).to.equal(24);
+            expect(err).to.not.exist;
+            expect(r).property('insertedId').to.exist;
+            expect(r.insertedId.toHexString()).to.have.lengthOf(24);
 
             // Update the record
             collection.updateOne(
               { i: 1 },
               { $set: { i: 2 } },
               configuration.writeConcernMax(),
-              err => {
+              (err, r) => {
                 expect(err).to.not.exist;
-                expect(r.n).to.equal(1);
+                expect(r).property('modifiedCount').to.equal(1);
 
                 // Remove safely
                 collection.deleteOne({}, configuration.writeConcernMax(), err => {
                   expect(err).to.not.exist;
-
                   done();
                 });
               }
@@ -414,7 +414,7 @@ describe('Collection', function () {
           test.updateObject,
           (err, r) => {
             expect(err).to.not.exist;
-            expect(r.result.n).to.equal(0);
+            expect(r).property('matchedCount').to.equal(0);
             done();
           }
         );
@@ -447,7 +447,7 @@ describe('Collection', function () {
             configuration.writeConcernMax(),
             (err, r) => {
               expect(err).to.not.exist;
-              expect(r.result.n).to.equal(0);
+              expect(r).property('matchedCount').to.equal(0);
 
               done();
             }
@@ -985,7 +985,7 @@ describe('Collection', function () {
             configuration.writeConcernMax(),
             (err, r) => {
               expect(err).to.not.exist;
-              expect(r.result.n).to.equal(0);
+              expect(r).property('matchedCount').to.equal(0);
 
               client.close(done);
             }

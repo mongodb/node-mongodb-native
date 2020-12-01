@@ -22,16 +22,15 @@ describe('Find', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
         db.collection('test_find_simple', function (err, collection) {
-          var doc1 = null;
+          const docs = [{ a: 2 }, { b: 3 }];
 
           // Insert some test documents
-          collection.insert([{ a: 2 }, { b: 3 }], configuration.writeConcernMax(), function (
-            err,
-            r
-          ) {
-            doc1 = r.ops[0];
+          collection.insert(docs, configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
 
             // Ensure correct insertion testing via the cursor and the count function
             collection.find().toArray(function (err, documents) {
@@ -39,12 +38,15 @@ describe('Find', function () {
               test.equal(2, documents.length);
 
               collection.count(function (err, count) {
+                expect(err).to.not.exist;
                 test.equal(2, count);
 
                 // Fetch values by selection
-                collection.find({ a: doc1.a }).toArray(function (err, documents) {
+                collection.find({ a: docs[0].a }).toArray(function (err, documents) {
+                  expect(err).to.not.exist;
+
                   test.equal(1, documents.length);
-                  test.equal(doc1.a, documents[0].a);
+                  test.equal(docs[0].a, documents[0].a);
                   // Let's close the db
                   client.close(done);
                 });
@@ -72,14 +74,11 @@ describe('Find', function () {
         db.createCollection('test_find_simple_chained', function (err) {
           expect(err).to.not.exist;
           db.collection('test_find_simple_chained', function (err, collection) {
-            var doc1 = null;
+            const docs = [{ a: 2 }, { b: 3 }];
 
             // Insert some test documents
-            collection.insert([{ a: 2 }, { b: 3 }], configuration.writeConcernMax(), function (
-              err,
-              r
-            ) {
-              doc1 = r.ops[0];
+            collection.insert(docs, configuration.writeConcernMax(), err => {
+              expect(err).to.not.exist;
 
               // Ensure correct insertion testing via the cursor and the count function
               collection.find().toArray(function (err, documents) {
@@ -89,9 +88,9 @@ describe('Find', function () {
                   test.equal(2, count);
 
                   // Fetch values by selection
-                  collection.find({ a: doc1.a }).toArray(function (err, documents) {
+                  collection.find({ a: docs[0].a }).toArray(function (err, documents) {
                     test.equal(1, documents.length);
-                    test.equal(doc1.a, documents[0].a);
+                    test.equal(docs[0].a, documents[0].a);
                     // Let's close the db
                     client.close(done);
                   });
@@ -118,86 +117,82 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('test_find_advanced');
+        const docs = [{ a: 1 }, { a: 2 }, { b: 3 }];
 
         // Insert some test documents
-        collection.insert(
-          [{ a: 1 }, { a: 2 }, { b: 3 }],
-          configuration.writeConcernMax(),
-          function (err, r) {
-            var doc1 = r.ops[0],
-              doc2 = r.ops[1];
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
+          expect(err).to.not.exist;
 
-            // Locate by less than
-            collection.find({ a: { $lt: 10 } }).toArray(function (err, documents) {
-              test.equal(2, documents.length);
-              // Check that the correct documents are returned
-              var results = [];
-              // Check that we have all the results we want
-              documents.forEach(function (doc) {
-                if (doc.a === 1 || doc.a === 2) results.push(1);
-              });
-              test.equal(2, results.length);
+          // Locate by less than
+          collection.find({ a: { $lt: 10 } }).toArray(function (err, documents) {
+            test.equal(2, documents.length);
+            // Check that the correct documents are returned
+            var results = [];
+            // Check that we have all the results we want
+            documents.forEach(function (doc) {
+              if (doc.a === 1 || doc.a === 2) results.push(1);
+            });
+            test.equal(2, results.length);
 
-              // Locate by greater than
-              collection.find({ a: { $gt: 1 } }).toArray(function (err, documents) {
+            // Locate by greater than
+            collection.find({ a: { $gt: 1 } }).toArray(function (err, documents) {
+              test.equal(1, documents.length);
+              test.equal(2, documents[0].a);
+
+              // Locate by less than or equal to
+              collection.find({ a: { $lte: 1 } }).toArray(function (err, documents) {
                 test.equal(1, documents.length);
-                test.equal(2, documents[0].a);
+                test.equal(1, documents[0].a);
 
-                // Locate by less than or equal to
-                collection.find({ a: { $lte: 1 } }).toArray(function (err, documents) {
-                  test.equal(1, documents.length);
-                  test.equal(1, documents[0].a);
+                // Locate by greater than or equal to
+                collection.find({ a: { $gte: 1 } }).toArray(function (err, documents) {
+                  test.equal(2, documents.length);
+                  // Check that the correct documents are returned
+                  var results = [];
+                  // Check that we have all the results we want
+                  documents.forEach(function (doc) {
+                    if (doc.a === 1 || doc.a === 2) results.push(1);
+                  });
+                  test.equal(2, results.length);
 
-                  // Locate by greater than or equal to
-                  collection.find({ a: { $gte: 1 } }).toArray(function (err, documents) {
-                    test.equal(2, documents.length);
-                    // Check that the correct documents are returned
-                    var results = [];
-                    // Check that we have all the results we want
-                    documents.forEach(function (doc) {
-                      if (doc.a === 1 || doc.a === 2) results.push(1);
-                    });
-                    test.equal(2, results.length);
+                  // Locate by between
+                  collection.find({ a: { $gt: 1, $lt: 3 } }).toArray(function (err, documents) {
+                    test.equal(1, documents.length);
+                    test.equal(2, documents[0].a);
 
-                    // Locate by between
-                    collection.find({ a: { $gt: 1, $lt: 3 } }).toArray(function (err, documents) {
-                      test.equal(1, documents.length);
-                      test.equal(2, documents[0].a);
-
-                      // Locate in clause
-                      collection.find({ a: { $in: [1, 2] } }).toArray(function (err, documents) {
-                        test.equal(2, documents.length);
-                        // Check that the correct documents are returned
-                        var results = [];
-                        // Check that we have all the results we want
-                        documents.forEach(function (doc) {
-                          if (doc.a === 1 || doc.a === 2) results.push(1);
-                        });
-                        test.equal(2, results.length);
-
-                        // Locate in _id clause
-                        collection
-                          .find({ _id: { $in: [doc1['_id'], doc2['_id']] } })
-                          .toArray(function (err, documents) {
-                            test.equal(2, documents.length);
-                            // Check that the correct documents are returned
-                            var results = [];
-                            // Check that we have all the results we want
-                            documents.forEach(function (doc) {
-                              if (doc.a === 1 || doc.a === 2) results.push(1);
-                            });
-                            test.equal(2, results.length);
-                            // Let's close the db
-                            client.close(done);
-                          });
+                    // Locate in clause
+                    collection.find({ a: { $in: [1, 2] } }).toArray(function (err, documents) {
+                      test.equal(2, documents.length);
+                      // Check that the correct documents are returned
+                      var results = [];
+                      // Check that we have all the results we want
+                      documents.forEach(function (doc) {
+                        if (doc.a === 1 || doc.a === 2) results.push(1);
                       });
+                      test.equal(2, results.length);
+
+                      // Locate in _id clause
+                      collection
+                        .find({ _id: { $in: [docs[0]['_id'], docs[1]['_id']] } })
+                        .toArray(function (err, documents) {
+                          test.equal(2, documents.length);
+                          // Check that the correct documents are returned
+                          var results = [];
+                          // Check that we have all the results we want
+                          documents.forEach(function (doc) {
+                            if (doc.a === 1 || doc.a === 2) results.push(1);
+                          });
+                          test.equal(2, results.length);
+                          // Let's close the db
+                          client.close(done);
+                        });
                     });
                   });
                 });
               });
             });
-          }
-        );
+          });
+        });
       });
     }
   });
@@ -626,16 +621,14 @@ describe('Find', function () {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
         db.createCollection('test_find_by_oid', (err, collection) => {
           collection.insertOne({ hello: 'mike' }, configuration.writeConcernMax(), (err, r) => {
-            var docs = r.ops[0];
-            test.ok(
-              docs._id instanceof ObjectId ||
-                Object.prototype.toString.call(docs._id) === '[object ObjectId]'
-            );
+            expect(err).to.not.exist;
+            expect(r).property('insertedId').to.exist;
 
-            collection.findOne({ _id: docs._id }, (err, doc) => {
+            collection.findOne({ _id: r.insertedId }, (err, doc) => {
               test.equal('mike', doc.hello);
 
               var id = doc._id.toString();
@@ -876,7 +869,7 @@ describe('Find', function () {
                                       function (err, updated_doc) {
                                         test.equal(2, Object.keys(updated_doc.value).length);
                                         test.equal(
-                                          r.ops[0]['_id'].toHexString(),
+                                          r.insertedIds[0].toHexString(),
                                           updated_doc.value._id.toHexString()
                                         );
                                         test.equal(5, updated_doc.value.b);
@@ -963,14 +956,14 @@ describe('Find', function () {
             configuration.writeConcernMax(),
             function (err, r) {
               // Fetch the id
-              var id = r.ops[0]._id;
+              var id = r.insertedIds[0];
 
               collection.update(
                 { _id: id },
                 { $inc: { 'meta.visitors': 1 } },
                 configuration.writeConcernMax(),
                 function (err, r) {
-                  test.equal(1, r.result.n);
+                  expect(r).property('matchedCount').to.equal(1);
                   expect(err).to.not.exist;
 
                   collection.findOne({ _id: id }, function (err, item) {
@@ -1498,7 +1491,7 @@ describe('Find', function () {
 
             collection.findOne(
               {
-                _id: r.ops[0]._id,
+                _id: r.insertedIds[0],
                 'funds.remaining': { $gte: 3.0 },
                 'transactions.id': { $ne: transaction.transactionId }
               },
@@ -1507,7 +1500,7 @@ describe('Find', function () {
 
                 collection.findAndModify(
                   {
-                    _id: r.ops[0]._id,
+                    _id: r.insertedIds[0],
                     'funds.remaining': { $gte: 3.0 },
                     'transactions.id': { $ne: transaction.transactionId }
                   },
@@ -1740,7 +1733,7 @@ describe('Find', function () {
             configuration.writeConcernMax(),
             function (err, r) {
               expect(err).to.not.exist;
-              var id = r.ops[1]._id;
+              var id = r.insertedIds[1];
               // Set an index
               collection.ensureIndex('login', { unique: true, w: 1 }, function (err) {
                 expect(err).to.not.exist;

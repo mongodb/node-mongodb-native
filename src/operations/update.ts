@@ -27,17 +27,16 @@ export interface UpdateOptions extends CommandOperationOptions {
 
 /** @public */
 export interface UpdateResult {
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
+  acknowledged: boolean;
   /** The number of documents that matched the filter */
   matchedCount: number;
   /** The number of documents that were modified */
   modifiedCount: number;
-  /** The number of documents upserted */
+  /** The number of documents that were upserted */
   upsertedCount: number;
-  /** The upserted id */
+  /** The identifier of the inserted document if an upsert took place */
   upsertedId: ObjectId;
-
-  // FIXME: remove
-  result: Document;
 }
 
 /** @internal */
@@ -86,29 +85,18 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, multi: false };
 
-    // Set single document update
-    options.multi = false;
-    // Execute update
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);
-
-      // If an explain option was executed, don't process the server results
-      if (this.explain) return callback(undefined, r);
-
-      const result: UpdateResult = {
+      if (typeof this.explain !== 'undefined') return callback(undefined, r);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
         modifiedCount: r.nModified != null ? r.nModified : r.n,
-        upsertedId:
-          Array.isArray(r.upserted) && r.upserted.length > 0
-            ? r.upserted[0] // FIXME(major): should be `r.upserted[0]._id`
-            : null,
+        upsertedId: Array.isArray(r.upserted) && r.upserted.length > 0 ? r.upserted[0]._id : null,
         upsertedCount: Array.isArray(r.upserted) && r.upserted.length ? r.upserted.length : 0,
-        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n,
-        result: r
-      };
-
-      callback(undefined, result);
+        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n
+      });
     });
   }
 }
@@ -131,29 +119,18 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, multi: true };
 
-    // Set single document update
-    options.multi = true;
-    // Execute update
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);
-
-      // If an explain option was executed, don't process the server results
-      if (this.explain) return callback(undefined, r);
-
-      const result: UpdateResult = {
+      if (typeof this.explain !== 'undefined') return callback(undefined, r);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
         modifiedCount: r.nModified != null ? r.nModified : r.n,
-        upsertedId:
-          Array.isArray(r.upserted) && r.upserted.length > 0
-            ? r.upserted[0] // FIXME(major): should be `r.upserted[0]._id`
-            : null,
+        upsertedId: Array.isArray(r.upserted) && r.upserted.length > 0 ? r.upserted[0]._id : null,
         upsertedCount: Array.isArray(r.upserted) && r.upserted.length ? r.upserted.length : 0,
-        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n,
-        result: r
-      };
-
-      callback(undefined, result);
+        matchedCount: Array.isArray(r.upserted) && r.upserted.length > 0 ? 0 : r.n
+      });
     });
   }
 }

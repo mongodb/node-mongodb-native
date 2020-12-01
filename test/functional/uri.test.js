@@ -27,13 +27,8 @@ describe('URI', function () {
           result
         ) {
           expect(err).to.not.exist;
-
-          if (result) {
-            expect(result.result.ok).to.equal(1);
-          } else {
-            expect(result).to.not.exist;
-          }
-
+          expect(result).to.exist;
+          expect(result).property('acknowledged').to.be.false;
           client.close(done);
         });
       });

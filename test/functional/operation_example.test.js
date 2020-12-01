@@ -2924,7 +2924,7 @@ describe('Operation Examples', function () {
           result
         ) {
           expect(err).to.not.exist;
-          test.equal(1, result.result.n);
+          expect(result).property('upsertedCount').to.equal(1);
 
           // Fetch the document that we modified and check if it got inserted correctly
           collection.findOne({ a: 1 }, function (err, item) {
@@ -2982,7 +2982,7 @@ describe('Operation Examples', function () {
             var o = configuration.writeConcernMax();
             collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o, function (err, r) {
               expect(err).to.not.exist;
-              test.equal(2, r.result.n);
+              expect(r).property('matchedCount').to.equal(2);
 
               // Fetch all the documents and verify that we have changed the b value
               collection.find().toArray(function (err, items) {
@@ -5753,7 +5753,7 @@ describe('Operation Examples', function () {
           { upsert: true },
           function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
 
             client.close(done);
           }
@@ -5849,7 +5849,7 @@ describe('Operation Examples', function () {
           { upsert: true },
           function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
 
             client.close(done);
           }
@@ -6221,7 +6221,7 @@ describe('Operation Examples', function () {
         var col = db.collection('insert_one');
         col.insertOne({ a: 1 }, function (err, r) {
           expect(err).to.not.exist;
-          test.equal(1, r.insertedCount);
+          expect(r).property('insertedId').to.exist;
           // Finish up test
           client.close(done);
         });
@@ -6538,7 +6538,7 @@ describe('Operation Examples', function () {
         var col = db.collection('find_one_and_delete');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           expect(err).to.not.exist;
-          test.equal(1, r.result.n);
+          expect(r).property('insertedCount').to.equal(1);
 
           col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }, function (
             err,
@@ -6586,7 +6586,7 @@ describe('Operation Examples', function () {
         var col = db.collection('find_one_and_replace');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           expect(err).to.not.exist;
-          test.equal(1, r.result.n);
+          expect(r).property('insertedCount').to.equal(1);
 
           col.findOneAndReplace(
             { a: 1 },
@@ -6642,7 +6642,7 @@ describe('Operation Examples', function () {
         var col = db.collection('find_one_and_update');
         col.insertMany([{ a: 1, b: 1 }], { w: 1 }, function (err, r) {
           expect(err).to.not.exist;
-          test.equal(1, r.result.n);
+          expect(r).property('insertedCount').to.equal(1);
 
           col.findOneAndUpdate(
             { a: 1 },
