@@ -22,7 +22,7 @@ describe('AbstractCursor', function () {
   before(
     withClientV2((client, done) => {
       const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];
-      const coll = client.db().collection('find_cursor');
+      const coll = client.db().collection('abstract_cursor');
       const tryNextColl = client.db().collection('try_next');
       coll.drop(() => tryNextColl.drop(() => coll.insertMany(docs, done)));
     })
@@ -35,7 +35,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['getMore'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         this.defer(() => cursor.close());
 
@@ -49,6 +49,38 @@ describe('AbstractCursor', function () {
     );
   });
 
+  context('#readBufferedDocuments', function () {
+    it(
+      'should support reading buffered documents',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { batchSize: 5 });
+
+        cursor.next((err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).property('a').to.equal(1);
+          expect(cursor.bufferedCount()).to.equal(4);
+
+          // Read the buffered Count
+          cursor.readBufferedDocuments(cursor.bufferedCount());
+
+          // Get the next item
+          cursor.next((err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.exist;
+
+            cursor.next((err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.be.null;
+
+              done();
+            });
+          });
+        });
+      })
+    );
+  });
+
   context('#close', function () {
     it(
       'should send a killCursors command when closed before completely iterated',
@@ -56,7 +88,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.next(err => {
           expect(err).to.not.exist;
@@ -75,7 +107,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.toArray(err => {
           expect(err).to.not.exist;
@@ -95,7 +127,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.close(err => {
           expect(err).to.not.exist;
@@ -110,7 +142,7 @@ describe('AbstractCursor', function () {
     it(
       'should iterate each document in a cursor',
       withClientV2(function (client, done) {
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
 
         const bag = [];
