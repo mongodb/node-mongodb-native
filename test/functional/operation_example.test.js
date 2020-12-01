@@ -4908,8 +4908,7 @@ describe('Operation Examples', function () {
    * @example-class Cursor
    * @example-method rewind
    */
-  // NOTE: unclear whether we should continue to support `rewind`
-  it.skip('Should correctly rewind and restart cursor', {
+  it('Should correctly rewind and restart cursor', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {

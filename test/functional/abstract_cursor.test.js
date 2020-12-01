@@ -159,4 +159,83 @@ describe('AbstractCursor', function () {
       })
     );
   });
+
+  context('#rewind', function () {
+    beforeEach(
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('rewind');
+        coll.drop(() => {
+          coll.insertMany([{}, {}], err => {
+            expect(err).to.not.exist;
+            done();
+          });
+        });
+      })
+    );
+
+    it(
+      'should rewind a cursor',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('rewind');
+        const cursor = coll.find({});
+        this.defer(() => cursor.close());
+
+        cursor.toArray((err, docs) => {
+          expect(err).to.not.exist;
+          expect(docs).to.have.length(2);
+
+          cursor.rewind();
+          cursor.toArray((err, docs) => {
+            expect(err).to.not.exist;
+            expect(docs).to.have.length(2);
+
+            done();
+          });
+        });
+      })
+    );
+
+    it(
+      'should end an implicit session on rewind',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('rewind');
+        const cursor = coll.find({}, { batchSize: 1 });
+        this.defer(() => cursor.close());
+
+        cursor.next((err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.exist;
+
+          const session = cursor.session;
+          expect(session).property('hasEnded').to.be.false;
+          cursor.rewind();
+          expect(session).property('hasEnded').to.be.true;
+          done();
+        });
+      })
+    );
+
+    it(
+      'should not end an explicit session on rewind',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('rewind');
+        const session = client.startSession();
+
+        const cursor = coll.find({}, { batchSize: 1, session });
+        this.defer(() => cursor.close());
+
+        cursor.next((err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).to.exist;
+
+          const session = cursor.session;
+          expect(session).property('hasEnded').to.be.false;
+          cursor.rewind();
+          expect(session).property('hasEnded').to.be.false;
+
+          session.endSession(done);
+        });
+      })
+    );
+  });
 });
