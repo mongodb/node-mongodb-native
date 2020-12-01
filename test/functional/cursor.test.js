@@ -2321,17 +2321,35 @@ describe('Cursor', function () {
         try {
           db.collection('shouldFailToSetReadPreferenceOnCursor')
             .find()
-            .setReadPreference('notsecondary');
+            .withReadPreference('notsecondary');
           test.ok(false);
         } catch (err) {} // eslint-disable-line
 
         db.collection('shouldFailToSetReadPreferenceOnCursor')
           .find()
-          .setReadPreference('secondary');
+          .withReadPreference('secondary');
 
         done();
       });
     }
+  });
+
+  it('should allow setting the cursors readConcern through a builder', {
+    metadata: { requires: { mongodb: '>=3.2' } },
+    test: withMonitoredClient(['find'], function (client, events, done) {
+      const db = client.db(this.configuration.db);
+      const cursor = db.collection('foo').find().withReadConcern('local');
+      expect(cursor).property('readConcern').to.have.property('level').equal('local');
+
+      cursor.toArray(err => {
+        expect(err).to.not.exist;
+
+        expect(events).to.have.length(1);
+        const findCommand = events[0];
+        expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
+        done();
+      });
+    })
   });
 
   it('shouldNotFailDueToStackOverflowEach', {

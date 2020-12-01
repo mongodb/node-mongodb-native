@@ -8,6 +8,7 @@ import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
 import { EventEmitter } from 'events';
 import type { ExecutionResult } from '../operations/execute_operation';
+import { ReadConcern, ReadConcernLike } from '../read_concern';
 
 const kId = Symbol('id');
 const kDocuments = Symbol('documents');
@@ -50,6 +51,7 @@ export type CursorFlag = typeof CURSOR_FLAGS[number];
 export interface AbstractCursorOptions extends BSONSerializeOptions {
   session?: ClientSession;
   readPreference?: ReadPreferenceLike;
+  readConcern?: ReadConcernLike;
   batchSize?: number;
   maxTimeMS?: number;
   comment?: Document | string;
@@ -62,6 +64,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
 export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPreference'> & {
   // resolved
   readPreference: ReadPreference;
+  readConcern?: ReadConcern;
 
   // cursor flags, some are deprecated
   oplogReplay?: boolean;
@@ -107,6 +110,11 @@ export abstract class AbstractCursor extends EventEmitter {
       ...pluckBSONSerializeOptions(options)
     };
 
+    const readConcern = ReadConcern.fromOptions(options);
+    if (readConcern) {
+      this[kOptions].readConcern = readConcern;
+    }
+
     if (typeof options.batchSize === 'number') {
       this[kOptions].batchSize = options.batchSize;
     }
@@ -142,6 +150,10 @@ export abstract class AbstractCursor extends EventEmitter {
 
   get readPreference(): ReadPreference {
     return this[kOptions].readPreference;
+  }
+
+  get readConcern(): ReadConcern | undefined {
+    return this[kOptions].readConcern;
   }
 
   get session(): ClientSession | undefined {
@@ -434,7 +446,7 @@ export abstract class AbstractCursor extends EventEmitter {
    *
    * @param readPreference - The new read preference for the cursor.
    */
-  setReadPreference(readPreference: ReadPreferenceLike): this {
+  withReadPreference(readPreference: ReadPreferenceLike): this {
     assertUninitialized(this);
     if (readPreference instanceof ReadPreference) {
       this[kOptions].readPreference = readPreference;
@@ -442,6 +454,21 @@ export abstract class AbstractCursor extends EventEmitter {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
       throw new TypeError('Invalid read preference: ' + readPreference);
+    }
+
+    return this;
+  }
+
+  /**
+   * Set the ReadPreference for the cursor.
+   *
+   * @param readPreference - The new read preference for the cursor.
+   */
+  withReadConcern(readConcern: ReadConcernLike): this {
+    assertUninitialized(this);
+    const resolvedReadConcern = ReadConcern.fromOptions({ readConcern });
+    if (resolvedReadConcern) {
+      this[kOptions].readConcern = resolvedReadConcern;
     }
 
     return this;
