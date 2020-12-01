@@ -140,7 +140,7 @@ describe('MongoClient Options', function() {
     }
   });
 
-  it('must respect a non-infinite connectTimeoutMS for the streaming protocol', {
+  it('must respect a finite connectTimeoutMS for the streaming protocol', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
     test: function(done) {
       if (!this.configuration.usingUnifiedTopology()) return done();
