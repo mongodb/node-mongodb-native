@@ -63,6 +63,7 @@ const kServerSession = Symbol('serverSession');
  */
 class ClientSession extends EventEmitter {
   topology: Topology;
+  /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
   clientOptions?: MongoClientOptions;
@@ -77,7 +78,7 @@ class ClientSession extends EventEmitter {
 
   /**
    * Create a client session.
-   *
+   * @internal
    * @param topology - The current client's topology (Internal Class)
    * @param sessionPool - The server session pool (Internal Class)
    * @param options - Optional settings
@@ -585,7 +586,7 @@ function supportsRecoveryToken(session: ClientSession) {
   return !!topology.s.options.useRecoveryToken;
 }
 
-/** @internal */
+/** @public */
 export type ServerSessionId = { id: Binary };
 
 /**

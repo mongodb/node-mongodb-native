@@ -65,7 +65,7 @@ export interface ResumeOptions {
 export type ResumeToken = unknown;
 
 /**
- * Represents a specific point in time on a server. Can be retrieved by using {@link Db.command}
+ * Represents a specific point in time on a server. Can be retrieved by using {@link Db#command}
  * @public
  * @remarks
  * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
@@ -180,6 +180,7 @@ export class ChangeStream extends EventEmitter {
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
+  /** @internal */
   cursor?: ChangeStreamCursor;
   streamOptions?: CursorStreamOptions;
   [kResumeQueue]: Denque;
@@ -206,6 +207,8 @@ export class ChangeStream extends EventEmitter {
   static readonly RESUME_TOKEN_CHANGED = 'resumeTokenChanged' as const;
 
   /**
+   * @internal
+   *
    * @param parent - The parent object that created this change stream
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
@@ -332,7 +335,7 @@ export class ChangeStream extends EventEmitter {
   }
 }
 
-/** @public */
+/** @internal */
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;

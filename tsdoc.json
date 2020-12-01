@@ -1,5 +1,6 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+    // Correct url: https://developer.microsoft.com/en-us/json-schemas/tsdoc/v0/tsdoc.schema.json
     "tagDefinitions": [
         {
             "syntaxKind": "block",

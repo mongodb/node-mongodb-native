@@ -90,7 +90,7 @@ import { FindCursor } from './cursor/find_cursor';
 
 /** @public */
 export interface Collection {
-  /** @deprecated Use {@link Collection.dropIndexes#Class} instead */
+  /** @deprecated Use {@link Collection#dropIndexes} instead */
   dropAllIndexes(): void;
   removeMany(
     filter: Document,
@@ -754,7 +754,7 @@ export class Collection implements OperationParent {
    * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
    * error.
    *
-   * **Note**: Unlike {@link (Collection:class).createIndex| createIndex}, this function takes in raw index specifications.
+   * **Note**: Unlike {@link Collection#createIndex| createIndex}, this function takes in raw index specifications.
    * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
@@ -948,8 +948,8 @@ export class Collection implements OperationParent {
 
   /**
    * Gets the number of documents matching the filter.
-   * For a fast count of the total documents in a collection see {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
-   * **Note**: When migrating from {@link Collection.count| count} to {@link Collection.countDocuments| countDocuments}
+   * For a fast count of the total documents in a collection see {@link Collection#estimatedDocumentCount| estimatedDocumentCount}.
+   * **Note**: When migrating from {@link Collection#count| count} to {@link Collection#countDocuments| countDocuments}
    * the following query operators must be replaced:
    *
    * | Operator | Replacement |
@@ -1420,10 +1420,10 @@ export class Collection implements OperationParent {
    * An estimated count of matching documents in the db to a query.
    *
    * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
-   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection.countDocuments| countDocuments}.
-   * To obtain an estimated count of all documents in the collection, use {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
+   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments| countDocuments}.
+   * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount| estimatedDocumentCount}.
    *
-   * @deprecated use {@link Collection.countDocuments| countDocuments} or {@link Collection.estimatedDocumentCount| estimatedDocumentCount} instead
+   * @deprecated use {@link Collection#countDocuments| countDocuments} or {@link Collection#estimatedDocumentCount| estimatedDocumentCount} instead
    *
    * @param query - The query for the count.
    * @param options - Optional settings for the command

@@ -22,7 +22,7 @@ const kInitialized = Symbol('initialized');
 const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 
-/** @internal */
+/** @public */
 export const CURSOR_FLAGS = [
   'tailable',
   'oplogReplay',
@@ -47,7 +47,7 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = typeof CURSOR_FLAGS[number];
 
-/** @internal */
+/** @public */
 export interface AbstractCursorOptions extends BSONSerializeOptions {
   session?: ClientSession;
   readPreference?: ReadPreferenceLike;
@@ -72,18 +72,29 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
   partial?: boolean;
 };
 
-/** @internal */
+/** @public */
 export abstract class AbstractCursor extends EventEmitter {
+  /** @internal */
   [kId]?: Long;
+  /** @internal */
   [kSession]?: ClientSession;
+  /** @internal */
   [kServer]?: Server;
+  /** @internal */
   [kNamespace]: MongoDBNamespace;
+  /** @internal */
   [kDocuments]: Document[];
+  /** @internal */
   [kTopology]: Topology;
+  /** @internal */
   [kTransform]?: (doc: Document) => Document;
+  /** @internal */
   [kInitialized]: boolean;
+  /** @internal */
   [kClosed]: boolean;
+  /** @internal */
   [kKilled]: boolean;
+  /** @internal */
   [kOptions]: InternalAbstractCursorOptions;
 
   /** @event */
@@ -540,13 +551,13 @@ export abstract class AbstractCursor extends EventEmitter {
    */
   abstract clone(): AbstractCursor;
 
-  /* @internal */
+  /** @internal */
   abstract _initialize(
     session: ClientSession | undefined,
     callback: Callback<ExecutionResult>
   ): void;
 
-  /* @internal */
+  /** @internal */
   _getMore(batchSize: number, callback: Callback<Document>): void {
     const cursorId = this[kId];
     const cursorNs = this[kNamespace];

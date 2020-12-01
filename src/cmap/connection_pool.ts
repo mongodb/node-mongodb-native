@@ -127,17 +127,6 @@ export interface CloseOptions {
   force?: boolean;
 }
 
-// NOTE: to be removed as part of NODE-2745
-/** @public */
-export interface ConnectionPool {
-  isConnected(): boolean;
-  write(
-    message: any,
-    commandOptions: CommandOptions,
-    callback: (err: MongoError, ...args: Document[]) => void
-  ): void;
-}
-
 /**
  * A pool of connections which dynamically resizes, and emit events related to pool activity
  * @public
@@ -145,15 +134,27 @@ export interface ConnectionPool {
 export class ConnectionPool extends EventEmitter {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
+  /** @internal */
   [kLogger]: Logger;
+  /** @internal */
   [kConnections]: Denque<Connection>;
-  /** An integer expressing how many total connections are permitted */
+  /**
+   * An integer expressing how many total connections are permitted
+   * @internal
+   */
   [kPermits]: number;
+  /** @internal */
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
-  /** An integer representing the SDAM generation of the pool */
+  /**
+   * An integer representing the SDAM generation of the pool
+   * @internal
+   */
   [kGeneration]: number;
+  /** @internal */
   [kConnectionCounter]: Generator<number>;
+  /** @internal */
   [kCancellationToken]: EventEmitter;
+  /** @internal */
   [kWaitQueue]: Denque<WaitQueueMember>;
 
   /**
@@ -430,6 +431,33 @@ export class ConnectionPool extends EventEmitter {
         }
       });
     });
+  }
+
+  // NOTE: remove `isConnected` and `write` as part of NODE-2745
+  // These functions only exist if makeServerTrampoline is
+  // called when using the wire protocol methods
+
+  /**
+   * @internal
+   * @deprecated Remove sever trampoline code. (NODE-2745)
+   */
+  isConnected(): boolean {
+    throw new TypeError('This is not a server trampoline instance');
+  }
+
+  /**
+   * @internal
+   * @deprecated Remove sever trampoline code. (NODE-2745)
+   */
+  write(
+    message: Document,
+    commandOptions: CommandOptions,
+    callback: (err: MongoError, ...args: Document[]) => void
+  ): void {
+    message;
+    commandOptions;
+    callback;
+    throw new TypeError('This is not a server trampoline instance');
   }
 }
 

@@ -115,7 +115,7 @@ export type AnyBulkWriteOperation =
   | { deleteOne: DeleteOneModel }
   | { deleteMany: DeleteManyModel };
 
-/** @internal */
+/** @public */
 export interface BulkResult {
   ok: number;
   writeErrors: WriteError[];
@@ -348,7 +348,7 @@ export class WriteConcernError {
   }
 }
 
-/** @internal */
+/** @public */
 export interface BulkWriteOperationError {
   index: number;
   code: number;
@@ -1301,7 +1301,7 @@ function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   return false;
 }
 
-/** @internal */
+/** @public */
 export interface UpdateStatement {
   /** The query that matches documents to update. */
   q: Document;
@@ -1368,7 +1368,7 @@ function isUpdateStatement(model: Document): model is UpdateStatement {
   return 'q' in model;
 }
 
-/** @internal */
+/** @public */
 export interface DeleteStatement {
   /** The query that matches documents to delete. */
   q: Document;

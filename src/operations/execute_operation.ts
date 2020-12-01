@@ -22,7 +22,7 @@ type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K
   ? K
   : never;
 
-/* @internal */
+/** @internal */
 export interface ExecutionResult {
   /** The server selected for the operation */
   server: Server;

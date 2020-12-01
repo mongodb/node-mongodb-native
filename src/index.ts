@@ -179,7 +179,8 @@ export type {
   MongoURIOptions,
   LogLevel,
   Auth,
-  DriverInfo
+  DriverInfo,
+  MongoOptions
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {
@@ -285,5 +286,13 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { TransactionOptions, Transaction, TxnState } from './transactions';
-export type { Callback, ClientMetadata, ClientMetadataOptions } from './utils';
+export type {
+  Callback,
+  ClientMetadata,
+  ClientMetadataOptions,
+  MongoDBNamespace,
+  InterruptableAsyncInterval
+} from './utils';
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
+export type { ExecutionResult } from './operations/execute_operation';
+export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
