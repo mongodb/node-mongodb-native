@@ -217,7 +217,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
         : { ismaster: true };
 
     const options = isAwaitable
-      ? { socketTimeout: connectTimeoutMS + maxAwaitTimeMS, exhaustAllowed: true }
+      ? {
+          socketTimeout: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
+          exhaustAllowed: true
+        }
       : { socketTimeout: connectTimeoutMS };
 
     if (isAwaitable && monitor[kRTTPinger] == null) {
