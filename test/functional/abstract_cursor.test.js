@@ -22,7 +22,7 @@ describe('AbstractCursor', function () {
   before(
     withClientV2((client, done) => {
       const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];
-      const coll = client.db().collection('find_cursor');
+      const coll = client.db().collection('abstract_cursor');
       const tryNextColl = client.db().collection('try_next');
       coll.drop(() => tryNextColl.drop(() => coll.insertMany(docs, done)));
     })
@@ -35,7 +35,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['getMore'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         this.defer(() => cursor.close());
 
@@ -56,7 +56,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.next(err => {
           expect(err).to.not.exist;
@@ -75,7 +75,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.toArray(err => {
           expect(err).to.not.exist;
@@ -95,7 +95,7 @@ describe('AbstractCursor', function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
         cursor.close(err => {
           expect(err).to.not.exist;
@@ -110,7 +110,7 @@ describe('AbstractCursor', function () {
     it(
       'should iterate each document in a cursor',
       withClientV2(function (client, done) {
-        const coll = client.db().collection('find_cursor');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 2 });
 
         const bag = [];
@@ -160,35 +160,26 @@ describe('AbstractCursor', function () {
     );
   });
 
-  context('#rewind', function () {
-    beforeEach(
-      withClientV2(function (client, done) {
-        const coll = client.db().collection('rewind');
-        coll.drop(() => {
-          coll.insertMany([{}, {}], err => {
-            expect(err).to.not.exist;
-            done();
-          });
-        });
-      })
-    );
-
+  context('#clone', function () {
     it(
-      'should rewind a cursor',
+      'should clone a find cursor',
       withClientV2(function (client, done) {
-        const coll = client.db().collection('rewind');
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({});
         this.defer(() => cursor.close());
 
         cursor.toArray((err, docs) => {
           expect(err).to.not.exist;
-          expect(docs).to.have.length(2);
+          expect(docs).to.have.length(6);
+          expect(cursor).property('closed').to.be.true;
 
-          cursor.rewind();
-          cursor.toArray((err, docs) => {
+          const clonedCursor = cursor.clone();
+          this.defer(() => clonedCursor.close());
+
+          clonedCursor.toArray((err, docs) => {
             expect(err).to.not.exist;
-            expect(docs).to.have.length(2);
-
+            expect(docs).to.have.length(6);
+            expect(clonedCursor).property('closed').to.be.true;
             done();
           });
         });
@@ -196,9 +187,58 @@ describe('AbstractCursor', function () {
     );
 
     it(
-      'should end an implicit session on rewind',
+      'should clone an aggregate cursor',
       withClientV2(function (client, done) {
-        const coll = client.db().collection('rewind');
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.aggregate([{ $match: {} }]);
+        this.defer(() => cursor.close());
+
+        cursor.toArray((err, docs) => {
+          expect(err).to.not.exist;
+          expect(docs).to.have.length(6);
+          expect(cursor).property('closed').to.be.true;
+
+          const clonedCursor = cursor.clone();
+          this.defer(() => clonedCursor.close());
+
+          clonedCursor.toArray((err, docs) => {
+            expect(err).to.not.exist;
+            expect(docs).to.have.length(6);
+            expect(clonedCursor).property('closed').to.be.true;
+            done();
+          });
+        });
+      })
+    );
+  });
+
+  context('#rewind', function () {
+    it(
+      'should rewind a cursor',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({});
+        this.defer(() => cursor.close());
+
+        cursor.toArray((err, docs) => {
+          expect(err).to.not.exist;
+          expect(docs).to.have.length(6);
+
+          cursor.rewind();
+          cursor.toArray((err, docs) => {
+            expect(err).to.not.exist;
+            expect(docs).to.have.length(6);
+
+            done();
+          });
+        });
+      })
+    );
+
+    it('should end an implicit session on rewind', {
+      metadata: { requires: { mongodb: '>=3.6' } },
+      test: withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { batchSize: 1 });
         this.defer(() => cursor.close());
 
@@ -213,12 +253,12 @@ describe('AbstractCursor', function () {
           done();
         });
       })
-    );
+    });
 
-    it(
-      'should not end an explicit session on rewind',
-      withClientV2(function (client, done) {
-        const coll = client.db().collection('rewind');
+    it('should not end an explicit session on rewind', {
+      metadata: { requires: { mongodb: '>=3.6' } },
+      test: withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
         const session = client.startSession();
 
         const cursor = coll.find({}, { batchSize: 1, session });
@@ -236,6 +276,6 @@ describe('AbstractCursor', function () {
           session.endSession(done);
         });
       })
-    );
+    });
   });
 });

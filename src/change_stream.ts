@@ -425,6 +425,12 @@ export class ChangeStreamCursor extends AbstractCursor {
     }
   }
 
+  clone(): ChangeStreamCursor {
+    return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
+      ...this.cursorOptions
+    });
+  }
+
   _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
     const aggregateOperation = new AggregateOperation(
       { s: { namespace: this.namespace } },

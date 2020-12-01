@@ -508,6 +508,11 @@ export abstract class AbstractCursor extends EventEmitter {
     }
   }
 
+  /**
+   * Returns a new uninitialized copy of this cursor, with options matching those that have been set on the current instance
+   */
+  abstract clone(): AbstractCursor;
+
   /* @internal */
   abstract _initialize(
     session: ClientSession | undefined,
