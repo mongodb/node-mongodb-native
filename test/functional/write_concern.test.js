@@ -24,9 +24,8 @@ describe('Write Concern', function() {
   // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
   describe('test journal connection string option', function() {
     function journalOptionTest(client, events, done) {
-      expect(client).to.have.nested.property('s.options');
-      const clientOptions = client.s.options;
-      expect(clientOptions).to.containSubset({ j: true });
+      expect(client).to.have.nested.property('s.options.writeConcern');
+      expect(client.s.options.writeConcern).to.satisfy(wc => wc.j || wc.journal);
       client
         .db('test')
         .collection('test')

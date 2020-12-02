@@ -2,6 +2,8 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const sinon = require('sinon');
+const Connection = require('../../lib/cmap/connection').Connection;
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -108,6 +110,62 @@ describe('MongoClient Options', function() {
       }
       client.close(done);
     });
+  });
+
+  it('must respect an infinite connectTimeoutMS for the streaming protocol', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
+    test: function(done) {
+      if (!this.configuration.usingUnifiedTopology()) return done();
+      const client = this.configuration.newClient({
+        connectTimeoutMS: 0,
+        heartbeatFrequencyMS: 500
+      });
+      client.connect(err => {
+        expect(err).to.not.exist;
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+          const args = Array.prototype.slice.call(arguments);
+          const ns = args[0];
+          const command = args[1];
+          const options = args[2];
+          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+            stub.restore();
+            expect(options)
+              .property('socketTimeout')
+              .to.equal(0);
+            client.close(done);
+          }
+          stub.wrappedMethod.apply(this, args);
+        });
+      });
+    }
+  });
+
+  it('must respect a finite connectTimeoutMS for the streaming protocol', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
+    test: function(done) {
+      if (!this.configuration.usingUnifiedTopology()) return done();
+      const client = this.configuration.newClient({
+        connectTimeoutMS: 10,
+        heartbeatFrequencyMS: 500
+      });
+      client.connect(err => {
+        expect(err).to.not.exist;
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function() {
+          const args = Array.prototype.slice.call(arguments);
+          const ns = args[0];
+          const command = args[1];
+          const options = args[2];
+          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+            stub.restore();
+            expect(options)
+              .property('socketTimeout')
+              .to.equal(510);
+            client.close(done);
+          }
+          stub.wrappedMethod.apply(this, args);
+        });
+      });
+    }
   });
 
   /**

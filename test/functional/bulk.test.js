@@ -760,7 +760,7 @@ describe('Bulk', function() {
           batch.insert({ b: 1 });
 
           // Execute the operations
-          batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+          batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -812,7 +812,7 @@ describe('Bulk', function() {
           batch.insert({ a: 1 });
 
           // Execute the operations
-          batch.execute(configuration.writeConcernMax(), (err, result) => {
+          batch.execute(configuration.writeConcernMax().writeConcern, (err, result) => {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -872,7 +872,7 @@ describe('Bulk', function() {
             batch.insert({ b: 1 });
 
             // Execute the operations
-            batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+            batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
               expect(err).to.exist;
               expect(result).to.not.exist;
 
@@ -928,7 +928,7 @@ describe('Bulk', function() {
           .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
-        batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+        batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
           // Check state of result
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
