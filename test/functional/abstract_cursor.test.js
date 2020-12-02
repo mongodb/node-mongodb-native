@@ -33,6 +33,38 @@ describe('AbstractCursor', function () {
     );
   });
 
+  context('#readBufferedDocuments', function () {
+    it(
+      'should support reading buffered documents',
+      withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { batchSize: 5 });
+
+        cursor.next((err, doc) => {
+          expect(err).to.not.exist;
+          expect(doc).property('a').to.equal(1);
+          expect(cursor.bufferedCount()).to.equal(4);
+
+          // Read the buffered Count
+          cursor.readBufferedDocuments(cursor.bufferedCount());
+
+          // Get the next item
+          cursor.next((err, doc) => {
+            expect(err).to.not.exist;
+            expect(doc).to.exist;
+
+            cursor.next((err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc).to.be.null;
+
+              done();
+            });
+          });
+        });
+      })
+    );
+  });
+
   context('#close', function () {
     it(
       'should send a killCursors command when closed before completely iterated',
