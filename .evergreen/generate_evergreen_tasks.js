@@ -79,13 +79,12 @@ const OPERATING_SYSTEMS = [
   )
 );
 
+const BASE_TASKS = [];
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function makeTask({ mongoVersion, topology, tags }) {
+function makeTask({ mongoVersion, topology }) {
   let topologyForTest = topology;
-  if (!tags) tags = [];
-  tags.unshift(mongoVersion, topology);
   let runTestsCommand = { func: 'run tests' };
   if (topology.indexOf('-unified') !== -1) {
     topologyForTest = topology.split('-unified')[0];
@@ -94,7 +93,7 @@ function makeTask({ mongoVersion, topology, tags }) {
 
   return {
     name: `test-${mongoVersion}-${topology}`,
-    tags,
+    tags: [mongoVersion, topology],
     commands: [
       { func: 'install dependencies' },
       {
@@ -111,7 +110,7 @@ function makeTask({ mongoVersion, topology, tags }) {
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology =>
-    TASKS.push(makeTask({ mongoVersion, topology, tags: ['full-suite'] }))
+    BASE_TASKS.push(makeTask({ mongoVersion, topology }))
   );
 });
 
@@ -325,15 +324,14 @@ const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
   const memo = {};
-  return function(mongoVersion, onlyFullSuite = false) {
-    const key = mongoVersion + (onlyFullSuite ? 'F' : '');
+  return function(mongoVersion, onlyBaseTasks = false) {
+    const key = mongoVersion + (onlyBaseTasks ? 'b' : '');
 
     if (memo[key]) {
       return memo[key];
     }
-
-    const ret = TASKS.filter(task => {
-      if (onlyFullSuite && (!task.tags || !task.tags.includes('full-suite'))) return false;
+    const taskList = onlyBaseTasks ? BASE_TASKS : BASE_TASKS.concat(TASKS);
+    const ret = taskList.filter(task => {
       const tasksWithVars = task.commands.filter(task => !!task.vars);
       if (task.name.match(/^aws/)) return false;
 
@@ -425,7 +423,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

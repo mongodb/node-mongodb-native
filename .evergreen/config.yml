@@ -452,7 +452,6 @@ tasks:
     tags:
       - latest
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -464,7 +463,6 @@ tasks:
     tags:
       - latest
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -476,7 +474,6 @@ tasks:
     tags:
       - latest
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -488,7 +485,6 @@ tasks:
     tags:
       - latest
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -502,7 +498,6 @@ tasks:
     tags:
       - latest
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -516,7 +511,6 @@ tasks:
     tags:
       - latest
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -530,7 +524,6 @@ tasks:
     tags:
       - '4.4'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -542,7 +535,6 @@ tasks:
     tags:
       - '4.4'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -554,7 +546,6 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -566,7 +557,6 @@ tasks:
     tags:
       - '4.4'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -580,7 +570,6 @@ tasks:
     tags:
       - '4.4'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -594,7 +583,6 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -608,7 +596,6 @@ tasks:
     tags:
       - '4.2'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -620,7 +607,6 @@ tasks:
     tags:
       - '4.2'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -632,7 +618,6 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -644,7 +629,6 @@ tasks:
     tags:
       - '4.2'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -658,7 +642,6 @@ tasks:
     tags:
       - '4.2'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -672,7 +655,6 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -686,7 +668,6 @@ tasks:
     tags:
       - '4.0'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -698,7 +679,6 @@ tasks:
     tags:
       - '4.0'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -710,7 +690,6 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -722,7 +701,6 @@ tasks:
     tags:
       - '4.0'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -736,7 +714,6 @@ tasks:
     tags:
       - '4.0'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -750,7 +727,6 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -764,7 +740,6 @@ tasks:
     tags:
       - '3.6'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -776,7 +751,6 @@ tasks:
     tags:
       - '3.6'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -788,7 +762,6 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -800,7 +773,6 @@ tasks:
     tags:
       - '3.6'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -814,7 +786,6 @@ tasks:
     tags:
       - '3.6'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -828,7 +799,6 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -842,7 +812,6 @@ tasks:
     tags:
       - '3.4'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -854,7 +823,6 @@ tasks:
     tags:
       - '3.4'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -866,7 +834,6 @@ tasks:
     tags:
       - '3.4'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -878,7 +845,6 @@ tasks:
     tags:
       - '3.4'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -892,7 +858,6 @@ tasks:
     tags:
       - '3.4'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -906,7 +871,6 @@ tasks:
     tags:
       - '3.4'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -920,7 +884,6 @@ tasks:
     tags:
       - '3.2'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -932,7 +895,6 @@ tasks:
     tags:
       - '3.2'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -944,7 +906,6 @@ tasks:
     tags:
       - '3.2'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -956,7 +917,6 @@ tasks:
     tags:
       - '3.2'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -970,7 +930,6 @@ tasks:
     tags:
       - '3.2'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -984,7 +943,6 @@ tasks:
     tags:
       - '3.2'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -998,7 +956,6 @@ tasks:
     tags:
       - '3.0'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1010,7 +967,6 @@ tasks:
     tags:
       - '3.0'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1022,7 +978,6 @@ tasks:
     tags:
       - '3.0'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1034,7 +989,6 @@ tasks:
     tags:
       - '3.0'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1048,7 +1002,6 @@ tasks:
     tags:
       - '3.0'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1062,7 +1015,6 @@ tasks:
     tags:
       - '3.0'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1076,7 +1028,6 @@ tasks:
     tags:
       - '2.6'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1088,7 +1039,6 @@ tasks:
     tags:
       - '2.6'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1100,7 +1050,6 @@ tasks:
     tags:
       - '2.6'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1112,7 +1061,6 @@ tasks:
     tags:
       - '2.6'
       - server-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1126,7 +1074,6 @@ tasks:
     tags:
       - '2.6'
       - replica_set-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1140,7 +1087,6 @@ tasks:
     tags:
       - '2.6'
       - sharded_cluster-unified
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
