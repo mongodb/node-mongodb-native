@@ -1672,12 +1672,12 @@ buildvariants:
       NODE_LTS_NAME: argon
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
-  - name: windows-64-vs2010-erbium
-    display_name: Windows (VS2010) Node Erbium
-    run_on: windows-64-vs2010-large
+  - name: windows-64-vs2013-erbium
+    display_name: Windows (VS2013) Node Erbium
+    run_on: windows-64-vs2013-large
     expansions:
       NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2010
+      MSVS_VERSION: 2013
     tasks: &ref_3
       - test-4.2-server
       - test-4.2-replica_set
@@ -1721,41 +1721,6 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
-  - name: windows-64-vs2010-dubnium
-    display_name: Windows (VS2010) Node Dubnium
-    run_on: windows-64-vs2010-large
-    expansions:
-      NODE_LTS_NAME: dubnium
-      MSVS_VERSION: 2010
-    tasks: *ref_3
-  - name: windows-64-vs2010-carbon
-    display_name: Windows (VS2010) Node Carbon
-    run_on: windows-64-vs2010-large
-    expansions:
-      NODE_LTS_NAME: carbon
-      MSVS_VERSION: 2010
-    tasks: *ref_3
-  - name: windows-64-vs2010-boron
-    display_name: Windows (VS2010) Node Boron
-    run_on: windows-64-vs2010-large
-    expansions:
-      NODE_LTS_NAME: boron
-      MSVS_VERSION: 2010
-    tasks: *ref_3
-  - name: windows-64-vs2010-argon
-    display_name: Windows (VS2010) Node Argon
-    run_on: windows-64-vs2010-large
-    expansions:
-      NODE_LTS_NAME: argon
-      MSVS_VERSION: 2010
-    tasks: *ref_3
-  - name: windows-64-vs2013-erbium
-    display_name: Windows (VS2013) Node Erbium
-    run_on: windows-64-vs2013-large
-    expansions:
-      NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2013
-    tasks: *ref_3
   - name: windows-64-vs2013-dubnium
     display_name: Windows (VS2013) Node Dubnium
     run_on: windows-64-vs2013-large

@@ -41,13 +41,6 @@ const OPERATING_SYSTEMS = [
     clientEncryption: true
   },
   {
-    name: 'windows-64-vs2010',
-    display_name: 'Windows (VS2010)',
-    run_on: 'windows-64-vs2010-large',
-    msvsVersion: 2010,
-    mongoVersion: '<4.4'
-  },
-  {
     name: 'windows-64-vs2013',
     display_name: 'Windows (VS2013)',
     run_on: 'windows-64-vs2013-large',
