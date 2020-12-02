@@ -885,9 +885,7 @@ export interface ClientMetadataOptions {
   appname?: string;
 }
 
-const NODE_DRIVER_VERSION = JSON.parse(
-  readFileSync(resolve(__dirname, '..', 'package.json'), { encoding: 'utf-8' })
-).version;
+const NODE_DRIVER_VERSION = require('../package.json').version;
 
 export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   options = options || {};
