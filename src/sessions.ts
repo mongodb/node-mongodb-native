@@ -45,8 +45,11 @@ export interface ClientSessionOptions {
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
 
-  owner: symbol | AbstractCursor;
+  /** @internal */
+  owner?: symbol | AbstractCursor;
+  /** @internal */
   explicit?: boolean;
+  /** @internal */
   initialClusterTime?: ClusterTime;
 }
 
@@ -70,7 +73,7 @@ class ClientSession extends EventEmitter {
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
   explicit: boolean;
-  owner: symbol | AbstractCursor;
+  owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
   [kServerSession]?: ServerSession;
