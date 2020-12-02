@@ -3,4 +3,4 @@
   --file test/tools/runner
   --ui test/tools/runner/metadata_ui.js
   --reporter spec-xunit-file
-  --color
+  --colors
