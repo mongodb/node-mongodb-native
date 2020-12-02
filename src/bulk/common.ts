@@ -1201,14 +1201,13 @@ export abstract class BulkOperationBase {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || {};
 
+    if (this.s.executed) {
+      return handleEarlyError(new MongoError('Batch cannot be re-executed'), callback);
+    }
+
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
       this.s.writeConcern = writeConcern;
-    }
-
-    if (this.s.executed) {
-      const executedError = new MongoError('batch cannot be re-executed');
-      return handleEarlyError(executedError, callback);
     }
 
     // If we have current batch
@@ -1225,6 +1224,7 @@ export abstract class BulkOperationBase {
       return handleEarlyError(emptyBatchError, callback);
     }
 
+    this.s.executed = true;
     return executeLegacyOperation(this.s.topology, executeCommands, [this, options, callback]);
   }
 
