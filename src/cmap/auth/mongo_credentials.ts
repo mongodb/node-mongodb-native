@@ -138,7 +138,24 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_X509 && this.password != null) {
+      if (this.password === '') {
+        Reflect.set(this, 'password', undefined);
+        return;
+      }
       throw new TypeError(`Password not allowed for mechanism MONGODB-X509`);
     }
+  }
+
+  static merge(
+    creds: MongoCredentials,
+    options: Partial<MongoCredentialsOptions>
+  ): MongoCredentials {
+    return new MongoCredentials({
+      username: options.username ?? creds.username,
+      password: options.password ?? creds.password,
+      mechanism: options.mechanism ?? creds.mechanism,
+      mechanismProperties: options.mechanismProperties ?? creds.mechanismProperties,
+      source: options.source ?? creds.source ?? options.db
+    });
   }
 }

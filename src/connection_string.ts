@@ -858,39 +858,20 @@ const DEFAULT_PK_FACTORY = {
   }
 };
 
-const defaultOptions = new Map<string, unknown>(
-  ([
-    ['readPreference', ReadPreference.primary],
-    ['autoEncryption', {}],
-    ['compression', 'none'],
-    ['compressors', 'none'],
-    ['connectTimeoutMS', 30000],
-    ['dbName', 'test'],
-    ['directConnection', false],
-    ['driverInfo', {}],
-    ['forceServerObjectId', false],
-    ['heartbeatFrequencyMS', 10000],
-    ['keepAlive', true],
-    ['keepAliveInitialDelay', 120000],
-    ['localThresholdMS', 0],
-    ['logger', new Logger('MongoClient')],
-    ['maxIdleTimeMS', 0],
-    ['maxPoolSize', 100],
-    ['minPoolSize', 0],
-    ['monitorCommands', false],
-    ['noDelay', true],
-    ['numberOfRetries', 5],
-    ['pkFactory', DEFAULT_PK_FACTORY],
-    ['raw', false],
-    ['retryReads', true],
-    ['retryWrites', true],
-    ['serverSelectionTimeoutMS', 30000],
-    ['serverSelectionTryOnce', false],
-    ['socketTimeoutMS', 0],
-    ['waitQueueTimeoutMS', 0],
-    ['zlibCompressionLevel', 0]
-  ] as [string, any][]).map(([k, v]) => [k.toLowerCase(), v])
-);
+class CaseInsensitiveMap extends Map<string, any> {
+  constructor(entries: Array<[string, any]> = []) {
+    super(entries.map(([k, v]) => [k.toLowerCase(), v]));
+  }
+  has(k: string) {
+    return super.has(k.toLowerCase());
+  }
+  get(k: string) {
+    return super.get(k.toLowerCase());
+  }
+  set(k: string, v: any) {
+    return super.set(k.toLowerCase(), v);
+  }
+}
 
 export function parseOptions(
   uri: string,
@@ -916,29 +897,32 @@ export function parseOptions(
     password: typeof url.password === 'string' ? decodeURIComponent(url.password) : undefined
   });
 
-  const urlOptions = new Map();
+  const urlOptions = new CaseInsensitiveMap();
   for (const key of url.searchParams.keys()) {
-    const loweredKey = key.toLowerCase();
     const values = [...url.searchParams.getAll(key)];
 
     if (values.includes('')) {
       throw new MongoParseError('URI cannot contain options with no value');
     }
 
-    if (urlOptions.has(loweredKey)) {
-      urlOptions.get(loweredKey)?.push(...values);
+    if (urlOptions.has(key)) {
+      urlOptions.get(key)?.push(...values);
     } else {
-      urlOptions.set(loweredKey, values);
+      urlOptions.set(key, values);
     }
   }
 
-  const objectOptions = new Map(
-    Object.entries(options).map(([k, v]) => [k.toLowerCase(), v] as [string, any])
+  const objectOptions = new CaseInsensitiveMap(Object.entries(options));
+
+  const defaultOptions = new CaseInsensitiveMap(
+    Object.entries(OPTIONS)
+      .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
+      .map(([k, d]) => [k, d.default])
   );
 
-  const allOptions = new Map();
+  const allOptions = new CaseInsensitiveMap();
 
-  const allKeys = new Set([
+  const allKeys = new Set<string>([
     ...urlOptions.keys(),
     ...objectOptions.keys(),
     ...defaultOptions.keys()
@@ -958,8 +942,10 @@ export function parseOptions(
     allOptions.set(key, values);
   }
 
-  for (const [loweredKey, values] of allOptions.entries()) {
-    setOption(mongoOptions, loweredKey, values);
+  for (const [key, descriptor] of Object.entries(OPTIONS)) {
+    const values = allOptions.get(key);
+    if (!values || values.length === 0) continue;
+    setOption(mongoOptions, key, descriptor, values);
   }
 
   mongoOptions.credentials?.validate();
@@ -968,12 +954,13 @@ export function parseOptions(
   return Object.freeze(mongoOptions) as Readonly<MongoOptions>;
 }
 
-function setOption(mongoOptions: any, loweredKey: string, values: unknown[]) {
-  const descriptor = descriptorFor(loweredKey);
-  const {
-    descriptor: { target, type, transform, deprecated },
-    key
-  } = descriptor;
+function setOption(
+  mongoOptions: any,
+  key: string,
+  descriptor: OptionDescriptor,
+  values: unknown[]
+) {
+  const { target, type, transform, deprecated } = descriptor;
   const name = target ?? key;
 
   if (deprecated) {
@@ -1020,7 +1007,7 @@ function toHostArray(hostString: string) {
   const parsedHost = new URL(`mongodb://${hostString.split(' ').join('%20')}`);
 
   let socketPath;
-  if (hostString.match(/\.sock/)) {
+  if (hostString.endsWith('.sock')) {
     // heuristically determine if we're working with a domain socket
     socketPath = decodeURIComponent(hostString);
   }
@@ -1051,6 +1038,7 @@ function toHostArray(hostString: string) {
 interface OptionDescriptor {
   target?: string;
   type?: 'boolean' | 'int' | 'uint' | 'record' | 'string' | 'any';
+  default?: any;
 
   deprecated?: boolean;
   /**
@@ -1074,8 +1062,7 @@ export const OPTIONS = {
       if (!isRecord(value, ['username', 'password'] as const)) {
         throw new TypeError(`${name} must be an object with 'username' and 'password' properties`);
       }
-      return new MongoCredentials({
-        ...options.credentials,
+      return MongoCredentials.merge(options.credentials, {
         username: value.username,
         password: value.password
       });
@@ -1103,11 +1090,10 @@ export const OPTIONS = {
       if (mechanism === AuthMechanism.MONGODB_X509 && password === '') {
         password = undefined;
       }
-      return new MongoCredentials({
-        ...options.credentials,
+      return MongoCredentials.merge(options.credentials, {
         mechanism,
         source,
-        password: password as any
+        password
       });
     }
   },
@@ -1120,13 +1106,13 @@ export const OPTIONS = {
       if (!isRecord(value)) {
         throw new TypeError('AuthMechanismProperties must be an object');
       }
-      return new MongoCredentials({ ...options.credentials, mechanismProperties: value });
+      return MongoCredentials.merge(options.credentials, { mechanismProperties: value });
     }
   },
   authSource: {
     target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
-      return new MongoCredentials({ ...options.credentials, source: String(value) });
+      return MongoCredentials.merge(options.credentials, { source: String(value) });
     }
   },
   autoEncryption: {
@@ -1146,6 +1132,7 @@ export const OPTIONS = {
     }
   },
   compression: {
+    default: 'none',
     target: 'compressors',
     transform({ values }) {
       const compressionList = new Set();
@@ -1160,6 +1147,7 @@ export const OPTIONS = {
     }
   },
   compressors: {
+    default: 'none',
     target: 'compressors',
     transform({ values }) {
       const compressionList = new Set();
@@ -1176,18 +1164,19 @@ export const OPTIONS = {
     }
   },
   connectTimeoutMS: {
+    default: 30000,
     type: 'uint'
   },
   dbName: {
+    default: 'test',
     type: 'string'
   },
   directConnection: {
-    type: 'boolean'
-  },
-  domainsEnabled: {
+    default: false,
     type: 'boolean'
   },
   driverInfo: {
+    default: {},
     type: 'record'
   },
   family: {
@@ -1203,6 +1192,7 @@ export const OPTIONS = {
     type: 'record'
   },
   forceServerObjectId: {
+    default: false,
     type: 'boolean'
   },
   fsync: {
@@ -1217,6 +1207,7 @@ export const OPTIONS = {
     }
   },
   heartbeatFrequencyMS: {
+    default: 10000,
     type: 'uint'
   },
   ignoreUndefined: {
@@ -1246,15 +1237,19 @@ export const OPTIONS = {
     }
   },
   keepAlive: {
+    default: true,
     type: 'boolean'
   },
   keepAliveInitialDelay: {
+    default: 120000,
     type: 'uint'
   },
   localThresholdMS: {
+    default: 0,
     type: 'uint'
   },
   logger: {
+    default: new Logger('MongoClient'),
     transform({ values: [value] }) {
       if (value instanceof Logger) {
         return value;
@@ -1271,9 +1266,11 @@ export const OPTIONS = {
     }
   },
   maxIdleTimeMS: {
+    default: 0,
     type: 'uint'
   },
   maxPoolSize: {
+    default: 100,
     type: 'uint'
   },
   maxStalenessSeconds: {
@@ -1283,12 +1280,14 @@ export const OPTIONS = {
     type: 'uint'
   },
   minPoolSize: {
+    default: 0,
     type: 'uint'
   },
   minHeartbeatFrequencyMS: {
     type: 'uint'
   },
   monitorCommands: {
+    default: true,
     type: 'boolean'
   },
   name: {
@@ -1298,9 +1297,11 @@ export const OPTIONS = {
     }
   } as OptionDescriptor,
   noDelay: {
+    default: true,
     type: 'boolean'
   },
   numberOfRetries: {
+    default: 5,
     type: 'int'
   },
   password: {
@@ -1309,10 +1310,11 @@ export const OPTIONS = {
       if (typeof password !== 'string') {
         throw new TypeError('pass must be a string');
       }
-      return new MongoCredentials({ ...options.credentials, password });
+      return MongoCredentials.merge(options.credentials, { password });
     }
   },
   pkFactory: {
+    default: DEFAULT_PK_FACTORY,
     target: 'createPk',
     transform({ values: [value] }): PkFactory {
       if (isRecord(value, ['createPk'] as const) && typeof value.createPk === 'function') {
@@ -1342,6 +1344,7 @@ export const OPTIONS = {
     type: 'boolean'
   },
   raw: {
+    default: false,
     type: 'boolean'
   },
   readConcern: {
@@ -1362,6 +1365,7 @@ export const OPTIONS = {
     }
   },
   readPreference: {
+    default: ReadPreference.primary,
     transform({ values: [value], options }) {
       if (value instanceof ReadPreference) {
         return ReadPreference.fromOptions({
@@ -1412,24 +1416,25 @@ export const OPTIONS = {
     type: 'string'
   },
   retryReads: {
+    default: true,
     type: 'boolean'
   },
   retryWrites: {
+    default: true,
     type: 'boolean'
   },
   serializeFunctions: {
     type: 'boolean'
   },
   serverSelectionTimeoutMS: {
+    default: 30000,
     type: 'uint'
-  },
-  serverSelectionTryOnce: {
-    type: 'boolean'
   },
   servername: {
     type: 'string'
   },
   socketTimeoutMS: {
+    default: 0,
     type: 'uint'
   },
   ssl: {
@@ -1499,7 +1504,7 @@ export const OPTIONS = {
   username: {
     target: 'credentials',
     transform({ values: [value], options }) {
-      return new MongoCredentials({ ...options.credentials, username: String(value) });
+      return MongoCredentials.merge(options.credentials, { username: String(value) });
     }
   },
   version: {
@@ -1515,6 +1520,7 @@ export const OPTIONS = {
     }
   },
   waitQueueTimeoutMS: {
+    default: 0,
     type: 'uint'
   },
   writeConcern: {
@@ -1552,15 +1558,7 @@ export const OPTIONS = {
     }
   },
   zlibCompressionLevel: {
+    default: 0,
     type: 'int'
   }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
-
-const keys = Object.keys(OPTIONS);
-function descriptorFor(name: string) {
-  const key = keys.filter(
-    k => !!k.match(new RegExp(String.raw`\b${name}\b`, 'i'))
-  )[0] as keyof MongoClientOptions;
-  if (!(key in OPTIONS)) throw new MongoParseError(`Unsupported option ${name}`);
-  return { descriptor: OPTIONS[key], key };
-}

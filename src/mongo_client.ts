@@ -119,8 +119,6 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   localThresholdMS?: number;
   /** Specifies how long (in milliseconds) to block for server selection before throwing an exception.  */
   serverSelectionTimeoutMS?: number;
-  /** When true, instructs the driver to scan the MongoDB deployment exactly once after server selection fails and then either select a server or raise an error. When false, the driver blocks and searches for a server up to the serverSelectionTimeoutMS value. */
-  serverSelectionTryOnce?: boolean;
   /** heartbeatFrequencyMS controls when the driver checks the state of the MongoDB deployment. Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one. */
   heartbeatFrequencyMS?: number;
   /** Sets the minimum heartbeat frequency. In the event that the driver has to frequently re-check a server's availability, it will wait at least this long since the previous check to avoid wasted effort. */
@@ -602,7 +600,6 @@ export interface MongoOptions
         | 'retryReads'
         | 'retryWrites'
         | 'serverSelectionTimeoutMS'
-        | 'serverSelectionTryOnce'
         | 'socketTimeoutMS'
         | 'tlsAllowInvalidCertificates'
         | 'tlsAllowInvalidHostnames'
