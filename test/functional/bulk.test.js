@@ -1,5 +1,5 @@
 'use strict';
-const { withClient, setupDatabase, ignoreNsNotFound } = require('./shared');
+const { withClient, withClientV2, setupDatabase, ignoreNsNotFound } = require('./shared');
 const test = require('./shared').assert;
 const { expect } = require('chai');
 const { MongoError } = require('../../src/error');
@@ -1743,4 +1743,20 @@ describe('Bulk', function () {
         .then(updatedAdam => expect(updatedAdam).property('age').to.equal(39));
     });
   });
+
+  it(
+    'should return correct ids for documents with generated ids',
+    withClientV2(function (client, done) {
+      const bulk = client.db().collection('coll').initializeUnorderedBulkOp();
+      for (let i = 0; i < 2; i++) bulk.insert({ x: 1 });
+      bulk.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).property('insertedIds').to.exist;
+        expect(Object.keys(result.insertedIds)).to.have.length(2);
+        expect(result.insertedIds[0]).to.exist;
+        expect(result.insertedIds[1]).to.exist;
+        done();
+      });
+    })
+  );
 });
