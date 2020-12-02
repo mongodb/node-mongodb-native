@@ -29,6 +29,10 @@
       "ae-internal-missing-underscore": {
         "logLevel": "none",
         "addToApiReportFile": false
+      },
+      "ae-forgotten-export": {
+        "logLevel": "error",
+        "addToApiReportFile": false
       }
     },
     "tsdocMessageReporting": {

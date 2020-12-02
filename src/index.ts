@@ -144,6 +144,7 @@ export type {
   RemoveOptions as WireRemoveOptions
 } from './cmap/wire_protocol/index';
 export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
+export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
