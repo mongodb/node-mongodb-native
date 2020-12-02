@@ -885,6 +885,7 @@ export interface ClientMetadataOptions {
   appname?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../package.json').version;
 
 export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
