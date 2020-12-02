@@ -368,6 +368,13 @@ export class ListIndexesCursor extends AbstractCursor {
     this.options = options;
   }
 
+  clone(): ListIndexesCursor {
+    return new ListIndexesCursor(this.parent, {
+      ...this.options,
+      ...this.cursorOptions
+    });
+  }
+
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const operation = new ListIndexesOperation(this.parent, {

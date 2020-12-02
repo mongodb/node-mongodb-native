@@ -48,6 +48,13 @@ export class AggregationCursor extends AbstractCursor {
     return this[kPipeline];
   }
 
+  clone(): AggregationCursor {
+    return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {
+      ...this[kOptions],
+      ...this.cursorOptions
+    });
+  }
+
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const aggregateOperation = new AggregateOperation(this[kParent], this[kPipeline], {

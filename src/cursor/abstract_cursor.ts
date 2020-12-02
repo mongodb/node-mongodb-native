@@ -508,6 +508,38 @@ export abstract class AbstractCursor extends EventEmitter {
     return this;
   }
 
+  /**
+   * Rewind this cursor to its uninitialized state. Any options that are present on the cursor will
+   * remain in effect. Iterating this cursor will cause new queries to be sent to the server, even
+   * if the resultant data has already been retrieved by this cursor.
+   */
+  rewind(): void {
+    if (!this[kInitialized]) {
+      return;
+    }
+
+    this[kId] = undefined;
+    this[kDocuments] = [];
+    this[kClosed] = false;
+    this[kKilled] = false;
+    this[kInitialized] = false;
+
+    const session = this[kSession];
+    if (session) {
+      // We only want to end this session if we created it, and it hasn't ended yet
+      if (session.explicit === false && !session.hasEnded) {
+        session.endSession();
+      }
+
+      this[kSession] = undefined;
+    }
+  }
+
+  /**
+   * Returns a new uninitialized copy of this cursor, with options matching those that have been set on the current instance
+   */
+  abstract clone(): AbstractCursor;
+
   /* @internal */
   abstract _initialize(
     session: ClientSession | undefined,
@@ -579,7 +611,7 @@ function next(
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     if (cursor[kSession] == null && cursor[kTopology].hasSessionSupport()) {
-      cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: true });
+      cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
     }
 
     cursor._initialize(cursor[kSession], (err, state) => {

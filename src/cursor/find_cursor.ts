@@ -49,6 +49,13 @@ export class FindCursor extends AbstractCursor {
     }
   }
 
+  clone(): FindCursor {
+    return new FindCursor(this.topology, this.namespace, this[kFilter], {
+      ...this[kBuiltOptions],
+      ...this.cursorOptions
+    });
+  }
+
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {

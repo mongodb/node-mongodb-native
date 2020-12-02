@@ -115,6 +115,13 @@ export class ListCollectionsCursor extends AbstractCursor {
     this.options = options;
   }
 
+  clone(): ListCollectionsCursor {
+    return new ListCollectionsCursor(this.parent, this.filter, {
+      ...this.options,
+      ...this.cursorOptions
+    });
+  }
+
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
