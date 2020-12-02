@@ -1,22 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { filterForCommands } = require('./shared');
-
-function withClientV2(callback) {
-  return function testFunction(done) {
-    const client = this.configuration.newClient({ monitorCommands: true });
-    client.connect(err => {
-      if (err) return done(err);
-      this.defer(() => client.close());
-
-      try {
-        callback.call(this, client, done);
-      } catch (err) {
-        done(err);
-      }
-    });
-  };
-}
+const { filterForCommands, withClientV2 } = require('./shared');
 
 describe('AbstractCursor', function () {
   before(

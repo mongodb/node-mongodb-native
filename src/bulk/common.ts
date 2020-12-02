@@ -1041,7 +1041,7 @@ export abstract class BulkOperationBase {
    * ```
    */
   insert(document: Document): BulkOperationBase {
-    if (document._id == null && shouldForceServerObjectId(this)) {
+    if (document._id == null && !shouldForceServerObjectId(this)) {
       document._id = new ObjectId();
     }
 
