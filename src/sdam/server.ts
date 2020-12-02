@@ -14,7 +14,8 @@ import {
   maxWireVersion,
   ClientMetadataOptions,
   Callback,
-  CallbackWithType
+  CallbackWithType,
+  MongoDBNamespace
 } from '../utils';
 import {
   ServerType,
@@ -39,12 +40,11 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
-import type { FindOptions } from '../operations/find';
+import type { QueryOptions } from '../cmap/wire_protocol/query';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -302,7 +302,7 @@ export class Server extends EventEmitter {
   }
 
   /** Execute a query against the server */
-  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
+  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
@@ -527,7 +527,7 @@ function makeOperationHandler(
   server: Server,
   connection: Connection,
   cmd: Document,
-  options: CommandOptions | WriteCommandOptions | QueryOptions | GetMoreOptions | undefined,
+  options: CommandOptions | WriteCommandOptions | GetMoreOptions | undefined,
   callback: Callback
 ): CallbackWithType<MongoError, Document> {
   const session = options?.session;

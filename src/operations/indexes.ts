@@ -15,7 +15,6 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { FindOptions } from './find';
 import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { ClientSession } from '../sessions';
 import { executeOperation, ExecutionResult } from './execute_operation';
@@ -337,13 +336,13 @@ export class ListIndexesOperation extends CommandOperation<ListIndexesOptions, D
   execute(server: Server, callback: Callback<Document>): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
-      const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes').toString();
+      const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes');
       const collectionNS = this.collectionNamespace.toString();
 
       server.query(
         systemIndexesNS,
         { query: { ns: collectionNS } },
-        this.options as FindOptions,
+        { ...this.options, readPreference: this.readPreference },
         callback
       );
       return;

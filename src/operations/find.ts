@@ -1,16 +1,23 @@
 import { Aspect, defineAspects, Hint } from './operation';
-import { maxWireVersion, MongoDBNamespace, Callback, normalizeHintField } from '../utils';
+import {
+  maxWireVersion,
+  MongoDBNamespace,
+  Callback,
+  normalizeHintField,
+  decorateWithExplain
+} from '../utils';
 import { MongoError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Sort, formatSort } from '../sort';
+import { isSharded } from '../cmap/wire_protocol/shared';
+import { ReadConcern } from '../read_concern';
 
 /** @public */
-export interface FindOptions extends QueryOptions, CommandOperationOptions {
+export interface FindOptions extends CommandOperationOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -59,10 +66,7 @@ const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @internal */
 export class FindOperation extends CommandOperation<FindOptions, Document> {
-  cmd: Document;
   filter: Document;
-
-  hint?: Hint;
 
   constructor(
     collection: Collection | undefined,
@@ -89,169 +93,243 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
 
     // special case passing in an ObjectId as a filter
     this.filter = filter != null && filter._bsontype === 'ObjectID' ? { _id: filter } : filter;
-
-    // FIXME: this should be removed as part of NODE-2790
-    this.cmd = {
-      find: this.ns.toString(),
-      query: this.filter
-    };
   }
 
   execute(server: Server, callback: Callback<Document>): void {
-    // copied from `CommandOperationV2`, to be subclassed in the future
     this.server = server;
-    const serverWireVersion = maxWireVersion(server);
 
+    const serverWireVersion = maxWireVersion(server);
     const options = this.options;
     if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
       callback(new MongoError('The `allowDiskUse` option is not supported on MongoDB < 3.2'));
       return;
     }
 
-    const findCommand: Document = Object.assign({}, this.cmd);
+    if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+      callback(
+        new MongoError(
+          `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
+        )
+      );
 
-    if (options.sort) {
-      findCommand.sort = formatSort(options.sort);
+      return;
     }
 
-    if (options.projection) {
-      let projection = options.projection;
-      if (projection && !Buffer.isBuffer(projection) && Array.isArray(projection)) {
-        projection = projection.length
-          ? projection.reduce((result, field) => {
-              result[field] = 1;
-              return result;
-            }, {})
-          : { _id: 1 };
-      }
-
-      findCommand.fields = projection;
-    }
-
-    if (options.hint) {
-      findCommand.hint = normalizeHintField(options.hint);
-    }
-
-    if (typeof options.skip === 'number') {
-      findCommand.skip = options.skip;
-    }
-
-    if (typeof options.limit === 'number') {
-      if (options.limit < 0 && maxWireVersion(server) >= 4) {
-        findCommand.limit = Math.abs(options.limit);
-        findCommand.singleBatch = true;
-      } else {
-        findCommand.limit = options.limit;
-      }
-    }
-
-    if (typeof options.batchSize === 'number') {
-      if (options.batchSize < 0) {
-        if (
-          options.limit &&
-          options.limit !== 0 &&
-          Math.abs(options.batchSize) < Math.abs(options.limit)
-        ) {
-          findCommand.limit = Math.abs(options.batchSize);
-        }
-
-        findCommand.singleBatch = true;
-      } else {
-        findCommand.batchSize = Math.abs(options.batchSize);
-      }
-    }
-
-    if (typeof options.singleBatch === 'boolean') {
-      findCommand.singleBatch = options.singleBatch;
-    }
-
-    if (options.comment) {
-      findCommand.comment = options.comment;
-    }
-
-    if (typeof options.maxTimeMS === 'number') {
-      findCommand.maxTimeMS = options.maxTimeMS;
-    }
-
-    if (this.readConcern) {
-      findCommand.readConcern = this.readConcern.toJSON();
-    }
-
-    if (options.max) {
-      findCommand.max = options.max;
-    }
-
-    if (options.min) {
-      findCommand.min = options.min;
-    }
-
-    if (typeof options.returnKey === 'boolean') {
-      findCommand.returnKey = options.returnKey;
-    }
-
-    if (typeof options.showRecordId === 'boolean') {
-      findCommand.showRecordId = options.showRecordId;
-    }
-
-    if (typeof options.tailable === 'boolean') {
-      findCommand.tailable = options.tailable;
-    }
-
-    if (typeof options.timeout === 'boolean') {
-      findCommand.noCursorTimeout = options.timeout;
-    } else if (typeof options.noCursorTimeout === 'boolean') {
-      findCommand.noCursorTimeout = options.noCursorTimeout;
-    }
-
-    if (typeof options.awaitData === 'boolean') {
-      findCommand.awaitData = options.awaitData;
-    }
-
-    if (typeof options.allowPartialResults === 'boolean') {
-      findCommand.allowPartialResults = options.allowPartialResults;
-    }
-
-    if (options.collation) {
-      if (serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+    if (serverWireVersion < 4) {
+      if (this.readConcern && this.readConcern.level !== 'local') {
         callback(
           new MongoError(
-            `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
+            `server find command does not support a readConcern level of ${this.readConcern.level}`
           )
         );
 
         return;
       }
 
-      findCommand.collation = options.collation;
+      const findCommand = makeLegacyFindCommand(this.ns, this.filter, options);
+      if (isSharded(server) && this.readPreference) {
+        findCommand.$readPreference = this.readPreference.toJSON();
+      }
+
+      server.query(
+        this.ns,
+        findCommand,
+        {
+          ...this.options,
+          ...this.bsonOptions,
+          documentsReturnedIn: 'firstBatch',
+          readPreference: this.readPreference
+        },
+        callback
+      );
+
+      return;
     }
 
-    if (typeof options.allowDiskUse === 'boolean') {
-      findCommand.allowDiskUse = options.allowDiskUse;
-    }
-
+    let findCommand = makeFindCommand(this.ns, this.filter, options);
     if (this.explain) {
-      // TODO: For now, we need to manually ensure explain is in the options. This will change after cursor refactor.
-      this.options.explain = this.explain.verbosity;
+      findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    // TODO: use `MongoDBNamespace` through and through
-    server.query(
+    server.command(
       this.ns.toString(),
       findCommand,
-      { fullResult: !!this.fullResponse, ...this.options, ...this.bsonOptions },
-      (err, result) => {
-        if (err) return callback(err);
-        if (this.explain) {
-          // TODO: NODE-2900
-          if (result.documents && result.documents[0]) {
-            return callback(undefined, result.documents[0]);
-          }
-        }
-
-        callback(undefined, result);
-      }
+      {
+        fullResult: !!this.fullResponse,
+        ...this.options,
+        ...this.bsonOptions,
+        documentsReturnedIn: 'firstBatch'
+      },
+      callback
     );
   }
+}
+
+function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOptions): Document {
+  const findCommand: Document = {
+    find: ns.collection,
+    filter
+  };
+
+  if (options.sort) {
+    findCommand.sort = formatSort(options.sort);
+  }
+
+  if (options.projection) {
+    let projection = options.projection;
+    if (projection && Array.isArray(projection)) {
+      projection = projection.length
+        ? projection.reduce((result, field) => {
+            result[field] = 1;
+            return result;
+          }, {})
+        : { _id: 1 };
+    }
+
+    findCommand.projection = projection;
+  }
+
+  if (options.hint) {
+    findCommand.hint = normalizeHintField(options.hint);
+  }
+
+  if (typeof options.skip === 'number') {
+    findCommand.skip = options.skip;
+  }
+
+  if (typeof options.limit === 'number') {
+    if (options.limit < 0) {
+      findCommand.limit = -options.limit;
+      findCommand.singleBatch = true;
+    } else {
+      findCommand.limit = options.limit;
+    }
+  }
+
+  if (typeof options.batchSize === 'number') {
+    if (options.batchSize < 0) {
+      if (
+        options.limit &&
+        options.limit !== 0 &&
+        Math.abs(options.batchSize) < Math.abs(options.limit)
+      ) {
+        findCommand.limit = -options.batchSize;
+      }
+
+      findCommand.singleBatch = true;
+    } else {
+      findCommand.batchSize = options.batchSize;
+    }
+  }
+
+  if (typeof options.singleBatch === 'boolean') {
+    findCommand.singleBatch = options.singleBatch;
+  }
+
+  if (options.comment) {
+    findCommand.comment = options.comment;
+  }
+
+  if (typeof options.maxTimeMS === 'number') {
+    findCommand.maxTimeMS = options.maxTimeMS;
+  }
+
+  const readConcern = ReadConcern.fromOptions(options);
+  if (readConcern) {
+    findCommand.readConcern = readConcern.toJSON();
+  }
+
+  if (options.max) {
+    findCommand.max = options.max;
+  }
+
+  if (options.min) {
+    findCommand.min = options.min;
+  }
+
+  if (typeof options.returnKey === 'boolean') {
+    findCommand.returnKey = options.returnKey;
+  }
+
+  if (typeof options.showRecordId === 'boolean') {
+    findCommand.showRecordId = options.showRecordId;
+  }
+
+  if (typeof options.tailable === 'boolean') {
+    findCommand.tailable = options.tailable;
+  }
+
+  if (typeof options.timeout === 'boolean') {
+    findCommand.noCursorTimeout = options.timeout;
+  } else if (typeof options.noCursorTimeout === 'boolean') {
+    findCommand.noCursorTimeout = options.noCursorTimeout;
+  }
+
+  if (typeof options.awaitData === 'boolean') {
+    findCommand.awaitData = options.awaitData;
+  }
+
+  if (typeof options.allowPartialResults === 'boolean') {
+    findCommand.allowPartialResults = options.allowPartialResults;
+  }
+
+  if (options.collation) {
+    findCommand.collation = options.collation;
+  }
+
+  if (typeof options.allowDiskUse === 'boolean') {
+    findCommand.allowDiskUse = options.allowDiskUse;
+  }
+
+  return findCommand;
+}
+
+function makeLegacyFindCommand(
+  ns: MongoDBNamespace,
+  filter: Document,
+  options: FindOptions
+): Document {
+  const findCommand: Document = {
+    $query: filter
+  };
+
+  if (options.sort) {
+    findCommand.$orderby = formatSort(options.sort);
+  }
+
+  if (options.hint) {
+    findCommand.$hint = normalizeHintField(options.hint);
+  }
+
+  if (typeof options.returnKey === 'boolean') {
+    findCommand.$returnKey = options.returnKey;
+  }
+
+  if (options.max) {
+    findCommand.$max = options.max;
+  }
+
+  if (options.min) {
+    findCommand.$min = options.min;
+  }
+
+  if (typeof options.showRecordId === 'boolean') {
+    findCommand.$showDiskLoc = options.showRecordId;
+  }
+
+  if (options.comment) {
+    findCommand.$comment = options.comment;
+  }
+
+  if (typeof options.maxTimeMS === 'number') {
+    findCommand.$maxTimeMS = options.maxTimeMS;
+  }
+
+  if (typeof options.explain !== 'undefined') {
+    findCommand.$explain = true;
+  }
+
+  return findCommand;
 }
 
 defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);

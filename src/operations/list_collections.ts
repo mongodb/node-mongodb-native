@@ -1,6 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion, Callback, getTopology } from '../utils';
+import { maxWireVersion, Callback, getTopology, MongoDBNamespace } from '../utils';
 import * as CONSTANTS from '../constants';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -76,9 +76,9 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
       };
 
       server.query(
-        `${databaseName}.${CONSTANTS.SYSTEM_NAMESPACE_COLLECTION}`,
+        new MongoDBNamespace(databaseName, CONSTANTS.SYSTEM_NAMESPACE_COLLECTION),
         { query: filter },
-        { batchSize: this.batchSize || 1000 },
+        { batchSize: this.batchSize || 1000, readPreference: this.readPreference },
         (err, result) => {
           if (result && result.documents && Array.isArray(result.documents)) {
             result.documents = result.documents.map(documentTransform);
