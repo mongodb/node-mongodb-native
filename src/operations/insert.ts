@@ -69,13 +69,6 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
     const doc = this.doc;
     const options = { ...this.options, ...this.bsonOptions };
 
-    // Final options for retryable writes
-    // let finalOptions = Object.assign({}, options);
-    // finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
-    // If keep going set unordered
-    // if (finalOptions.keepGoing === true) finalOptions.ordered = false;
-
     // File inserts
     server.insert(
       coll.s.namespace.toString(),
