@@ -9354,9 +9354,7 @@ describe('Operation Examples', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+    metadata: { requires: { os: '!win32' } }, // leaks on windows
 
     // The actual test we wish to run
     test: function(done) {

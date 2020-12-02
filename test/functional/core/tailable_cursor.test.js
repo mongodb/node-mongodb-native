@@ -10,9 +10,7 @@ describe('Tailable cursor tests', function() {
   });
 
   it('should correctly perform awaitdata', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+    metadata: { requires: { os: '!win32' } }, // leaks on windows
 
     test: function(done) {
       var self = this;

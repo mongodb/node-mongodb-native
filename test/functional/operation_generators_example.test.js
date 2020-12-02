@@ -6464,7 +6464,13 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor with Generators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: {
+      requires: {
+        generators: true,
+        topology: ['single'],
+        os: '!win32' // leaks on windows
+      }
+    },
 
     // The actual test we wish to run
     test: function() {
@@ -6492,7 +6498,7 @@ describe('Operation (Generators)', function() {
         var collection = yield db.createCollection('a_simple_collection_2_with_generators', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           w: 1
         });
         var docs = [];
