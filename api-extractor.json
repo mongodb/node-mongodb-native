@@ -9,7 +9,7 @@
   },
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "<projectFolder>/<unscopedPackageName>-internal.d.ts",
+    "untrimmedFilePath": "",
     "publicTrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts"
   },
   "tsdocMetadata": {
