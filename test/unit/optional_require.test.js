@@ -41,7 +41,7 @@ describe('optionalRequire', function () {
         return this.skip();
       }
       const gssapi = new GSSAPI();
-      gssapi.prepare('', new AuthContext(null, true, { host: true, port: true }), error => {
+      gssapi.auth(new AuthContext(null, true, { host: true, port: true }), error => {
         expect(error).to.exist;
         expect(error.message).includes('not found');
       });
