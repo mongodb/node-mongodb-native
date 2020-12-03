@@ -1330,8 +1330,8 @@ describe('Find', function () {
         ) {
           var _lowerId = new ObjectId();
           var _higherId = new ObjectId();
-          var lowerId = new Long.fromString('133118461172916224', 10);
-          var higherId = new Long.fromString('133118461172916225', 10);
+          var lowerId = Long.fromString('133118461172916224', 10);
+          var higherId = Long.fromString('133118461172916225', 10);
 
           var lowerDoc = { _id: _lowerId, id: lowerId };
           var higherDoc = { _id: _higherId, id: higherId };

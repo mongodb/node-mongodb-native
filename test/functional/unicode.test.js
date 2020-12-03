@@ -79,43 +79,33 @@ describe('Unicode', function () {
     }
   });
 
-  it('shouldCorrectlyInsertUnicodeCharacters', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
+  it('should Correctly Insert Unicode Characters', function (done) {
+    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      const db = client.db(this.configuration.db);
+      db.createCollection('unicode_test_collection', (err, collection) => {
         expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        db.createCollection('unicode_test_collection', function (err, collection) {
-          var test_strings = ['ouooueauiOUOOUEAUI', 'öüóőúéáűíÖÜÓŐÚÉÁŰÍ', '本荘由利地域に洪水警報'];
-          collection.insert({ id: 0, text: test_strings[0] }, { writeConcern: { w: 1 } }, function (
-            err
-          ) {
+        const test_strings = ['ouooueauiOUOOUEAUI', 'öüóőúéáűíÖÜÓŐÚÉÁŰÍ', '本荘由利地域に洪水警報'];
+        collection.insert({ id: 0, text: test_strings[0] }, { writeConcern: { w: 1 } }, err => {
+          expect(err).to.not.exist;
+          collection.insert({ id: 1, text: test_strings[1] }, { writeConcern: { w: 1 } }, err => {
             expect(err).to.not.exist;
-            collection.insert(
-              { id: 1, text: test_strings[1] },
-              { writeConcern: { w: 1 } },
-              function (err) {
+            collection.find().forEach(
+              doc => {
+                expect(doc).property('text').to.equal(test_strings[doc.id]);
+              },
+              err => {
                 expect(err).to.not.exist;
-                collection.find().forEach(
-                  doc => {
-                    expect(doc).property('text').to.equal(test_strings[doc.id]);
-                  },
-                  err => {
-                    expect(err).to.not.exist;
-                    client.close(done);
-                  }
-                );
-              });
-            });
+                client.close(done);
+              }
+            );
           });
         });
       });
-    }
+    });
   });
 
   it('shouldCreateObjectWithChineseObjectName', {

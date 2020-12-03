@@ -700,11 +700,11 @@ describe('Insert', function () {
             collection.find().toArray(function (err, items) {
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
-              expect(items[1].ref.db).to.be.null;
+              expect(items[1].ref.db).to.not.exist;
 
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
-              expect(items[2].ref.db).to.be.null;
+              expect(items[2].ref.db).to.not.exist;
 
               client.close(done);
             });
