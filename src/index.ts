@@ -140,7 +140,6 @@ export type { CompressorName, Compressor } from './cmap/wire_protocol/compressio
 export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
 export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
-export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {

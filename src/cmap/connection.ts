@@ -280,17 +280,17 @@ export class Connection extends EventEmitter {
   }
 
   /** @internal */
-  insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void {
+  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
   /** @internal */
-  update(ns: string, ops: Document[], options: UpdateOptions, callback: Callback): void {
+  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     wp.update(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
   /** @internal */
-  remove(ns: string, ops: Document[], options: RemoveOptions, callback: Callback): void {
+  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
     wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }
