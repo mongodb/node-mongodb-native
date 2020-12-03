@@ -39,24 +39,28 @@ const OPERATING_SYSTEMS = [
     run_on: 'ubuntu1804-test',
     mongoVersion: '>=3.2',
     clientEncryption: true
+  },
+  {
+    name: 'windows-64-vs2013',
+    display_name: 'Windows (VS2013)',
+    run_on: 'windows-64-vs2013-large',
+    msvsVersion: 2013,
+    mongoVersion: '<4.4'
+  },
+  {
+    name: 'windows-64-vs2015',
+    display_name: 'Windows (VS2015)',
+    run_on: 'windows-64-vs2015-large',
+    msvsVersion: 2015,
+    mongoVersion: '<4.4'
+  },
+  {
+    name: 'windows-64-vs2017',
+    display_name: 'Windows (VS2017)',
+    run_on: 'windows-64-vs2017-large',
+    msvsVersion: 2017,
+    mongoVersion: '<4.4'
   }
-
-  // Windows. reenable this when nvm supports windows, or we settle on an alternative tool
-  // {
-  //   name: 'windows-64-vs2010-test',
-  //   display_name: 'Windows (VS2010)',
-  //   run_on: 'windows-64-vs2010-test'
-  // },
-  // {
-  //   name: 'windows-64-vs2013-test',
-  //   display_name: 'Windows (VS2013)',
-  //   run_on: 'windows-64-vs2013-test'
-  // },
-  // {
-  //   name: 'windows-64-vs2015-test',
-  //   display_name: 'Windows (VS2015)',
-  //   run_on: 'windows-64-vs2015-test'
-  // }
 ].map(osConfig =>
   Object.assign(
     {
@@ -68,6 +72,7 @@ const OPERATING_SYSTEMS = [
   )
 );
 
+const BASE_TASKS = [];
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
@@ -98,7 +103,7 @@ function makeTask({ mongoVersion, topology }) {
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology =>
-    TASKS.push(makeTask({ mongoVersion, topology }))
+    BASE_TASKS.push(makeTask({ mongoVersion, topology }))
   );
 });
 
@@ -312,14 +317,14 @@ const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
   const memo = {};
-  return function(mongoVersion) {
-    const key = mongoVersion;
+  return function(mongoVersion, onlyBaseTasks = false) {
+    const key = mongoVersion + (onlyBaseTasks ? 'b' : '');
 
     if (memo[key]) {
       return memo[key];
     }
-
-    const ret = TASKS.filter(task => {
+    const taskList = onlyBaseTasks ? BASE_TASKS : BASE_TASKS.concat(TASKS);
+    const ret = taskList.filter(task => {
       const tasksWithVars = task.commands.filter(task => !!task.vars);
       if (task.name.match(/^aws/)) return false;
 
@@ -352,10 +357,11 @@ OPERATING_SYSTEMS.forEach(
     run_on,
     mongoVersion = '>=2.6',
     nodeVersions = NODE_VERSIONS,
-    clientEncryption
+    clientEncryption,
+    msvsVersion
   }) => {
     const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
-    const tasks = getTaskList(mongoVersion);
+    const tasks = getTaskList(mongoVersion, !!msvsVersion);
 
     testedNodeVersions.forEach(NODE_LTS_NAME => {
       const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.substr(1)}`;
@@ -365,6 +371,9 @@ OPERATING_SYSTEMS.forEach(
 
       if (clientEncryption) {
         expansions.CLIENT_ENCRYPTION = true;
+      }
+      if (msvsVersion) {
+        expansions.MSVS_VERSION = msvsVersion;
       }
 
       BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });
@@ -407,7 +416,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

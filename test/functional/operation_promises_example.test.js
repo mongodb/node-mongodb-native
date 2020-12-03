@@ -7036,7 +7036,12 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor With Promises', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: {
+      requires: {
+        topology: ['single'],
+        os: '!win32' // NODE-2943: timeout on windows
+      }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -7062,7 +7067,7 @@ describe('Operation (Promises)', function() {
         db.createCollection('a_simple_collection_2_with_promise', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           w: 1
         })
           .then(function(_collection) {

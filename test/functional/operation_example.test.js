@@ -9355,7 +9355,9 @@ describe('Operation Examples', function() {
    */
   it('Should correctly add capped collection options to cursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
     },
 
     // The actual test we wish to run
@@ -9379,7 +9381,7 @@ describe('Operation Examples', function() {
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection_2',
-          { capped: true, size: 100000, max: 10000, w: 1 },
+          { capped: true, size: 100000, max: 1000, w: 1 },
           function(err, collection) {
             test.equal(null, err);
 

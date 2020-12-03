@@ -2,6 +2,8 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
@@ -2216,7 +2218,9 @@ describe('Cursor', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
     },
 
     // The actual test we wish to run
@@ -2239,8 +2243,8 @@ describe('Cursor', function() {
           collection.insert(docs, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            var filename = '/tmp/_nodemongodbnative_stream_out.txt',
-              out = fs.createWriteStream(filename);
+            const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
+            const out = fs.createWriteStream(filename);
 
             // hack so we don't need to create a stream filter just to
             // stringify the objects (otherwise the created file would
@@ -2282,12 +2286,13 @@ describe('Cursor', function() {
   /**
    * @ignore
    */
-  it('shouldCloseDeadTailableCursors', {
+  it('should close dead tailable cursors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
-      sessions: { skipLeakTests: true }
+      sessions: { skipLeakTests: true },
+      os: '!win32' // NODE-2943: timeout on windows
     },
 
     // The actual test we wish to run

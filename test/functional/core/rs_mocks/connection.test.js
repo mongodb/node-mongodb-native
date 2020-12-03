@@ -265,7 +265,8 @@ describe('ReplSet Connection Tests (mocks)', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'single'
+        topology: 'single',
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 
@@ -372,7 +373,8 @@ describe('ReplSet Connection Tests (mocks)', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'single'
+        topology: 'single',
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 
