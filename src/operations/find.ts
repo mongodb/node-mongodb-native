@@ -15,6 +15,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Sort, formatSort } from '../sort';
 import { isSharded } from '../cmap/wire_protocol/shared';
 import { ReadConcern } from '../read_concern';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface FindOptions extends CommandOperationOptions {
@@ -65,7 +66,8 @@ export interface FindOptions extends CommandOperationOptions {
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @internal */
-export class FindOperation extends CommandOperation<FindOptions, Document> {
+export class FindOperation extends CommandOperation<Document> {
+  options: FindOptions;
   filter: Document;
 
   constructor(
@@ -75,6 +77,8 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     options: FindOptions = {}
   ) {
     super(collection, options);
+
+    this.options = options;
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
@@ -95,7 +99,7 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectID' ? { _id: filter } : filter;
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     this.server = server;
 
     const serverWireVersion = maxWireVersion(server);
@@ -158,7 +162,8 @@ export class FindOperation extends CommandOperation<FindOptions, Document> {
         fullResult: !!this.fullResponse,
         ...this.options,
         ...this.bsonOptions,
-        documentsReturnedIn: 'firstBatch'
+        documentsReturnedIn: 'firstBatch',
+        session
       },
       callback
     );

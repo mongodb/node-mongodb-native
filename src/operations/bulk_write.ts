@@ -1,5 +1,5 @@
-import { applyRetryableWrites, Callback } from '../utils';
-import { Aspect, defineAspects, OperationBase } from './operation';
+import { Aspect, defineAspects, AbstractOperation } from './operation';
+import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type {
   BulkOperationBase,
@@ -8,9 +8,11 @@ import type {
   AnyBulkWriteOperation
 } from '../bulk/common';
 import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
 
 /** @internal */
-export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWriteResult> {
+export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
+  options: BulkWriteOptions;
   collection: Collection;
   operations: AnyBulkWriteOperation[];
 
@@ -20,15 +22,15 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
     options: BulkWriteOptions
   ) {
     super(options);
-
+    this.options = options;
     this.collection = collection;
     this.operations = operations;
   }
 
-  execute(server: Server, callback: Callback<BulkWriteResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<BulkWriteResult>): void {
     const coll = this.collection;
     const operations = this.operations;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
@@ -45,11 +47,8 @@ export class BulkWriteOperation extends OperationBase<BulkWriteOptions, BulkWrit
       return callback(err);
     }
 
-    let finalOptions = Object.assign({}, options);
-    finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
     // Execute the bulk
-    bulk.execute(finalOptions, (err, r) => {
+    bulk.execute({ ...options, session }, (err, r) => {
       // We have connection level error
       if (!r && err) {
         return callback(err);

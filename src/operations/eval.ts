@@ -5,7 +5,8 @@ import { MongoError } from '../error';
 import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
-import type { Collection } from '..';
+import type { Collection } from '../collection';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {
@@ -13,7 +14,8 @@ export interface EvalOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EvalOperation extends CommandOperation<EvalOptions, Document> {
+export class EvalOperation extends CommandOperation<Document> {
+  options: EvalOptions;
   code: Code;
   parameters?: Document | Document[];
 
@@ -25,6 +27,7 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
   ) {
     super(db, options);
 
+    this.options = options ?? {};
     this.code = code;
     this.parameters = parameters;
     // force primary read preference
@@ -35,7 +38,7 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
     });
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     let finalCode = this.code;
     let finalParameters: Document[] = [];
 
@@ -58,7 +61,7 @@ export class EvalOperation extends CommandOperation<EvalOptions, Document> {
     }
 
     // Execute the command
-    super.executeCommand(server, cmd, (err, result) => {
+    super.executeCommand(server, session, cmd, (err, result) => {
       if (err) return callback(err);
       if (result && result.ok === 1) {
         return callback(undefined, result.retval);

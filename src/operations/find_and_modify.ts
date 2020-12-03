@@ -13,6 +13,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { Sort, formatSort } from '../sort';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface FindAndModifyOptions extends CommandOperationOptions {
@@ -40,7 +41,8 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class FindAndModifyOperation extends CommandOperation<FindAndModifyOptions, Document> {
+export class FindAndModifyOperation extends CommandOperation<Document> {
+  options: FindAndModifyOptions;
   collection: Collection;
   query: Document;
   sort?: Sort;
@@ -54,6 +56,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     options?: FindAndModifyOptions
   ) {
     super(collection, options);
+    this.options = options ?? {};
 
     // force primary read preference
     this.readPreference = ReadPreference.primary;
@@ -64,7 +67,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
     const sort = formatSort(this.sort);
@@ -147,7 +150,7 @@ export class FindAndModifyOperation extends CommandOperation<FindAndModifyOption
     }
 
     // Execute the command
-    super.executeCommand(server, cmd, (err, result) => {
+    super.executeCommand(server, session, cmd, (err, result) => {
       if (err) return callback(err);
       return callback(undefined, result);
     });

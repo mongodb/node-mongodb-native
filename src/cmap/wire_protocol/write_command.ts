@@ -41,7 +41,7 @@ export function writeCommand(
     options = {};
   }
 
-  options = options || {};
+  options = options ?? {};
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
   let writeCommand: Document = {};

@@ -5,6 +5,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { MongoError } from '../error';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;
@@ -13,7 +14,8 @@ export type DistinctOptions = CommandOperationOptions;
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandOperation<DistinctOptions, Document[]> {
+export class DistinctOperation extends CommandOperation<Document[]> {
+  options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
   key: string;
@@ -31,12 +33,13 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
   constructor(collection: Collection, key: string, query: Document, options?: DistinctOptions) {
     super(collection, options);
 
+    this.options = options ?? {};
     this.collection = collection;
     this.key = key;
     this.query = query;
   }
 
-  execute(server: Server, callback: Callback<Document[]>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document[]>): void {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -69,7 +72,7 @@ export class DistinctOperation extends CommandOperation<DistinctOptions, Documen
       return;
     }
 
-    super.executeCommand(server, cmd, (err, result) => {
+    super.executeCommand(server, session, cmd, (err, result) => {
       if (err) {
         callback(err);
         return;

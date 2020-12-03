@@ -397,7 +397,7 @@ function write(
     callback = options;
   }
 
-  options = options || {};
+  options = options ?? {};
   const operationDescription: OperationDescription = {
     requestId: command.requestId,
     cb: callback,

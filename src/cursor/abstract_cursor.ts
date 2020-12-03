@@ -329,7 +329,7 @@ export abstract class AbstractCursor extends EventEmitter {
   close(options: CursorCloseOptions, callback: Callback): void;
   close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;

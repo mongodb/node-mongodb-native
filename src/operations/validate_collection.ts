@@ -3,6 +3,7 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -11,10 +12,8 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends CommandOperation<
-  ValidateCollectionOptions,
-  Document
-> {
+export class ValidateCollectionOperation extends CommandOperation<Document> {
+  options: ValidateCollectionOptions;
   collectionName: string;
   command: Document;
 
@@ -29,14 +28,15 @@ export class ValidateCollectionOperation extends CommandOperation<
     }
 
     super(admin.s.db, options);
+    this.options = options;
     this.command = command;
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const collectionName = this.collectionName;
 
-    super.executeCommand(server, this.command, (err, doc) => {
+    super.executeCommand(server, session, this.command, (err, doc) => {
       if (err != null) return callback(err);
 
       if (doc.ok === 0) return callback(new Error('Error with validate command'));

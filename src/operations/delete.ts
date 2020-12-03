@@ -1,4 +1,4 @@
-import { defineAspects, Aspect, OperationBase, Hint } from './operation';
+import { defineAspects, Aspect, AbstractOperation, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { isObject } from 'util';
 import {
@@ -12,6 +12,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
+import type { ClientSession } from '../sessions';
 import { MongoError } from '../error';
 
 /** @public */
@@ -29,11 +30,13 @@ export interface DeleteResult {
 }
 
 /** @internal */
-export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
+export class DeleteOperation extends AbstractOperation<Document> {
+  options: DeleteOptions;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
     super(options);
+    this.options = options;
     this.ns = ns;
     this.operations = ops;
   }
@@ -42,31 +45,33 @@ export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
     return this.operations.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
   }
 
-  execute(server: Server, callback: Callback): void {
+  execute(server: Server, session: ClientSession, callback: Callback): void {
     server.remove(
       this.ns.toString(),
       this.operations,
-      this.options as WriteCommandOptions,
+      { ...this.options, readPreference: this.readPreference, session } as WriteCommandOptions,
       callback
     );
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+export class DeleteOneOperation extends CommandOperation<DeleteResult> {
+  options: DeleteOptions;
   collection: Collection;
   filter: Document;
 
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection, options);
 
+    this.options = options;
     this.collection = collection;
     this.filter = filter;
   }
 
-  execute(server: Server, callback: Callback<DeleteResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, session };
 
     options.single = true;
     removeDocuments(server, coll, filter, options, (err, res) => {
@@ -80,7 +85,8 @@ export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteRe
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
+export class DeleteManyOperation extends CommandOperation<DeleteResult> {
+  options: DeleteOptions;
   collection: Collection;
   filter: Document;
 
@@ -91,14 +97,15 @@ export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteR
       throw new TypeError('filter is a required parameter');
     }
 
+    this.options = options;
     this.collection = collection;
     this.filter = filter;
   }
 
-  execute(server: Server, callback: Callback<DeleteResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
     const coll = this.collection;
     const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, session };
 
     // a user can pass `single: true` in to `deleteMany` to remove a single document, theoretically
     if (typeof options.single !== 'boolean') {

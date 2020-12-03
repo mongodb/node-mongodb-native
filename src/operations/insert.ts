@@ -1,5 +1,5 @@
 import { MongoError } from '../error';
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { defineAspects, Aspect, AbstractOperation } from './operation';
 import { CommandOperation } from './command';
 import { prepareDocs } from './common_functions';
 import type { Callback, MongoDBNamespace } from '../utils';
@@ -9,22 +9,26 @@ import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import type { WriteConcernOptions } from '../write_concern';
+import type { ClientSession } from '../sessions';
+import { ReadPreference } from '../read_preference';
 
 /** @internal */
-export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
+export class InsertOperation extends AbstractOperation<Document> {
+  options: BulkWriteOptions;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: BulkWriteOptions) {
     super(options);
+    this.options = options;
     this.ns = ns;
     this.operations = ops;
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     server.insert(
       this.ns.toString(),
       this.operations,
-      this.options as WriteCommandOptions,
+      { ...this.options, readPreference: this.readPreference, session } as WriteCommandOptions,
       callback
     );
   }
@@ -40,34 +44,34 @@ export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOpti
 
 /** @public */
 export interface InsertOneResult {
-  /**
-   * Indicates whether this write result was acknowledged. If not, then all
-   * other members of this result will be undefined.
-   */
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
   acknowledged: boolean;
-
-  /**
-   * The identifier that was inserted. If the server generated the identifier, this value
-   * will be null as the driver does not have access to that data.
-   */
+  /** The identifier that was inserted. If the server generated the identifier, this value will be null as the driver does not have access to that data */
   insertedId: ObjectId;
 }
 
-export class InsertOneOperation extends CommandOperation<InsertOneOptions, InsertOneResult> {
+export class InsertOneOperation extends CommandOperation<InsertOneResult> {
+  options: InsertOneOptions;
   collection: Collection;
   doc: Document;
 
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
     super(collection, options);
 
+    this.options = options;
     this.collection = collection;
     this.doc = doc;
   }
 
-  execute(server: Server, callback: Callback<InsertOneResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<InsertOneResult>): void {
     const coll = this.collection;
     const doc = this.doc;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = {
+      ...this.options,
+      ...this.bsonOptions,
+      readPreference: ReadPreference.primary,
+      session
+    };
 
     // File inserts
     server.insert(

@@ -3,21 +3,24 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export type DropCollectionOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropCollectionOperation extends CommandOperation<DropCollectionOptions, boolean> {
+export class DropCollectionOperation extends CommandOperation<boolean> {
+  options: DropCollectionOptions;
   name: string;
 
   constructor(db: Db, name: string, options: DropCollectionOptions) {
     super(db, options);
+    this.options = options;
     this.name = name;
   }
 
-  execute(server: Server, callback: Callback<boolean>): void {
-    super.executeCommand(server, { drop: this.name }, (err, result) => {
+  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+    super.executeCommand(server, session, { drop: this.name }, (err, result) => {
       if (err) return callback(err);
       if (result.ok) return callback(undefined, true);
       callback(undefined, false);
@@ -29,9 +32,15 @@ export class DropCollectionOperation extends CommandOperation<DropCollectionOpti
 export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropDatabaseOperation extends CommandOperation<DropDatabaseOptions, boolean> {
-  execute(server: Server, callback: Callback<boolean>): void {
-    super.executeCommand(server, { dropDatabase: 1 }, (err, result) => {
+export class DropDatabaseOperation extends CommandOperation<boolean> {
+  options: DropDatabaseOptions;
+
+  constructor(db: Db, options: DropDatabaseOptions) {
+    super(db, options);
+    this.options = options;
+  }
+  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+    super.executeCommand(server, session, { dropDatabase: 1 }, (err, result) => {
       if (err) return callback(err);
       if (result.ok) return callback(undefined, true);
       callback(undefined, false);

@@ -28,7 +28,7 @@ export function query(
   options: QueryOptions,
   callback: Callback
 ): void {
-  options = options || {};
+  options = options ?? {};
 
   const isExplain = typeof findCommand.$explain !== 'undefined';
   const readPreference = options.readPreference ?? ReadPreference.primary;

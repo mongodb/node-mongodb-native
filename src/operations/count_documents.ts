@@ -3,6 +3,7 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface CountDocumentsOptions extends AggregateOptions {
@@ -31,8 +32,8 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection, pipeline, options);
   }
 
-  execute(server: Server, callback: Callback<number>): void {
-    super.execute(server, (err, result) => {
+  execute(server: Server, session: ClientSession, callback: Callback<number>): void {
+    super.execute(server, session, (err, result) => {
       if (err || !result) {
         callback(err);
         return;

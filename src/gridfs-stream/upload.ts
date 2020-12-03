@@ -83,7 +83,7 @@ export class GridFSBucketWriteStream extends Writable {
   constructor(bucket: GridFSBucket, filename: string, options?: GridFSBucketWriteStreamOptions) {
     super();
 
-    options = options || {};
+    options = options ?? {};
     this.bucket = bucket;
     this.chunks = bucket.s._chunksCollection;
     this.filename = filename;

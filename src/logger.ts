@@ -42,7 +42,7 @@ export class Logger {
    * @param options - Optional logging settings
    */
   constructor(className: string, options?: LoggerOptions) {
-    options = options || {};
+    options = options ?? {};
 
     // Current reference
     this.className = className;

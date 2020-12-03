@@ -103,7 +103,7 @@ class ClientSession extends EventEmitter {
       throw new Error('ClientSession requires a ServerSessionPool');
     }
 
-    options = options || {};
+    options = options ?? {};
     clientOptions = clientOptions || {};
 
     this.topology = topology;
@@ -155,7 +155,7 @@ class ClientSession extends EventEmitter {
     callback?: Callback<void>
   ): void | Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
@@ -795,16 +795,6 @@ function applySession(
     }
 
     return;
-  }
-
-  if (options) {
-    ReadPreference.translate(options);
-    const readPreference = options.readPreference as ReadPreference;
-    if (readPreference && !readPreference.equals(ReadPreference.primary)) {
-      return new MongoError(
-        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
-      );
-    }
   }
 
   // `autocommit` must always be false to differentiate from retryable writes

@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError, AnyError } from '../error';
-import { Aspect, OperationBase, OperationOptions } from './operation';
+import { MongoError, isRetryableError } from '../error';
+import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
@@ -12,13 +12,7 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> = TOperation extends OperationBase<
-  OperationOptions,
-  infer K
->
-  ? K
-  : never;
-type OptionsFromOperation<TOperation> = TOperation extends OperationBase<infer K, unknown>
+type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<infer K>
   ? K
   : never;
 
@@ -48,26 +42,22 @@ export interface ExecutionResult {
  * @param callback - The command result callback
  */
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T): Promise<TResult>;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
 export function executeOperation<
-  T extends OperationBase<TOptions, TResult>,
-  TOptions = OptionsFromOperation<T>,
+  T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
-  if (!(operation instanceof OperationBase)) {
+  if (!(operation instanceof AbstractOperation)) {
     throw new TypeError('This method requires a valid operation instance');
   }
 
@@ -79,45 +69,36 @@ export function executeOperation<
           return;
         }
 
-        executeOperation<T, TOptions, TResult>(topology, operation, cb);
+        executeOperation<T, TResult>(topology, operation, cb);
       });
     });
   }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
-  let session: ClientSession;
+  let session = operation.session;
   let owner: symbol;
   if (topology.hasSessionSupport()) {
-    if (operation.session == null) {
+    if (session == null) {
       owner = Symbol();
       session = topology.startSession({ owner, explicit: false });
-      operation.session = session;
     } else if (operation.session.hasEnded) {
       throw new MongoError('Use of expired sessions is not permitted');
     }
   }
 
   return maybePromise(callback, cb => {
-    function executeCallback(err?: AnyError, result?: TResult) {
-      if (session && session.owner === owner) {
-        session.endSession();
-        if (operation.session === session) {
-          operation.clearSession();
-        }
-      }
-
-      cb(err, result);
-    }
-
     try {
-      executeWithServerSelection(topology, operation, executeCallback);
-    } catch (e) {
-      if (session && session.owner === owner) {
-        session.endSession();
-        if (operation.session === session) {
-          operation.clearSession();
+      executeWithServerSelection(topology, session, operation, (err, result) => {
+        if (session && session.owner && session.owner === owner) {
+          return session.endSession(err2 => cb(err2 || err, result));
         }
+
+        cb(err, result);
+      });
+    } catch (e) {
+      if (session && session.owner && session.owner === owner) {
+        session.endSession();
       }
 
       throw e;
@@ -129,8 +110,12 @@ function supportsRetryableReads(server: Server) {
   return maxWireVersion(server) >= 6;
 }
 
-function executeWithServerSelection(topology: Topology, operation: any, callback: Callback) {
-  const session = operation.session;
+function executeWithServerSelection(
+  topology: Topology,
+  session: ClientSession,
+  operation: any,
+  callback: Callback
+) {
   const readPreference = operation.readPreference || ReadPreference.primary;
   const inTransaction = session && session.inTransaction();
 
@@ -186,8 +171,23 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
         return;
       }
 
-      operation.execute(server, callback);
+      operation.execute(server, session, callback);
     });
+  }
+
+  if (
+    readPreference &&
+    !readPreference.equals(ReadPreference.primary) &&
+    session &&
+    session.inTransaction()
+  ) {
+    callback(
+      new MongoError(
+        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
+      )
+    );
+
+    return;
   }
 
   // select a server, and execute the operation against it
@@ -197,17 +197,15 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
       return;
     }
 
-    if (operation.hasAspect(Aspect.RETRYABLE)) {
+    if (session && operation.hasAspect(Aspect.RETRYABLE)) {
       const willRetryRead =
         topology.s.options.retryReads !== false &&
-        operation.session &&
         !inTransaction &&
         supportsRetryableReads(server) &&
         operation.canRetryRead;
 
       const willRetryWrite =
         topology.s.options.retryWrites === true &&
-        operation.session &&
         !inTransaction &&
         supportsRetryableWrites(server) &&
         operation.canRetryWrite;
@@ -218,15 +216,15 @@ function executeWithServerSelection(topology: Topology, operation: any, callback
       if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
         if (hasWriteAspect && willRetryWrite) {
           operation.options.willRetryWrite = true;
-          operation.session.incrementTransactionNumber();
+          session.incrementTransactionNumber();
         }
 
-        operation.execute(server, callbackWithRetry);
+        operation.execute(server, session, callbackWithRetry);
         return;
       }
     }
 
-    operation.execute(server, callback);
+    operation.execute(server, session, callback);
   });
 }
 

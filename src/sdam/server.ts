@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { ReadPreference } from '../read_preference';
 import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { ServerDescription, compareTopologyVersion } from './server_description';
@@ -256,18 +255,13 @@ export class Server extends EventEmitter {
     callback?: Callback<Document>
   ): void {
     if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
+      (callback = options), (options = {}), (options = options ?? {});
     }
 
     if (!callback) return;
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
-    }
-
-    const error = basicReadValidations(this, options);
-    if (error) {
-      return callback(error);
     }
 
     // Clone the options
@@ -440,18 +434,12 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
   return alpha * duration + (1 - alpha) * oldRtt;
 }
 
-function basicReadValidations(server: Server, options?: CommandOptions) {
-  if (options?.readPreference && !(options.readPreference instanceof ReadPreference)) {
-    return new MongoError('readPreference must be an instance of ReadPreference');
-  }
-}
-
 function executeWriteOperation(
   args: { server: Server; op: string; ns: string; ops: Document[] | Document },
   options: WriteCommandOptions,
   callback: Callback
 ) {
-  options = options || {};
+  options = options ?? {};
 
   const { server, op, ns } = args;
   const ops = Array.isArray(args.ops) ? args.ops : [args.ops];

@@ -120,7 +120,7 @@ export class FindCursor extends AbstractCursor {
     }
 
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       this.topology,

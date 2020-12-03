@@ -4,6 +4,7 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
@@ -13,10 +14,8 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EstimatedDocumentCountOperation extends CommandOperation<
-  EstimatedDocumentCountOptions,
-  number
-> {
+export class EstimatedDocumentCountOperation extends CommandOperation<number> {
+  options: EstimatedDocumentCountOptions;
   collectionName: string;
   query?: Document;
 
@@ -33,13 +32,14 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
     }
 
     super(collection, options);
+    this.options = options;
     this.collectionName = collection.collectionName;
     if (query) {
       this.query = query;
     }
   }
 
-  execute(server: Server, callback: Callback<number>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<number>): void {
     const options = this.options;
     const cmd: Document = { count: this.collectionName };
 
@@ -59,7 +59,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<
       cmd.hint = options.hint;
     }
 
-    super.executeCommand(server, cmd, (err, response) => {
+    super.executeCommand(server, session, cmd, (err, response) => {
       if (err) {
         callback(err);
         return;

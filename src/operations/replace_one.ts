@@ -7,6 +7,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { UpdateResult } from './update';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface ReplaceOptions extends CommandOperationOptions {
@@ -24,7 +25,8 @@ export interface ReplaceOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, UpdateResult> {
+export class ReplaceOneOperation extends CommandOperation<UpdateResult> {
+  options: ReplaceOptions;
   collection: Collection;
   filter: Document;
   replacement: Document;
@@ -41,16 +43,17 @@ export class ReplaceOneOperation extends CommandOperation<ReplaceOptions, Update
       throw new TypeError('Replacement document must not contain atomic operators');
     }
 
+    this.options = options;
     this.collection = collection;
     this.filter = filter;
     this.replacement = replacement;
   }
 
-  execute(server: Server, callback: Callback<UpdateResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const replacement = this.replacement;
-    const options = { ...this.options, ...this.bsonOptions, multi: false };
+    const options = { ...this.options, ...this.bsonOptions, session, multi: false };
 
     updateDocuments(server, coll, filter, replacement, options, (err, r) => {
       if (err || !r) return callback(err);

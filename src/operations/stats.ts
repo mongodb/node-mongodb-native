@@ -4,6 +4,8 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import type { Db } from '../db';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface CollStatsOptions extends CommandOperationOptions {
@@ -15,7 +17,8 @@ export interface CollStatsOptions extends CommandOperationOptions {
  * Get all the collection statistics.
  * @internal
  */
-export class CollStatsOperation extends CommandOperation<CollStatsOptions, Document> {
+export class CollStatsOperation extends CommandOperation<Document> {
+  options: CollStatsOptions;
   collectionName: string;
 
   /**
@@ -26,16 +29,17 @@ export class CollStatsOperation extends CommandOperation<CollStatsOptions, Docum
    */
   constructor(collection: Collection, options?: CollStatsOptions) {
     super(collection, options);
+    this.options = options ?? {};
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
 
-    super.executeCommand(server, command, callback);
+    super.executeCommand(server, session, command, callback);
   }
 }
 
@@ -46,14 +50,21 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DbStatsOperation extends CommandOperation<DbStatsOptions, Document> {
-  execute(server: Server, callback: Callback<Document>): void {
+export class DbStatsOperation extends CommandOperation<Document> {
+  options: DbStatsOptions;
+
+  constructor(db: Db, options: DbStatsOptions) {
+    super(db, options);
+    this.options = options;
+  }
+
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
 
-    super.executeCommand(server, command, callback);
+    super.executeCommand(server, session, command, callback);
   }
 }
 

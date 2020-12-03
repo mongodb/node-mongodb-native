@@ -8,7 +8,7 @@ import type { Topology } from './sdam/topology';
 import type { EventEmitter } from 'events';
 import type { Db } from './db';
 import type { Collection } from './collection';
-import type { OperationOptions, OperationBase, Hint } from './operations/operation';
+import type { OperationOptions, Hint } from './operations/operation';
 import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
@@ -230,7 +230,7 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
  * @param args - Arguments to apply the provided operation
  * @param options - Options that modify the behavior of the method
  */
-export function executeLegacyOperation<T extends OperationBase>(
+export function executeLegacyOperation<T>(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
@@ -242,7 +242,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     throw new TypeError('This method requires an array of arguments to apply');
   }
 
-  options = options || {};
+  options = options ?? {};
 
   let callback = args[args.length - 1];
 
@@ -350,7 +350,7 @@ export function applyWriteConcern<T extends HasWriteConcern>(
   sources: { db?: Db; collection?: Collection },
   options?: OperationOptions & WriteConcernOptions
 ): T {
-  options = options || {};
+  options = options ?? {};
   const db = sources.db;
   const coll = sources.collection;
 
@@ -887,7 +887,7 @@ export interface ClientMetadataOptions {
 const NODE_DRIVER_VERSION = require('../package.json').version;
 
 export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
-  options = options || {};
+  options = options ?? {};
 
   const metadata: ClientMetadata = {
     driver: {
@@ -1000,7 +1000,7 @@ export function makeInterruptableAsyncInterval(
   let lastWakeTime: number;
   let stopped = false;
 
-  options = options || {};
+  options = options ?? {};
   const interval = options.interval || 1000;
   const minInterval = options.minInterval || 500;
   const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
