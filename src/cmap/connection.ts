@@ -83,14 +83,23 @@ export class Connection extends EventEmitter {
   closed: boolean;
   destroyed: boolean;
   lastIsMasterMS?: number;
+  /** @internal */
   [kDescription]: StreamDescription;
+  /** @internal */
   [kGeneration]: number;
+  /** @internal */
   [kLastUseTime]: number;
+  /** @internal */
   [kAutoEncrypter]?: unknown;
+  /** @internal */
   [kQueue]: Map<number, OperationDescription>;
+  /** @internal */
   [kMessageStream]: MessageStream;
+  /** @internal */
   [kStream]: Stream;
+  /** @internal */
   [kIsMaster]: Document;
+  /** @internal */
   [kClusterTime]: Document;
 
   /** @event */
@@ -242,7 +251,9 @@ export class Connection extends EventEmitter {
   }
 
   // Wire protocol methods
+  /** @internal */
   command(ns: string, cmd: Document, callback: Callback): void;
+  /** @internal */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   command(
     ns: string,
@@ -253,34 +264,44 @@ export class Connection extends EventEmitter {
     wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
   }
 
+  /** @internal */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     wp.query(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
+  /** @internal */
   getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
     wp.getMore(makeServerTrampoline(this), ns, cursorId, options, callback);
   }
 
+  /** @internal */
   killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback: Callback): void {
     wp.killCursors(makeServerTrampoline(this), ns, cursorIds, options, callback);
   }
 
+  /** @internal */
   insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void {
     wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
+  /** @internal */
   update(ns: string, ops: Document[], options: UpdateOptions, callback: Callback): void {
     wp.update(makeServerTrampoline(this), ns, ops, options, callback);
   }
 
+  /** @internal */
   remove(ns: string, ops: Document[], options: RemoveOptions, callback: Callback): void {
     wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }
 
-/// This lets us emulate a legacy `Server` instance so we can work with the existing wire
-/// protocol methods. Eventually, the operation executor will return a `Connection` to execute
-/// against.
+/**
+ * This lets us emulate a legacy `Server` instance so we can work with the existing wire
+ * protocol methods. Eventually, the operation executor will return a `Connection` to execute
+ * against.
+ * @internal
+ * @deprecated Remove (NODE-2745)
+ */
 function makeServerTrampoline(connection: Connection): Server {
   return ({
     description: connection.description,

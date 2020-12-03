@@ -122,6 +122,7 @@ export class ListCollectionsCursor extends AbstractCursor {
     });
   }
 
+  /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,

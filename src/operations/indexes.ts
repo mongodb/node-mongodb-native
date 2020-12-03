@@ -63,7 +63,7 @@ export type IndexSpecification =
   | { [key: string]: IndexDirection }[]
   | IndexSpecification[];
 
-/** @internal */
+/** @public */
 export interface IndexDescription {
   collation?: CollationOptions;
   name?: string;

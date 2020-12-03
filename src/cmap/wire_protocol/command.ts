@@ -11,7 +11,7 @@ import type { ReadPreferenceLike } from '../../read_preference';
 import type { WriteConcernOptions, WriteConcern, W } from '../../write_concern';
 import type { WriteCommandOptions } from './write_command';
 
-/** @internal */
+/** @public */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: boolean;
   slaveOk?: boolean;

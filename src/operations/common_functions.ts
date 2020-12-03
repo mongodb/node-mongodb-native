@@ -16,7 +16,7 @@ import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { DeleteOptions } from './delete';
 
-/** @internal */
+/** @public */
 export interface IndexInformationOptions {
   full?: boolean;
   readPreference?: ReadPreference;

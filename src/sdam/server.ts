@@ -242,8 +242,12 @@ export class Server extends EventEmitter {
     this[kMonitor].requestCheck();
   }
 
-  /** Execute a command */
+  /**
+   * Execute a command
+   * @internal
+   */
   command(ns: string, cmd: Document, callback: Callback): void;
+  /** @internal */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   command(
     ns: string,
@@ -301,7 +305,10 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a query against the server */
+  /**
+   * Execute a query against the server
+   * @internal
+   */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
@@ -318,7 +325,10 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a `getMore` against the server */
+  /**
+   * Execute a `getMore` against the server
+   * @internal
+   */
   getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
@@ -340,7 +350,10 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a `killCursors` command against the server */
+  /**
+   * Execute a `killCursors` command against the server
+   * @internal
+   */
   killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback?: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
@@ -367,6 +380,7 @@ export class Server extends EventEmitter {
 
   /**
    * Insert one or more documents
+   * @internal
    *
    * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param ops - An array of documents to insert
@@ -377,6 +391,7 @@ export class Server extends EventEmitter {
 
   /**
    * Perform one or more update operations
+   * @internal
    *
    * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param ops - An array of updates
@@ -387,6 +402,7 @@ export class Server extends EventEmitter {
 
   /**
    * Perform one or more remove operations
+   * @internal
    *
    * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param ops - An array of removes

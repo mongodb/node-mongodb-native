@@ -18,7 +18,7 @@ export interface OperationConstructor extends Function {
   aspects?: Set<symbol>;
 }
 
-/** @internal */
+/** @public */
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
