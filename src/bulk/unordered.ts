@@ -6,12 +6,14 @@ import {
   BulkWriteOptions,
   UpdateStatement,
   DeleteStatement,
-  BulkWriteResult
+  BulkWriteResult,
+  BatchTypeId
 } from './common';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 
+/** @public */
 export class UnorderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, false);
@@ -26,7 +28,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
   }
 
   addToOperationsList(
-    batchType: BatchType,
+    batchType: BatchTypeId,
     document: Document | UpdateStatement | DeleteStatement
   ): this {
     // Get the bsonSize

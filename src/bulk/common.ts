@@ -25,11 +25,15 @@ import type { Hint } from '../operations/operation';
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
 
-export enum BatchType {
-  INSERT = 1,
-  UPDATE = 2,
-  REMOVE = 3
-}
+/** @public */
+export const BatchType = {
+  INSERT: 1,
+  UPDATE: 2,
+  REMOVE: 3
+} as const;
+
+/** @public */
+export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
 export interface InsertOneModel {
@@ -133,17 +137,19 @@ export interface BulkResult {
 /**
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
+ *
+ * @internal
  */
 export class Batch {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
-  batchType: BatchType;
+  batchType: BatchTypeId;
   operations: Document[];
   size: number;
   sizeBytes: number;
 
-  constructor(batchType: BatchType, originalZeroIndex: number) {
+  constructor(batchType: BatchTypeId, originalZeroIndex: number) {
     this.originalZeroIndex = originalZeroIndex;
     this.currentIndex = 0;
     this.originalIndexes = [];
@@ -704,8 +710,10 @@ export class MongoBulkWriteError extends MongoError {
 /**
  * A builder object that is returned from {@link BulkOperationBase#find}.
  * Is used to build a write operation that involves a query filter.
+ *
+ * @public
  */
-class FindOperators {
+export class FindOperators {
   bulkOperation: BulkOperationBase;
 
   /**
@@ -855,16 +863,17 @@ class FindOperators {
     return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
   }
 
-  removeOne() {
+  removeOne(): BulkOperationBase {
     return this.deleteOne();
   }
 
-  remove() {
+  remove(): BulkOperationBase {
     return this.delete();
   }
 }
 
-interface BulkOperationPrivate {
+/** @internal */
+export interface BulkOperationPrivate {
   bulkResult: BulkResult;
   currentBatch?: Batch;
   currentIndex: number;
@@ -916,8 +925,10 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
+  /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
 
@@ -1263,7 +1274,7 @@ export abstract class BulkOperationBase {
   }
 
   abstract addToOperationsList(
-    batchType: BatchType,
+    batchType: BatchTypeId,
     document: Document | UpdateStatement | DeleteStatement
   ): this;
 }

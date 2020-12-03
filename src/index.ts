@@ -297,3 +297,13 @@ export type {
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
+export type {
+  BulkOperationBase,
+  BulkOperationPrivate,
+  BatchType,
+  BatchTypeId,
+  FindOperators,
+  Batch
+} from './bulk/common';
+export type { OrderedBulkOperation } from './bulk/ordered';
+export type { UnorderedBulkOperation } from './bulk/unordered';
