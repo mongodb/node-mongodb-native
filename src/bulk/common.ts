@@ -1196,7 +1196,7 @@ export abstract class BulkOperationBase {
     return this.s.writeConcern;
   }
 
-  get operations(): Batch[] {
+  get batches(): Batch[] {
     const batches = [...this.s.batches];
     if (this.isOrdered) {
       if (this.s.currentBatch) batches.push(this.s.currentBatch);

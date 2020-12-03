@@ -1165,16 +1165,16 @@ describe('Bulk', function () {
         .upsert()
         .updateOne({ $set: { a: 1 } });
       batch.insert({ b: 3, a: 2 });
-      const operations = batch.operations;
-      expect(operations).to.have.lengthOf(3);
-      expect(operations[0].operations[0]).to.containSubset({ b: 1, a: 1 });
-      expect(operations[1].operations[0]).to.containSubset({
+      const batches = batch.batches;
+      expect(batches).to.have.lengthOf(3);
+      expect(batches[0].operations[0]).to.containSubset({ b: 1, a: 1 });
+      expect(batches[1].operations[0]).to.containSubset({
         q: { b: 2 },
         u: { $set: { a: 1 } },
         multi: false,
         upsert: true
       });
-      expect(operations[2].operations[0]).to.containSubset({ b: 3, a: 2 });
+      expect(batches[2].operations[0]).to.containSubset({ b: 3, a: 2 });
       client.close(done);
     });
   });
@@ -1267,11 +1267,11 @@ describe('Bulk', function () {
         .upsert()
         .updateOne({ $set: { a: 1 } });
       batch.insert({ b: 3, a: 2 });
-      const operations = batch.operations;
-      expect(operations).to.have.lengthOf(2);
-      expect(operations[0].operations[0]).to.containSubset({ b: 1, a: 1 });
-      expect(operations[0].operations[1]).to.containSubset({ b: 3, a: 2 });
-      expect(operations[1].operations[0]).to.containSubset({
+      const batches = batch.batches;
+      expect(batches).to.have.lengthOf(2);
+      expect(batches[0].operations[0]).to.containSubset({ b: 1, a: 1 });
+      expect(batches[0].operations[1]).to.containSubset({ b: 3, a: 2 });
+      expect(batches[1].operations[0]).to.containSubset({
         q: { b: 2 },
         u: { $set: { a: 1 } },
         multi: false,
@@ -1280,6 +1280,7 @@ describe('Bulk', function () {
       client.close(done);
     });
   });
+
   it('should fail with w:2 and wtimeout write concern due single mongod instance unordered', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
