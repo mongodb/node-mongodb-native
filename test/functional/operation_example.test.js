@@ -9354,7 +9354,11 @@ describe('Operation Examples', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor', {
-    metadata: { requires: { os: '!win32' } }, // leaks on windows
+    metadata: {
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
+    },
 
     // The actual test we wish to run
     test: function(done) {

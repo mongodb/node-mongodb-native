@@ -101,7 +101,11 @@ describe('Connect Tests', function() {
   });
 
   it('should allow a cancellaton token', {
-    metadata: { requires: { os: '!win32' } }, // 240.0.0.1 doesnt work for windows
+    metadata: {
+      requires: {
+        os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
+      }
+    },
     test: function(done) {
       const cancellationToken = new EventEmitter();
       setTimeout(() => cancellationToken.emit('cancel'), 500);

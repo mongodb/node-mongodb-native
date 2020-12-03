@@ -6468,7 +6468,7 @@ describe('Operation (Generators)', function() {
       requires: {
         generators: true,
         topology: ['single'],
-        os: '!win32' // leaks on windows
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 

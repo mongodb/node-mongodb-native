@@ -7039,7 +7039,7 @@ describe('Operation (Promises)', function() {
     metadata: {
       requires: {
         topology: ['single'],
-        os: '!win32' // leaks on windows
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 

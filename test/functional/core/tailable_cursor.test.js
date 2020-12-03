@@ -10,7 +10,11 @@ describe('Tailable cursor tests', function() {
   });
 
   it('should correctly perform awaitdata', {
-    metadata: { requires: { os: '!win32' } }, // leaks on windows
+    metadata: {
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
+    },
 
     test: function(done) {
       var self = this;

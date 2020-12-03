@@ -266,7 +266,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       requires: {
         generators: true,
         topology: 'single',
-        os: '!win32'
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 
@@ -374,7 +374,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       requires: {
         generators: true,
         topology: 'single',
-        os: '!win32'
+        os: '!win32' // NODE-2943: timeout on windows
       }
     },
 
