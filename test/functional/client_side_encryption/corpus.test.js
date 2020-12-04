@@ -24,8 +24,8 @@ describe('Client Side Encryption Corpus', function() {
     return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { strict: true }));
   }
 
-  const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED';
-  const kmsProviders = EJSON.parse(CSFLE_KMS_PROVIDERS);
+  const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
+  const kmsProviders = CSFLE_KMS_PROVIDERS ? EJSON.parse(CSFLE_KMS_PROVIDERS) : {};
   kmsProviders.local = {
     key: Buffer.from(
       'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
