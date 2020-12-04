@@ -14,6 +14,7 @@ import type { MongoClient } from '../mongo_client';
 import { ConnectionOptions, Connection } from '../cmap/connection';
 import { AuthMechanism, AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
 import { Server } from '../sdam/server';
+import { WRITE_CONCERN_KEYS } from '../write_concern';
 
 const validOptionNames = [
   'poolSize',
@@ -553,8 +554,7 @@ function transformUrlOptions(connStrOptions: any) {
 
   // Any write concern options from the URL will be top-level, so we manually
   // move them options under `object.writeConcern`
-  const wcKeys = ['w', 'wtimeout', 'j', 'journal', 'fsync'];
-  for (const key of wcKeys) {
+  for (const key of WRITE_CONCERN_KEYS) {
     if (connStrOpts[key] !== undefined) {
       if (connStrOpts.writeConcern === undefined) connStrOpts.writeConcern = {};
       connStrOpts.writeConcern[key] = connStrOpts[key];

@@ -23,6 +23,8 @@ export interface WriteConcernSettings {
   fsync?: boolean | 1;
 }
 
+export const WRITE_CONCERN_KEYS = ['w', 'wtimeout', 'j', 'journal', 'fsync'];
+
 /**
  * A MongoDB WriteConcern, which describes the level of acknowledgement
  * requested from MongoDB for write operations.
