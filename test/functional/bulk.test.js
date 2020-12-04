@@ -1759,4 +1759,22 @@ describe('Bulk', function () {
       });
     })
   );
+
+  it(
+    'should throw an error if bulk execute is called more than once',
+    withClientV2(function (client, done) {
+      const bulk = client.db().collection('coll').initializeUnorderedBulkOp();
+      bulk.insert({});
+
+      bulk.execute((err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+
+        bulk.execute(err => {
+          expect(err).to.match(/Batch cannot be re-executed/);
+          done();
+        });
+      });
+    })
+  );
 });
