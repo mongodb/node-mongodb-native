@@ -86,7 +86,7 @@ EOT
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
-  nvm install --no-progress --lts=${NODE_LTS_NAME}
+  nvm install --no-progress $NODE_VERSION
 
   # setup npm cache in a local directory
   cat <<EOT > .npmrc
@@ -101,10 +101,4 @@ fi
 # NOTE: registry was overridden to not use artifactory, remove the `registry` line when
 #       BUILD-6774 is resolved.
 
-# install node dependencies
-if [[ "$SKIP_INSTALL" == "1" ]]; then
-  echo "Skipping npm install"
-else
-  echo "Running npm install"
-  npm install --unsafe-perm
-fi
+npm install --unsafe-perm

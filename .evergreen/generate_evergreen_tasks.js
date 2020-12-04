@@ -45,7 +45,8 @@ const OPERATING_SYSTEMS = [
     display_name: 'Windows (VS2013)',
     run_on: 'windows-64-vs2013-large',
     msvsVersion: 2013,
-    mongoVersion: '<4.4'
+    mongoVersion: '<4.4',
+    nodeVersions: ['carbon', 'boron', 'argon']
   },
   {
     name: 'windows-64-vs2015',
