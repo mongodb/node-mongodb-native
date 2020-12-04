@@ -12,8 +12,6 @@ import type { OperationOptions, OperationBase, Hint } from './operations/operati
 import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { Document, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 import type { Explain } from './explain';
