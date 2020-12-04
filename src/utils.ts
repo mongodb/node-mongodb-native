@@ -12,8 +12,6 @@ import type { OperationOptions, OperationBase, Hint } from './operations/operati
 import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { Document, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 import type { Explain } from './explain';
@@ -885,9 +883,8 @@ export interface ClientMetadataOptions {
   appname?: string;
 }
 
-const NODE_DRIVER_VERSION = JSON.parse(
-  readFileSync(resolve(__dirname, '..', 'package.json'), { encoding: 'utf-8' })
-).version;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const NODE_DRIVER_VERSION = require('../package.json').version;
 
 export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
   options = options || {};
