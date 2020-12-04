@@ -14,7 +14,6 @@ import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
 import type { UpdateOptions } from './update';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { DeleteOptions } from './delete';
 
 /** @public */
 export interface IndexInformationOptions {
@@ -102,89 +101,6 @@ export function prepareDocs(
 
     return doc;
   });
-}
-
-export function removeDocuments(server: Server, coll: Collection, callback?: Callback): void;
-export function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector?: Document,
-  callback?: Callback
-): void;
-export function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector?: Document,
-  options?: DeleteOptions,
-  callback?: Callback
-): void;
-export function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector?: Document,
-  options?: DeleteOptions | Document,
-  callback?: Callback
-): void {
-  if (typeof options === 'function') {
-    (callback = options as Callback), (options = {});
-  } else if (typeof selector === 'function') {
-    callback = selector as Callback;
-    options = {};
-    selector = {};
-  }
-
-  // Create an empty options object if the provided one is null
-  options = options || {};
-
-  // Final options for retryable writes
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
-  // If selector is null set empty
-  if (selector == null) selector = {};
-
-  // Build the op
-  const op = { q: selector, limit: 0 } as any;
-  if (options.single) {
-    op.limit = 1;
-  } else if (finalOptions.retryWrites) {
-    finalOptions.retryWrites = false;
-  }
-  if (options.hint) {
-    op.hint = options.hint;
-  }
-
-  // Have we specified collation
-  try {
-    decorateWithCollation(finalOptions, coll, options);
-  } catch (err) {
-    return callback ? callback(err, null) : undefined;
-  }
-
-  if (options.explain !== undefined && maxWireVersion(server) < 3) {
-    return callback
-      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
-      : undefined;
-  }
-
-  // Execute the remove
-  server.remove(
-    coll.s.namespace.toString(),
-    [op],
-    finalOptions as WriteCommandOptions,
-    (err, result) => {
-      if (callback == null) return;
-      if (err) return callback(err);
-      if (result == null) return callback();
-      if (result.code) return callback(new MongoError(result));
-      if (result.writeErrors) {
-        return callback(new MongoError(result.writeErrors[0]));
-      }
-
-      // Return the results
-      callback(undefined, result);
-    }
-  );
 }
 
 export function updateDocuments(

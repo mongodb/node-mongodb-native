@@ -1,13 +1,12 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, OperationBase } from './operation';
 import { CommandOperation } from './command';
-import { applyRetryableWrites, Callback, MongoDBNamespace } from '../utils';
 import { prepareDocs } from './common_functions';
+import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
-import type { Connection } from '../cmap/connection';
 import type { BulkWriteOptions } from '../bulk/common';
 import type { WriteConcernOptions } from '../write_concern';
 
@@ -35,20 +34,23 @@ export class InsertOperation extends OperationBase<BulkWriteOptions, Document> {
 export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
+  /** Force server to assign _id values instead of driver. */
+  forceServerObjectId?: boolean;
 }
 
 /** @public */
 export interface InsertOneResult {
-  /** The total amount of documents inserted */
-  insertedCount: number;
-  /** The driver generated ObjectId for the insert operation */
-  insertedId?: ObjectId;
-  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
-  ops?: Document[];
-  /** The connection object used for the operation */
-  connection?: Connection;
-  /** The raw command result object returned from MongoDB (content might vary by server version) */
-  result: Document;
+  /**
+   * Indicates whether this write result was acknowledged. If not, then all
+   * other members of this result will be undefined.
+   */
+  acknowledged: boolean;
+
+  /**
+   * The identifier that was inserted. If the server generated the identifier, this value
+   * will be null as the driver does not have access to that data.
+   */
+  insertedId: ObjectId;
 }
 
 export class InsertOneOperation extends CommandOperation<InsertOneOptions, InsertOneResult> {
@@ -67,63 +69,23 @@ export class InsertOneOperation extends CommandOperation<InsertOneOptions, Inser
     const doc = this.doc;
     const options = { ...this.options, ...this.bsonOptions };
 
-    if (Array.isArray(doc)) {
-      return callback(
-        MongoError.create({ message: 'doc parameter must be an object', driver: true })
-      );
-    }
+    // File inserts
+    server.insert(
+      coll.s.namespace.toString(),
+      prepareDocs(coll, [this.doc], options),
+      options as WriteCommandOptions,
+      (err, result) => {
+        if (err || result == null) return callback(err);
+        if (result.code) return callback(new MongoError(result));
+        if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
 
-    insertDocuments(server, coll, [doc], options, (err, r) => {
-      if (callback == null) return;
-      if (err && callback) return callback(err);
-      // Workaround for pre 2.6 servers
-      if (r == null) return callback(undefined, { insertedCount: 0, result: { ok: 1 } });
-      // Add values to top level to ensure crud spec compatibility
-      r.insertedCount = r.n;
-      r.insertedId = doc._id;
-      if (callback) callback(undefined, r as InsertOneResult);
-    });
+        callback(undefined, {
+          acknowledged: this.writeConcern?.w !== 0 ?? true,
+          insertedId: doc._id
+        });
+      }
+    );
   }
-}
-
-function insertDocuments(
-  server: Server,
-  coll: Collection,
-  docs: Document[],
-  options: BulkWriteOptions,
-  callback: Callback<Document>
-) {
-  if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
-  // Ensure we are operating on an array op docs
-  docs = Array.isArray(docs) ? docs : [docs];
-
-  // Final options for retryable writes
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
-  // If keep going set unordered
-  if (finalOptions.keepGoing === true) finalOptions.ordered = false;
-
-  docs = prepareDocs(coll, docs, options);
-
-  // File inserts
-  server.insert(
-    coll.s.namespace.toString(),
-    docs,
-    finalOptions as WriteCommandOptions,
-    (err, result) => {
-      if (callback == null) return;
-      if (err) return callback(err);
-      if (result == null) return callback();
-      if (result.code) return callback(new MongoError(result));
-      if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
-      // Add docs to the list
-      result.ops = docs;
-      // Return the results
-      callback(undefined, result);
-    }
-  );
 }
 
 defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);

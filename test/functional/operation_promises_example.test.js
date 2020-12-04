@@ -2245,7 +2245,7 @@ describe('Operation (Promises)', function () {
         return collection
           .updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 })
           .then(function (result) {
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
 
             // Fetch the document that we modified and check if it got inserted correctly
             return collection.findOne({ a: 1 });
@@ -2303,7 +2303,7 @@ describe('Operation (Promises)', function () {
             return collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o);
           })
           .then(function (r) {
-            test.equal(2, r.result.n);
+            expect(r).property('matchedCount').to.equal(2);
 
             // Fetch all the documents and verify that we have changed the b value
             return collection.find().toArray();
@@ -4163,7 +4163,7 @@ describe('Operation (Promises)', function () {
           .collection('replicaset_mongo_client_collection_with_promise')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function (result) {
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
             return client.close();
           });
       });
@@ -4246,7 +4246,7 @@ describe('Operation (Promises)', function () {
           .collection('mongoclient_test_with_promise')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function (result) {
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
             return client.close();
           });
       });
@@ -4426,7 +4426,7 @@ describe('Operation (Promises)', function () {
         // Get the collection
         var col = db.collection('insert_one_with_promise');
         return col.insertOne({ a: 1 }).then(function (r) {
-          test.equal(1, r.insertedCount);
+          expect(r).property('insertedId').to.exist;
           // Finish up test
           return client.close();
         });
@@ -4771,8 +4771,7 @@ describe('Operation (Promises)', function () {
         return col
           .insertMany([{ a: 1, b: 1 }], { w: 1 })
           .then(function (r) {
-            test.equal(1, r.result.n);
-
+            expect(r).property('insertedCount').to.equal(1);
             return col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
           })
           .then(function (r) {
@@ -4814,7 +4813,7 @@ describe('Operation (Promises)', function () {
         // Get the collection
         var col = db.collection('find_one_and_replace_with_promise');
         return col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
-          test.equal(1, r.result.n);
+          expect(r).property('insertedCount').to.equal(1);
 
           return col
             .findOneAndReplace(
@@ -4870,7 +4869,7 @@ describe('Operation (Promises)', function () {
         return col
           .insertMany([{ a: 1, b: 1 }], { w: 1 })
           .then(function (r) {
-            test.equal(1, r.result.n);
+            expect(r).property('insertedCount').to.equal(1);
 
             return col.findOneAndUpdate(
               { a: 1 },

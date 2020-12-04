@@ -167,6 +167,8 @@ export class Batch {
 export class BulkWriteResult {
   result: BulkResult;
 
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
+  // acknowledged: Boolean;
   /** Number of documents inserted. */
   insertedCount: number;
   /** Number of documents matched for update. */

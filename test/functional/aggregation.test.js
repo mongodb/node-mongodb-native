@@ -53,7 +53,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -172,7 +172,7 @@ describe('Aggregation', function () {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -260,7 +260,7 @@ describe('Aggregation', function () {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -346,7 +346,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(err).to.not.exist;
           expect(result).to.exist;
 
@@ -426,7 +426,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -515,7 +515,7 @@ describe('Aggregation', function () {
         // Create a collection
         const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, (err, result) => {
+        collection.insertMany(docs, { w: 1 }, (err, result) => {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -604,7 +604,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -689,7 +689,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -759,9 +759,9 @@ describe('Aggregation', function () {
           expect(err).to.not.exist;
 
           // Insert a single document
-          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
+          col.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
             expect(err).to.not.exist;
-            expect(r.result.n).to.equal(3);
+            expect(r).property('insertedCount').to.equal(3);
 
             // Get first two documents that match the query
             col
@@ -810,9 +810,9 @@ describe('Aggregation', function () {
           expect(err).to.not.exist;
           var count = 0;
 
-          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
+          col.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
             expect(err).to.not.exist;
-            expect(r.result.n).to.equal(3);
+            expect(r).property('insertedCount').to.equal(3);
 
             const cursor = col.aggregate([{ $project: { a: 1 } }]);
 
@@ -885,7 +885,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
         // Insert the docs
-        collection.insert(docs, { w: 1 }, function (err, result) {
+        collection.insertMany(docs, { w: 1 }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -1027,7 +1027,7 @@ describe('Aggregation', function () {
           // Create a collection
           const collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
-          collection.insert(docs, { w: 1 }, (err, result) => {
+          collection.insertMany(docs, { w: 1 }, (err, result) => {
             expect(result).to.exist;
             expect(err).to.not.exist;
 

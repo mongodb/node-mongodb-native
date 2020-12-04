@@ -239,9 +239,11 @@ function _rename(
     if (error) {
       return callback(error);
     }
-    if (!res?.result.n) {
+
+    if (!res?.matchedCount) {
       return callback(new MongoError(`File with id ${id} not found`));
     }
+
     return callback();
   });
 }

@@ -297,9 +297,9 @@ describe('CRUD API', function () {
         // Legacy insert method
         // -------------------------------------------------
         var legacyInsert = function () {
-          db.collection('t2_1').insert([{ a: 1 }, { a: 2 }], function (err, r) {
+          db.collection('t2_1').insertMany([{ a: 1 }, { a: 2 }], function (err, r) {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
+            expect(r).property('insertedCount').to.equal(2);
 
             bulkAPIInsert();
           });
@@ -325,10 +325,7 @@ describe('CRUD API', function () {
         var insertOne = function () {
           db.collection('t2_3').insertOne({ a: 1 }, { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            expect(r).property('insertedCount').to.equal(1);
-            test.equal(1, r.insertedCount);
-            test.ok(r.insertedId != null);
-
+            expect(r).property('insertedId').to.exist;
             insertMany();
           });
         };
@@ -340,9 +337,7 @@ describe('CRUD API', function () {
           var docs = [{ a: 1 }, { a: 1 }];
           db.collection('t2_4').insertMany(docs, { w: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.equal(2, r.result.n);
-            test.equal(2, r.insertedCount);
-            test.equal(2, Object.keys(r.insertedIds).length);
+            expect(r).property('insertedCount').to.equal(2);
 
             // Ordered bulk unordered
             bulkWriteUnOrdered();
@@ -398,7 +393,7 @@ describe('CRUD API', function () {
             r
           ) {
             expect(err).to.not.exist;
-            test.equal(3, r.result.n);
+            expect(r).property('insertedCount').to.equal(3);
 
             db.collection('t2_6').bulkWrite(
               [
@@ -587,10 +582,8 @@ describe('CRUD API', function () {
             ) {
               expect(err).to.not.exist;
               expect(r).property('modifiedCount').to.equal(1);
-              test.ok(r.result.upserted == null);
-
-              test.equal(1, r.matchedCount);
-              test.ok(r.upsertedId == null);
+              expect(r).property('upsertedCount').to.equal(0);
+              expect(r).property('matchedCount').to.equal(1);
 
               updateMany();
             });
@@ -845,7 +838,8 @@ describe('CRUD API', function () {
         var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
         col.insertOne({ a: 1 }, { w: 0 }, function (err, result) {
           expect(err).to.not.exist;
-          test.equal(1, result.ok);
+          expect(result).property('acknowledged').to.be.false;
+          expect(result).property('insertedId').to.exist;
 
           col.insertMany([{ a: 1 }], { w: 0 }, function (err, result) {
             expect(err).to.not.exist;

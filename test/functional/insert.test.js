@@ -104,19 +104,9 @@ describe('Insert', function () {
         var docs = [{ a: 1 }, { a: 2 }];
 
         collection.insert(docs, configuration.writeConcernMax(), function (err, r) {
-          test.equal(2, r.result.n);
-          test.equal(2, r.ops.length);
-          test.equal(2, r.insertedCount);
-          test.equal(2, Object.keys(r.insertedIds).length);
+          expect(r).property('insertedCount').to.equal(2);
           test.ok(r.insertedIds[0]._bsontype === 'ObjectID');
           test.ok(r.insertedIds[1]._bsontype === 'ObjectID');
-
-          r.ops.forEach(function (doc) {
-            test.ok(
-              doc['_id']._bsontype === 'ObjectID' ||
-                Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'
-            );
-          });
 
           // Let's ensure we have both documents
           collection.find().toArray(function (err, docs) {
@@ -286,9 +276,7 @@ describe('Insert', function () {
               user_collection.insert(
                 [newUser],
                 configuration.writeConcernMax(),
-                getResult(function (r) {
-                  var user = r.ops[0];
-
+                getResult(function () {
                   var scriptCode = "settings.block = []; settings.block.push('test');";
                   var context = { settings: { thisOneWorks: 'somestring' } };
 
@@ -298,12 +286,12 @@ describe('Insert', function () {
                   var updateCommand = { $set: context };
 
                   user_collection.update(
-                    { _id: user._id },
+                    { _id: newUser._id },
                     updateCommand,
                     configuration.writeConcernMax(),
                     getResult(function () {
                       // Fetch the object and check that the changes are persisted
-                      user_collection.findOne({ _id: user._id }, function (err, doc) {
+                      user_collection.findOne({ _id: newUser._id }, function (err, doc) {
                         test.ok(err == null);
                         test.equal('Test Account', doc.name);
                         test.equal('somestring', doc.settings.thisOneWorks);
@@ -535,7 +523,8 @@ describe('Insert', function () {
         ) {
           expect(err).to.not.exist;
 
-          collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
+          collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+            expect(err).to.not.exist;
             test.equal(normalizedFunctionString(func), object.z.code);
             test.equal(1, object.i);
             client.close(done);
@@ -568,7 +557,8 @@ describe('Insert', function () {
           function (err, result) {
             expect(err).to.not.exist;
 
-            collection.findOne({ _id: result.ops[0]._id }, function (err, object) {
+            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+              expect(err).to.not.exist;
               test.equal(normalizedFunctionString(func), object.z.code);
               test.equal(1, object.i);
               client.close(done);
@@ -655,13 +645,13 @@ describe('Insert', function () {
             expect(err).to.not.exist;
             test.ok(result);
 
-            collection.update(
+            collection.updateOne(
               { _id: '12345678123456781234567812345678' },
               { $set: { field: 0 } },
               configuration.writeConcernMax(),
               function (err, r) {
                 expect(err).to.not.exist;
-                test.equal(1, r.result.n);
+                expect(r).property('matchedCount').to.equal(1);
                 client.close(done);
               }
             );
@@ -820,7 +810,7 @@ describe('Insert', function () {
           configuration.writeConcernMax(),
           function (err, result) {
             expect(err).to.not.exist;
-            test.equal(0, result.result.n);
+            expect(result).property('matchedCount').to.equal(0);
             client.close(done);
           }
         );
@@ -965,7 +955,8 @@ describe('Insert', function () {
             { $set: { c: 1, d: function () {} } },
             { w: 1, serializeFunctions: false },
             function (err, result) {
-              test.equal(1, result.result.n);
+              expect(err).to.not.exist;
+              expect(result).property('matchedCount').to.equal(1);
 
               collection.findOne({ str: 'String' }, function (err, item) {
                 expect(item.d).to.not.exist;
@@ -1068,13 +1059,15 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
-        collection.update({ a: 1 }, { $set: { a: 1 } }, configuration.writeConcernMax(), function (
-          err,
-          r
-        ) {
-          test.equal(0, r.result.n);
-          client.close(done);
-        });
+        collection.updateMany(
+          { a: 1 },
+          { $set: { a: 1 } },
+          configuration.writeConcernMax(),
+          function (err, r) {
+            expect(r).property('matchedCount').to.equal(0);
+            client.close(done);
+          }
+        );
       });
     }
   });
@@ -1114,7 +1107,7 @@ describe('Insert', function () {
             configuration.writeConcernMax(),
             function (err, r) {
               expect(err).to.not.exist;
-              test.equal(1, r.result.n);
+              expect(r).property('matchedCount').to.equal(1);
 
               collection.findOne({ _id: doc._id }, function (err, item) {
                 expect(err).to.not.exist;
@@ -1145,16 +1138,14 @@ describe('Insert', function () {
           'Should_Correctly_update_two_fields_including_a_sub_field_2'
         );
 
-        collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, result) {
+        collection.insertOne({ _id: 1 }, configuration.writeConcernMax(), function (err, result) {
           expect(err).to.not.exist;
           test.ok(result);
 
           // Update two fields
-          collection.insert({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
+          collection.insertOne({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
+            expect(err).to.exist;
             expect(r).to.not.exist;
-            test.ok(err != null);
-            test.ok(err.result);
-
             client.close(done);
           });
         });
@@ -1215,17 +1206,15 @@ describe('Insert', function () {
           result
         ) {
           expect(err).to.not.exist;
-          if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
-          test.equal(1, result.result.n);
-          test.ok(result.result.upserted != null);
+          expect(result).property('upsertedCount').to.equal(1);
 
           // Upsert an existing doc
           collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
             err,
             result
           ) {
-            if (result.updatedExisting) test.equal(true, result.updatedExisting);
-            test.equal(1, result.result.n);
+            expect(err).to.not.exist;
+            expect(result).property('matchedCount').to.equal(1);
             client.close(done);
           });
         });
@@ -1375,8 +1364,7 @@ describe('Insert', function () {
             configuration.writeConcernMax(),
             function (err, r) {
               expect(err).to.not.exist;
-              test.equal(1, r.result.n);
-
+              expect(r).property('matchedCount').to.equal(1);
               client.close(done);
             }
           );
@@ -2215,19 +2203,18 @@ describe('Insert', function () {
           docs.push({ a: i });
         }
 
-        col.insert(docs, function (err, doc) {
+        col.insertMany(docs, function (err, result) {
           expect(err).to.not.exist;
-          test.equal(2000, doc.result.n);
-          docs = [];
+          expect(result).property('insertedCount').to.equal(2000);
 
+          docs = [];
           for (var i = 0; i < 2000; i++) {
             docs.push({ a: i });
           }
 
-          col.insertMany(docs, function (err, doc) {
+          col.insertMany(docs, function (err, res) {
             expect(err).to.not.exist;
-            test.equal(2000, doc.result.n);
-
+            expect(res).property('insertedCount').to.equal(2000);
             client.close(done);
           });
         });
@@ -2517,7 +2504,7 @@ describe('Insert', function () {
         db.collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: true })
           .then(function (r) {
-            test.equal(3, Object.keys(r.insertedIds).length);
+            expect(r).property('insertedCount').to.equal(3);
             client.close(done);
           });
       });
@@ -2536,7 +2523,7 @@ describe('Insert', function () {
           .insertMany([{}, {}, {}], { ordered: false })
           .then(function (r) {
             expect(err).to.not.exist;
-            test.equal(3, Object.keys(r.insertedIds).length);
+            expect(r).property('insertedCount').to.equal(3);
             client.close(done);
           });
       });

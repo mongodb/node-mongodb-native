@@ -1,23 +1,21 @@
 import { Aspect, defineAspects, OperationBase } from './operation';
 import { BulkWriteOperation } from './bulk_write';
-import { MongoError } from '../error';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { ObjectId, Document } from '../bson';
-import type { BulkWriteResult, BulkWriteOptions } from '../bulk/common';
+import type { BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
+import { WriteConcern } from '../write_concern';
 
 /** @public */
 export interface InsertManyResult {
-  /** The total amount of documents inserted. */
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
+  acknowledged: boolean;
+  /** The number of inserted documents for this operations */
   insertedCount: number;
-  /** Map of the index of the inserted document to the id of the inserted document. */
+  /** Map of the index of the inserted document to the id of the inserted document */
   insertedIds: { [key: number]: ObjectId };
-  /** All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany */
-  ops: Document[];
-  /** The raw command result object returned from MongoDB (content might vary by server version). */
-  result: Document;
 }
 
 /** @internal */
@@ -28,47 +26,33 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
   constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
     super(options);
 
+    if (!Array.isArray(docs)) {
+      throw new TypeError('docs parameter must be an array of documents');
+    }
+
     this.collection = collection;
     this.docs = docs;
   }
 
   execute(server: Server, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
-    let docs = this.docs;
     const options = { ...this.options, ...this.bsonOptions };
+    const writeConcern = WriteConcern.fromOptions(options);
+    const bulkWriteOperation = new BulkWriteOperation(
+      coll,
+      [{ insertMany: prepareDocs(coll, this.docs, options) }],
+      options
+    );
 
-    if (!Array.isArray(docs)) {
-      return callback(
-        MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
-      );
-    }
-
-    docs = prepareDocs(coll, docs, options);
-
-    // Generate the bulk write operations
-    const operations = [{ insertMany: docs }];
-    const bulkWriteOperation = new BulkWriteOperation(coll, operations, options);
-
-    bulkWriteOperation.execute(server, (err, result) => {
-      if (err || !result) return callback(err);
-      callback(undefined, mapInsertManyResults(docs, result));
+    bulkWriteOperation.execute(server, (err, res) => {
+      if (err || res == null) return callback(err);
+      callback(undefined, {
+        acknowledged: writeConcern?.w !== 0 ?? true,
+        insertedCount: res.insertedCount,
+        insertedIds: res.insertedIds
+      });
     });
   }
-}
-
-function mapInsertManyResults(docs: Document[], r: BulkWriteResult): InsertManyResult {
-  const finalResult: InsertManyResult = {
-    result: { ok: 1, n: r.insertedCount },
-    ops: docs,
-    insertedCount: r.insertedCount,
-    insertedIds: r.insertedIds
-  };
-
-  if (r.getLastOp()) {
-    finalResult.result.opTime = r.getLastOp();
-  }
-
-  return finalResult;
 }
 
 defineAspects(InsertManyOperation, [Aspect.WRITE_OPERATION]);
