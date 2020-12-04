@@ -38,10 +38,10 @@ export interface FindOptions extends CommandOperationOptions {
   batchSize?: number;
   /** If true, returns only the index keys in the resulting documents. */
   returnKey?: boolean;
-  /** Set index bounds. */
-  min?: number;
-  /** Set index bounds. */
-  max?: number;
+  /** The inclusive lower bound for a specific index */
+  min?: Document;
+  /** The exclusive upper bound for a specific index */
+  max?: Document;
   /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
   comment?: string | Document;
   /** Number of milliseconds to wait before aborting the query. */

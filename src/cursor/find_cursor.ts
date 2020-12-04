@@ -178,7 +178,7 @@ export class FindCursor extends AbstractCursor {
    *
    * @param min - Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
    */
-  min(min: number): this {
+  min(min: Document): this {
     assertUninitialized(this);
     this[kBuiltOptions].min = min;
     return this;
@@ -189,7 +189,7 @@ export class FindCursor extends AbstractCursor {
    *
    * @param max - Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    */
-  max(max: number): this {
+  max(max: Document): this {
     assertUninitialized(this);
     this[kBuiltOptions].max = max;
     return this;
@@ -249,7 +249,7 @@ export class FindCursor extends AbstractCursor {
         break;
 
       case 'max':
-        this[kBuiltOptions].max = value as number;
+        this[kBuiltOptions].max = value as Document;
         break;
 
       case 'maxTimeMS':
@@ -257,7 +257,7 @@ export class FindCursor extends AbstractCursor {
         break;
 
       case 'min':
-        this[kBuiltOptions].min = value as number;
+        this[kBuiltOptions].min = value as Document;
         break;
 
       case 'orderby':
