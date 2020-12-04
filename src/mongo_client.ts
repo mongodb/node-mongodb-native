@@ -386,7 +386,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   db(dbName: string): Db;
   db(dbName: string, options: DbOptions & { returnNonCachedInstance?: boolean }): Db;
   db(dbName: string, options?: DbOptions & { returnNonCachedInstance?: boolean }): Db {
-    options = options || {};
+    options = options ?? {};
 
     // Default to db from connection string if not provided
     if (!dbName && this.s.options?.dbName) {
@@ -437,7 +437,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
     callback?: Callback<MongoClient>
   ): Promise<MongoClient> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     // Create client
     const mongoClient = new MongoClient(url, options);
@@ -527,7 +527,7 @@ export class MongoClient extends EventEmitter implements OperationParent {
   watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
-    options = options || {};
+    options = options ?? {};
 
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {

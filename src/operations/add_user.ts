@@ -6,6 +6,7 @@ import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface AddUserOptions extends CommandOperationOptions {
@@ -18,7 +19,8 @@ export interface AddUserOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AddUserOperation extends CommandOperation<AddUserOptions, Document> {
+export class AddUserOperation extends CommandOperation<Document> {
+  options: AddUserOptions;
   db: Db;
   username: string;
   password?: string;
@@ -35,9 +37,10 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
     this.db = db;
     this.username = username;
     this.password = password;
+    this.options = options ?? {};
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;
@@ -99,7 +102,7 @@ export class AddUserOperation extends CommandOperation<AddUserOptions, Document>
       command.pwd = userPassword;
     }
 
-    super.executeCommand(server, command, callback);
+    super.executeCommand(server, session, command, callback);
   }
 }
 

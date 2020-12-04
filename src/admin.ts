@@ -104,7 +104,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     return this.command({ buildinfo: 1 }, options, callback as Callback<Document>);
   }
 
@@ -123,7 +123,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     return this.command({ buildinfo: 1 }, options, callback as Callback<Document>);
   }
 
@@ -142,7 +142,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     return this.command({ serverStatus: 1 }, options, callback as Callback<Document>);
   }
 
@@ -161,7 +161,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     return this.command({ ping: 1 }, options, callback as Callback<Document>);
   }
 
@@ -260,7 +260,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       getTopology(this.s.db),
@@ -284,7 +284,7 @@ export class Admin {
     callback?: Callback<ListDatabasesResult>
   ): Promise<ListDatabasesResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       getTopology(this.s.db),
@@ -308,7 +308,7 @@ export class Admin {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     return this.command({ replSetGetStatus: 1 }, options, callback as Callback<Document>);
   }
 }

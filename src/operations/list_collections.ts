@@ -20,7 +20,8 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
+export class ListCollectionsOperation extends CommandOperation<string[]> {
+  options: ListCollectionsOptions;
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -29,6 +30,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
     super(db, options);
 
+    this.options = options ?? {};
     this.db = db;
     this.filter = filter;
     this.nameOnly = !!this.options.nameOnly;
@@ -38,7 +40,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
     }
   }
 
-  execute(server: Server, callback: Callback<string[]>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -98,7 +100,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
       nameOnly: this.nameOnly
     };
 
-    return super.executeCommand(server, command, callback);
+    return super.executeCommand(server, session, command, callback);
   }
 }
 

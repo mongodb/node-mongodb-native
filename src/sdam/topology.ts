@@ -317,7 +317,7 @@ export class Topology extends EventEmitter {
   /** Initiate server connect */
   connect(options?: ConnectOptions, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
     if (this.s.state === STATE_CONNECTED) {
       if (typeof callback === 'function') {
         callback();
@@ -391,7 +391,7 @@ export class Topology extends EventEmitter {
       options = { force: options };
     }
 
-    options = options || {};
+    options = options ?? {};
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
       if (typeof callback === 'function') {
         callback();
@@ -729,7 +729,7 @@ function destroyServer(
   options?: DestroyOptions,
   callback?: Callback
 ) {
-  options = options || {};
+  options = options ?? {};
   LOCAL_SERVER_EVENTS.forEach((event: string) => server.removeAllListeners(event));
 
   server.destroy(options, () => {

@@ -538,7 +538,7 @@ export class Response {
   parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
-    options = options || {};
+    options = options ?? {};
 
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
@@ -666,7 +666,7 @@ export class Msg {
     }
 
     // Ensure empty options
-    this.options = options || {};
+    this.options = options ?? {};
 
     // Additional options
     this.requestId = options.requestId ? options.requestId : Msg.getRequestId();
@@ -806,7 +806,7 @@ export class BinMsg {
   parse(options: OpResponseOptions): void {
     // Don't parse again if not needed
     if (this.parsed) return;
-    options = options || {};
+    options = options ?? {};
 
     this.index = 4;
     // Allow the return of raw documents instead of parsing

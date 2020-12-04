@@ -1,4 +1,4 @@
-import { Aspect, defineAspects, OperationBase } from './operation';
+import { Aspect, defineAspects, AbstractOperation } from './operation';
 import { BulkWriteOperation } from './bulk_write';
 import { prepareDocs } from './common_functions';
 import type { Callback } from '../utils';
@@ -7,6 +7,7 @@ import type { ObjectId, Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import type { Server } from '../sdam/server';
 import { WriteConcern } from '../write_concern';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface InsertManyResult {
@@ -19,7 +20,8 @@ export interface InsertManyResult {
 }
 
 /** @internal */
-export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertManyResult> {
+export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
+  options: BulkWriteOptions;
   collection: Collection;
   docs: Document[];
 
@@ -30,13 +32,14 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
       throw new TypeError('docs parameter must be an array of documents');
     }
 
+    this.options = options;
     this.collection = collection;
     this.docs = docs;
   }
 
-  execute(server: Server, callback: Callback<InsertManyResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<InsertManyResult>): void {
     const coll = this.collection;
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
     const writeConcern = WriteConcern.fromOptions(options);
     const bulkWriteOperation = new BulkWriteOperation(
       coll,
@@ -44,7 +47,7 @@ export class InsertManyOperation extends OperationBase<BulkWriteOptions, InsertM
       options
     );
 
-    bulkWriteOperation.execute(server, (err, res) => {
+    bulkWriteOperation.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       callback(undefined, {
         acknowledged: writeConcern?.w !== 0 ?? true,

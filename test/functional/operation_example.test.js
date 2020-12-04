@@ -3769,6 +3769,7 @@ describe('Operation Examples', function () {
 
             // Retrieve the number of documents from the collection
             collection.count(function (err, count) {
+              expect(err).to.not.exist;
               test.equal(1, count);
 
               // Rename the collection

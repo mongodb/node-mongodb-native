@@ -97,7 +97,7 @@ export class ReadPreference {
     this.tags = tags;
     this.hedge = options?.hedge;
 
-    options = options || {};
+    options = options ?? {};
     if (options.maxStalenessSeconds != null) {
       if (options.maxStalenessSeconds <= 0) {
         throw new TypeError('maxStalenessSeconds must be a positive integer');

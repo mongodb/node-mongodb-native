@@ -585,7 +585,7 @@ export class Collection implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       getTopology(this),
@@ -1089,7 +1089,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(getTopology(this), new CollStatsOperation(this, options), callback);
   }
@@ -1232,7 +1232,7 @@ export class Collection implements OperationParent {
   watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
-    options = options || {};
+    options = options ?? {};
 
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
@@ -1365,7 +1365,7 @@ export class Collection implements OperationParent {
     callback: Callback<Document>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return this.updateMany(selector, update, options, callback);
   }
@@ -1384,7 +1384,7 @@ export class Collection implements OperationParent {
     callback: Callback
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return this.deleteMany(selector, options, callback);
   }

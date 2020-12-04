@@ -1,4 +1,4 @@
-import { defineAspects, Aspect, OperationBase } from './operation';
+import { defineAspects, Aspect, AbstractOperation } from './operation';
 import { updateDocuments } from './common_functions';
 import { hasAtomicOperators, MongoDBNamespace, Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { CollationOptions, WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ObjectId, Document } from '../bson';
+import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {
@@ -40,11 +41,13 @@ export interface UpdateResult {
 }
 
 /** @internal */
-export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
+export class UpdateOperation extends AbstractOperation<Document> {
+  options: UpdateOptions;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: UpdateOptions) {
     super(options);
+    this.options = options;
     this.ns = ns;
     this.operations = ops;
   }
@@ -53,18 +56,19 @@ export class UpdateOperation extends OperationBase<UpdateOptions, Document> {
     return this.operations.every(op => op.multi == null || op.multi === false);
   }
 
-  execute(server: Server, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     server.update(
       this.ns.toString(),
       this.operations,
-      this.options as WriteCommandOptions,
+      { ...this.options, readPreference: this.readPreference, session } as WriteCommandOptions,
       callback
     );
   }
 }
 
 /** @internal */
-export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateOneOperation extends CommandOperation<UpdateResult> {
+  options: UpdateOptions;
   collection: Collection;
   filter: Document;
   update: Document;
@@ -76,16 +80,17 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
       throw new TypeError('Update document requires atomic operators');
     }
 
+    this.options = options;
     this.collection = collection;
     this.filter = filter;
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback<UpdateResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = { ...this.options, ...this.bsonOptions, multi: false };
+    const options = { ...this.options, ...this.bsonOptions, session, multi: false };
 
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);
@@ -102,7 +107,8 @@ export class UpdateOneOperation extends CommandOperation<UpdateOptions, UpdateRe
 }
 
 /** @internal */
-export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateResult> {
+export class UpdateManyOperation extends CommandOperation<UpdateResult> {
+  options: UpdateOptions;
   collection: Collection;
   filter: Document;
   update: Document;
@@ -110,16 +116,17 @@ export class UpdateManyOperation extends CommandOperation<UpdateOptions, UpdateR
   constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(collection, options);
 
+    this.options = options;
     this.collection = collection;
     this.filter = filter;
     this.update = update;
   }
 
-  execute(server: Server, callback: Callback<UpdateResult>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<UpdateResult>): void {
     const coll = this.collection;
     const filter = this.filter;
     const update = this.update;
-    const options = { ...this.options, ...this.bsonOptions, multi: true };
+    const options = { ...this.options, ...this.bsonOptions, session, multi: true };
 
     updateDocuments(server, coll, filter, update, options, (err, r) => {
       if (err || !r) return callback(err);

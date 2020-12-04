@@ -154,7 +154,7 @@ export class Db implements OperationParent {
    * @param options - Optional settings for Db construction
    */
   constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
-    options = options || {};
+    options = options ?? {};
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Filter the options
@@ -781,7 +781,7 @@ export class Db implements OperationParent {
   watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
-    options = options || {};
+    options = options ?? {};
 
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
@@ -887,7 +887,7 @@ export class Db implements OperationParent {
     callback?: Callback<Document[]>
   ): Promise<Document[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     const cursor = this.collection('system.profile').find({}, options);
     return callback ? cursor.toArray(callback) : cursor.toArray();

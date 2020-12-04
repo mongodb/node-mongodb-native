@@ -28,6 +28,8 @@ export interface OperationOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
 }
 
+const kSession = Symbol('session');
+
 /**
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
@@ -35,11 +37,7 @@ export interface OperationOptions extends BSONSerializeOptions {
  * a specific aspect.
  * @internal
  */
-export abstract class OperationBase<
-  T extends OperationOptions = OperationOptions,
-  TResult = Document
-> {
-  options: T;
+export abstract class AbstractOperation<T> {
   ns!: MongoDBNamespace;
   cmd!: Document;
   readPreference: ReadPreference;
@@ -49,21 +47,22 @@ export abstract class OperationBase<
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
 
-  constructor(options: T = {} as T) {
-    this.options = Object.assign({}, options);
+  [kSession]: ClientSession;
 
+  constructor(options: OperationOptions = {}) {
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
-    // TODO: A lot of our code depends on having the read preference in the options. This should
-    //       go away, but also requires massive test rewrites.
-    this.options.readPreference = this.readPreference;
 
     // Pull the BSON serialize options from the already-resolved options
     this.bsonOptions = resolveBSONOptions(options);
+
+    if (options.session) {
+      this[kSession] = options.session;
+    }
   }
 
-  abstract execute(server: Server, callback: Callback<TResult>): void;
+  abstract execute(server: Server, session: ClientSession, callback: Callback<T>): void;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
@@ -74,20 +73,8 @@ export abstract class OperationBase<
     return ctor.aspects.has(aspect);
   }
 
-  set session(session: ClientSession) {
-    Object.assign(this.options, { session });
-  }
-
   get session(): ClientSession {
-    // NOTE: Using the bang operator here because we know there is always a
-    //       session, explicit or implicit. We should disambiguate the session
-    //       from the options and set it as an explicit field
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.options.session!;
-  }
-
-  clearSession(): void {
-    delete this.options.session;
+    return this[kSession];
   }
 
   get canRetryRead(): boolean {

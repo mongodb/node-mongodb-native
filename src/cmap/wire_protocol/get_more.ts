@@ -21,7 +21,7 @@ export function getMore(
   options: GetMoreOptions,
   callback: Callback<Document>
 ): void {
-  options = options || {};
+  options = options ?? {};
 
   const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
   const wireVersion = maxWireVersion(server);
