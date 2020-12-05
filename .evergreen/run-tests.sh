@@ -1,5 +1,5 @@
 #!/bin/bash
-set -o xtrace   # Write all commands first to stderr
+# set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
 # Supported/used environment variables:
@@ -10,17 +10,21 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "test-nolint"
 #       SKIP_DEPS               Skip installing dependencies
+#       NO_EXIT                 Don't exit early from tests that leak resources
 
 AUTH=${AUTH:-noauth}
-UNIFIED=${UNIFIED:-}
+UNIFIED=${UNIFIED:-0}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-test-nolint}
+if [[ -z "${NO_EXIT}" ]]; then
+  TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
+fi
 
 # ssl setup
 SSL=${SSL:-nossl}
 if [ "$SSL" != "nossl" ]; then
-   export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
-   export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
+  export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
+  export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
 fi
 
 # run tests

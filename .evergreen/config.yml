@@ -113,7 +113,8 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
