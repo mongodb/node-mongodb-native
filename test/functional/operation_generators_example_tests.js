@@ -1065,7 +1065,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { mongodb: '<=4.4', generators: true, topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {

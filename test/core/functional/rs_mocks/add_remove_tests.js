@@ -387,6 +387,7 @@ describe('ReplSet Add Remove (mocks)', function() {
   it('Successfully remove and re-add secondary server to the set', {
     metadata: {
       requires: {
+        os: '!win32',
         generators: true,
         topology: 'single'
       }

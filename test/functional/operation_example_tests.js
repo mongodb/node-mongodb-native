@@ -1721,7 +1721,7 @@ describe('Operation Examples', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommand', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '<=4.4', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2791,7 +2791,7 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single'] }
     },
 
     // The actual test we wish to run

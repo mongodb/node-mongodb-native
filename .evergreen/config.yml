@@ -132,12 +132,17 @@ functions:
           NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}'
           ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' bash
           ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  upload test results:
+    - command: attach.xunit_results
+      params:
+        file: src/xunit.xml
 pre:
   - func: fetch source
   - func: prepare resources
   - func: fix absolute paths
   - func: make files executable
 post:
+  - func: upload test results
   - func: cleanup
 tasks:
   - name: test-latest-server

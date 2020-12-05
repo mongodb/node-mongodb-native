@@ -484,7 +484,7 @@ describe('MongoClient', function() {
   });
 
   it('should correctly connect to mongodb using domain socket', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {

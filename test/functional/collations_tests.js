@@ -825,7 +825,9 @@ describe('Collation', function() {
   });
 
   it('Should correctly create collection with collation', {
-    metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
+    metadata: { requires: { topology: 'single', mongodb: '>=3.3.12 <=4.4' } },
+    // skipped on mongodb > 4.4 because of server error:
+    //   BSON field 'listCollections.collation' is an unknown field.
 
     test: function() {
       const configuration = this.configuration;

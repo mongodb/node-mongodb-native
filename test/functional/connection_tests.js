@@ -12,7 +12,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('should correctly start monitoring for single server connection', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -36,7 +36,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('should correctly disable monitoring for single server connection', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -64,7 +64,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('should correctly connect to server using domain socket', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -162,7 +162,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('should connect to server using domain socket with undefined port', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {
