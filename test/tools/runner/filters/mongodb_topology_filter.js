@@ -9,7 +9,7 @@ const TopologyType = require('../../../../lib/core/sdam/common').TopologyType;
  * example:
  * metadata: {
  *    requires: {
- *      topology: 'single' | 'replicaset' | 'sharded' | 'auth' | 'ssl'
+ *      topology: 'single' | 'replicaset' | 'sharded'
  *    }
  * }
  */

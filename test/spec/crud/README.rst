@@ -128,7 +128,7 @@ Each YAML file has the following keys:
         present then use the collection under test.
 
       - ``data``: The data that should exist in the collection after the
-        operation has been run.
+        operation has been run, sorted by "_id".
 
 Legacy Test Format for Single Operations
 ----------------------------------------
@@ -246,6 +246,8 @@ For each test file:
 
   - If the ``outcome`` field is present, assert the contents of the specified
     collection using ``globalMongoClient``.
+    Note the server does not guarantee that documents returned by a find
+    command will be in inserted order. This find MUST sort by ``{_id:1}``.
 
 Evaluating Matches
 ------------------

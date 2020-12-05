@@ -1,0 +1,83 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.4"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "find-network-error"
+
+data: &data
+  - {_id: 1}
+  - {_id: 2}
+
+tests:
+  - description: Reset server and pool after network error on find
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["find"]
+          closeConnection: true
+          appName: findNetworkErrorTest
+    clientOptions:
+      retryWrites: false
+      retryReads: false
+      appname: findNetworkErrorTest
+    operations:
+      - name: find
+        object: collection
+        arguments:
+          filter:
+            _id: 1
+        error: true
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+      # Perform another operation to ensure the node is rediscovered.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 5
+            - _id: 6
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+
+    expectations:
+      - command_started_event:
+          command:
+            find: *collection_name
+          command_name: find
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 5
+              - _id: 6
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 5}
+          - {_id: 6}

@@ -1,7 +1,6 @@
 'use strict';
-var test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
@@ -36,25 +35,29 @@ describe('CRUD API', function() {
           //
           // Cursor
           // --------------------------------------------------
-          var cursor = db.collection('t').find({});
-          // Possible methods on the the cursor instance
-          cursor
-            .filter({ a: 1 })
-            .addCursorFlag('noCursorTimeout', true)
-            .addQueryModifier('$comment', 'some comment')
-            .batchSize(2)
-            .comment('some comment 2')
-            .limit(2)
-            .maxTimeMs(50)
-            .project({ a: 1 })
-            .skip(0)
-            .sort({ a: 1 });
+          const makeCursor = () => {
+            // Possible methods on the the cursor instance
+            return db
+              .collection('t')
+              .find({})
+              .filter({ a: 1 })
+              .addCursorFlag('noCursorTimeout', true)
+              .addQueryModifier('$comment', 'some comment')
+              .batchSize(2)
+              .comment('some comment 2')
+              .limit(2)
+              .maxTimeMs(50)
+              .project({ a: 1 })
+              .skip(0)
+              .sort({ a: 1 });
+          };
 
           //
           // Exercise count method
           // -------------------------------------------------
           var countMethod = function() {
             // Execute the different methods supported by the cursor
+            const cursor = makeCursor();
             cursor.count(function(err, count) {
               test.equal(null, err);
               test.equal(2, count);
@@ -68,6 +71,7 @@ describe('CRUD API', function() {
           var eachMethod = function() {
             var count = 0;
 
+            const cursor = makeCursor();
             cursor.each(function(err, doc) {
               test.equal(null, err);
               if (doc) count = count + 1;
@@ -82,6 +86,7 @@ describe('CRUD API', function() {
           // Exercise toArray
           // -------------------------------------------------
           var toArrayMethod = function() {
+            const cursor = makeCursor();
             cursor.toArray(function(err, docs) {
               test.equal(null, err);
               test.equal(2, docs.length);
@@ -93,16 +98,16 @@ describe('CRUD API', function() {
           // Exercise next method
           // -------------------------------------------------
           var nextMethod = function() {
-            var clonedCursor = cursor.clone();
-            clonedCursor.next(function(err, doc) {
+            const cursor = makeCursor();
+            cursor.next(function(err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
 
-              clonedCursor.next(function(err, doc) {
+              cursor.next(function(err, doc) {
                 test.equal(null, err);
                 test.ok(doc != null);
 
-                clonedCursor.next(function(err, doc) {
+                cursor.next(function(err, doc) {
                   test.equal(null, err);
                   test.equal(null, doc);
                   streamMethod();
@@ -116,12 +121,12 @@ describe('CRUD API', function() {
           // -------------------------------------------------
           var streamMethod = function() {
             var count = 0;
-            var clonedCursor = cursor.clone();
-            clonedCursor.on('data', function() {
+            const cursor = makeCursor();
+            cursor.on('data', function() {
               count = count + 1;
             });
 
-            clonedCursor.once('end', function() {
+            cursor.once('end', function() {
               test.equal(2, count);
               explainMethod();
             });
@@ -131,8 +136,8 @@ describe('CRUD API', function() {
           // Explain method
           // -------------------------------------------------
           var explainMethod = function() {
-            var clonedCursor = cursor.clone();
-            clonedCursor.explain(function(err, result) {
+            const cursor = makeCursor();
+            cursor.explain(function(err, result) {
               test.equal(null, err);
               test.ok(result != null);
 
@@ -1010,115 +1015,6 @@ describe('CRUD API', function() {
           test.ok(err !== null);
           client.close(done);
         });
-      });
-    }
-  });
-
-  it('should correctly throw error if update doc for findOneAndUpdate lacks atomic operator', function(done) {
-    let configuration = this.configuration;
-    let client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-    client.connect(function(err, client) {
-      expect(err).to.not.exist;
-      let db = client.db(configuration.db);
-      let col = db.collection('t21_1');
-      col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
-        expect(err).to.not.exist;
-        expect(r.insertedCount).to.equal(1);
-
-        // empty update document
-        col.findOneAndUpdate({ a: 1 }, {}, function(err, r) {
-          expect(err).to.exist;
-          expect(r).to.not.exist;
-
-          // update document non empty but still lacks atomic operator
-          col.findOneAndUpdate({ a: 1 }, { b: 5 }, function(err, r) {
-            expect(err).to.exist;
-            expect(r).to.not.exist;
-
-            client.close(done);
-          });
-        });
-      });
-    });
-  });
-
-  it('should correctly throw error if update doc for updateOne lacks atomic operator', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        var col = db.collection('t21_1');
-        col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
-          expect(err).to.not.exist;
-          expect(r.insertedCount).to.equal(1);
-
-          // empty update document
-          col.updateOne({ a: 1 }, {}, function(err, r) {
-            expect(err).to.exist;
-            expect(r).to.not.exist;
-
-            // update document non empty but still lacks atomic operator
-            col.updateOne({ a: 1 }, { b: 5 }, function(err, r) {
-              expect(err).to.exist;
-              expect(r).to.not.exist;
-
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
-  });
-
-  it('should correctly throw error if update doc for updateMany lacks atomic operator', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        var col = db.collection('t22_1');
-        col.insertMany(
-          [
-            { a: 1, b: 2 },
-            { a: 1, b: 3 },
-            { a: 1, b: 4 }
-          ],
-          function(err, r) {
-            expect(err).to.not.exist;
-            expect(r.insertedCount).to.equal(3);
-
-            // empty update document
-            col.updateMany({ a: 1 }, {}, function(err, r) {
-              expect(err).to.exist;
-              expect(r).to.not.exist;
-
-              // update document non empty but still lacks atomic operator
-              col.updateMany({ a: 1 }, { b: 5 }, function(err, r) {
-                expect(err).to.exist;
-                expect(r).to.not.exist;
-
-                client.close(done);
-              });
-            });
-          }
-        );
       });
     }
   });

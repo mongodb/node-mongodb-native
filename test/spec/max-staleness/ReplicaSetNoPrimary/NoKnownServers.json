@@ -14,7 +14,8 @@
   },
   "read_preference": {
     "mode": "Nearest",
-    "maxStalenessSeconds": 1
+    "maxStalenessSeconds": 90
   },
-  "error": true
+  "suitable_servers": [],
+  "in_latency_window": []
 }

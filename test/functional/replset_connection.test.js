@@ -1,6 +1,7 @@
 'use strict';
 var f = require('util').format;
 var test = require('./shared').assert;
+const expect = require('chai').expect;
 var setupDatabase = require('./shared').setupDatabase;
 
 var restartAndDone = function(configuration, done) {
@@ -595,7 +596,7 @@ describe.skip('ReplSet (Connection)', function() {
         var db = client.db(configuration.db);
 
         test.equal(500, client.topology.connections()[0].connectionTimeout);
-        test.equal(360000, client.topology.connections()[0].socketTimeout);
+        expect(client.topology.connections()[0].socketTimeout).to.equal(0);
 
         db.collection('replicaset_mongo_client_collection').update(
           { a: 1 },
@@ -864,7 +865,8 @@ describe.skip('ReplSet (Connection)', function() {
     }
   });
 
-  var waitForPrimary = function(count, config, options, callback) {
+  var waitForPrimary;
+  waitForPrimary = function(count, config, options, callback) {
     var ReplSet = require('../../lib/core').ReplSet;
     if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect

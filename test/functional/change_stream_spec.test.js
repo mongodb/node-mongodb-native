@@ -44,7 +44,11 @@ describe('Change Stream Spec', function() {
               return gc.db(suite.database2_name).createCollection(suite.collection2_name);
             }
           })
-          .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
+          .then(() =>
+            configuration
+              .newClient({}, { monitorCommands: true, heartbeatFrequencyMS: 100 })
+              .connect()
+          )
           .then(client => {
             ctx = { gc, client };
             events = [];

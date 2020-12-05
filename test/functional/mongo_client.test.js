@@ -3,6 +3,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const ReadPreference = require('../../lib/core/topologies/read_preference');
 const Db = require('../../lib/db');
 const expect = require('chai').expect;
 
@@ -367,7 +368,7 @@ describe('MongoClient', function() {
 
         for (var i = 0; i < connections.length; i++) {
           test.equal(10000, connections[i].connectionTimeout);
-          test.equal(360000, connections[i].socketTimeout);
+          expect(connections[i].socketTimeout).to.equal(0);
         }
 
         client.close();
@@ -486,7 +487,7 @@ describe('MongoClient', function() {
   });
 
   it('should correctly connect to mongodb using domain socket', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], os: '!win32' } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -517,7 +518,10 @@ describe('MongoClient', function() {
         {},
         {
           keepAlive: true,
-          keepAliveInitialDelay: 100
+          keepAliveInitialDelay: 100,
+          // keepAliveInitialDelay is clamped to half the size of socketTimeout
+          // if socketTimeout is less than keepAliveInitialDelay
+          socketTimeout: 101
         }
       );
 
@@ -830,5 +834,11 @@ describe('MongoClient', function() {
           throw err;
         }
       });
+  });
+
+  it('should cache a resolved readPreference from options', function() {
+    const client = this.configuration.newClient({}, { readPreference: ReadPreference.SECONDARY });
+    expect(client.readPreference).to.be.instanceOf(ReadPreference);
+    expect(client.readPreference).to.have.property('mode', ReadPreference.SECONDARY);
   });
 });

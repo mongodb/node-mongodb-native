@@ -4,6 +4,7 @@ const test = require('./shared').assert,
   expect = require('chai').expect;
 
 const MongoError = require('../../index').MongoError;
+const ignoreNsNotFound = require('./shared').ignoreNsNotFound;
 
 describe('Bulk', function() {
   before(function() {
@@ -301,63 +302,6 @@ describe('Bulk', function() {
       });
     }
   });
-
-  it(
-    'should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands',
-    {
-      metadata: {
-        requires: {
-          mongodb: '>2.5.4',
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-        }
-      },
-
-      test: function(done) {
-        var self = this;
-        var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          poolSize: 1
-        });
-
-        client.connect(function(err, client) {
-          var db = client.db(self.configuration.db);
-          var col = db.collection('batch_write_ordered_ops_5');
-
-          // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err) {
-            test.equal(err, null);
-
-            var batch = col.initializeOrderedBulkOp();
-
-            // Add illegal insert operation
-            batch.insert({ $set: { a: 1 } });
-
-            // Execute the operations
-            batch.execute(function(err) {
-              test.ok(err != null);
-
-              var batch = col.initializeOrderedBulkOp();
-              // Add illegal remove
-              batch.find({ $set: { a: 1 } }).removeOne();
-              // Execute the operations
-              batch.execute(function(err) {
-                test.ok(err != null);
-
-                var batch = col.initializeOrderedBulkOp();
-                // Add illegal update
-                batch.find({ a: { $set2: 1 } }).updateOne({ c: { $set: { a: 1 } } });
-                // Execute the operations
-                batch.execute(function(err) {
-                  test.ok(err != null);
-
-                  client.close(done);
-                });
-              });
-            });
-          });
-        });
-      }
-    }
-  );
 
   it(
     'should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates',
@@ -782,68 +726,6 @@ describe('Bulk', function() {
     }
   });
 
-  it('should Correctly Fail Unordered Batch Operation due to illegal Operations', {
-    metadata: {
-      requires: {
-        mongodb: '>2.5.4',
-        topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function(done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        poolSize: 1
-      });
-
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        var col = db.collection('batch_write_unordered_ops_legacy_5');
-
-        // Write concern
-        var writeConcern = self.configuration.writeConcernMax();
-        writeConcern.unique = true;
-        writeConcern.sparse = false;
-
-        // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ b: 1 }, writeConcern, function(err) {
-          test.equal(err, null);
-
-          // Initialize the unordered Batch
-          var batch = col.initializeUnorderedBulkOp();
-
-          // Add illegal insert operation
-          batch.insert({ $set: { a: 1 } });
-
-          // Execute the operations
-          batch.execute(function(err) {
-            test.ok(err != null);
-
-            // Initialize the unordered Batch
-            var batch = col.initializeUnorderedBulkOp();
-            // Add illegal remove
-            batch.find({ $set: { a: 1 } }).removeOne();
-            // Execute the operations
-            batch.execute(function(err) {
-              test.ok(err != null);
-
-              // Initialize the unordered Batch
-              var batch = col.initializeUnorderedBulkOp();
-              // Add illegal update
-              batch.find({ $set: { a: 1 } }).updateOne({ c: { $set: { a: 1 } } });
-              // Execute the operations
-              batch.execute(function(err) {
-                test.ok(err != null);
-
-                client.close(done);
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
   it('should Correctly Execute Unordered Batch with duplicate key errors on updates', {
     metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
@@ -878,7 +760,7 @@ describe('Bulk', function() {
           batch.insert({ b: 1 });
 
           // Execute the operations
-          batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+          batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -930,7 +812,7 @@ describe('Bulk', function() {
           batch.insert({ a: 1 });
 
           // Execute the operations
-          batch.execute(configuration.writeConcernMax(), (err, result) => {
+          batch.execute(configuration.writeConcernMax().writeConcern, (err, result) => {
             expect(err).to.exist;
             expect(result).to.not.exist;
 
@@ -990,7 +872,7 @@ describe('Bulk', function() {
             batch.insert({ b: 1 });
 
             // Execute the operations
-            batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+            batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
               expect(err).to.exist;
               expect(result).to.not.exist;
 
@@ -1046,7 +928,7 @@ describe('Bulk', function() {
           .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
-        batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+        batch.execute(self.configuration.writeConcernMax().writeConcern, function(err, result) {
           // Check state of result
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1616,16 +1498,41 @@ describe('Bulk', function() {
       .then(() => client.close());
   });
 
+  it('should promote a single error to the top-level message, and preserve writeErrors', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('single_bulk_write_error');
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => coll.insert(Array.from({ length: 4 }, (_, i) => ({ _id: i, a: i }))))
+        .then(() =>
+          coll.bulkWrite([{ insertOne: { _id: 5, a: 0 } }, { insertOne: { _id: 5, a: 0 } }])
+        )
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err)
+              .property('message')
+              .to.match(/E11000/);
+            expect(err)
+              .to.have.property('writeErrors')
+              .with.length(1);
+          }
+        );
+    });
+  });
+
   it('should preserve order of operation index in unordered bulkWrite', function() {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
       this.defer(() => client.close());
 
       const coll = client.db().collection('bulk_write_ordering_test');
-      function ignoreNsNotFound(err) {
-        if (!err.message.match(/ns not found/)) throw err;
-      }
-
       return coll
         .drop()
         .catch(ignoreNsNotFound)
@@ -1637,9 +1544,9 @@ describe('Bulk', function() {
               coll.bulkWrite(
                 [
                   { insertOne: { _id: 5, a: 0 } },
-                  { updateOne: { filter: { _id: 1 }, update: { $set: { a: 0 } } } },
+                  { updateOne: { filter: { _id: 1 }, update: { $set: { a: 15 } } } },
                   { insertOne: { _id: 6, a: 0 } },
-                  { updateOne: { filter: { _id: 2 }, update: { $set: { a: 0 } } } }
+                  { updateOne: { filter: { _id: 2 }, update: { $set: { a: 42 } } } }
                 ],
                 { ordered: false }
               )
@@ -1666,11 +1573,7 @@ describe('Bulk', function() {
     return client.connect().then(() => {
       this.defer(() => client.close());
 
-      const coll = client.db().collection('bulk_op_ordering_test');
-      function ignoreNsNotFound(err) {
-        if (!err.message.match(/ns not found/)) throw err;
-      }
-
+      const coll = client.db().collection('unordered_preserve_order');
       return coll
         .drop()
         .catch(ignoreNsNotFound)
@@ -1694,6 +1597,68 @@ describe('Bulk', function() {
             expect(err).to.have.nested.property('writeErrors[0].err.index', 1);
             expect(err).to.have.nested.property('writeErrors[1].err.index', 3);
           }
+        );
+    });
+  });
+
+  it('should not fail on the first error in an unorderd bulkWrite', function() {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('bulk_op_ordering_test');
+      return coll
+        .drop()
+        .catch(ignoreNsNotFound)
+        .then(() => coll.createIndex({ email: 1 }, { unique: 1, background: false }))
+        .then(() =>
+          Promise.all([
+            coll.updateOne(
+              { email: 'adam@gmail.com' },
+              { $set: { name: 'Adam Smith', age: 29 } },
+              { upsert: true }
+            ),
+            coll.updateOne(
+              { email: 'john@gmail.com' },
+              { $set: { name: 'John Doe', age: 32 } },
+              { upsert: true }
+            )
+          ])
+        )
+        .then(() =>
+          coll.bulkWrite(
+            [
+              {
+                updateOne: {
+                  filter: { email: 'adam@gmail.com' },
+                  update: { $set: { age: 39 } }
+                }
+              },
+              {
+                insertOne: {
+                  document: {
+                    email: 'john@gmail.com'
+                  }
+                }
+              }
+            ],
+            { ordered: false }
+          )
+        )
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err =>
+            expect(err)
+              .property('code')
+              .to.equal(11000)
+        )
+        .then(() => coll.findOne({ email: 'adam@gmail.com' }))
+        .then(updatedAdam =>
+          expect(updatedAdam)
+            .property('age')
+            .to.equal(39)
         );
     });
   });

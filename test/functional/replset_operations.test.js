@@ -252,7 +252,7 @@ describe('ReplSet (Operations)', function() {
             batch
               .find({ a: 3 })
               .upsert()
-              .updateOne({ a: 3, b: 1 });
+              .updateOne({ $set: { a: 3, b: 1 } });
             batch.insert({ a: 2 });
 
             // Execute the operations

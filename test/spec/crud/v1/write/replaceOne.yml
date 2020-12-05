@@ -10,9 +10,8 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: 
-                    _id: {$gt: 1}
-                replacement: {x: 111}
+                filter: { _id: {$gt: 1} }
+                replacement: { x: 111 }
 
         outcome:
             result:
@@ -26,8 +25,8 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: {_id: 1}
-                replacement: {_id: 1, x: 111}
+                filter: { _id: 1 }
+                replacement: { _id: 1, x: 111 }
 
         outcome:
             result:
@@ -44,8 +43,8 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: {_id: 4}
-                replacement: {_id: 4, x: 1}
+                filter: { _id: 4 }
+                replacement: { _id: 4, x: 1 }
 
         outcome:
             result:
@@ -62,8 +61,8 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: {_id: 4}
-                replacement: {x: 1}
+                filter: { _id: 4 }
+                replacement: { x: 1 }
                 upsert: true
 
         outcome:
@@ -84,8 +83,8 @@ tests:
         operation:
             name: "replaceOne"
             arguments:
-                filter: {_id: 4}
-                replacement: {_id: 4, x: 1}
+                filter: { _id: 4 }
+                replacement: { _id: 4, x: 1 }
                 upsert: true
 
         outcome:
@@ -100,3 +99,18 @@ tests:
                     - {_id: 2, x: 22}
                     - {_id: 3, x: 33}
                     - {_id: 4, x: 1}
+    -
+        description: "ReplaceOne require no atomic operators in replacement document"
+        operation:
+            name: "replaceOne"
+            arguments:
+                filter: { _id: 4 }
+                replacement: { $set: { _id: 4, x: 1 } }
+                upsert: true
+        outcome:
+            error: true
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 22}
+                    - {_id: 3, x: 33}

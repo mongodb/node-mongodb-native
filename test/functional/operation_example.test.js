@@ -1754,7 +1754,7 @@ describe('Operation Examples', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommand', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '<=4.4', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -3936,15 +3936,17 @@ describe('Operation Examples', function() {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
+        expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        test.equal(null, err);
+        db.createCollection('example', err => {
+          expect(err).to.not.exist;
+          // Retry to get the collection, should work as it's now created
+          db.collections(function(err, collections) {
+            expect(err).to.not.exist;
+            test.ok(collections.length > 0);
 
-        // Retry to get the collection, should work as it's now created
-        db.collections(function(err, collections) {
-          test.equal(null, err);
-          test.ok(collections.length > 0);
-
-          client.close(done);
+            client.close(done);
+          });
         });
       });
       // END
@@ -9353,7 +9355,9 @@ describe('Operation Examples', function() {
    */
   it('Should correctly add capped collection options to cursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
     },
 
     // The actual test we wish to run
@@ -9377,7 +9381,7 @@ describe('Operation Examples', function() {
         // Create a capped collection with a maximum of 1000 documents
         db.createCollection(
           'a_simple_collection_2',
-          { capped: true, size: 100000, max: 10000, w: 1 },
+          { capped: true, size: 100000, max: 1000, w: 1 },
           function(err, collection) {
             test.equal(null, err);
 

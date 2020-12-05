@@ -4,6 +4,7 @@ const BSON = require('bson');
 const Topology = require('../../../lib/core/sdam/topology').Topology;
 const Monitor = require('../../../lib/core/sdam/monitor').Monitor;
 const ServerType = require('../../../lib/core/sdam/common').ServerType;
+const ServerDescription = require('../../../lib/core/sdam/server_description').ServerDescription;
 const expect = require('chai').expect;
 
 class MockServer {
@@ -12,10 +13,8 @@ class MockServer {
       bson: new BSON()
     };
 
-    this.description = {
-      type: ServerType.Unknown,
-      address: `${options.host}:${options.port}`
-    };
+    this.description = new ServerDescription(`${options.host}:${options.port}`);
+    this.description.type = ServerType.Unknown;
   }
 }
 
@@ -87,20 +86,17 @@ describe('monitoring', function() {
     const topology = new Topology(mockServer.uri());
     topology.connect(err => {
       expect(err).to.not.exist;
+      expect(topology)
+        .property('description')
+        .property('servers')
+        .to.have.length(1);
 
-      setTimeout(() => {
-        expect(topology)
-          .property('description')
-          .property('servers')
-          .to.have.length(1);
+      const serverDescription = Array.from(topology.description.servers.values())[0];
+      expect(serverDescription)
+        .property('roundTripTime')
+        .to.be.greaterThan(0);
 
-        const serverDescription = Array.from(topology.description.servers.values())[0];
-        expect(serverDescription)
-          .property('roundTripTime')
-          .to.be.greaterThan(0);
-
-        topology.close(done);
-      }, 500);
+      topology.close(done);
     });
   });
 
@@ -217,172 +213,6 @@ describe('monitoring', function() {
       monitor.on('close', () => {
         expect(events).to.have.length(2);
         done();
-      });
-
-      monitor.connect();
-    });
-
-    it('should signal to reset the connection pool after first failed heartbeat', function(done) {
-      let isMasterCount = 0;
-      mockServer.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster) {
-          isMasterCount++;
-          request.reply(
-            isMasterCount === 2
-              ? { ok: 0, errmsg: 'forced from mock server' }
-              : mock.DEFAULT_ISMASTER_36
-          );
-        }
-      });
-
-      const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {
-        heartbeatFrequencyMS: 250,
-        minHeartbeatFrequencyMS: 50
-      });
-      this.defer(() => monitor.close());
-
-      let resetRequested = false;
-      monitor.on('serverHeartbeatFailed', () => {
-        if (resetRequested) {
-          done(new Error('unexpected heartbeat failure'));
-        }
-      });
-
-      monitor.on('resetConnectionPool', () => (resetRequested = true));
-      monitor.on('serverHeartbeatSucceeded', () => {
-        if (server.description.type === ServerType.Unknown) {
-          // this is the first successful heartbeat, set the server type
-          server.description.type = ServerType.Standalone;
-          return;
-        }
-
-        // otherwise, this is the second heartbeat success and we should verify
-        // a reset was requested
-        expect(resetRequested).to.be.true;
-        done();
-      });
-
-      monitor.connect();
-    });
-
-    it('should report the most recent error on second monitoring failure', function(done) {
-      let failedCount = 0;
-      let initialConnectCompleted = false;
-      mockServer.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster) {
-          if (!initialConnectCompleted) {
-            request.reply(mock.DEFAULT_ISMASTER_36);
-            initialConnectCompleted = true;
-            return;
-          }
-
-          if (failedCount === 0) {
-            failedCount++;
-            request.reply({ ok: 0, errmsg: 'first error message' });
-          } else if (failedCount === 1) {
-            failedCount++;
-            request.reply({ ok: 0, errmsg: 'second error message' });
-          } else {
-            request.reply(mock.DEFAULT_ISMASTER_36);
-          }
-        }
-      });
-
-      const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {
-        heartbeatFrequencyMS: 250,
-        minHeartbeatFrequencyMS: 50
-      });
-      this.defer(() => monitor.close());
-
-      let resetRequested = false;
-      monitor.on('resetConnectionPool', () => (resetRequested = true));
-      monitor.once('serverHeartbeatSucceeded', () => {
-        // this is the first successful heartbeat, set the server type
-        server.description.type = ServerType.Standalone;
-
-        let failureCount = 0;
-        monitor.on('serverHeartbeatFailed', event => {
-          failureCount++;
-          if (failureCount === 2) {
-            expect(resetRequested).to.be.true;
-            expect(event)
-              .property('failure')
-              .to.match(/second error message/);
-            done();
-          }
-        });
-      });
-
-      monitor.connect();
-    });
-
-    it('should report events in the correct order during monitoring failure', function(done) {
-      let failedCount = 0;
-      let initialConnectCompleted = false;
-      mockServer.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster) {
-          if (!initialConnectCompleted) {
-            request.reply(mock.DEFAULT_ISMASTER_36);
-            initialConnectCompleted = true;
-            return;
-          }
-
-          if (failedCount === 0) {
-            failedCount++;
-            request.reply({ ok: 0, errmsg: 'first error message' });
-          } else {
-            failedCount++;
-            request.reply({ ok: 0, errmsg: 'second error message' });
-          }
-        }
-      });
-
-      const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {
-        heartbeatFrequencyMS: 250,
-        minHeartbeatFrequencyMS: 50
-      });
-      this.defer(() => monitor.close());
-
-      let poolResetRequested = false;
-      let serverResetRequested = false;
-      monitor.on('resetConnectionPool', () => (poolResetRequested = true));
-      monitor.on('resetServer', () => (serverResetRequested = true));
-
-      const events = [];
-      monitor.once('serverHeartbeatSucceeded', () => {
-        // this is the first successful heartbeat, set the server type
-        server.description.type = ServerType.Standalone;
-
-        monitor.on('serverHeartbeatStarted', event => events.push(event));
-        monitor.on('serverHeartbeatFailed', event => events.push(event));
-        monitor.once('resetServer', err => {
-          expect(poolResetRequested).to.be.true;
-          expect(serverResetRequested).to.be.true;
-          expect(events.map(e => e.constructor.name)).to.eql([
-            'ServerHeartbeatStartedEvent',
-            'ServerHeartbeatFailedEvent',
-            'ServerHeartbeatStartedEvent',
-            'ServerHeartbeatFailedEvent'
-          ]);
-
-          expect(events[1])
-            .property('failure')
-            .to.match(/first error message/);
-          expect(events[3])
-            .property('failure')
-            .to.match(/second error message/);
-          expect(events[3])
-            .property('failure')
-            .to.eql(err);
-
-          done();
-        });
       });
 
       monitor.connect();

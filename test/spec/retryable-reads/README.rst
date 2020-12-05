@@ -84,7 +84,10 @@ Each YAML file has the following keys:
 - ``bucket_name``: Optional. The GridFS bucket name to use for testing.
 
 - ``data``: The data that should exist in the collection(s) under test before
-  each test run.
+  each test run. This will typically be an array of documents to be inserted
+  into the collection under test (i.e. ``collection_name``); however, this field
+  may also be an object mapping collection names to arrays of documents to be
+  inserted into the specified collection.
     
 - ``tests``: An array of tests that are to be run independently of each other.
   Each test will have some or all of the following fields:
@@ -126,6 +129,9 @@ GridFS Tests
 ------------
 
 GridFS tests are denoted by when the YAML file contains ``bucket_name``.
+The ``data`` field will also be an object, which maps collection names
+(e.g. ``fs.files``) to an array of documents that should be inserted into
+the specified collection.
 
 ``fs.files`` and ``fs.chunks`` should be created in the database
 specified by ``database_name``. This could be done via inserts or by

@@ -9,7 +9,7 @@ tests:
         operation:
             name: findOneAndReplace
             arguments:
-                filter: 
+                filter:
                     _id: {$gt: 1}
                 replacement: {x: 32}
                 projection: {x: 1, _id: 0}
@@ -27,7 +27,7 @@ tests:
         operation:
             name: findOneAndReplace
             arguments:
-                filter: 
+                filter:
                     _id: {$gt: 1}
                 replacement: {x: 32}
                 projection: {x: 1, _id: 0}
@@ -106,6 +106,24 @@ tests:
 
         outcome:
             result: null
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 22}
+                    - {_id: 3, x: 33}
+    -
+        description: "FindOneAndReplace require no atomic operators in replacement document"
+        operation:
+            name: findOneAndReplace
+            arguments:
+                filter: { _id: 4 }
+                replacement: { $set: { x: 44 } }
+                projection: { x: 1, _id: 0 }
+                returnDocument: After
+                sort: { x: 1 }
+
+        outcome:
+            error: true
             collection:
                 data:
                     - {_id: 1, x: 11}

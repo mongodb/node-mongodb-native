@@ -11,7 +11,9 @@ describe('Tailable cursor tests', function() {
 
   it('should correctly perform awaitdata', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
     },
 
     test: function(done) {

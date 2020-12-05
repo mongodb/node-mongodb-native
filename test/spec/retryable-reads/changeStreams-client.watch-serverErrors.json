@@ -59,7 +59,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -76,7 +75,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -116,7 +114,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -133,7 +130,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -173,7 +169,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -190,7 +185,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -230,7 +224,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -247,7 +240,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -287,7 +279,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -304,7 +295,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -344,7 +334,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -361,7 +350,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -401,7 +389,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -418,7 +405,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -458,7 +444,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -475,7 +460,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -515,7 +499,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -532,7 +515,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -572,7 +554,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -589,7 +570,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -629,7 +609,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -646,7 +625,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -687,7 +665,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -704,7 +681,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }
@@ -748,7 +724,6 @@
               "pipeline": [
                 {
                   "$changeStream": {
-                    "fullDocument": "default",
                     "allChangesForCluster": true
                   }
                 }

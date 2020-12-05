@@ -1,7 +1,35 @@
 {
   "description": "Direct connection to RSPrimary with wrong set name",
-  "uri": "mongodb://a/?directConnection=true&replicaSet=wrong",
+  "uri": "mongodb://a/?directConnection=true&replicaSet=rs",
   "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "wrong",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "Unknown"
+          }
+        },
+        "topologyType": "Single",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    },
     {
       "responses": [
         [
@@ -28,7 +56,7 @@
         },
         "topologyType": "Single",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "wrong"
+        "setName": "rs"
       }
     }
   ]

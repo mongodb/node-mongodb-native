@@ -1,0 +1,29 @@
+{
+  "root": true,
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "plugins": [
+    "prettier",
+    "es"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "env": {
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "es/no-destructuring": "error",
+    "es/no-rest-spread-properties": "error",
+    "es/no-spread-elements": "error",
+    "no-console": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "strict": ["error", "global"]
+  },
+  "ignorePatterns": ["test/benchmarks/*.js", "test/examples/*.js"]
+}

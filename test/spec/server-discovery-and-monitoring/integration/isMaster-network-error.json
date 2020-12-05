@@ -1,0 +1,225 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "isMaster-network-error",
+  "data": [],
+  "tests": [
+    {
+      "description": "Network error on Monitor handshake",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "isMaster"
+          ],
+          "appName": "networkErrorHandshakeTest",
+          "closeConnection": true
+        }
+      },
+      "clientOptions": {
+        "retryWrites": false,
+        "connectTimeoutMS": 250,
+        "heartbeatFrequencyMS": 500,
+        "appname": "networkErrorHandshakeTest"
+      },
+      "operations": [
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              }
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "isMaster-network-error",
+              "documents": [
+                {
+                  "_id": 1
+                },
+                {
+                  "_id": 2
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Network error on Monitor check",
+      "clientOptions": {
+        "retryWrites": false,
+        "connectTimeoutMS": 250,
+        "heartbeatFrequencyMS": 500,
+        "appname": "networkErrorCheckTest"
+      },
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "configureFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "isMaster"
+                ],
+                "appName": "networkErrorCheckTest",
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "isMaster-network-error",
+              "documents": [
+                {
+                  "_id": 1
+                },
+                {
+                  "_id": 2
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "isMaster-network-error",
+              "documents": [
+                {
+                  "_id": 3
+                },
+                {
+                  "_id": 4
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

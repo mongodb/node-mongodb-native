@@ -352,6 +352,12 @@
       "credential": null
     },
     {
+      "description": "authSource without username doesn't create credential",
+      "uri": "mongodb://localhost/?authSource=foo",
+      "valid": true,
+      "credential": null
+    },
+    {
       "description": "should throw an exception if no username provided (userinfo implies default mechanism)",
       "uri": "mongodb://@localhost.com/",
       "valid": false

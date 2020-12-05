@@ -23,7 +23,7 @@ describe('Client Side Encryption Prose Tests', function() {
 
   const shared = require('../shared');
   const dropCollection = shared.dropCollection;
-  const EventCollector = shared.EventCollector;
+  const APMEventCollector = shared.APMEventCollector;
 
   const localKey = Buffer.from(
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
@@ -43,7 +43,7 @@ describe('Client Side Encryption Prose Tests', function() {
         { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
       );
 
-      this.commandStartedEvents = new EventCollector(this.client, 'commandStarted', {
+      this.commandStartedEvents = new APMEventCollector(this.client, 'commandStarted', {
         exclude: ['ismaster']
       });
 
@@ -512,7 +512,7 @@ describe('Client Side Encryption Prose Tests', function() {
       );
       return this.clientEncrypted.connect().then(() => {
         this.encryptedColl = this.clientEncrypted.db(dataDbName).collection(dataCollName);
-        this.commandStartedEvents = new EventCollector(this.clientEncrypted, 'commandStarted', {
+        this.commandStartedEvents = new APMEventCollector(this.clientEncrypted, 'commandStarted', {
           include: ['insert']
         });
       });
@@ -788,7 +788,7 @@ describe('Client Side Encryption Prose Tests', function() {
                   { useNewUrlParser: true, useUnifiedTopology: true, monitorCommands: true }
                 );
 
-                this.commandStartedEvents = new EventCollector(
+                this.commandStartedEvents = new APMEventCollector(
                   this.externalClient,
                   'commandStarted',
                   {

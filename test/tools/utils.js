@@ -5,6 +5,7 @@ const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const arrayStrictEqual = require('../../lib/core/utils').arrayStrictEqual;
 const errorStrictEqual = require('../../lib/core/utils').errorStrictEqual;
 const chalk = require('chalk');
+const util = require('util');
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
@@ -66,7 +67,9 @@ function diff(lhs, rhs, fields, comparator) {
 
     if (!comparator(lhs[field], rhs[field])) {
       diff.push(
-        `  ${field}: ${chalk.green(`[${lhs[field]}]`)} => ${chalk.green(`[${rhs[field]}]`)}`
+        `  ${field}: ${chalk.green(`${util.inspect(lhs[field])}`)} => ${chalk.green(
+          `${util.inspect(rhs[field])}`
+        )}`
       );
     }
 

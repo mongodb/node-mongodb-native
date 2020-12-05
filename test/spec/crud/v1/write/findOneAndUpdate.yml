@@ -9,9 +9,9 @@ tests:
         operation:
             name: findOneAndUpdate
             arguments:
-                filter: 
+                filter:
                     _id: {$gt: 1}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 sort: {x: 1}
@@ -28,9 +28,9 @@ tests:
         operation:
             name: findOneAndUpdate
             arguments:
-                filter: 
+                filter:
                     _id: {$gt: 1}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 returnDocument: After
@@ -49,7 +49,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 2}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 sort: {x: 1}
@@ -67,7 +67,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 2}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 returnDocument: After
@@ -86,7 +86,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 4}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 sort: {x: 1}
@@ -104,7 +104,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 4}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 # Omit the sort option as it has no effect when no documents
@@ -127,7 +127,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 4}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 returnDocument: After
@@ -146,7 +146,7 @@ tests:
             name: findOneAndUpdate
             arguments:
                 filter: {_id: 4}
-                update: 
+                update:
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
                 returnDocument: After
@@ -161,3 +161,22 @@ tests:
                     - {_id: 2, x: 22}
                     - {_id: 3, x: 33}
                     - {_id: 4, x: 1}
+    -
+        description: "FindOneAndUpdate require atomic operators for update document"
+        operation:
+            name: findOneAndUpdate
+            arguments:
+                filter: { _id: 4 }
+                update: { x: 1 }
+                projection: { x: 1, _id: 0 }
+                returnDocument: After
+                sort: { x: 1 }
+                upsert: true
+
+        outcome:
+            error: true
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 22}
+                    - {_id: 3, x: 33}

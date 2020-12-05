@@ -1,0 +1,44 @@
+runOn:
+  # These tests assert that the driver does not raise client-side errors and
+  # instead relies on the server to raise an error. Server versions >= 3.2.0
+  # raise errors for unknown find options, and server versions >= 4.3.1
+  # support the allowDiskUse option in find.
+  - { minServerVersion: "3.2", maxServerVersion: "4.3.0" }
+
+collection_name: &collection_name 'test_find_allowdiskuse_servererror'
+
+tests:
+  -
+    description: "Find fails when allowDiskUse true is specified against pre 4.4 server (server-side error)"
+    operations:
+      -
+        object: collection
+        name: find
+        arguments:
+          filter: &filter { }
+          allowDiskUse: true
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            find: *collection_name
+            filter: *filter
+            allowDiskUse: true
+  -
+    description: "Find fails when allowDiskUse false is specified against pre 4.4 server (server-side error)"
+    operations:
+      -
+        object: collection
+        name: find
+        arguments:
+          filter: *filter
+          allowDiskUse: false
+        error: true
+    expectations:
+      -
+        command_started_event:
+          command:
+            find: *collection_name
+            filter: *filter
+            allowDiskUse: false

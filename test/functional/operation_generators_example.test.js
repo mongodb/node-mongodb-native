@@ -1093,7 +1093,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { mongodb: '<=4.4', generators: true, topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2220,7 +2220,7 @@ describe('Operation (Generators)', function() {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
 
         // Remove all the document
-        collection.removeMany();
+        yield collection.removeMany();
 
         // Fetch all results
         var items = yield collection.find().toArray();
@@ -2931,6 +2931,7 @@ describe('Operation (Generators)', function() {
           .newClient(configuration.writeConcernMax(), { poolSize: 1 })
           .connect();
         var db = client.db(configuration.db);
+        yield db.createCollection('example');
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   co = require('co');
         // LINE   test = require('assert');
@@ -6463,7 +6464,13 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor with Generators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: {
+      requires: {
+        generators: true,
+        topology: ['single'],
+        os: '!win32' // NODE-2943: timeout on windows
+      }
+    },
 
     // The actual test we wish to run
     test: function() {
@@ -6491,7 +6498,7 @@ describe('Operation (Generators)', function() {
         var collection = yield db.createCollection('a_simple_collection_2_with_generators', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           w: 1
         });
         var docs = [];

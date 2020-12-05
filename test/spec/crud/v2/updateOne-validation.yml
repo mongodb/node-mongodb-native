@@ -1,0 +1,21 @@
+data:
+  - { _id: 1, x: 11 }
+
+tests:
+  -
+    description: "UpdateOne requires atomic modifiers"
+    operations:
+      -
+        object: collection
+        name: updateOne
+        arguments:
+          filter: { _id: 1 }
+          # Only the first field is tested, as the spec permits drivers to only
+          # check that and rely on the server to check subsequent fields.
+          update: { x: 22 }
+        error: true
+    expectations: []
+    outcome:
+      collection:
+        data:
+          - { _id: 1, x: 11 }

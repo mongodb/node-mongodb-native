@@ -1,0 +1,144 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "find-network-error",
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    }
+  ],
+  "tests": [
+    {
+      "description": "Reset server and pool after network error on find",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "find"
+          ],
+          "closeConnection": true,
+          "appName": "findNetworkErrorTest"
+        }
+      },
+      "clientOptions": {
+        "retryWrites": false,
+        "retryReads": false,
+        "appname": "findNetworkErrorTest"
+      },
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "error": true
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 5
+              },
+              {
+                "_id": 6
+              }
+            ]
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "find-network-error"
+            },
+            "command_name": "find",
+            "database_name": "sdam-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "find-network-error",
+              "documents": [
+                {
+                  "_id": 5
+                },
+                {
+                  "_id": 6
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 5
+            },
+            {
+              "_id": 6
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

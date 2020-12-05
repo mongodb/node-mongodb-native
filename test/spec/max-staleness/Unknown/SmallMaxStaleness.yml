@@ -7,6 +7,7 @@ topology_description:
   - &1
     address: a:27017
     type: Unknown
+    maxWireVersion: 5
 read_preference:
   mode: Nearest
   maxStalenessSeconds: 1

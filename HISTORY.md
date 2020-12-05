@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.6.3"></a>
+## [3.6.3](https://github.com/mongodb/node-mongodb-native/compare/v3.6.1...v3.6.3) (2020-11-06)
+
+
+### Bug Fixes
+
+* add peerDependenciesMeta to mark optional deps ([#2606](https://github.com/mongodb/node-mongodb-native/issues/2606)) ([186090e](https://github.com/mongodb/node-mongodb-native/commit/186090e))
+* adds topology discovery for sharded cluster ([f8fd310](https://github.com/mongodb/node-mongodb-native/commit/f8fd310))
+* allow event loop to process during wait queue processing ([#2537](https://github.com/mongodb/node-mongodb-native/issues/2537)) ([4e03dfa](https://github.com/mongodb/node-mongodb-native/commit/4e03dfa))
+* Change socket timeout default to 0 ([#2572](https://github.com/mongodb/node-mongodb-native/issues/2572)) ([89b77ed](https://github.com/mongodb/node-mongodb-native/commit/89b77ed))
+* connection leak if wait queue member cancelled ([cafaa1b](https://github.com/mongodb/node-mongodb-native/commit/cafaa1b))
+* correctly assign username to X509 auth command ([#2587](https://github.com/mongodb/node-mongodb-native/issues/2587)) ([9110a45](https://github.com/mongodb/node-mongodb-native/commit/9110a45))
+* correctly re-establishes pipe destinations ([a6e7caf](https://github.com/mongodb/node-mongodb-native/commit/a6e7caf))
+* Fix test filters and revert mocha version ([#2558](https://github.com/mongodb/node-mongodb-native/issues/2558)) ([0e5c45a](https://github.com/mongodb/node-mongodb-native/commit/0e5c45a))
+* move kerberos client setup from prepare to auth ([#2608](https://github.com/mongodb/node-mongodb-native/issues/2608)) ([033b6e7](https://github.com/mongodb/node-mongodb-native/commit/033b6e7))
+* permit waking async interval with unreliable clock ([e0e11bb](https://github.com/mongodb/node-mongodb-native/commit/e0e11bb))
+* remove geoNear deprecation ([4955a52](https://github.com/mongodb/node-mongodb-native/commit/4955a52))
+* revert use of setImmediate to process.nextTick ([#2611](https://github.com/mongodb/node-mongodb-native/issues/2611)) ([c9f9d5e](https://github.com/mongodb/node-mongodb-native/commit/c9f9d5e))
+* sets primary read preference for writes ([ddcd03d](https://github.com/mongodb/node-mongodb-native/commit/ddcd03d))
+* use options for readPreference in client ([6acced0](https://github.com/mongodb/node-mongodb-native/commit/6acced0))
+* user roles take single string & DDL readPreference tests ([967de13](https://github.com/mongodb/node-mongodb-native/commit/967de13))
+
+
+
+<a name="3.6.2"></a>
+## [3.6.2](https://github.com/mongodb/node-mongodb-native/compare/v3.6.1...v3.6.2) (2020-09-10)
+
+
+### Bug Fixes
+
+* allow event loop to process during wait queue processing ([#2537](https://github.com/mongodb/node-mongodb-native/issues/2537)) ([4e03dfa](https://github.com/mongodb/node-mongodb-native/commit/4e03dfa))
+
+
+
+<a name="3.6.1"></a>
+## [3.6.1](https://github.com/mongodb/node-mongodb-native/compare/v3.6.0...v3.6.1) (2020-09-02)
+
+
+### Bug Fixes
+
+* add host/port to cmap connection ([06a2444](https://github.com/mongodb/node-mongodb-native/commit/06a2444))
+* update full list of index options ([0af3191](https://github.com/mongodb/node-mongodb-native/commit/0af3191))
+
+
+### Features
+
+* **db:** deprecate createCollection strict mode ([4cc6bcc](https://github.com/mongodb/node-mongodb-native/commit/4cc6bcc))
+
+
+
 <a name="3.6.0-beta.0"></a>
 # [3.6.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.5...v3.6.0-beta.0) (2020-04-14)
 

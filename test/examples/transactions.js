@@ -232,7 +232,7 @@ describe('examples(transactions):', function() {
       const client = new MongoClient(uri);
       await client.connect();
 
-      // Prereq: Create collections. CRUD operations in transactions must be on existing collections.
+      // Prereq: Create collections.
 
       await client
         .db('mydb1')

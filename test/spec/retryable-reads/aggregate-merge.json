@@ -1,7 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.2.0"
+      "minServerVersion": "4.1.11"
     }
   ],
   "database_name": "retryable-reads-tests",

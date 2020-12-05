@@ -163,8 +163,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
-  context.dbName = suite.database_name;
-  context.collectionName = suite.collection_name;
+  context.dbName = suite.database_name || 'spec_db';
+  context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
   const setupPromise = db
@@ -178,7 +178,7 @@ function prepareDatabaseForSuite(suite, context) {
       throw err;
     });
 
-  if (context.collectionName == null) {
+  if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;
   }
 
@@ -241,40 +241,68 @@ function parseSessionOptions(options) {
 }
 
 const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint', 'endSessions']);
+const SDAM_EVENTS = new Set([
+  'serverOpening',
+  'serverClosed',
+  'serverDescriptionChanged',
+  'topologyOpening',
+  'topologyClosed',
+  'topologyDescriptionChanged',
+  'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded',
+  'serverHeartbeatFailed'
+]);
+
+const CMAP_EVENTS = new Set([
+  'connectionPoolCreated',
+  'connectionPoolClosed',
+  'connectionCreated',
+  'connectionReady',
+  'connectionClosed',
+  'connectionCheckOutStarted',
+  'connectionCheckOutFailed',
+  'connectionCheckedOut',
+  'connectionCheckedIn',
+  'connectionPoolCleared'
+]);
 
 let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
   const clientOptions = translateClientOptions(
-    Object.assign({ monitorCommands: true }, spec.clientOptions)
+    Object.assign(
+      {
+        useUnifiedTopology: true,
+        autoReconnect: false,
+        haInterval: 100,
+        heartbeatFrequencyMS: 100,
+        minHeartbeatFrequencyMS: 100,
+        useRecoveryToken: true,
+        monitorCommands: true
+      },
+      spec.clientOptions
+    )
   );
-
-  // test-specific client options
-  clientOptions.autoReconnect = false;
-  clientOptions.haInterval = 100;
-  clientOptions.minHeartbeatFrequencyMS = 100;
-  clientOptions.useRecoveryToken = true;
-
-  // TODO: this should be configured by `newClient` and env variables
-  clientOptions.useUnifiedTopology = true;
 
   const url = resolveConnectionString(configuration, spec);
   const client = configuration.newClient(url, clientOptions);
+  CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
+  SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
+  client.on('commandStarted', event => {
+    if (IGNORED_COMMANDS.has(event.commandName)) {
+      return;
+    }
+
+    context.commandEvents.push(event);
+
+    // very useful for debugging
+    if (displayCommands) {
+      // console.dir(event, { depth: 5 });
+    }
+  });
+
   return client.connect().then(client => {
     context.testClient = client;
-    client.on('commandStarted', event => {
-      if (IGNORED_COMMANDS.has(event.commandName)) {
-        return;
-      }
-
-      context.commandEvents.push(event);
-
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
-      }
-    });
-
     const sessionOptions = Object.assign({}, spec.transactionOptions);
 
     spec.sessionOptions = spec.sessionOptions || {};
@@ -319,11 +347,12 @@ function runTestSuiteTest(configuration, spec, context) {
         throw err;
       })
       .then(() => {
-        if (session0) session0.endSession();
-        if (session1) session1.endSession();
-
-        return validateExpectations(context.commandEvents, spec, savedSessionData);
-      });
+        const promises = [];
+        if (session0) promises.push(session0.endSession());
+        if (session1) promises.push(session1.endSession());
+        return Promise.all(promises);
+      })
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
   });
 }
 
@@ -336,6 +365,7 @@ function validateOutcome(testData, testContext) {
       .db(testContext.dbName)
       .collection(outcomeCollection)
       .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+      .sort({ _id: 1 })
       .toArray()
       .then(docs => {
         expect(docs).to.matchMongoSpec(testData.outcome.collection.data);
@@ -406,7 +436,7 @@ function extractCrudResult(result, operation) {
   }
 
   return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (result.hasOwnProperty(key) && result[key] != null) {
+    if (Object.prototype.hasOwnProperty.call(result, key) && result[key] != null) {
       // FIXME(major): update crud results are broken and need to be changed
       crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
     }
@@ -505,6 +535,31 @@ function maybeSession(operation, context) {
 }
 
 const kOperations = new Map([
+  [
+    'recordPrimary',
+    (operation, testRunner, context /*, options */) => {
+      testRunner.recordPrimary(context.client);
+    }
+  ],
+  [
+    'waitForPrimaryChange',
+    (operation, testRunner, context /*, options */) => {
+      return testRunner.waitForPrimaryChange(context.client);
+    }
+  ],
+  [
+    'runOnThread',
+    (operation, testRunner, context, options) => {
+      const args = operation.arguments;
+      const threadName = args.name;
+      const subOperation = args.operation;
+
+      return testRunner.runOnThread(
+        threadName,
+        testOperation(subOperation, context[subOperation.object], context, options)
+      );
+    }
+  ],
   [
     'createIndex',
     (operation, collection, context /*, options */) => {

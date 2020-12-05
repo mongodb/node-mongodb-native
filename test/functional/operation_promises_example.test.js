@@ -1120,7 +1120,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '<=4.4', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3149,22 +3149,28 @@ describe('Operation (Promises)', function() {
         auto_reconnect: false
       });
 
-      return client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Retry to get the collection, should work as it's now created
-        return db.collections().then(function(collections) {
+      return client
+        .connect()
+        .then(function(client) {
+          var db = client.db(configuration.db);
+          return db.createCollection('example');
+        })
+        .then(() => {
+          // LINE var MongoClient = require('mongodb').MongoClient,
+          // LINE   test = require('assert');
+          // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+          // LINE client.connect().then(() => {
+          // LINE   var db = client.db('test);
+          // REPLACE configuration.writeConcernMax() WITH {w:1}
+          // REMOVE-LINE done();
+          // BEGIN
+          // Retry to get the collection, should work as it's now created
+          return client.db(configuration.db).collections();
+        })
+        .then(function(collections) {
           test.ok(collections.length > 0);
           return client.close();
         });
-      });
       // END
     }
   });
@@ -7030,7 +7036,12 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor With Promises', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: {
+      requires: {
+        topology: ['single'],
+        os: '!win32' // NODE-2943: timeout on windows
+      }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -7056,7 +7067,7 @@ describe('Operation (Promises)', function() {
         db.createCollection('a_simple_collection_2_with_promise', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           w: 1
         })
           .then(function(_collection) {
@@ -7166,7 +7177,8 @@ describe('Operation (Promises)', function() {
           });
           // END
         }
-        client
+
+        return client
           .connect()
           .then(() => updateEmployeeInfo(client))
           .then(() => client.close());

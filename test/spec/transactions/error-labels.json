@@ -134,6 +134,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -223,6 +224,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -312,6 +314,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -462,7 +465,7 @@
       }
     },
     {
-      "description": "add TransientTransactionError label to connection errors",
+      "description": "add TransientTransactionError label to connection errors, but do not add RetryableWriteError label",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -497,6 +500,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -512,6 +516,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -534,6 +539,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -550,6 +556,7 @@
               "TransientTransactionError"
             ],
             "errorLabelsOmit": [
+              "RetryableWriteError",
               "UnknownTransactionCommitResult"
             ]
           }
@@ -1095,6 +1102,103 @@
               "_id": 1
             }
           ]
+        }
+      }
+    },
+    {
+      "description": "do not add RetryableWriteError label to writeConcernError ShutdownInProgress that occurs within transaction",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "writeConcern": {
+                "w": "majority"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "errorLabelsContain": [],
+            "errorLabelsOmit": [
+              "RetryableWriteError",
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
         }
       }
     },
