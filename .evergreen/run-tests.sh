@@ -10,11 +10,15 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "test-nolint"
 #       SKIP_DEPS               Skip installing dependencies
+#       NO_EXIT                 Exit early from tests that leak resources
 
 AUTH=${AUTH:-noauth}
 UNIFIED=${UNIFIED:-}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-test-nolint}
+if [[ -z "${NO_EXIT}" ]]; then
+  TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
+fi
 
 # ssl setup
 SSL=${SSL:-nossl}
