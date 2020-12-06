@@ -1,21 +1,9 @@
 'use strict';
-var test = require('./shared').assert;
-var co = require('co');
-var mock = require('mongodb-mock-server');
+const co = require('co');
+const mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
 
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for (var name in template) {
-    object[name] = template[name];
-  }
-
-  for (var fieldName in fields) {
-    object[fieldName] = fields[fieldName];
-  }
-
-  return object;
-};
+const TEST_OPTIONS = { writeConcern: { w: 2, wtimeout: 1000 } };
 
 class WriteConcernTest {
   constructor(configuration) {
@@ -28,34 +16,30 @@ class WriteConcernTest {
       setVersion: 1,
       electionId: electionIds[0],
       hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+      primary: 'localhost:32000',
       arbiters: ['localhost:32002']
     });
     this.serverStates = {
       primary: [
-        extend(defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
-          me: 'localhost:32000',
-          primary: 'localhost:32000',
-          tags: { loc: 'ny' }
+          me: 'localhost:32000'
         })
       ],
       firstSecondary: [
-        extend(defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
-          me: 'localhost:32001',
-          primary: 'localhost:32000',
-          tags: { loc: 'sf' }
+          me: 'localhost:32001'
         })
       ],
       arbiter: [
-        extend(defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
-          me: 'localhost:32002',
-          primary: 'localhost:32000'
+          me: 'localhost:32002'
         })
       ]
     };
@@ -71,7 +55,7 @@ class WriteConcernTest {
       let arbiterServer = yield mock.createServer(32002, 'localhost');
 
       primaryServer.setMessageHandler(request => {
-        var doc = request.document;
+        const doc = request.document;
         if (doc.ismaster) {
           request.reply(self.serverStates.primary[0]);
         } else if (doc[resultKey]) {
@@ -83,7 +67,7 @@ class WriteConcernTest {
       });
 
       firstSecondaryServer.setMessageHandler(request => {
-        var doc = request.document;
+        const doc = request.document;
         if (doc.ismaster) {
           request.reply(self.serverStates.firstSecondary[0]);
         } else if (doc.endSessions) {
@@ -92,7 +76,7 @@ class WriteConcernTest {
       });
 
       arbiterServer.setMessageHandler(request => {
-        var doc = request.document;
+        const doc = request.document;
         if (doc.ismaster) {
           request.reply(self.serverStates.arbiter[0]);
         } else if (doc.endSessions) {
@@ -105,51 +89,37 @@ class WriteConcernTest {
       );
 
       client.connect(function(err, client) {
-        test.equal(null, err);
-        var db = client.db(self.configuration.db);
-        testFn(client, db);
+        expect(err).to.not.exist;
+        testFn(client, client.db(self.configuration.db));
       });
     });
   }
 }
 
-function withStubbedClient(testFn) {
+function writeConcernTest(command, testFn) {
   return function(done) {
     const t = new WriteConcernTest(this.configuration);
-    testFn.call(this, t, done);
-  };
-}
-
-const writeConcernTestOptions = { w: 2, wtimeout: 1000 };
-
-function writeConcernTest(command, testFn) {
-  return withStubbedClient(function(t, done) {
     switch (command) {
       case 'mapReduce':
         t.decorateResponse({ result: 'tempCollection' });
         break;
     }
     t.run(command, (client, db) =>
-      testFn.call(this, db, Object.assign({}, writeConcernTestOptions), err => {
-        test.equal(null, err);
-        test.deepEqual(writeConcernTestOptions, t.commandResult.writeConcern);
+      testFn.call(this, db, Object.assign({}, TEST_OPTIONS), err => {
+        expect(err).to.not.exist;
+        expect(TEST_OPTIONS.writeConcern).to.deep.equal(t.commandResult.writeConcern);
         client.close(done);
       })
     );
-  });
+  };
 }
 
 describe('Command Write Concern', function() {
   afterEach(() => mock.cleanup());
+  const metadata = { requires: { generators: true, topology: 'single' } };
 
   it('successfully pass through writeConcern to aggregate command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('aggregate', function(db, writeConcernTestOptions, done) {
       db.collection('test')
         .aggregate(
@@ -161,26 +131,14 @@ describe('Command Write Concern', function() {
   });
 
   it('successfully pass through writeConcern to create command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('create', function(db, writeConcernTestOptions, done) {
       db.createCollection('test_collection_methods', writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to createIndexes command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('createIndexes', function(db, writeConcernTestOptions, done) {
       db.collection('indexOptionDefault').createIndex(
         { a: 1 },
@@ -191,52 +149,28 @@ describe('Command Write Concern', function() {
   });
 
   it('successfully pass through writeConcern to drop command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('drop', function(db, writeConcernTestOptions, done) {
       db.collection('indexOptionDefault').drop(writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to dropDatabase command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('dropDatabase', function(db, writeConcernTestOptions, done) {
       db.dropDatabase(writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to dropIndexes command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('dropIndexes', function(db, writeConcernTestOptions, done) {
       db.collection('test').dropIndexes(writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to mapReduce command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('mapReduce', function(db, writeConcernTestOptions, done) {
       const Code = this.configuration.require.Code;
       const map = new Code('function() { emit(this.user_id, 1); }');
@@ -251,39 +185,21 @@ describe('Command Write Concern', function() {
   });
 
   it('successfully pass through writeConcern to createUser command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('createUser', function(db, writeConcernTestOptions, done) {
       db.admin().addUser('kay:kay', 'abc123', writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to dropUser command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('dropUser', function(db, writeConcernTestOptions, done) {
       db.admin().removeUser('kay:kay', writeConcernTestOptions, done);
     })
   });
 
   it('successfully pass through writeConcern to findAndModify command', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
-
+    metadata,
     test: writeConcernTest('findAndModify', function(db, writeConcernTestOptions, done) {
       db.collection('test').findAndModify(
         { a: 1 },
