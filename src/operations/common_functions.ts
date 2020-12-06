@@ -1,19 +1,10 @@
 import { MongoError } from '../error';
-import {
-  applyRetryableWrites,
-  decorateWithCollation,
-  Callback,
-  getTopology,
-  maxWireVersion
-} from '../utils';
+import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
-import type { Server } from '../sdam/server';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
-import type { UpdateOptions } from './update';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 
 /** @public */
 export interface IndexInformationOptions {
@@ -101,92 +92,4 @@ export function prepareDocs(
 
     return doc;
   });
-}
-
-export function updateDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  document: Document,
-  callback: Callback
-): void;
-export function updateDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  document: Document,
-  options: UpdateOptions,
-  callback: Callback
-): void;
-export function updateDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  document: Document,
-  _options: UpdateOptions | Callback,
-  _callback?: Callback
-): void {
-  let options = _options as UpdateOptions;
-  let callback = _callback as Callback;
-  if ('function' === typeof options) {
-    callback = options;
-    options = {};
-  }
-
-  // If we are not providing a selector or document throw
-  if (selector == null || typeof selector !== 'object')
-    return callback(new TypeError('selector must be a valid JavaScript object'));
-  if (document == null || typeof document !== 'object')
-    return callback(new TypeError('document must be a valid JavaScript object'));
-
-  // Final options for retryable writes
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
-  // Execute the operation
-  const op: Document = { q: selector, u: document };
-  op.upsert = options.upsert !== void 0 ? !!options.upsert : false;
-  op.multi = options.multi !== void 0 ? !!options.multi : false;
-
-  if (options.hint) {
-    op.hint = options.hint;
-  }
-
-  if (finalOptions.arrayFilters) {
-    op.arrayFilters = finalOptions.arrayFilters;
-    delete finalOptions.arrayFilters;
-  }
-
-  if (finalOptions.retryWrites && op.multi) {
-    finalOptions.retryWrites = false;
-  }
-
-  // Have we specified collation
-  try {
-    decorateWithCollation(finalOptions, coll, options);
-  } catch (err) {
-    return callback(err, null);
-  }
-
-  if (options.explain !== undefined && maxWireVersion(server) < 3) {
-    return callback
-      ? callback(new MongoError(`server ${server.name} does not support explain on update`))
-      : undefined;
-  }
-
-  // Update options
-  server.update(
-    coll.s.namespace.toString(),
-    [op],
-    finalOptions as WriteCommandOptions,
-    (err, result) => {
-      if (callback == null) return;
-      if (err) return callback(err);
-      if (result == null) return callback();
-      if (result.code) return callback(new MongoError(result));
-      if (result.writeErrors) return callback(new MongoError(result.writeErrors[0]));
-      // Return the results
-      callback(undefined, result);
-    }
-  );
 }

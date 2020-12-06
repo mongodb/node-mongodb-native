@@ -1,24 +1,26 @@
-import { defineAspects, Aspect, AbstractOperation, Hint } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { isObject } from 'util';
-import {
-  applyRetryableWrites,
-  Callback,
-  decorateWithCollation,
-  maxWireVersion,
-  MongoDBNamespace
-} from '../utils';
+import { defineAspects, Aspect } from './operation';
+import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { ClientSession } from '../sessions';
 import { MongoError } from '../error';
+import type { WriteConcernOptions } from '../write_concern';
 
 /** @public */
-export interface DeleteOptions extends CommandOperationOptions {
+export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {
+  /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
+  ordered?: boolean;
+  /** A user-provided comment to attach to this command */
+  comment?: string | Document;
+  /** Specifies the collation to use for the operation */
+  collation?: CollationOptions;
+  /** Specify that the update query should only consider plans using the hinted index */
+  hint?: string | Document;
+
+  /** @deprecated use `removeOne` or `removeMany` to implicitly specify the limit */
   single?: boolean;
-  hint?: Hint;
 }
 
 /** @public */
@@ -30,53 +32,64 @@ export interface DeleteResult {
 }
 
 /** @internal */
-export class DeleteOperation extends AbstractOperation<Document> {
+export class DeleteOperation extends CommandOperation<Document> {
   options: DeleteOptions;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
-    super(options);
+    super(undefined, options);
     this.options = options;
     this.ns = ns;
     this.operations = ops;
   }
 
   get canRetryWrite(): boolean {
+    if (super.canRetryWrite === false) {
+      return false;
+    }
+
     return this.operations.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
   }
 
   execute(server: Server, session: ClientSession, callback: Callback): void {
-    server.remove(
-      this.ns.toString(),
-      this.operations,
-      { ...this.options, readPreference: this.readPreference, session } as WriteCommandOptions,
-      callback
-    );
+    const options = this.options ?? {};
+    const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
+    const command: Document = {
+      delete: this.ns.collection,
+      deletes: this.operations,
+      ordered
+    };
+
+    if (options.explain !== undefined && maxWireVersion(server) < 3) {
+      return callback
+        ? callback(new MongoError(`server ${server.name} does not support explain on delete`))
+        : undefined;
+    }
+
+    const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
+    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
+      if (this.operations.find((o: Document) => o.hint)) {
+        callback(new MongoError(`servers < 3.4 do not support hint on delete`));
+        return;
+      }
+    }
+
+    super.executeCommand(server, session, command, callback);
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteResult> {
-  options: DeleteOptions;
-  collection: Collection;
-  filter: Document;
-
+export class DeleteOneOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection, options);
-
-    this.options = options;
-    this.collection = collection;
-    this.filter = filter;
+    super(collection.s.namespace, [makeDeleteOperation(filter, { ...options, limit: 1 })], options);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
-    const coll = this.collection;
-    const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions, session };
-
-    options.single = true;
-    removeDocuments(server, coll, filter, options, (err, res) => {
+    super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
-      if (typeof options.explain !== 'undefined') return callback(undefined, res);
+      if (res.code) return callback(new MongoError(res));
+      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (this.explain) return callback(undefined, res);
+
       callback(undefined, {
         acknowledged: this.writeConcern?.w !== 0 ?? true,
         deletedCount: res.n
@@ -85,36 +98,18 @@ export class DeleteOneOperation extends CommandOperation<DeleteResult> {
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteResult> {
-  options: DeleteOptions;
-  collection: Collection;
-  filter: Document;
-
+export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection, options);
-
-    if (!isObject(filter)) {
-      throw new TypeError('filter is a required parameter');
-    }
-
-    this.options = options;
-    this.collection = collection;
-    this.filter = filter;
+    super(collection.s.namespace, [makeDeleteOperation(filter, options)], options);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
-    const coll = this.collection;
-    const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions, session };
-
-    // a user can pass `single: true` in to `deleteMany` to remove a single document, theoretically
-    if (typeof options.single !== 'boolean') {
-      options.single = false;
-    }
-
-    removeDocuments(server, coll, filter, options, (err, res) => {
+    super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
-      if (typeof options.explain !== 'undefined') return callback(undefined, res);
+      if (res.code) return callback(new MongoError(res));
+      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (this.explain) return callback(undefined, res);
+
       callback(undefined, {
         acknowledged: this.writeConcern?.w !== 0 ?? true,
         deletedCount: res.n
@@ -123,73 +118,43 @@ export class DeleteManyOperation extends CommandOperation<DeleteResult> {
   }
 }
 
-function removeDocuments(
-  server: Server,
-  coll: Collection,
-  selector: Document,
-  options: DeleteOptions | Document,
-  callback: Callback
-): void {
-  if (typeof options === 'function') {
-    (callback = options as Callback), (options = {});
-  } else if (typeof selector === 'function') {
-    callback = selector as Callback;
-    options = {};
-    selector = {};
-  }
+function makeDeleteOperation(
+  filter: Document,
+  options: DeleteOptions & { limit?: number }
+): Document {
+  const op: Document = {
+    q: filter,
+    limit: typeof options.limit === 'number' ? options.limit : 0
+  };
 
-  // Create an empty options object if the provided one is null
-  options = options || {};
-
-  // Final options for retryable writes
-  let finalOptions = Object.assign({}, options);
-  finalOptions = applyRetryableWrites(finalOptions, coll.s.db);
-
-  // If selector is null set empty
-  if (selector == null) selector = {};
-
-  // Build the op
-  const op = { q: selector, limit: 0 } as any;
-  if (options.single) {
+  if (options.single === true) {
     op.limit = 1;
-  } else if (finalOptions.retryWrites) {
-    finalOptions.retryWrites = false;
   }
+
+  if (options.collation) {
+    op.collation = options.collation;
+  }
+
   if (options.hint) {
     op.hint = options.hint;
   }
 
-  // Have we specified collation
-  try {
-    decorateWithCollation(finalOptions, coll, options);
-  } catch (err) {
-    return callback ? callback(err, null) : undefined;
+  if (options.comment) {
+    op.comment = options.comment;
   }
 
-  if (options.explain !== undefined && maxWireVersion(server) < 3) {
-    return callback
-      ? callback(new MongoError(`server ${server.name} does not support explain on remove`))
-      : undefined;
-  }
-
-  // Execute the remove
-  server.remove(
-    coll.s.namespace.toString(),
-    [op],
-    finalOptions as WriteCommandOptions,
-    (err, result) => {
-      if (err || result == null) return callback(err);
-      if (result.code) return callback(new MongoError(result));
-      if (result.writeErrors) {
-        return callback(new MongoError(result.writeErrors[0]));
-      }
-
-      // Return the results
-      callback(undefined, result);
-    }
-  );
+  return op;
 }
 
 defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(DeleteOneOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.EXPLAINABLE,
+  Aspect.SKIP_COLLATION
+]);
+defineAspects(DeleteManyOperation, [
+  Aspect.WRITE_OPERATION,
+  Aspect.EXPLAINABLE,
+  Aspect.SKIP_COLLATION
+]);

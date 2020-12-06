@@ -9,7 +9,6 @@ import type { Server } from '../../sdam/server';
 import type { Topology } from '../../sdam/topology';
 import type { ReadPreferenceLike } from '../../read_preference';
 import type { WriteConcernOptions, WriteConcern, W } from '../../write_concern';
-import type { WriteCommandOptions } from './write_command';
 
 /** @public */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -105,7 +104,7 @@ function _command(
       clusterTime = session.clusterTime;
     }
 
-    const err = applySession(session, finalCmd, options as WriteCommandOptions);
+    const err = applySession(session, finalCmd, options as CommandOptions);
     if (err) {
       return callback(err);
     }

@@ -17,10 +17,11 @@ import {
 } from './utils';
 import type { Topology } from './sdam/topology';
 import type { MongoClientOptions } from './mongo_client';
-import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
+import type { CommandOptions } from './cmap/wire_protocol/command';
+import type { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -744,7 +745,7 @@ function commandSupportsReadConcern(command: Document, options?: Document): bool
 function applySession(
   session: ClientSession,
   command: Document,
-  options?: WriteCommandOptions
+  options?: CommandOptions
 ): MongoError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
@@ -758,7 +759,7 @@ function applySession(
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
-  if (options && options.writeConcern && options.writeConcern.w === 0) {
+  if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
       return new MongoError('Cannot have explicit session with unacknowledged writes');
     }

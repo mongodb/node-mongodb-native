@@ -30,7 +30,6 @@ import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
 import type { QueryOptions } from './wire_protocol/query';
-import type { WriteCommandOptions } from './wire_protocol/write_command';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -277,21 +276,6 @@ export class Connection extends EventEmitter {
   /** @internal */
   killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback: Callback): void {
     wp.killCursors(makeServerTrampoline(this), ns, cursorIds, options, callback);
-  }
-
-  /** @internal */
-  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
-  }
-
-  /** @internal */
-  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    wp.update(makeServerTrampoline(this), ns, ops, options, callback);
-  }
-
-  /** @internal */
-  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
   }
 }
 

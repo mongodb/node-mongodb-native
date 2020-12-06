@@ -51,13 +51,20 @@ import {
   FindOneAndUpdateOperation,
   FindAndModifyOptions
 } from './operations/find_and_modify';
-import { InsertManyOperation, InsertManyResult } from './operations/insert_many';
-import { InsertOneOperation, InsertOneOptions, InsertOneResult } from './operations/insert';
+import {
+  InsertOneOperation,
+  InsertOneOptions,
+  InsertOneResult,
+  InsertManyOperation,
+  InsertManyResult
+} from './operations/insert';
 import {
   UpdateOneOperation,
   UpdateManyOperation,
   UpdateOptions,
-  UpdateResult
+  UpdateResult,
+  ReplaceOneOperation,
+  ReplaceOptions
 } from './operations/update';
 import {
   DeleteOneOperation,
@@ -74,7 +81,6 @@ import {
 } from './operations/map_reduce';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
-import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
 import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import type { Db } from './db';
@@ -387,21 +393,25 @@ export class Collection {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  updateOne(filter: Document, update: Document): Promise<UpdateResult>;
-  updateOne(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateOne(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
+  updateOne(filter: Document, update: Document): Promise<UpdateResult | Document>;
+  updateOne(filter: Document, update: Document, callback: Callback<UpdateResult | Document>): void;
+  updateOne(
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document>;
   updateOne(
     filter: Document,
     update: Document,
     options: UpdateOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
     filter: Document,
     update: Document,
-    options?: UpdateOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options?: UpdateOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -419,25 +429,29 @@ export class Collection {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  replaceOne(filter: Document, replacement: Document): Promise<UpdateResult>;
-  replaceOne(filter: Document, replacement: Document, callback: Callback<UpdateResult>): void;
+  replaceOne(filter: Document, replacement: Document): Promise<UpdateResult | Document>;
   replaceOne(
     filter: Document,
     replacement: Document,
-    options: ReplaceOptions
-  ): Promise<UpdateResult>;
-  replaceOne(
-    filter: Document,
-    replacement: Document,
-    options: ReplaceOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
     filter: Document,
     replacement: Document,
-    options?: ReplaceOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options: ReplaceOptions
+  ): Promise<UpdateResult | Document>;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options: ReplaceOptions,
+    callback: Callback<UpdateResult | Document>
+  ): void;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options?: ReplaceOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -455,21 +469,25 @@ export class Collection {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  updateMany(filter: Document, update: Document): Promise<UpdateResult>;
-  updateMany(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateMany(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
+  updateMany(filter: Document, update: Document): Promise<UpdateResult | Document>;
+  updateMany(filter: Document, update: Document, callback: Callback<UpdateResult | Document>): void;
+  updateMany(
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document>;
   updateMany(
     filter: Document,
     update: Document,
     options: UpdateOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
     filter: Document,
     update: Document,
-    options?: UpdateOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options?: UpdateOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(

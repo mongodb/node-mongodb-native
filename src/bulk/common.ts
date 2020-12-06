@@ -18,8 +18,7 @@ import { DeleteOperation } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
-import type { CommandOperationOptions } from '../operations/command';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
 
 // Error codes

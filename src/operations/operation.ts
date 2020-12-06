@@ -8,7 +8,8 @@ export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
-  EXPLAINABLE: Symbol('EXPLAINABLE')
+  EXPLAINABLE: Symbol('EXPLAINABLE'),
+  SKIP_COLLATION: Symbol('SKIP_COLLATION')
 } as const;
 
 /** @public */

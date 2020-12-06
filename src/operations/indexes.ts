@@ -8,13 +8,17 @@ import {
   Callback,
   getTopology
 } from '../utils';
-import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
+import {
+  CommandOperation,
+  CommandOperationOptions,
+  OperationParent,
+  CollationOptions
+} from './command';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { ClientSession } from '../sessions';
 import { executeOperation, ExecutionResult } from './execute_operation';

@@ -1,4 +1,9 @@
-import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
+import {
+  CommandOperation,
+  CommandOperationOptions,
+  OperationParent,
+  CollationOptions
+} from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -6,7 +11,6 @@ import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ClientSession } from '../sessions';
 
 /** @internal */

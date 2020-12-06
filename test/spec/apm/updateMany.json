@@ -51,8 +51,7 @@
                       "x": 1
                     }
                   },
-                  "multi": true,
-                  "upsert": false
+                  "multi": true
                 }
               ]
             },
@@ -106,8 +105,7 @@
                       "x": 1
                     }
                   },
-                  "multi": true,
-                  "upsert": false
+                  "multi": true
                 }
               ]
             },

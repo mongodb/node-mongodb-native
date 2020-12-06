@@ -40,7 +40,6 @@ import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { QueryOptions } from '../cmap/wire_protocol/query';
@@ -371,41 +370,6 @@ export class Server extends EventEmitter {
       );
     }, callback);
   }
-
-  /**
-   * Insert one or more documents
-   * @internal
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of documents to insert
-   */
-  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more update operations
-   * @internal
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of updates
-   */
-  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more remove operations
-   * @internal
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of removes
-   * @param options - options for removal
-   * @param callback - A callback function
-   */
-  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
-  }
 }
 
 Object.defineProperty(Server.prototype, 'clusterTime', {
@@ -432,64 +396,6 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
 
   const alpha = 0.2;
   return alpha * duration + (1 - alpha) * oldRtt;
-}
-
-function executeWriteOperation(
-  args: { server: Server; op: string; ns: string; ops: Document[] | Document },
-  options: WriteCommandOptions,
-  callback: Callback
-) {
-  options = options ?? {};
-
-  const { server, op, ns } = args;
-  const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
-  if (server.s.state === STATE_CLOSING || server.s.state === STATE_CLOSED) {
-    callback(new MongoError('server is closed'));
-    return;
-  }
-
-  if (collationNotSupported(server, options)) {
-    callback(new MongoError(`server ${server.name} does not support collation`));
-    return;
-  }
-
-  const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
-  if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-    if ((op === 'update' || op === 'remove') && ops.find((o: Document) => o.hint)) {
-      callback(new MongoError(`servers < 3.4 do not support hint on ${op}`));
-      return;
-    }
-  }
-
-  server.s.pool.withConnection((err, conn, cb) => {
-    if (err || !conn) {
-      markServerUnknown(server, err);
-      return cb(err);
-    }
-
-    if (op === 'insert') {
-      conn.insert(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    } else if (op === 'update') {
-      conn.update(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    } else {
-      conn.remove(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    }
-  }, callback);
 }
 
 function markServerUnknown(server: Server, error?: MongoError) {
@@ -531,7 +437,7 @@ function makeOperationHandler(
   server: Server,
   connection: Connection,
   cmd: Document,
-  options: CommandOptions | WriteCommandOptions | GetMoreOptions | undefined,
+  options: CommandOptions | GetMoreOptions | undefined,
   callback: Callback
 ): CallbackWithType<MongoError, Document> {
   const session = options?.session;

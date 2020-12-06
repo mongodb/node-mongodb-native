@@ -1,11 +1,11 @@
 import type { Document } from '../bson';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import { MongoError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { FindOperation, FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
+import type { CollationOptions } from '../operations/command';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
