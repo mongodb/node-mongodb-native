@@ -153,24 +153,23 @@ export class IndexesOperation extends AbstractOperation<Document> {
 export class CreateIndexesOperation extends CommandOperation<Document> {
   options: CreateIndexesOptions;
   collectionName: string;
-  onlyReturnNameOfCreatedIndex?: boolean;
+  singular?: boolean;
   indexes: IndexDescription[];
 
   constructor(
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    singular?: boolean
   ) {
     super(parent, options);
 
     this.options = options ?? {};
+    this.singular = singular ?? false;
     this.collectionName = collectionName;
 
     this.indexes = indexes;
-    if (indexes.length === 1) {
-      this.onlyReturnNameOfCreatedIndex = true;
-    }
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
@@ -219,13 +218,14 @@ export class CreateIndexesOperation extends CommandOperation<Document> {
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommand(server, session, cmd, err => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(undefined, this.onlyReturnNameOfCreatedIndex ? indexes[0].name : result);
+      const names = indexes.map(index => index.name);
+      callback(undefined, (this.singular ? names[0] : names) as Document);
     });
   }
 }
@@ -244,7 +244,7 @@ export class CreateIndexOperation extends CreateIndexesOperation {
     //   coll.createIndex([['a', 1]]);
     // createIndexes is always called with an array of index spec objects
 
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
+    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options, true);
   }
 }
 
