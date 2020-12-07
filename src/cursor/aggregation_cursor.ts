@@ -25,8 +25,11 @@ const kOptions = Symbol('options');
  * @public
  */
 export class AggregationCursor extends AbstractCursor {
+  /** @internal */
   [kParent]: OperationParent; // TODO: NODE-2883
+  /** @internal */
   [kPipeline]: Document[];
+  /** @internal */
   [kOptions]: AggregateOptions;
 
   /** @internal */

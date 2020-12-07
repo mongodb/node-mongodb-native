@@ -84,7 +84,6 @@ import type { CountOptions } from './operations/count';
 import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
-import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
 import { FindCursor } from './cursor/find_cursor';
 
@@ -161,7 +160,7 @@ export interface CollectionPrivate {
  * });
  * ```
  */
-export class Collection implements OperationParent {
+export class Collection {
   /** @internal */
   s: CollectionPrivate;
 

@@ -16,7 +16,6 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
-import type { OperationParent } from './operations/command';
 import type { TagSet } from './sdam/server_description';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { TcpSocketConnectOpts as ConnectionOptions } from 'net';
@@ -247,7 +246,7 @@ export interface MongoClientPrivate {
  * });
  * ```
  */
-export class MongoClient extends EventEmitter implements OperationParent {
+export class MongoClient extends EventEmitter {
   /** @internal */
   s: MongoClientPrivate;
   topology?: Topology;

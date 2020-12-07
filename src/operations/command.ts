@@ -37,19 +37,13 @@ export interface CommandOperationOptions
   noResponse?: boolean;
 }
 
-/** @public */
+/** @internal */
 export interface OperationParent {
-  /** @internal */
   s: { namespace: MongoDBNamespace };
-  /** @internal */
   readConcern?: ReadConcern;
-  /** @internal */
   writeConcern?: WriteConcern;
-  /** @internal */
   readPreference?: ReadPreference;
-  /** @internal */
   logger?: Logger;
-  /** @internal */
   bsonOptions?: BSONSerializeOptions;
 }
 
