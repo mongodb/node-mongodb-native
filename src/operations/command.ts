@@ -39,11 +39,17 @@ export interface CommandOperationOptions
 
 /** @public */
 export interface OperationParent {
+  /** @internal */
   s: { namespace: MongoDBNamespace };
+  /** @internal */
   readConcern?: ReadConcern;
+  /** @internal */
   writeConcern?: WriteConcern;
+  /** @internal */
   readPreference?: ReadPreference;
+  /** @internal */
   logger?: Logger;
+  /** @internal */
   bsonOptions?: BSONSerializeOptions;
 }
 
