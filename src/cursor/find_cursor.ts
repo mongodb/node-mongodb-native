@@ -12,7 +12,6 @@ import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
-/** @internal */
 const kFilter = Symbol('filter');
 const kNumReturned = Symbol('numReturned');
 const kBuiltOptions = Symbol('builtOptions');
@@ -29,8 +28,11 @@ export const FLAGS = [
 
 /** @public */
 export class FindCursor extends AbstractCursor {
+  /** @internal */
   [kFilter]: Document;
+  /** @internal */
   [kNumReturned]?: number;
+  /** @internal */
   [kBuiltOptions]: FindOptions;
 
   constructor(

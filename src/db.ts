@@ -55,7 +55,6 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
-import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
 
 // Allowed parameters
@@ -135,7 +134,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
  * });
  * ```
  */
-export class Db implements OperationParent {
+export class Db {
   /** @internal */
   s: DbPrivate;
 

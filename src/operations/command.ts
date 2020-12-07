@@ -37,7 +37,7 @@ export interface CommandOperationOptions
   noResponse?: boolean;
 }
 
-/** @public */
+/** @internal */
 export interface OperationParent {
   s: { namespace: MongoDBNamespace };
   readConcern?: ReadConcern;

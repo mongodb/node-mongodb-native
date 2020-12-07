@@ -183,8 +183,11 @@ export class ChangeStream extends EventEmitter {
   /** @internal */
   cursor?: ChangeStreamCursor;
   streamOptions?: CursorStreamOptions;
+  /** @internal */
   [kResumeQueue]: Denque;
+  /** @internal */
   [kCursorStream]?: Readable;
+  /** @internal */
   [kClosed]: boolean;
 
   /** @event */
