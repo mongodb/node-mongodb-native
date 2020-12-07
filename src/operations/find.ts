@@ -155,7 +155,7 @@ export class FindOperation extends CommandOperation<Document> {
     }
 
     server.command(
-      this.ns.toString(),
+      this.ns,
       findCommand,
       {
         fullResult: !!this.fullResponse,

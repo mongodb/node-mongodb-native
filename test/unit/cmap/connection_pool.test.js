@@ -61,7 +61,7 @@ describe('Connection Pool', function () {
     pool.checkOut((err, conn) => {
       expect(err).to.not.exist;
 
-      conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+      conn.command('admin.$cmd', { ping: 1 }, undefined, (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
 
@@ -101,7 +101,7 @@ describe('Connection Pool', function () {
     pool.withConnection(
       (err, conn, cb) => {
         expect(err).to.not.exist;
-        conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+        conn.command('admin.$cmd', { ping: 1 }, undefined, (err, result) => {
           expect(err).to.exist;
           expect(result).to.not.exist;
           expect(err).to.match(/timed out/);
@@ -164,7 +164,7 @@ describe('Connection Pool', function () {
       pool.withConnection((err, conn, cb) => {
         expect(err).to.not.exist;
 
-        conn.command('$admin.cmd', { ismaster: 1 }, (cmdErr, ismaster) => {
+        conn.command('$admin.cmd', { ismaster: 1 }, undefined, (cmdErr, ismaster) => {
           expect(cmdErr).to.not.exist;
           cb(undefined, ismaster);
         });

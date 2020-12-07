@@ -4,7 +4,7 @@ import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
-import type { CommandOptions } from './wire_protocol/command';
+import type { CommandOptions } from './connection';
 
 // Incrementing request id
 let _requestId = 0;

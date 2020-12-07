@@ -33,16 +33,19 @@ import {
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake
 } from '../error';
-import { Connection, DestroyOptions } from '../cmap/connection';
+import {
+  Connection,
+  DestroyOptions,
+  QueryOptions,
+  GetMoreOptions,
+  CommandOptions
+} from '../cmap/connection';
 import type { Topology } from './topology';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
-import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -244,11 +247,16 @@ export class Server extends EventEmitter {
    * Execute a command
    * @internal
    */
-  command(ns: string, cmd: Document, callback: Callback): void;
+  command(ns: MongoDBNamespace, cmd: Document, callback: Callback): void;
   /** @internal */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   command(
-    ns: string,
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions,
+    callback: Callback<Document>
+  ): void;
+  command(
+    ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions | Callback<Document>,
     callback?: Callback<Document>
@@ -322,7 +330,12 @@ export class Server extends EventEmitter {
    * Execute a `getMore` against the server
    * @internal
    */
-  getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
+  getMore(
+    ns: MongoDBNamespace,
+    cursorId: Long,
+    options: GetMoreOptions,
+    callback: Callback<Document>
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
@@ -347,7 +360,12 @@ export class Server extends EventEmitter {
    * Execute a `killCursors` command against the server
    * @internal
    */
-  killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback?: Callback): void {
+  killCursors(
+    ns: MongoDBNamespace,
+    cursorIds: Long[],
+    options: CommandOptions,
+    callback?: Callback
+  ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
         callback(new MongoError('server is closed'));

@@ -1,7 +1,7 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
 import { Kerberos, KerberosClient } from '../../deps';
-import type { Callback } from '../../utils';
+import { Callback, ns } from '../../utils';
 import type { Document } from '../../bson';
 
 type MechanismProperties = {
@@ -19,7 +19,7 @@ export class GSSAPI extends AuthProvider {
       command: Document,
       cb: Callback<{ payload: string; conversationId: any }>
     ) {
-      return connection.command('$external.$cmd', command, cb);
+      return connection.command(ns('$external.$cmd'), command, undefined, cb);
     }
     makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);

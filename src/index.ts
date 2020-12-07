@@ -121,7 +121,14 @@ export type {
   OpQueryOptions
 } from './cmap/commands';
 export type { Stream } from './cmap/connect';
-export type { Connection, ConnectionOptions, DestroyOptions } from './cmap/connection';
+export type {
+  Connection,
+  ConnectionOptions,
+  DestroyOptions,
+  CommandOptions,
+  QueryOptions,
+  GetMoreOptions
+} from './cmap/connection';
 export type {
   CloseOptions,
   ConnectionPoolOptions,
@@ -135,10 +142,7 @@ export type {
   MessageStreamOptions
 } from './cmap/message_stream';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
-export type { CommandOptions } from './cmap/wire_protocol/command';
 export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
-export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
-export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {

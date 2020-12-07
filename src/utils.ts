@@ -560,6 +560,11 @@ export function deprecateOptions(
   return deprecated;
 }
 
+/** @internal */
+export function ns(ns: string): MongoDBNamespace {
+  return MongoDBNamespace.fromString(ns);
+}
+
 /** @public */
 export class MongoDBNamespace {
   db: string;

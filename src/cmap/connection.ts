@@ -1,35 +1,45 @@
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
-import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
-import { updateSessionFromResponse } from '../sessions';
+import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   uuidV4,
   ClientMetadata,
   now,
   calculateDurationInMs,
   Callback,
-  MongoDBNamespace
+  MongoDBNamespace,
+  maxWireVersion
 } from '../utils';
 import {
+  AnyError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoWriteConcernError
 } from '../error';
-import type { BinMsg, WriteProtocolMessageType, Response } from './commands';
-import type { Document, Long } from '../bson';
+import {
+  BinMsg,
+  WriteProtocolMessageType,
+  Response,
+  KillCursor,
+  GetMore,
+  Query,
+  OpQueryOptions,
+  Msg
+} from './commands';
+import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ConnectionOptions as TLSConnectionOptions } from 'tls';
 import type { TcpNetConnectOpts, IpcNetConnectOpts } from 'net';
-import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
-import type { CommandOptions } from './wire_protocol/command';
-import type { GetMoreOptions } from './wire_protocol/get_more';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
-import type { QueryOptions } from './wire_protocol/query';
+import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_protocol/shared';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { isTransactionCommand } from '../transactions';
+import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -41,6 +51,53 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
+/** @internal */
+export interface QueryOptions extends BSONSerializeOptions {
+  readPreference: ReadPreference;
+  documentsReturnedIn?: string;
+  batchSize?: number;
+  limit?: number;
+  skip?: number;
+  projection?: Document;
+  tailable?: boolean;
+  awaitData?: boolean;
+  noCursorTimeout?: boolean;
+  /** @deprecated use `noCursorTimeout` instead */
+  timeout?: boolean;
+  partial?: boolean;
+  oplogReplay?: boolean;
+}
+
+/** @public */
+export interface CommandOptions extends BSONSerializeOptions {
+  command?: boolean;
+  slaveOk?: boolean;
+  /** Specify read preference if command supports it */
+  readPreference?: ReadPreferenceLike;
+  raw?: boolean;
+  monitoring?: boolean;
+  fullResult?: boolean;
+  socketTimeout?: number;
+  /** Session to use for the operation */
+  session?: ClientSession;
+  documentsReturnedIn?: string;
+  noResponse?: boolean;
+
+  // FIXME: NODE-2802
+  willRetryWrite?: boolean;
+
+  // FIXME: NODE-2781
+  writeConcern?: WriteConcernOptions | WriteConcern | W;
+}
+
+/** @internal */
+export interface GetMoreOptions extends CommandOptions {
+  batchSize?: number;
+  maxTimeMS?: number;
+  maxAwaitTimeMS?: number;
+  comment?: Document | string;
+}
+
 /** @public */
 export interface ConnectionOptions
   extends Partial<TcpNetConnectOpts>,
@@ -51,7 +108,7 @@ export interface ConnectionOptions
   id: number;
   monitorCommands: boolean;
   generation: number;
-  autoEncrypter: AutoEncrypter;
+  autoEncrypter?: AutoEncrypter;
   connectionType: typeof Connection;
   credentials?: MongoCredentials;
   connectTimeoutMS?: number;
@@ -89,8 +146,6 @@ export class Connection extends EventEmitter {
   /** @internal */
   [kLastUseTime]: number;
   /** @internal */
-  [kAutoEncrypter]?: unknown;
-  /** @internal */
   [kQueue]: Map<number, OperationDescription>;
   /** @internal */
   [kMessageStream]: MessageStream;
@@ -122,11 +177,6 @@ export class Connection extends EventEmitter {
     this[kDescription] = new StreamDescription(this.address, options);
     this[kGeneration] = options.generation;
     this[kLastUseTime] = now();
-
-    // retain a reference to an `AutoEncrypter` if present
-    if (options.autoEncrypter) {
-      this[kAutoEncrypter] = options.autoEncrypter;
-    }
 
     // setup parser stream and message handling
     this[kQueue] = new Map();
@@ -186,6 +236,7 @@ export class Connection extends EventEmitter {
   // the `connect` method stores the result of the handshake ismaster on the connection
   set ismaster(response: Document) {
     this[kDescription].receiveResponse(response);
+    this[kDescription] = Object.freeze(this[kDescription]);
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kIsMaster] = response;
@@ -249,52 +300,331 @@ export class Connection extends EventEmitter {
     });
   }
 
-  // Wire protocol methods
   /** @internal */
-  command(ns: string, cmd: Document, callback: Callback): void;
-  /** @internal */
-  command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   command(
-    ns: string,
+    ns: MongoDBNamespace,
     cmd: Document,
-    options: CommandOptions | Callback,
-    callback?: Callback
+    options: CommandOptions | undefined,
+    callback: Callback
   ): void {
-    wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
+    const readPreference = getReadPreference(cmd, options);
+    const shouldUseOpMsg = supportsOpMsg(this);
+    const session = options?.session;
+
+    let clusterTime = this.clusterTime;
+    let finalCmd = Object.assign({}, cmd);
+    if (hasSessionSupport(this) && session) {
+      if (
+        session.clusterTime &&
+        clusterTime &&
+        session.clusterTime.clusterTime.greaterThan(clusterTime.clusterTime)
+      ) {
+        clusterTime = session.clusterTime;
+      }
+
+      const err = applySession(session, finalCmd, options as CommandOptions);
+      if (err) {
+        return callback(err);
+      }
+    }
+
+    // if we have a known cluster time, gossip it
+    if (clusterTime) {
+      finalCmd.$clusterTime = clusterTime;
+    }
+
+    if (isSharded(this) && !shouldUseOpMsg && readPreference && readPreference.mode !== 'primary') {
+      finalCmd = {
+        $query: finalCmd,
+        $readPreference: readPreference.toJSON()
+      };
+    }
+
+    const commandOptions: Document = Object.assign(
+      {
+        command: true,
+        numberToSkip: 0,
+        numberToReturn: -1,
+        checkKeys: false
+      },
+      options
+    );
+
+    // This value is not overridable
+    commandOptions.slaveOk = readPreference.slaveOk();
+    const cmdNs = `${ns.db}.$cmd`;
+    const message = shouldUseOpMsg
+      ? new Msg(cmdNs, finalCmd, commandOptions)
+      : new Query(cmdNs, finalCmd, commandOptions);
+
+    const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
+    const commandResponseHandler = inTransaction
+      ? (err?: AnyError, ...args: Document[]) => {
+          // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
+          if (
+            err &&
+            err instanceof MongoNetworkError &&
+            !err.hasErrorLabel('TransientTransactionError')
+          ) {
+            err.addErrorLabel('TransientTransactionError');
+          }
+
+          if (
+            session &&
+            !cmd.commitTransaction &&
+            err &&
+            err instanceof MongoError &&
+            err.hasErrorLabel('TransientTransactionError')
+          ) {
+            session.transaction.unpinServer();
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          return callback!(err, ...args);
+        }
+      : callback;
+
+    try {
+      write(this, message, commandOptions, commandResponseHandler);
+    } catch (err) {
+      commandResponseHandler(err);
+    }
   }
 
   /** @internal */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
-    wp.query(makeServerTrampoline(this), ns, cmd, options, callback);
+    const isExplain = typeof cmd.$explain !== 'undefined';
+    const readPreference = options.readPreference ?? ReadPreference.primary;
+    const batchSize = options.batchSize || 0;
+    const limit = options.limit;
+    const numberToSkip = options.skip || 0;
+    let numberToReturn = 0;
+    if (
+      limit &&
+      (limit < 0 || (limit !== 0 && limit < batchSize) || (limit > 0 && batchSize === 0))
+    ) {
+      numberToReturn = limit;
+    } else {
+      numberToReturn = batchSize;
+    }
+
+    if (isExplain) {
+      // nToReturn must be 0 (match all) or negative (match N and close cursor)
+      // nToReturn > 0 will give explain results equivalent to limit(0)
+      numberToReturn = -Math.abs(limit || 0);
+    }
+
+    const queryOptions: OpQueryOptions = {
+      numberToSkip,
+      numberToReturn,
+      pre32Limit: typeof limit === 'number' ? limit : undefined,
+      checkKeys: false,
+      slaveOk: readPreference.slaveOk()
+    };
+
+    if (options.projection) {
+      queryOptions.returnFieldSelector = options.projection;
+    }
+
+    const query = new Query(ns.toString(), cmd, queryOptions);
+    if (typeof options.tailable === 'boolean') {
+      query.tailable = options.tailable;
+    }
+
+    if (typeof options.oplogReplay === 'boolean') {
+      query.oplogReplay = options.oplogReplay;
+    }
+
+    if (typeof options.timeout === 'boolean') {
+      query.noCursorTimeout = options.timeout;
+    } else if (typeof options.noCursorTimeout === 'boolean') {
+      query.noCursorTimeout = options.noCursorTimeout;
+    }
+
+    if (typeof options.awaitData === 'boolean') {
+      query.awaitData = options.awaitData;
+    }
+
+    if (typeof options.partial === 'boolean') {
+      query.partial = options.partial;
+    }
+
+    write(
+      this,
+      query,
+      { fullResult: true, ...pluckBSONSerializeOptions(options) },
+      (err, result) => {
+        if (err || !result) return callback(err, result);
+        if (isExplain && result.documents && result.documents[0]) {
+          return callback(undefined, result.documents[0]);
+        }
+
+        callback(undefined, result);
+      }
+    );
   }
 
   /** @internal */
-  getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
-    wp.getMore(makeServerTrampoline(this), ns, cursorId, options, callback);
+  getMore(
+    ns: MongoDBNamespace,
+    cursorId: Long,
+    options: GetMoreOptions,
+    callback: Callback<Document>
+  ): void {
+    const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
+    const wireVersion = maxWireVersion(this);
+    if (!cursorId) {
+      callback(new MongoError('Invalid internal cursor state, no known cursor id'));
+      return;
+    }
+
+    if (wireVersion < 4) {
+      const getMoreOp = new GetMore(ns.toString(), cursorId, { numberToReturn: options.batchSize });
+      const queryOptions = applyCommonQueryOptions(
+        {},
+        Object.assign(options, { ...pluckBSONSerializeOptions(options) })
+      );
+
+      queryOptions.fullResult = true;
+      queryOptions.command = true;
+      write(this, getMoreOp, queryOptions, (err, response) => {
+        if (fullResult) return callback(err, response);
+        if (err) return callback(err);
+        callback(undefined, { cursor: { id: response.cursorId, nextBatch: response.documents } });
+      });
+
+      return;
+    }
+
+    const getMoreCmd: Document = {
+      getMore: cursorId,
+      collection: ns.collection
+    };
+
+    if (typeof options.batchSize === 'number') {
+      getMoreCmd.batchSize = Math.abs(options.batchSize);
+    }
+
+    if (typeof options.maxAwaitTimeMS === 'number') {
+      getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
+    }
+
+    const commandOptions = Object.assign(
+      {
+        returnFieldSelector: null,
+        documentsReturnedIn: 'nextBatch'
+      },
+      options
+    );
+
+    this.command(ns, getMoreCmd, commandOptions, callback);
   }
 
   /** @internal */
-  killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback: Callback): void {
-    wp.killCursors(makeServerTrampoline(this), ns, cursorIds, options, callback);
+  killCursors(
+    ns: MongoDBNamespace,
+    cursorIds: Long[],
+    options: CommandOptions,
+    callback: Callback
+  ): void {
+    if (!cursorIds || !Array.isArray(cursorIds)) {
+      throw new TypeError('Invalid list of cursor ids provided: ' + cursorIds);
+    }
+
+    if (maxWireVersion(this) < 4) {
+      try {
+        write(
+          this,
+          new KillCursor(ns.toString(), cursorIds),
+          { noResponse: true, ...options },
+          callback
+        );
+      } catch (err) {
+        callback(err);
+      }
+
+      return;
+    }
+
+    this.command(
+      ns,
+      { killCursors: ns.collection, cursors: cursorIds },
+      { fullResult: true, ...options },
+      (err, response) => {
+        if (err || !response) return callback(err);
+        if (response.cursorNotFound) {
+          return callback(new MongoNetworkError('cursor killed or timed out'), null);
+        }
+
+        if (!Array.isArray(response.documents) || response.documents.length === 0) {
+          return callback(
+            new MongoError(`invalid killCursors result returned for cursor id ${cursorIds[0]}`)
+          );
+        }
+
+        callback(undefined, response.documents[0]);
+      }
+    );
   }
 }
 
-/**
- * This lets us emulate a legacy `Server` instance so we can work with the existing wire
- * protocol methods. Eventually, the operation executor will return a `Connection` to execute
- * against.
- * @internal
- * @deprecated Remove (NODE-2745)
- */
-function makeServerTrampoline(connection: Connection): Server {
-  return ({
-    description: connection.description,
-    clusterTime: connection[kClusterTime],
-    s: {
-      pool: { write: write.bind(connection), isConnected: () => true }
-    },
-    autoEncrypter: connection[kAutoEncrypter]
-  } as unknown) as Server;
+/** @internal */
+export class CryptoConnection extends Connection {
+  /** @internal */
+  [kAutoEncrypter]?: AutoEncrypter;
+
+  constructor(stream: Stream, options: ConnectionOptions) {
+    super(stream, options);
+    this[kAutoEncrypter] = options.autoEncrypter;
+  }
+
+  /** @internal @override */
+  command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions, callback: Callback): void {
+    const autoEncrypter = this[kAutoEncrypter];
+    if (!autoEncrypter) {
+      return callback(new MongoError('No AutoEncrypter available for encryption'));
+    }
+
+    const serverWireVersion = maxWireVersion(this);
+    if (serverWireVersion === 0) {
+      // This means the initial handshake hasn't happend yet
+      return super.command(ns, cmd, options, callback);
+    }
+
+    if (serverWireVersion < 8) {
+      callback(new MongoError('Auto-encryption requires a minimum MongoDB version of 4.2'));
+      return;
+    }
+
+    autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
+      if (err || encrypted == null) {
+        callback(err, null);
+        return;
+      }
+
+      super.command(ns, encrypted, options, (err, response) => {
+        if (err || response == null) {
+          callback(err, response);
+          return;
+        }
+
+        autoEncrypter.decrypt(response, options, callback);
+      });
+    });
+  }
+}
+
+function hasSessionSupport(conn: Connection) {
+  return conn.description.logicalSessionTimeoutMinutes != null;
+}
+
+function supportsOpMsg(conn: Connection) {
+  const description = conn.description;
+  if (description == null) {
+    return false;
+  }
+
+  return maxWireVersion(conn) >= 6 && !description.__nodejs_mock_server__;
 }
 
 function messageHandler(conn: Connection) {
@@ -370,9 +700,8 @@ function streamIdentifier(stream: Stream) {
   return uuidV4().toString('hex');
 }
 
-// Not meant to be called directly, the wire protocol methods call this assuming it is a `Pool` instance
 function write(
-  this: Connection,
+  conn: Connection,
   command: WriteProtocolMessageType,
   options: CommandOptions,
   callback: Callback
@@ -399,40 +728,40 @@ function write(
     started: 0
   };
 
-  if (this[kDescription] && this[kDescription].compressor) {
-    operationDescription.agreedCompressor = this[kDescription].compressor;
+  if (conn[kDescription] && conn[kDescription].compressor) {
+    operationDescription.agreedCompressor = conn[kDescription].compressor;
 
-    if (this[kDescription].zlibCompressionLevel) {
-      operationDescription.zlibCompressionLevel = this[kDescription].zlibCompressionLevel;
+    if (conn[kDescription].zlibCompressionLevel) {
+      operationDescription.zlibCompressionLevel = conn[kDescription].zlibCompressionLevel;
     }
   }
 
   if (typeof options.socketTimeout === 'number') {
     operationDescription.socketTimeoutOverride = true;
-    this[kStream].setTimeout(options.socketTimeout);
+    conn[kStream].setTimeout(options.socketTimeout);
   }
 
   // if command monitoring is enabled we need to modify the callback here
-  if (this.monitorCommands) {
-    this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, command));
+  if (conn.monitorCommands) {
+    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
-        this.emit(
+        conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(this, command, err, operationDescription.started)
+          new CommandFailedEvent(conn, command, err, operationDescription.started)
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
-          this.emit(
+          conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(this, command, reply, operationDescription.started)
+            new CommandFailedEvent(conn, command, reply, operationDescription.started)
           );
         } else {
-          this.emit(
+          conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(this, command, reply, operationDescription.started)
+            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
           );
         }
       }
@@ -444,14 +773,14 @@ function write(
   }
 
   if (!operationDescription.noResponse) {
-    this[kQueue].set(operationDescription.requestId, operationDescription);
+    conn[kQueue].set(operationDescription.requestId, operationDescription);
   }
 
   try {
-    this[kMessageStream].writeCommand(command, operationDescription);
+    conn[kMessageStream].writeCommand(command, operationDescription);
   } catch (e) {
     if (!operationDescription.noResponse) {
-      this[kQueue].delete(operationDescription.requestId);
+      conn[kQueue].delete(operationDescription.requestId);
       operationDescription.cb(e);
       return;
     }
