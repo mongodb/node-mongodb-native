@@ -2934,7 +2934,7 @@ describe('Operation Examples', function () {
           { upsert: true, writeConcern: { w: 1 } },
           function (err, result) {
             expect(err).to.not.exist;
-            test.equal(1, result.result.n);
+            expect(result).property('upsertedCount').to.equal(1);
 
             // Fetch the document that we modified and check if it got inserted correctly
             collection.findOne({ a: 1 }, function (err, item) {

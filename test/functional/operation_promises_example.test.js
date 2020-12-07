@@ -4831,7 +4831,7 @@ describe('Operation (Promises)', function () {
         // Get the collection
         var col = db.collection('find_one_and_replace_with_promise');
         return col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
-          test.equal(1, r.result.n);
+          expect(r).property('insertedCount').to.equal(1);
 
           return col
             .findOneAndReplace(

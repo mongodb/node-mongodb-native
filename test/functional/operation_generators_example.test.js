@@ -4464,7 +4464,7 @@ describe('Operation (Generators)', function () {
         // Get the collection
         var col = db.collection('find_one_and_delete_with_generators');
         var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
-        test.equal(1, r.result.n);
+        expect(r).property('insertedCount').to.equal(1);
 
         r = yield col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
         test.equal(1, r.lastErrorObject.n);
@@ -4509,7 +4509,7 @@ describe('Operation (Generators)', function () {
         // Get the collection
         var col = db.collection('find_one_and_replace_with_generators');
         var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
-        test.equal(1, r.result.n);
+        expect(r).property('insertedCount').to.equal(1);
 
         r = yield col.findOneAndReplace(
           { a: 1 },
@@ -4564,7 +4564,7 @@ describe('Operation (Generators)', function () {
         // Get the collection
         var col = db.collection('find_one_and_update_with_generators');
         var r = yield col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
-        test.equal(1, r.result.n);
+        expect(r).property('insertedCount').to.equal(1);
 
         r = yield col.findOneAndUpdate(
           { a: 1 },
