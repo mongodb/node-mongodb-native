@@ -43,7 +43,7 @@ export interface Auth {
   /** The username for auth */
   user?: string;
   /** The password for auth */
-  pass?: string;
+  password?: string;
 }
 
 /** @public */
