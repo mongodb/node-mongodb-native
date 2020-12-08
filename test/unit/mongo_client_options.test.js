@@ -309,4 +309,30 @@ describe('MongoOptions', function () {
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
   });
+
+  it('toURI should not emit defaults', function () {
+    const uri = 'mongodb://localhost:1234,farawayHost:1235,downTheStreetHost/testDb';
+    const options = parseOptions(uri);
+    expect(options.toURI()).to.equal(
+      'mongodb://localhost:1234,farawayHost:1235,downTheStreetHost:27017/testDb'
+    );
+  });
+
+  it('toURI handles complex objects', function () {
+    const uri = 'mongodb://localhost:1234,farawayHost:1235,downTheStreetHost/testDb';
+    const options = parseOptions(uri, {
+      readPreference: new ReadPreference('nearest', [{ ny: 'dc', la: 'sf' }, { rack: 1 }]),
+      writeConcern: new WriteConcern(2, undefined, true),
+      driverInfo: {
+        name: 'my_🥳_app'
+      }
+    });
+    const resolvedURI = options.toURI();
+    expect(resolvedURI).to.include('readPreference=nearest');
+    expect(resolvedURI).to.include('readPreferenceTags=ny:dc,la:sf');
+    expect(resolvedURI).to.include('readPreferenceTags=rack:1');
+    expect(resolvedURI).to.include('w=2');
+    expect(resolvedURI).to.include('journal=true');
+    expect(resolvedURI).to.include('appName=my_🥳_app');
+  });
 });

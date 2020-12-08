@@ -851,6 +851,160 @@ function toRecord(value: string): Record<string, any> {
   return record;
 }
 
+const URI_OPTIONS = [
+  'appname',
+  'authMechanism',
+  'authMechanismProperties',
+  'authSource',
+  'compressors',
+  'connectTimeoutMS',
+  'directConnection',
+  'heartbeatFrequencyMS',
+  'journal',
+  'localThresholdMS',
+  'maxIdleTimeMS',
+  'maxPoolSize',
+  'maxStalenessSeconds',
+  'minPoolSize',
+  'readConcernLevel',
+  'readPreference',
+  'readPreferenceTags',
+  'replicaSet',
+  'retryReads',
+  'retryWrites',
+  'serverSelectionTimeoutMS',
+  'serverSelectionTryOnce',
+  'socketTimeoutMS',
+  'ssl',
+  'tls',
+  'tlsAllowInvalidCertificates',
+  'tlsAllowInvalidHostnames',
+  'tlsCAFile',
+  'tlsCertificateKeyFile',
+  'tlsCertificateKeyFilePassword',
+  'tlsDisableCertificateRevocationCheck',
+  'tlsDisableOCSPEndpointCheck',
+  'tlsInsecure',
+  'w',
+  'waitQueueTimeoutMS',
+  'wTimeoutMS',
+  'zlibCompressionLevel'
+] as const;
+
+function mongoOptionsToURI(this: MongoOptions): string {
+  function recordToString(object: Record<string, any>): string {
+    return Object.entries(object)
+      .map(([k, v]) => `${k}:${v}`)
+      .join(',');
+  }
+  const protocol = this.srv ? 'mongodb+srv://' : 'mongodb://';
+
+  let authString = '';
+  if (this.credentials.username) authString += this.credentials.username;
+  if (this.credentials.password) authString += `:${this.credentials.password}@`;
+
+  const hosts = this.hosts
+    .map(h => {
+      if (h.type === 'tcp') {
+        return `${h.host}:${h.port}`;
+      } else {
+        return `${h.host}`;
+      }
+    })
+    .join(',');
+
+  const defaultOptions = new CaseInsensitiveMap(
+    Object.entries(OPTIONS)
+      .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
+      .map(([k, d]) => [k, d.default])
+  );
+
+  const searchParams: [string, string][] = [];
+  for (const optionKey of URI_OPTIONS) {
+    const optionValue = Reflect.get(this, optionKey);
+
+    if (optionValue !== undefined && defaultOptions.get(optionKey.toLowerCase()) === optionValue) {
+      continue;
+    }
+
+    // special cases:
+    switch (optionKey) {
+      case 'appname':
+        if (this.driverInfo.name) searchParams.push(['appName', `${this.driverInfo.name}`]);
+        continue;
+      case 'authMechanism':
+        if (this.credentials?.mechanism && this.credentials.mechanism !== 'DEFAULT')
+          searchParams.push(['authMechanism', `${this.credentials.mechanism}`]);
+        continue;
+      case 'authMechanismProperties':
+        if (
+          this.credentials?.mechanismProperties &&
+          Object.keys(this.credentials.mechanismProperties).length !== 0
+        )
+          searchParams.push([
+            'authMechanismProperties',
+            `${recordToString(this.credentials.mechanismProperties)}`
+          ]);
+        continue;
+      case 'authSource':
+        if (this.credentials?.source && this.credentials.source !== this.dbName)
+          searchParams.push(['authSource', `${this.credentials.source}`]);
+        continue;
+      case 'compressors':
+        if (
+          this.compressors?.length === 1 &&
+          this.compressors?.[0] === defaultOptions.get('compressors')
+        )
+          continue;
+        searchParams.push(['compressors', `${this.compressors}`]);
+        continue;
+      case 'journal':
+        if (this.writeConcern?.j)
+          searchParams.push(['journal', `${this.writeConcern.j ?? this.writeConcern.fsync}`]);
+        continue;
+      case 'w':
+        if (this.writeConcern?.w) searchParams.push(['w', `${this.writeConcern.w}`]);
+        continue;
+      case 'wTimeoutMS':
+        if (this.writeConcern?.wtimeout)
+          searchParams.push(['wtimeoutMS', `${this.writeConcern.wtimeout}`]);
+        continue;
+      case 'readConcernLevel':
+        if (this.readConcern?.level)
+          searchParams.push(['readConcernLevel', this.readConcern.level]);
+        continue;
+      case 'readPreference':
+        if (this.readPreference?.mode === defaultOptions.get('readpreference')?.mode) continue;
+        searchParams.push(['readPreference', this.readPreference.mode]);
+        continue;
+      case 'readPreferenceTags': {
+        if (searchParams.filter(p => p[0] === 'readPreference').length > 1) continue;
+        const tags =
+          this.readPreference.tags?.map(
+            t =>
+              [
+                'readPreferenceTags',
+                `${Object.entries(t)
+                  .map(([k, v]) => `${k}:${v}`)
+                  .join(',')}`
+              ] as [string, string]
+          ) ?? [];
+        searchParams.push(...tags);
+        continue;
+      }
+    }
+
+    if (!optionValue) continue;
+
+    searchParams.push([optionKey, String(optionValue)]);
+  }
+
+  let searchParamsString = searchParams.map(p => p.join('=')).join('&');
+  if (searchParamsString) searchParamsString = '?' + searchParamsString;
+
+  return `${protocol}${authString}${hosts}/${this.dbName ?? ''}${searchParamsString}`;
+}
+
 const DEFAULT_PK_FACTORY = {
   createPk(): ObjectId {
     // We prefer not to rely on ObjectId having a createPk method
@@ -885,11 +1039,15 @@ export function parseOptions(
   Reflect.deleteProperty(options, 'port');
 
   const mongoOptions = Object.create(null);
-  mongoOptions.hosts = srv ? [{ host: hosts[0], type: 'srv' }] : hosts.map(toHostArray);
-  mongoOptions.srv = srv;
+
   mongoOptions.dbName = decodeURIComponent(
     url.pathname[0] === '/' ? url.pathname.slice(1) : url.pathname
   );
+  options.dbName = mongoOptions.dbName; // ensure doesn't get overwritten (uri takes precedence)
+
+  mongoOptions.hosts = srv ? [{ host: hosts[0], type: 'srv' }] : hosts.map(toHostArray);
+  mongoOptions.srv = srv;
+
   mongoOptions.credentials = new MongoCredentials({
     ...mongoOptions.credentials,
     source: mongoOptions.dbName,
@@ -898,6 +1056,14 @@ export function parseOptions(
   });
 
   const urlOptions = new CaseInsensitiveMap();
+
+  Object.defineProperty(mongoOptions, 'toURI', {
+    configurable: false,
+    writable: false,
+    enumerable: false,
+    value: mongoOptionsToURI
+  });
+
   for (const key of url.searchParams.keys()) {
     const values = [...url.searchParams.getAll(key)];
 

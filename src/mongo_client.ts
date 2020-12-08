@@ -262,8 +262,7 @@ export class MongoClient extends EventEmitter {
   options;
 
   // debugging
-  originalUri;
-  originalOptions;
+  private originalUri;
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
@@ -275,7 +274,6 @@ export class MongoClient extends EventEmitter {
       delete options.promiseLibrary;
     }
     this.originalUri = url;
-    this.originalOptions = options;
 
     this.options = parseOptions(url, options);
 
@@ -573,7 +571,6 @@ export interface MongoOptions
       Pick<
         MongoClientOptions,
         | 'autoEncryption'
-        | 'compression'
         | 'compressors'
         | 'connectTimeoutMS'
         | 'dbName'
@@ -633,10 +630,6 @@ export interface MongoOptions
    */
   tls: boolean;
 
-  /**
-   * Turn these options into a reusable options dictionary
-   */
-  toJSON(): Record<string, any>;
   /**
    * Turn these options into a reusable connection URI
    */
