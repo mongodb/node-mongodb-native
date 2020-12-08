@@ -3,7 +3,7 @@ import {
   now,
   makeStateMachine,
   calculateDurationInMs,
-  makeInterruptableAsyncInterval
+  makeInterruptibleAsyncInterval
 } from '../utils';
 import { EventEmitter } from 'events';
 import { connect } from '../cmap/connect';
@@ -17,7 +17,7 @@ import {
 } from './events';
 
 import { Server } from './server';
-import type { InterruptableAsyncInterval, Callback } from '../utils';
+import type { InterruptibleAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
 import type { ConnectionOptions } from '../cmap/connection';
 
@@ -65,7 +65,7 @@ export class Monitor extends EventEmitter {
   [kConnection]?: Connection;
   [kCancellationToken]: EventEmitter;
   /** @internal */
-  [kMonitorId]?: InterruptableAsyncInterval;
+  [kMonitorId]?: InterruptibleAsyncInterval;
   [kRTTPinger]?: RTTPinger;
 
   constructor(server: Server, options?: Partial<MonitorOptions>) {
@@ -123,7 +123,7 @@ export class Monitor extends EventEmitter {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptableAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS,
       immediate: true
@@ -153,7 +153,7 @@ export class Monitor extends EventEmitter {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptableAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS
     });

@@ -26,7 +26,6 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
-    "bl": "^2.2.1",
     "bson": "^4.0.4",
     "denque": "^1.4.1",
     "lodash": "^4.17.20"
