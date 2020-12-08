@@ -1126,3 +1126,32 @@ export function resolveOptions<T extends CommandOperationOptions>(
 
   return result;
 }
+
+export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boolean {
+  set = Array.isArray(set) ? new Set(set) : set;
+  subset = Array.isArray(subset) ? new Set(subset) : subset;
+  for (const elem of subset) {
+    if (!set.has(elem)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function isRecord<T extends readonly string[]>(
+  value: unknown,
+  requiredKeys: T
+): value is Record<T[number], any>;
+export function isRecord(value: unknown): value is Record<string, any>;
+export function isRecord(
+  value: unknown,
+  requiredKeys: string[] | undefined = undefined
+): value is Record<string, any> {
+  const isRecord = !!value && typeof value === 'object' && !Array.isArray(value);
+  if (isRecord && requiredKeys) {
+    const keys = Object.keys(value as Record<string, any>);
+    return isSuperset(keys, requiredKeys);
+  }
+
+  return isRecord;
+}

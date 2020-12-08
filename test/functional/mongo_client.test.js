@@ -69,31 +69,10 @@ describe('MongoClient', function () {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient('user:password@localhost:27017/test');
-
-      client.connect(function (err) {
-        expect(err).to.exist.and.to.have.property('message', 'Invalid connection string');
-        done();
-      });
-    }
-  });
-
-  it('Should fail due to wrong uri user:password@localhost, with new url parser', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient('user:password@localhost:27017/test');
-
-      client.connect(function (err) {
-        test.equal(err.message, 'Invalid connection string');
-        done();
-      });
+    test() {
+      expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
+        'Invalid connection string user:password@localhost:27017/test'
+      );
     }
   });
 

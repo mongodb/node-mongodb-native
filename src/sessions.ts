@@ -540,11 +540,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     callback(e, r);
   }
 
-  if (
+  if (session.transaction.recoveryToken && supportsRecoveryToken(session)) {
     // Assumption here that commandName is "commitTransaction" or "abortTransaction"
-    session.transaction.recoveryToken &&
-    supportsRecoveryToken(session)
-  ) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 

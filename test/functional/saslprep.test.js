@@ -79,7 +79,7 @@ describe('SASLPrep', function () {
       },
       test: function () {
         const options = {
-          user: username,
+          username: username,
           password: password,
           authSource: 'admin',
           authMechanism: 'SCRAM-SHA-256'

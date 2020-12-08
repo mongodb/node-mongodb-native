@@ -3,19 +3,19 @@ import type { Document } from './bson';
 import type { ClientSession } from './sessions';
 
 /** @public */
-export type ReadPreferenceLike =
-  | ReadPreference
-  | ReadPreferenceMode
-  | keyof typeof ReadPreferenceMode;
+export type ReadPreferenceLike = ReadPreference | ReadPreferenceModeId;
 
 /** @public */
-export enum ReadPreferenceMode {
-  primary = 'primary',
-  primaryPreferred = 'primaryPreferred',
-  secondary = 'secondary',
-  secondaryPreferred = 'secondaryPreferred',
-  nearest = 'nearest'
-}
+export const ReadPreferenceMode = {
+  primary: 'primary',
+  primaryPreferred: 'primaryPreferred',
+  secondary: 'secondary',
+  secondaryPreferred: 'secondaryPreferred',
+  nearest: 'nearest'
+} as const;
+
+/** @public */
+export type ReadPreferenceModeId = keyof typeof ReadPreferenceMode;
 
 /** @public */
 export interface HedgeOptions {
@@ -36,17 +36,16 @@ export interface ReadPreferenceLikeOptions extends ReadPreferenceOptions {
   readPreference?:
     | ReadPreferenceLike
     | {
-        mode?: ReadPreferenceMode;
-        preference?: ReadPreferenceMode;
-        tags: TagSet[];
-        maxStalenessSeconds: number;
+        mode?: ReadPreferenceModeId;
+        preference?: ReadPreferenceModeId;
+        tags?: TagSet[];
+        maxStalenessSeconds?: number;
       };
 }
 
 /** @public */
-export interface ReadPreferenceFromOptions {
+export interface ReadPreferenceFromOptions extends ReadPreferenceLikeOptions {
   session?: ClientSession;
-  readPreference?: ReadPreferenceLikeOptions['readPreference'];
   readPreferenceTags?: TagSet[];
   hedge?: HedgeOptions;
 }
@@ -59,7 +58,7 @@ export interface ReadPreferenceFromOptions {
  * @see https://docs.mongodb.com/manual/core/read-preference/
  */
 export class ReadPreference {
-  mode: ReadPreferenceMode;
+  mode: ReadPreferenceModeId;
   tags?: TagSet[];
   hedge?: HedgeOptions;
   maxStalenessSeconds?: number;
@@ -82,9 +81,9 @@ export class ReadPreference {
    * @param tags - A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
    * @param options - Additional read preference options
    */
-  constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
+  constructor(mode: ReadPreferenceModeId, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
-      throw new TypeError(`Invalid read preference mode ${mode}`);
+      throw new TypeError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
     if (options === undefined && typeof tags === 'object' && !Array.isArray(tags)) {
       options = tags;
@@ -96,6 +95,8 @@ export class ReadPreference {
     this.mode = mode;
     this.tags = tags;
     this.hedge = options?.hedge;
+    this.maxStalenessSeconds = undefined;
+    this.minWireVersion = undefined;
 
     options = options ?? {};
     if (options.maxStalenessSeconds != null) {
@@ -126,12 +127,12 @@ export class ReadPreference {
   }
 
   // Support the deprecated `preference` property introduced in the porcelain layer
-  get preference(): ReadPreferenceMode {
+  get preference(): ReadPreferenceModeId {
     return this.mode;
   }
 
   static fromString(mode: string): ReadPreference {
-    return new ReadPreference(mode as ReadPreferenceMode);
+    return new ReadPreference(mode as ReadPreferenceModeId);
   }
 
   /**
@@ -150,11 +151,11 @@ export class ReadPreference {
     }
 
     if (typeof readPreference === 'string') {
-      return new ReadPreference(readPreference as ReadPreferenceMode, readPreferenceTags);
+      return new ReadPreference(readPreference as ReadPreferenceModeId, readPreferenceTags);
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
       const mode = readPreference.mode || readPreference.preference;
       if (mode && typeof mode === 'string') {
-        return new ReadPreference(mode as ReadPreferenceMode, readPreference.tags, {
+        return new ReadPreference(mode as ReadPreferenceModeId, readPreference.tags, {
           maxStalenessSeconds: readPreference.maxStalenessSeconds,
           hedge: options.hedge
         });
@@ -172,11 +173,11 @@ export class ReadPreference {
     const r = options.readPreference;
 
     if (typeof r === 'string') {
-      options.readPreference = new ReadPreference(r as ReadPreferenceMode);
+      options.readPreference = new ReadPreference(r as ReadPreferenceModeId);
     } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
       const mode = r.mode || r.preference;
       if (mode && typeof mode === 'string') {
-        options.readPreference = new ReadPreference(mode as ReadPreferenceMode, r.tags, {
+        options.readPreference = new ReadPreference(mode as ReadPreferenceModeId, r.tags, {
           maxStalenessSeconds: r.maxStalenessSeconds
         });
       }
@@ -202,7 +203,7 @@ export class ReadPreference {
       null
     ]);
 
-    return VALID_MODES.has(mode as ReadPreferenceMode);
+    return VALID_MODES.has(mode as ReadPreferenceModeId);
   }
 
   /**
@@ -220,7 +221,7 @@ export class ReadPreference {
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean {
-    const NEEDS_SLAVEOK = new Set([
+    const NEEDS_SLAVEOK = new Set<string>([
       ReadPreference.PRIMARY_PREFERRED,
       ReadPreference.SECONDARY,
       ReadPreference.SECONDARY_PREFERRED,

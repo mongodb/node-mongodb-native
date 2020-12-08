@@ -200,8 +200,8 @@ describe('Connection', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var user = 'testConnectGoodAuthAsOption',
-        password = 'password';
+      const username = 'testConnectGoodAuthAsOption';
+      const password = 'password';
 
       // First add a user.
       const setupClient = configuration.newClient();
@@ -209,14 +209,14 @@ describe('Connection', function () {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
-        db.addUser(user, password, function (err) {
+        db.addUser(username, password, function (err) {
           expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
 
       function restOfTest() {
-        var opts = { auth: { user: user, password: password } };
+        var opts = { auth: { username, password } };
 
         const testClient = configuration.newClient(
           configuration.url('baduser', 'badpassword'),
@@ -249,17 +249,9 @@ describe('Connection', function () {
   it('test connect bad url', {
     metadata: { requires: { topology: 'single' } },
 
-    test: function (done) {
+    test: function () {
       const configuration = this.configuration;
-      const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
-
-      test.throws(function () {
-        client.connect(function () {
-          test.ok(false, 'Bad URL!');
-        });
-      });
-
-      done();
+      expect(() => configuration.newClient('mangodb://localhost:27017/test?safe=false')).to.throw();
     }
   });
 

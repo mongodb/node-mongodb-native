@@ -109,7 +109,7 @@ export type {
   OperationTime,
   ResumeOptions
 } from './change_stream';
-export type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+export type { AuthMechanism, AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
@@ -138,13 +138,8 @@ export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_
 export type { CommandOptions } from './cmap/wire_protocol/command';
 export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
 export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
-export type {
-  InsertOptions as WireInsertOptions,
-  UpdateOptions as WireUpdateOptions,
-  RemoveOptions as WireRemoveOptions
-} from './cmap/wire_protocol/index';
-export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
 export type { QueryOptions } from './cmap/wire_protocol/query';
+export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
@@ -179,9 +174,11 @@ export type {
   PkFactory,
   MongoURIOptions,
   LogLevel,
+  LogLevelId,
   Auth,
   DriverInfo,
-  MongoOptions
+  MongoOptions,
+  HostAddress
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {
@@ -236,12 +233,13 @@ export type { UpdateResult, UpdateOptions } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
 export type {
   ReadConcern,
-  ReadConcernLevel,
   ReadConcernLike,
-  ReadConcernLevelLike
+  ReadConcernLevel,
+  ReadConcernLevelId
 } from './read_concern';
 export type {
   ReadPreferenceLike,
+  ReadPreferenceModeId,
   ReadPreferenceMode,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
@@ -270,12 +268,12 @@ export type {
   Topology,
   TopologyPrivate,
   ServerSelectionRequest,
-  ServerAddress,
   TopologyOptions,
   ServerCapabilities,
   ConnectOptions,
   SelectServerOptions,
-  ServerSelectionCallback
+  ServerSelectionCallback,
+  ServerAddress
 } from './sdam/topology';
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {

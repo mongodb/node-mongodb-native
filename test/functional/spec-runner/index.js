@@ -4,6 +4,7 @@ const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const { EJSON } = require('bson');
+const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 
@@ -26,10 +27,6 @@ chai.config.truncateThreshold = 0;
 
 function escape(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && Array.isArray(value) === false;
 }
 
 function translateClientOptions(options) {
@@ -426,7 +423,7 @@ function normalizeCommandShapes(commands) {
 }
 
 function extractCrudResult(result, operation) {
-  if (Array.isArray(result) || !isPlainObject(result)) {
+  if (Array.isArray(result) || !isRecord(result)) {
     return result;
   }
 

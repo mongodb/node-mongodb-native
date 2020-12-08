@@ -45,9 +45,7 @@ describe('URI', function () {
         return done();
       }
 
-      const client = this.configuration.newClient(
-        'mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false'
-      );
+      const client = this.configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock');
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;

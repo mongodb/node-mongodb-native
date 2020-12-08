@@ -235,7 +235,7 @@ export class Topology extends EventEmitter {
         result.set(address, new ServerDescription(address));
         return result;
       },
-      new Map()
+      new Map<string, ServerDescription>()
     );
 
     this[kWaitQueue] = new Denque();
