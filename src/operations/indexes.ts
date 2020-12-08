@@ -221,8 +221,8 @@ export class CreateIndexesOperation<T = string[]> extends CommandOperation<T> {
         return;
       }
 
-      const names = indexes.map(index => index.name);
-      callback(undefined, names);
+      const indexNames = indexes.map(index => index.name);
+      callback(undefined, indexNames);
     });
   }
 }
@@ -244,9 +244,9 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
   execute(server: Server, session: ClientSession, callback: Callback<string>): void {
-    super.execute(server, session, (err, result) => {
+    super.execute(server, session, (err, indexNames) => {
       if (err) return callback(err);
-      return callback(undefined, result[0]);
+      return callback(undefined, indexNames[0]);
     });
   }
 }

@@ -1210,7 +1210,10 @@ export abstract class BulkOperationBase {
   }
 
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
-  execute(options?: BulkWriteOptions, callback?: Callback<BulkWriteResult>): Promise<void> | void {
+  execute(
+    options?: BulkWriteOptions,
+    callback?: Callback<BulkWriteResult>
+  ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
@@ -1292,7 +1295,7 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
 function handleEarlyError(
   err?: AnyError,
   callback?: Callback<BulkWriteResult>
-): Promise<void> | void {
+): Promise<BulkWriteResult> | void {
   const Promise = PromiseProvider.get();
   if (typeof callback === 'function') {
     callback(err);
