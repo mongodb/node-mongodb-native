@@ -150,29 +150,26 @@ export class IndexesOperation extends AbstractOperation<Document> {
 }
 
 /** @internal */
-export class CreateIndexesOperation extends CommandOperation<Document> {
+export class CreateIndexesOperation<T = string[]> extends CommandOperation<T> {
   options: CreateIndexesOptions;
   collectionName: string;
-  singular?: boolean;
   indexes: IndexDescription[];
 
   constructor(
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions,
-    singular?: boolean
+    options?: CreateIndexesOptions
   ) {
     super(parent, options);
 
     this.options = options ?? {};
-    this.singular = singular ?? false;
     this.collectionName = collectionName;
 
     this.indexes = indexes;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -225,13 +222,13 @@ export class CreateIndexesOperation extends CommandOperation<Document> {
       }
 
       const names = indexes.map(index => index.name);
-      callback(undefined, (this.singular ? names[0] : names) as Document);
+      callback(undefined, names);
     });
   }
 }
 
 /** @internal */
-export class CreateIndexOperation extends CreateIndexesOperation {
+export class CreateIndexOperation extends CreateIndexesOperation<string> {
   constructor(
     parent: OperationParent,
     collectionName: string,
@@ -244,7 +241,13 @@ export class CreateIndexOperation extends CreateIndexesOperation {
     //   coll.createIndex([['a', 1]]);
     // createIndexes is always called with an array of index spec objects
 
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options, true);
+    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
+  }
+  execute(server: Server, session: ClientSession, callback: Callback<string>): void {
+    super.execute(server, session, (err, result) => {
+      if (err) return callback(err);
+      return callback(undefined, result[0]);
+    });
   }
 }
 
