@@ -1,5 +1,5 @@
 'use strict';
-const { eachAsync, now, makeInterruptableAsyncInterval, BufferPool } = require('../../src/utils');
+const { eachAsync, now, makeInterruptibleAsyncInterval, BufferPool } = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
 
@@ -35,7 +35,7 @@ describe('utils', function () {
     });
   });
 
-  context('makeInterruptableAsyncInterval', function () {
+  context('makeInterruptibleAsyncInterval', function () {
     before(function () {
       this.clock = sinon.useFakeTimers();
     });
@@ -47,7 +47,7 @@ describe('utils', function () {
     it('should execute a method in an repeating interval', function (done) {
       let lastTime = now();
       const marks = [];
-      const executor = makeInterruptableAsyncInterval(
+      const executor = makeInterruptibleAsyncInterval(
         callback => {
           marks.push(now() - lastTime);
           lastTime = now();
@@ -69,7 +69,7 @@ describe('utils', function () {
     it('should schedule execution sooner if requested within min interval threshold', function (done) {
       let lastTime = now();
       const marks = [];
-      const executor = makeInterruptableAsyncInterval(
+      const executor = makeInterruptibleAsyncInterval(
         callback => {
           marks.push(now() - lastTime);
           lastTime = now();
@@ -93,7 +93,7 @@ describe('utils', function () {
     it('should debounce multiple requests to wake the interval sooner', function (done) {
       let lastTime = now();
       const marks = [];
-      const executor = makeInterruptableAsyncInterval(
+      const executor = makeInterruptibleAsyncInterval(
         callback => {
           marks.push(now() - lastTime);
           lastTime = now();
@@ -119,7 +119,7 @@ describe('utils', function () {
       let clockCalled = 0;
       let lastTime = now();
       const marks = [];
-      const executor = makeInterruptableAsyncInterval(
+      const executor = makeInterruptibleAsyncInterval(
         callback => {
           marks.push(now() - lastTime);
           lastTime = now();
@@ -198,7 +198,9 @@ describe('utils', function () {
 
       it('across multiple buffers', function () {
         const buffer = new BufferPool();
-        buffer.append(Buffer.from([0, 1, 2, 3, 4, 5]));
+        buffer.append(Buffer.from([0, 1]));
+        buffer.append(Buffer.from([2, 3]));
+        buffer.append(Buffer.from([4, 5]));
         const data = buffer.peek(6);
         expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4, 5]));
         expect(buffer).property('length').to.equal(6);
@@ -234,7 +236,9 @@ describe('utils', function () {
 
       it('across multiple buffers', function () {
         const buffer = new BufferPool();
-        buffer.append(Buffer.from([0, 1, 2, 3, 4, 5]));
+        buffer.append(Buffer.from([0, 1]));
+        buffer.append(Buffer.from([2, 3]));
+        buffer.append(Buffer.from([4, 5]));
         const data = buffer.read(6);
         expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4, 5]));
         expect(buffer).property('length').to.equal(0);

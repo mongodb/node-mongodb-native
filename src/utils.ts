@@ -1159,7 +1159,10 @@ export function isRecord(
 const kBuffers = Symbol('buffers');
 const kLength = Symbol('length');
 
-/** @internal */
+/**
+ * A pool of Buffers which allow you to read them as if they were one
+ * @internal
+ */
 export class BufferPool {
   [kBuffers]: Buffer[];
   [kLength]: number;
@@ -1173,22 +1176,21 @@ export class BufferPool {
     return this[kLength];
   }
 
+  /** Adds a buffer to the internal buffer pool list */
   append(buffer: Buffer): void {
     this[kBuffers].push(buffer);
     this[kLength] += buffer.length;
   }
 
+  /** Returns the requested number of bytes without consuming them */
   peek(size: number): Buffer {
     return this.read(size, false);
   }
 
+  /** Reads the requested number of bytes, optionally consuming them */
   read(size: number, consume = true): Buffer {
     if (typeof size !== 'number' || size < 0) {
       throw new TypeError('Parameter size must be a non-negative number');
-    }
-
-    if (typeof size === 'number' && size < 0) {
-      size += this.length;
     }
 
     if (size > this[kLength]) {
@@ -1243,10 +1245,6 @@ export class BufferPool {
       // compact the internal buffer array
       if (consume) {
         this[kBuffers] = this[kBuffers].slice(idx);
-      }
-
-      if (result.length > offset) {
-        return result.slice(0, offset);
       }
     }
 
