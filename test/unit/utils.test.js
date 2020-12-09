@@ -201,8 +201,9 @@ describe('utils', function () {
         buffer.append(Buffer.from([0, 1]));
         buffer.append(Buffer.from([2, 3]));
         buffer.append(Buffer.from([4, 5]));
-        const data = buffer.peek(6);
-        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4, 5]));
+        expect(buffer).property('length').to.equal(6);
+        const data = buffer.peek(5);
+        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
         expect(buffer).property('length').to.equal(6);
       });
     });
@@ -239,9 +240,10 @@ describe('utils', function () {
         buffer.append(Buffer.from([0, 1]));
         buffer.append(Buffer.from([2, 3]));
         buffer.append(Buffer.from([4, 5]));
-        const data = buffer.read(6);
-        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4, 5]));
-        expect(buffer).property('length').to.equal(0);
+        expect(buffer).property('length').to.equal(6);
+        const data = buffer.read(5);
+        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
+        expect(buffer).property('length').to.equal(1);
       });
     });
   });

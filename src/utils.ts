@@ -1245,6 +1245,7 @@ export class BufferPool {
       // compact the internal buffer array
       if (consume) {
         this[kBuffers] = this[kBuffers].slice(idx);
+        this[kLength] -= size;
       }
     }
 
