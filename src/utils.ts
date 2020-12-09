@@ -1233,7 +1233,7 @@ export class BufferPool {
         } else {
           bytesCopied = this[kBuffers][idx].copy(result, offset, 0, bytesToCopy);
           if (consume) {
-            this[kBuffers][idx] = this[kBuffers][idx].slice(0, bytesCopied);
+            this[kBuffers][idx] = this[kBuffers][idx].slice(bytesCopied);
           }
           offset += bytesCopied;
           break;

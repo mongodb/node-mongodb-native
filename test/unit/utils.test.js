@@ -244,6 +244,7 @@ describe('utils', function () {
         const data = buffer.read(5);
         expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
         expect(buffer).property('length').to.equal(1);
+        expect(buffer.read(1)).to.eql(Buffer.from([5]));
       });
     });
   });
