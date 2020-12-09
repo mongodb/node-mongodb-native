@@ -13,8 +13,8 @@ import {
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { UpdateOperation } from '../operations/update';
-import { DeleteOperation } from '../operations/delete';
+import { UpdateOperation, UpdateStatement } from '../operations/update';
+import { DeleteOperation, DeleteStatement } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
@@ -28,7 +28,7 @@ const WRITE_CONCERN_ERROR = 64;
 export const BatchType = {
   INSERT: 1,
   UPDATE: 2,
-  REMOVE: 3
+  DELETE: 3
 } as const;
 
 /** @public */
@@ -139,12 +139,12 @@ export interface BulkResult {
  *
  * @public
  */
-export class Batch {
+export class Batch<T = Document> {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
   batchType: BatchTypeId;
-  operations: Document[];
+  operations: T[];
   size: number;
   sizeBytes: number;
 
@@ -483,12 +483,12 @@ function mergeBatchResults(
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === BatchType.INSERT && result.n) {
+  if (isInsertBatch(batch) && result.n) {
     bulkResult.nInserted = bulkResult.nInserted + result.n;
   }
 
   // If we have an insert Batch type
-  if (batch.batchType === BatchType.REMOVE && result.n) {
+  if (isDeleteBatch(batch) && result.n) {
     bulkResult.nRemoved = bulkResult.nRemoved + result.n;
   }
 
@@ -514,7 +514,7 @@ function mergeBatchResults(
   }
 
   // If we have an update Batch type
-  if (batch.batchType === BatchType.UPDATE && result.n) {
+  if (isUpdateBatch(batch) && result.n) {
     const nModified = result.nModified;
     bulkResult.nUpserted = bulkResult.nUpserted + nUpserted;
     bulkResult.nMatched = bulkResult.nMatched + (result.n - nUpserted);
@@ -605,30 +605,30 @@ function executeCommands(
   }
 
   if (finalOptions.retryWrites) {
-    if (batch.batchType === BatchType.UPDATE) {
+    if (isUpdateBatch(batch)) {
       finalOptions.retryWrites = finalOptions.retryWrites && !batch.operations.some(op => op.multi);
     }
 
-    if (batch.batchType === BatchType.REMOVE) {
+    if (isDeleteBatch(batch)) {
       finalOptions.retryWrites =
         finalOptions.retryWrites && !batch.operations.some(op => op.limit === 0);
     }
   }
 
   try {
-    if (batch.batchType === BatchType.INSERT) {
+    if (isInsertBatch(batch)) {
       executeOperation(
         bulkOperation.s.topology,
         new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
-    } else if (batch.batchType === BatchType.UPDATE) {
+    } else if (isUpdateBatch(batch)) {
       executeOperation(
         bulkOperation.s.topology,
         new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
-    } else if (batch.batchType === BatchType.REMOVE) {
+    } else if (isDeleteBatch(batch)) {
       executeOperation(
         bulkOperation.s.topology,
         new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
@@ -844,7 +844,7 @@ export class FindOperators {
 
     // Clear out current Op
     this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
+    return this.bulkOperation.addToOperationsList(BatchType.DELETE, document);
   }
 
   /** Add a delete many operation to the bulk operation */
@@ -861,7 +861,7 @@ export class FindOperators {
 
     // Clear out current Op
     this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
+    return this.bulkOperation.addToOperationsList(BatchType.DELETE, document);
   }
 
   removeOne(): BulkOperationBase {
@@ -1168,28 +1168,28 @@ export abstract class BulkOperationBase {
 
     if ('removeOne' in op) {
       return this.addToOperationsList(
-        BatchType.REMOVE,
+        BatchType.DELETE,
         makeDeleteStatement(this.s.topology, op.removeOne, false)
       );
     }
 
     if ('removeMany' in op) {
       return this.addToOperationsList(
-        BatchType.REMOVE,
+        BatchType.DELETE,
         makeDeleteStatement(this.s.topology, op.removeMany, true)
       );
     }
 
     if ('deleteOne' in op) {
       return this.addToOperationsList(
-        BatchType.REMOVE,
+        BatchType.DELETE,
         makeDeleteStatement(this.s.topology, op.deleteOne, false)
       );
     }
 
     if ('deleteMany' in op) {
       return this.addToOperationsList(
-        BatchType.REMOVE,
+        BatchType.DELETE,
         makeDeleteStatement(this.s.topology, op.deleteMany, true)
       );
     }
@@ -1328,24 +1328,6 @@ function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   return false;
 }
 
-/** @public */
-export interface UpdateStatement {
-  /** The query that matches documents to update. */
-  q: Document;
-  /** The modifications to apply. */
-  u: Document | Document[];
-  /**  If true, perform an insert if no documents match the query. */
-  upsert?: boolean;
-  /** If true, updates all documents that meet the query criteria. */
-  multi?: boolean;
-  /** Specifies the collation to use for the operation. */
-  collation?: CollationOptions;
-  /** An array of filter documents that determines which array elements to modify for an update operation on an array field. */
-  arrayFilters?: Document[];
-  /** A document or string that specifies the index to use to support the query predicate. */
-  hint?: Hint;
-}
-
 function makeUpdateStatement(
   topology: Topology,
   model: ReplaceOneModel | UpdateOneModel | UpdateManyModel,
@@ -1395,18 +1377,6 @@ function isUpdateStatement(model: Document): model is UpdateStatement {
   return 'q' in model;
 }
 
-/** @public */
-export interface DeleteStatement {
-  /** The query that matches documents to delete. */
-  q: Document;
-  /** The number of matching documents to delete. */
-  limit: number;
-  /** Specifies the collation to use for the operation. */
-  collation?: CollationOptions;
-  /** A document or string that specifies the index to use to support the query predicate. */
-  hint?: Hint;
-}
-
 function makeDeleteStatement(
   topology: Topology,
   model: DeleteOneModel | DeleteManyModel,
@@ -1444,4 +1414,16 @@ function makeDeleteStatement(
 
 function isDeleteStatement(model: Document): model is DeleteStatement {
   return 'q' in model;
+}
+
+function isInsertBatch(batch: Batch): boolean {
+  return batch.batchType === BatchType.INSERT;
+}
+
+function isUpdateBatch(batch: Batch): batch is Batch<UpdateStatement> {
+  return batch.batchType === BatchType.UPDATE;
+}
+
+function isDeleteBatch(batch: Batch): batch is Batch<DeleteStatement> {
+  return batch.batchType === BatchType.DELETE;
 }

@@ -95,9 +95,7 @@ export type {
   BulkWriteResult,
   WriteError,
   WriteConcernError,
-  BulkWriteOperationError,
-  UpdateStatement,
-  DeleteStatement
+  BulkWriteOperationError
 } from './bulk/common';
 export type {
   ChangeStream,
@@ -199,7 +197,7 @@ export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
 export type { CreateCollectionOptions } from './operations/create_collection';
-export type { DeleteOptions, DeleteResult } from './operations/delete';
+export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
@@ -231,7 +229,12 @@ export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
-export type { UpdateResult, UpdateOptions, ReplaceOptions } from './operations/update';
+export type {
+  UpdateResult,
+  UpdateOptions,
+  ReplaceOptions,
+  UpdateStatement
+} from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
 export type {
   ReadConcern,
