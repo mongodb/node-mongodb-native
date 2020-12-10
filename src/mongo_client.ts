@@ -203,7 +203,6 @@ export type WithSessionCallback = (session: ClientSession) => Promise<any> | voi
 export interface MongoClientPrivate {
   url: string;
   options?: MongoClientOptions;
-  dbCache: Map<string, Db>;
   sessions: Set<ClientSession>;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -283,7 +282,6 @@ export class MongoClient extends EventEmitter {
     this.s = {
       url,
       options: options ?? {},
-      dbCache: new Map(),
       sessions: new Set(),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
@@ -380,15 +378,13 @@ export class MongoClient extends EventEmitter {
 
   /**
    * Create a new Db instance sharing the current socket connections.
-   * Db instances are cached so performing db('db1') twice will return the same instance.
-   * You can control these behaviors with the options noListener and returnNonCachedInstance.
    *
    * @param dbName - The name of the database we want to use. If not provided, use database name from connection string.
    * @param options - Optional settings for Db construction
    */
   db(dbName: string): Db;
-  db(dbName: string, options: DbOptions & { returnNonCachedInstance?: boolean }): Db;
-  db(dbName: string, options?: DbOptions & { returnNonCachedInstance?: boolean }): Db {
+  db(dbName: string, options: DbOptions): Db;
+  db(dbName: string, options?: DbOptions): Db {
     options = options ?? {};
 
     // Default to db from connection string if not provided
@@ -399,12 +395,6 @@ export class MongoClient extends EventEmitter {
     // Copy the options and add out internal override of the not shared flag
     const finalOptions = Object.assign({}, this.s.options, options);
 
-    // Do we have the db in the cache already
-    const dbFromCache = this.s.dbCache.get(dbName);
-    if (dbFromCache && finalOptions.returnNonCachedInstance !== true) {
-      return dbFromCache;
-    }
-
     // If no topology throw an error message
     if (!this.topology) {
       throw new MongoError('MongoClient must be connected before calling MongoClient.prototype.db');
@@ -413,8 +403,6 @@ export class MongoClient extends EventEmitter {
     // Return the db object
     const db = new Db(this, dbName, finalOptions);
 
-    // Add the db to the cache
-    this.s.dbCache.set(dbName, db);
     // Return the database
     return db;
   }
