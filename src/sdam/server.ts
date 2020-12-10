@@ -265,7 +265,14 @@ export class Server extends EventEmitter {
       (callback = options), (options = {}), (options = options ?? {});
     }
 
-    if (!callback) return;
+    if (callback == null) {
+      throw new TypeError('callback must be provided');
+    }
+
+    if (ns.db == null || typeof ns === 'string') {
+      throw new TypeError('ns must not be a string');
+    }
+
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;

@@ -4,6 +4,7 @@ const mock = require('mongodb-mock-server');
 const { ReplSetFixture } = require('./common');
 const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
+const { ns } = require('../../../src/utils');
 
 describe('WriteConcernError', function () {
   let test;
@@ -100,7 +101,7 @@ describe('WriteConcernError', function () {
       topology.selectServer('primary', (err, server) => {
         expect(err).to.not.exist;
 
-        server.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+        server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
           let _err;
           try {
             expect(err).to.be.an.instanceOf(MongoWriteConcernError);
@@ -141,7 +142,7 @@ describe('WriteConcernError', function () {
       topology.selectServer('primary', (err, server) => {
         expect(err).to.not.exist;
 
-        server.command('db1', Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+        server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
           let _err;
           try {
             expect(err).to.be.an.instanceOf(MongoWriteConcernError);

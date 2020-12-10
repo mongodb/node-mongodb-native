@@ -10,7 +10,7 @@ const sinon = require('sinon');
 const { EJSON } = require('bson');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../../../src/error');
-const { eachAsyncSeries } = require('../../../src/utils');
+const { eachAsyncSeries, ns } = require('../../../src/utils');
 
 const chai = require('chai');
 chai.use(require('chai-subset'));
@@ -257,7 +257,7 @@ function executeSDAMTest(testData, testDone) {
                   .callsFake(withConnectionStubImpl(appError));
 
                 const server = topology.s.servers.get(appError.address);
-                server.command('admin.$cmd', { ping: 1 }, err => {
+                server.command(ns('admin.$cmd'), { ping: 1 }, undefined, err => {
                   expect(err).to.exist;
                   withConnectionStub.restore();
 

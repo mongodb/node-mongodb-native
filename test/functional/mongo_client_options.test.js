@@ -4,7 +4,6 @@ const { setupDatabase } = require('./shared');
 const { expect } = require('chai');
 const { MongoClient } = require('../../src');
 const { Connection } = require('../../src/cmap/connection');
-const { ns } = require('../../src/utils');
 
 describe('MongoClient Options', function () {
   before(function () {

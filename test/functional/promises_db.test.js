@@ -275,35 +275,6 @@ describe('Promises (Db)', function () {
     }
   });
 
-  it('Should correctly execute executeDbAdminCommand using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        client
-          .db(configuration.db)
-          .executeDbAdminCommand({ ismaster: true })
-          .then(function (r) {
-            test.ok(r);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
   it('Should correctly execute createIndex using Promise', {
     metadata: {
       requires: {

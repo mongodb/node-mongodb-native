@@ -21,7 +21,9 @@ describe('Retryable Writes', function () {
             }
 
             return Promise.resolve()
-              .then(() => (ctx.failPointName ? turnOffFailPoint(ctx.db, ctx.failPointName) : {}))
+              .then(() =>
+                ctx.failPointName ? turnOffFailPoint(ctx.client, ctx.failPointName) : {}
+              )
               .then(() => ctx.client.close())
               .then(() => (ctx = {}));
           });
@@ -75,7 +77,7 @@ function executeScenarioSetup(scenario, test, config, ctx) {
         ? ctx.collection.insertMany(scenario.data)
         : {}
     )
-    .then(() => (test.failPoint ? ctx.db.executeDbAdminCommand(test.failPoint) : {}));
+    .then(() => (test.failPoint ? ctx.client.db('admin').command(test.failPoint) : {}));
 }
 
 function executeScenarioTest(test, ctx) {
@@ -170,14 +172,9 @@ function transformToResultValue(result) {
   return result && result.value ? result.value : result;
 }
 
-/**
- * Runs a command that turns off a fail point
- *
- * @param {any} db
- * @param {any} name
- */
-function turnOffFailPoint(db, name) {
-  return db.executeDbAdminCommand({
+/** Runs a command that turns off a fail point */
+function turnOffFailPoint(client, name) {
+  return client.db('admin').command({
     configureFailPoint: name,
     mode: 'off'
   });

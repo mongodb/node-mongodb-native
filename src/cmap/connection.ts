@@ -307,6 +307,10 @@ export class Connection extends EventEmitter {
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
+    if (typeof ns.db === 'undefined' || typeof ns === 'string') {
+      throw new TypeError('ns cannot be a string');
+    }
+
     const readPreference = getReadPreference(cmd, options);
     const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
