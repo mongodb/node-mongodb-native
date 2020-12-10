@@ -183,11 +183,9 @@ function continueScramConversation(
   const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
   const serverKey = HMAC(cryptoMethod, saltedPassword, 'Server Key');
   const storedKey = H(cryptoMethod, clientKey);
-  const authMessage = [
-    clientFirstMessageBare(username, nonce),
-    payload.value().toString('base64'),
-    withoutProof
-  ].join(',');
+  const authMessage = [clientFirstMessageBare(username, nonce), payload.value(), withoutProof].join(
+    ','
+  );
 
   const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
   const clientProof = `p=${xor(clientKey, clientSignature)}`;
