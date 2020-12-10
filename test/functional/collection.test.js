@@ -381,12 +381,10 @@ describe('Collection', function () {
 
     it('should throw error due to illegal update', function (done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
-        coll.update({}, null, err => {
-          expect(err.message).to.equal('document must be a valid JavaScript object');
-        });
-        coll.update(null, null, err => {
-          expect(err.message).to.equal('selector must be a valid JavaScript object');
-        });
+        expect(() => coll.update({}, null)).to.throw(/document must be a valid JavaScript object/);
+        expect(() => coll.update(null, null)).to.throw(
+          /selector must be a valid JavaScript object/
+        );
 
         done();
       });

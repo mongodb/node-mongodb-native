@@ -15,8 +15,7 @@ import {
 import type { ReadPreference } from './read_preference';
 import type { Timestamp, Document } from './bson';
 import type { Topology } from './sdam/topology';
-import type { OperationParent } from './operations/command';
-import type { CollationOptions } from './cmap/wire_protocol/write_command';
+import type { OperationParent, CollationOptions } from './operations/command';
 import { MongoClient } from './mongo_client';
 import { Db } from './db';
 import { Collection } from './collection';

@@ -96,7 +96,7 @@ describe('Document Validation', function () {
 
               // Should fail
               col.update({ b: 1 }, { $set: { b: 1 } }, { upsert: true }, function (err) {
-                test.ok(err != null);
+                expect(err).to.exist;
 
                 // Ensure validation was correctly applied
                 col.update(

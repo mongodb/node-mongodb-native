@@ -108,7 +108,9 @@
               "x": 22
             }
           ],
-          "ordered": false
+          "options": {
+            "ordered": false
+          }
         }
       },
       "expectations": [

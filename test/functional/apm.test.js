@@ -952,12 +952,23 @@ describe('APM', function () {
           );
 
           // Unpack the operation
+          if (args.options) options = args.options;
           if (args.filter) params.push(args.filter);
           if (args.deletes) params.push(args.deletes);
           if (args.document) params.push(args.document);
           if (args.documents) params.push(args.documents);
           if (args.update) params.push(args.update);
-          if (args.requests) params.push(args.requests);
+          if (args.requests) {
+            if (operation.name !== 'bulkWrite') {
+              params.push(args.requests);
+            } else {
+              params.push(
+                args.requests.map(r => {
+                  return { [r.name]: r.arguments.document || r.arguments };
+                })
+              );
+            }
+          }
 
           if (args.writeConcern) {
             if (options == null) {
@@ -1013,12 +1024,15 @@ describe('APM', function () {
                 )
               );
           }
-
           // Add options if they exists
           if (options) params.push(options);
 
           // Execute the operation
-          const promise = collection[commandName].apply(collection, params);
+          const coll = operation.collectionOptions
+            ? db.collection(scenario.collection_name, operation.collectionOptions)
+            : db.collection(scenario.collection_name);
+
+          const promise = coll[commandName].apply(coll, params);
           return promise
             .catch(() => {} /* ignore */)
             .then(() =>

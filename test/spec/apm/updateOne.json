@@ -50,9 +50,7 @@
                     "$inc": {
                       "x": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ]
             },
@@ -103,7 +101,6 @@
                       "x": 1
                     }
                   },
-                  "multi": false,
                   "upsert": true
                 }
               ]
@@ -131,7 +128,6 @@
     },
     {
       "description": "A successful update one command with write errors",
-      "ignore_if_server_version_greater_than": "4.5",
       "operation": {
         "name": "updateOne",
         "arguments": {
@@ -164,9 +160,7 @@
                     "$nothing": {
                       "x": 1
                     }
-                  },
-                  "multi": false,
-                  "upsert": false
+                  }
                 }
               ]
             },

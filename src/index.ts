@@ -139,7 +139,6 @@ export type { CommandOptions } from './cmap/wire_protocol/command';
 export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
 export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
 export type { QueryOptions } from './cmap/wire_protocol/query';
-export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
@@ -189,7 +188,8 @@ export type {
 export type {
   CommandOperationOptions,
   OperationParent,
-  CommandOperation
+  CommandOperation,
+  CollationOptions
 } from './operations/command';
 export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
@@ -211,8 +211,7 @@ export type {
   ListIndexesOptions,
   IndexDirection
 } from './operations/indexes';
-export type { InsertOneResult, InsertOneOptions } from './operations/insert';
-export type { InsertManyResult } from './operations/insert_many';
+export type { InsertOneResult, InsertOneOptions, InsertManyResult } from './operations/insert';
 export type { ListCollectionsOptions } from './operations/list_collections';
 export type { ListDatabasesResult, ListDatabasesOptions } from './operations/list_databases';
 export type {
@@ -225,11 +224,10 @@ export type { Hint, OperationOptions, AbstractOperation } from './operations/ope
 export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
-export type { ReplaceOptions } from './operations/replace_one';
 export type { RunCommandOptions } from './operations/run_command';
 export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
-export type { UpdateResult, UpdateOptions } from './operations/update';
+export type { UpdateResult, UpdateOptions, ReplaceOptions } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
 export type {
   ReadConcern,

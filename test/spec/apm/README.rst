@@ -14,6 +14,12 @@ Testing
 
 Tests are provided in YML and JSON format to assert proper upconversion of commands.
 
+Database and Collection Names
+-----------------------------
+
+The collection under test is specified in each test file with the fields
+``database_name`` and ``collection_name``.
+
 Data
 ----
 
@@ -98,19 +104,25 @@ the YAML, then the command does *not* pass the test::
     readConcern:
       level: majority
 
-Ignoring Tests Based On Server Version
-``````````````````````````````````````
+Ignoring Tests Based On Server Version or Topology Type
+```````````````````````````````````````````````````````
 
-Due to variations in server behaviour, some tests may not be valid on a specific range
-of server versions and MUST NOT be run. These tests are indicated with the fields
-``ignore_if_server_version_greater_than`` and ``ignore_if_server_version_less_than`` which
-are optionally provided at the description level of the test. When determining if the test
-must be run or not, use only the minor server version.
+Due to variations in server behavior, some tests may not be valid and MUST NOT be run on
+certain server versions or topology types. These tests are indicated with any of the
+following fields, which will be optionally provided at the ``description`` level of each
+test:
 
-Example:
+- ``ignore_if_server_version_greater_than`` (optional): If specified, the test MUST be
+  skipped if the minor version of the server is greater than this minor version. The
+  server's patch version MUST NOT be considered. For example, a value of ``3.0`` implies
+  that the test can run on server version ``3.0.15`` but not ``3.1.0``.
 
-If ``ignore_if_server_version_greater_than`` is ``3.0``, then the tests MUST NOT run on
-``3.1`` and higher, but MUST run on ``3.0.3``.
+- ``ignore_if_server_version_less_than`` (optional): If specified, the test MUST be
+  skipped if the minor version of the server is less than this minor version. The
+  server's patch version MUST NOT be considered. For example, a value of ``3.2`` implies
+  that the test can run on server version ``3.2.0`` but not ``3.0.15``.
 
-Tests which do not have either one of these fields MUST run on all supported server
-versions.
+- ``ignore_if_topology_type`` (optional): An array of server topologies for which the test
+  MUST be skipped. Valid topologies are "single", "replicaset", and "sharded".
+
+Tests that have none of these fields MUST be run on all supported server versions.

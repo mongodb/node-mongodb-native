@@ -1439,7 +1439,7 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely3');
-        collection.update({ a: 1 }, { a: 2 }, { upsert: true, w: 0 }, cb);
+        collection.update({ a: 1 }, { $set: { a: 2 } }, { upsert: true, w: 0 }, cb);
       });
     }
   });

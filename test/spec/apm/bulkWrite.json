@@ -23,7 +23,8 @@
         "arguments": {
           "requests": [
             {
-              "insertOne": {
+              "name": "insertOne",
+              "arguments": {
                 "document": {
                   "_id": 4,
                   "x": 44
@@ -31,7 +32,8 @@
               }
             },
             {
-              "updateOne": {
+              "name": "updateOne",
+              "arguments": {
                 "filter": {
                   "_id": 3
                 },
@@ -84,9 +86,7 @@
                     "$set": {
                       "x": 333
                     }
-                  },
-                  "upsert": false,
-                  "multi": false
+                  }
                 }
               ],
               "ordered": true

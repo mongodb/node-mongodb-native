@@ -8,11 +8,22 @@ import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 import { Explain, ExplainOptions } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
+
+/** @public */
+export interface CollationOptions {
+  locale: string;
+  caseLevel: boolean;
+  caseFirst: string;
+  strength: number;
+  numericOrdering: boolean;
+  alternate: string;
+  maxVariable: string;
+  backwards: boolean;
+}
 
 /** @public */
 export interface CommandOperationOptions
@@ -126,12 +137,16 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       return;
     }
 
-    if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-        Object.assign(cmd, { writeConcern: this.writeConcern });
-      }
+    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
+      Object.assign(cmd, { writeConcern: this.writeConcern });
+    }
 
-      if (options.collation && typeof options.collation === 'object') {
+    if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+      if (
+        options.collation &&
+        typeof options.collation === 'object' &&
+        !this.hasAspect(Aspect.SKIP_COLLATION)
+      ) {
         Object.assign(cmd, { collation: options.collation });
       }
     }

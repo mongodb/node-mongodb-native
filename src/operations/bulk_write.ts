@@ -34,9 +34,9 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
-      options.ordered === true || options.ordered == null
-        ? coll.initializeOrderedBulkOp(options)
-        : coll.initializeUnorderedBulkOp(options);
+      options.ordered === false
+        ? coll.initializeUnorderedBulkOp(options)
+        : coll.initializeOrderedBulkOp(options);
 
     // for each op go through and add to the bulk
     try {
