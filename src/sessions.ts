@@ -17,10 +17,11 @@ import {
 } from './utils';
 import type { Topology } from './sdam/topology';
 import type { MongoClientOptions } from './mongo_client';
-import type { WriteCommandOptions } from './cmap/wire_protocol/write_command';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
+import type { CommandOptions } from './cmap/wire_protocol/command';
+import type { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -45,8 +46,11 @@ export interface ClientSessionOptions {
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
 
-  owner: symbol | AbstractCursor;
+  /** @internal */
+  owner?: symbol | AbstractCursor;
+  /** @internal */
   explicit?: boolean;
+  /** @internal */
   initialClusterTime?: ClusterTime;
 }
 
@@ -63,6 +67,7 @@ const kServerSession = Symbol('serverSession');
  */
 class ClientSession extends EventEmitter {
   topology: Topology;
+  /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
   clientOptions?: MongoClientOptions;
@@ -70,14 +75,14 @@ class ClientSession extends EventEmitter {
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
   explicit: boolean;
-  owner: symbol | AbstractCursor;
+  owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
   [kServerSession]?: ServerSession;
 
   /**
    * Create a client session.
-   *
+   * @internal
    * @param topology - The current client's topology (Internal Class)
    * @param sessionPool - The server session pool (Internal Class)
    * @param options - Optional settings
@@ -99,7 +104,7 @@ class ClientSession extends EventEmitter {
       throw new Error('ClientSession requires a ServerSessionPool');
     }
 
-    options = options || {};
+    options = options ?? {};
     clientOptions = clientOptions || {};
 
     this.topology = topology;
@@ -151,7 +156,7 @@ class ClientSession extends EventEmitter {
     callback?: Callback<void>
   ): void | Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
@@ -536,11 +541,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     callback(e, r);
   }
 
-  if (
+  if (session.transaction.recoveryToken && supportsRecoveryToken(session)) {
     // Assumption here that commandName is "commitTransaction" or "abortTransaction"
-    session.transaction.recoveryToken &&
-    supportsRecoveryToken(session)
-  ) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
@@ -585,7 +587,7 @@ function supportsRecoveryToken(session: ClientSession) {
   return !!topology.s.options.useRecoveryToken;
 }
 
-/** @internal */
+/** @public */
 export type ServerSessionId = { id: Binary };
 
 /**
@@ -743,7 +745,7 @@ function commandSupportsReadConcern(command: Document, options?: Document): bool
 function applySession(
   session: ClientSession,
   command: Document,
-  options?: WriteCommandOptions
+  options?: CommandOptions
 ): MongoError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
@@ -757,7 +759,7 @@ function applySession(
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
-  if (options && options.writeConcern && options.writeConcern.w === 0) {
+  if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
       return new MongoError('Cannot have explicit session with unacknowledged writes');
     }
@@ -791,16 +793,6 @@ function applySession(
     }
 
     return;
-  }
-
-  if (options) {
-    ReadPreference.translate(options);
-    const readPreference = options.readPreference as ReadPreference;
-    if (readPreference && !readPreference.equals(ReadPreference.primary)) {
-      return new MongoError(
-        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
-      );
-    }
   }
 
   // `autocommit` must always be false to differentiate from retryable writes

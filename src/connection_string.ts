@@ -2,13 +2,26 @@ import * as url from 'url';
 import * as qs from 'querystring';
 import * as dns from 'dns';
 import { URL } from 'url';
-import { ReadPreference } from './read_preference';
+import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import { ReadPreference, ReadPreferenceModeId } from './read_preference';
+import { ReadConcern, ReadConcernLevelId } from './read_concern';
+import { W, WriteConcern } from './write_concern';
 import { MongoParseError } from './error';
-import type { AnyOptions, Callback } from './utils';
+import { AnyOptions, Callback, isRecord } from './utils';
 import type { ConnectionOptions } from './cmap/connection';
 import type { Document } from './bson';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { MongoClientOptions, MongoOptions } from './mongo_client';
+import type {
+  DriverInfo,
+  HostAddress,
+  MongoClientOptions,
+  MongoOptions,
+  PkFactory
+} from './mongo_client';
+import { MongoCredentials } from './cmap/auth/mongo_credentials';
+import type { TagSet } from './sdam/server_description';
+import { Logger, LoggerLevel } from './logger';
+import { ObjectId } from 'bson';
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -175,17 +188,7 @@ const BOOLEAN_OPTIONS = new Set([
 const STRING_OPTIONS = new Set(['authsource', 'replicaset']);
 
 // Supported text representations of auth mechanisms
-// NOTE: this list exists in native already, if it is merged here we should deduplicate
-const AUTH_MECHANISMS = new Set([
-  'GSSAPI',
-  'MONGODB-AWS',
-  'MONGODB-X509',
-  'MONGODB-CR',
-  'DEFAULT',
-  'SCRAM-SHA-1',
-  'SCRAM-SHA-256',
-  'PLAIN'
-]);
+export const AUTH_MECHANISMS = new Set([...Object.values(AuthMechanism)]);
 
 // Lookup table used to translate normalized (lower-cased) forms of connection string
 // options to their expected camelCase version
@@ -502,31 +505,18 @@ function checkTLSQueryString(queryString: any) {
 }
 
 /**
- * Checks options object if both options are present (any value) will throw an error.
- *
- * @param options - The options used for options parsing
- * @param optionKeyA - A options key
- * @param optionKeyB - B options key
- * @throws MongoParseError if two provided options are mutually exclusive.
- */
-function assertRepelOptions(options: AnyOptions, optionKeyA: string, optionKeyB: string) {
-  if (
-    Object.prototype.hasOwnProperty.call(options, optionKeyA) &&
-    Object.prototype.hasOwnProperty.call(options, optionKeyB)
-  ) {
-    throw new MongoParseError(`The \`${optionKeyA}\` option cannot be used with \`${optionKeyB}\``);
-  }
-}
-
-/**
  * Checks if TLS options are valid
  *
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-function checkTLSOptions(options: AnyOptions) {
-  if (!options) return null;
-  const check = (a: any, b: any) => assertRepelOptions(options, a, b);
+export function checkTLSOptions(options: AnyOptions): void {
+  if (!options) return;
+  const check = (a: string, b: string) => {
+    if (Reflect.has(options, a) && Reflect.has(options, b)) {
+      throw new MongoParseError(`The '${a}' option cannot be used with '${b}'`);
+    }
+  };
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
   check('tlsInsecure', 'tlsAllowInvalidHostnames');
   check('tlsInsecure', 'tlsDisableCertificateRevocationCheck');
@@ -766,7 +756,7 @@ export function parseConnectionString(
 // NEW PARSER WORK...
 
 const HOSTS_REGEX = new RegExp(
-  '(?<protocol>mongodb(?:\\+srv|)):\\/\\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>[^\\/?]*)(?<rest>.*)'
+  String.raw`(?<protocol>mongodb(?:\+srv|)):\/\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>(?!:)[^\/?@]+)(?<rest>.*)`
 );
 
 function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
@@ -785,26 +775,790 @@ function parseURI(uri: string): { srv: boolean; url: URL; hosts: string[] } {
     throw new MongoParseError('Invalid connection string, protocol and host(s) required');
   }
 
-  const authString = username ? (password ? `${username}:${password}` : `${username}`) : '';
+  decodeURIComponent(username ?? '');
+  decodeURIComponent(password ?? '');
+
+  // characters not permitted in username nor password Set([':', '/', '?', '#', '[', ']', '@'])
+  const illegalCharacters = new RegExp(String.raw`[:/?#\[\]@]`, 'gi');
+  if (username?.match(illegalCharacters)) {
+    throw new MongoParseError(`Username contains unescaped characters ${username}`);
+  }
+  if (!username || !password) {
+    const uriWithoutProtocol = uri.replace(`${protocol}://`, '');
+    if (uriWithoutProtocol.startsWith('@') || uriWithoutProtocol.startsWith(':')) {
+      throw new MongoParseError('URI contained empty userinfo section');
+    }
+  }
+
+  if (password?.match(illegalCharacters)) {
+    throw new MongoParseError('Password contains unescaped characters');
+  }
+
+  let authString = '';
+  if (typeof username === 'string') authString += username;
+  if (typeof password === 'string') authString += `:${password}`;
+
+  const srv = protocol.includes('srv');
+  const hostList = hosts.split(',');
+  const url = new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`);
+
+  if (srv && hostList.length !== 1) {
+    throw new MongoParseError('mongodb+srv URI cannot have multiple service names');
+  }
+  if (srv && hostList[0].includes(':')) {
+    throw new MongoParseError('mongodb+srv URI cannot have port number');
+  }
+
   return {
-    srv: protocol.includes('srv'),
-    url: new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`),
+    srv,
+    url,
     hosts: hosts.split(',')
   };
 }
 
-export function parseOptions(
-  uri: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  options: MongoClientOptions = {}
-): Readonly<MongoOptions> {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { srv, url, hosts } = parseURI(uri);
-    const mongoOptions: MongoOptions = ({ srv, hosts } as unknown) as MongoOptions;
-    // TODO(NODE-2699): option parse logic
-    return Object.freeze(mongoOptions);
-  } catch {
-    return Object.freeze({} as MongoOptions);
+const TRUTHS = new Set(['true', 't', '1', 'y', 'yes']);
+const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
+function getBoolean(name: string, value: unknown): boolean {
+  if (typeof value === 'boolean') return value;
+  const valueString = String(value).toLowerCase();
+  if (TRUTHS.has(valueString)) return true;
+  if (FALSEHOODS.has(valueString)) return false;
+  throw new TypeError(`For ${name} Expected stringified boolean value, got: ${value}`);
+}
+
+function getInt(name: string, value: unknown): number {
+  if (typeof value === 'number') return Math.trunc(value);
+  const parsedValue = Number.parseInt(String(value), 10);
+  if (!Number.isNaN(parsedValue)) return parsedValue;
+  throw new TypeError(`Expected ${name} to be stringified int value, got: ${value}`);
+}
+
+function getUint(name: string, value: unknown): number {
+  const parsedValue = getInt(name, value);
+  if (parsedValue < 0) {
+    throw new TypeError(`${name} can only be a positive int value, got: ${value}`);
+  }
+  return parsedValue;
+}
+
+function toRecord(value: string): Record<string, any> {
+  const record = Object.create(null);
+  const keyValuePairs = value.split(',');
+  for (const keyValue of keyValuePairs) {
+    const [key, value] = keyValue.split(':');
+    record[key] = value;
+  }
+  return record;
+}
+
+const DEFAULT_PK_FACTORY = {
+  createPk(): ObjectId {
+    // We prefer not to rely on ObjectId having a createPk method
+    return new ObjectId();
+  }
+};
+
+class CaseInsensitiveMap extends Map<string, any> {
+  constructor(entries: Array<[string, any]> = []) {
+    super(entries.map(([k, v]) => [k.toLowerCase(), v]));
+  }
+  has(k: string) {
+    return super.has(k.toLowerCase());
+  }
+  get(k: string) {
+    return super.get(k.toLowerCase());
+  }
+  set(k: string, v: any) {
+    return super.set(k.toLowerCase(), v);
   }
 }
+
+export function parseOptions(
+  uri: string,
+  options: MongoClientOptions = {}
+): Readonly<MongoOptions> {
+  const { url, hosts, srv } = parseURI(uri);
+
+  // TODO(NODE-2704): Move back to test/tools/runner/config.js
+  options = { ...options };
+  Reflect.deleteProperty(options, 'host');
+  Reflect.deleteProperty(options, 'port');
+
+  const mongoOptions = Object.create(null);
+  mongoOptions.hosts = srv ? [{ host: hosts[0], type: 'srv' }] : hosts.map(toHostArray);
+  mongoOptions.srv = srv;
+  mongoOptions.dbName = decodeURIComponent(
+    url.pathname[0] === '/' ? url.pathname.slice(1) : url.pathname
+  );
+  mongoOptions.credentials = new MongoCredentials({
+    ...mongoOptions.credentials,
+    source: mongoOptions.dbName,
+    username: typeof url.username === 'string' ? decodeURIComponent(url.username) : undefined,
+    password: typeof url.password === 'string' ? decodeURIComponent(url.password) : undefined
+  });
+
+  const urlOptions = new CaseInsensitiveMap();
+  for (const key of url.searchParams.keys()) {
+    const values = [...url.searchParams.getAll(key)];
+
+    if (values.includes('')) {
+      throw new MongoParseError('URI cannot contain options with no value');
+    }
+
+    if (urlOptions.has(key)) {
+      urlOptions.get(key)?.push(...values);
+    } else {
+      urlOptions.set(key, values);
+    }
+  }
+
+  const objectOptions = new CaseInsensitiveMap(Object.entries(options));
+
+  const defaultOptions = new CaseInsensitiveMap(
+    Object.entries(OPTIONS)
+      .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
+      .map(([k, d]) => [k, d.default])
+  );
+
+  const allOptions = new CaseInsensitiveMap();
+
+  const allKeys = new Set<string>([
+    ...urlOptions.keys(),
+    ...objectOptions.keys(),
+    ...defaultOptions.keys()
+  ]);
+
+  for (const key of allKeys) {
+    const values = [];
+    if (urlOptions.has(key)) {
+      values.push(...urlOptions.get(key));
+    }
+    if (objectOptions.has(key)) {
+      values.push(objectOptions.get(key));
+    }
+    if (defaultOptions.has(key)) {
+      values.push(defaultOptions.get(key));
+    }
+    allOptions.set(key, values);
+  }
+
+  for (const [key, descriptor] of Object.entries(OPTIONS)) {
+    const values = allOptions.get(key);
+    if (!values || values.length === 0) continue;
+    setOption(mongoOptions, key, descriptor, values);
+  }
+
+  mongoOptions.credentials?.validate();
+  checkTLSOptions(mongoOptions);
+
+  return Object.freeze(mongoOptions) as Readonly<MongoOptions>;
+}
+
+function setOption(
+  mongoOptions: any,
+  key: string,
+  descriptor: OptionDescriptor,
+  values: unknown[]
+) {
+  const { target, type, transform, deprecated } = descriptor;
+  const name = target ?? key;
+
+  if (deprecated) {
+    console.warn(`${key} is a deprecated option`);
+  }
+
+  switch (type) {
+    case 'boolean':
+      mongoOptions[name] = getBoolean(name, values[0]);
+      break;
+    case 'int':
+      mongoOptions[name] = getInt(name, values[0]);
+      break;
+    case 'uint':
+      mongoOptions[name] = getUint(name, values[0]);
+      break;
+    case 'string':
+      if (values[0] === undefined) {
+        break;
+      }
+      mongoOptions[name] = String(values[0]);
+      break;
+    case 'record':
+      if (!isRecord(values[0])) {
+        throw new TypeError(`${name} must be an object`);
+      }
+      mongoOptions[name] = values[0];
+      break;
+    case 'any':
+      mongoOptions[name] = values[0];
+      break;
+    default: {
+      if (!transform) {
+        throw new MongoParseError('Descriptors missing a type must define a transform');
+      }
+      const transformValue = transform({ name, options: mongoOptions, values });
+      mongoOptions[name] = transformValue;
+      break;
+    }
+  }
+}
+
+function toHostArray(hostString: string) {
+  const parsedHost = new URL(`mongodb://${hostString.split(' ').join('%20')}`);
+
+  let socketPath;
+  if (hostString.endsWith('.sock')) {
+    // heuristically determine if we're working with a domain socket
+    socketPath = decodeURIComponent(hostString);
+  }
+
+  let ipv6SanitizedHostName;
+  if (parsedHost.hostname.startsWith('[') && parsedHost.hostname.endsWith(']')) {
+    ipv6SanitizedHostName = parsedHost.hostname.substring(1, parsedHost.hostname.length - 1);
+  }
+
+  const result: HostAddress = socketPath
+    ? {
+        host: socketPath,
+        type: 'unix'
+      }
+    : {
+        host: decodeURIComponent(ipv6SanitizedHostName ?? parsedHost.hostname),
+        port: parsedHost.port ? parseInt(parsedHost.port) : 27017,
+        type: 'tcp'
+      };
+
+  if (result.type === 'tcp' && result.port === 0) {
+    throw new MongoParseError('Invalid port (zero) with hostname');
+  }
+
+  return result;
+}
+
+interface OptionDescriptor {
+  target?: string;
+  type?: 'boolean' | 'int' | 'uint' | 'record' | 'string' | 'any';
+  default?: any;
+
+  deprecated?: boolean;
+  /**
+   * @param name - the original option name
+   * @param options - the options so far for resolution
+   * @param values - the possible values in precedence order
+   */
+  transform?: (args: { name: string; options: MongoOptions; values: unknown[] }) => unknown;
+}
+
+export const OPTIONS = {
+  appName: {
+    target: 'driverInfo',
+    transform({ options, values: [value] }): DriverInfo {
+      return { ...options.driverInfo, name: String(value) };
+    }
+  },
+  auth: {
+    target: 'credentials',
+    transform({ name, options, values: [value] }): MongoCredentials {
+      if (!isRecord(value, ['username', 'password'] as const)) {
+        throw new TypeError(`${name} must be an object with 'username' and 'password' properties`);
+      }
+      return MongoCredentials.merge(options.credentials, {
+        username: value.username,
+        password: value.password
+      });
+    }
+  },
+  authMechanism: {
+    target: 'credentials',
+    transform({ options, values: [value] }): MongoCredentials {
+      const mechanisms = Object.values(AuthMechanism);
+      const [mechanism] = mechanisms.filter(m => m.match(RegExp(String.raw`\b${value}\b`, 'i')));
+      if (!mechanism) {
+        throw new TypeError(`authMechanism one of ${mechanisms}, got ${value}`);
+      }
+      let source = options.credentials.source; // some mechanisms have '$external' as the Auth Source
+      if (
+        mechanism === AuthMechanism.MONGODB_PLAIN ||
+        mechanism === AuthMechanism.MONGODB_GSSAPI ||
+        mechanism === AuthMechanism.MONGODB_AWS ||
+        mechanism === AuthMechanism.MONGODB_X509
+      ) {
+        source = '$external';
+      }
+
+      let password: string | undefined = options.credentials.password;
+      if (mechanism === AuthMechanism.MONGODB_X509 && password === '') {
+        password = undefined;
+      }
+      return MongoCredentials.merge(options.credentials, {
+        mechanism,
+        source,
+        password
+      });
+    }
+  },
+  authMechanismProperties: {
+    target: 'credentials',
+    transform({ options, values: [value] }): MongoCredentials {
+      if (typeof value === 'string') {
+        value = toRecord(value);
+      }
+      if (!isRecord(value)) {
+        throw new TypeError('AuthMechanismProperties must be an object');
+      }
+      return MongoCredentials.merge(options.credentials, { mechanismProperties: value });
+    }
+  },
+  authSource: {
+    target: 'credentials',
+    transform({ options, values: [value] }): MongoCredentials {
+      return MongoCredentials.merge(options.credentials, { source: String(value) });
+    }
+  },
+  autoEncryption: {
+    type: 'record'
+  },
+  checkKeys: {
+    type: 'boolean'
+  },
+  checkServerIdentity: {
+    target: 'checkServerIdentity',
+    transform({
+      values: [value]
+    }): boolean | ((hostname: string, cert: Document) => Error | undefined) {
+      if (typeof value !== 'boolean' && typeof value !== 'function')
+        throw new TypeError('check server identity must be a boolean or custom function');
+      return value as boolean | ((hostname: string, cert: Document) => Error | undefined);
+    }
+  },
+  compression: {
+    default: 'none',
+    target: 'compressors',
+    transform({ values }) {
+      const compressionList = new Set();
+      for (const c of values) {
+        if (['none', 'snappy', 'zlib'].includes(String(c))) {
+          compressionList.add(String(c));
+        } else {
+          throw new TypeError(`${c} is not a valid compression mechanism`);
+        }
+      }
+      return [...compressionList];
+    }
+  },
+  compressors: {
+    default: 'none',
+    target: 'compressors',
+    transform({ values }) {
+      const compressionList = new Set();
+      for (const compVal of values as string[]) {
+        for (const c of compVal.split(',')) {
+          if (['none', 'snappy', 'zlib'].includes(String(c))) {
+            compressionList.add(String(c));
+          } else {
+            throw new TypeError(`${c} is not a valid compression mechanism`);
+          }
+        }
+      }
+      return [...compressionList];
+    }
+  },
+  connectTimeoutMS: {
+    default: 30000,
+    type: 'uint'
+  },
+  dbName: {
+    default: 'test',
+    type: 'string'
+  },
+  directConnection: {
+    default: false,
+    type: 'boolean'
+  },
+  driverInfo: {
+    default: {},
+    type: 'record'
+  },
+  family: {
+    transform({ name, values: [value] }): 4 | 6 {
+      const transformValue = getInt(name, value);
+      if (transformValue === 4 || transformValue === 6) {
+        return transformValue;
+      }
+      throw new TypeError(`Option 'family' must be 4 or 6 got ${transformValue}.`);
+    }
+  },
+  fieldsAsRaw: {
+    type: 'record'
+  },
+  forceServerObjectId: {
+    default: false,
+    type: 'boolean'
+  },
+  fsync: {
+    target: 'writeConcern',
+    transform({ name, options, values: [value] }): WriteConcern {
+      const wc = WriteConcern.fromOptions({
+        ...options.writeConcern,
+        fsync: getBoolean(name, value)
+      });
+      if (!wc) throw new TypeError(`Unable to make a writeConcern from fsync=${value}`);
+      return wc;
+    }
+  },
+  heartbeatFrequencyMS: {
+    default: 10000,
+    type: 'uint'
+  },
+  ignoreUndefined: {
+    type: 'boolean'
+  },
+  j: {
+    target: 'writeConcern',
+    transform({ name, options, values: [value] }): WriteConcern {
+      console.warn('j is deprecated');
+      const wc = WriteConcern.fromOptions({
+        ...options.writeConcern,
+        journal: getBoolean(name, value)
+      });
+      if (!wc) throw new TypeError(`Unable to make a writeConcern from journal=${value}`);
+      return wc;
+    }
+  },
+  journal: {
+    target: 'writeConcern',
+    transform({ name, options, values: [value] }): WriteConcern {
+      const wc = WriteConcern.fromOptions({
+        ...options.writeConcern,
+        journal: getBoolean(name, value)
+      });
+      if (!wc) throw new TypeError(`Unable to make a writeConcern from journal=${value}`);
+      return wc;
+    }
+  },
+  keepAlive: {
+    default: true,
+    type: 'boolean'
+  },
+  keepAliveInitialDelay: {
+    default: 120000,
+    type: 'uint'
+  },
+  localThresholdMS: {
+    default: 0,
+    type: 'uint'
+  },
+  logger: {
+    default: new Logger('MongoClient'),
+    transform({ values: [value] }) {
+      if (value instanceof Logger) {
+        return value;
+      }
+      console.warn('Alternative loggers might not be supported');
+      // TODO: make Logger an interface that others can implement, make usage consistent in driver
+      // DRIVERS-1204
+    }
+  },
+  loggerLevel: {
+    target: 'logger',
+    transform({ values: [value] }) {
+      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
+    }
+  },
+  maxIdleTimeMS: {
+    default: 0,
+    type: 'uint'
+  },
+  maxPoolSize: {
+    default: 100,
+    type: 'uint'
+  },
+  maxStalenessSeconds: {
+    type: 'uint'
+  },
+  minInternalBufferSize: {
+    type: 'uint'
+  },
+  minPoolSize: {
+    default: 0,
+    type: 'uint'
+  },
+  minHeartbeatFrequencyMS: {
+    type: 'uint'
+  },
+  monitorCommands: {
+    default: true,
+    type: 'boolean'
+  },
+  name: {
+    target: 'driverInfo',
+    transform({ values: [value], options }) {
+      return { ...options.driverInfo, name: String(value) };
+    }
+  } as OptionDescriptor,
+  noDelay: {
+    default: true,
+    type: 'boolean'
+  },
+  numberOfRetries: {
+    default: 5,
+    type: 'int'
+  },
+  password: {
+    target: 'credentials',
+    transform({ values: [password], options }) {
+      if (typeof password !== 'string') {
+        throw new TypeError('pass must be a string');
+      }
+      return MongoCredentials.merge(options.credentials, { password });
+    }
+  },
+  pkFactory: {
+    default: DEFAULT_PK_FACTORY,
+    target: 'createPk',
+    transform({ values: [value] }): PkFactory {
+      if (isRecord(value, ['createPk'] as const) && typeof value.createPk === 'function') {
+        return value as PkFactory;
+      }
+      throw new TypeError(
+        `Option pkFactory must be an object with a createPk function, got ${value}`
+      );
+    }
+  },
+  platform: {
+    target: 'driverInfo',
+    transform({ values: [value], options }) {
+      return { ...options.driverInfo, platform: String(value) };
+    }
+  } as OptionDescriptor,
+  promiseLibrary: {
+    type: 'any'
+  },
+  promoteBuffers: {
+    type: 'boolean'
+  },
+  promoteLongs: {
+    type: 'boolean'
+  },
+  promoteValues: {
+    type: 'boolean'
+  },
+  raw: {
+    default: false,
+    type: 'boolean'
+  },
+  readConcern: {
+    transform({ values: [value], options }) {
+      if (value instanceof ReadConcern || isRecord(value, ['level'] as const)) {
+        return ReadConcern.fromOptions({ ...options.readConcern, ...value } as any);
+      }
+      throw new MongoParseError(`ReadConcern must be an object, got ${JSON.stringify(value)}`);
+    }
+  },
+  readConcernLevel: {
+    target: 'readConcern',
+    transform({ values: [level], options }) {
+      return ReadConcern.fromOptions({
+        ...options.readConcern,
+        level: level as ReadConcernLevelId
+      });
+    }
+  },
+  readPreference: {
+    default: ReadPreference.primary,
+    transform({ values: [value], options }) {
+      if (value instanceof ReadPreference) {
+        return ReadPreference.fromOptions({
+          readPreference: { ...options.readPreference, ...value },
+          ...value
+        } as any);
+      }
+      if (isRecord(value, ['mode'] as const)) {
+        const rp = ReadPreference.fromOptions({
+          readPreference: { ...options.readPreference, ...value },
+          ...value
+        } as any);
+        if (rp) return rp;
+        else throw new MongoParseError(`Cannot make read preference from ${JSON.stringify(value)}`);
+      }
+      if (typeof value === 'string') {
+        const rpOpts = {
+          hedge: options.readPreference?.hedge,
+          maxStalenessSeconds: options.readPreference?.maxStalenessSeconds
+        };
+        return new ReadPreference(
+          value as ReadPreferenceModeId,
+          options.readPreference?.tags,
+          rpOpts
+        );
+      }
+    }
+  },
+  readPreferenceTags: {
+    transform({ values }) {
+      const tags: TagSet = Object.create(null);
+      for (const tag of values) {
+        if (typeof tag === 'string') {
+          for (const [k, v] of Object.entries(toRecord(tag))) {
+            tags[k] = v;
+          }
+        }
+        if (isRecord(tag)) {
+          for (const [k, v] of Object.entries(tag)) {
+            tags[k] = v;
+          }
+        }
+      }
+      return tags;
+    }
+  },
+  replicaSet: {
+    type: 'string'
+  },
+  retryReads: {
+    default: true,
+    type: 'boolean'
+  },
+  retryWrites: {
+    default: true,
+    type: 'boolean'
+  },
+  serializeFunctions: {
+    type: 'boolean'
+  },
+  serverSelectionTimeoutMS: {
+    default: 30000,
+    type: 'uint'
+  },
+  servername: {
+    type: 'string'
+  },
+  socketTimeoutMS: {
+    default: 0,
+    type: 'uint'
+  },
+  ssl: {
+    target: 'tls',
+    deprecated: true,
+    type: 'boolean'
+  },
+  sslCA: {
+    deprecated: true,
+    target: 'ca',
+    type: 'any'
+  },
+  sslCRL: {
+    target: 'crl',
+    type: 'any'
+  },
+  sslCert: {
+    deprecated: true,
+    target: 'cert',
+    type: 'any'
+  },
+  sslKey: {
+    deprecated: true,
+    target: 'key',
+    type: 'any'
+  },
+  sslPass: {
+    deprecated: true,
+    target: 'passphrase',
+    type: 'string'
+  },
+  sslValidate: {
+    target: 'rejectUnauthorized',
+    type: 'boolean'
+  },
+  tls: {
+    type: 'boolean'
+  },
+  tlsAllowInvalidCertificates: {
+    type: 'boolean'
+  },
+  tlsAllowInvalidHostnames: {
+    type: 'boolean'
+  },
+  tlsCAFile: {
+    target: 'ca',
+    type: 'any'
+  },
+  tlsCertificateFile: {
+    target: 'cert',
+    type: 'any'
+  },
+  tlsCertificateKeyFile: {
+    target: 'key',
+    type: 'any'
+  },
+  tlsCertificateKeyFilePassword: {
+    target: 'passphrase',
+    type: 'any'
+  },
+  tlsInsecure: {
+    type: 'boolean'
+  },
+  useRecoveryToken: {
+    type: 'boolean'
+  },
+  username: {
+    target: 'credentials',
+    transform({ values: [value], options }) {
+      return MongoCredentials.merge(options.credentials, { username: String(value) });
+    }
+  },
+  version: {
+    target: 'driverInfo',
+    transform({ values: [value], options }) {
+      return { ...options.driverInfo, version: String(value) };
+    }
+  } as OptionDescriptor,
+  w: {
+    target: 'writeConcern',
+    transform({ values: [value], options }) {
+      return WriteConcern.fromOptions({ ...options.writeConcern, w: value as W });
+    }
+  },
+  waitQueueTimeoutMS: {
+    default: 0,
+    type: 'uint'
+  },
+  writeConcern: {
+    target: 'writeConcern',
+    transform({ values: [value], options }) {
+      if (isRecord(value)) {
+        return WriteConcern.fromOptions({
+          ...options.writeConcern,
+          ...value
+        });
+      }
+      throw new MongoParseError(`WriteConcern must be an object, got ${JSON.stringify(value)}`);
+    }
+  },
+  wtimeout: {
+    target: 'writeConcern',
+    transform({ values: [value], options }) {
+      const wc = WriteConcern.fromOptions({
+        ...options.writeConcern,
+        wtimeout: getUint('wtimeout', value)
+      });
+      if (wc) return wc;
+      throw new MongoParseError(`Cannot make WriteConcern from wtimeout`);
+    }
+  },
+  wtimeoutMS: {
+    target: 'writeConcern',
+    transform({ values: [value], options }) {
+      const wc = WriteConcern.fromOptions({
+        ...options.writeConcern,
+        wtimeoutMS: getUint('wtimeoutMS', value)
+      });
+      if (wc) return wc;
+      throw new MongoParseError(`Cannot make WriteConcern from wtimeout`);
+    }
+  },
+  zlibCompressionLevel: {
+    default: 0,
+    type: 'int'
+  }
+} as Record<keyof MongoClientOptions, OptionDescriptor>;

@@ -4,9 +4,9 @@ const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const { EJSON } = require('bson');
+const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
-const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -27,10 +27,6 @@ chai.config.truncateThreshold = 0;
 
 function escape(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && Array.isArray(value) === false;
 }
 
 function translateClientOptions(options) {
@@ -427,7 +423,7 @@ function normalizeCommandShapes(commands) {
 }
 
 function extractCrudResult(result, operation) {
-  if (Array.isArray(result) || !isPlainObject(result)) {
+  if (Array.isArray(result) || !isRecord(result)) {
     return result;
   }
 
@@ -441,14 +437,7 @@ function extractCrudResult(result, operation) {
     return result.value;
   }
 
-  return Object.keys(operation.result).reduce((crudResult, key) => {
-    if (hasOwnProperty.call(result, key) && result[key] != null) {
-      // FIXME(major): update crud results are broken and need to be changed
-      crudResult[key] = key === 'upsertedId' ? result[key]._id : result[key];
-    }
-
-    return crudResult;
-  }, {});
+  return operation.result;
 }
 
 function isTransactionCommand(command) {

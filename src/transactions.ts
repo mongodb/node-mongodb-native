@@ -62,6 +62,7 @@ export interface TransactionOptions extends CommandOperationOptions {
  * A class maintaining state related to a server transaction. Internal Only
  */
 export class Transaction {
+  /** @internal */
   state: TxnState;
   options: TransactionOptions;
   _pinnedServer?: Server;
@@ -69,7 +70,7 @@ export class Transaction {
 
   /** Create a transaction */
   constructor(options?: TransactionOptions) {
-    options = options || {};
+    options = options ?? {};
 
     this.state = TxnState.NO_TRANSACTION;
     this.options = {};
@@ -123,7 +124,7 @@ export class Transaction {
 
   /**
    * Transition the transaction in the state machine
-   *
+   * @internal
    * @param nextState - The new state to transition to
    */
   transition(nextState: TxnState): void {

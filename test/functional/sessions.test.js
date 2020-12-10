@@ -113,8 +113,10 @@ describe('Sessions', function () {
 
           return client
             .withSession(testCase.operation(client))
-            .catch(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-            .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+            .then(
+              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1),
+              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1)
+            )
             .then(() => client.close())
             .then(() => {
               // verify that the `endSessions` command was sent

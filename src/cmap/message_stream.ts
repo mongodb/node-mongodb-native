@@ -1,4 +1,3 @@
-import BufferList = require('bl');
 import { Duplex, DuplexOptions } from 'stream';
 import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
 import { MongoError, MongoParseError } from '../error';
@@ -11,7 +10,7 @@ import {
   CompressorName
 } from './wire_protocol/compression';
 import type { Document, BSONSerializeOptions } from '../bson';
-import type { Callback } from '../utils';
+import { BufferPool, Callback } from '../utils';
 import type { ClientSession } from '../sessions';
 
 const MESSAGE_HEADER_SIZE = 16;
@@ -48,21 +47,19 @@ export interface OperationDescription extends BSONSerializeOptions {
  * @internal
  */
 export class MessageStream extends Duplex {
+  /** @internal */
   maxBsonMessageSize: number;
-  [kBuffer]: BufferList;
+  /** @internal */
+  [kBuffer]: BufferPool;
 
   constructor(options: MessageStreamOptions = {}) {
     super(options);
-
     this.maxBsonMessageSize = options.maxBsonMessageSize || kDefaultMaxBsonMessageSize;
-
-    this[kBuffer] = new BufferList();
+    this[kBuffer] = new BufferPool();
   }
 
   _write(chunk: Buffer, _: unknown, callback: Callback<Buffer>): void {
-    const buffer = this[kBuffer];
-    buffer.append(chunk);
-
+    this[kBuffer].append(chunk);
     processIncomingData(this, callback);
   }
 
@@ -135,7 +132,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     return;
   }
 
-  const sizeOfMessage = buffer.readInt32LE(0);
+  const sizeOfMessage = buffer.peek(4).readInt32LE();
   if (sizeOfMessage < 0) {
     callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}`));
     return;
@@ -155,9 +152,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     return;
   }
 
-  const message = buffer.slice(0, sizeOfMessage);
-  buffer.consume(sizeOfMessage);
-
+  const message = buffer.read(sizeOfMessage);
   const messageHeader: MessageHeader = {
     length: message.readInt32LE(0),
     requestId: message.readInt32LE(4),

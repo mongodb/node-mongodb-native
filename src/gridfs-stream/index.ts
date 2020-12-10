@@ -142,7 +142,7 @@ export class GridFSBucket extends EventEmitter {
   /** Convenience wrapper around find on the files collection */
   find(filter: Document, options?: FindOptions): FindCursor {
     filter = filter || {};
-    options = options || {};
+    options = options ?? {};
     return this.s._filesCollection.find(filter, options);
   }
 
@@ -239,9 +239,11 @@ function _rename(
     if (error) {
       return callback(error);
     }
-    if (!res?.result.n) {
+
+    if (!res?.matchedCount) {
       return callback(new MongoError(`File with id ${id} not found`));
     }
+
     return callback();
   });
 }

@@ -7,6 +7,7 @@ import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
 import { saslprep } from '../../deps';
+import { AuthMechanism } from './defaultAuthProviders';
 
 type CryptoMethod = 'sha1' | 'sha256';
 
@@ -83,7 +84,8 @@ function makeFirstMessage(
   nonce: Buffer
 ) {
   const username = cleanUsername(credentials.username);
-  const mechanism = cryptoMethod === 'sha1' ? 'SCRAM-SHA-1' : 'SCRAM-SHA-256';
+  const mechanism =
+    cryptoMethod === 'sha1' ? AuthMechanism.MONGODB_SCRAM_SHA1 : AuthMechanism.MONGODB_SCRAM_SHA256;
 
   // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
   // Since the username is not sasl-prep-d, we need to do this here.
@@ -181,11 +183,9 @@ function continueScramConversation(
   const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
   const serverKey = HMAC(cryptoMethod, saltedPassword, 'Server Key');
   const storedKey = H(cryptoMethod, clientKey);
-  const authMessage = [
-    clientFirstMessageBare(username, nonce),
-    payload.value().toString('base64'),
-    withoutProof
-  ].join(',');
+  const authMessage = [clientFirstMessageBare(username, nonce), payload.value(), withoutProof].join(
+    ','
+  );
 
   const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
   const clientProof = `p=${xor(clientKey, clientSignature)}`;

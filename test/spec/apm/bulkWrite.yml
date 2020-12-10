@@ -13,9 +13,11 @@ tests:
       name: "bulkWrite"
       arguments:
         requests:
-          - insertOne: 
+          - name: "insertOne"
+            arguments:
               document: { _id: 4, x: 44 }
-          - updateOne:
+          - name: "updateOne"
+            arguments:
               filter: { _id: 3 }
               update: { $set: { x: 333 } }
     expectations:
@@ -37,7 +39,7 @@ tests:
           command:
             update: *collection_name
             updates:
-              - { q: {_id: 3 }, u: { $set: { x: 333 } }, upsert: false, multi: false }
+              - { q: {_id: 3 }, u: { $set: { x: 333 } } }
             ordered: true
           command_name: "update"
           database_name: *database_name

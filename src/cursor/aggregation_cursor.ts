@@ -25,8 +25,11 @@ const kOptions = Symbol('options');
  * @public
  */
 export class AggregationCursor extends AbstractCursor {
+  /** @internal */
   [kParent]: OperationParent; // TODO: NODE-2883
+  /** @internal */
   [kPipeline]: Document[];
+  /** @internal */
   [kOptions]: AggregateOptions;
 
   /** @internal */
@@ -46,6 +49,13 @@ export class AggregationCursor extends AbstractCursor {
 
   get pipeline(): Document[] {
     return this[kPipeline];
+  }
+
+  clone(): AggregationCursor {
+    return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {
+      ...this[kOptions],
+      ...this.cursorOptions
+    });
   }
 
   /** @internal */

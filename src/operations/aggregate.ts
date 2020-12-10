@@ -1,4 +1,9 @@
-import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
+import {
+  CommandOperation,
+  CommandOperationOptions,
+  OperationParent,
+  CollationOptions
+} from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoError } from '../error';
 import { maxWireVersion } from '../utils';
@@ -6,7 +11,7 @@ import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { ClientSession } from '../sessions';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;
@@ -34,7 +39,8 @@ export interface AggregateOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AggregateOperation<T = Document> extends CommandOperation<AggregateOptions, T> {
+export class AggregateOperation<T = Document> extends CommandOperation<T> {
+  options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
@@ -42,6 +48,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
   constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
     super(parent, options);
 
+    this.options = options ?? {};
     this.target =
       parent.s.namespace && parent.s.namespace.collection
         ? parent.s.namespace.collection
@@ -82,7 +89,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
     this.pipeline.push(stage);
   }
 
-  execute(server: Server, callback: Callback<T>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<T>): void {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
@@ -114,7 +121,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<Aggregate
       command.cursor.batchSize = options.batchSize;
     }
 
-    super.executeCommand(server, command, callback);
+    super.executeCommand(server, session, command, callback);
   }
 }
 

@@ -18,18 +18,21 @@ import { DeleteOperation } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
-import type { CommandOperationOptions } from '../operations/command';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
+import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
 
 // Error codes
 const WRITE_CONCERN_ERROR = 64;
 
-export enum BatchType {
-  INSERT = 1,
-  UPDATE = 2,
-  REMOVE = 3
-}
+/** @public */
+export const BatchType = {
+  INSERT: 1,
+  UPDATE: 2,
+  REMOVE: 3
+} as const;
+
+/** @public */
+export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
 export interface InsertOneModel {
@@ -115,7 +118,7 @@ export type AnyBulkWriteOperation =
   | { deleteOne: DeleteOneModel }
   | { deleteMany: DeleteManyModel };
 
-/** @internal */
+/** @public */
 export interface BulkResult {
   ok: number;
   writeErrors: WriteError[];
@@ -133,17 +136,19 @@ export interface BulkResult {
 /**
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
+ *
+ * @internal
  */
 export class Batch {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
-  batchType: BatchType;
+  batchType: BatchTypeId;
   operations: Document[];
   size: number;
   sizeBytes: number;
 
-  constructor(batchType: BatchType, originalZeroIndex: number) {
+  constructor(batchType: BatchTypeId, originalZeroIndex: number) {
     this.originalZeroIndex = originalZeroIndex;
     this.currentIndex = 0;
     this.originalIndexes = [];
@@ -161,6 +166,8 @@ export class Batch {
 export class BulkWriteResult {
   result: BulkResult;
 
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
+  // acknowledged: Boolean;
   /** Number of documents inserted. */
   insertedCount: number;
   /** Number of documents matched for update. */
@@ -348,7 +355,7 @@ export class WriteConcernError {
   }
 }
 
-/** @internal */
+/** @public */
 export interface BulkWriteOperationError {
   index: number;
   code: number;
@@ -704,8 +711,10 @@ export class MongoBulkWriteError extends MongoError {
 /**
  * A builder object that is returned from {@link BulkOperationBase#find}.
  * Is used to build a write operation that involves a query filter.
+ *
+ * @public
  */
-class FindOperators {
+export class FindOperators {
   bulkOperation: BulkOperationBase;
 
   /**
@@ -855,16 +864,17 @@ class FindOperators {
     return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
   }
 
-  removeOne() {
+  removeOne(): BulkOperationBase {
     return this.deleteOne();
   }
 
-  remove() {
+  remove(): BulkOperationBase {
     return this.delete();
   }
 }
 
-interface BulkOperationPrivate {
+/** @internal */
+export interface BulkOperationPrivate {
   bulkResult: BulkResult;
   currentBatch?: Batch;
   currentIndex: number;
@@ -916,8 +926,10 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
+  /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
 
@@ -1041,7 +1053,7 @@ export abstract class BulkOperationBase {
    * ```
    */
   insert(document: Document): BulkOperationBase {
-    if (document._id == null && shouldForceServerObjectId(this)) {
+    if (document._id == null && !shouldForceServerObjectId(this)) {
       document._id = new ObjectId();
     }
 
@@ -1199,16 +1211,15 @@ export abstract class BulkOperationBase {
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
   execute(options?: BulkWriteOptions, callback?: Callback<BulkWriteResult>): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
+
+    if (this.s.executed) {
+      return handleEarlyError(new MongoError('Batch cannot be re-executed'), callback);
+    }
 
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
       this.s.writeConcern = writeConcern;
-    }
-
-    if (this.s.executed) {
-      const executedError = new MongoError('batch cannot be re-executed');
-      return handleEarlyError(executedError, callback);
     }
 
     // If we have current batch
@@ -1225,6 +1236,7 @@ export abstract class BulkOperationBase {
       return handleEarlyError(emptyBatchError, callback);
     }
 
+    this.s.executed = true;
     return executeLegacyOperation(this.s.topology, executeCommands, [this, options, callback]);
   }
 
@@ -1263,7 +1275,7 @@ export abstract class BulkOperationBase {
   }
 
   abstract addToOperationsList(
-    batchType: BatchType,
+    batchType: BatchTypeId,
     document: Document | UpdateStatement | DeleteStatement
   ): this;
 }
@@ -1301,7 +1313,7 @@ function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   return false;
 }
 
-/** @internal */
+/** @public */
 export interface UpdateStatement {
   /** The query that matches documents to update. */
   q: Document;
@@ -1368,7 +1380,7 @@ function isUpdateStatement(model: Document): model is UpdateStatement {
   return 'q' in model;
 }
 
-/** @internal */
+/** @public */
 export interface DeleteStatement {
   /** The query that matches documents to delete. */
   q: Document;

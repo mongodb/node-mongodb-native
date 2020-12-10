@@ -58,7 +58,7 @@ tests:
       arguments:
         documents:
           - { _id: 2, x: 22 }
-        ordered: false
+        options: { ordered: false }
     expectations:
       -
         command_started_event:

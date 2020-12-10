@@ -55,7 +55,6 @@ import { executeOperation } from './operations/execute_operation';
 import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
-import type { OperationParent } from './operations/command';
 import type { Admin } from './admin';
 
 // Allowed parameters
@@ -71,7 +70,6 @@ const legalOptionNames = [
   'pkFactory',
   'serializeFunctions',
   'raw',
-  'bufferMaxEntries',
   'authSource',
   'ignoreUndefined',
   'promoteLongs',
@@ -135,7 +133,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
  * });
  * ```
  */
-export class Db implements OperationParent {
+export class Db {
   /** @internal */
   s: DbPrivate;
 
@@ -154,7 +152,7 @@ export class Db implements OperationParent {
    * @param options - Optional settings for Db construction
    */
   constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
-    options = options || {};
+    options = options ?? {};
     emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Filter the options
@@ -781,7 +779,7 @@ export class Db implements OperationParent {
   watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
-    options = options || {};
+    options = options ?? {};
 
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
@@ -887,7 +885,7 @@ export class Db implements OperationParent {
     callback?: Callback<Document[]>
   ): Promise<Document[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     const cursor = this.collection('system.profile').find({}, options);
     return callback ? cursor.toArray(callback) : cursor.toArray();

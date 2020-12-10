@@ -1,15 +1,15 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
-import { AuthMechanism } from './defaultAuthProviders';
+import { AuthMechanismId, AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
+function getDefaultAuthMechanism(ismaster?: Document): AuthMechanismId {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
     if (Array.isArray(ismaster.saslSupportedMechs)) {
-      return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
+      return ismaster.saslSupportedMechs.includes(AuthMechanism.MONGODB_SCRAM_SHA256)
         ? AuthMechanism.MONGODB_SCRAM_SHA256
         : AuthMechanism.MONGODB_SCRAM_SHA1;
     }
@@ -30,7 +30,7 @@ export interface MongoCredentialsOptions {
   password: string;
   source: string;
   db?: string;
-  mechanism?: AuthMechanism;
+  mechanism?: AuthMechanismId;
   mechanismProperties: Document;
 }
 
@@ -46,7 +46,7 @@ export class MongoCredentials {
   /** The database that the user should authenticate against */
   readonly source: string;
   /** The method used to authenticate */
-  readonly mechanism: AuthMechanism;
+  readonly mechanism: AuthMechanismId;
   /** Special properties used by some types of auth mechanisms */
   readonly mechanismProperties: Document;
 
@@ -107,5 +107,55 @@ export class MongoCredentials {
     }
 
     return this;
+  }
+
+  validate(): void {
+    if (
+      (this.mechanism === AuthMechanism.MONGODB_GSSAPI ||
+        this.mechanism === AuthMechanism.MONGODB_CR ||
+        this.mechanism === AuthMechanism.MONGODB_PLAIN ||
+        this.mechanism === AuthMechanism.MONGODB_SCRAM_SHA1 ||
+        this.mechanism === AuthMechanism.MONGODB_SCRAM_SHA256) &&
+      !this.username
+    ) {
+      throw new TypeError(`Username required for mechanism '${this.mechanism}'`);
+    }
+
+    if (
+      this.mechanism === AuthMechanism.MONGODB_GSSAPI ||
+      this.mechanism === AuthMechanism.MONGODB_AWS ||
+      this.mechanism === AuthMechanism.MONGODB_X509
+    ) {
+      if (this.source != null && this.source !== '$external') {
+        throw new TypeError(
+          `Invalid source '${this.source}' for mechanism '${this.mechanism}' specified.`
+        );
+      }
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_PLAIN && this.source == null) {
+      throw new TypeError('PLAIN Authentication Mechanism needs an auth source');
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_X509 && this.password != null) {
+      if (this.password === '') {
+        Reflect.set(this, 'password', undefined);
+        return;
+      }
+      throw new TypeError(`Password not allowed for mechanism MONGODB-X509`);
+    }
+  }
+
+  static merge(
+    creds: MongoCredentials,
+    options: Partial<MongoCredentialsOptions>
+  ): MongoCredentials {
+    return new MongoCredentials({
+      username: options.username ?? creds.username,
+      password: options.password ?? creds.password,
+      mechanism: options.mechanism ?? creds.mechanism,
+      mechanismProperties: options.mechanismProperties ?? creds.mechanismProperties,
+      source: options.source ?? creds.source ?? options.db
+    });
   }
 }

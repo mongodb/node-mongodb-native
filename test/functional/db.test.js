@@ -40,9 +40,7 @@ describe('Db', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
@@ -76,9 +74,7 @@ describe('Db', function () {
 
     test: function (done) {
       let configuration = this.configuration;
-      let client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
+      let client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       client.connect(function (err, client) {
         let callbackCalled = 0;

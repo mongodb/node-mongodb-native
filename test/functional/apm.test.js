@@ -40,7 +40,7 @@ describe('APM', function () {
             client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 })
           )
           .then(r => {
-            expect(r.insertedCount).to.equal(1);
+            expect(r).property('insertedId').to.exist;
             expect(started.length).to.equal(1);
             expect(started[0].commandName).to.equal('insert');
             expect(started[0].command.insert).to.equal('apm_test');
@@ -60,7 +60,7 @@ describe('APM', function () {
           })
           .then(() => client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 }))
           .then(r => {
-            expect(r.insertedCount).to.equal(1);
+            expect(r).property('insertedId').to.exist;
             expect(started.length).to.equal(0);
             expect(succeeded.length).to.equal(0);
             return client.close();
@@ -88,7 +88,7 @@ describe('APM', function () {
           .collection('apm_test')
           .insertOne({ a: 1 })
           .then(r => {
-            expect(r.insertedCount).to.equal(1);
+            expect(r).property('insertedId').to.exist;
             expect(started.length).to.equal(1);
             expect(started[0].commandName).to.equal('insert');
             expect(started[0].command.insert).to.equal('apm_test');
@@ -107,7 +107,7 @@ describe('APM', function () {
               .collection('apm_test')
               .insertOne({ a: 1 })
               .then(r => {
-                expect(r.insertedCount).to.equal(1);
+                expect(r).property('insertedId').to.exist;
                 expect(started.length).to.equal(0);
                 expect(succeeded.length).to.equal(0);
                 return newClient.close();
@@ -135,7 +135,7 @@ describe('APM', function () {
         .connect()
         .then(client => client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 }))
         .then(r => {
-          expect(r.insertedCount).to.equal(1);
+          expect(r).property('insertedId').to.exist;
           expect(started.length).to.equal(1);
           expect(started[0].commandName).to.equal('insert');
           expect(started[0].command.insert).to.equal('apm_test');
@@ -164,7 +164,7 @@ describe('APM', function () {
         const db = client.db(self.configuration.db);
         const collection = db.collection('apm_test_cursor');
         return collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]).then(r => {
-          expect(r.insertedCount).to.equal(3);
+          expect(r).property('insertedCount').to.equal(3);
           const cursor = collection.find({});
           return cursor.count().then(() => {
             cursor.close(); // <-- Will cause error in APM module.
@@ -197,7 +197,7 @@ describe('APM', function () {
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
           .then(r => {
-            expect(r.insertedCount).to.equal(1);
+            expect(r).property('insertedId').to.exist;
             return db.listCollections({}, { readPreference: ReadPreference.PRIMARY }).toArray();
           })
           .then(() =>
@@ -236,7 +236,7 @@ describe('APM', function () {
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
           .then(r => {
-            expect(r.insertedCount).to.equal(1);
+            expect(r).property('insertedId').to.exist;
 
             return db
               .collection('apm_test_list_collections')
@@ -361,8 +361,7 @@ describe('APM', function () {
               .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 });
           })
           .then(r => {
-            expect(r.insertedCount).to.equal(6);
-
+            expect(r).property('insertedCount').to.equal(6);
             return db
               .collection('apm_test_2')
               .find({ a: 1 })
@@ -373,7 +372,7 @@ describe('APM', function () {
               .batchSize(2)
               .comment('some comment')
               .maxTimeMS(5000)
-              .setReadPreference(ReadPreference.PRIMARY)
+              .withReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
               .toArray();
           })
@@ -434,7 +433,7 @@ describe('APM', function () {
               .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
           })
           .then(r => {
-            expect(r.insertedCount).to.equal(6);
+            expect(r).property('insertedCount').to.equal(6);
             return db
               .collection('apm_test_2')
               .find({ $illegalfield: 1 })
@@ -445,7 +444,7 @@ describe('APM', function () {
               .batchSize(2)
               .comment('some comment')
               .maxTimeMS(5000)
-              .setReadPreference(ReadPreference.PRIMARY)
+              .withReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
               .toArray();
           })
@@ -532,7 +531,7 @@ describe('APM', function () {
               .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 })
           )
           .then(r => {
-            expect(r.insertedCount).to.equal(6);
+            expect(r).property('insertedCount').to.equal(6);
             return db.collection('apm_test_2').find({ a: 1 }).explain();
           })
           .then(explain => {
@@ -936,7 +935,7 @@ describe('APM', function () {
         })
         .then(() => collection.insertMany(data))
         .then(r => {
-          expect(data).to.have.length(r.insertedCount);
+          expect(data).to.have.length(Object.keys(r.insertedIds).length);
 
           // Set up the listeners
           client.on(
@@ -953,12 +952,23 @@ describe('APM', function () {
           );
 
           // Unpack the operation
+          if (args.options) options = args.options;
           if (args.filter) params.push(args.filter);
           if (args.deletes) params.push(args.deletes);
           if (args.document) params.push(args.document);
           if (args.documents) params.push(args.documents);
           if (args.update) params.push(args.update);
-          if (args.requests) params.push(args.requests);
+          if (args.requests) {
+            if (operation.name !== 'bulkWrite') {
+              params.push(args.requests);
+            } else {
+              params.push(
+                args.requests.map(r => {
+                  return { [r.name]: r.arguments.document || r.arguments };
+                })
+              );
+            }
+          }
 
           if (args.writeConcern) {
             if (options == null) {
@@ -1014,12 +1024,15 @@ describe('APM', function () {
                 )
               );
           }
-
           // Add options if they exists
           if (options) params.push(options);
 
           // Execute the operation
-          const promise = collection[commandName].apply(collection, params);
+          const coll = operation.collectionOptions
+            ? db.collection(scenario.collection_name, operation.collectionOptions)
+            : db.collection(scenario.collection_name);
+
+          const promise = coll[commandName].apply(coll, params);
           return promise
             .catch(() => {} /* ignore */)
             .then(() =>

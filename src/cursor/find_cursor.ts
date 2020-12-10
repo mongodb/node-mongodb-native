@@ -1,18 +1,17 @@
 import type { Document } from '../bson';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import { MongoError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { FindOperation, FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
+import type { CollationOptions } from '../operations/command';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
-/** @internal */
 const kFilter = Symbol('filter');
 const kNumReturned = Symbol('numReturned');
 const kBuiltOptions = Symbol('builtOptions');
@@ -29,8 +28,11 @@ export const FLAGS = [
 
 /** @public */
 export class FindCursor extends AbstractCursor {
+  /** @internal */
   [kFilter]: Document;
+  /** @internal */
   [kNumReturned]?: number;
+  /** @internal */
   [kBuiltOptions]: FindOptions;
 
   constructor(
@@ -47,6 +49,13 @@ export class FindCursor extends AbstractCursor {
     if (typeof options.sort !== 'undefined') {
       this[kBuiltOptions].sort = formatSort(options.sort);
     }
+  }
+
+  clone(): FindCursor {
+    return new FindCursor(this.topology, this.namespace, this[kFilter], {
+      ...this[kBuiltOptions],
+      ...this.cursorOptions
+    });
   }
 
   /** @internal */
@@ -113,7 +122,7 @@ export class FindCursor extends AbstractCursor {
     }
 
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       this.topology,
@@ -171,7 +180,7 @@ export class FindCursor extends AbstractCursor {
    *
    * @param min - Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
    */
-  min(min: number): this {
+  min(min: Document): this {
     assertUninitialized(this);
     this[kBuiltOptions].min = min;
     return this;
@@ -182,7 +191,7 @@ export class FindCursor extends AbstractCursor {
    *
    * @param max - Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    */
-  max(max: number): this {
+  max(max: Document): this {
     assertUninitialized(this);
     this[kBuiltOptions].max = max;
     return this;
@@ -242,7 +251,7 @@ export class FindCursor extends AbstractCursor {
         break;
 
       case 'max':
-        this[kBuiltOptions].max = value as number;
+        this[kBuiltOptions].max = value as Document;
         break;
 
       case 'maxTimeMS':
@@ -250,7 +259,7 @@ export class FindCursor extends AbstractCursor {
         break;
 
       case 'min':
-        this[kBuiltOptions].min = value as number;
+        this[kBuiltOptions].min = value as Document;
         break;
 
       case 'orderby':

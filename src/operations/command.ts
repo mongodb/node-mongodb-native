@@ -1,18 +1,29 @@
-import { Aspect, OperationBase, OperationOptions } from './operation';
+import { Aspect, AbstractOperation, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import type { ReadPreference } from '../read_preference';
-import { commandSupportsReadConcern } from '../sessions';
+import { ClientSession, commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
-import type { CollationOptions } from '../cmap/wire_protocol/write_command';
 import type { ReadConcernLike } from './../read_concern';
 import { Explain, ExplainOptions } from '../explain';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
+
+/** @public */
+export interface CollationOptions {
+  locale: string;
+  caseLevel: boolean;
+  caseFirst: string;
+  strength: number;
+  numericOrdering: boolean;
+  alternate: string;
+  maxVariable: string;
+  backwards: boolean;
+}
 
 /** @public */
 export interface CommandOperationOptions
@@ -48,10 +59,8 @@ export interface OperationParent {
 }
 
 /** @internal */
-export abstract class CommandOperation<
-  T extends CommandOperationOptions = CommandOperationOptions,
-  TResult = Document
-> extends OperationBase<T> {
+export abstract class CommandOperation<T> extends AbstractOperation<T> {
+  options: CommandOperationOptions;
   ns: MongoDBNamespace;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -59,8 +68,9 @@ export abstract class CommandOperation<
   fullResponse?: boolean;
   logger?: Logger;
 
-  constructor(parent?: OperationParent, options?: T) {
+  constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(options);
+    this.options = options ?? {};
 
     // NOTE: this was explicitly added for the add/remove user operations, it's likely
     //       something we'd want to reconsider. Perhaps those commands can use `Admin`
@@ -98,13 +108,19 @@ export abstract class CommandOperation<
     return true;
   }
 
-  abstract execute(server: Server, callback: Callback<TResult>): void;
+  abstract execute(server: Server, session: ClientSession, callback: Callback<T>): void;
 
-  executeCommand(server: Server, cmd: Document, callback: Callback): void {
+  executeCommand(server: Server, session: ClientSession, cmd: Document, callback: Callback): void {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
-    const options = { ...this.options, ...this.bsonOptions };
+    const options = {
+      ...this.options,
+      ...this.bsonOptions,
+      readPreference: this.readPreference,
+      session
+    };
+
     const serverWireVersion = maxWireVersion(server);
     const inTransaction = this.session && this.session.inTransaction();
 
@@ -121,12 +137,16 @@ export abstract class CommandOperation<
       return;
     }
 
-    if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-        Object.assign(cmd, { writeConcern: this.writeConcern });
-      }
+    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
+      Object.assign(cmd, { writeConcern: this.writeConcern });
+    }
 
-      if (options.collation && typeof options.collation === 'object') {
+    if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
+      if (
+        options.collation &&
+        typeof options.collation === 'object' &&
+        !this.hasAspect(Aspect.SKIP_COLLATION)
+      ) {
         Object.assign(cmd, { collation: options.collation });
       }
     }
@@ -155,7 +175,7 @@ export abstract class CommandOperation<
     server.command(
       this.ns.toString(),
       cmd,
-      { fullResult: !!this.fullResponse, ...this.options },
+      { fullResult: !!this.fullResponse, ...options },
       callback
     );
   }

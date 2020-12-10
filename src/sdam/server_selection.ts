@@ -8,7 +8,7 @@ import type { ServerDescription, TagSet } from './server_description';
 const IDLE_WRITE_PERIOD = 10000;
 const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
-/** @internal */
+/** @public */
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[]

@@ -32,13 +32,13 @@ export class SrvPollingEvent {
   }
 }
 
-/** @internal */
+/** @public */
 export interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
 
-/** @internal */
+/** @public */
 export class SrvPoller extends EventEmitter {
   srvHost: string;
   rescanSrvIntervalMS: number;

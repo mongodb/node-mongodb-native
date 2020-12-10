@@ -1,124 +1,160 @@
-import { defineAspects, Aspect, OperationBase, Hint } from './operation';
-import { removeDocuments } from './common_functions';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { isObject } from 'util';
-import type { Callback, MongoDBNamespace } from '../utils';
+import { defineAspects, Aspect } from './operation';
+import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
-import type { Connection } from '../cmap/connection';
+import type { ClientSession } from '../sessions';
+import { MongoError } from '../error';
+import type { WriteConcernOptions } from '../write_concern';
 
 /** @public */
-export interface DeleteOptions extends CommandOperationOptions {
+export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {
+  /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
+  ordered?: boolean;
+  /** A user-provided comment to attach to this command */
+  comment?: string | Document;
+  /** Specifies the collation to use for the operation */
+  collation?: CollationOptions;
+  /** Specify that the update query should only consider plans using the hinted index */
+  hint?: string | Document;
+
+  /** @deprecated use `removeOne` or `removeMany` to implicitly specify the limit */
   single?: boolean;
-  hint?: Hint;
 }
 
 /** @public */
 export interface DeleteResult {
-  /** Indicates whether this write result was acknowledged */
+  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined. */
   acknowledged: boolean;
   /** The number of documents that were deleted */
   deletedCount: number;
-  /** The raw result returned from MongoDB. Will vary depending on server version */
-  result: Document;
-  /** The connection object used for the operation */
-  connection?: Connection;
 }
 
 /** @internal */
-export class DeleteOperation extends OperationBase<DeleteOptions, Document> {
+export class DeleteOperation extends CommandOperation<Document> {
+  options: DeleteOptions;
   operations: Document[];
 
   constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
-    super(options);
+    super(undefined, options);
+    this.options = options;
     this.ns = ns;
     this.operations = ops;
   }
 
   get canRetryWrite(): boolean {
+    if (super.canRetryWrite === false) {
+      return false;
+    }
+
     return this.operations.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
   }
 
-  execute(server: Server, callback: Callback): void {
-    server.remove(
-      this.ns.toString(),
-      this.operations,
-      this.options as WriteCommandOptions,
-      callback
-    );
+  execute(server: Server, session: ClientSession, callback: Callback): void {
+    const options = this.options ?? {};
+    const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
+    const command: Document = {
+      delete: this.ns.collection,
+      deletes: this.operations,
+      ordered
+    };
+
+    if (options.explain !== undefined && maxWireVersion(server) < 3) {
+      return callback
+        ? callback(new MongoError(`server ${server.name} does not support explain on delete`))
+        : undefined;
+    }
+
+    const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
+    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
+      if (this.operations.find((o: Document) => o.hint)) {
+        callback(new MongoError(`servers < 3.4 do not support hint on delete`));
+        return;
+      }
+    }
+
+    super.executeCommand(server, session, command, callback);
   }
 }
 
-export class DeleteOneOperation extends CommandOperation<DeleteOptions, DeleteResult> {
-  collection: Collection;
-  filter: Document;
-
+export class DeleteOneOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection, options);
-
-    this.collection = collection;
-    this.filter = filter;
+    super(collection.s.namespace, [makeDeleteOperation(filter, { ...options, limit: 1 })], options);
   }
 
-  execute(server: Server, callback: Callback<DeleteResult>): void {
-    const coll = this.collection;
-    const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions };
+  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
+    super.execute(server, session, (err, res) => {
+      if (err || res == null) return callback(err);
+      if (res.code) return callback(new MongoError(res));
+      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (this.explain) return callback(undefined, res);
 
-    options.single = true;
-    removeDocuments(server, coll, filter, options, (err, r) => {
-      if (callback == null) return;
-      if (err && callback) return callback(err);
-      if (r == null) {
-        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
-      }
-
-      r.deletedCount = r.n;
-      if (callback) callback(undefined, r);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
+        deletedCount: res.n
+      });
     });
   }
 }
 
-export class DeleteManyOperation extends CommandOperation<DeleteOptions, DeleteResult> {
-  collection: Collection;
-  filter: Document;
-
+export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection, options);
-
-    if (!isObject(filter)) {
-      throw new TypeError('filter is a required parameter');
-    }
-
-    this.collection = collection;
-    this.filter = filter;
+    super(collection.s.namespace, [makeDeleteOperation(filter, options)], options);
   }
 
-  execute(server: Server, callback: Callback<DeleteResult>): void {
-    const coll = this.collection;
-    const filter = this.filter;
-    const options = { ...this.options, ...this.bsonOptions };
+  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
+    super.execute(server, session, (err, res) => {
+      if (err || res == null) return callback(err);
+      if (res.code) return callback(new MongoError(res));
+      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (this.explain) return callback(undefined, res);
 
-    // a user can pass `single: true` in to `deleteMany` to remove a single document, theoretically
-    if (typeof options.single !== 'boolean') {
-      options.single = false;
-    }
-
-    removeDocuments(server, coll, filter, options, (err, r) => {
-      if (callback == null) return;
-      if (err && callback) return callback(err);
-      if (r == null) {
-        return callback(undefined, { acknowledged: true, deletedCount: 0, result: { ok: 1 } });
-      }
-
-      r.deletedCount = r.n;
-      if (callback) callback(undefined, r);
+      callback(undefined, {
+        acknowledged: this.writeConcern?.w !== 0 ?? true,
+        deletedCount: res.n
+      });
     });
   }
+}
+
+function makeDeleteOperation(
+  filter: Document,
+  options: DeleteOptions & { limit?: number }
+): Document {
+  const op: Document = {
+    q: filter,
+    limit: typeof options.limit === 'number' ? options.limit : 0
+  };
+
+  if (options.single === true) {
+    op.limit = 1;
+  }
+
+  if (options.collation) {
+    op.collation = options.collation;
+  }
+
+  if (options.hint) {
+    op.hint = options.hint;
+  }
+
+  if (options.comment) {
+    op.comment = options.comment;
+  }
+
+  return op;
 }
 
 defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(DeleteOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
-defineAspects(DeleteManyOperation, [Aspect.WRITE_OPERATION, Aspect.EXPLAINABLE]);
+defineAspects(DeleteOneOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.EXPLAINABLE,
+  Aspect.SKIP_COLLATION
+]);
+defineAspects(DeleteManyOperation, [
+  Aspect.WRITE_OPERATION,
+  Aspect.EXPLAINABLE,
+  Aspect.SKIP_COLLATION
+]);

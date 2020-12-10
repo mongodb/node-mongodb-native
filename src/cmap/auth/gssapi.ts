@@ -2,10 +2,7 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
 import { Kerberos, KerberosClient } from '../../deps';
 import type { Callback } from '../../utils';
-import type { HandshakeDocument } from '../connect';
 import type { Document } from '../../bson';
-
-const kGssapiClient = Symbol('GSSAPI_CLIENT');
 
 type MechanismProperties = {
   gssapiCanonicalizeHostName?: boolean;
@@ -14,98 +11,47 @@ type MechanismProperties = {
 import * as dns from 'dns';
 
 export class GSSAPI extends AuthProvider {
-  [kGssapiClient]: KerberosClient;
-  prepare(
-    handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
-    const { host, port } = authContext.options;
-    const { credentials } = authContext;
-    if (!host || !port || !credentials) {
-      return callback(
-        new MongoError(
-          `Connection must specify: ${host ? 'host' : ''}, ${port ? 'port' : ''}, ${
-            credentials ? 'host' : 'credentials'
-          }.`
-        )
-      );
-    }
-
-    if ('kModuleError' in Kerberos) {
-      return callback(Kerberos['kModuleError']);
-    }
-
-    const { username, password, mechanismProperties } = credentials;
-    const serviceName =
-      mechanismProperties['gssapiservicename'] ||
-      mechanismProperties['gssapiServiceName'] ||
-      'mongodb';
-
-    performGssapiCanonicalizeHostName(
-      host,
-      mechanismProperties as MechanismProperties,
-      (err?: Error | MongoError, host?: string) => {
-        if (err) return callback(err);
-
-        const initOptions = {};
-        if (password != null) {
-          Object.assign(initOptions, { user: username, password: password });
-        }
-
-        Kerberos.initializeClient(
-          `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
-          initOptions,
-          (err: string, client: KerberosClient): void => {
-            if (err) return callback(new MongoError(err));
-            if (client == null) return callback();
-            this[kGssapiClient] = client;
-            callback(undefined, handshakeDoc);
-          }
-        );
-      }
-    );
-  }
-
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (credentials == null) return callback(new MongoError('credentials required'));
     const { username } = credentials;
-    const client = this[kGssapiClient];
-    if (client == null) return callback(new MongoError('gssapi client missing'));
     function externalCommand(
       command: Document,
       cb: Callback<{ payload: string; conversationId: any }>
     ) {
       return connection.command('$external.$cmd', command, cb);
     }
-    client.step('', (err, payload) => {
+    makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);
-
-      externalCommand(saslStart(payload), (err, result) => {
+      if (client == null) return callback(new MongoError('gssapi client missing'));
+      client.step('', (err, payload) => {
         if (err) return callback(err);
-        if (result == null) return callback();
-        negotiate(client, 10, result.payload, (err, payload) => {
+
+        externalCommand(saslStart(payload), (err, result) => {
           if (err) return callback(err);
-
-          externalCommand(saslContinue(payload, result.conversationId), (err, result) => {
+          if (result == null) return callback();
+          negotiate(client, 10, result.payload, (err, payload) => {
             if (err) return callback(err);
-            if (result == null) return callback();
-            finalize(client, username, result.payload, (err, payload) => {
+
+            externalCommand(saslContinue(payload, result.conversationId), (err, result) => {
               if (err) return callback(err);
+              if (result == null) return callback();
+              finalize(client, username, result.payload, (err, payload) => {
+                if (err) return callback(err);
 
-              externalCommand(
-                {
-                  saslContinue: 1,
-                  conversationId: result.conversationId,
-                  payload
-                },
-                (err, result) => {
-                  if (err) return callback(err);
+                externalCommand(
+                  {
+                    saslContinue: 1,
+                    conversationId: result.conversationId,
+                    payload
+                  },
+                  (err, result) => {
+                    if (err) return callback(err);
 
-                  callback(undefined, result);
-                }
-              );
+                    callback(undefined, result);
+                  }
+                );
+              });
             });
           });
         });
@@ -113,6 +59,52 @@ export class GSSAPI extends AuthProvider {
     });
   }
 }
+function makeKerberosClient(authContext: AuthContext, callback: Callback<KerberosClient>): void {
+  const { host, port } = authContext.options;
+  const { credentials } = authContext;
+  if (!host || !port || !credentials) {
+    return callback(
+      new MongoError(
+        `Connection must specify: ${host ? 'host' : ''}, ${port ? 'port' : ''}, ${
+          credentials ? 'host' : 'credentials'
+        }.`
+      )
+    );
+  }
+
+  if ('kModuleError' in Kerberos) {
+    return callback(Kerberos['kModuleError']);
+  }
+
+  const { username, password, mechanismProperties } = credentials;
+  const serviceName =
+    mechanismProperties['gssapiservicename'] ||
+    mechanismProperties['gssapiServiceName'] ||
+    'mongodb';
+
+  performGssapiCanonicalizeHostName(
+    host,
+    mechanismProperties as MechanismProperties,
+    (err?: Error | MongoError, host?: string) => {
+      if (err) return callback(err);
+
+      const initOptions = {};
+      if (password != null) {
+        Object.assign(initOptions, { user: username, password: password });
+      }
+
+      Kerberos.initializeClient(
+        `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
+        initOptions,
+        (err: string, client: KerberosClient): void => {
+          if (err) return callback(new MongoError(err));
+          callback(undefined, client);
+        }
+      );
+    }
+  );
+}
+
 function saslStart(payload?: string): Document {
   return {
     saslStart: 1,

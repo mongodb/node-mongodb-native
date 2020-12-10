@@ -276,6 +276,23 @@ class APMEventCollector {
   }
 }
 
+// simplified `withClient` helper that only uses callbacks
+function withClientV2(callback) {
+  return function testFunction(done) {
+    const client = this.configuration.newClient({ monitorCommands: true });
+    client.connect(err => {
+      if (err) return done(err);
+      this.defer(() => client.close());
+
+      try {
+        callback.call(this, client, done);
+      } catch (err) {
+        done(err);
+      }
+    });
+  };
+}
+
 module.exports = {
   assert,
   delay,
@@ -285,6 +302,7 @@ module.exports = {
   ignoreNsNotFound,
   setupDatabase,
   withClient,
+  withClientV2,
   withMonitoredClient,
   withCursor,
   APMEventCollector

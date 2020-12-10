@@ -46,7 +46,7 @@ export class TopologyDescription {
     commonWireVersion?: number,
     options?: TopologyDescriptionOptions
   ) {
-    options = options || {};
+    options = options ?? {};
 
     // TODO: consider assigning all these values to a temporary value `s` which
     //       we use `Object.freeze` on, ensuring the internal state of this type

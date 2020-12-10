@@ -51,13 +51,20 @@ import {
   FindOneAndUpdateOperation,
   FindAndModifyOptions
 } from './operations/find_and_modify';
-import { InsertManyOperation, InsertManyResult } from './operations/insert_many';
-import { InsertOneOperation, InsertOneOptions, InsertOneResult } from './operations/insert';
+import {
+  InsertOneOperation,
+  InsertOneOptions,
+  InsertOneResult,
+  InsertManyOperation,
+  InsertManyResult
+} from './operations/insert';
 import {
   UpdateOneOperation,
   UpdateManyOperation,
   UpdateOptions,
-  UpdateResult
+  UpdateResult,
+  ReplaceOneOperation,
+  ReplaceOptions
 } from './operations/update';
 import {
   DeleteOneOperation,
@@ -74,7 +81,6 @@ import {
 } from './operations/map_reduce';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
-import { ReplaceOneOperation, ReplaceOptions } from './operations/replace_one';
 import { CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import type { Db } from './db';
@@ -84,13 +90,12 @@ import type { CountOptions } from './operations/count';
 import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
-import type { OperationParent } from './operations/command';
 import type { Sort } from './sort';
 import { FindCursor } from './cursor/find_cursor';
 
 /** @public */
 export interface Collection {
-  /** @deprecated Use {@link Collection.dropIndexes#Class} instead */
+  /** @deprecated Use {@link Collection#dropIndexes} instead */
   dropAllIndexes(): void;
   removeMany(
     filter: Document,
@@ -161,7 +166,7 @@ export interface CollectionPrivate {
  * });
  * ```
  */
-export class Collection implements OperationParent {
+export class Collection {
   /** @internal */
   s: CollectionPrivate;
 
@@ -388,21 +393,25 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  updateOne(filter: Document, update: Document): Promise<UpdateResult>;
-  updateOne(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateOne(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
+  updateOne(filter: Document, update: Document): Promise<UpdateResult | Document>;
+  updateOne(filter: Document, update: Document, callback: Callback<UpdateResult | Document>): void;
+  updateOne(
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document>;
   updateOne(
     filter: Document,
     update: Document,
     options: UpdateOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
     filter: Document,
     update: Document,
-    options?: UpdateOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options?: UpdateOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -420,25 +429,29 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  replaceOne(filter: Document, replacement: Document): Promise<UpdateResult>;
-  replaceOne(filter: Document, replacement: Document, callback: Callback<UpdateResult>): void;
+  replaceOne(filter: Document, replacement: Document): Promise<UpdateResult | Document>;
   replaceOne(
     filter: Document,
     replacement: Document,
-    options: ReplaceOptions
-  ): Promise<UpdateResult>;
-  replaceOne(
-    filter: Document,
-    replacement: Document,
-    options: ReplaceOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
     filter: Document,
     replacement: Document,
-    options?: ReplaceOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options: ReplaceOptions
+  ): Promise<UpdateResult | Document>;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options: ReplaceOptions,
+    callback: Callback<UpdateResult | Document>
+  ): void;
+  replaceOne(
+    filter: Document,
+    replacement: Document,
+    options?: ReplaceOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -456,21 +469,25 @@ export class Collection implements OperationParent {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  updateMany(filter: Document, update: Document): Promise<UpdateResult>;
-  updateMany(filter: Document, update: Document, callback: Callback<UpdateResult>): void;
-  updateMany(filter: Document, update: Document, options: UpdateOptions): Promise<UpdateResult>;
+  updateMany(filter: Document, update: Document): Promise<UpdateResult | Document>;
+  updateMany(filter: Document, update: Document, callback: Callback<UpdateResult | Document>): void;
+  updateMany(
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document>;
   updateMany(
     filter: Document,
     update: Document,
     options: UpdateOptions,
-    callback: Callback<UpdateResult>
+    callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
     filter: Document,
     update: Document,
-    options?: UpdateOptions | Callback<UpdateResult>,
-    callback?: Callback<UpdateResult>
-  ): Promise<UpdateResult> | void {
+    options?: UpdateOptions | Callback<UpdateResult | Document>,
+    callback?: Callback<UpdateResult | Document>
+  ): Promise<UpdateResult | Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -585,7 +602,7 @@ export class Collection implements OperationParent {
     callback?: Callback<boolean>
   ): Promise<boolean> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(
       getTopology(this),
@@ -754,7 +771,7 @@ export class Collection implements OperationParent {
    * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
    * error.
    *
-   * **Note**: Unlike {@link (Collection:class).createIndex| createIndex}, this function takes in raw index specifications.
+   * **Note**: Unlike {@link Collection#createIndex| createIndex}, this function takes in raw index specifications.
    * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
@@ -948,8 +965,8 @@ export class Collection implements OperationParent {
 
   /**
    * Gets the number of documents matching the filter.
-   * For a fast count of the total documents in a collection see {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
-   * **Note**: When migrating from {@link Collection.count| count} to {@link Collection.countDocuments| countDocuments}
+   * For a fast count of the total documents in a collection see {@link Collection#estimatedDocumentCount| estimatedDocumentCount}.
+   * **Note**: When migrating from {@link Collection#count| count} to {@link Collection#countDocuments| countDocuments}
    * the following query operators must be replaced:
    *
    * | Operator | Replacement |
@@ -1089,7 +1106,7 @@ export class Collection implements OperationParent {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return executeOperation(getTopology(this), new CollStatsOperation(this, options), callback);
   }
@@ -1232,7 +1249,7 @@ export class Collection implements OperationParent {
   watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
-    options = options || {};
+    options = options ?? {};
 
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
@@ -1305,12 +1322,12 @@ export class Collection implements OperationParent {
   }
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
-  initializeUnorderedBulkOp(options?: BulkWriteOptions): any {
+  initializeUnorderedBulkOp(options?: BulkWriteOptions): UnorderedBulkOperation {
     return new UnorderedBulkOperation(this, resolveOptions(this, options));
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
-  initializeOrderedBulkOp(options?: BulkWriteOptions): any {
+  initializeOrderedBulkOp(options?: BulkWriteOptions): OrderedBulkOperation {
     return new OrderedBulkOperation(this, resolveOptions(this, options));
   }
 
@@ -1365,7 +1382,7 @@ export class Collection implements OperationParent {
     callback: Callback<Document>
   ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return this.updateMany(selector, update, options, callback);
   }
@@ -1384,7 +1401,7 @@ export class Collection implements OperationParent {
     callback: Callback
   ): Promise<DeleteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     return this.deleteMany(selector, options, callback);
   }
@@ -1420,10 +1437,10 @@ export class Collection implements OperationParent {
    * An estimated count of matching documents in the db to a query.
    *
    * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
-   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection.countDocuments| countDocuments}.
-   * To obtain an estimated count of all documents in the collection, use {@link Collection.estimatedDocumentCount| estimatedDocumentCount}.
+   * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments| countDocuments}.
+   * To obtain an estimated count of all documents in the collection, use {@link Collection#estimatedDocumentCount| estimatedDocumentCount}.
    *
-   * @deprecated use {@link Collection.countDocuments| countDocuments} or {@link Collection.estimatedDocumentCount| estimatedDocumentCount} instead
+   * @deprecated use {@link Collection#countDocuments| countDocuments} or {@link Collection#estimatedDocumentCount| estimatedDocumentCount} instead
    *
    * @param query - The query for the count.
    * @param options - Optional settings for the command

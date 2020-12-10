@@ -17,7 +17,7 @@ const DATA_BEARING_SERVER_TYPES = new Set([
   ServerType.Standalone
 ]);
 
-/** @internal */
+/** @public */
 export interface TopologyVersion {
   processId: ObjectId;
   counter: Long;

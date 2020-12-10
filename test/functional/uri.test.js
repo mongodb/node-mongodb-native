@@ -22,20 +22,17 @@ describe('URI', function () {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
-        db.collection('mongoclient_test').update({ a: 1 }, { b: 1 }, { upsert: true }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-
-          if (result) {
-            expect(result.result.ok).to.equal(1);
-          } else {
-            expect(result).to.not.exist;
+        db.collection('mongoclient_test').update(
+          { a: 1 },
+          { $set: { b: 1 } },
+          { upsert: true },
+          function (err, result) {
+            expect(err).to.not.exist;
+            expect(result).to.exist;
+            expect(result).property('acknowledged').to.be.false;
+            client.close(done);
           }
-
-          client.close(done);
-        });
+        );
       });
     }
   });
@@ -50,9 +47,7 @@ describe('URI', function () {
         return done();
       }
 
-      const client = this.configuration.newClient(
-        'mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false'
-      );
+      const client = this.configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock');
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;

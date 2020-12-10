@@ -8,12 +8,10 @@ import type { Topology } from './sdam/topology';
 import type { EventEmitter } from 'events';
 import type { Db } from './db';
 import type { Collection } from './collection';
-import type { OperationOptions, OperationBase, Hint } from './operations/operation';
+import type { OperationOptions, Hint } from './operations/operation';
 import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { Document, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 import type { Explain } from './explain';
@@ -232,7 +230,7 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
  * @param args - Arguments to apply the provided operation
  * @param options - Options that modify the behavior of the method
  */
-export function executeLegacyOperation<T extends OperationBase>(
+export function executeLegacyOperation<T>(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
@@ -244,7 +242,7 @@ export function executeLegacyOperation<T extends OperationBase>(
     throw new TypeError('This method requires an array of arguments to apply');
   }
 
-  options = options || {};
+  options = options ?? {};
 
   let callback = args[args.length - 1];
 
@@ -352,7 +350,7 @@ export function applyWriteConcern<T extends HasWriteConcern>(
   sources: { db?: Db; collection?: Collection },
   options?: OperationOptions & WriteConcernOptions
 ): T {
-  options = options || {};
+  options = options ?? {};
   const db = sources.db;
   const coll = sources.collection;
 
@@ -885,12 +883,11 @@ export interface ClientMetadataOptions {
   appname?: string;
 }
 
-const NODE_DRIVER_VERSION = JSON.parse(
-  readFileSync(resolve(__dirname, '..', 'package.json'), { encoding: 'utf-8' })
-).version;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const NODE_DRIVER_VERSION = require('../package.json').version;
 
 export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
-  options = options || {};
+  options = options ?? {};
 
   const metadata: ClientMetadata = {
     driver: {
@@ -964,7 +961,7 @@ export function calculateDurationInMs(started: number): number {
   return elapsed < 0 ? 0 : elapsed;
 }
 
-export interface InterruptableAsyncIntervalOptions {
+export interface InterruptibleAsyncIntervalOptions {
   /** The interval to execute a method on */
   interval: number;
   /** A minimum interval that must elapse before the method is called */
@@ -980,7 +977,7 @@ export interface InterruptableAsyncIntervalOptions {
 }
 
 /** @internal */
-export interface InterruptableAsyncInterval {
+export interface InterruptibleAsyncInterval {
   wake(): void;
   stop(): void;
 }
@@ -994,16 +991,16 @@ export interface InterruptableAsyncInterval {
  *
  * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
  */
-export function makeInterruptableAsyncInterval(
+export function makeInterruptibleAsyncInterval(
   fn: (callback: Callback) => void,
-  options?: Partial<InterruptableAsyncIntervalOptions>
-): InterruptableAsyncInterval {
+  options?: Partial<InterruptibleAsyncIntervalOptions>
+): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
   let lastCallTime: number;
   let lastWakeTime: number;
   let stopped = false;
 
-  options = options || {};
+  options = options ?? {};
   const interval = options.interval || 1000;
   const minInterval = options.minInterval || 500;
   const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
@@ -1128,4 +1125,130 @@ export function resolveOptions<T extends CommandOperationOptions>(
   }
 
   return result;
+}
+
+export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boolean {
+  set = Array.isArray(set) ? new Set(set) : set;
+  subset = Array.isArray(subset) ? new Set(subset) : subset;
+  for (const elem of subset) {
+    if (!set.has(elem)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function isRecord<T extends readonly string[]>(
+  value: unknown,
+  requiredKeys: T
+): value is Record<T[number], any>;
+export function isRecord(value: unknown): value is Record<string, any>;
+export function isRecord(
+  value: unknown,
+  requiredKeys: string[] | undefined = undefined
+): value is Record<string, any> {
+  const isRecord = !!value && typeof value === 'object' && !Array.isArray(value);
+  if (isRecord && requiredKeys) {
+    const keys = Object.keys(value as Record<string, any>);
+    return isSuperset(keys, requiredKeys);
+  }
+
+  return isRecord;
+}
+
+const kBuffers = Symbol('buffers');
+const kLength = Symbol('length');
+
+/**
+ * A pool of Buffers which allow you to read them as if they were one
+ * @internal
+ */
+export class BufferPool {
+  [kBuffers]: Buffer[];
+  [kLength]: number;
+
+  constructor() {
+    this[kBuffers] = [];
+    this[kLength] = 0;
+  }
+
+  get length(): number {
+    return this[kLength];
+  }
+
+  /** Adds a buffer to the internal buffer pool list */
+  append(buffer: Buffer): void {
+    this[kBuffers].push(buffer);
+    this[kLength] += buffer.length;
+  }
+
+  /** Returns the requested number of bytes without consuming them */
+  peek(size: number): Buffer {
+    return this.read(size, false);
+  }
+
+  /** Reads the requested number of bytes, optionally consuming them */
+  read(size: number, consume = true): Buffer {
+    if (typeof size !== 'number' || size < 0) {
+      throw new TypeError('Parameter size must be a non-negative number');
+    }
+
+    if (size > this[kLength]) {
+      return Buffer.alloc(0);
+    }
+
+    let result: Buffer;
+
+    // read the whole buffer
+    if (size === this.length) {
+      result = Buffer.concat(this[kBuffers]);
+
+      if (consume) {
+        this[kBuffers] = [];
+        this[kLength] = 0;
+      }
+    }
+
+    // size is within first buffer, no need to concat
+    else if (size <= this[kBuffers][0].length) {
+      result = this[kBuffers][0].slice(0, size);
+      if (consume) {
+        this[kBuffers][0] = this[kBuffers][0].slice(size);
+        this[kLength] -= size;
+      }
+    }
+
+    // size is beyond first buffer, need to track and copy
+    else {
+      result = Buffer.allocUnsafe(size);
+
+      let idx;
+      let offset = 0;
+      let bytesToCopy = size;
+      for (idx = 0; idx < this[kBuffers].length; ++idx) {
+        let bytesCopied;
+        if (bytesToCopy > this[kBuffers][idx].length) {
+          bytesCopied = this[kBuffers][idx].copy(result, offset, 0);
+          offset += bytesCopied;
+        } else {
+          bytesCopied = this[kBuffers][idx].copy(result, offset, 0, bytesToCopy);
+          if (consume) {
+            this[kBuffers][idx] = this[kBuffers][idx].slice(bytesCopied);
+          }
+          offset += bytesCopied;
+          break;
+        }
+
+        bytesToCopy -= bytesCopied;
+      }
+
+      // compact the internal buffer array
+      if (consume) {
+        this[kBuffers] = this[kBuffers].slice(idx);
+        this[kLength] -= size;
+      }
+    }
+
+    return result;
+  }
 }

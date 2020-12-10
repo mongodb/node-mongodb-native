@@ -80,7 +80,7 @@ describe('SCRAM-SHA-256 auth', function () {
         test: function () {
           const options = {
             auth: {
-              user: user.username,
+              username: user.username,
               password: user.password
             },
             authMechanism: mechanism,
@@ -119,7 +119,7 @@ describe('SCRAM-SHA-256 auth', function () {
       test: function () {
         const options = {
           auth: {
-            user: user.username,
+            username: user.username,
             password: user.password
           },
           authSource: this.configuration.db
@@ -154,7 +154,7 @@ describe('SCRAM-SHA-256 auth', function () {
     test: function () {
       const options = {
         auth: {
-          user: userMap.both.username,
+          username: userMap.both.username,
           password: userMap.both.password
         },
         authSource: this.configuration.db
@@ -173,7 +173,7 @@ describe('SCRAM-SHA-256 auth', function () {
     test: function () {
       const options = {
         auth: {
-          user: userMap.both.username,
+          username: userMap.both.username,
           password: userMap.both.password
         },
         authSource: this.configuration.db
@@ -205,7 +205,7 @@ describe('SCRAM-SHA-256 auth', function () {
     test: function () {
       const options = {
         auth: {
-          user: userMap.sha256.username,
+          username: userMap.sha256.username,
           password: userMap.sha256.password
         },
         authSource: this.configuration.db,
@@ -229,7 +229,7 @@ describe('SCRAM-SHA-256 auth', function () {
     test: function () {
       const noUsernameOptions = {
         auth: {
-          user: 'roth',
+          username: 'roth',
           password: 'pencil'
         },
         authSource: 'admin'
@@ -237,7 +237,7 @@ describe('SCRAM-SHA-256 auth', function () {
 
       const badPasswordOptions = {
         auth: {
-          user: 'both',
+          username: 'both',
           password: 'pencil'
         },
         authSource: 'admin'
@@ -259,7 +259,7 @@ describe('SCRAM-SHA-256 auth', function () {
     test: function () {
       const options = {
         auth: {
-          user: userMap.both.username,
+          username: userMap.both.username,
           password: userMap.both.password
         },
         authSource: this.configuration.db

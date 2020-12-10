@@ -8,6 +8,7 @@ import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
 import { EventEmitter } from 'events';
 import type { ExecutionResult } from '../operations/execute_operation';
+import { ReadConcern, ReadConcernLike } from '../read_concern';
 
 const kId = Symbol('id');
 const kDocuments = Symbol('documents');
@@ -21,7 +22,7 @@ const kInitialized = Symbol('initialized');
 const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 
-/** @internal */
+/** @public */
 export const CURSOR_FLAGS = [
   'tailable',
   'oplogReplay',
@@ -46,10 +47,11 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = typeof CURSOR_FLAGS[number];
 
-/** @internal */
+/** @public */
 export interface AbstractCursorOptions extends BSONSerializeOptions {
   session?: ClientSession;
   readPreference?: ReadPreferenceLike;
+  readConcern?: ReadConcernLike;
   batchSize?: number;
   maxTimeMS?: number;
   comment?: Document | string;
@@ -62,6 +64,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
 export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPreference'> & {
   // resolved
   readPreference: ReadPreference;
+  readConcern?: ReadConcern;
 
   // cursor flags, some are deprecated
   oplogReplay?: boolean;
@@ -69,18 +72,29 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
   partial?: boolean;
 };
 
-/** @internal */
+/** @public */
 export abstract class AbstractCursor extends EventEmitter {
+  /** @internal */
   [kId]?: Long;
+  /** @internal */
   [kSession]?: ClientSession;
+  /** @internal */
   [kServer]?: Server;
+  /** @internal */
   [kNamespace]: MongoDBNamespace;
+  /** @internal */
   [kDocuments]: Document[];
+  /** @internal */
   [kTopology]: Topology;
+  /** @internal */
   [kTransform]?: (doc: Document) => Document;
+  /** @internal */
   [kInitialized]: boolean;
+  /** @internal */
   [kClosed]: boolean;
+  /** @internal */
   [kKilled]: boolean;
+  /** @internal */
   [kOptions]: InternalAbstractCursorOptions;
 
   /** @event */
@@ -106,6 +120,11 @@ export abstract class AbstractCursor extends EventEmitter {
           : ReadPreference.primary,
       ...pluckBSONSerializeOptions(options)
     };
+
+    const readConcern = ReadConcern.fromOptions(options);
+    if (readConcern) {
+      this[kOptions].readConcern = readConcern;
+    }
 
     if (typeof options.batchSize === 'number') {
       this[kOptions].batchSize = options.batchSize;
@@ -142,6 +161,10 @@ export abstract class AbstractCursor extends EventEmitter {
 
   get readPreference(): ReadPreference {
     return this[kOptions].readPreference;
+  }
+
+  get readConcern(): ReadConcern | undefined {
+    return this[kOptions].readConcern;
   }
 
   get session(): ClientSession | undefined {
@@ -213,7 +236,7 @@ export abstract class AbstractCursor extends EventEmitter {
         return done(undefined, true);
       }
 
-      next(this, (err, doc) => {
+      next(this, true, (err, doc) => {
         if (err) return done(err);
 
         if (doc) {
@@ -236,7 +259,23 @@ export abstract class AbstractCursor extends EventEmitter {
         return done(new MongoError('Cursor is exhausted'));
       }
 
-      next(this, done);
+      next(this, true, done);
+    });
+  }
+
+  /**
+   * Try to get the next available document from the cursor or `null` if an empty batch is returned
+   * @internal
+   */
+  tryNext(): Promise<Document | null>;
+  tryNext(callback: Callback<Document | null>): void;
+  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    return maybePromise(callback, done => {
+      if (this[kId] === Long.ZERO) {
+        return done(new MongoError('Cursor is exhausted'));
+      }
+
+      next(this, false, done);
     });
   }
 
@@ -259,7 +298,7 @@ export abstract class AbstractCursor extends EventEmitter {
     return maybePromise(callback, done => {
       const transform = this[kTransform];
       const fetchDocs = () => {
-        next(this, (err, doc) => {
+        next(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
           if (doc == null) return done();
 
@@ -290,7 +329,7 @@ export abstract class AbstractCursor extends EventEmitter {
   close(options: CursorCloseOptions, callback: Callback): void;
   close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options || {};
+    options = options ?? {};
 
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
@@ -350,7 +389,7 @@ export abstract class AbstractCursor extends EventEmitter {
       const transform = this[kTransform];
       const fetchDocs = () => {
         // NOTE: if we add a `nextBatch` then we should use it here
-        next(this, (err, doc) => {
+        next(this, true, (err, doc) => {
           if (err) return done(err);
           if (doc == null) return done(undefined, docs);
 
@@ -418,7 +457,7 @@ export abstract class AbstractCursor extends EventEmitter {
    *
    * @param readPreference - The new read preference for the cursor.
    */
-  setReadPreference(readPreference: ReadPreferenceLike): this {
+  withReadPreference(readPreference: ReadPreferenceLike): this {
     assertUninitialized(this);
     if (readPreference instanceof ReadPreference) {
       this[kOptions].readPreference = readPreference;
@@ -426,6 +465,21 @@ export abstract class AbstractCursor extends EventEmitter {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
       throw new TypeError('Invalid read preference: ' + readPreference);
+    }
+
+    return this;
+  }
+
+  /**
+   * Set the ReadPreference for the cursor.
+   *
+   * @param readPreference - The new read preference for the cursor.
+   */
+  withReadConcern(readConcern: ReadConcernLike): this {
+    assertUninitialized(this);
+    const resolvedReadConcern = ReadConcern.fromOptions({ readConcern });
+    if (resolvedReadConcern) {
+      this[kOptions].readConcern = resolvedReadConcern;
     }
 
     return this;
@@ -465,13 +519,45 @@ export abstract class AbstractCursor extends EventEmitter {
     return this;
   }
 
-  /* @internal */
+  /**
+   * Rewind this cursor to its uninitialized state. Any options that are present on the cursor will
+   * remain in effect. Iterating this cursor will cause new queries to be sent to the server, even
+   * if the resultant data has already been retrieved by this cursor.
+   */
+  rewind(): void {
+    if (!this[kInitialized]) {
+      return;
+    }
+
+    this[kId] = undefined;
+    this[kDocuments] = [];
+    this[kClosed] = false;
+    this[kKilled] = false;
+    this[kInitialized] = false;
+
+    const session = this[kSession];
+    if (session) {
+      // We only want to end this session if we created it, and it hasn't ended yet
+      if (session.explicit === false && !session.hasEnded) {
+        session.endSession();
+      }
+
+      this[kSession] = undefined;
+    }
+  }
+
+  /**
+   * Returns a new uninitialized copy of this cursor, with options matching those that have been set on the current instance
+   */
+  abstract clone(): AbstractCursor;
+
+  /** @internal */
   abstract _initialize(
     session: ClientSession | undefined,
     callback: Callback<ExecutionResult>
   ): void;
 
-  /* @internal */
+  /** @internal */
   _getMore(batchSize: number, callback: Callback<Document>): void {
     const cursorId = this[kId];
     const cursorNs = this[kNamespace];
@@ -518,7 +604,11 @@ function nextDocument(cursor: AbstractCursor): Document | null | undefined {
   return null;
 }
 
-function next(cursor: AbstractCursor, callback: Callback<Document | null>): void {
+function next(
+  cursor: AbstractCursor,
+  blocking: boolean,
+  callback: Callback<Document | null>
+): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
@@ -532,7 +622,7 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     if (cursor[kSession] == null && cursor[kTopology].hasSessionSupport()) {
-      cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: true });
+      cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
     }
 
     cursor._initialize(cursor[kSession], (err, state) => {
@@ -577,7 +667,7 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
         return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
       }
 
-      next(cursor, callback);
+      next(cursor, blocking, callback);
     });
 
     return;
@@ -604,7 +694,11 @@ function next(cursor: AbstractCursor, callback: Callback<Document | null>): void
       return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
     }
 
-    next(cursor, callback);
+    if (cursor[kDocuments].length === 0 && blocking === false) {
+      return callback(undefined, null);
+    }
+
+    next(cursor, blocking, callback);
   });
 }
 
@@ -666,7 +760,7 @@ function makeCursorStream(cursor: AbstractCursor) {
 
   function readNext() {
     needToClose = false;
-    next(cursor, (err, result) => {
+    next(cursor, true, (err, result) => {
       needToClose = err ? !cursor.closed : result !== null;
 
       if (err) {

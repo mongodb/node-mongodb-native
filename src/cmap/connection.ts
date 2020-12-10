@@ -4,7 +4,14 @@ import { StreamDescription, StreamDescriptionOptions } from './stream_descriptio
 import * as wp from './wire_protocol';
 import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
 import { updateSessionFromResponse } from '../sessions';
-import { uuidV4, ClientMetadata, now, calculateDurationInMs, Callback } from '../utils';
+import {
+  uuidV4,
+  ClientMetadata,
+  now,
+  calculateDurationInMs,
+  Callback,
+  MongoDBNamespace
+} from '../utils';
 import {
   MongoError,
   MongoNetworkError,
@@ -20,10 +27,9 @@ import type { Server } from '../sdam/server';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { CommandOptions } from './wire_protocol/command';
 import type { GetMoreOptions } from './wire_protocol/get_more';
-import type { InsertOptions, UpdateOptions, RemoveOptions } from './wire_protocol/index';
 import type { Stream } from './connect';
 import type { LoggerOptions } from '../logger';
-import type { FindOptions } from '../operations/find';
+import type { QueryOptions } from './wire_protocol/query';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -76,14 +82,23 @@ export class Connection extends EventEmitter {
   closed: boolean;
   destroyed: boolean;
   lastIsMasterMS?: number;
+  /** @internal */
   [kDescription]: StreamDescription;
+  /** @internal */
   [kGeneration]: number;
+  /** @internal */
   [kLastUseTime]: number;
+  /** @internal */
   [kAutoEncrypter]?: unknown;
+  /** @internal */
   [kQueue]: Map<number, OperationDescription>;
+  /** @internal */
   [kMessageStream]: MessageStream;
+  /** @internal */
   [kStream]: Stream;
+  /** @internal */
   [kIsMaster]: Document;
+  /** @internal */
   [kClusterTime]: Document;
 
   /** @event */
@@ -235,7 +250,9 @@ export class Connection extends EventEmitter {
   }
 
   // Wire protocol methods
+  /** @internal */
   command(ns: string, cmd: Document, callback: Callback): void;
+  /** @internal */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback): void;
   command(
     ns: string,
@@ -246,34 +263,29 @@ export class Connection extends EventEmitter {
     wp.command(makeServerTrampoline(this), ns, cmd, options as CommandOptions, callback);
   }
 
-  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
+  /** @internal */
+  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     wp.query(makeServerTrampoline(this), ns, cmd, options, callback);
   }
 
+  /** @internal */
   getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
     wp.getMore(makeServerTrampoline(this), ns, cursorId, options, callback);
   }
 
+  /** @internal */
   killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback: Callback): void {
     wp.killCursors(makeServerTrampoline(this), ns, cursorIds, options, callback);
   }
-
-  insert(ns: string, ops: Document[], options: InsertOptions, callback: Callback): void {
-    wp.insert(makeServerTrampoline(this), ns, ops, options, callback);
-  }
-
-  update(ns: string, ops: Document[], options: UpdateOptions, callback: Callback): void {
-    wp.update(makeServerTrampoline(this), ns, ops, options, callback);
-  }
-
-  remove(ns: string, ops: Document[], options: RemoveOptions, callback: Callback): void {
-    wp.remove(makeServerTrampoline(this), ns, ops, options, callback);
-  }
 }
 
-/// This lets us emulate a legacy `Server` instance so we can work with the existing wire
-/// protocol methods. Eventually, the operation executor will return a `Connection` to execute
-/// against.
+/**
+ * This lets us emulate a legacy `Server` instance so we can work with the existing wire
+ * protocol methods. Eventually, the operation executor will return a `Connection` to execute
+ * against.
+ * @internal
+ * @deprecated Remove (NODE-2745)
+ */
 function makeServerTrampoline(connection: Connection): Server {
   return ({
     description: connection.description,
@@ -369,7 +381,7 @@ function write(
     callback = options;
   }
 
-  options = options || {};
+  options = options ?? {};
   const operationDescription: OperationDescription = {
     requestId: command.requestId,
     cb: callback,

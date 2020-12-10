@@ -109,7 +109,7 @@ export type {
   OperationTime,
   ResumeOptions
 } from './change_stream';
-export type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+export type { AuthMechanism, AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
@@ -138,13 +138,7 @@ export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_
 export type { CommandOptions } from './cmap/wire_protocol/command';
 export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
 export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
-export type {
-  InsertOptions as WireInsertOptions,
-  UpdateOptions as WireUpdateOptions,
-  RemoveOptions as WireRemoveOptions
-} from './cmap/wire_protocol/index';
 export type { QueryOptions } from './cmap/wire_protocol/query';
-export type { CollationOptions, WriteCommandOptions } from './cmap/wire_protocol/write_command';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
@@ -179,8 +173,11 @@ export type {
   PkFactory,
   MongoURIOptions,
   LogLevel,
+  LogLevelId,
   Auth,
-  DriverInfo
+  DriverInfo,
+  MongoOptions,
+  HostAddress
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {
@@ -191,7 +188,8 @@ export type {
 export type {
   CommandOperationOptions,
   OperationParent,
-  CommandOperation
+  CommandOperation,
+  CollationOptions
 } from './operations/command';
 export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
@@ -213,8 +211,7 @@ export type {
   ListIndexesOptions,
   IndexDirection
 } from './operations/indexes';
-export type { InsertOneResult, InsertOneOptions } from './operations/insert';
-export type { InsertManyResult } from './operations/insert_many';
+export type { InsertOneResult, InsertOneOptions, InsertManyResult } from './operations/insert';
 export type { ListCollectionsOptions } from './operations/list_collections';
 export type { ListDatabasesResult, ListDatabasesOptions } from './operations/list_databases';
 export type {
@@ -223,24 +220,24 @@ export type {
   MapReduceOptions,
   FinalizeFunction
 } from './operations/map_reduce';
-export type { Hint, OperationOptions, OperationBase } from './operations/operation';
+export type { Hint, OperationOptions, AbstractOperation } from './operations/operation';
 export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
-export type { ReplaceOptions } from './operations/replace_one';
 export type { RunCommandOptions } from './operations/run_command';
 export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
-export type { UpdateResult, UpdateOptions } from './operations/update';
+export type { UpdateResult, UpdateOptions, ReplaceOptions } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
 export type {
   ReadConcern,
-  ReadConcernLevel,
   ReadConcernLike,
-  ReadConcernLevelLike
+  ReadConcernLevel,
+  ReadConcernLevelId
 } from './read_concern';
 export type {
   ReadPreferenceLike,
+  ReadPreferenceModeId,
   ReadPreferenceMode,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
@@ -269,12 +266,12 @@ export type {
   Topology,
   TopologyPrivate,
   ServerSelectionRequest,
-  ServerAddress,
   TopologyOptions,
   ServerCapabilities,
   ConnectOptions,
   SelectServerOptions,
-  ServerSelectionCallback
+  ServerSelectionCallback,
+  ServerAddress
 } from './sdam/topology';
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {
@@ -286,5 +283,24 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { TransactionOptions, Transaction, TxnState } from './transactions';
-export type { Callback, ClientMetadata, ClientMetadataOptions } from './utils';
+export type {
+  Callback,
+  ClientMetadata,
+  ClientMetadataOptions,
+  MongoDBNamespace,
+  InterruptibleAsyncInterval,
+  BufferPool
+} from './utils';
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
+export type { ExecutionResult } from './operations/execute_operation';
+export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
+export type {
+  BulkOperationBase,
+  BulkOperationPrivate,
+  BatchType,
+  BatchTypeId,
+  FindOperators,
+  Batch
+} from './bulk/common';
+export type { OrderedBulkOperation } from './bulk/ordered';
+export type { UnorderedBulkOperation } from './bulk/unordered';

@@ -9,6 +9,7 @@ import type { PkFactory } from '../mongo_client';
 
 // eslint-disable-next-line
 import type { Collection } from '../collection';
+import type { ClientSession } from '../sessions';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -64,20 +65,20 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class CreateCollectionOperation extends CommandOperation<
-  CreateCollectionOptions,
-  Collection
-> {
+export class CreateCollectionOperation extends CommandOperation<Collection> {
+  options: CreateCollectionOptions;
   db: Db;
   name: string;
 
   constructor(db: Db, name: string, options: CreateCollectionOptions = {}) {
     super(db, options);
+
+    this.options = options;
     this.db = db;
     this.name = name;
   }
 
-  execute(server: Server, callback: Callback<Collection>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Collection>): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -103,7 +104,7 @@ export class CreateCollectionOperation extends CommandOperation<
     }
 
     // otherwise just execute the command
-    super.executeCommand(server, cmd, done);
+    super.executeCommand(server, session, cmd, done);
   }
 }
 

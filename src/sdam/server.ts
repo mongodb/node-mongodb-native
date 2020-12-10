@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { ReadPreference } from '../read_preference';
 import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { ServerDescription, compareTopologyVersion } from './server_description';
@@ -14,7 +13,8 @@ import {
   maxWireVersion,
   ClientMetadataOptions,
   Callback,
-  CallbackWithType
+  CallbackWithType,
+  MongoDBNamespace
 } from '../utils';
 import {
   ServerType,
@@ -39,12 +39,10 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from '../cmap/wire_protocol/command';
-import type { QueryOptions } from '../cmap/wire_protocol/query';
 import type { GetMoreOptions } from '../cmap/wire_protocol/get_more';
-import type { WriteCommandOptions } from '../cmap/wire_protocol/write_command';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
-import type { FindOptions } from '../operations/find';
+import type { QueryOptions } from '../cmap/wire_protocol/query';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -242,8 +240,12 @@ export class Server extends EventEmitter {
     this[kMonitor].requestCheck();
   }
 
-  /** Execute a command */
+  /**
+   * Execute a command
+   * @internal
+   */
   command(ns: string, cmd: Document, callback: Callback): void;
+  /** @internal */
   command(ns: string, cmd: Document, options: CommandOptions, callback: Callback<Document>): void;
   command(
     ns: string,
@@ -252,18 +254,13 @@ export class Server extends EventEmitter {
     callback?: Callback<Document>
   ): void {
     if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
+      (callback = options), (options = {}), (options = options ?? {});
     }
 
     if (!callback) return;
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
-    }
-
-    const error = basicReadValidations(this, options);
-    if (error) {
-      return callback(error);
     }
 
     // Clone the options
@@ -301,8 +298,11 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a query against the server */
-  query(ns: string, cmd: Document, options: FindOptions, callback: Callback): void {
+  /**
+   * Execute a query against the server
+   * @internal
+   */
+  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
       return;
@@ -318,7 +318,10 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a `getMore` against the server */
+  /**
+   * Execute a `getMore` against the server
+   * @internal
+   */
   getMore(ns: string, cursorId: Long, options: GetMoreOptions, callback: Callback<Document>): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       callback(new MongoError('server is closed'));
@@ -340,7 +343,10 @@ export class Server extends EventEmitter {
     }, callback);
   }
 
-  /** Execute a `killCursors` command against the server */
+  /**
+   * Execute a `killCursors` command against the server
+   * @internal
+   */
   killCursors(ns: string, cursorIds: Long[], options: CommandOptions, callback?: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
@@ -363,38 +369,6 @@ export class Server extends EventEmitter {
         makeOperationHandler(this, conn, {}, undefined, cb) as Callback
       );
     }, callback);
-  }
-
-  /**
-   * Insert one or more documents
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of documents to insert
-   */
-  insert(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more update operations
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of updates
-   */
-  update(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
-  }
-
-  /**
-   * Perform one or more remove operations
-   *
-   * @param ns - The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param ops - An array of removes
-   * @param options - options for removal
-   * @param callback - A callback function
-   */
-  remove(ns: string, ops: Document[], options: WriteCommandOptions, callback: Callback): void {
-    executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
   }
 }
 
@@ -422,70 +396,6 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
 
   const alpha = 0.2;
   return alpha * duration + (1 - alpha) * oldRtt;
-}
-
-function basicReadValidations(server: Server, options?: CommandOptions) {
-  if (options?.readPreference && !(options.readPreference instanceof ReadPreference)) {
-    return new MongoError('readPreference must be an instance of ReadPreference');
-  }
-}
-
-function executeWriteOperation(
-  args: { server: Server; op: string; ns: string; ops: Document[] | Document },
-  options: WriteCommandOptions,
-  callback: Callback
-) {
-  options = options || {};
-
-  const { server, op, ns } = args;
-  const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
-  if (server.s.state === STATE_CLOSING || server.s.state === STATE_CLOSED) {
-    callback(new MongoError('server is closed'));
-    return;
-  }
-
-  if (collationNotSupported(server, options)) {
-    callback(new MongoError(`server ${server.name} does not support collation`));
-    return;
-  }
-
-  const unacknowledgedWrite = options.writeConcern && options.writeConcern.w === 0;
-  if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-    if ((op === 'update' || op === 'remove') && ops.find((o: Document) => o.hint)) {
-      callback(new MongoError(`servers < 3.4 do not support hint on ${op}`));
-      return;
-    }
-  }
-
-  server.s.pool.withConnection((err, conn, cb) => {
-    if (err || !conn) {
-      markServerUnknown(server, err);
-      return cb(err);
-    }
-
-    if (op === 'insert') {
-      conn.insert(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    } else if (op === 'update') {
-      conn.update(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    } else {
-      conn.remove(
-        ns,
-        ops,
-        options,
-        makeOperationHandler(server, conn, ops, options, cb) as Callback
-      );
-    }
-  }, callback);
 }
 
 function markServerUnknown(server: Server, error?: MongoError) {
@@ -527,7 +437,7 @@ function makeOperationHandler(
   server: Server,
   connection: Connection,
   cmd: Document,
-  options: CommandOptions | WriteCommandOptions | QueryOptions | GetMoreOptions | undefined,
+  options: CommandOptions | GetMoreOptions | undefined,
   callback: Callback
 ): CallbackWithType<MongoError, Document> {
   const session = options?.session;

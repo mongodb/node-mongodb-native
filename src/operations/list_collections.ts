@@ -1,6 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { maxWireVersion, Callback, getTopology } from '../utils';
+import { maxWireVersion, Callback, getTopology, MongoDBNamespace } from '../utils';
 import * as CONSTANTS from '../constants';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -20,7 +20,8 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<ListCollectionsOptions, string[]> {
+export class ListCollectionsOperation extends CommandOperation<string[]> {
+  options: ListCollectionsOptions;
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -29,6 +30,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
     super(db, options);
 
+    this.options = options ?? {};
     this.db = db;
     this.filter = filter;
     this.nameOnly = !!this.options.nameOnly;
@@ -38,7 +40,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
     }
   }
 
-  execute(server: Server, callback: Callback<string[]>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;
@@ -76,9 +78,9 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
       };
 
       server.query(
-        `${databaseName}.${CONSTANTS.SYSTEM_NAMESPACE_COLLECTION}`,
+        new MongoDBNamespace(databaseName, CONSTANTS.SYSTEM_NAMESPACE_COLLECTION),
         { query: filter },
-        { batchSize: this.batchSize || 1000 },
+        { batchSize: this.batchSize || 1000, readPreference: this.readPreference },
         (err, result) => {
           if (result && result.documents && Array.isArray(result.documents)) {
             result.documents = result.documents.map(documentTransform);
@@ -98,7 +100,7 @@ export class ListCollectionsOperation extends CommandOperation<ListCollectionsOp
       nameOnly: this.nameOnly
     };
 
-    return super.executeCommand(server, command, callback);
+    return super.executeCommand(server, session, command, callback);
   }
 }
 
@@ -115,6 +117,14 @@ export class ListCollectionsCursor extends AbstractCursor {
     this.options = options;
   }
 
+  clone(): ListCollectionsCursor {
+    return new ListCollectionsCursor(this.parent, this.filter, {
+      ...this.options,
+      ...this.cursorOptions
+    });
+  }
+
+  /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,

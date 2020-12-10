@@ -217,7 +217,7 @@ describe.skip('Buffering Proxy', function () {
 
               db.collection('test')
                 .find({})
-                .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
+                .withReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
                   expect(err).to.not.exist;
                   results.push('find');
@@ -439,7 +439,7 @@ describe.skip('Buffering Proxy', function () {
 
               db.collection('test')
                 .find({})
-                .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
+                .withReadPreference(new ReadPreference(ReadPreference.SECONDARY))
                 .toArray(function (err) {
                   expect(err).to.not.exist;
                   results.push('find');
