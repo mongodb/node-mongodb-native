@@ -4,6 +4,7 @@ const { setupDatabase } = require('./shared');
 const { expect } = require('chai');
 const { MongoClient } = require('../../src');
 const { Connection } = require('../../src/cmap/connection');
+const { ns } = require('../../src/utils');
 
 describe('MongoClient Options', function () {
   before(function () {
@@ -47,11 +48,12 @@ describe('MongoClient Options', function () {
           const ns = args[0];
           const command = args[1];
           const options = args[2];
-          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+          if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
             stub.restore();
             expect(options).property('socketTimeout').to.equal(0);
             client.close(done);
           }
+
           stub.wrappedMethod.apply(this, args);
         });
       });
@@ -72,11 +74,12 @@ describe('MongoClient Options', function () {
           const ns = args[0];
           const command = args[1];
           const options = args[2];
-          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+          if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
             stub.restore();
             expect(options).property('socketTimeout').to.equal(510);
             client.close(done);
           }
+
           stub.wrappedMethod.apply(this, args);
         });
       });
