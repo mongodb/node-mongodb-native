@@ -13,7 +13,9 @@ describe('Tailable cursor tests', function () {
 
   it('should correctly perform awaitData', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '>=3.2' }
+      requires: {
+        os: '!win32' // NODE-2943: timeout on windows
+      }
     },
 
     test: function (done) {

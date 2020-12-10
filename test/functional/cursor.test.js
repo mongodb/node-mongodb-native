@@ -1876,7 +1876,8 @@ describe('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
-      sessions: { skipLeakTests: true }
+      sessions: { skipLeakTests: true },
+      os: '!win32' // NODE-2943: timeout on windows
     },
 
     test: function (done) {
