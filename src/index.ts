@@ -288,7 +288,8 @@ export type {
   ClientMetadata,
   ClientMetadataOptions,
   MongoDBNamespace,
-  InterruptableAsyncInterval
+  InterruptibleAsyncInterval,
+  BufferPool
 } from './utils';
 export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';

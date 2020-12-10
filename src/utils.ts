@@ -961,7 +961,7 @@ export function calculateDurationInMs(started: number): number {
   return elapsed < 0 ? 0 : elapsed;
 }
 
-export interface InterruptableAsyncIntervalOptions {
+export interface InterruptibleAsyncIntervalOptions {
   /** The interval to execute a method on */
   interval: number;
   /** A minimum interval that must elapse before the method is called */
@@ -977,7 +977,7 @@ export interface InterruptableAsyncIntervalOptions {
 }
 
 /** @internal */
-export interface InterruptableAsyncInterval {
+export interface InterruptibleAsyncInterval {
   wake(): void;
   stop(): void;
 }
@@ -991,10 +991,10 @@ export interface InterruptableAsyncInterval {
  *
  * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
  */
-export function makeInterruptableAsyncInterval(
+export function makeInterruptibleAsyncInterval(
   fn: (callback: Callback) => void,
-  options?: Partial<InterruptableAsyncIntervalOptions>
-): InterruptableAsyncInterval {
+  options?: Partial<InterruptibleAsyncIntervalOptions>
+): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
   let lastCallTime: number;
   let lastWakeTime: number;
@@ -1154,4 +1154,101 @@ export function isRecord(
   }
 
   return isRecord;
+}
+
+const kBuffers = Symbol('buffers');
+const kLength = Symbol('length');
+
+/**
+ * A pool of Buffers which allow you to read them as if they were one
+ * @internal
+ */
+export class BufferPool {
+  [kBuffers]: Buffer[];
+  [kLength]: number;
+
+  constructor() {
+    this[kBuffers] = [];
+    this[kLength] = 0;
+  }
+
+  get length(): number {
+    return this[kLength];
+  }
+
+  /** Adds a buffer to the internal buffer pool list */
+  append(buffer: Buffer): void {
+    this[kBuffers].push(buffer);
+    this[kLength] += buffer.length;
+  }
+
+  /** Returns the requested number of bytes without consuming them */
+  peek(size: number): Buffer {
+    return this.read(size, false);
+  }
+
+  /** Reads the requested number of bytes, optionally consuming them */
+  read(size: number, consume = true): Buffer {
+    if (typeof size !== 'number' || size < 0) {
+      throw new TypeError('Parameter size must be a non-negative number');
+    }
+
+    if (size > this[kLength]) {
+      return Buffer.alloc(0);
+    }
+
+    let result: Buffer;
+
+    // read the whole buffer
+    if (size === this.length) {
+      result = Buffer.concat(this[kBuffers]);
+
+      if (consume) {
+        this[kBuffers] = [];
+        this[kLength] = 0;
+      }
+    }
+
+    // size is within first buffer, no need to concat
+    else if (size <= this[kBuffers][0].length) {
+      result = this[kBuffers][0].slice(0, size);
+      if (consume) {
+        this[kBuffers][0] = this[kBuffers][0].slice(size);
+        this[kLength] -= size;
+      }
+    }
+
+    // size is beyond first buffer, need to track and copy
+    else {
+      result = Buffer.allocUnsafe(size);
+
+      let idx;
+      let offset = 0;
+      let bytesToCopy = size;
+      for (idx = 0; idx < this[kBuffers].length; ++idx) {
+        let bytesCopied;
+        if (bytesToCopy > this[kBuffers][idx].length) {
+          bytesCopied = this[kBuffers][idx].copy(result, offset, 0);
+          offset += bytesCopied;
+        } else {
+          bytesCopied = this[kBuffers][idx].copy(result, offset, 0, bytesToCopy);
+          if (consume) {
+            this[kBuffers][idx] = this[kBuffers][idx].slice(bytesCopied);
+          }
+          offset += bytesCopied;
+          break;
+        }
+
+        bytesToCopy -= bytesCopied;
+      }
+
+      // compact the internal buffer array
+      if (consume) {
+        this[kBuffers] = this[kBuffers].slice(idx);
+        this[kLength] -= size;
+      }
+    }
+
+    return result;
+  }
 }
