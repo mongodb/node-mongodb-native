@@ -150,7 +150,9 @@ export class IndexesOperation extends AbstractOperation<Document> {
 }
 
 /** @internal */
-export class CreateIndexesOperation<T = string[]> extends CommandOperation<T> {
+export class CreateIndexesOperation<
+  T extends string | string[] = string[]
+> extends CommandOperation<T> {
   options: CreateIndexesOptions;
   collectionName: string;
   indexes: IndexDescription[];
@@ -169,7 +171,7 @@ export class CreateIndexesOperation<T = string[]> extends CommandOperation<T> {
     this.indexes = indexes;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<T>): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -221,8 +223,8 @@ export class CreateIndexesOperation<T = string[]> extends CommandOperation<T> {
         return;
       }
 
-      const indexNames = indexes.map(index => index.name);
-      callback(undefined, indexNames);
+      const indexNames = indexes.map(index => index.name || '');
+      callback(undefined, indexNames as T);
     });
   }
 }
@@ -245,7 +247,7 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
   }
   execute(server: Server, session: ClientSession, callback: Callback<string>): void {
     super.execute(server, session, (err, indexNames) => {
-      if (err) return callback(err);
+      if (err || !indexNames) return callback(err);
       return callback(undefined, indexNames[0]);
     });
   }
