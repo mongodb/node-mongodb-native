@@ -77,8 +77,8 @@ path: $NVM_SYMLINK
 EOT
   nvm install $NODE_VERSION
   nvm use $NODE_VERSION
-  which node
-  which npm
+  which node || echo "node not found, PATH=$PATH"
+  which npm || echo "npm not found, PATH=$PATH"
   npm config set msvs_version ${MSVS_VERSION}
   npm config set scripts-prepend-node-path true
 
