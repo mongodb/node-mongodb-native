@@ -1924,7 +1924,7 @@ describe('Cursor', function () {
             collection.insertMany(docs, err => {
               expect(err).to.not.exist;
 
-              setTimeout(() => client.close(validator));
+              setTimeout(() => client.close());
             });
           });
         });
