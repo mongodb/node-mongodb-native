@@ -335,6 +335,13 @@ export class ChangeStream extends EventEmitter {
     }
     return this.cursor.stream(options);
   }
+
+  tryNext(): Promise<Document | null> {
+    if (!this.cursor) {
+      throw new MongoError('ChangeStream has no cursor, unable to tryNext');
+    }
+    return this.cursor.tryNext();
+  }
 }
 
 /** @internal */
