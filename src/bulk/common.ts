@@ -1208,6 +1208,18 @@ export abstract class BulkOperationBase {
     return this.s.writeConcern;
   }
 
+  get batches(): Batch[] {
+    const batches = [...this.s.batches];
+    if (this.isOrdered) {
+      if (this.s.currentBatch) batches.push(this.s.currentBatch);
+    } else {
+      if (this.s.currentInsertBatch) batches.push(this.s.currentInsertBatch);
+      if (this.s.currentUpdateBatch) batches.push(this.s.currentUpdateBatch);
+      if (this.s.currentRemoveBatch) batches.push(this.s.currentRemoveBatch);
+    }
+    return batches;
+  }
+
   /** An internal helper method. Do not invoke directly. Will be going away in the future */
   execute(options?: BulkWriteOptions, callback?: Callback<BulkWriteResult>): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
