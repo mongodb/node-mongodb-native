@@ -349,13 +349,13 @@ export class Connection extends EventEmitter {
         command: true,
         numberToSkip: 0,
         numberToReturn: -1,
-        checkKeys: false
+        checkKeys: false,
+        // This value is not overridable
+        slaveOk: readPreference.slaveOk()
       },
       options
     );
 
-    // This value is not overridable
-    commandOptions.slaveOk = readPreference.slaveOk();
     const cmdNs = `${ns.db}.$cmd`;
     const message = shouldUseOpMsg
       ? new Msg(cmdNs, finalCmd, commandOptions)
@@ -383,8 +383,7 @@ export class Connection extends EventEmitter {
             session.transaction.unpinServer();
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          return callback!(err, ...args);
+          return callback(err, ...args);
         }
       : callback;
 
