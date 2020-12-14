@@ -744,19 +744,19 @@ export class Collection {
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    * ```
    */
-  createIndex(indexSpec: IndexSpecification): Promise<Document>;
-  createIndex(indexSpec: IndexSpecification, callback: Callback<Document>): void;
-  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<Document>;
+  createIndex(indexSpec: IndexSpecification): Promise<string>;
+  createIndex(indexSpec: IndexSpecification, callback: Callback<string>): void;
+  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<string>;
   createIndex(
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
-    callback: Callback<Document>
+    callback: Callback<string>
   ): void;
   createIndex(
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: CreateIndexesOptions | Callback<string>,
+    callback?: Callback<string>
+  ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
@@ -798,19 +798,19 @@ export class Collection {
    * ]);
    * ```
    */
-  createIndexes(indexSpecs: IndexDescription[]): Promise<Document>;
-  createIndexes(indexSpecs: IndexDescription[], callback: Callback<Document>): void;
-  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<Document>;
+  createIndexes(indexSpecs: IndexDescription[]): Promise<string[]>;
+  createIndexes(indexSpecs: IndexDescription[], callback: Callback<string[]>): void;
+  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<string[]>;
   createIndexes(
     indexSpecs: IndexDescription[],
     options: CreateIndexesOptions,
-    callback: Callback<Document>
+    callback: Callback<string[]>
   ): void;
   createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: CreateIndexesOptions | Callback<string[]>,
+    callback?: Callback<string[]>
+  ): Promise<string[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ? Object.assign({}, options) : {};
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;

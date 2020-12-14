@@ -579,25 +579,25 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, indexSpec: IndexSpecification): Promise<Document>;
-  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<Document>): void;
+  createIndex(name: string, indexSpec: IndexSpecification): Promise<string>;
+  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<string>): void;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions
-  ): Promise<Document>;
+  ): Promise<string>;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
-    callback: Callback<Document>
+    callback: Callback<string>
   ): void;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: CreateIndexesOptions | Callback<string>,
+    callback?: Callback<string>
+  ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(

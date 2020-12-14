@@ -831,10 +831,8 @@ describe('Indexes', function () {
     }
   });
 
-  it('should correctly execute createIndexes', {
-    metadata: {
-      requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('should correctly execute createIndexes with multiple indexes', {
+    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -845,7 +843,7 @@ describe('Indexes', function () {
           [{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }],
           function (err, r) {
             expect(err).to.not.exist;
-            test.equal(3, r.numIndexesAfter);
+            expect(r).to.deep.equal(['a_1', 'hello1']);
 
             db.collection('createIndexes')
               .listIndexes()
@@ -864,6 +862,38 @@ describe('Indexes', function () {
               });
           }
         );
+      });
+    }
+  });
+
+  it('should correctly execute createIndexes with one index', {
+    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
+
+    test: function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.connect(function (err, client) {
+        var db = client.db(configuration.db);
+        db.collection('createIndexes').createIndexes([{ key: { a: 1 } }], function (err, r) {
+          expect(err).to.not.exist;
+          expect(r).to.deep.equal(['a_1']);
+
+          db.collection('createIndexes')
+            .listIndexes()
+            .toArray(function (err, docs) {
+              expect(err).to.not.exist;
+              var keys = {};
+
+              for (var i = 0; i < docs.length; i++) {
+                keys[docs[i].name] = true;
+              }
+
+              test.ok(keys['a_1']);
+              test.ok(keys['hello1']);
+
+              client.close(done);
+            });
+        });
       });
     }
   });
