@@ -12,25 +12,25 @@ title = "Tutorials"
 The tutorials in this section provide examples of some frequently used operations. This section is not meant to be an exhaustive list of all operations available in the Node.js driver.
 
 
-[Connect to MongoDB]({{< relref "tutorials/connect/index.md" >}})
+[Connect to MongoDB](connect/index.md)
 
-[Collections]({{< relref "tutorials/collections.md" >}})
+[Collections](collections.md)
 
-[Create Indexes]({{< relref "tutorials/create-indexes.md" >}})
+[Create Indexes](create-indexes.md)
 
-[CRUD Operations]({{< relref "tutorials/crud.md" >}})
+[CRUD Operations](crud.md)
 
-[Collations]({{< relref "tutorials/collations.md" >}})
+[Collations](collations.md)
 
-[Projections]({{< relref "tutorials/projections.md" >}})
+[Projections](projections.md)
 
-[Aggregation]({{< relref "tutorials/aggregation.md" >}})
+[Aggregation](aggregation.md)
 
-[Text Search]({{< relref "tutorials/text-search.md" >}})
+[Text Search](text-search.md)
 
-[Geospatial Search]({{< relref "tutorials/geospatial-search.md" >}})
+[Geospatial Search](geospatial-search.md)
 
-[Database Commands]({{< relref "tutorials/commands.md" >}})
+[Database Commands](commands.md)
 
-[GridFS]({{< relref "tutorials/gridfs/index.md" >}})
+[GridFS](gridfs/index.md)
 
