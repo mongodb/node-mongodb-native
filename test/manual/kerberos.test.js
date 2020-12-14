@@ -5,12 +5,12 @@ const expect = chai.expect;
 
 describe('Kerberos', function () {
   if (process.env.MONGODB_URI == null) {
-    console.log('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
+    console.error('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
     return;
   }
   let krb5Uri = process.env.MONGODB_URI;
   if (process.platform === 'win32') {
-    console.log('Win32 run detected');
+    console.error('Win32 run detected');
     if (process.env.LDAPTEST_PASSWORD == null) {
       throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
     }

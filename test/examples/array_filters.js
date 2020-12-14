@@ -2,7 +2,7 @@
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 
-describe('examples(project-fields-from-query):', function () {
+describe('examples(array filters):', function () {
   let client;
   let collection;
 

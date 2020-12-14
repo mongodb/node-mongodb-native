@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const { setupDatabase } = require('../../functional/shared');
 const { ns } = require('../../../src/utils');
 
-describe('Connection', function () {
+describe('Connection - functional/cmap', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

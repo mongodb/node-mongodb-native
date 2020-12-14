@@ -41,8 +41,8 @@ after(function () {
   }, 0);
 
   if (openClientCount > 0) {
-    console.log(chalk.red('WARNING:') + ` ${openClientCount} client(s) left open after test`);
-    traces.forEach(trace => console.log(trace));
+    console.warn(chalk.red('WARNING:') + ` ${openClientCount} client(s) left open after test`);
+    traces.forEach(trace => console.warn(trace));
   }
 
   activeClients = [];

@@ -3,7 +3,7 @@ const { MongoClient } = require('../../src');
 
 describe('Atlas Connectivity', function () {
   if (process.env.ATLAS_CONNECTIVITY == null) {
-    console.log(
+    console.error(
       'skipping atlas connectivity tests, ATLAS_CONNECTIVITY environment variable is not defined'
     );
 
