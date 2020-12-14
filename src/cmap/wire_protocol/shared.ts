@@ -8,17 +8,18 @@ import type { Topology } from '../../sdam/topology';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 import type { ReadPreferenceLike } from '../../read_preference';
-import type { CommandOptions } from './command';
+import type { CommandOptions } from '../connection';
+import type { Connection } from '../connection';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
 }
 
-export function getReadPreference(cmd: Document, options: ReadPreferenceOption): ReadPreference {
+export function getReadPreference(cmd: Document, options?: ReadPreferenceOption): ReadPreference {
   // Default to command version of the readPreference
   let readPreference = cmd.readPreference || ReadPreference.primary;
   // If we have an option readPreference override the command one
-  if (options.readPreference) {
+  if (options?.readPreference) {
     readPreference = options.readPreference;
   }
 
@@ -51,7 +52,7 @@ export function applyCommonQueryOptions(
   return queryOptions;
 }
 
-export function isSharded(topologyOrServer: Topology | Server): boolean {
+export function isSharded(topologyOrServer: Topology | Server | Connection): boolean {
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
   }

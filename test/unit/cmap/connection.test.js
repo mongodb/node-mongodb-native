@@ -2,8 +2,9 @@
 
 const mock = require('mongodb-mock-server');
 const { connect } = require('../../../src/cmap/connect');
-const Connection = require('../../../src/cmap/connection').Connection;
-const expect = require('chai').expect;
+const { Connection } = require('../../../src/cmap/connection');
+const { expect } = require('chai');
+const { ns } = require('../../../src/utils');
 
 describe('Connection', function () {
   let server;
@@ -24,7 +25,7 @@ describe('Connection', function () {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
-      conn.command('$admin.cmd', { ping: 1 }, { noResponse: true }, (err, result) => {
+      conn.command(ns('$admin.cmd'), { ping: 1 }, { noResponse: true }, (err, result) => {
         expect(err).to.not.exist;
         expect(result).to.not.exist;
 
@@ -47,7 +48,7 @@ describe('Connection', function () {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
-      conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
+      conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
 

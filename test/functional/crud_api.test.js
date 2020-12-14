@@ -363,7 +363,6 @@ describe('CRUD API', function () {
               ],
               { ordered: false, w: 1 },
               function (err, r) {
-                if (err) console.dir(err);
                 expect(err).to.not.exist;
                 test.equal(3, r.nInserted);
                 test.equal(1, r.nUpserted);

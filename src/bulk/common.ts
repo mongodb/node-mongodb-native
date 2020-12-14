@@ -137,7 +137,7 @@ export interface BulkResult {
  * Keeps the state of a unordered batch so we can rewrite the results
  * correctly after command execution
  *
- * @internal
+ * @public
  */
 export class Batch {
   originalZeroIndex: number;

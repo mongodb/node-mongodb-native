@@ -1,7 +1,7 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
 import type { Document } from '../../bson';
-import type { Callback } from '../../utils';
+import { Callback, ns } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
@@ -30,7 +30,12 @@ export class X509 extends AuthProvider {
       return callback();
     }
 
-    connection.command('$external.$cmd', x509AuthenticateCommand(credentials), callback);
+    connection.command(
+      ns('$external.$cmd'),
+      x509AuthenticateCommand(credentials),
+      undefined,
+      callback
+    );
   }
 }
 

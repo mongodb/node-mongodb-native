@@ -5,7 +5,7 @@ import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
-import { maxWireVersion, Callback } from '../../utils';
+import { maxWireVersion, Callback, ns } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
@@ -70,7 +70,7 @@ export class MongoDBAWS extends AuthProvider {
         payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
       };
 
-      connection.command(`${db}.$cmd`, saslStart, (err, res) => {
+      connection.command(ns(`${db}.$cmd`), saslStart, undefined, (err, res) => {
         if (err) return callback(err);
 
         const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions);
@@ -130,7 +130,7 @@ export class MongoDBAWS extends AuthProvider {
           payload: BSON.serialize(payload, bsonOptions)
         };
 
-        connection.command(`${db}.$cmd`, saslContinue, callback);
+        connection.command(ns(`${db}.$cmd`), saslContinue, undefined, callback);
       });
     });
   }

@@ -1,9 +1,10 @@
 'use strict';
 
-const Connection = require('../../../src/cmap/connection').Connection;
+const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
-const expect = require('chai').expect;
-const setupDatabase = require('../../functional/shared').setupDatabase;
+const { expect } = require('chai');
+const { setupDatabase } = require('../../functional/shared');
+const { ns } = require('../../../src/utils');
 
 describe('Connection', function () {
   before(function () {
@@ -20,7 +21,7 @@ describe('Connection', function () {
       expect(err).to.not.exist;
       this.defer(_done => conn.destroy(_done));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
+      conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
@@ -44,7 +45,7 @@ describe('Connection', function () {
       conn.on('commandSucceeded', event => events.push(event));
       conn.on('commandFailed', event => events.push(event));
 
-      conn.command('admin.$cmd', { ismaster: 1 }, (err, ismaster) => {
+      conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
         expect(err).to.not.exist;
         expect(ismaster).to.exist;
         expect(ismaster.ok).to.equal(1);
@@ -71,7 +72,7 @@ describe('Connection', function () {
   it('should support calling back multiple times on exhaust commands', {
     metadata: { requires: { mongodb: '>=4.2.0', topology: ['single'] } },
     test: function (done) {
-      const ns = `${this.configuration.db}.$cmd`;
+      const namespace = ns(`${this.configuration.db}.$cmd`);
       const connectOptions = Object.assign(
         { connectionType: Connection },
         this.configuration.options
@@ -85,33 +86,35 @@ describe('Connection', function () {
           test: Math.floor(Math.random() * idx)
         }));
 
-        conn.command(ns, { insert: 'test', documents }, (err, res) => {
-          expect(err).to.not.exist;
-          expect(res).nested.property('n').to.equal(documents.length);
-
-          let totalDocumentsRead = 0;
-          conn.command(ns, { find: 'test', batchSize: 100 }, (err, result) => {
+        conn.command(namespace, { drop: 'test' }, undefined, () => {
+          conn.command(namespace, { insert: 'test', documents }, undefined, (err, res) => {
             expect(err).to.not.exist;
-            expect(result).nested.property('cursor').to.exist;
-            const cursor = result.cursor;
-            totalDocumentsRead += cursor.firstBatch.length;
+            expect(res).nested.property('n').to.equal(documents.length);
 
-            conn.command(
-              ns,
-              { getMore: cursor.id, collection: 'test', batchSize: 100 },
-              { exhaustAllowed: true },
-              (err, result) => {
-                expect(err).to.not.exist;
-                expect(result).nested.property('cursor').to.exist;
-                const cursor = result.cursor;
-                totalDocumentsRead += cursor.nextBatch.length;
+            let totalDocumentsRead = 0;
+            conn.command(namespace, { find: 'test', batchSize: 100 }, undefined, (err, result) => {
+              expect(err).to.not.exist;
+              expect(result).nested.property('cursor').to.exist;
+              const cursor = result.cursor;
+              totalDocumentsRead += cursor.firstBatch.length;
 
-                if (cursor.id === 0 || cursor.id.isZero()) {
-                  expect(totalDocumentsRead).to.equal(documents.length);
-                  done();
+              conn.command(
+                namespace,
+                { getMore: cursor.id, collection: 'test', batchSize: 100 },
+                { exhaustAllowed: true },
+                (err, result) => {
+                  expect(err).to.not.exist;
+                  expect(result).nested.property('cursor').to.exist;
+                  const cursor = result.cursor;
+                  totalDocumentsRead += cursor.nextBatch.length;
+
+                  if (cursor.id === 0 || cursor.id.isZero()) {
+                    expect(totalDocumentsRead).to.equal(documents.length);
+                    done();
+                  }
                 }
-              }
-            );
+              );
+            });
           });
         });
       });

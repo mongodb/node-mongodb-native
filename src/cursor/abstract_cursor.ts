@@ -355,7 +355,7 @@ export abstract class AbstractCursor extends EventEmitter {
 
       this[kKilled] = true;
       server.killCursors(
-        cursorNs.toString(),
+        cursorNs,
         [cursorId],
         { ...pluckBSONSerializeOptions(this[kOptions]), session },
         () => {
@@ -574,7 +574,7 @@ export abstract class AbstractCursor extends EventEmitter {
     }
 
     server.getMore(
-      cursorNs.toString(),
+      cursorNs,
       cursorId,
       {
         ...this[kOptions],

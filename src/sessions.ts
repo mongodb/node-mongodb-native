@@ -20,7 +20,7 @@ import type { MongoClientOptions } from './mongo_client';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
-import type { CommandOptions } from './cmap/wire_protocol/command';
+import type { CommandOptions } from './cmap/connection';
 import type { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;

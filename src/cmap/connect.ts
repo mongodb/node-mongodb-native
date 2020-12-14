@@ -1,10 +1,10 @@
 import * as net from 'net';
 import * as tls from 'tls';
-import { Connection, ConnectionOptions } from './connection';
+import { Connection, ConnectionOptions, CryptoConnection } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
 import { defaultAuthProviders, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType } from '../utils';
+import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType, ns } from '../utils';
 import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
@@ -39,9 +39,12 @@ export function connect(
     cancellationToken = undefined;
   }
 
-  const ConnectionType: typeof Connection =
-    options && options.connectionType ? options.connectionType : Connection;
   const family = options.family !== undefined ? options.family : 0;
+  let ConnectionType: typeof Connection =
+    options && options.connectionType ? options.connectionType : Connection;
+  if (options.autoEncrypter) {
+    ConnectionType = CryptoConnection;
+  }
 
   makeConnection(family, options, cancellationToken, (err, socket) => {
     if (err || !socket) {
@@ -111,7 +114,7 @@ function performInitialHandshake(
     }
 
     const start = new Date().getTime();
-    conn.command('admin.$cmd', handshakeDoc, handshakeOptions, (err, response) => {
+    conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
       if (err) {
         callback(err);
         return;
