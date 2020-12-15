@@ -278,7 +278,7 @@ export class ChangeStream extends EventEmitter {
   hasNext(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
-        if (err || !cursor) return cb(err || NO_CURSOR_ERROR); // failed to resume, raise an error
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
         cursor.hasNext(cb);
       });
     });
@@ -288,7 +288,7 @@ export class ChangeStream extends EventEmitter {
   next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
-        if (err || !cursor) return cb(err || NO_CURSOR_ERROR); // failed to resume, raise an error
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
         cursor.next((error, change) => {
           if (error) {
             this[kResumeQueue].push(() => this.next(cb));
@@ -342,7 +342,7 @@ export class ChangeStream extends EventEmitter {
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
-        if (err || !cursor) return cb(err || NO_CURSOR_ERROR); // failed to resume, raise an error
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
         return cursor.tryNext(cb);
       });
     });
@@ -719,11 +719,16 @@ function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCu
 function processResumeQueue(changeStream: ChangeStream, err?: Error) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
-    if (changeStream[kClosed] && !err) {
-      request(CHANGESTREAM_CLOSED_ERROR);
-      return;
+    if (!err) {
+      if (changeStream[kClosed]) {
+        request(CHANGESTREAM_CLOSED_ERROR);
+        return;
+      }
+      if (!changeStream.cursor) {
+        request(NO_CURSOR_ERROR);
+        return;
+      }
     }
-
     request(err, changeStream.cursor);
   }
 }
