@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, filterForCommands, withMonitoredClient } = require('./shared');
+const { assert: test, filterForCommands, withClient, withMonitoredClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -4089,5 +4089,40 @@ describe('Cursor', function () {
         beta: 1
       });
     });
+
+    it(
+      'should use allowDiskUse option on sort',
+      withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_allow_disk_use', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            const { command } = events.shift();
+            expect(command.sort).to.deep.equal({ alpha: 1 });
+            expect(command.allowDiskUse).to.be.true;
+            cursor.close(done);
+          });
+        });
+      })
+    );
+
+    it(
+      'should error if allowDiskUse option used without sort',
+      withClient(function (client, done) {
+        const db = client.db('test');
+        db.collection('test_sort_allow_disk_use', (err, collection) => {
+          expect(err).to.not.exist;
+          try {
+            collection.find({}).allowDiskUse();
+          } catch (err) {
+            expect(err).to.exist;
+            expect(err.message).to.equal('allowDiskUse must follow sort');
+            done();
+          }
+        });
+      })
+    );
   });
 });
