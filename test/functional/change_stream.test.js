@@ -1924,10 +1924,7 @@ describe('Change Streams', function () {
     });
 
     it('when invoked using eventEmitter API', {
-      metadata: {
-        requires: { topology: 'replicaset', mongodb: '>=3.6' },
-        sessions: { skipLeakTests: true }
-      },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function (done) {
         let closed = false;
         const close = _err => {
@@ -1942,8 +1939,7 @@ describe('Change Streams', function () {
         changeStream.on('change', () => {
           counter += 1;
           if (counter === 2) {
-            changeStream.close();
-            setTimeout(() => close());
+            changeStream.close(close);
           } else if (counter >= 3) {
             close(new Error('should not have received more than 2 events'));
           }
