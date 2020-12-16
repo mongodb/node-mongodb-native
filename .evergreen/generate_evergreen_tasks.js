@@ -80,10 +80,9 @@ function makeTask({ mongoVersion, topology, tags = [] }) {
   };
 }
 
+const BASE_TASKS = [];
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology =>
-    TASKS.push(makeTask({ mongoVersion, topology, tags: ['full-suite'] }))
-  );
+  TOPOLOGIES.forEach(topology => BASE_TASKS.push(makeTask({ mongoVersion, topology })));
 });
 
 // manually added tasks
@@ -402,29 +401,30 @@ const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
   const memo = {};
-  return function (mongoVersion, onlyFullSuite = false) {
-    const key = mongoVersion + (onlyFullSuite ? 'F' : '');
+  return function (mongoVersion, onlyBaseTasks = false) {
+    const key = mongoVersion + (onlyBaseTasks ? 'b' : '');
 
     if (memo[key]) {
       return memo[key];
     }
+    const taskList = onlyBaseTasks ? BASE_TASKS : BASE_TASKS.concat(TASKS);
+    const ret = taskList
+      .filter(task => {
+        const tasksWithVars = task.commands.filter(task => !!task.vars);
+        if (task.name.match(/^aws/)) return false;
 
-    const ret = TASKS.filter(task => {
-      if (onlyFullSuite && (!task.tags || !task.tags.includes('full-suite'))) return false;
-      const tasksWithVars = task.commands.filter(task => !!task.vars);
-      if (task.name.match(/^aws/)) return false;
+        if (!tasksWithVars.length) {
+          return true;
+        }
 
-      if (!tasksWithVars.length) {
-        return true;
-      }
+        const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
+        if (VERSION === 'latest') {
+          return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
+        }
 
-      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
-      if (VERSION === 'latest') {
-        return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
-      }
-
-      return semver.satisfies(semver.coerce(VERSION), mongoVersion);
-    }).map(x => x.name);
+        return semver.satisfies(semver.coerce(VERSION), mongoVersion);
+      })
+      .map(x => x.name);
 
     memo[key] = ret;
     return ret;
@@ -497,7 +497,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

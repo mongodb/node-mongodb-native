@@ -127,7 +127,8 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -474,7 +475,6 @@ tasks:
     tags:
       - latest
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -486,7 +486,6 @@ tasks:
     tags:
       - latest
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -498,7 +497,6 @@ tasks:
     tags:
       - latest
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -510,7 +508,6 @@ tasks:
     tags:
       - '4.4'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -522,7 +519,6 @@ tasks:
     tags:
       - '4.4'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -534,7 +530,6 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -546,7 +541,6 @@ tasks:
     tags:
       - '4.2'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -558,7 +552,6 @@ tasks:
     tags:
       - '4.2'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -570,7 +563,6 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -582,7 +574,6 @@ tasks:
     tags:
       - '4.0'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -594,7 +585,6 @@ tasks:
     tags:
       - '4.0'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -606,7 +596,6 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -618,7 +607,6 @@ tasks:
     tags:
       - '3.6'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -630,7 +618,6 @@ tasks:
     tags:
       - '3.6'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -642,7 +629,6 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -654,7 +640,6 @@ tasks:
     tags:
       - '3.4'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -666,7 +651,6 @@ tasks:
     tags:
       - '3.4'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -678,7 +662,6 @@ tasks:
     tags:
       - '3.4'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -690,7 +673,6 @@ tasks:
     tags:
       - '3.2'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -702,7 +684,6 @@ tasks:
     tags:
       - '3.2'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -714,7 +695,6 @@ tasks:
     tags:
       - '3.2'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -726,7 +706,6 @@ tasks:
     tags:
       - '3.0'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -738,7 +717,6 @@ tasks:
     tags:
       - '3.0'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -750,7 +728,6 @@ tasks:
     tags:
       - '3.0'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -762,7 +739,6 @@ tasks:
     tags:
       - '2.6'
       - server
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -774,7 +750,6 @@ tasks:
     tags:
       - '2.6'
       - replica_set
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -786,7 +761,6 @@ tasks:
     tags:
       - '2.6'
       - sharded_cluster
-      - full-suite
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
