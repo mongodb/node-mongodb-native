@@ -78,7 +78,7 @@ describe('Bulk', function () {
     metadata: { requires: { mongodb: '>=3.6.x' } },
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient({}, { w: 1 });
+      const client = configuration.newClient({ w: 1 });
 
       client.connect((err, client) => {
         const db = client.db(configuration.db);
@@ -622,7 +622,7 @@ describe('Bulk', function () {
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function (err, result) {
+        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1128,7 +1128,7 @@ describe('Bulk', function () {
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function (err, result) {
+        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1195,7 +1195,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
@@ -1297,7 +1297,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);

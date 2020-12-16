@@ -1084,7 +1084,7 @@ export abstract class BulkOperationBase {
    * bulkOp.find({ h: 8 }).delete();
    *
    * // Add a replaceOne
-   * bulkOp.find({ i: 9 }).replaceOne({ j: 10 });
+   * bulkOp.find({ i: 9 }).replaceOne({writeConcern: { j: 10 }});
    *
    * // Update using a pipeline (requires Mongodb 4.2 or higher)
    * bulk.find({ k: 11, y: { $exists: true }, z: { $exists: true } }).updateOne([

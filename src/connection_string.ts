@@ -1199,8 +1199,10 @@ export const OPTIONS = {
     target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
       const wc = WriteConcern.fromOptions({
-        ...options.writeConcern,
-        fsync: getBoolean(name, value)
+        writeConcern: {
+          ...options.writeConcern,
+          fsync: getBoolean(name, value)
+        }
       });
       if (!wc) throw new TypeError(`Unable to make a writeConcern from fsync=${value}`);
       return wc;
@@ -1216,10 +1218,11 @@ export const OPTIONS = {
   j: {
     target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
-      console.warn('j is deprecated');
       const wc = WriteConcern.fromOptions({
-        ...options.writeConcern,
-        journal: getBoolean(name, value)
+        writeConcern: {
+          ...options.writeConcern,
+          journal: getBoolean(name, value)
+        }
       });
       if (!wc) throw new TypeError(`Unable to make a writeConcern from journal=${value}`);
       return wc;
@@ -1229,8 +1232,10 @@ export const OPTIONS = {
     target: 'writeConcern',
     transform({ name, options, values: [value] }): WriteConcern {
       const wc = WriteConcern.fromOptions({
-        ...options.writeConcern,
-        journal: getBoolean(name, value)
+        writeConcern: {
+          ...options.writeConcern,
+          journal: getBoolean(name, value)
+        }
       });
       if (!wc) throw new TypeError(`Unable to make a writeConcern from journal=${value}`);
       return wc;
@@ -1516,7 +1521,7 @@ export const OPTIONS = {
   w: {
     target: 'writeConcern',
     transform({ values: [value], options }) {
-      return WriteConcern.fromOptions({ ...options.writeConcern, w: value as W });
+      return WriteConcern.fromOptions({ writeConcern: { ...options.writeConcern, w: value as W } });
     }
   },
   waitQueueTimeoutMS: {
@@ -1528,8 +1533,10 @@ export const OPTIONS = {
     transform({ values: [value], options }) {
       if (isRecord(value) || value instanceof WriteConcern) {
         return WriteConcern.fromOptions({
-          ...options.writeConcern,
-          ...value
+          writeConcern: {
+            ...options.writeConcern,
+            ...value
+          }
         });
       }
 
@@ -1540,8 +1547,10 @@ export const OPTIONS = {
     target: 'writeConcern',
     transform({ values: [value], options }) {
       const wc = WriteConcern.fromOptions({
-        ...options.writeConcern,
-        wtimeout: getUint('wtimeout', value)
+        writeConcern: {
+          ...options.writeConcern,
+          wtimeout: getUint('wtimeout', value)
+        }
       });
       if (wc) return wc;
       throw new MongoParseError(`Cannot make WriteConcern from wtimeout`);
@@ -1551,8 +1560,10 @@ export const OPTIONS = {
     target: 'writeConcern',
     transform({ values: [value], options }) {
       const wc = WriteConcern.fromOptions({
-        ...options.writeConcern,
-        wtimeoutMS: getUint('wtimeoutMS', value)
+        writeConcern: {
+          ...options.writeConcern,
+          wtimeoutMS: getUint('wtimeoutMS', value)
+        }
       });
       if (wc) return wc;
       throw new MongoParseError(`Cannot make WriteConcern from wtimeout`);

@@ -25,10 +25,7 @@ describe('MongoClient', function () {
       const client = configuration.newClient(
         {},
         {
-          w: 1,
-          wtimeout: 1000,
-          fsync: true,
-          j: true,
+          writeConcern: { w: 1, wtimeout: 1000, fsync: true, j: true },
           readPreference: 'nearest',
           readPreferenceTags: { loc: 'ny' },
           forceServerObjectId: true,

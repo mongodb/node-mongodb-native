@@ -14,6 +14,7 @@ import type { MongoClient } from '../mongo_client';
 import { ConnectionOptions, Connection } from '../cmap/connection';
 import { AuthMechanism, AuthMechanismId } from '../cmap/auth/defaultAuthProviders';
 import { Server } from '../sdam/server';
+import { WRITE_CONCERN_KEYS } from '../write_concern';
 
 const validOptionNames = [
   'poolSize',
@@ -40,9 +41,7 @@ const validOptionNames = [
   'acceptableLatencyMS',
   'connectWithNoPrimary',
   'authSource',
-  'w',
-  'wtimeout',
-  'j',
+  'writeConcern',
   'forceServerObjectId',
   'serializeFunctions',
   'ignoreUndefined',
@@ -68,7 +67,6 @@ const validOptionNames = [
   'password',
   'authMechanism',
   'compression',
-  'fsync',
   'readPreferenceTags',
   'numberOfRetries',
   'auto_reconnect',
@@ -214,12 +212,6 @@ export function connect(
 
     if (finalOptions.db_options && finalOptions.db_options.auth) {
       delete finalOptions.db_options.auth;
-    }
-
-    // `journal` should be translated to `j` for the driver
-    if (finalOptions.journal != null) {
-      finalOptions.j = finalOptions.journal;
-      finalOptions.journal = undefined;
     }
 
     // resolve tls options if needed
@@ -412,7 +404,9 @@ function createUnifiedOptions(finalOptions: any, options: any) {
   const noMerge = ['readconcern', 'compression', 'autoencryption'];
 
   for (const name in options) {
-    if (noMerge.indexOf(name.toLowerCase()) !== -1) {
+    if (name === 'writeConcern') {
+      finalOptions[name] = { ...finalOptions[name], ...options[name] };
+    } else if (noMerge.indexOf(name.toLowerCase()) !== -1) {
       finalOptions[name] = options[name];
     } else if (childOptions.indexOf(name.toLowerCase()) !== -1) {
       finalOptions = mergeOptions(finalOptions, options[name], false);
@@ -551,10 +545,21 @@ function transformUrlOptions(connStrOptions: any) {
 
   if (connStrOpts.wTimeoutMS) {
     connStrOpts.wtimeout = connStrOpts.wTimeoutMS;
+    connStrOpts.wTimeoutMS = undefined;
   }
 
   if (connStrOptions.srvHost) {
     connStrOpts.srvHost = connStrOptions.srvHost;
+  }
+
+  // Any write concern options from the URL will be top-level, so we manually
+  // move them options under `object.writeConcern`
+  for (const key of WRITE_CONCERN_KEYS) {
+    if (connStrOpts[key] !== undefined) {
+      if (connStrOpts.writeConcern === undefined) connStrOpts.writeConcern = {};
+      connStrOpts.writeConcern[key] = connStrOpts[key];
+      connStrOpts[key] = undefined;
+    }
   }
 
   return connStrOpts;

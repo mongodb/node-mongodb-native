@@ -55,10 +55,7 @@ import type { Admin } from './admin';
 
 // Allowed parameters
 const legalOptionNames = [
-  'w',
-  'wtimeout',
-  'fsync',
-  'j',
+  'writeConcern',
   'readPreference',
   'readPreferenceTags',
   'native_parser',
