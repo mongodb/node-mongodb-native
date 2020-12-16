@@ -1,4 +1,4 @@
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, Hint } from './operation';
 import {
   hasAtomicOperators,
   MongoDBNamespace,
@@ -41,21 +41,39 @@ export interface UpdateResult {
   upsertedId: ObjectId;
 }
 
+/** @public */
+export interface UpdateStatement {
+  /** The query that matches documents to update. */
+  q: Document;
+  /** The modifications to apply. */
+  u: Document | Document[];
+  /**  If true, perform an insert if no documents match the query. */
+  upsert?: boolean;
+  /** If true, updates all documents that meet the query criteria. */
+  multi?: boolean;
+  /** Specifies the collation to use for the operation. */
+  collation?: CollationOptions;
+  /** An array of filter documents that determines which array elements to modify for an update operation on an array field. */
+  arrayFilters?: Document[];
+  /** A document or string that specifies the index to use to support the query predicate. */
+  hint?: Hint;
+}
+
 /** @internal */
 export class UpdateOperation extends CommandOperation<Document> {
   options: UpdateOptions & { ordered?: boolean };
-  operations: Document[];
+  statements: UpdateStatement[];
 
   constructor(
     ns: MongoDBNamespace,
-    ops: Document[],
+    statements: UpdateStatement[],
     options: UpdateOptions & { ordered?: boolean }
   ) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
 
-    this.operations = ops;
+    this.statements = statements;
   }
 
   get canRetryWrite(): boolean {
@@ -63,7 +81,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       return false;
     }
 
-    return this.operations.every(op => op.multi == null || op.multi === false);
+    return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
@@ -71,7 +89,7 @@ export class UpdateOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       update: this.ns.collection,
-      updates: this.operations,
+      updates: this.statements,
       ordered
     };
 
@@ -86,7 +104,7 @@ export class UpdateOperation extends CommandOperation<Document> {
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-      if (this.operations.find((o: Document) => o.hint)) {
+      if (this.statements.find((o: Document) => o.hint)) {
         callback(new MongoError(`servers < 3.4 do not support hint on update`));
         return;
       }
@@ -106,7 +124,7 @@ export class UpdateOneOperation extends UpdateOperation {
   constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(
       collection.s.namespace,
-      [makeUpdateOperation(filter, update, { ...options, multi: false })],
+      [makeUpdateStatement(filter, update, { ...options, multi: false })],
       options
     );
 
@@ -143,7 +161,7 @@ export class UpdateManyOperation extends UpdateOperation {
   constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
     super(
       collection.s.namespace,
-      [makeUpdateOperation(filter, update, { ...options, multi: true })],
+      [makeUpdateStatement(filter, update, { ...options, multi: true })],
       options
     );
 
@@ -197,7 +215,7 @@ export class ReplaceOneOperation extends UpdateOperation {
   ) {
     super(
       collection.s.namespace,
-      [makeUpdateOperation(filter, replacement, { ...options, multi: false })],
+      [makeUpdateStatement(filter, replacement, { ...options, multi: false })],
       options
     );
 
@@ -229,11 +247,11 @@ export class ReplaceOneOperation extends UpdateOperation {
   }
 }
 
-function makeUpdateOperation(
+function makeUpdateStatement(
   filter: Document,
   update: Document,
   options: UpdateOptions & { multi?: boolean }
-): Document {
+): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
     throw new TypeError('selector must be a valid JavaScript object');
   }
@@ -242,7 +260,7 @@ function makeUpdateOperation(
     throw new TypeError('document must be a valid JavaScript object');
   }
 
-  const op: Document = { q: filter, u: update };
+  const op: UpdateStatement = { q: filter, u: update };
   if (typeof options.upsert === 'boolean') {
     op.upsert = options.upsert;
   }
