@@ -1152,19 +1152,23 @@ export function isRecord(
   value: unknown,
   requiredKeys: string[] | undefined = undefined
 ): value is Record<string, any> {
-  const isObject = (v: any) => Object.prototype.toString.call(v) === '[object Object]';
+  const toString = Object.prototype.toString;
   const hasOwnProperty = Object.prototype.hasOwnProperty;
+  const isObject = (v: unknown) => toString.call(v) === '[object Object]';
   if (!isObject(value)) {
     return false;
   }
 
   const ctor = (value as any).constructor;
-  if (
-    ctor &&
-    (!isObject(ctor.prototype) ||
-      (ctor.prototype && !hasOwnProperty.call(ctor.prototype, 'isPrototypeOf')))
-  ) {
-    return false;
+  if (ctor && ctor.prototype) {
+    if (!isObject(ctor.prototype)) {
+      return false;
+    }
+
+    // Check to see if some method exists from the Object exists
+    if (!hasOwnProperty.call(ctor.prototype, 'isPrototypeOf')) {
+      return false;
+    }
   }
 
   if (requiredKeys) {
