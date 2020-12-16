@@ -1,10 +1,9 @@
 import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
-import { calculateDurationInMs } from '../utils';
+import { calculateDurationInMs, deepCopy } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
 import type { Document } from '../bson';
 import type { AnyError } from '../error';
-import { cloneDeep } from 'lodash';
 
 /**
  * The base export class for all monitoring events published from the connection pool
@@ -395,10 +394,6 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {
-  if (reply) {
-    reply = cloneDeep(reply);
-  }
-
   if (command instanceof KillCursor) {
     return {
       ok: 1,
@@ -414,15 +409,15 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
     return {
       ok: 1,
       cursor: {
-        id: reply.cursorId,
+        id: deepCopy(reply.cursorId),
         ns: namespace(command),
-        nextBatch: reply.documents
+        nextBatch: deepCopy(reply.documents)
       }
     };
   }
 
   if (command instanceof Msg) {
-    return reply.result ? reply.result : reply;
+    return deepCopy(reply.result ? reply.result : reply);
   }
 
   // is this a legacy find command?
@@ -430,14 +425,14 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
     return {
       ok: 1,
       cursor: {
-        id: reply.cursorId,
+        id: deepCopy(reply.cursorId),
         ns: namespace(command),
-        firstBatch: reply.documents
+        firstBatch: deepCopy(reply.documents)
       }
     };
   }
 
-  return reply.result ? reply.result : reply;
+  return deepCopy(reply.result ? reply.result : reply);
 }
 
 function extractConnectionDetails(connection: Connection | ConnectionPool) {

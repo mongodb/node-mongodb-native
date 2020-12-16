@@ -1152,13 +1152,68 @@ export function isRecord(
   value: unknown,
   requiredKeys: string[] | undefined = undefined
 ): value is Record<string, any> {
-  const isRecord = !!value && typeof value === 'object' && !Array.isArray(value);
-  if (isRecord && requiredKeys) {
+  const toString = Object.prototype.toString;
+  const hasOwnProperty = Object.prototype.hasOwnProperty;
+  const isObject = (v: unknown) => toString.call(v) === '[object Object]';
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const ctor = (value as any).constructor;
+  if (ctor && ctor.prototype) {
+    if (!isObject(ctor.prototype)) {
+      return false;
+    }
+
+    // Check to see if some method exists from the Object exists
+    if (!hasOwnProperty.call(ctor.prototype, 'isPrototypeOf')) {
+      return false;
+    }
+  }
+
+  if (requiredKeys) {
     const keys = Object.keys(value as Record<string, any>);
     return isSuperset(keys, requiredKeys);
   }
 
-  return isRecord;
+  return true;
+}
+
+/**
+ * Make a deep copy of an object
+ *
+ * NOTE: This is not meant to be the perfect implementation of a deep copy,
+ * but instead something that is good enough for the purposes of
+ * command monitoring.
+ */
+export function deepCopy<T extends any>(value: T): T {
+  if (value == null) {
+    return value;
+  } else if (Array.isArray(value)) {
+    return value.map(item => deepCopy(item)) as T;
+  } else if (isRecord(value)) {
+    const res = {} as any;
+    for (const key in value) {
+      res[key] = deepCopy(value[key]);
+    }
+    return res;
+  }
+
+  const ctor = (value as any).constructor;
+  if (ctor) {
+    switch (ctor.name.toLowerCase()) {
+      case 'date':
+        return new ctor(Number(value));
+      case 'map':
+        return new Map(value as any) as T;
+      case 'set':
+        return new Set(value as any) as T;
+      case 'buffer':
+        return Buffer.from(value as Buffer) as T;
+    }
+  }
+
+  return value;
 }
 
 const kBuffers = Symbol('buffers');

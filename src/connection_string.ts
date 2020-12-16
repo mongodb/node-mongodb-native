@@ -1526,12 +1526,13 @@ export const OPTIONS = {
   writeConcern: {
     target: 'writeConcern',
     transform({ values: [value], options }) {
-      if (isRecord(value)) {
+      if (isRecord(value) || value instanceof WriteConcern) {
         return WriteConcern.fromOptions({
           ...options.writeConcern,
           ...value
         });
       }
+
       throw new MongoParseError(`WriteConcern must be an object, got ${JSON.stringify(value)}`);
     }
   },
