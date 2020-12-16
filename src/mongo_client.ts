@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import { ReadPreference, ReadPreferenceModeId } from './read_preference';
 import { MongoError, AnyError } from './error';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { WriteConcern, W, WriteConcernSettings } from './write_concern';
 import { maybePromise, MongoDBNamespace, Callback, resolveOptions } from './utils';
 import { deprecate } from 'util';
 import { connect, validOptions } from './operations/connect';
@@ -60,7 +60,7 @@ type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Prom
  * @public
  * @see https://docs.mongodb.com/manual/reference/connection-string
  */
-export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | 'w' | 'wtimeoutMS'> {
+export interface MongoURIOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /** Enables or disables TLS/SSL for the connection. */
@@ -134,13 +134,19 @@ export interface MongoURIOptions extends Pick<WriteConcernOptions, 'journal' | '
   // username and password in Authority section not query string.
   username?: string;
   password?: string;
+
+  // remove in NODE-2704
+  fsync?: boolean;
+  w?: W;
+  j?: boolean;
+  journal?: boolean;
+  wtimeout?: number;
+  wtimeoutMS?: number;
+  writeConcern?: WriteConcern | WriteConcernSettings;
 }
 
 /** @public */
-export interface MongoClientOptions
-  extends WriteConcernOptions,
-    MongoURIOptions,
-    BSONSerializeOptions {
+export interface MongoClientOptions extends MongoURIOptions, BSONSerializeOptions {
   /** Validate mongod server certificate against Certificate Authority */
   sslValidate?: boolean;
   /** SSL Certificate store binary buffer. */

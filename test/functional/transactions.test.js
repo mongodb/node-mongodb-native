@@ -6,7 +6,6 @@ const { ClientSession } = require('../../src/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
 const { MongoNetworkError } = require('../../src/error');
-const semver = require('semver');
 
 function ignoreNsNotFoundForListIndexes(err) {
   if (err.code !== 26) {
@@ -97,22 +96,17 @@ describe('Transactions', function () {
         return testContext.setup(this.configuration);
       });
 
-      function testFilter(spec, config) {
-        // NODE-2574: remove this when HELP-15010 is resolved
-        if (config.topologyType === 'Sharded' && semver.satisfies(config.version, '>=4.4')) {
-          return false;
-        }
-
+      function testFilter(spec) {
         const SKIP_TESTS = [
           // commitTransaction retry seems to be swallowed by mongos in these three cases
           'commitTransaction retry succeeds on new mongos',
           'commitTransaction retry fails on new mongos',
           'unpin after transient error within a transaction and commit',
-          'count',
+          // 'count',
           // This test needs there to be multiple mongoses
-          'increment txnNumber',
+          // 'increment txnNumber',
           // Skipping this until SPEC-1320 is resolved
-          'remain pinned after non-transient error on commit',
+          // 'remain pinned after non-transient error on commit',
 
           // Will be implemented as part of NODE-2034
           'Client side error in command starting transaction',
@@ -246,7 +240,7 @@ describe('Transactions', function () {
                 expect(err).to.not.exist;
                 expect(session.inTransaction()).to.be.true;
 
-                db.executeDbAdminCommand(
+                client.db('admin').command(
                   {
                     configureFailPoint: 'failCommand',
                     mode: { times: 1 },
@@ -282,7 +276,7 @@ describe('Transactions', function () {
           const db = client.db(configuration.db);
           const coll = db.collection('transaction_error_test1');
 
-          db.executeDbAdminCommand(
+          client.db('admin').command(
             {
               configureFailPoint: 'failCommand',
               mode: { times: 2 },

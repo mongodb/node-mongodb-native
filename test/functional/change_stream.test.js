@@ -32,14 +32,18 @@ function withChangeStream(dbName, collectionName, callback) {
   return withClient((client, done) => {
     const db = client.db(dbName);
     db.dropCollection(collectionName, () => {
-      db.createCollection(collectionName, { w: 'majority' }, (err, collection) => {
-        if (err) return done(err);
-        withCursor(
-          collection.watch(),
-          (cursor, done) => callback(collection, cursor, done),
-          err => collection.drop(dropErr => done(err || dropErr))
-        );
-      });
+      db.createCollection(
+        collectionName,
+        { writeConcern: { w: 'majority' } },
+        (err, collection) => {
+          if (err) return done(err);
+          withCursor(
+            collection.watch(),
+            (cursor, done) => callback(collection, cursor, done),
+            err => collection.drop(dropErr => done(err || dropErr))
+          );
+        }
+      );
     });
   });
 }
@@ -1942,8 +1946,7 @@ describe('Change Streams', function () {
         changeStream.on('change', () => {
           counter += 1;
           if (counter === 2) {
-            changeStream.close();
-            setTimeout(() => close());
+            changeStream.close(close);
           } else if (counter >= 3) {
             close(new Error('should not have received more than 2 events'));
           }
@@ -2539,7 +2542,7 @@ describe('Change Streams', function () {
         coll = client.db('integration_tests').collection('setupAfterTest');
         const changeStream = coll.watch();
         waitForStarted(changeStream, () => {
-          coll.insertOne({ x: 1 }, { w: 'majority', j: true }, err => {
+          coll.insertOne({ x: 1 }, { writeConcern: { w: 'majority', j: true } }, err => {
             expect(err).to.not.exist;
 
             coll.drop(err => {
@@ -2567,7 +2570,7 @@ describe('Change Streams', function () {
         const changeStream = coll.watch([], { startAfter });
         this.defer(() => changeStream.close());
 
-        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+        coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } }, err => {
           expect(err).to.not.exist;
           changeStream.once('change', change => {
             expect(change).to.containSubset({
@@ -2587,7 +2590,7 @@ describe('Change Streams', function () {
         const changeStream = coll.watch([], { startAfter });
         this.defer(() => changeStream.close());
 
-        coll.insertOne({ x: 2 }, { w: 'majority', j: true }, err => {
+        coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } }, err => {
           expect(err).to.not.exist;
           exhaust(changeStream, (err, bag) => {
             expect(err).to.not.exist;
@@ -2632,7 +2635,7 @@ describe('Change Streams', function () {
         waitForStarted(changeStream, () => {
           triggerResumableError(changeStream, () => {
             events.push('error');
-            coll.insertOne({ x: 2 }, { w: 'majority', j: true });
+            coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
           });
         });
       }
@@ -2672,8 +2675,8 @@ describe('Change Streams', function () {
         waitForStarted(changeStream, () =>
           this.defer(
             coll
-              .insertOne({ x: 2 }, { w: 'majority', j: true })
-              .then(() => coll.insertOne({ x: 3 }, { w: 'majority', j: true }))
+              .insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } })
+              .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
           )
         );
       }

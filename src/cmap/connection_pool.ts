@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { Connection, ConnectionOptions } from './connection';
+import { Connection, ConnectionOptions, CommandOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
@@ -18,7 +18,6 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { CommandOptions } from './wire_protocol/command';
 import type { Document } from '../bson';
 
 const kLogger = Symbol('logger');

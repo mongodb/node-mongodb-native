@@ -1,7 +1,7 @@
 'use strict';
-const expect = require('chai').expect;
-const resolveConnectionString = require('./utils').resolveConnectionString;
-
+const { expect } = require('chai');
+const { resolveConnectionString } = require('./utils');
+const { ns } = require('../../../src/utils');
 class Thread {
   constructor() {
     this._killed = false;
@@ -126,7 +126,7 @@ class TestRunnerContext {
 
     return new Promise((resolve, reject) => {
       const server = session.transaction.server;
-      server.command(`admin.$cmd`, failPoint, err => {
+      server.command(ns('admin.$cmd'), failPoint, undefined, err => {
         if (err) return reject(err);
 
         this.appliedFailPoints.push(failPoint);
@@ -137,13 +137,13 @@ class TestRunnerContext {
 
   enableFailPoint(failPoint) {
     return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+      return client.db('admin').command(failPoint);
     });
   }
 
   disableFailPoint(failPoint) {
     return this.runFailPointCmd(client => {
-      return client.db(this.dbName).executeDbAdminCommand({
+      return client.db('admin').command({
         configureFailPoint: failPoint.configureFailPoint,
         mode: 'off'
       });

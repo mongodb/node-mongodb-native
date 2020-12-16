@@ -154,10 +154,11 @@ export class IndexesOperation extends AbstractOperation<Document> {
 }
 
 /** @internal */
-export class CreateIndexesOperation extends CommandOperation<Document> {
+export class CreateIndexesOperation<
+  T extends string | string[] = string[]
+> extends CommandOperation<T> {
   options: CreateIndexesOptions;
   collectionName: string;
-  onlyReturnNameOfCreatedIndex?: boolean;
   indexes: IndexDescription[];
 
   constructor(
@@ -172,12 +173,9 @@ export class CreateIndexesOperation extends CommandOperation<Document> {
     this.collectionName = collectionName;
 
     this.indexes = indexes;
-    if (indexes.length === 1) {
-      this.onlyReturnNameOfCreatedIndex = true;
-    }
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<T>): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -223,19 +221,20 @@ export class CreateIndexesOperation extends CommandOperation<Document> {
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommand(server, session, cmd, err => {
       if (err) {
         callback(err);
         return;
       }
 
-      callback(undefined, this.onlyReturnNameOfCreatedIndex ? indexes[0].name : result);
+      const indexNames = indexes.map(index => index.name || '');
+      callback(undefined, indexNames as T);
     });
   }
 }
 
 /** @internal */
-export class CreateIndexOperation extends CreateIndexesOperation {
+export class CreateIndexOperation extends CreateIndexesOperation<string> {
   constructor(
     parent: OperationParent,
     collectionName: string,
@@ -249,6 +248,12 @@ export class CreateIndexOperation extends CreateIndexesOperation {
     // createIndexes is always called with an array of index spec objects
 
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
+  }
+  execute(server: Server, session: ClientSession, callback: Callback<string>): void {
+    super.execute(server, session, (err, indexNames) => {
+      if (err || !indexNames) return callback(err);
+      return callback(undefined, indexNames[0]);
+    });
   }
 }
 

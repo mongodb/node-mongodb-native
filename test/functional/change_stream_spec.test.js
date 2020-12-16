@@ -37,7 +37,9 @@ describe('Change Stream Spec', function () {
         const sDB = suite.database_name;
         const sColl = suite.collection_name;
         const configuration = this.configuration;
-        return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase({ w: 'majority' })))
+        return Promise.all(
+          ALL_DBS.map(db => gc.db(db).dropDatabase({ writeConcern: { w: 'majority' } }))
+        )
           .then(() => gc.db(sDB).createCollection(sColl))
           .then(() => {
             if (suite.database2_name && suite.collection2_name) {

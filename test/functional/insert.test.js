@@ -517,19 +517,20 @@ describe('Insert', function () {
           return 1;
         };
         // Insert the update
-        collection.insert({ i: 1, z: func }, { w: 1, serializeFunctions: true }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-
-          collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+        collection.insert(
+          { i: 1, z: func },
+          { writeConcern: { w: 1 }, serializeFunctions: true },
+          function (err, result) {
             expect(err).to.not.exist;
-            test.equal(normalizedFunctionString(func), object.z.code);
-            test.equal(1, object.i);
-            client.close(done);
-          });
-        });
+
+            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+              expect(err).to.not.exist;
+              test.equal(normalizedFunctionString(func), object.z.code);
+              test.equal(1, object.i);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -553,7 +554,7 @@ describe('Insert', function () {
         // Insert the update
         collection.insert(
           { i: 1, z: func },
-          { w: 1, serializeFunctions: true, ordered: false },
+          { writeConcern: { w: 1 }, serializeFunctions: true, ordered: false },
           function (err, result) {
             expect(err).to.not.exist;
 
@@ -699,11 +700,11 @@ describe('Insert', function () {
             collection.find().toArray(function (err, items) {
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
               test.equal(doc._id.toString(), items[1].ref.oid.toString());
-              expect(items[1].ref.db).to.be.null;
+              expect(items[1].ref.db).to.not.exist;
 
               test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
               test.equal(doc._id.toString(), items[2].ref.oid.toString());
-              expect(items[2].ref.db).to.be.null;
+              expect(items[2].ref.db).to.not.exist;
 
               client.close(done);
             });
@@ -953,7 +954,7 @@ describe('Insert', function () {
           collection.update(
             { str: 'String' },
             { $set: { c: 1, d: function () {} } },
-            { w: 1, serializeFunctions: false },
+            { writeConcern: { w: 1 }, serializeFunctions: false },
             function (err, result) {
               expect(err).to.not.exist;
               expect(result).property('matchedCount').to.equal(1);
@@ -1201,23 +1202,27 @@ describe('Insert', function () {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          expect(result).property('upsertedCount').to.equal(1);
-
-          // Upsert an existing doc
-          collection.update({ a: 1 }, { $set: { a: 1 } }, { upsert: true, w: 1 }, function (
-            err,
-            result
-          ) {
+        collection.update(
+          { a: 1 },
+          { $set: { a: 1 } },
+          { upsert: true, writeConcern: { w: 1 } },
+          function (err, result) {
             expect(err).to.not.exist;
-            expect(result).property('matchedCount').to.equal(1);
-            client.close(done);
-          });
-        });
+            expect(result).property('upsertedCount').to.equal(1);
+
+            // Upsert an existing doc
+            collection.update(
+              { a: 1 },
+              { $set: { a: 1 } },
+              { upsert: true, writeConcern: { w: 1 } },
+              function (err, result) {
+                expect(err).to.not.exist;
+                expect(result).property('matchedCount').to.equal(1);
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1416,7 +1421,7 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely2');
-        collection.insert({ a: 1 }, { w: 0 }, cb);
+        collection.insert({ a: 1 }, { writeConcern: { w: 0 } }, cb);
       });
     }
   });
@@ -1439,7 +1444,12 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely3');
-        collection.update({ a: 1 }, { $set: { a: 2 } }, { upsert: true, w: 0 }, cb);
+        collection.update(
+          { a: 1 },
+          { $set: { a: 2 } },
+          { upsert: true, writeConcern: { w: 0 } },
+          cb
+        );
       });
     }
   });
@@ -1462,7 +1472,7 @@ describe('Insert', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('gh-completely1');
-        collection.remove({ a: 1 }, { w: 0 }, cb);
+        collection.remove({ a: 1 }, { writeConcern: { w: 0 } }, cb);
       });
     }
   });

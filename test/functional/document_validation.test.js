@@ -303,36 +303,40 @@ describe('Document Validation', function () {
               expect(err).to.not.exist;
 
               // Insert the docs
-              col.insertMany(docs, { w: 1, bypassDocumentValidation: true }, function (err) {
-                expect(err).to.not.exist;
-
-                // Execute aggregate, notice the pipeline is expressed as an Array
-                const cursor = col.aggregate(
-                  [
-                    {
-                      $project: {
-                        author: 1,
-                        tags: 1
-                      }
-                    },
-                    { $unwind: '$tags' },
-                    {
-                      $group: {
-                        _id: { tags: '$tags' },
-                        authors: { $addToSet: '$author' }
-                      }
-                    },
-                    { $out: 'createValidationCollectionOut' }
-                  ],
-                  { bypassDocumentValidation: true }
-                );
-
-                cursor.toArray(function (err) {
+              col.insertMany(
+                docs,
+                { writeConcern: { w: 1 }, bypassDocumentValidation: true },
+                function (err) {
                   expect(err).to.not.exist;
 
-                  client.close(done);
-                });
-              });
+                  // Execute aggregate, notice the pipeline is expressed as an Array
+                  const cursor = col.aggregate(
+                    [
+                      {
+                        $project: {
+                          author: 1,
+                          tags: 1
+                        }
+                      },
+                      { $unwind: '$tags' },
+                      {
+                        $group: {
+                          _id: { tags: '$tags' },
+                          authors: { $addToSet: '$author' }
+                        }
+                      },
+                      { $out: 'createValidationCollectionOut' }
+                    ],
+                    { bypassDocumentValidation: true }
+                  );
+
+                  cursor.toArray(function (err) {
+                    expect(err).to.not.exist;
+
+                    client.close(done);
+                  });
+                }
+              );
             }
           );
         });

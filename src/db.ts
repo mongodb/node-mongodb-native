@@ -23,11 +23,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
 import { CollectionsOperation } from './operations/collections';
 import { DbStatsOperation, DbStatsOptions } from './operations/stats';
-import {
-  RunCommandOperation,
-  RunAdminCommandOperation,
-  RunCommandOptions
-} from './operations/run_command';
+import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
 import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
 import {
   CreateIndexOperation,
@@ -59,10 +55,7 @@ import type { Admin } from './admin';
 
 // Allowed parameters
 const legalOptionNames = [
-  'w',
-  'wtimeout',
-  'fsync',
-  'j',
+  'writeConcern',
   'readPreference',
   'readPreferenceTags',
   'native_parser',
@@ -539,39 +532,6 @@ export class Db {
   }
 
   /**
-   * Runs a command on the database as admin.
-   *
-   * @remarks
-   * This command does not inherit options from the MongoClient.
-   *
-   * @param command - The command to run
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  executeDbAdminCommand(command: Document): Promise<void>;
-  executeDbAdminCommand(command: Document, callback: Callback): void;
-  executeDbAdminCommand(command: Document, options: RunCommandOptions): Promise<void>;
-  executeDbAdminCommand(
-    command: Document,
-    options: RunCommandOptions,
-    callback: Callback<void>
-  ): void;
-  executeDbAdminCommand(
-    command: Document,
-    options?: RunCommandOptions | Callback<void>,
-    callback?: Callback<void>
-  ): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
-    // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
-      getTopology(this),
-      new RunAdminCommandOperation(this, command, options ?? {}),
-      callback
-    );
-  }
-
-  /**
    * Creates an index on the db and collection.
    *
    * @param name - Name of the collection to create the index on.
@@ -579,25 +539,25 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, indexSpec: IndexSpecification): Promise<Document>;
-  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<Document>): void;
+  createIndex(name: string, indexSpec: IndexSpecification): Promise<string>;
+  createIndex(name: string, indexSpec: IndexSpecification, callback?: Callback<string>): void;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions
-  ): Promise<Document>;
+  ): Promise<string>;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions,
-    callback: Callback<Document>
+    callback: Callback<string>
   ): void;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: CreateIndexesOptions | Callback<string>,
+    callback?: Callback<string>
+  ): Promise<string> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(

@@ -95,9 +95,7 @@ export type {
   BulkWriteResult,
   WriteError,
   WriteConcernError,
-  BulkWriteOperationError,
-  UpdateStatement,
-  DeleteStatement
+  BulkWriteOperationError
 } from './bulk/common';
 export type {
   ChangeStream,
@@ -121,7 +119,14 @@ export type {
   OpQueryOptions
 } from './cmap/commands';
 export type { Stream } from './cmap/connect';
-export type { Connection, ConnectionOptions, DestroyOptions } from './cmap/connection';
+export type {
+  Connection,
+  ConnectionOptions,
+  DestroyOptions,
+  CommandOptions,
+  QueryOptions,
+  GetMoreOptions
+} from './cmap/connection';
 export type {
   CloseOptions,
   ConnectionPoolOptions,
@@ -135,10 +140,7 @@ export type {
   MessageStreamOptions
 } from './cmap/message_stream';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
-export type { CommandOptions } from './cmap/wire_protocol/command';
 export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
-export type { GetMoreOptions } from './cmap/wire_protocol/get_more';
-export type { QueryOptions } from './cmap/wire_protocol/query';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
@@ -195,7 +197,7 @@ export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
 export type { CreateCollectionOptions } from './operations/create_collection';
-export type { DeleteOptions, DeleteResult } from './operations/delete';
+export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
@@ -227,7 +229,12 @@ export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
-export type { UpdateResult, UpdateOptions, ReplaceOptions } from './operations/update';
+export type {
+  UpdateResult,
+  UpdateOptions,
+  ReplaceOptions,
+  UpdateStatement
+} from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
 export type {
   ReadConcern,
@@ -291,7 +298,7 @@ export type {
   InterruptibleAsyncInterval,
   BufferPool
 } from './utils';
-export type { WriteConcern, W, WriteConcernOptions } from './write_concern';
+export type { WriteConcern, W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type {

@@ -56,9 +56,9 @@ describe('Connections survive primary step down', function () {
         db = client.db('step-down');
         collection = db.collection('step-down');
       })
-      .then(() => collection.drop({ w: 'majority' }))
+      .then(() => collection.drop({ writeConcern: { w: 'majority' } }))
       .catch(ignoreNsNotFound)
-      .then(() => db.createCollection('step-down', { w: 'majority' }));
+      .then(() => db.createCollection('step-down', { writeConcern: { w: 'majority' } }));
   });
 
   let deferred = [];
@@ -75,7 +75,7 @@ describe('Connections survive primary step down', function () {
     test: function () {
       return collection
         .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }], {
-          w: 'majority'
+          writeConcern: { w: 'majority' }
         })
         .then(result => expect(result.insertedCount).to.equal(5))
         .then(() => {
@@ -89,14 +89,14 @@ describe('Connections survive primary step down', function () {
             .then(item => expect(item.a).to.equal(2))
             .then(() => {
               return connectionCount(checkClient).then(initialConnectionCount => {
-                return db
-                  .executeDbAdminCommand({ replSetFreeze: 0 }, { readPreference: 'secondary' })
+                return client
+                  .db('admin')
+                  .command({ replSetFreeze: 0 }, { readPreference: 'secondary' })
                   .then(result => expect(result).property('info').to.equal('unfreezing'))
                   .then(() =>
-                    db.executeDbAdminCommand(
-                      { replSetStepDown: 30, force: true },
-                      { readPreference: 'primary' }
-                    )
+                    client
+                      .db('admin')
+                      .command({ replSetStepDown: 30, force: true }, { readPreference: 'primary' })
                   )
                   .then(() => cursor.next())
                   .then(item => expect(item.a).to.equal(3))
@@ -113,15 +113,16 @@ describe('Connections survive primary step down', function () {
 
   function runStepownScenario(errorCode, predicate) {
     return connectionCount(checkClient).then(initialConnectionCount => {
-      return db
-        .executeDbAdminCommand({
+      return client
+        .db('admin')
+        .command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: { failCommands: ['insert'], errorCode }
         })
         .then(() => {
           deferred.push(() =>
-            db.executeDbAdminCommand({ configureFailPoint: 'failCommand', mode: 'off' })
+            client.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' })
           );
 
           return collection.insertOne({ test: 1 }).then(

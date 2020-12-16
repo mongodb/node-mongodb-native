@@ -172,11 +172,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       }
     }
 
-    server.command(
-      this.ns.toString(),
-      cmd,
-      { fullResult: !!this.fullResponse, ...options },
-      callback
-    );
+    server.command(this.ns, cmd, { fullResult: !!this.fullResponse, ...options }, callback);
   }
 }

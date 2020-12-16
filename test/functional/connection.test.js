@@ -42,18 +42,22 @@ describe('Connection', function () {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
-        db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function (err) {
-          expect(err).to.not.exist;
+        db.collection('domainSocketCollection0').insert(
+          { a: 1 },
+          { writeConcern: { w: 1 } },
+          function (err) {
+            expect(err).to.not.exist;
 
-          db.collection('domainSocketCollection0')
-            .find({ a: 1 })
-            .toArray(function (err, items) {
-              expect(err).to.not.exist;
-              test.equal(1, items.length);
+            db.collection('domainSocketCollection0')
+              .find({ a: 1 })
+              .toArray(function (err, items) {
+                expect(err).to.not.exist;
+                test.equal(1, items.length);
 
-              client.close(done);
-            });
-        });
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -106,18 +110,22 @@ describe('Connection', function () {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
-        db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function (err) {
-          expect(err).to.not.exist;
+        db.collection('domainSocketCollection1').insert(
+          { x: 1 },
+          { writeConcern: { w: 1 } },
+          function (err) {
+            expect(err).to.not.exist;
 
-          db.collection('domainSocketCollection1')
-            .find({ x: 1 })
-            .toArray(function (err, items) {
-              expect(err).to.not.exist;
-              test.equal(1, items.length);
+            db.collection('domainSocketCollection1')
+              .find({ x: 1 })
+              .toArray(function (err, items) {
+                expect(err).to.not.exist;
+                test.equal(1, items.length);
 
-              client.close(done);
-            });
-        });
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -135,7 +143,7 @@ describe('Connection', function () {
       db.collection(testName, function (err, collection) {
         expect(err).to.not.exist;
 
-        collection.insert({ foo: 123 }, { w: 1 }, function (err) {
+        collection.insert({ foo: 123 }, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
 
           db.dropDatabase(function (err, dropped) {

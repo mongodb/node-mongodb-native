@@ -22,7 +22,8 @@ import {
   makeClientMetadata,
   emitDeprecatedOptionWarning,
   ClientMetadata,
-  Callback
+  Callback,
+  ns
 } from '../utils';
 import {
   TopologyType,
@@ -356,7 +357,7 @@ export class Topology extends EventEmitter {
 
       // TODO: NODE-2471
       if (server && this.s.credentials) {
-        server.command('admin.$cmd', { ping: 1 }, err => {
+        server.command(ns('admin.$cmd'), { ping: 1 }, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
             return;
@@ -576,7 +577,7 @@ export class Topology extends EventEmitter {
         }
 
         server.command(
-          'admin.$cmd',
+          ns('admin.$cmd'),
           { endSessions: sessions },
           { noResponse: true },
           (err, result) => {

@@ -1,9 +1,11 @@
 'use strict';
 const { withClient, withClientV2, setupDatabase, ignoreNsNotFound } = require('./shared');
 const test = require('./shared').assert;
-const { expect } = require('chai');
 const { MongoError } = require('../../src/error');
 const { Long } = require('../../src');
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-subset'));
 
 describe('Bulk', function () {
   before(function () {
@@ -76,7 +78,7 @@ describe('Bulk', function () {
     metadata: { requires: { mongodb: '>=3.6.x' } },
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient({}, { w: 1 });
+      const client = configuration.newClient({ w: 1 });
 
       client.connect((err, client) => {
         const db = client.db(configuration.db);
@@ -620,7 +622,7 @@ describe('Bulk', function () {
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function (err, result) {
+        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1126,7 +1128,7 @@ describe('Bulk', function () {
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
-        bulk.execute({ w: 0 }, function (err, result) {
+        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
@@ -1146,6 +1148,37 @@ describe('Bulk', function () {
    * Ordered
    *
    *******************************************************************/
+  it('should provide an accessor for operations on ordered bulk ops', function (done) {
+    var self = this;
+    var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
+
+    client.connect(function (err, client) {
+      var db = client.db(self.configuration.db);
+      var col = db.collection('bulk_get_operations_test');
+
+      var batch = col.initializeOrderedBulkOp();
+      batch.insert({ b: 1, a: 1 });
+      batch
+        .find({ b: 2 })
+        .upsert()
+        .updateOne({ $set: { a: 1 } });
+      batch.insert({ b: 3, a: 2 });
+      const batches = batch.batches;
+      expect(batches).to.have.lengthOf(3);
+      expect(batches[0].operations[0]).to.containSubset({ b: 1, a: 1 });
+      expect(batches[1].operations[0]).to.containSubset({
+        q: { b: 2 },
+        u: { $set: { a: 1 } },
+        multi: false,
+        upsert: true
+      });
+      expect(batches[2].operations[0]).to.containSubset({ b: 3, a: 2 });
+      client.close(done);
+    });
+  });
+
   it('should fail with w:2 and wtimeout write concern due single mongod instance ordered', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
@@ -1162,7 +1195,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
@@ -1217,6 +1250,37 @@ describe('Bulk', function () {
    * Unordered
    *
    *******************************************************************/
+  it('should provide an accessor for operations on unordered bulk ops', function (done) {
+    var self = this;
+    var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
+
+    client.connect(function (err, client) {
+      var db = client.db(self.configuration.db);
+      var col = db.collection('bulk_get_operations_test');
+
+      var batch = col.initializeUnorderedBulkOp();
+      batch.insert({ b: 1, a: 1 });
+      batch
+        .find({ b: 2 })
+        .upsert()
+        .updateOne({ $set: { a: 1 } });
+      batch.insert({ b: 3, a: 2 });
+      const batches = batch.batches;
+      expect(batches).to.have.lengthOf(2);
+      expect(batches[0].operations[0]).to.containSubset({ b: 1, a: 1 });
+      expect(batches[0].operations[1]).to.containSubset({ b: 3, a: 2 });
+      expect(batches[1].operations[0]).to.containSubset({
+        q: { b: 2 },
+        u: { $set: { a: 1 } },
+        multi: false,
+        upsert: true
+      });
+      client.close(done);
+    });
+  });
+
   it('should fail with w:2 and wtimeout write concern due single mongod instance unordered', {
     metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
@@ -1233,7 +1297,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ w: 2, wtimeout: 1000 }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);

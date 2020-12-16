@@ -1,7 +1,7 @@
 import { Binary } from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoError } from '../../error';
-import type { Callback } from '../../utils';
+import { Callback, ns } from '../../utils';
 
 export class Plain extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
@@ -20,6 +20,6 @@ export class Plain extends AuthProvider {
       autoAuthorize: 1
     };
 
-    connection.command('$external.$cmd', command, callback);
+    connection.command(ns('$external.$cmd'), command, undefined, callback);
   }
 }

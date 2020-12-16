@@ -3,7 +3,8 @@ import {
   now,
   makeStateMachine,
   calculateDurationInMs,
-  makeInterruptibleAsyncInterval
+  makeInterruptibleAsyncInterval,
+  ns
 } from '../utils';
 import { EventEmitter } from 'events';
 import { connect } from '../cmap/connect';
@@ -112,6 +113,10 @@ export class Monitor extends EventEmitter {
 
     // ensure no authentication is used for monitoring
     delete connectOptions.credentials;
+    if (connectOptions.autoEncrypter) {
+      delete connectOptions.autoEncrypter;
+    }
+
     this.connectOptions = Object.freeze(connectOptions);
   }
 
@@ -233,7 +238,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
       );
     }
 
-    connection.command('admin.$cmd', cmd, options, (err, isMaster) => {
+    connection.command(ns('admin.$cmd'), cmd, options, (err, isMaster) => {
       if (err) {
         failureHandler(err);
         return;
@@ -429,7 +434,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     return;
   }
 
-  connection.command('admin.$cmd', { ismaster: 1 }, err => {
+  connection.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, err => {
     if (err) {
       rttPinger[kConnection] = undefined;
       rttPinger[kRoundTripTime] = 0;

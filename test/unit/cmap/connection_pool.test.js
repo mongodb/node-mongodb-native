@@ -1,16 +1,15 @@
 'use strict';
 
 const util = require('util');
-const loadSpecTests = require('../../spec').loadSpecTests;
-const ConnectionPool = require('../../../src/cmap/connection_pool').ConnectionPool;
-const WaitQueueTimeoutError = require('../../../src/cmap/errors').WaitQueueTimeoutError;
-const EventEmitter = require('events').EventEmitter;
+const { loadSpecTests } = require('../../spec');
+const { ConnectionPool } = require('../../../src/cmap/connection_pool');
+const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
+const { EventEmitter } = require('events');
 const mock = require('mongodb-mock-server');
 const cmapEvents = require('../../../src/cmap/events');
 const sinon = require('sinon');
-const chai = require('chai');
-chai.use(require('../../functional/spec-runner/matcher').default);
-const expect = chai.expect;
+const { expect } = require('chai');
+const { ns } = require('../../../src/utils');
 
 const ALL_POOL_EVENTS = new Set([
   'connectionPoolCreated',
@@ -61,7 +60,7 @@ describe('Connection Pool', function () {
     pool.checkOut((err, conn) => {
       expect(err).to.not.exist;
 
-      conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+      conn.command(ns('admin.$cmd'), { ping: 1 }, undefined, (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
 
@@ -101,7 +100,7 @@ describe('Connection Pool', function () {
     pool.withConnection(
       (err, conn, cb) => {
         expect(err).to.not.exist;
-        conn.command('admin.$cmd', { ping: 1 }, (err, result) => {
+        conn.command(ns('admin.$cmd'), { ping: 1 }, undefined, (err, result) => {
           expect(err).to.exist;
           expect(result).to.not.exist;
           expect(err).to.match(/timed out/);
@@ -164,7 +163,7 @@ describe('Connection Pool', function () {
       pool.withConnection((err, conn, cb) => {
         expect(err).to.not.exist;
 
-        conn.command('$admin.cmd', { ismaster: 1 }, (cmdErr, ismaster) => {
+        conn.command(ns('$admin.cmd'), { ismaster: 1 }, undefined, (cmdErr, ismaster) => {
           expect(cmdErr).to.not.exist;
           cb(undefined, ismaster);
         });

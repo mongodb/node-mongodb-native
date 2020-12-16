@@ -1,15 +1,9 @@
 import * as BSON from '../bson';
-import {
-  BulkOperationBase,
-  Batch,
-  BatchType,
-  BulkWriteOptions,
-  UpdateStatement,
-  DeleteStatement,
-  BatchTypeId
-} from './common';
+import { BulkOperationBase, Batch, BatchType, BulkWriteOptions, BatchTypeId } from './common';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import type { UpdateStatement } from '../operations/update';
+import type { DeleteStatement } from '../operations/delete';
 
 /** @public */
 export class OrderedBulkOperation extends BulkOperationBase {
