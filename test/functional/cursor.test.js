@@ -4090,9 +4090,9 @@ describe('Cursor', function () {
       });
     });
 
-    it(
-      'should use allowDiskUse option on sort',
-      withMonitoredClient('find', function (client, events, done) {
+    it('should use allowDiskUse option on sort', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
         db.collection('test_sort_allow_disk_use', (err, collection) => {
           expect(err).to.not.exist;
@@ -4106,11 +4106,11 @@ describe('Cursor', function () {
           });
         });
       })
-    );
+    });
 
-    it(
-      'should error if allowDiskUse option used without sort',
-      withClient(function (client, done) {
+    it('should error if allowDiskUse option used without sort', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClient(function (client, done) {
         const db = client.db('test');
         db.collection('test_sort_allow_disk_use', (err, collection) => {
           expect(err).to.not.exist;
@@ -4123,6 +4123,6 @@ describe('Cursor', function () {
           }
         });
       })
-    );
+    });
   });
 });
