@@ -725,8 +725,8 @@ export class FindOperators {
     this.bulkOperation = bulkOperation;
   }
 
-  /** Add a multiple update operation to the bulk operation */
-  update(updateDocument: Document): BulkOperationBase {
+  /** @internal */
+  makeUpdateDocument(u: Document, multi: boolean): Document {
     if (!this.bulkOperation.s.currentOp) {
       this.bulkOperation.s.currentOp = {};
     }
@@ -738,86 +738,93 @@ export class FindOperators {
         : false;
 
     // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: updateDocument,
-      multi: true,
-      upsert: upsert
-    };
+    const q = this.bulkOperation.s.currentOp.selector;
+    const result: Document = { q, u, multi, upsert };
 
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
+    if (u.hint) {
+      result.hint = u.hint;
+    }
+
+    if (this.bulkOperation.s.currentOp.collation) {
+      result.collation = this.bulkOperation.s.currentOp.collation;
     }
 
     // Clear out current Op
     this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+
+    return result;
+  }
+
+  /** @internal */
+  makeDeleteDocument(limit: number): Document {
+    if (!this.bulkOperation.s.currentOp) {
+      this.bulkOperation.s.currentOp = {};
+    }
+
+    // Establish the update command
+    const document: DeleteStatement = {
+      q: this.bulkOperation.s.currentOp.selector,
+      limit
+    };
+
+    if (this.bulkOperation.s.currentOp.collation) {
+      document.collation = this.bulkOperation.s.currentOp.collation;
+    }
+
+    // Clear out current Op
+    this.bulkOperation.s.currentOp = undefined;
+
+    return document;
+  }
+
+  /** Add a multiple update operation to the bulk operation */
+  update(updateDocument: Document): BulkOperationBase {
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      this.makeUpdateDocument(updateDocument, true)
+    );
   }
 
   /** Add a single update operation to the bulk operation */
   updateOne(updateDocument: Document): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Perform upsert
-    const upsert =
-      typeof this.bulkOperation.s.currentOp.upsert === 'boolean'
-        ? this.bulkOperation.s.currentOp.upsert
-        : false;
-
-    // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: updateDocument,
-      multi: false,
-      upsert: upsert
-    };
-
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
-    }
-
     if (!hasAtomicOperators(updateDocument)) {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      this.makeUpdateDocument(updateDocument, false)
+    );
   }
 
   /** Add a replace one operation to the bulk operation */
   replaceOne(replacement: Document): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Perform upsert
-    const upsert =
-      typeof this.bulkOperation.s.currentOp.upsert === 'boolean'
-        ? this.bulkOperation.s.currentOp.upsert
-        : false;
-
-    // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: replacement,
-      multi: false,
-      upsert: upsert
-    };
-
-    if (replacement.hint) {
-      document.hint = replacement.hint;
-    }
-
     if (hasAtomicOperators(replacement)) {
       throw new TypeError('Replacement document must not use atomic operators');
     }
 
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      this.makeUpdateDocument(replacement, false)
+    );
+  }
+
+  /** Add a delete one operation to the bulk operation */
+  deleteOne(): BulkOperationBase {
+    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, this.makeDeleteDocument(1));
+  }
+
+  /** Add a delete many operation to the bulk operation */
+  delete(): BulkOperationBase {
+    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, this.makeDeleteDocument(0));
+  }
+
+  removeOne(): BulkOperationBase {
+    return this.deleteOne();
+  }
+
+  remove(): BulkOperationBase {
+    return this.delete();
   }
 
   /** Upsert modifier for update bulk operation, noting that this operation is an upsert. */
@@ -830,46 +837,14 @@ export class FindOperators {
     return this;
   }
 
-  /** Add a delete one operation to the bulk operation */
-  deleteOne(): BulkOperationBase {
+  /** Specifies the collation for the query condition. */
+  collation(collation: CollationOptions): this {
     if (!this.bulkOperation.s.currentOp) {
       this.bulkOperation.s.currentOp = {};
     }
 
-    // Establish the update command
-    const document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      limit: 1
-    };
-
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
-  }
-
-  /** Add a delete many operation to the bulk operation */
-  delete(): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Establish the update command
-    const document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      limit: 0
-    };
-
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.REMOVE, document);
-  }
-
-  removeOne(): BulkOperationBase {
-    return this.deleteOne();
-  }
-
-  remove(): BulkOperationBase {
-    return this.delete();
+    this.bulkOperation.s.currentOp.collation = collation;
+    return this;
   }
 }
 
