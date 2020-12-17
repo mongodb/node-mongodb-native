@@ -354,12 +354,15 @@ export class FindCursor extends AbstractCursor {
   }
 
   /**
-   * Allows disk use for blocking sort operations exceeding 100MB memory.
+   * Allows disk use for blocking sort operations exceeding 100MB memory. (MongoDB 3.2 or higher)
+   *
+   * @remarks
+   * {@link https://docs.mongodb.com/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
    */
   allowDiskUse(): this {
     assertUninitialized(this);
     if (!this[kBuiltOptions].sort) {
-      throw new MongoError('allowDiskUse must follow sort');
+      throw new MongoError('allowDiskUse requires a sort specification');
     }
     this[kBuiltOptions].allowDiskUse = true;
     return this;

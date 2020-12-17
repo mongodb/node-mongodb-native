@@ -4114,13 +4114,10 @@ describe('Cursor', function () {
         const db = client.db('test');
         db.collection('test_sort_allow_disk_use', (err, collection) => {
           expect(err).to.not.exist;
-          try {
-            collection.find({}).allowDiskUse();
-          } catch (err) {
-            expect(err).to.exist;
-            expect(err.message).to.equal('allowDiskUse must follow sort');
-            done();
-          }
+          expect(collection.find({}).allowDiskUse()).to.throw(
+            /allowDiskUse requires a sort specification/
+          );
+          done();
         });
       })
     });
