@@ -40,16 +40,11 @@ describe('Find and Modify', function () {
 
         var collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate
-        collection.findOneAndUpdate({}, { $set: { a: 1 } }, { fsync: 1 }, function (err) {
-          expect(err).to.not.exist;
-          test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-          // Cleanup
-          started = [];
-          succeeded = [];
-
-          // Execute findOneAndReplace
-          collection.findOneAndReplace({}, { b: 1 }, { fsync: 1 }, function (err) {
+        collection.findOneAndUpdate(
+          {},
+          { $set: { a: 1 } },
+          { writeConcern: { fsync: 1 } },
+          function (err) {
             expect(err).to.not.exist;
             test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
@@ -58,15 +53,27 @@ describe('Find and Modify', function () {
             succeeded = [];
 
             // Execute findOneAndReplace
-            collection.findOneAndDelete({}, { fsync: 1 }, function (err) {
+            collection.findOneAndReplace({}, { b: 1 }, { writeConcern: { fsync: 1 } }, function (
+              err
+            ) {
               expect(err).to.not.exist;
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
-              listener.uninstrument();
-              client.close(done);
+              // Cleanup
+              started = [];
+              succeeded = [];
+
+              // Execute findOneAndReplace
+              collection.findOneAndDelete({}, { writeConcern: { fsync: 1 } }, function (err) {
+                expect(err).to.not.exist;
+                test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
+
+                listener.uninstrument();
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -100,7 +107,7 @@ describe('Find and Modify', function () {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
 
-        var collection = db.collection('findAndModifyTEST', { fsync: 1 });
+        var collection = db.collection('findAndModifyTEST', { writeConcern: { fsync: 1 } });
         // Execute findOneAndUpdate
         collection.findOneAndUpdate({}, { $set: { a: 1 } }, function (err) {
           expect(err).to.not.exist;

@@ -33,7 +33,7 @@ class NativeConfiguration {
     );
 
     this.writeConcern = function () {
-      return { w: 1 };
+      return { writeConcern: { w: 1 } };
     };
   }
 
@@ -103,6 +103,12 @@ class NativeConfiguration {
 
     if (this.options.replicaSet) {
       Object.assign(dbOptions, { replicaSet: this.options.replicaSet });
+    }
+
+    // Flatten any options nested under `writeConcern` before we make the connection string
+    if (dbOptions.writeConcern) {
+      Object.assign(dbOptions, dbOptions.writeConcern);
+      delete dbOptions.writeConcern;
     }
 
     const urlOptions = {
@@ -210,10 +216,10 @@ class NativeConfiguration {
 
   writeConcernMax() {
     if (this.topologyType !== TopologyType.Single) {
-      return { w: 'majority', wtimeout: 30000 };
+      return { writeConcern: { w: 'majority', wtimeout: 30000 } };
     }
 
-    return { w: 1 };
+    return { writeConcern: { w: 1 } };
   }
 
   // Accessors and methods Client-Side Encryption

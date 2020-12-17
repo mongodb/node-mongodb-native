@@ -1,4 +1,4 @@
-import { defineAspects, Aspect } from './operation';
+import { defineAspects, Aspect, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
 import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import type { Document } from '../bson';
@@ -31,16 +31,30 @@ export interface DeleteResult {
   deletedCount: number;
 }
 
+/** @public */
+export interface DeleteStatement {
+  /** The query that matches documents to delete. */
+  q: Document;
+  /** The number of matching documents to delete. */
+  limit: number;
+  /** Specifies the collation to use for the operation. */
+  collation?: CollationOptions;
+  /** A document or string that specifies the index to use to support the query predicate. */
+  hint?: Hint;
+  /** A user-provided comment to attach to this command */
+  comment?: string | Document;
+}
+
 /** @internal */
 export class DeleteOperation extends CommandOperation<Document> {
   options: DeleteOptions;
-  operations: Document[];
+  statements: DeleteStatement[];
 
-  constructor(ns: MongoDBNamespace, ops: Document[], options: DeleteOptions) {
+  constructor(ns: MongoDBNamespace, statements: DeleteStatement[], options: DeleteOptions) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
-    this.operations = ops;
+    this.statements = statements;
   }
 
   get canRetryWrite(): boolean {
@@ -48,7 +62,7 @@ export class DeleteOperation extends CommandOperation<Document> {
       return false;
     }
 
-    return this.operations.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
+    return this.statements.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
   }
 
   execute(server: Server, session: ClientSession, callback: Callback): void {
@@ -56,7 +70,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       delete: this.ns.collection,
-      deletes: this.operations,
+      deletes: this.statements,
       ordered
     };
 
@@ -68,7 +82,7 @@ export class DeleteOperation extends CommandOperation<Document> {
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-      if (this.operations.find((o: Document) => o.hint)) {
+      if (this.statements.find((o: Document) => o.hint)) {
         callback(new MongoError(`servers < 3.4 do not support hint on delete`));
         return;
       }
@@ -80,7 +94,7 @@ export class DeleteOperation extends CommandOperation<Document> {
 
 export class DeleteOneOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteOperation(filter, { ...options, limit: 1 })], options);
+    super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
@@ -100,7 +114,7 @@ export class DeleteOneOperation extends DeleteOperation {
 
 export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteOperation(filter, options)], options);
+    super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
@@ -118,11 +132,11 @@ export class DeleteManyOperation extends DeleteOperation {
   }
 }
 
-function makeDeleteOperation(
+function makeDeleteStatement(
   filter: Document,
   options: DeleteOptions & { limit?: number }
-): Document {
-  const op: Document = {
+): DeleteStatement {
+  const op: DeleteStatement = {
     q: filter,
     limit: typeof options.limit === 'number' ? options.limit : 0
   };

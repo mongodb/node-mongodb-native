@@ -199,7 +199,7 @@ describe('Sessions', function () {
   context('unacknowledged writes', () => {
     it('should not include session for unacknowledged writes', {
       metadata: { requires: { topology: 'single', mongodb: '>=3.6.0' } },
-      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+      test: withMonitoredClient('insert', { clientOptions: { writeConcern: { w: 0 } } }, function (
         client,
         events,
         done
@@ -218,7 +218,7 @@ describe('Sessions', function () {
     });
     it('should throw error with explicit session', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
-      test: withMonitoredClient('insert', { clientOptions: { w: 0 } }, function (
+      test: withMonitoredClient('insert', { clientOptions: { writeConcern: { w: 0 } } }, function (
         client,
         events,
         done

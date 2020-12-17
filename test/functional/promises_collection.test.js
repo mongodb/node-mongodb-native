@@ -64,7 +64,7 @@ describe('Promises (Collection)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_delete_with_promise_no_option');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
           expect(r).property('insertedCount').to.equal(1);
 
           col
@@ -110,7 +110,7 @@ describe('Promises (Collection)', function () {
         // BEGIN
         // Get the collection
         var col = db.collection('find_one_and_update_with_promise_no_option');
-        col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
           expect(r).property('insertedCount').to.equal(1);
 
           col
@@ -158,7 +158,7 @@ describe('Promises (Collection)', function () {
           // BEGIN
           // Get the collection
           var col = db.collection('find_one_and_replace_with_promise_no_option');
-          col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function (r) {
+          col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
             expect(r).property('insertedCount').to.equal(1);
 
             col
@@ -264,7 +264,9 @@ describe('Promises (Collection)', function () {
       const client = configuration.newClient(url);
       client.connect().then(function (client) {
         var db = client.db(configuration.db);
-        var bulk = db.collection('unordered_bulk_promise_form').initializeUnorderedBulkOp({ w: 1 });
+        var bulk = db
+          .collection('unordered_bulk_promise_form')
+          .initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
         bulk.insert({ a: 1 });
         return bulk
           .execute()
@@ -297,7 +299,9 @@ describe('Promises (Collection)', function () {
       const client = configuration.newClient(url);
       client.connect().then(function (client) {
         var db = client.db(configuration.db);
-        var bulk = db.collection('unordered_bulk_promise_form').initializeOrderedBulkOp({ w: 1 });
+        var bulk = db
+          .collection('unordered_bulk_promise_form')
+          .initializeOrderedBulkOp({ writeConcern: { w: 1 } });
         bulk.insert({ a: 1 });
         return bulk
           .execute()

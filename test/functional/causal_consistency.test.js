@@ -203,7 +203,7 @@ describe('Causal Consistency', function () {
 
         return db
           .collection('causal_test')
-          .insert({}, { session: session, w: 0 })
+          .insert({}, { session: session, writeConcern: { w: 0 } })
           .then(() => {
             expect(session.operationTime).to.be.null;
           });
