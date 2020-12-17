@@ -56,9 +56,9 @@ describe('Connections survive primary step down', function () {
         db = client.db('step-down');
         collection = db.collection('step-down');
       })
-      .then(() => collection.drop({ w: 'majority' }))
+      .then(() => collection.drop({ writeConcern: { w: 'majority' } }))
       .catch(ignoreNsNotFound)
-      .then(() => db.createCollection('step-down', { w: 'majority' }));
+      .then(() => db.createCollection('step-down', { writeConcern: { w: 'majority' } }));
   });
 
   let deferred = [];
@@ -75,7 +75,7 @@ describe('Connections survive primary step down', function () {
     test: function () {
       return collection
         .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }], {
-          w: 'majority'
+          writeConcern: { w: 'majority' }
         })
         .then(result => expect(result.insertedCount).to.equal(5))
         .then(() => {

@@ -234,9 +234,15 @@ describe('examples(transactions):', function () {
 
       // Prereq: Create collections.
 
-      await client.db('mydb1').collection('foo').insertOne({ abc: 0 }, { w: 'majority' });
+      await client
+        .db('mydb1')
+        .collection('foo')
+        .insertOne({ abc: 0 }, { writeConcern: { w: 'majority' } });
 
-      await client.db('mydb2').collection('bar').insertOne({ xyz: 0 }, { w: 'majority' });
+      await client
+        .db('mydb2')
+        .collection('bar')
+        .insertOne({ xyz: 0 }, { writeConcern: { w: 'majority' } });
 
       // Step 1: Start a Client Session
       const session = client.startSession();

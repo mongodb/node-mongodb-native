@@ -46,6 +46,7 @@ const CHANGE_DOMAIN_TYPES = {
 const NO_RESUME_TOKEN_ERROR = new MongoError(
   'A change stream document has been received that lacks a resume token (_id).'
 );
+const NO_CURSOR_ERROR = new MongoError('ChangeStream has no cursor');
 const CHANGESTREAM_CLOSED_ERROR = new MongoError('ChangeStream is closed');
 
 /** @public */
@@ -287,8 +288,7 @@ export class ChangeStream extends EventEmitter {
   next(callback?: Callback): Promise<void> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
-        if (err) return cb(err); // failed to resume, raise an error
-        if (!cursor) return cb(new MongoError('Cursor is undefined'));
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
         cursor.next((error, change) => {
           if (error) {
             this[kResumeQueue].push(() => this.next(cb));
@@ -330,10 +330,22 @@ export class ChangeStream extends EventEmitter {
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
-    if (!this.cursor) {
-      throw new MongoError('ChangeStream has no cursor, unable to stream');
-    }
+    if (!this.cursor) throw NO_CURSOR_ERROR;
     return this.cursor.stream(options);
+  }
+
+  /**
+   * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
+   */
+  tryNext(): Promise<Document | null>;
+  tryNext(callback: Callback<Document | null>): void;
+  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    return maybePromise(callback, cb => {
+      getCursor(this, (err, cursor) => {
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
+        return cursor.tryNext(cb);
+      });
+    });
   }
 }
 
@@ -707,11 +719,16 @@ function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCu
 function processResumeQueue(changeStream: ChangeStream, err?: Error) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
-    if (changeStream[kClosed] && !err) {
-      request(CHANGESTREAM_CLOSED_ERROR);
-      return;
+    if (!err) {
+      if (changeStream[kClosed]) {
+        request(CHANGESTREAM_CLOSED_ERROR);
+        return;
+      }
+      if (!changeStream.cursor) {
+        request(NO_CURSOR_ERROR);
+        return;
+      }
     }
-
     request(err, changeStream.cursor);
   }
 }
