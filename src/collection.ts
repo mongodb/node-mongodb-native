@@ -333,6 +333,8 @@ export class Collection {
    * ```js
    *  { insertOne: { document: { a: 1 } } }
    *
+   *  { insertMany: [{ g: 1 }, { g: 2 }]}
+   *
    *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
    *
    *  { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }

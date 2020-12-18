@@ -357,12 +357,12 @@ describe('CRUD API', function () {
 
             db.collection('t2_5').bulkWrite(
               [
-                { insertOne: { a: 1 } },
+                { insertOne: { document: { a: 1 } } },
                 { insertMany: [{ g: 1 }, { g: 2 }] },
-                { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
-                { updateMany: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
-                { deleteOne: { q: { c: 1 } } },
-                { deleteMany: { q: { c: 1 } } }
+                { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+                { updateMany: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+                { deleteOne: { filter: { c: 1 } } },
+                { deleteMany: { filter: { c: 1 } } }
               ],
               { ordered: false, writeConcern: { w: 1 } },
               function (err, r) {
@@ -442,12 +442,12 @@ describe('CRUD API', function () {
 
             db.collection('t2_7').bulkWrite(
               [
-                { insertOne: { a: 1 } },
+                { insertOne: { document: { a: 1 } } },
                 { insertMany: [{ g: 1 }, { g: 2 }] },
-                { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
-                { updateMany: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
-                { deleteOne: { q: { c: 1 } } },
-                { deleteMany: { q: { c: 1 } } }
+                { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+                { updateMany: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+                { deleteOne: { filter: { c: 1 } } },
+                { deleteMany: { filter: { c: 1 } } }
               ],
               { ordered: true, writeConcern: { w: 1 } },
               function (err, r) {

@@ -536,13 +536,13 @@ describe('Collation', function () {
             [
               {
                 updateOne: {
-                  q: { a: 2 },
-                  u: { $set: { a: 2 } },
+                  filter: { a: 2 },
+                  update: { $set: { a: 2 } },
                   upsert: true,
                   collation: { caseLevel: true }
                 }
               },
-              { deleteOne: { q: { c: 1 } } }
+              { deleteOne: { filter: { c: 1 } } }
             ],
             { ordered: true }
           )
@@ -559,7 +559,7 @@ describe('Collation', function () {
     }
   });
 
-  it('Successfully fail bulkWrite due to unsupported collation', {
+  it('Successfully fail bulkWrite due to unsupported collation in update', {
     metadata: { requires: { generators: true, topology: 'single' } },
     test: function () {
       const configuration = this.configuration;
@@ -588,13 +588,63 @@ describe('Collation', function () {
             [
               {
                 updateOne: {
-                  q: { a: 2 },
-                  u: { $set: { a: 2 } },
+                  filter: { a: 2 },
+                  update: { $set: { a: 2 } },
                   upsert: true,
                   collation: { caseLevel: true }
                 }
               },
-              { deleteOne: { q: { c: 1 } } }
+              { deleteOne: { filter: { c: 1 } } }
+            ],
+            { ordered: true }
+          )
+          .then(() => {
+            throw new Error('should not succeed');
+          })
+          .catch(err => {
+            expect(err).to.exist;
+            expect(err.message).to.match(/does not support collation/);
+          })
+          .then(() => client.close());
+      });
+    }
+  });
+
+  it('Successfully fail bulkWrite due to unsupported collation in delete', {
+    metadata: { requires: { generators: true, topology: 'single' } },
+    test: function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
+
+      testContext.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(primary[0]);
+        } else if (doc.update) {
+          request.reply({ ok: 1 });
+        } else if (doc.delete) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      return client.connect().then(() => {
+        const db = client.db(configuration.db);
+
+        return db
+          .collection('test')
+          .bulkWrite(
+            [
+              {
+                updateOne: {
+                  filter: { a: 2 },
+                  update: { $set: { a: 2 } },
+                  upsert: true
+                }
+              },
+              { deleteOne: { filter: { c: 1 }, collation: { caseLevel: true } } }
             ],
             { ordered: true }
           )

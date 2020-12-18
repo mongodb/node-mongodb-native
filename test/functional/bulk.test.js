@@ -1874,13 +1874,13 @@ describe('Bulk', function () {
         expect(events).to.be.an('array').with.length.at.least(1);
         expect(events[0]).property('commandName').to.equal('update');
         const updateCommand = events[0].command;
-        expect(updateCommand).property('updates').to.be.an('array').with.length.at.least(1);
+        expect(updateCommand).property('updates').to.be.an('array').with.length(3);
         updateCommand.updates.forEach((statement, idx) => {
           expect(statement).property('collation').to.eql({ locale: locales[idx] });
         });
         expect(events[1]).property('commandName').to.equal('delete');
         const deleteCommand = events[1].command;
-        expect(deleteCommand).property('deletes').to.be.an('array').with.length.at.least(1);
+        expect(deleteCommand).property('deletes').to.be.an('array').with.length(2);
         deleteCommand.deletes.forEach((statement, idx) => {
           expect(statement).property('collation').to.eql({ locale: locales[idx] });
         });
