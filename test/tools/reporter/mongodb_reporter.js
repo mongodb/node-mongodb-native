@@ -17,6 +17,24 @@ const {
 const fs = require('fs');
 const os = require('os');
 
+/**
+ * @typedef {object} MongoMochaSuiteExtension
+ * @property {Date} timestamp - suite start date
+ * @property {string} stdout - capture of stdout
+ * @property {string} stderr - capture of stderr
+ * @property {MongoMochaTest} test - capture of stderr
+ *
+ * @typedef {object} MongoMochaTestExtension
+ * @property {Date} startTime - test start date
+ * @property {Date} endTime - test end date
+ * @property {number} elapsedTime - difference between end and start
+ * @property {Error} [error] - The possible error from a test
+ * @property {true} [skipped] - Set if test was skipped
+ *
+ * @typedef {MongoMochaSuiteExtension & Mocha.Suite} MongoMochaSuite
+ * @typedef {MongoMochaTestExtension & Mocha.Test} MongoMochaTest
+ */
+
 // Turn this on if you have to debug this custom reporter!
 let REPORT_TO_STDIO = false;
 
@@ -46,7 +64,7 @@ function captureStream(stream) {
 class MongoDBMochaReporter extends mocha.reporters.Spec {
   constructor(runner) {
     super(runner);
-    /** @type {Map<string, {suite: Mocha.Suite, stdout?: any, stderr?: any}>} */
+    /** @type {Map<string, {suite: MongoMochaSuite, stdout?: any, stderr?: any}>} */
     this.suites = new Map();
     this.xunitWritten = false;
     runner.on(EVENT_RUN_BEGIN, () => this.start());
@@ -73,20 +91,23 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
         let testCases = [];
         let failureCount = 0;
 
-        for (const test of suite.tests) {
-          let time = Reflect.get(test, 'elapsedTime') / 1000;
+        const tests = /** @type {MongoMochaTest[]}*/ (suite.tests);
+        for (const test of tests) {
+          let time = test.elapsedTime / 1000;
           time = Number.isNaN(time) ? 0 : time;
 
           totalSuiteTime += time;
           failureCount += test.state === 'failed' ? 1 : 0;
 
-          let startTime = Reflect.get(test, 'startTime');
+          /** @type {string | Date | number} */
+          let startTime = test.startTime;
           startTime = startTime ? startTime.toISOString() : 0;
 
-          let endTime = Reflect.get(test, 'endTime');
+          /** @type {string | Date | number} */
+          let endTime = test.endTime;
           endTime = endTime ? endTime.toISOString() : 0;
 
-          let error = Reflect.get(test, 'error');
+          let error = test.error;
           let failure = error
             ? {
                 type: error.constructor.name,
@@ -95,7 +116,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
               }
             : undefined;
 
-          let skipped = !!Reflect.get(test, 'skipped');
+          let skipped = !!test.skipped;
 
           testCases.push({
             name: test.title,
@@ -108,7 +129,8 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
           });
         }
 
-        let timestamp = Reflect.get(suite, 'timestamp');
+        /** @type {string | Date | number} */
+        let timestamp = suite.timestamp;
         timestamp = timestamp ? timestamp.toISOString().split('.')[0] : '';
 
         output.testSuites.push({
@@ -122,8 +144,8 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
           errors: '0',
           time: totalSuiteTime,
           testCases,
-          stdout: Reflect.get(suite, 'stdout'),
-          stderr: Reflect.get(suite, 'stderr')
+          stdout: suite.stdout,
+          stderr: suite.stderr
         });
       }
 
@@ -138,12 +160,12 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
   }
 
   /**
-   * @param {Mocha.Suite} suite
+   * @param {MongoMochaSuite} suite
    */
   onSuite(suite) {
     if (suite.root) return;
     if (!this.suites.has(suite.fullTitle())) {
-      Reflect.set(suite, 'timestamp', new Date());
+      suite.timestamp = new Date();
       this.suites.set(suite.fullTitle(), {
         suite,
         stdout: captureStream(process.stdout),
@@ -155,7 +177,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
   }
 
   /**
-   * @param {Mocha.Suite} suite
+   * @param {MongoMochaSuite} suite
    */
   suiteEnd(suite) {
     if (suite.root) return;
@@ -165,54 +187,50 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
       process.exit(1);
     }
     if (currentSuite.stdout || currentSuite.stderr) {
-      Reflect.set(suite, 'stdout', currentSuite.stdout.unhook());
-      Reflect.set(suite, 'stderr', currentSuite.stderr.unhook());
+      suite.stdout = currentSuite.stdout.unhook();
+      suite.stderr = currentSuite.stderr.unhook();
       delete currentSuite.stdout;
       delete currentSuite.stderr;
     }
   }
 
   /**
-   * @param {Mocha.Test} test
+   * @param {MongoMochaTest} test
    */
   onTest(test) {
-    Reflect.set(test, 'startTime', new Date());
+    test.startTime = new Date();
   }
 
   /**
-   * @param {Mocha.Test} test
+   * @param {MongoMochaTest} test
    */
   testEnd(test) {
-    Reflect.set(test, 'endTime', new Date());
-    Reflect.set(
-      test,
-      'elapsedTime',
-      Number(Reflect.get(test, 'endTime') - Reflect.get(test, 'startTime'))
-    );
+    test.endTime = new Date();
+    test.elapsedTime = Number(test.endTime) - Number(test.startTime);
   }
 
   /**
-   * @param {Mocha.Test} test
+   * @param {MongoMochaTest} test
    */
   pass(test) {
     if (REPORT_TO_STDIO) console.log(chalk.green(`✔ ${test.fullTitle()}`));
   }
 
   /**
-   * @param {Mocha.Test} test
-   * @param {{ message: any; }} error
+   * @param {MongoMochaTest} test
+   * @param {Error} error
    */
   fail(test, error) {
     if (REPORT_TO_STDIO) console.log(chalk.red(`⨯ ${test.fullTitle()} -- ${error.message}`));
-    Reflect.set(test, 'error', error);
+    test.error = error;
   }
 
   /**
-   * @param {Mocha.Test} test
+   * @param {MongoMochaTest} test
    */
   pending(test) {
     if (REPORT_TO_STDIO) console.log(chalk.cyan(`↬ ${test.fullTitle()}`));
-    Reflect.set(test, 'skipped', true);
+    test.skipped = true;
   }
 }
 
