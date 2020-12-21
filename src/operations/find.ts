@@ -52,7 +52,7 @@ export interface FindOptions extends CommandOperationOptions {
   noCursorTimeout?: boolean;
   /** Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields). */
   collation?: CollationOptions;
-  /** Enables writing to temporary files on the server. */
+  /** Allows disk use for blocking sort operations exceeding 100MB memory. (MongoDB 3.2 or higher) */
   allowDiskUse?: boolean;
   /** Determines whether to close the cursor after the first batch. Defaults to false. */
   singleBatch?: boolean;

@@ -4943,7 +4943,7 @@ describe('Operation (Promises)', function () {
         db.createCollection('a_simple_collection_2_with_promise', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           writeConcern: { w: 1 }
         })
           .then(function (_collection) {

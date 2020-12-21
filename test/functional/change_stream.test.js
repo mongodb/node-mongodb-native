@@ -1,5 +1,4 @@
 'use strict';
-const path = require('path');
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
 const { MongoNetworkError } = require('../../src/error');
@@ -11,6 +10,8 @@ const expect = chai.expect;
 const sinon = require('sinon');
 const { ObjectId, Timestamp, Long, ReadPreference } = require('../../src');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const crypto = require('crypto');
 
 chai.use(require('chai-subset'));
@@ -1460,13 +1461,14 @@ describe('Change Streams', function () {
   it('should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
+        os: '!win32', // (fs.watch isn't reliable on win32)
         generators: true,
         topology: 'single',
         mongodb: '>=3.6'
       }
     },
     test: function (done) {
-      const filename = path.join(__dirname, '_nodemongodbnative_resumepipe.txt');
+      const filename = path.join(os.tmpdir(), '_nodemongodbnative_resumepipe.txt');
       this.defer(() => fs.unlinkSync(filename));
       const configuration = this.configuration;
 
@@ -1578,6 +1580,7 @@ describe('Change Streams', function () {
           const changeStream = collection.watch(pipeline);
 
           const outStream = fs.createWriteStream(filename);
+          this.defer(() => outStream.close());
 
           changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
           this.defer(() => changeStream.close());

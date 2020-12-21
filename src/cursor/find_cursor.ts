@@ -354,6 +354,21 @@ export class FindCursor extends AbstractCursor {
   }
 
   /**
+   * Allows disk use for blocking sort operations exceeding 100MB memory. (MongoDB 3.2 or higher)
+   *
+   * @remarks
+   * {@link https://docs.mongodb.com/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
+   */
+  allowDiskUse(): this {
+    assertUninitialized(this);
+    if (!this[kBuiltOptions].sort) {
+      throw new MongoError('allowDiskUse requires a sort specification');
+    }
+    this[kBuiltOptions].allowDiskUse = true;
+    return this;
+  }
+
+  /**
    * Set the collation options for the cursor.
    *
    * @param value - The cursor collation options (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).

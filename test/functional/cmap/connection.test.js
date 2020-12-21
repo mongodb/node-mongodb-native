@@ -55,18 +55,25 @@ describe('Connection', function () {
     });
   });
 
-  it('should support socket timeouts', function (done) {
-    const connectOptions = Object.assign({
-      host: '240.0.0.1',
-      connectionType: Connection,
-      connectionTimeout: 500
-    });
+  it('should support socket timeouts', {
+    metadata: {
+      requires: {
+        os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
+      }
+    },
+    test: function (done) {
+      const connectOptions = Object.assign({
+        host: '240.0.0.1',
+        connectionType: Connection,
+        connectionTimeout: 500
+      });
 
-    connect(connectOptions, err => {
-      expect(err).to.exist;
-      expect(err).to.match(/timed out/);
-      done();
-    });
+      connect(connectOptions, err => {
+        expect(err).to.exist;
+        expect(err).to.match(/timed out/);
+        done();
+      });
+    }
   });
 
   it('should support calling back multiple times on exhaust commands', {

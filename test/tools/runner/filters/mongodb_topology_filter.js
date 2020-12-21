@@ -7,7 +7,7 @@ const { TopologyType } = require('../../../../src/sdam/common');
  * example:
  * metadata: {
  *    requires: {
- *      topology: 'single' | 'replicaset' | 'sharded' | 'auth' | 'ssl'
+ *      topology: 'single' | 'replicaset' | 'sharded'
  *    }
  * }
  */

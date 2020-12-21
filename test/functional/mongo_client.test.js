@@ -93,7 +93,7 @@ describe('MongoClient', function () {
   });
 
   it('should correctly connect to mongodb using domain socket', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;

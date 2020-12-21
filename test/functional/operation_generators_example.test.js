@@ -4620,7 +4620,7 @@ describe('Operation (Generators)', function () {
         var collection = yield db.createCollection('a_simple_collection_2_with_generators', {
           capped: true,
           size: 100000,
-          max: 10000,
+          max: 1000,
           writeConcern: { w: 1 }
         });
         var docs = [];
