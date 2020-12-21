@@ -1072,6 +1072,9 @@ export abstract class BulkOperationBase {
 
     if ('replaceOne' in op || 'updateOne' in op || 'updateMany' in op) {
       if ('replaceOne' in op) {
+        if ('q' in op.replaceOne) {
+          throw new TypeError('Raw operations are not allowed');
+        }
         const updateStatement = makeUpdateStatement(
           op.replaceOne.filter,
           op.replaceOne.replacement,
@@ -1080,11 +1083,13 @@ export abstract class BulkOperationBase {
         if (hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Replacement document must not use atomic operators');
         }
-
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
 
       if ('updateOne' in op) {
+        if ('q' in op.updateOne) {
+          throw new TypeError('Raw operations are not allowed');
+        }
         const updateStatement = makeUpdateStatement(op.updateOne.filter, op.updateOne.update, {
           ...op.updateOne,
           multi: false
@@ -1092,11 +1097,13 @@ export abstract class BulkOperationBase {
         if (!hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Update document requires atomic operators');
         }
-
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
 
       if ('updateMany' in op) {
+        if ('q' in op.updateMany) {
+          throw new TypeError('Raw operations are not allowed');
+        }
         const updateStatement = makeUpdateStatement(op.updateMany.filter, op.updateMany.update, {
           ...op.updateMany,
           multi: true
@@ -1104,7 +1111,6 @@ export abstract class BulkOperationBase {
         if (!hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Update document requires atomic operators');
         }
-
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
     }
@@ -1124,6 +1130,9 @@ export abstract class BulkOperationBase {
     }
 
     if ('deleteOne' in op) {
+      if ('q' in op.deleteOne) {
+        throw new TypeError('Raw operations are not allowed');
+      }
       return this.addToOperationsList(
         BatchType.DELETE,
         makeDeleteStatement(op.deleteOne.filter, { ...op.deleteOne, limit: 1 })
@@ -1131,6 +1140,9 @@ export abstract class BulkOperationBase {
     }
 
     if ('deleteMany' in op) {
+      if ('q' in op.deleteMany) {
+        throw new TypeError('Raw operations are not allowed');
+      }
       return this.addToOperationsList(
         BatchType.DELETE,
         makeDeleteStatement(op.deleteMany.filter, { ...op.deleteMany, limit: 0 })

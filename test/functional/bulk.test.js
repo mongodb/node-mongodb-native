@@ -1888,4 +1888,26 @@ describe('Bulk', function () {
       });
     })
   });
+
+  it('should throw an error if raw operations are passed to bulkWrite', function () {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('single_bulk_write_error');
+      return coll
+        .bulkWrite([
+          { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
+          { deleteOne: { q: { c: 1 } } }
+        ])
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err).to.match(/Raw operations are not allowed/);
+          }
+        );
+    });
+  });
 });

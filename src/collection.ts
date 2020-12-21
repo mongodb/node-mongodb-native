@@ -347,6 +347,7 @@ export class Collection {
    *
    *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
    *```
+   * Please note that raw operations are no longer accepted as of driver version 4.0.
    *
    * If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
