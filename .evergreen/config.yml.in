@@ -26,10 +26,8 @@ functions:
     - command: git.get_project
       params:
         directory: "src"
-    # Applies the submitted patch, if any
-    # Deprecated. Should be removed. But still needed for certain agents (ZAP)
-    - command: git.apply_patch
-    # Make an evergreen exapanstion file with dynamic values
+        shallow_clone: true # speed things up by limiting clone depth to 100
+    # Make an evergreen expansion file with dynamic values
     - command: shell.exec
       params:
         working_dir: "src"
@@ -42,10 +40,19 @@ functions:
            fi
 
            export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+
            export PROJECT_DIRECTORY="$(pwd)"
            export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
            export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
            export UPLOAD_BUCKET="${project}"
+
+           # fix paths on windows
+           if [ "Windows_NT" = "$OS" ]; then
+             export DRIVERS_TOOLS=$(cygpath -m -a $DRIVERS_TOOLS)
+             export MONGO_ORCHESTRATION_HOME=$(cygpath -m -a $MONGO_ORCHESTRATION_HOME)
+             export MONGODB_BINARIES=$(cygpath -m -a $MONGODB_BINARIES)
+             export PROJECT_DIRECTORY=$(cygpath -m -a $PROJECT_DIRECTORY)
+           fi
 
            cat <<EOT > expansion.yml
            CURRENT_VERSION: "$CURRENT_VERSION"
@@ -80,13 +87,7 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          rm -rf $DRIVERS_TOOLS
-          if [ "${project}" = "drivers-tools" ]; then
-            # If this was a patch build, doing a fresh clone would not actually test the patch
-            cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
-          else
-            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-          fi
+          git clone --depth 1 git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
 
   "bootstrap mongo-orchestration":
@@ -134,6 +135,7 @@ functions:
       type: test
       params:
         working_dir: "src"
+        timeout_secs: 60
         script: |
           ${PREPARE_SHELL}
 
@@ -145,7 +147,8 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run checks":
     - command: shell.exec
@@ -159,6 +162,7 @@ functions:
   "cleanup":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           rm -rf $DRIVERS_TOOLS || true
@@ -166,27 +170,30 @@ functions:
   "fix absolute paths":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
 
-  # "windows fix":
-  #   - command: shell.exec
-  #     params:
-  #       script: |
-  #         ${PREPARE_SHELL}
-  #         for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
-  #           cat $i | tr -d '\r' > $i.new
-  #           mv $i.new $i
-  #         done
-  #         # Copy client certificate because symlinks do not work on Windows.
-  #         cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
+  "windows fix":
+    - command: shell.exec
+      params:
+        silent: true
+        script: |
+          ${PREPARE_SHELL}
+          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+          #   cat $i | tr -d '\r' > $i.new
+          #   mv $i.new $i
+          # done
+          # Copy client certificate because symlinks do not work on Windows.
+          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
 
   "make files executable":
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -200,7 +207,11 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+    - command: expansions.update
+      params:
+        file: src/deps-expansion.yml
 
   "run atlas tests":
     - command: shell.exec
@@ -495,10 +506,13 @@ functions:
 pre:
   - func: "fetch source"
   - func: "prepare resources"
-  # - func: "windows fix"
+  - func: "windows fix"
   - func: "fix absolute paths"
   - func: "make files executable"
 
 post:
   - func: "upload test results"
   - func: "cleanup"
+
+ignore:
+  - '*.md'

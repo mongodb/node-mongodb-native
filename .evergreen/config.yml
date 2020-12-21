@@ -11,7 +11,7 @@ functions:
     - command: git.get_project
       params:
         directory: src
-    - command: git.apply_patch
+        shallow_clone: true
     - command: shell.exec
       params:
         working_dir: src
@@ -24,10 +24,19 @@ functions:
           fi
 
           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
           export UPLOAD_BUCKET="${project}"
+
+          # fix paths on windows
+          if [ "Windows_NT" = "$OS" ]; then
+            export DRIVERS_TOOLS=$(cygpath -m -a $DRIVERS_TOOLS)
+            export MONGO_ORCHESTRATION_HOME=$(cygpath -m -a $MONGO_ORCHESTRATION_HOME)
+            export MONGODB_BINARIES=$(cygpath -m -a $MONGODB_BINARIES)
+            export PROJECT_DIRECTORY=$(cygpath -m -a $PROJECT_DIRECTORY)
+          fi
 
           cat <<EOT > expansion.yml
           CURRENT_VERSION: "$CURRENT_VERSION"
@@ -60,14 +69,7 @@ functions:
         script: >
           ${PREPARE_SHELL}
 
-          rm -rf $DRIVERS_TOOLS
-
-          if [ "${project}" = "drivers-tools" ]; then
-            # If this was a patch build, doing a fresh clone would not actually test the patch
-            cp -R ${PROJECT_DIRECTORY}/ $DRIVERS_TOOLS
-          else
-            git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-          fi
+          git clone --depth 1 git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
 
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" >
           $MONGO_ORCHESTRATION_HOME/orchestration.config
@@ -113,6 +115,7 @@ functions:
       type: test
       params:
         working_dir: src
+        timeout_secs: 60
         script: |
           ${PREPARE_SHELL}
 
@@ -124,7 +127,8 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -136,20 +140,35 @@ functions:
   cleanup:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           rm -rf $DRIVERS_TOOLS || true
   fix absolute paths:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
+  windows fix:
+    - command: shell.exec
+      params:
+        silent: true
+        script: |
+          ${PREPARE_SHELL}
+          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+          #   cat $i | tr -d '\r' > $i.new
+          #   mv $i.new $i
+          # done
+          # Copy client certificate because symlinks do not work on Windows.
+          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
   make files executable:
     - command: shell.exec
       params:
+        silent: true
         script: |
           ${PREPARE_SHELL}
           for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
@@ -162,7 +181,11 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+    - command: expansions.update
+      params:
+        file: src/deps-expansion.yml
   run atlas tests:
     - command: shell.exec
       type: test
@@ -439,11 +462,14 @@ functions:
 pre:
   - func: fetch source
   - func: prepare resources
+  - func: windows fix
   - func: fix absolute paths
   - func: make files executable
 post:
   - func: upload test results
   - func: cleanup
+ignore:
+  - '*.md'
 tasks:
   - name: test-latest-server
     tags:
@@ -1186,7 +1212,7 @@ buildvariants:
     tasks: *ref_0
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
-    run_on: ubuntu1404-test
+    run_on: ubuntu1404-large
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
@@ -1214,13 +1240,13 @@ buildvariants:
       - test-auth-ldap
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
-    run_on: ubuntu1404-test
+    run_on: ubuntu1404-large
     expansions:
       NODE_LTS_NAME: erbium
     tasks: *ref_1
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
@@ -1274,11 +1300,60 @@ buildvariants:
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
+  - name: windows-64-vs2015-dubnium
+    display_name: Windows (VS2015) Node Dubnium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2015
+    tasks: &ref_3
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+  - name: windows-64-vs2015-erbium
+    display_name: Windows (VS2015) Node Erbium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2015
+    tasks: *ref_3
+  - name: windows-64-vs2017-dubnium
+    display_name: Windows (VS2017) Node Dubnium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: dubnium
+      MSVS_VERSION: 2017
+    tasks: *ref_3
+  - name: windows-64-vs2017-erbium
+    display_name: Windows (VS2017) Node Erbium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2017
+    tasks: *ref_3
   - name: lint
     display_name: lint
     run_on: rhel70

@@ -9,7 +9,7 @@ describe('Connection', function () {
   });
 
   it('should correctly start monitoring for single server connection', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -29,7 +29,7 @@ describe('Connection', function () {
   });
 
   it('should correctly connect to server using domain socket', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -97,7 +97,7 @@ describe('Connection', function () {
   });
 
   it('should connect to server using domain socket with undefined port', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', os: '!win32' } },
 
     test: function (done) {
       var configuration = this.configuration;

@@ -2,6 +2,8 @@
 const { assert: test, filterForCommands, withClient, withMonitoredClient } = require('./shared');
 const { setupDatabase } = require('./shared');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
@@ -1840,7 +1842,7 @@ describe('Cursor', function () {
           collection.insertMany(docs, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
-            const filename = '/tmp/_nodemongodbnative_stream_out.txt';
+            const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
             const out = fs.createWriteStream(filename);
             const stream = collection.find().stream({
               transform: doc => JSON.stringify(doc)
@@ -1869,12 +1871,13 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldCloseDeadTailableCursors', {
+  it('should close dead tailable cursors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
-      sessions: { skipLeakTests: true }
+      sessions: { skipLeakTests: true },
+      os: '!win32' // NODE-2943: timeout on windows
     },
 
     test: function (done) {

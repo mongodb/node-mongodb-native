@@ -98,16 +98,23 @@ describe('Connect Tests', function () {
     });
   });
 
-  it('should allow a cancellaton token', function (done) {
-    const cancellationToken = new EventEmitter();
-    setTimeout(() => cancellationToken.emit('cancel'), 500);
-    // set no response handler for mock server, effecively blackhole requests
+  it('should allow a cancellaton token', {
+    metadata: {
+      requires: {
+        os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
+      }
+    },
+    test: function (done) {
+      const cancellationToken = new EventEmitter();
+      setTimeout(() => cancellationToken.emit('cancel'), 500);
+      // set no response handler for mock server, effecively blackhole requests
 
-    connect({ host: '240.0.0.1' }, cancellationToken, (err, conn) => {
-      expect(err).to.exist;
-      expect(err).to.match(/connection establishment was cancelled/);
-      expect(conn).to.not.exist;
-      done();
-    });
+      connect({ host: '240.0.0.1' }, cancellationToken, (err, conn) => {
+        expect(err).to.exist;
+        expect(err).to.match(/connection establishment was cancelled/);
+        expect(conn).to.not.exist;
+        done();
+      });
+    }
   });
 });
