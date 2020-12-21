@@ -1,6 +1,6 @@
 import { defineAspects, Aspect, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace, collationNotSupported } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -88,6 +88,12 @@ export class DeleteOperation extends CommandOperation<Document> {
       }
     }
 
+    const statementWithCollation = this.statements.find(statement => !!statement.collation);
+    if (statementWithCollation && collationNotSupported(server, statementWithCollation)) {
+      callback(new MongoError(`server ${server.name} does not support collation`));
+      return;
+    }
+
     super.executeCommand(server, session, command, callback);
   }
 }
@@ -132,7 +138,7 @@ export class DeleteManyOperation extends DeleteOperation {
   }
 }
 
-function makeDeleteStatement(
+export function makeDeleteStatement(
   filter: Document,
   options: DeleteOptions & { limit?: number }
 ): DeleteStatement {

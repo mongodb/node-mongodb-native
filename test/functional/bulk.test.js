@@ -1,5 +1,11 @@
 'use strict';
-const { withClient, withClientV2, setupDatabase, ignoreNsNotFound } = require('./shared');
+const {
+  withClient,
+  withClientV2,
+  withMonitoredClient,
+  setupDatabase,
+  ignoreNsNotFound
+} = require('./shared');
 const test = require('./shared').assert;
 const { MongoError } = require('../../src/error');
 const { Long } = require('../../src');
@@ -1841,4 +1847,67 @@ describe('Bulk', function () {
       });
     })
   );
+
+  it('should apply collation via FindOperators', {
+    metadata: { requires: { mongodb: '>= 3.4' } },
+    test: withMonitoredClient(['update', 'delete'], function (client, events, done) {
+      const locales = ['fr', 'de', 'es'];
+      const bulk = client.db().collection('coll').initializeOrderedBulkOp();
+
+      // updates
+      bulk
+        .find({ b: 1 })
+        .collation({ locale: locales[0] })
+        .updateOne({ $set: { b: 2 } });
+      bulk
+        .find({ b: 2 })
+        .collation({ locale: locales[1] })
+        .update({ $set: { b: 3 } });
+      bulk.find({ b: 3 }).collation({ locale: locales[2] }).replaceOne({ b: 2 });
+
+      // deletes
+      bulk.find({ b: 2 }).collation({ locale: locales[0] }).removeOne();
+      bulk.find({ b: 1 }).collation({ locale: locales[1] }).remove();
+
+      bulk.execute(err => {
+        expect(err).to.not.exist;
+        expect(events).to.be.an('array').with.length.at.least(1);
+        expect(events[0]).property('commandName').to.equal('update');
+        const updateCommand = events[0].command;
+        expect(updateCommand).property('updates').to.be.an('array').with.length(3);
+        updateCommand.updates.forEach((statement, idx) => {
+          expect(statement).property('collation').to.eql({ locale: locales[idx] });
+        });
+        expect(events[1]).property('commandName').to.equal('delete');
+        const deleteCommand = events[1].command;
+        expect(deleteCommand).property('deletes').to.be.an('array').with.length(2);
+        deleteCommand.deletes.forEach((statement, idx) => {
+          expect(statement).property('collation').to.eql({ locale: locales[idx] });
+        });
+        client.close(done);
+      });
+    })
+  });
+
+  it('should throw an error if raw operations are passed to bulkWrite', function () {
+    const client = this.configuration.newClient();
+    return client.connect().then(() => {
+      this.defer(() => client.close());
+
+      const coll = client.db().collection('single_bulk_write_error');
+      return coll
+        .bulkWrite([
+          { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
+          { deleteOne: { q: { c: 1 } } }
+        ])
+        .then(
+          () => {
+            throw new Error('expected a bulk error');
+          },
+          err => {
+            expect(err).to.match(/Raw operations are not allowed/);
+          }
+        );
+    });
+  });
 });

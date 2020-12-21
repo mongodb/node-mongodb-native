@@ -7,14 +7,13 @@ import {
   hasAtomicOperators,
   Callback,
   MongoDBNamespace,
-  maxWireVersion,
   getTopology,
   resolveOptions
 } from '../utils';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { UpdateOperation, UpdateStatement } from '../operations/update';
-import { DeleteOperation, DeleteStatement } from '../operations/delete';
+import { UpdateOperation, UpdateStatement, makeUpdateStatement } from '../operations/update';
+import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { WriteConcern } from '../write_concern';
 import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
@@ -727,97 +726,66 @@ export class FindOperators {
 
   /** Add a multiple update operation to the bulk operation */
   update(updateDocument: Document): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Perform upsert
-    const upsert =
-      typeof this.bulkOperation.s.currentOp.upsert === 'boolean'
-        ? this.bulkOperation.s.currentOp.upsert
-        : false;
-
-    // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: updateDocument,
-      multi: true,
-      upsert: upsert
-    };
-
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
-    }
-
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+    const currentOp = buildCurrentOp(this.bulkOperation);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      makeUpdateStatement(currentOp.selector, updateDocument, {
+        ...currentOp,
+        multi: true
+      })
+    );
   }
 
   /** Add a single update operation to the bulk operation */
   updateOne(updateDocument: Document): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Perform upsert
-    const upsert =
-      typeof this.bulkOperation.s.currentOp.upsert === 'boolean'
-        ? this.bulkOperation.s.currentOp.upsert
-        : false;
-
-    // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: updateDocument,
-      multi: false,
-      upsert: upsert
-    };
-
-    if (updateDocument.hint) {
-      document.hint = updateDocument.hint;
-    }
-
     if (!hasAtomicOperators(updateDocument)) {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+    const currentOp = buildCurrentOp(this.bulkOperation);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      makeUpdateStatement(currentOp.selector, updateDocument, { ...currentOp, multi: false })
+    );
   }
 
   /** Add a replace one operation to the bulk operation */
   replaceOne(replacement: Document): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Perform upsert
-    const upsert =
-      typeof this.bulkOperation.s.currentOp.upsert === 'boolean'
-        ? this.bulkOperation.s.currentOp.upsert
-        : false;
-
-    // Establish the update command
-    const document: Document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      u: replacement,
-      multi: false,
-      upsert: upsert
-    };
-
-    if (replacement.hint) {
-      document.hint = replacement.hint;
-    }
-
     if (hasAtomicOperators(replacement)) {
       throw new TypeError('Replacement document must not use atomic operators');
     }
 
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.UPDATE, document);
+    const currentOp = buildCurrentOp(this.bulkOperation);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.UPDATE,
+      makeUpdateStatement(currentOp.selector, replacement, { ...currentOp, multi: false })
+    );
+  }
+
+  /** Add a delete one operation to the bulk operation */
+  deleteOne(): BulkOperationBase {
+    const currentOp = buildCurrentOp(this.bulkOperation);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.DELETE,
+      makeDeleteStatement(currentOp.selector, { ...currentOp, limit: 1 })
+    );
+  }
+
+  /** Add a delete many operation to the bulk operation */
+  delete(): BulkOperationBase {
+    const currentOp = buildCurrentOp(this.bulkOperation);
+    return this.bulkOperation.addToOperationsList(
+      BatchType.DELETE,
+      makeDeleteStatement(currentOp.selector, { ...currentOp, limit: 0 })
+    );
+  }
+
+  removeOne(): BulkOperationBase {
+    return this.deleteOne();
+  }
+
+  remove(): BulkOperationBase {
+    return this.delete();
   }
 
   /** Upsert modifier for update bulk operation, noting that this operation is an upsert. */
@@ -830,46 +798,14 @@ export class FindOperators {
     return this;
   }
 
-  /** Add a delete one operation to the bulk operation */
-  deleteOne(): BulkOperationBase {
+  /** Specifies the collation for the query condition. */
+  collation(collation: CollationOptions): this {
     if (!this.bulkOperation.s.currentOp) {
       this.bulkOperation.s.currentOp = {};
     }
 
-    // Establish the update command
-    const document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      limit: 1
-    };
-
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.DELETE, document);
-  }
-
-  /** Add a delete many operation to the bulk operation */
-  delete(): BulkOperationBase {
-    if (!this.bulkOperation.s.currentOp) {
-      this.bulkOperation.s.currentOp = {};
-    }
-
-    // Establish the update command
-    const document = {
-      q: this.bulkOperation.s.currentOp.selector,
-      limit: 0
-    };
-
-    // Clear out current Op
-    this.bulkOperation.s.currentOp = undefined;
-    return this.bulkOperation.addToOperationsList(BatchType.DELETE, document);
-  }
-
-  removeOne(): BulkOperationBase {
-    return this.deleteOne();
-  }
-
-  remove(): BulkOperationBase {
-    return this.delete();
+    this.bulkOperation.s.currentOp.collation = collation;
+    return this;
   }
 }
 
@@ -1136,32 +1072,45 @@ export abstract class BulkOperationBase {
 
     if ('replaceOne' in op || 'updateOne' in op || 'updateMany' in op) {
       if ('replaceOne' in op) {
-        const updateStatement = makeUpdateStatement(this.s.topology, op.replaceOne, false);
+        if ('q' in op.replaceOne) {
+          throw new TypeError('Raw operations are not allowed');
+        }
+        const updateStatement = makeUpdateStatement(
+          op.replaceOne.filter,
+          op.replaceOne.replacement,
+          { ...op.replaceOne, multi: false }
+        );
         if (hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Replacement document must not use atomic operators');
         }
-
-        return this.addToOperationsList(
-          BatchType.UPDATE,
-          makeUpdateStatement(this.s.topology, op.replaceOne, false)
-        );
+        return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
 
       if ('updateOne' in op) {
-        const updateStatement = makeUpdateStatement(this.s.topology, op.updateOne, false);
+        if ('q' in op.updateOne) {
+          throw new TypeError('Raw operations are not allowed');
+        }
+        const updateStatement = makeUpdateStatement(op.updateOne.filter, op.updateOne.update, {
+          ...op.updateOne,
+          multi: false
+        });
         if (!hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Update document requires atomic operators');
         }
-
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
 
       if ('updateMany' in op) {
-        const updateStatement = makeUpdateStatement(this.s.topology, op.updateMany, true);
+        if ('q' in op.updateMany) {
+          throw new TypeError('Raw operations are not allowed');
+        }
+        const updateStatement = makeUpdateStatement(op.updateMany.filter, op.updateMany.update, {
+          ...op.updateMany,
+          multi: true
+        });
         if (!hasAtomicOperators(updateStatement.u)) {
           throw new TypeError('Update document requires atomic operators');
         }
-
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
     }
@@ -1169,28 +1118,34 @@ export abstract class BulkOperationBase {
     if ('removeOne' in op) {
       return this.addToOperationsList(
         BatchType.DELETE,
-        makeDeleteStatement(this.s.topology, op.removeOne, false)
+        makeDeleteStatement(op.removeOne.filter, { ...op.removeOne, limit: 1 })
       );
     }
 
     if ('removeMany' in op) {
       return this.addToOperationsList(
         BatchType.DELETE,
-        makeDeleteStatement(this.s.topology, op.removeMany, true)
+        makeDeleteStatement(op.removeMany.filter, { ...op.removeMany, limit: 0 })
       );
     }
 
     if ('deleteOne' in op) {
+      if ('q' in op.deleteOne) {
+        throw new TypeError('Raw operations are not allowed');
+      }
       return this.addToOperationsList(
         BatchType.DELETE,
-        makeDeleteStatement(this.s.topology, op.deleteOne, false)
+        makeDeleteStatement(op.deleteOne.filter, { ...op.deleteOne, limit: 1 })
       );
     }
 
     if ('deleteMany' in op) {
+      if ('q' in op.deleteMany) {
+        throw new TypeError('Raw operations are not allowed');
+      }
       return this.addToOperationsList(
         BatchType.DELETE,
-        makeDeleteStatement(this.s.topology, op.deleteMany, true)
+        makeDeleteStatement(op.deleteMany.filter, { ...op.deleteMany, limit: 0 })
       );
     }
 
@@ -1328,94 +1283,6 @@ function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   return false;
 }
 
-function makeUpdateStatement(
-  topology: Topology,
-  model: ReplaceOneModel | UpdateOneModel | UpdateManyModel,
-  multi: boolean
-): UpdateStatement {
-  // NOTE: legacy support for a raw statement, consider removing
-  if (isUpdateStatement(model)) {
-    if ('collation' in model && maxWireVersion(topology) < 5) {
-      throw new TypeError('Topology does not support collation');
-    }
-
-    return model as UpdateStatement;
-  }
-
-  const statement: UpdateStatement = {
-    q: model.filter,
-    u: 'update' in model ? model.update : model.replacement,
-    multi,
-    upsert: 'upsert' in model ? model.upsert : false
-  };
-
-  if ('collation' in model) {
-    if (maxWireVersion(topology) < 5) {
-      throw new TypeError('Topology does not support collation');
-    }
-
-    statement.collation = model.collation;
-  }
-
-  if ('arrayFilters' in model) {
-    // TODO: this check should be done at command construction against a connection, not a topology
-    if (maxWireVersion(topology) < 6) {
-      throw new TypeError('arrayFilters are only supported on MongoDB 3.6+');
-    }
-
-    statement.arrayFilters = model.arrayFilters;
-  }
-
-  if ('hint' in model) {
-    statement.hint = model.hint;
-  }
-
-  return statement;
-}
-
-function isUpdateStatement(model: Document): model is UpdateStatement {
-  return 'q' in model;
-}
-
-function makeDeleteStatement(
-  topology: Topology,
-  model: DeleteOneModel | DeleteManyModel,
-  multi: boolean
-): DeleteStatement {
-  // NOTE: legacy support for a raw statement, consider removing
-  if (isDeleteStatement(model)) {
-    if ('collation' in model && maxWireVersion(topology) < 5) {
-      throw new TypeError('Topology does not support collation');
-    }
-
-    model.limit = multi ? 0 : 1;
-    return model as DeleteStatement;
-  }
-
-  const statement: DeleteStatement = {
-    q: model.filter,
-    limit: multi ? 0 : 1
-  };
-
-  if ('collation' in model) {
-    if (maxWireVersion(topology) < 5) {
-      throw new TypeError('Topology does not support collation');
-    }
-
-    statement.collation = model.collation;
-  }
-
-  if ('hint' in model) {
-    statement.hint = model.hint;
-  }
-
-  return statement;
-}
-
-function isDeleteStatement(model: Document): model is DeleteStatement {
-  return 'q' in model;
-}
-
 function isInsertBatch(batch: Batch): boolean {
   return batch.batchType === BatchType.INSERT;
 }
@@ -1426,4 +1293,11 @@ function isUpdateBatch(batch: Batch): batch is Batch<UpdateStatement> {
 
 function isDeleteBatch(batch: Batch): batch is Batch<DeleteStatement> {
   return batch.batchType === BatchType.DELETE;
+}
+
+function buildCurrentOp(bulkOp: BulkOperationBase): Document {
+  let { currentOp } = bulkOp.s;
+  bulkOp.s.currentOp = undefined;
+  if (!currentOp) currentOp = {};
+  return currentOp;
 }

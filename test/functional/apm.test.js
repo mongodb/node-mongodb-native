@@ -483,9 +483,9 @@ describe('APM', function () {
           .collection('apm_test_3')
           .bulkWrite(
             [
-              { insertOne: { a: 1 } },
-              { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
-              { deleteOne: { q: { c: 1 } } }
+              { insertOne: { document: { a: 1 } } },
+              { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+              { deleteOne: { filter: { c: 1 } } }
             ],
             { ordered: true }
           )

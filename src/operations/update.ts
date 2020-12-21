@@ -97,7 +97,11 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
-    if (collationNotSupported(server, options)) {
+    const statementWithCollation = this.statements.find(statement => !!statement.collation);
+    if (
+      collationNotSupported(server, options) ||
+      (statementWithCollation && collationNotSupported(server, statementWithCollation))
+    ) {
       callback(new MongoError(`server ${server.name} does not support collation`));
       return;
     }
@@ -112,6 +116,11 @@ export class UpdateOperation extends CommandOperation<Document> {
 
     if (this.explain && maxWireVersion(server) < 3) {
       callback(new MongoError(`server ${server.name} does not support explain on update`));
+      return;
+    }
+
+    if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
+      callback(new MongoError('arrayFilters are only supported on MongoDB 3.6+'));
       return;
     }
 
@@ -247,7 +256,7 @@ export class ReplaceOneOperation extends UpdateOperation {
   }
 }
 
-function makeUpdateStatement(
+export function makeUpdateStatement(
   filter: Document,
   update: Document,
   options: UpdateOptions & { multi?: boolean }
