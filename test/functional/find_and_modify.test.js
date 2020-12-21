@@ -226,4 +226,46 @@ describe('Find and Modify', function() {
       });
     }
   });
+
+  it('should honor ignoreUndefined on all findAndModify commands', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({}, { ignoreUndefined: true });
+    client.connect((err, client) => {
+      expect(err).to.be.null;
+      const db = client.db(configuration.db);
+      const collection = db.collection('findAndModifyIgnoreUndefined');
+      collection.findOneAndUpdate(
+        { test: 'test' },
+        {
+          $set: { undefined_1: undefined, null_1: null },
+          $setOnInsert: { undefined_2: undefined, null_2: null }
+        },
+        { upsert: true },
+        err => {
+          expect(err).to.be.null;
+          collection.findOne({ test: 'test' }, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result).to.have.property('null_1', null);
+            expect(result).to.not.have.property('undefined_1');
+            expect(result).to.have.property('null_2', null);
+            expect(result).to.not.have.property('undefined_2');
+            collection.findOneAndReplace(
+              { test: 'test' },
+              { test: 'test', undefined_3: undefined, null_3: null },
+              (err, result) => {
+                expect(err).to.not.exist;
+                expect(result).to.exist;
+                collection.findOne({ test: 'test' }, (err, result) => {
+                  expect(err).to.not.exist;
+                  expect(result).to.have.property('null_3', null);
+                  expect(result).to.not.have.property('undefined_3');
+                  client.close(done);
+                });
+              }
+            );
+          });
+        }
+      );
+    });
+  });
 });
