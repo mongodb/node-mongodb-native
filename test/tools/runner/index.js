@@ -116,7 +116,7 @@ function dumpAndExit() {
     try {
       wtfnode.dump();
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
 
     process.exit();

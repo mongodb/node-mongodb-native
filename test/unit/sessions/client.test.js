@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
 const test = {};
-describe('Sessions', function () {
+describe('Sessions - client/unit', function () {
   describe('Client', function () {
     afterEach(() => mock.cleanup());
     beforeEach(() => {

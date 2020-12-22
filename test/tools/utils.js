@@ -114,7 +114,7 @@ function topologyDescriptionDiff(lhs, rhs) {
 
 function visualizeMonitoringEvents(client) {
   function print(msg) {
-    console.log(`${chalk.white(new Date().toISOString())} ${msg}`);
+    console.error(`${chalk.white(new Date().toISOString())} ${msg}`);
   }
 
   client.on('serverHeartbeatStarted', event =>
@@ -156,7 +156,7 @@ function visualizeMonitoringEvents(client) {
 
   client.on('serverDescriptionChanged', event => {
     print(`${chalk.cyan('server')} [${event.address}] changed:`);
-    console.log(serverDescriptionDiff(event.previousDescription, event.newDescription));
+    console.error(serverDescriptionDiff(event.previousDescription, event.newDescription));
   });
 
   // topology information
@@ -172,7 +172,7 @@ function visualizeMonitoringEvents(client) {
     const diff = topologyDescriptionDiff(event.previousDescription, event.newDescription);
     if (diff !== '') {
       print(`${chalk.magenta('topology')} [topology#${event.topologyId}] changed:`);
-      console.log(diff);
+      console.error(diff);
     }
   });
 }

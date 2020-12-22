@@ -8,7 +8,7 @@ const { ServerSessionPool, ServerSession, ClientSession } = require('../../../sr
 const { now } = require('../../../src/utils');
 
 let test = {};
-describe('Sessions', function () {
+describe('Sessions - unit/core', function () {
   describe('ClientSession', function () {
     it('should throw errors with invalid parameters', {
       metadata: { requires: { topology: 'single' } },

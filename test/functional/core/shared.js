@@ -33,7 +33,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
         command: true
       },
       function (err, result) {
-        if (err) console.log(err.stack);
+        if (err) console.error(err.stack);
         // Close the pool
         _pool.destroy();
         // If we have an error return
@@ -74,7 +74,7 @@ function locateAuthMethod(configuration, cb) {
         command: true
       },
       function (err, result) {
-        if (err) console.log(err.stack);
+        if (err) console.error(err.stack);
         // Close the pool
         _pool.destroy();
         // If we have an error return

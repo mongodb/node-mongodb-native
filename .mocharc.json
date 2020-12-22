@@ -5,6 +5,6 @@
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
   "timeout": 60000,
-  "reporter": "spec-xunit-file",
+  "reporter": "test/tools/reporter/mongodb_reporter.js",
   "color": true
 }

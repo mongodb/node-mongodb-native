@@ -9,7 +9,7 @@ chai.use(sinonChai);
 const makeTestFunction = require('../tools/utils').makeTestFunction;
 const ensureCalledWith = require('../tools/utils').ensureCalledWith;
 
-describe('Deprecation Warnings', function () {
+describe('Deprecation Warnings - unit', function () {
   let messages = [];
   const deprecatedOptions = ['maxScan', 'snapshot', 'fields'];
   const defaultMessage = ' is deprecated and will be removed in a later version.';

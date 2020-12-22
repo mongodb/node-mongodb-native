@@ -30,7 +30,7 @@ const test = {
   }
 };
 
-describe('Sessions', function () {
+describe('Sessions - functional', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
