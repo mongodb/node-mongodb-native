@@ -1,10 +1,10 @@
 'use strict';
 const co = require('co');
-const mock = require('mongodb-mock-server');
+const mock = require('../tools/mock');
 const expect = require('chai').expect;
 const { ObjectId, Code } = require('../../src');
 
-const TEST_OPTIONS = { writeConcern: { w: 2, wtimeout: 1000 } };
+const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 
 class WriteConcernTest {
   constructor(configuration) {
@@ -110,7 +110,10 @@ function writeConcernTest(command, testFn) {
     t.run(command, (client, db) =>
       testFn.call(this, db, Object.assign({}, TEST_OPTIONS), err => {
         expect(err).to.not.exist;
-        expect(TEST_OPTIONS.writeConcern).to.deep.equal(t.commandResult.writeConcern);
+        expect({
+          w: TEST_OPTIONS.writeConcern.w,
+          wtimeout: TEST_OPTIONS.writeConcern.wtimeoutMS
+        }).to.deep.equal(t.commandResult.writeConcern);
         client.close(done);
       })
     );

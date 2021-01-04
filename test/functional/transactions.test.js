@@ -129,7 +129,7 @@ describe('Transactions', function () {
   describe('withTransaction', function () {
     let session, sessionPool;
     beforeEach(() => {
-      const topology = new Topology('localhost:27017');
+      const topology = new Topology('localhost:27017', {});
       sessionPool = topology.s.sessionPool;
       session = new ClientSession(topology, sessionPool);
     });

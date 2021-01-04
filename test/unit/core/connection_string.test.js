@@ -1,11 +1,10 @@
 'use strict';
 
-const { parseConnectionString } = require('../../../src/connection_string');
-const punycode = require('punycode');
 const { MongoParseError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
 const { parseOptions } = require('../../../src/connection_string');
+const { AuthMechanism } = require('../../../src/cmap/auth/defaultAuthProviders');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
@@ -30,197 +29,124 @@ const skipTests = [
 ];
 
 describe('Connection String', function () {
-  it('should support auth passed in through options', function (done) {
+  it('should not support auth passed with user', function () {
     const optionsWithUser = {
       authMechanism: 'SCRAM-SHA-1',
       auth: { user: 'testing', password: 'llamas' }
     };
 
+    expect(() => parseOptions('mongodb://localhost', optionsWithUser)).to.throw(MongoParseError);
+  });
+
+  it('should support auth passed with username', function () {
     const optionsWithUsername = {
       authMechanism: 'SCRAM-SHA-1',
       auth: { username: 'testing', password: 'llamas' }
     };
-
-    parseConnectionString('mongodb://localhost', optionsWithUser, (err, result) => {
-      expect(err).to.not.exist;
-      expect(result.auth).to.containSubset({
-        db: 'admin',
-        username: 'testing',
-        password: 'llamas'
-      });
-
-      parseConnectionString('mongodb://localhost', optionsWithUsername, (err, result) => {
-        expect(err).to.not.exist;
-        expect(result.auth).to.containSubset({
-          db: 'admin',
-          username: 'testing',
-          password: 'llamas'
-        });
-
-        done();
-      });
+    const options = parseOptions('mongodb://localhost', optionsWithUsername);
+    expect(options.credentials).to.containSubset({
+      source: 'admin',
+      username: 'testing',
+      password: 'llamas'
     });
   });
 
-  it('should provide a default port if one is not provided', function (done) {
-    parseConnectionString('mongodb://hostname', function (err, result) {
-      expect(err).to.not.exist;
-      expect(result.hosts[0].port).to.equal(27017);
-      done();
-    });
+  it('should provide a default port if one is not provided', function () {
+    const options = parseOptions('mongodb://hostname');
+    expect(options.hosts[0].socketPath).to.be.undefined;
+    expect(options.hosts[0].host).to.be.a('string');
+    expect(options.hosts[0].port).to.equal(27017);
   });
 
-  it('should correctly parse arrays', function (done) {
-    parseConnectionString('mongodb://hostname?foo=bar&foo=baz', function (err, result) {
-      expect(err).to.not.exist;
-      expect(result.options.foo).to.deep.equal(['bar', 'baz']);
-      done();
-    });
-  });
-
-  it('should parse boolean values', function (done) {
-    parseConnectionString('mongodb://hostname?retryWrites=1', function (err, result) {
-      expect(err).to.not.exist;
-      expect(result.options.retryWrites).to.equal(false);
-
-      parseConnectionString('mongodb://hostname?retryWrites=false', function (err, result) {
-        expect(err).to.not.exist;
-        expect(result.options.retryWrites).to.equal(false);
-
-        parseConnectionString('mongodb://hostname?retryWrites=true', function (err, result) {
-          expect(err).to.not.exist;
-          expect(result.options.retryWrites).to.equal(true);
-          done();
-        });
-      });
-    });
-  });
-
-  it('should parse compression options', function (done) {
-    parseConnectionString(
-      'mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4',
-      (err, result) => {
-        expect(err).to.not.exist;
-        expect(result.options).to.have.property('compression');
-        expect(result.options.compression).to.eql({
-          compressors: ['zlib'],
-          zlibCompressionLevel: 4
-        });
-
-        done();
-      }
+  it('should parse multiple readPreferenceTags', function () {
+    const options = parseOptions(
+      'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
     );
+    expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
   });
 
-  it('should parse `readConcernLevel`', function (done) {
-    parseConnectionString('mongodb://localhost/?readConcernLevel=local', (err, result) => {
-      expect(err).to.not.exist;
-      expect(result.options).to.have.property('readConcern');
-      expect(result.options.readConcern).to.eql({ level: 'local' });
-      done();
-    });
+  it('should parse boolean values', function () {
+    let options = parseOptions('mongodb://hostname?retryWrites=1');
+    expect(options.retryWrites).to.equal(true);
+    options = parseOptions('mongodb://hostname?retryWrites=false');
+    expect(options.retryWrites).to.equal(false);
+    options = parseOptions('mongodb://hostname?retryWrites=t');
+    expect(options.retryWrites).to.equal(true);
   });
 
-  it('should parse `authMechanismProperties`', function (done) {
-    parseConnectionString(
-      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI',
-      (err, result) => {
-        expect(err).to.not.exist;
+  it('should parse compression options', function () {
+    const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
+    expect(options).to.have.property('compressors');
+    expect(options.compressors).to.include('zlib');
+    expect(options.zlibCompressionLevel).to.equal(4);
+  });
 
-        const options = result.options;
-        expect(options).to.deep.include({
-          gssapiServiceName: 'other',
-          gssapiServiceRealm: 'blah',
-          gssapiCanonicalizeHostName: true
-        });
+  it('should parse `readConcernLevel`', function () {
+    const options = parseOptions('mongodb://localhost/?readConcernLevel=local');
+    expect(options).to.have.property('readConcern');
+    expect(options.readConcern.level).to.equal('local');
+  });
 
-        expect(options).to.have.property('authMechanism');
-        expect(options.authMechanism).to.equal('GSSAPI');
-
-        done();
-      }
+  it('should parse `authMechanismProperties`', function () {
+    const options = parseOptions(
+      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI'
     );
-  });
-
-  it('should parse a numeric authSource with variable width', function (done) {
-    parseConnectionString('mongodb://test@localhost/?authSource=0001', (err, result) => {
-      expect(err).to.not.exist;
-      expect(result.options).to.have.property('authSource');
-      expect(result.options.authSource).to.equal('0001');
-
-      done();
+    expect(options.credentials.mechanismProperties).to.deep.include({
+      SERVICE_NAME: 'other',
+      SERVICE_REALM: 'blah',
+      CANONICALIZE_HOST_NAME: true
     });
+    expect(options.credentials.mechanism).to.equal(AuthMechanism.MONGODB_GSSAPI);
   });
 
-  it('should parse a replicaSet with a leading number', function (done) {
-    parseConnectionString('mongodb://localhost/?replicaSet=123abc', (err, result) => {
-      expect(err).to.not.exist;
-      expect(result.options).to.have.property('replicaSet');
-      expect(result.options.replicaSet).to.equal('123abc');
-
-      done();
-    });
+  it('should parse a numeric authSource with variable width', function () {
+    const options = parseOptions('mongodb://test@localhost/?authSource=0001');
+    expect(options.credentials.source).to.equal('0001');
   });
 
-  it('should parse multiple readPreferenceTags', function (done) {
-    parseConnectionString(
-      'mongodb://localhost/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny',
-      (err, result) => {
-        expect(err).to.not.exist;
-        expect(result.options).to.have.property('readPreferenceTags');
-        expect(result.options.readPreferenceTags).to.deep.equal([
-          { dc: 'ny', rack: '1' },
-          { dc: 'ny' }
-        ]);
-
-        done();
-      }
-    );
+  it('should parse a replicaSet with a leading number', function () {
+    const options = parseOptions('mongodb://localhost/?replicaSet=123abc');
+    expect(options).to.have.property('replicaSet');
+    expect(options.replicaSet).to.equal('123abc');
   });
 
   describe('validation', function () {
-    it('should validate compression options', function (done) {
-      parseConnectionString('mongodb://localhost/?zlibCompressionLevel=15', err => {
-        expect(err).to.exist;
-
-        parseConnectionString('mongodb://localhost/?compressors=bunnies', err => {
-          expect(err).to.exist;
-
-          done();
-        });
-      });
+    it('should validate compressors options', function () {
+      expect(() => parseOptions('mongodb://localhost/?compressors=bunnies')).to.throw(
+        MongoParseError,
+        'bunnies is not a valid compression mechanism'
+      );
     });
 
-    it('should validate authMechanism', function (done) {
-      parseConnectionString('mongodb://localhost/?authMechanism=DOGS', err => {
-        expect(err).to.exist;
-        done();
-      });
+    it('should validate authMechanism', function () {
+      expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
+        MongoParseError,
+        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509, got DOGS'
+      );
     });
 
-    it('should validate readPreference', function (done) {
-      parseConnectionString('mongodb://localhost/?readPreference=llamasPreferred', err => {
-        expect(err).to.exist;
-        done();
-      });
+    it('should validate readPreference', function () {
+      expect(() => parseOptions('mongodb://localhost/?readPreference=llamasPreferred')).to.throw(
+        TypeError, // not parse Error b/c thrown from ReadPreference construction
+        'Invalid read preference mode "llamasPreferred"'
+      );
     });
 
-    it('should validate non-equal tls values', function (done) {
-      parseConnectionString('mongodb://localhost/?tls=true&tls=false', err => {
-        expect(err).to.have.property('message', 'All values of tls must be the same.');
-        done();
-      });
+    it('should validate non-equal tls values', function () {
+      expect(() => parseOptions('mongodb://localhost/?tls=true&tls=false')).to.throw(
+        MongoParseError,
+        'All values of tls must be the same.'
+      );
     });
   });
 
   describe('spec tests', function () {
-    /** @type {import('../../spec/connection-string/valid-auth.json')[]} */
     const suites = loadSpecTests('connection-string').concat(loadSpecTests('auth'));
 
     for (const suite of suites) {
       describe(suite.name, function () {
         for (const test of suite.tests) {
-          it(`${test.description} -- new MongoOptions parser`, function () {
+          it(`${test.description}`, function () {
             if (skipTests.includes(test.description)) {
               return this.skip();
             }
@@ -234,12 +160,20 @@ describe('Connection String', function () {
 
               if (test.hosts) {
                 for (const [index, { host, port }] of test.hosts.entries()) {
-                  expect(options.hosts[index].host, message).to.equal(host);
+                  expect(options.hosts[index], message).to.satisfy(e => {
+                    return e.host === host || e.socketPath === host;
+                  });
                   if (typeof port === 'number') expect(options.hosts[index].port).to.equal(port);
                 }
               }
 
-              if (test.auth) {
+              if (test.auth && test.auth.db != null) {
+                expect(options.dbName, message).to.equal(test.auth.db);
+              }
+
+              if (test.auth && test.auth.username) {
+                expect(options.credentials, message).to.exist;
+
                 if (test.auth.db != null) {
                   expect(options.credentials.source, message).to.equal(test.auth.db);
                 }
@@ -253,10 +187,28 @@ describe('Connection String', function () {
                 }
               }
 
-              // TODO
-              // if (test.options) {
-              //   expect(options, message).to.deep.include(test.options);
-              // }
+              if (test.options) {
+                for (const [optionKey, optionValue] of Object.entries(test.options)) {
+                  switch (optionKey) {
+                    case 'authmechanism':
+                      expect(options.credentials.mechanism, message).to.eq(optionValue);
+                      break;
+                    case 'authmechanismproperties':
+                      expect(options.credentials.mechanismProperties, message).to.deep.eq(
+                        optionValue
+                      );
+                      break;
+                    case 'replicaset':
+                      expect(options.replicaSet, message).to.equal(optionValue);
+                      break;
+                    case 'w':
+                      expect(options.writeConcern.w).to.equal(optionValue);
+                      break;
+                    default:
+                      throw Error(`This options is not covered by the spec test: ${optionKey}`);
+                  }
+                }
+              }
             } else {
               expect(() => parseOptions(test.uri), message).to.throw();
             }
@@ -264,78 +216,5 @@ describe('Connection String', function () {
         }
       });
     }
-
-    suites.forEach(suite => {
-      describe(suite.name, function () {
-        suite.tests.forEach(test => {
-          it(test.description, {
-            metadata: { requires: { topology: 'single' } },
-            test: function (done) {
-              if (skipTests.indexOf(test.description) !== -1) {
-                return this.skip();
-              }
-
-              const valid = test.valid;
-              parseConnectionString(test.uri, { caseTranslate: false }, function (err, result) {
-                if (valid === false) {
-                  expect(err).to.exist;
-                  expect(err).to.be.instanceOf(MongoParseError);
-                  expect(result).to.not.exist;
-                } else {
-                  expect(err).to.not.exist;
-                  expect(result).to.exist;
-
-                  // remove data we don't track
-                  if (test.auth && test.auth.password === '') {
-                    test.auth.password = null;
-                  }
-
-                  if (test.hosts != null) {
-                    test.hosts = test.hosts.map(host => {
-                      delete host.type;
-                      host.host = punycode.toASCII(host.host);
-                      return host;
-                    });
-
-                    // remove values that require no validation
-                    test.hosts.forEach(host => {
-                      Object.keys(host).forEach(key => {
-                        if (host[key] == null) delete host[key];
-                      });
-                    });
-
-                    expect(result.hosts).to.containSubset(test.hosts);
-                  }
-
-                  if (test.auth) {
-                    if (test.auth.db != null) {
-                      expect(result.auth).to.have.property('db');
-                      expect(result.auth.db).to.eql(test.auth.db);
-                    }
-
-                    if (test.auth.username != null) {
-                      expect(result.auth).to.have.property('username');
-                      expect(result.auth.username).to.eql(test.auth.username);
-                    }
-
-                    if (test.auth.password != null) {
-                      expect(result.auth).to.have.property('password');
-                      expect(result.auth.password).to.eql(test.auth.password);
-                    }
-                  }
-
-                  if (test.options != null) {
-                    // it's possible we have options which are not explicitly included in the spec test
-                    expect(result.options).to.deep.include(test.options);
-                  }
-                }
-
-                done();
-              });
-            }
-          });
-        });
-      });
-    });
   });
 });

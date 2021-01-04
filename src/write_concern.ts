@@ -12,13 +12,15 @@ export interface WriteConcernSettings {
   /** The write concern */
   w?: W;
   /** The write concern timeout */
-  wtimeout?: number;
-  /** The write concern timeout */
   wtimeoutMS?: number;
   /** The journal write concern */
-  j?: boolean;
-  /** The journal write concern */
   journal?: boolean;
+
+  // legacy options
+  /** The journal write concern */
+  j?: boolean;
+  /** The write concern timeout */
+  wtimeout?: number;
   /** The file sync write concern */
   fsync?: boolean | 1;
 }
@@ -70,13 +72,19 @@ export class WriteConcern {
 
   /** Construct a WriteConcern given an options object. */
   static fromOptions(
-    options?: WriteConcernOptions | WriteConcern,
+    options?: WriteConcernOptions | WriteConcern | W,
     inherit?: WriteConcernOptions | WriteConcern
   ): WriteConcern | undefined {
     if (typeof options === 'undefined') return undefined;
     inherit = inherit ?? {};
-    const opts: WriteConcern | WriteConcernSettings | undefined =
-      options instanceof WriteConcern ? options : options.writeConcern;
+    let opts;
+    if (typeof options === 'string' || typeof options === 'number') {
+      opts = { w: options };
+    } else if (options instanceof WriteConcern) {
+      opts = options;
+    } else {
+      opts = options.writeConcern;
+    }
     const parentOpts: WriteConcern | WriteConcernSettings | undefined =
       inherit instanceof WriteConcern ? inherit : inherit.writeConcern;
 

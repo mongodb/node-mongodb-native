@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { connect } = require('../../../src/cmap/connect');
 const { Connection } = require('../../../src/cmap/connection');
 const { expect } = require('chai');
@@ -21,7 +21,7 @@ describe('Connection - unit/cmap', function () {
       // blackhole all other requests
     });
 
-    connect(Object.assign({ connectionType: Connection }, server.address()), (err, conn) => {
+    connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
@@ -44,7 +44,7 @@ describe('Connection - unit/cmap', function () {
       // blackhole all other requests
     });
 
-    connect(Object.assign({ connectionType: Connection }, server.address()), (err, conn) => {
+    connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 

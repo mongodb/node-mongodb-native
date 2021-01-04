@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var co = require('co');
-var mock = require('mongodb-mock-server');
+const mock = require('../tools/mock');
 const { ReadPreference, ObjectId } = require('../../src');
 const { expect } = require('chai');
 

@@ -25,7 +25,7 @@ describe('MongoClient', function () {
       const client = configuration.newClient(
         {},
         {
-          writeConcern: { w: 1, wtimeout: 1000, fsync: true, j: true },
+          writeConcern: { w: 1, wtimeoutMS: 1000, fsync: true, j: true },
           readPreference: 'nearest',
           readPreferenceTags: { loc: 'ny' },
           forceServerObjectId: true,
@@ -35,8 +35,7 @@ describe('MongoClient', function () {
             }
           },
           serializeFunctions: true,
-          raw: true,
-          numberOfRetries: 10
+          raw: true
         }
       );
 
@@ -49,13 +48,12 @@ describe('MongoClient', function () {
         test.equal(true, db.writeConcern.j);
 
         test.equal('nearest', db.s.readPreference.mode);
-        test.deepEqual({ loc: 'ny' }, db.s.readPreference.tags);
+        test.deepEqual([{ loc: 'ny' }], db.s.readPreference.tags);
 
         test.equal(true, db.s.options.forceServerObjectId);
         test.equal(1, db.s.pkFactory.createPk());
         test.equal(true, db.bsonOptions.serializeFunctions);
         test.equal(true, db.bsonOptions.raw);
-        test.equal(10, db.s.options.numberOfRetries);
 
         client.close(done);
       });

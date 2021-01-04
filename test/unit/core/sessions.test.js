@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('./common');
 const { Topology } = require('../../../src/sdam/topology');
@@ -30,7 +30,7 @@ describe('Sessions - unit/core', function () {
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
       test: function (done) {
-        const client = new Topology('localhost:27017');
+        const client = new Topology('localhost:27017', {});
         const sessionPool = client.s.sessionPool;
         const session = new ClientSession(client, sessionPool);
         done = sessionCleanupHandler(session, sessionPool, done);
@@ -44,7 +44,7 @@ describe('Sessions - unit/core', function () {
       metadata: { requires: { topology: 'single' } },
       test: function (done) {
         const clusterTime = genClusterTime(Date.now());
-        const client = new Topology('localhost:27017');
+        const client = new Topology('localhost:27017', {});
         const sessionPool = client.s.sessionPool;
         const session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
         done = sessionCleanupHandler(session, sessionPool, done);
@@ -57,7 +57,7 @@ describe('Sessions - unit/core', function () {
 
   describe('ServerSessionPool', function () {
     afterEach(() => {
-      test.client.destroy();
+      test.client.close();
       return mock.cleanup();
     });
 
@@ -76,7 +76,7 @@ describe('Sessions - unit/core', function () {
           });
         })
         .then(() => {
-          test.client = new Topology(test.server.address());
+          test.client = new Topology(test.server.hostAddress(), {});
 
           return new Promise((resolve, reject) => {
             test.client.once('error', reject);

@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const { MongoError } = require('../../../src/error');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 const { MongoDBNamespace } = require('../../../src/utils');
@@ -24,7 +24,7 @@ describe('Response', function () {
         errmsg: 'Cursor not found (namespace: "liveearth.entityEvents", id: 2018648316188432590).'
       };
 
-      const client = new Topology(test.server.address());
+      const client = new Topology(test.server.hostAddress(), {});
 
       test.server.setMessageHandler(request => {
         const doc = request.document;

@@ -4153,14 +4153,9 @@ describe('Operation Examples', function () {
       var configuration = this.configuration;
 
       // Replica configuration
-      var client = new Topology(
-        [
-          { host: configuration.host, port: configuration.port },
-          { host: configuration.host, port: configuration.port + 1 },
-          { host: configuration.host, port: configuration.port + 2 }
-        ],
-        { replicaSet: configuration.replicasetName }
-      );
+      var client = new Topology(configuration.options.hostAddresses, {
+        replicaSet: configuration.replicasetName
+      });
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;

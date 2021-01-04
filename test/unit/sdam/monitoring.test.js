@@ -1,5 +1,5 @@
 'use strict';
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { ServerType } = require('../../../src/sdam/common');
 const { Topology } = require('../../../src/sdam/topology');
 const { Monitor } = require('../../../src/sdam/monitor');
@@ -8,7 +8,7 @@ const { ServerDescription } = require('../../../src/sdam/server_description');
 
 class MockServer {
   constructor(options) {
-    this.s = {};
+    this.s = { pool: { generation: 1 } };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
   }
@@ -33,7 +33,7 @@ describe('monitoring', function () {
     });
 
     // set `heartbeatFrequencyMS` to 250ms to force a quick monitoring check, and wait 500ms to validate below
-    const topology = new Topology(mockServer.uri(), { heartbeatFrequencyMS: 250 });
+    const topology = new Topology(mockServer.hostAddress(), { heartbeatFrequencyMS: 250 });
     topology.connect(err => {
       expect(err).to.not.exist;
 
@@ -74,7 +74,7 @@ describe('monitoring', function () {
       acceptConnections = true;
     }, 250);
 
-    const topology = new Topology(mockServer.uri());
+    const topology = new Topology(mockServer.hostAddress(), {});
     topology.connect(err => {
       expect(err).to.not.exist;
       expect(topology).property('description').property('servers').to.have.length(1);
@@ -181,7 +181,7 @@ describe('monitoring', function () {
       });
 
       const server = new MockServer(mockServer.address());
-      server.description = new ServerDescription(server.description.address);
+      server.description = new ServerDescription(server.description.hostAddress);
       const monitor = new Monitor(server, {
         heartbeatFrequencyMS: 250,
         minHeartbeatFrequencyMS: 50

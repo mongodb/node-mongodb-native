@@ -6,7 +6,12 @@ const util = require('util');
 const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
+const { parseURI } = require('../../../src/connection_string');
+const { HostAddress } = require('../../../src/utils');
 
+/**
+ * @param {Record<string, any>} obj
+ */
 function convertToConnStringMap(obj) {
   let result = [];
   Object.keys(obj).forEach(key => {
@@ -16,25 +21,32 @@ function convertToConnStringMap(obj) {
   return result.join(',');
 }
 
-class NativeConfiguration {
-  constructor(parsedURI, context) {
+class TestConfiguration {
+  constructor(uri, context) {
+    const { url, hosts } = parseURI(uri);
+    const hostAddresses = hosts.map(HostAddress.fromString);
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
-    this.options = Object.assign(
-      {
-        auth: parsedURI.auth,
-        hosts: parsedURI.hosts,
-        host: parsedURI.hosts[0] ? parsedURI.hosts[0].host : 'localhost',
-        port: parsedURI.hosts[0] ? parsedURI.hosts[0].port : 27017,
-        db: parsedURI.auth && parsedURI.auth.db ? parsedURI.auth.db : 'integration_tests'
-      },
-      parsedURI.options
-    );
-
-    this.writeConcern = function () {
-      return { writeConcern: { w: 1 } };
+    this.options = {
+      hosts,
+      hostAddresses,
+      hostAddress: hostAddresses[0],
+      host: hostAddresses[0].host,
+      port: typeof hostAddresses[0].host === 'string' ? hostAddresses[0].port : undefined,
+      db: url.pathname.slice(1) ? url.pathname.slice(1) : 'integration_tests',
+      replicaSet: url.searchParams.get('replicaSet')
     };
+    if (url.username) {
+      this.options.auth = {
+        username: url.username,
+        password: url.password
+      };
+    }
+  }
+
+  writeConcern() {
+    return { writeConcern: { w: 1 } };
   }
 
   get host() {
@@ -121,18 +133,24 @@ class NativeConfiguration {
     };
 
     if (this.options.auth) {
-      let auth = this.options.auth.username;
-      if (this.options.auth.password) {
-        auth = `${auth}:${this.options.auth.password}`;
+      const { username, password } = this.options.auth;
+      if (username) {
+        urlOptions.auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}`;
       }
-
-      urlOptions.auth = auth;
     }
 
-    // TODO(NODE-2704): Uncomment this, unix socket related issues
-    // Reflect.deleteProperty(serverOptions, 'host');
-    // Reflect.deleteProperty(serverOptions, 'port');
+    if (dbOptions.auth) {
+      const { username, password } = dbOptions.auth;
+      if (username) {
+        urlOptions.auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}`;
+      }
+      delete urlOptions.query.auth;
+    }
+
     const connectionString = url.format(urlOptions);
+    if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
+      throw new Error(`Cannot use options to specify host/port, must be in ${connectionString}`);
+    }
     return new MongoClient(connectionString, serverOptions);
   }
 
@@ -144,7 +162,8 @@ class NativeConfiguration {
     }
 
     options = Object.assign({}, options);
-    const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
+    const hosts =
+      host == null ? [].concat(this.options.hostAddresses) : [new HostAddress(`${host}:${port}`)];
     return new Topology(hosts, options);
   }
 
@@ -161,18 +180,23 @@ class NativeConfiguration {
       // NOTE: The only way to force a sharded topology with the driver is to duplicate
       //       the host entry. This will eventually be solved by autodetection.
       if (this.topologyType === TopologyType.Sharded) {
-        const firstHost = this.options.hosts[0];
-        multipleHosts = `${firstHost.host}:${firstHost.port},${firstHost.host}:${firstHost.port}`;
+        const firstHost = this.options.hostAddresses[0];
+        if (firstHost.type === 'tcp') {
+          multipleHosts = `${firstHost.host}:${firstHost.port},${firstHost.host}:${firstHost.port}`;
+        } else {
+          multipleHosts = `${firstHost.host},${firstHost.host}`;
+        }
       } else {
-        multipleHosts = this.options.hosts
+        multipleHosts = this.options.hostAddresses
           .reduce((built, host) => {
-            built.push(`${host.host}:${host.port}`);
+            built.push(host.type === 'tcp' ? `${host.host}:${host.port}` : host.host);
             return built;
           }, [])
           .join(',');
       }
     }
 
+    /** @type {Record<string, any>} */
     const urlObject = {
       protocol: 'mongodb',
       slashes: true,
@@ -216,7 +240,7 @@ class NativeConfiguration {
 
   writeConcernMax() {
     if (this.topologyType !== TopologyType.Single) {
-      return { writeConcern: { w: 'majority', wtimeout: 30000 } };
+      return { writeConcern: { w: 'majority', wtimeoutMS: 30000 } };
     }
 
     return { writeConcern: { w: 1 } };
@@ -244,4 +268,4 @@ class NativeConfiguration {
   }
 }
 
-module.exports = NativeConfiguration;
+module.exports = { TestConfiguration };

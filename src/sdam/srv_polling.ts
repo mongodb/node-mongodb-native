@@ -1,6 +1,7 @@
 import * as dns from 'dns';
 import { Logger, LoggerOptions } from '../logger';
 import { EventEmitter } from 'events';
+import { HostAddress } from '../utils';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order
@@ -27,8 +28,13 @@ export class SrvPollingEvent {
     this.srvRecords = srvRecords;
   }
 
-  addresses(): Set<string> {
-    return new Set(this.srvRecords.map((record: dns.SrvRecord) => `${record.name}:${record.port}`));
+  addresses(): Map<string, HostAddress> {
+    return new Map(
+      this.srvRecords.map(record => {
+        const host = new HostAddress(`${record.name}:${record.port}`);
+        return [host.toString(), host];
+      })
+    );
   }
 }
 

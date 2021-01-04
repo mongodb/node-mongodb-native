@@ -15,7 +15,7 @@ describe('selectServer', function () {
   });
 
   it('should schedule monitoring if no suitable server is found', function (done) {
-    const topology = new Topology('someserver:27019');
+    const topology = new Topology('someserver:27019', {});
     const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
     // satisfy the initial connect, then restore the original method
@@ -48,7 +48,7 @@ describe('selectServer', function () {
   });
 
   it('should disallow selection when the topology is explicitly closed', function (done) {
-    const topology = new Topology('someserver:27019');
+    const topology = new Topology('someserver:27019', {});
     this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
@@ -65,7 +65,7 @@ describe('selectServer', function () {
 
   describe('waitQueue', function () {
     it('should process all wait queue members, including selection with errors', function (done) {
-      const topology = new Topology('someserver:27019');
+      const topology = new Topology('someserver:27019', {});
       const selectServer = this.sinon
         .stub(Topology.prototype, 'selectServer')
         .callsFake(function (selector, options, callback) {

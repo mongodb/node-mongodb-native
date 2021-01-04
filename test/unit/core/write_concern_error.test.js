@@ -1,6 +1,6 @@
 'use strict';
 const { Topology } = require('../../../src/sdam/topology');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { ReplSetFixture } = require('./common');
 const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
@@ -12,7 +12,7 @@ describe('WriteConcernError', function () {
     createUser: 'foo2',
     pwd: 'pwd',
     roles: ['read'],
-    writeConcern: { w: 'majority', wtimeout: 1 }
+    writeConcern: { w: 'majority', wtimeoutMS: 1 }
   };
 
   const RAW_USER_WRITE_CONCERN_ERROR = {
@@ -56,7 +56,7 @@ describe('WriteConcernError', function () {
   function makeAndConnectReplSet(cb) {
     let invoked = false;
     const replSet = new Topology(
-      [test.primaryServer.address(), test.firstSecondaryServer.address()],
+      [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
       { replicaSet: 'rs' }
     );
 

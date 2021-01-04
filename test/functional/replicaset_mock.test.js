@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const mock = require('mongodb-mock-server');
+const mock = require('../tools/mock');
 const { ObjectId } = require('bson');
 const { Logger } = require('../../src/logger');
 

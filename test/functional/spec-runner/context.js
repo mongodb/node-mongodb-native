@@ -70,7 +70,7 @@ class TestRunnerContext {
       resolveConnectionString(config, { useMultipleMongoses: true }, this)
     );
     if (config.topologyType === 'Sharded') {
-      this.failPointClients = config.options.hosts.map(proxy =>
+      this.failPointClients = config.options.hostAddresses.map(proxy =>
         config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
       );
     }

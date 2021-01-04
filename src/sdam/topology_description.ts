@@ -51,8 +51,8 @@ export class TopologyDescription {
     // TODO: consider assigning all these values to a temporary value `s` which
     //       we use `Object.freeze` on, ensuring the internal state of this type
     //       is immutable.
-    this.type = topologyType || TopologyType.Unknown;
-    this.servers = serverDescriptions || new Map();
+    this.type = topologyType ?? TopologyType.Unknown;
+    this.servers = serverDescriptions ?? new Map();
     this.stale = false;
     this.compatible = true;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 0;
@@ -127,8 +127,8 @@ export class TopologyDescription {
       return this;
     }
 
-    for (const address of newAddresses) {
-      serverDescriptions.set(address, new ServerDescription(address));
+    for (const [address, host] of newAddresses) {
+      serverDescriptions.set(address, new ServerDescription(host));
     }
 
     return new TopologyDescription(
@@ -217,15 +217,16 @@ export class TopologyDescription {
           maxElectionId
         );
 
-        (topologyType = result[0]),
-          (setName = result[1]),
-          (maxSetVersion = result[2]),
-          (maxElectionId = result[3]);
+        topologyType = result[0];
+        setName = result[1];
+        maxSetVersion = result[2];
+        maxElectionId = result[3];
       } else if (
         [ServerType.RSSecondary, ServerType.RSArbiter, ServerType.RSOther].indexOf(serverType) >= 0
       ) {
         const result = updateRsNoPrimaryFromMember(serverDescriptions, serverDescription, setName);
-        (topologyType = result[0]), (setName = result[1]);
+        topologyType = result[0];
+        setName = result[1];
       }
     }
 
@@ -242,10 +243,10 @@ export class TopologyDescription {
           maxElectionId
         );
 
-        (topologyType = result[0]),
-          (setName = result[1]),
-          (maxSetVersion = result[2]),
-          (maxElectionId = result[3]);
+        topologyType = result[0];
+        setName = result[1];
+        maxSetVersion = result[2];
+        maxElectionId = result[3];
       } else if (
         [ServerType.RSSecondary, ServerType.RSArbiter, ServerType.RSOther].indexOf(serverType) >= 0
       ) {
@@ -400,7 +401,7 @@ function updateRsFromPrimary(
   });
 
   // Remove hosts not in the response.
-  const currentAddresses = Array.from(serverDescriptions.keys()) as string[];
+  const currentAddresses = Array.from(serverDescriptions.keys());
   const responseAddresses = serverDescription.allHosts;
   currentAddresses
     .filter((addr: string) => responseAddresses.indexOf(addr) === -1)
