@@ -796,7 +796,7 @@ function createAndConnectServer(
     return server;
   }
 
-  server.connect();
+  process.nextTick(() => server.connect());
   return server;
 }
 
