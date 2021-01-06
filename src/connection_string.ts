@@ -392,8 +392,9 @@ export function parseOptions(
       );
     }
 
-    if (!gssapiOrX509 && mongoOptions.dbName) {
+    if (!gssapiOrX509 && mongoOptions.dbName && !allOptions.has('authSource')) {
       // inherit the dbName unless GSSAPI or X509, then silently ignore dbName
+      // and there was no specific authSource given
       mongoOptions.credentials = MongoCredentials.merge(mongoOptions.credentials, {
         source: mongoOptions.dbName
       });
