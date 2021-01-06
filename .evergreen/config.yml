@@ -113,7 +113,8 @@ functions:
           fi
 
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
       type: test
@@ -1672,11 +1673,11 @@ buildvariants:
       NODE_LTS_NAME: argon
       CLIENT_ENCRYPTION: true
     tasks: *ref_2
-  - name: windows-64-vs2013-erbium
-    display_name: Windows (VS2013) Node Erbium
+  - name: windows-64-vs2013-carbon
+    display_name: Windows (VS2013) Node Carbon
     run_on: windows-64-vs2013-large
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: carbon
       MSVS_VERSION: 2013
     tasks: &ref_3
       - test-4.2-server
@@ -1721,20 +1722,6 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
-  - name: windows-64-vs2013-dubnium
-    display_name: Windows (VS2013) Node Dubnium
-    run_on: windows-64-vs2013-large
-    expansions:
-      NODE_LTS_NAME: dubnium
-      MSVS_VERSION: 2013
-    tasks: *ref_3
-  - name: windows-64-vs2013-carbon
-    display_name: Windows (VS2013) Node Carbon
-    run_on: windows-64-vs2013-large
-    expansions:
-      NODE_LTS_NAME: carbon
-      MSVS_VERSION: 2013
-    tasks: *ref_3
   - name: windows-64-vs2013-boron
     display_name: Windows (VS2013) Node Boron
     run_on: windows-64-vs2013-large

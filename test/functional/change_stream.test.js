@@ -1601,10 +1601,12 @@ describe('Change Streams', function() {
           const collection = database.collection('MongoNetworkErrorTestPromises');
           const changeStream = collection.watch(pipeline);
 
-          const outStream = fs.createWriteStream(filename);
+          const outStream = fs.createWriteStream(filename, { flags: 'w' });
           this.defer(() => outStream.close());
 
-          changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+          changeStream
+            .stream({ transform: change => JSON.stringify(change) + '\n' })
+            .pipe(outStream);
           this.defer(() => changeStream.close());
           // Listen for changes to the file
           const watcher = fs.watch(filename, eventType => {
@@ -1612,9 +1614,8 @@ describe('Change Streams', function() {
             expect(eventType).to.equal('change');
 
             const fileContents = fs.readFileSync(filename, 'utf8');
-            const parsedFileContents = JSON.parse(fileContents);
+            const parsedFileContents = JSON.parse(fileContents.split(/\n/)[0]);
             expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
-
             done();
           });
         });
