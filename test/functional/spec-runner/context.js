@@ -65,9 +65,10 @@ class TestRunnerContext {
       : fn(this.sharedClient);
   }
 
-  setup(config) {
+  setup(config, options) {
     this.sharedClient = config.newClient(
-      resolveConnectionString(config, { useMultipleMongoses: true }, this)
+      resolveConnectionString(config, { useMultipleMongoses: true }, this),
+      options
     );
     if (config.topologyType === 'Sharded') {
       this.failPointClients = config.options.hostAddresses.map(proxy =>

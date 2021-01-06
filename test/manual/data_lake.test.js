@@ -19,7 +19,7 @@ describe('Atlas Data Lake', function () {
 
     after(() => testContext.teardown());
     before(function () {
-      return testContext.setup(this.configuration);
+      return testContext.setup(this.configuration, { authSource: 'admin' });
     });
 
     generateTopologyTests(testSuites, testContext);
