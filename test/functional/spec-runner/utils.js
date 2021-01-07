@@ -8,7 +8,9 @@ function resolveConnectionString(configuration, spec, context) {
   const authSource = context && context.authSource;
   const connectionString =
     isShardedEnvironment && !useMultipleMongoses
-      ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}?directConnection=false&authSource=${authSource}`
+      ? `mongodb://${configuration.host}:${configuration.port}/${
+          configuration.db
+        }?directConnection=false${authSource ? '&authSource=${authSource}' : ''}`
       : configuration.url(user, password, { authSource });
   return connectionString;
 }

@@ -181,11 +181,7 @@ class TestConfiguration {
       //       the host entry. This will eventually be solved by autodetection.
       if (this.topologyType === TopologyType.Sharded) {
         const firstHost = this.options.hostAddresses[0];
-        if (firstHost.type === 'tcp') {
-          multipleHosts = `${firstHost.host}:${firstHost.port},${firstHost.host}:${firstHost.port}`;
-        } else {
-          multipleHosts = `${firstHost.host},${firstHost.host}`;
-        }
+        multipleHosts = `${firstHost.host}:${firstHost.port}`;
       } else {
         multipleHosts = this.options.hostAddresses
           .reduce((built, host) => {
