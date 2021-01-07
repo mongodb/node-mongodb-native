@@ -229,6 +229,10 @@ class TestConfiguration {
           )
         });
       }
+
+      if (options.authSource) {
+        query.authSource = options.authSource;
+      }
     }
 
     if (multipleHosts) {
