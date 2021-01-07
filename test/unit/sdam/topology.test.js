@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
-const { ns, HostAddress, makeClientMetadata } = require('../../../src/utils');
+const { ns, makeClientMetadata } = require('../../../src/utils');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -19,14 +19,11 @@ describe('Topology (unit)', function () {
 
       test: function (done) {
         // Attempt to connect
-        var server = new Topology(
-          [{ host: this.configuration.host, port: this.configuration.port }],
-          {
-            metadata: makeClientMetadata({
-              appName: 'My application name'
-            })
-          }
-        );
+        var server = new Topology([`${this.configuration.host}:${this.configuration.port}`], {
+          metadata: makeClientMetadata({
+            appName: 'My application name'
+          })
+        });
 
         expect(server.clientMetadata.application.name).to.equal('My application name');
         done();
@@ -87,7 +84,7 @@ describe('Topology (unit)', function () {
     });
 
     it('should check for sessions if connected to a single server and has no known servers', function (done) {
-      const topology = new Topology('someserver:27019', {});
+      const topology = new Topology('someserver:27019');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
@@ -100,7 +97,7 @@ describe('Topology (unit)', function () {
     });
 
     it('should not check for sessions if connected to a single server', function (done) {
-      const topology = new Topology('someserver:27019', {});
+      const topology = new Topology('someserver:27019');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
@@ -120,10 +117,7 @@ describe('Topology (unit)', function () {
     });
 
     it('should check for sessions if there are no data-bearing nodes', function (done) {
-      const topology = new Topology(
-        ['mongos:27019', 'mongos:27018', 'mongos:27017'].map(HostAddress.fromString),
-        {}
-      );
+      const topology = new Topology(['mongos:27019', 'mongos:27018', 'mongos:27017'], {});
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
@@ -161,7 +155,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress(), {});
+      const topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -197,7 +191,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress(), {});
+      const topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -234,7 +228,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress(), {});
+      const topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -271,7 +265,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress(), {});
+      const topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 

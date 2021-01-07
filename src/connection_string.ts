@@ -334,18 +334,12 @@ export function parseOptions(
 
   const objectOptions = new CaseInsensitiveMap(Object.entries(options));
 
-  const defaultOptions = new CaseInsensitiveMap(
-    Object.entries(OPTIONS)
-      .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
-      .map(([k, d]) => [k, d.default])
-  );
-
   const allOptions = new CaseInsensitiveMap();
 
   const allKeys = new Set<string>([
     ...urlOptions.keys(),
     ...objectOptions.keys(),
-    ...defaultOptions.keys()
+    ...DEFAULT_OPTIONS.keys()
   ]);
 
   for (const key of allKeys) {
@@ -356,8 +350,8 @@ export function parseOptions(
     if (objectOptions.has(key)) {
       values.push(objectOptions.get(key));
     }
-    if (defaultOptions.has(key)) {
-      values.push(defaultOptions.get(key));
+    if (DEFAULT_OPTIONS.has(key)) {
+      values.push(DEFAULT_OPTIONS.get(key));
     }
     allOptions.set(key, values);
   }
@@ -895,7 +889,6 @@ export const OPTIONS = {
   },
   ssl: {
     target: 'tls',
-    deprecated: true,
     type: 'boolean'
   },
   sslCA: {
@@ -1038,7 +1031,7 @@ export const OPTIONS = {
   // Custom types for modifying core behavior
   connectionType: { type: 'any' },
   srvPoller: { type: 'any' },
-  /// Accepted NodeJS Options
+  // Accepted NodeJS Options
   minDHSize: { type: 'any' },
   pskCallback: { type: 'any' },
   secureContext: { type: 'any' },
@@ -1064,3 +1057,9 @@ export const OPTIONS = {
   secureProtocol: { type: 'any' },
   index: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
+
+export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
+  Object.entries(OPTIONS)
+    .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
+    .map(([k, d]) => [k, d.default])
+);

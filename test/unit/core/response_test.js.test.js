@@ -24,7 +24,7 @@ describe('Response', function () {
         errmsg: 'Cursor not found (namespace: "liveearth.entityEvents", id: 2018648316188432590).'
       };
 
-      const client = new Topology(test.server.hostAddress(), {});
+      const client = new Topology(test.server.hostAddress());
 
       test.server.setMessageHandler(request => {
         const doc = request.document;

@@ -50,8 +50,6 @@ export class Logger {
     // Current logger
     if (!(options.logger instanceof Logger) && typeof options.logger === 'function') {
       currentLogger = options.logger;
-    } else if (currentLogger == null) {
-      currentLogger = console.log;
     }
 
     // Set level of logging, default is error

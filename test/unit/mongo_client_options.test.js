@@ -26,7 +26,7 @@ describe('MongoOptions', function () {
     expect(options.prototype).to.not.exist;
   });
 
-  it('tls renames', function () {
+  it('should rename tls options correctly', function () {
     const filename = `${os.tmpdir()}/tmp.pem`;
     fs.closeSync(fs.openSync(filename, 'w'));
     const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
@@ -124,19 +124,12 @@ describe('MongoOptions', function () {
     servername: 'some tls option',
     socketTimeoutMS: 3,
     ssl: true,
-    // sslCA: 'ca',
-    // sslCert: 'cert',
-    // sslCRL: 'crl',
-    // sslKey: 'key',
     sslPass: 'pass',
     sslValidate: true,
     tls: false,
     tlsAllowInvalidCertificates: true,
     tlsAllowInvalidHostnames: true,
-    // tlsCAFile: 'tls-ca',
-    // tlsCertificateKeyFile: 'tls-key',
     tlsCertificateKeyFilePassword: 'tls-pass',
-    // tlsInsecure: true,
     w: 'majority',
     waitQueueTimeoutMS: 3,
     writeConcern: new WriteConcern(2),
@@ -183,12 +176,7 @@ describe('MongoOptions', function () {
       'tls=true',
       'tlsAllowInvalidCertificates=true',
       'tlsAllowInvalidHostnames=true',
-      // 'tlsCAFile=CA_FILE',
-      // 'tlsCertificateKeyFile=KEY_FILE',
       'tlsCertificateKeyFilePassword=PASSWORD',
-      // 'tlsDisableCertificateRevocationCheck=true', // not implemented
-      // 'tlsDisableOCSPEndpointCheck=true', // not implemented
-      // 'tlsInsecure=true',
       'w=majority',
       'waitQueueTimeoutMS=2',
       'wTimeoutMS=2',

@@ -243,12 +243,9 @@ describe('Mongos SRV Polling', function () {
     it('should not make an srv poller if there is no srv host', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(
-        ['localhost:27017', 'localhost:27018'].map(HostAddress.fromString),
-        {
-          srvPoller
-        }
-      );
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+        srvPoller
+      });
 
       expect(topology).to.not.have.property('srvPoller');
     });
@@ -256,13 +253,10 @@ describe('Mongos SRV Polling', function () {
     it('should make an srvPoller if there is an srvHost', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(
-        ['localhost:27017', 'localhost:27018'].map(HostAddress.fromString),
-        {
-          srvHost: SRV_HOST,
-          srvPoller
-        }
-      );
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+        srvHost: SRV_HOST,
+        srvPoller
+      });
 
       expect(topology.s).to.have.property('srvPoller').that.equals(srvPoller);
     });
@@ -271,13 +265,10 @@ describe('Mongos SRV Polling', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
       sinon.stub(srvPoller, 'start');
 
-      const topology = new Topology(
-        ['localhost:27017', 'localhost:27018'].map(HostAddress.fromString),
-        {
-          srvHost: SRV_HOST,
-          srvPoller
-        }
-      );
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+        srvHost: SRV_HOST,
+        srvPoller
+      });
 
       const topologyDescriptions = [
         new TopologyDescription(TopologyType.Unknown),

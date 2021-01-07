@@ -51,6 +51,7 @@ import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import { DestroyOptions, Connection } from '../cmap/connection';
 import type { MongoClientOptions } from '../mongo_client';
+import { DEFAULT_OPTIONS } from '../connection_string';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -138,7 +139,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
-
   metadata: ClientMetadata;
   useRecoveryToken: boolean;
 }
@@ -192,13 +192,45 @@ export class Topology extends EventEmitter {
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(seedlist: string | HostAddress | HostAddress[], options: TopologyOptions) {
+  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
 
-    if (typeof seedlist === 'string') {
-      seedlist = [HostAddress.fromString(seedlist)];
-    } else if (!Array.isArray(seedlist)) {
-      seedlist = [seedlist];
+    // Options should only be undefined in tests, MongoClient will always have defined options
+    options = options ?? {
+      hosts: [HostAddress.fromString('localhost:27017')],
+      retryReads: DEFAULT_OPTIONS.get('retryReads'),
+      retryWrites: DEFAULT_OPTIONS.get('retryWrites'),
+      serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
+      directConnection: DEFAULT_OPTIONS.get('directConnection'),
+      metadata: DEFAULT_OPTIONS.get('metadata'),
+      useRecoveryToken: DEFAULT_OPTIONS.get('useRecoveryToken'),
+      monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
+      tls: DEFAULT_OPTIONS.get('tls'),
+      maxPoolSize: DEFAULT_OPTIONS.get('maxPoolSize'),
+      minPoolSize: DEFAULT_OPTIONS.get('minPoolSize'),
+      waitQueueTimeoutMS: DEFAULT_OPTIONS.get('waitQueueTimeoutMS'),
+      connectionType: DEFAULT_OPTIONS.get('connectionType'),
+      connectTimeoutMS: DEFAULT_OPTIONS.get('connectTimeoutMS'),
+      maxIdleTimeMS: DEFAULT_OPTIONS.get('maxIdleTimeMS'),
+      heartbeatFrequencyMS: DEFAULT_OPTIONS.get('heartbeatFrequencyMS'),
+      minHeartbeatFrequencyMS: DEFAULT_OPTIONS.get('minHeartbeatFrequencyMS')
+    };
+
+    if (typeof seeds === 'string') {
+      seeds = [HostAddress.fromString(seeds)];
+    } else if (!Array.isArray(seeds)) {
+      seeds = [seeds];
+    }
+
+    const seedlist: HostAddress[] = [];
+    for (const seed of seeds) {
+      if (typeof seed === 'string') {
+        seedlist.push(HostAddress.fromString(seed));
+      } else if (seed instanceof HostAddress) {
+        seedlist.push(seed);
+      } else {
+        throw new Error(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
+      }
     }
 
     const topologyType = topologyTypeFromOptions(options);

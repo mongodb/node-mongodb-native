@@ -38,11 +38,11 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
   const serverVersionHighEnough =
     ismaster &&
     (typeof ismaster.maxWireVersion === 'number' || ismaster.maxWireVersion instanceof Int32) &&
-    ismaster.maxWireVersion.valueOf() >= MIN_SUPPORTED_WIRE_VERSION;
+    ismaster.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
     ismaster &&
     (typeof ismaster.maxWireVersion === 'number' || ismaster.maxWireVersion instanceof Int32) &&
-    ismaster.minWireVersion.valueOf() <= MAX_SUPPORTED_WIRE_VERSION;
+    ismaster.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
     if (serverVersionLowEnough) {
