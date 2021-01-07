@@ -298,7 +298,9 @@ export function parseOptions(
     const dbName = decodeURIComponent(
       url.pathname[0] === '/' ? url.pathname.slice(1) : url.pathname
     );
-    urlOptions.set('dbName', [dbName]);
+    if (dbName) {
+      urlOptions.set('dbName', [dbName]);
+    }
   }
 
   if (url.username !== '') {

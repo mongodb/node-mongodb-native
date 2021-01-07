@@ -289,6 +289,15 @@ describe('MongoOptions', function () {
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
+    expect(options.credentials.source).to.equal('admin');
+  });
+
+  it('supports Credentials option in url with db', function () {
+    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/foo');
+    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
+    expect(options.credentials.username).to.equal('USERNAME');
+    expect(options.credentials.password).to.equal('PASSWORD');
+    expect(options.credentials.source).to.equal('foo');
   });
 
   it('supports Credentials option in auth object plain', function () {
