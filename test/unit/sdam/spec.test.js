@@ -5,7 +5,7 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
 const sdamEvents = require('../../../src/sdam/events');
-const parse = require('../../../src/connection_string').parseConnectionString;
+const { parseOptions } = require('../../../src/connection_string');
 const sinon = require('sinon');
 const { EJSON } = require('bson');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
@@ -171,112 +171,107 @@ function cloneForCompare(event) {
 }
 
 function executeSDAMTest(testData, testDone) {
-  parse(testData.uri, (err, parsedUri) => {
-    if (err) return done(err);
+  const options = parseOptions(testData.uri);
+  // create the topology
+  const topology = new Topology(options.hosts, options);
+  // Each test will attempt to connect by doing server selection. We want to make the first
+  // call to `selectServers` call a fake, and then immediately restore the original behavior.
+  let topologySelectServers = sinon
+    .stub(Topology.prototype, 'selectServer')
+    .callsFake(function (selector, options, callback) {
+      topologySelectServers.restore();
 
-    // create the topology
-    const topology = new Topology(parsedUri.hosts, parsedUri.options);
-
-    // Each test will attempt to connect by doing server selection. We want to make the first
-    // call to `selectServers` call a fake, and then immediately restore the original behavior.
-    let topologySelectServers = sinon
-      .stub(Topology.prototype, 'selectServer')
-      .callsFake(function (selector, options, callback) {
-        topologySelectServers.restore();
-
-        const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
-        callback(undefined, fakeServer);
-      });
-
-    // listen for SDAM monitoring events
-    let events = [];
-    [
-      'serverOpening',
-      'serverClosed',
-      'serverDescriptionChanged',
-      'topologyOpening',
-      'topologyClosed',
-      'topologyDescriptionChanged',
-      'serverHeartbeatStarted',
-      'serverHeartbeatSucceeded',
-      'serverHeartbeatFailed'
-    ].forEach(eventName => {
-      topology.on(eventName, event => events.push(event));
+      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+      callback(undefined, fakeServer);
     });
+  // listen for SDAM monitoring events
+  let events = [];
+  [
+    'serverOpening',
+    'serverClosed',
+    'serverDescriptionChanged',
+    'topologyOpening',
+    'topologyClosed',
+    'topologyDescriptionChanged',
+    'serverHeartbeatStarted',
+    'serverHeartbeatSucceeded',
+    'serverHeartbeatFailed'
+  ].forEach(eventName => {
+    topology.on(eventName, event => events.push(event));
+  });
 
-    function done(err) {
-      topology.close(e => testDone(e || err));
-    }
+  function done(err) {
+    topology.close(e => testDone(e || err));
+  }
 
-    const incompatibilityHandler = err => {
-      if (err.message.match(/but this version of the driver/)) return;
-      throw err;
-    };
+  const incompatibilityHandler = err => {
+    if (err.message.match(/but this version of the driver/)) return;
+    throw err;
+  };
 
-    // connect the topology
-    topology.connect(testData.uri, err => {
-      expect(err).to.not.exist;
+  // connect the topology
+  topology.connect(options, err => {
+    expect(err).to.not.exist;
 
-      eachAsyncSeries(
-        testData.phases,
-        (phase, cb) => {
-          function phaseDone() {
-            if (phase.outcome) {
-              assertOutcomeExpectations(topology, events, phase.outcome);
-            }
-
-            // remove error handler
-            topology.removeListener('error', incompatibilityHandler);
-            // reset the captured events for each phase
-            events = [];
-            cb();
+    eachAsyncSeries(
+      testData.phases,
+      (phase, cb) => {
+        function phaseDone() {
+          if (phase.outcome) {
+            assertOutcomeExpectations(topology, events, phase.outcome);
           }
 
-          const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
-          if (incompatibilityExpected) {
-            topology.on('error', incompatibilityHandler);
-          }
-
-          // if (phase.description) {
-          //   console.log(`[phase] ${phase.description}`);
-          // }
-
-          if (phase.responses) {
-            // simulate each ismaster response
-            phase.responses.forEach(response =>
-              topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
-            );
-
-            phaseDone();
-          } else if (phase.applicationErrors) {
-            eachAsyncSeries(
-              phase.applicationErrors,
-              (appError, phaseCb) => {
-                let withConnectionStub = sinon
-                  .stub(ConnectionPool.prototype, 'withConnection')
-                  .callsFake(withConnectionStubImpl(appError));
-
-                const server = topology.s.servers.get(appError.address);
-                server.command(ns('admin.$cmd'), { ping: 1 }, undefined, err => {
-                  expect(err).to.exist;
-                  withConnectionStub.restore();
-
-                  phaseCb();
-                });
-              },
-              err => {
-                expect(err).to.not.exist;
-                phaseDone();
-              }
-            );
-          }
-        },
-        err => {
-          expect(err).to.not.exist;
-          done();
+          // remove error handler
+          topology.removeListener('error', incompatibilityHandler);
+          // reset the captured events for each phase
+          events = [];
+          cb();
         }
-      );
-    });
+
+        const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
+        if (incompatibilityExpected) {
+          topology.on('error', incompatibilityHandler);
+        }
+
+        // if (phase.description) {
+        //   console.log(`[phase] ${phase.description}`);
+        // }
+
+        if (phase.responses) {
+          // simulate each ismaster response
+          phase.responses.forEach(response =>
+            topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
+          );
+
+          phaseDone();
+        } else if (phase.applicationErrors) {
+          eachAsyncSeries(
+            phase.applicationErrors,
+            (appError, phaseCb) => {
+              let withConnectionStub = sinon
+                .stub(ConnectionPool.prototype, 'withConnection')
+                .callsFake(withConnectionStubImpl(appError));
+
+              const server = topology.s.servers.get(appError.address);
+              server.command(ns('admin.$cmd'), { ping: 1 }, undefined, err => {
+                expect(err).to.exist;
+                withConnectionStub.restore();
+
+                phaseCb();
+              });
+            },
+            err => {
+              expect(err).to.not.exist;
+              phaseDone();
+            }
+          );
+        }
+      },
+      err => {
+        expect(err).to.not.exist;
+        done();
+      }
+    );
   });
 }
 

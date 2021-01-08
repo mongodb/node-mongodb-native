@@ -1,7 +1,7 @@
 'use strict';
 const { Timestamp } = require('bson');
 const { expect } = require('chai');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 
 const test = {};
 describe('Sessions - unit/sessions', function () {

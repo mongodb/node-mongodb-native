@@ -7,6 +7,7 @@ const { compress } = require('../../src/cmap/wire_protocol/compression');
 const { GSSAPI } = require('../../src/cmap/auth/gssapi');
 const { AuthContext } = require('../../src/cmap/auth/auth_provider');
 const { MongoDBAWS } = require('../../src/cmap/auth/mongodb_aws');
+const { HostAddress } = require('../../src/utils');
 
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../node_modules/${moduleName}`));
@@ -41,10 +42,13 @@ describe('optionalRequire', function () {
         return this.skip();
       }
       const gssapi = new GSSAPI();
-      gssapi.auth(new AuthContext(null, true, { host: true, port: true }), error => {
-        expect(error).to.exist;
-        expect(error.message).includes('not found');
-      });
+      gssapi.auth(
+        new AuthContext(null, true, { hostAddress: new HostAddress('a'), credentials: true }),
+        error => {
+          expect(error).to.exist;
+          expect(error.message).includes('not found');
+        }
+      );
     });
   });
 

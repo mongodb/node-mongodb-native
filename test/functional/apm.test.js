@@ -30,7 +30,7 @@ describe('APM', function () {
         instrumentation.on('succeeded', filterForCommands('insert', succeeded));
 
         let client = this.configuration.newClient(
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           { maxPoolSize: 1, monitorCommands: true }
         );
 
@@ -52,7 +52,7 @@ describe('APM', function () {
             started = [];
             succeeded = [];
             client = this.configuration.newClient(
-              { w: 1 },
+              { writeConcern: { w: 1 } },
               { maxPoolSize: 1, monitorCommands: true }
             );
 
@@ -124,7 +124,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = this.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -153,7 +153,7 @@ describe('APM', function () {
       const succeeded = [];
       const self = this;
       const client = this.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -183,33 +183,36 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
       client.on('commandStarted', filterForCommands('listCollections', started));
       client.on('commandSucceeded', filterForCommands('listCollections', succeeded));
 
-      return client.connect().then(client => {
-        const db = client.db(self.configuration.db);
+      return client
+        .connect()
+        .then(client => {
+          const db = client.db(self.configuration.db);
 
-        return db
-          .collection('apm_test_list_collections')
-          .insertOne({ a: 1 }, self.configuration.writeConcernMax())
-          .then(r => {
-            expect(r).property('insertedId').to.exist;
-            return db.listCollections({}, { readPreference: ReadPreference.PRIMARY }).toArray();
-          })
-          .then(() =>
-            db.listCollections({}, { readPreference: ReadPreference.SECONDARY }).toArray()
-          )
-          .then(() => {
-            expect(started).to.have.lengthOf(2);
-            expect(started[0]).property('address').to.not.equal(started[1].address);
+          return db
+            .collection('apm_test_list_collections')
+            .insertOne({ a: 1 }, self.configuration.writeConcernMax())
+            .then(r => {
+              expect(r).property('insertedId').to.exist;
+              return db.listCollections({}, { readPreference: ReadPreference.primary }).toArray();
+            })
+            .then(() =>
+              db.listCollections({}, { readPreference: ReadPreference.secondary }).toArray()
+            )
+            .then(() => {
+              expect(started).to.have.lengthOf(2);
+              expect(started[0]).property('address').to.not.equal(started[1].address);
 
-            return client.close();
-          });
-      });
+              return client.close();
+            });
+        })
+        .catch(err => expect(err).to.not.exist);
     }
   });
 
@@ -221,7 +224,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -301,7 +304,7 @@ describe('APM', function () {
         // });
 
         const client = self.configuration.newClient(
-          { w: 1 },
+          { writeConcern: { w: 1 } },
           { maxPoolSize: 1, monitorCommands: true }
         );
 
@@ -337,7 +340,7 @@ describe('APM', function () {
       const succeeded = [];
       const failed = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -411,7 +414,7 @@ describe('APM', function () {
       const succeeded = [];
       const failed = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -469,7 +472,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -511,7 +514,7 @@ describe('APM', function () {
       const succeeded = [];
       const failed = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -561,7 +564,7 @@ describe('APM', function () {
       const succeeded = [];
       const failed = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -593,7 +596,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -628,7 +631,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -663,7 +666,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -693,7 +696,7 @@ describe('APM', function () {
     test: function () {
       const self = this;
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -743,7 +746,7 @@ describe('APM', function () {
       for (let i = 0; i < 2500; i++) docs.push({ a: i });
 
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -789,7 +792,7 @@ describe('APM', function () {
       const started = [];
       const succeeded = [];
       const client = self.configuration.newClient(
-        { w: 1 },
+        { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 

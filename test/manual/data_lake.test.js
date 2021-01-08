@@ -12,7 +12,8 @@ describe('Atlas Data Lake', function () {
       skipPrepareDatabase: true,
       useSessions: false,
       user: 'mhuser',
-      password: 'pencil'
+      password: 'pencil',
+      authSource: 'admin'
     });
 
     let testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/atlas-data-lake-testing'));

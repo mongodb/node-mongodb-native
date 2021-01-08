@@ -1,5 +1,6 @@
 'use strict';
-
+const os = require('os');
+const fs = require('fs');
 const { expect } = require('chai');
 const { parseOptions } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
@@ -7,10 +8,12 @@ const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
+const { MongoClient } = require('../../src');
 
 describe('MongoOptions', function () {
-  it('parseOptions should always return frozen object', function () {
-    expect(parseOptions('mongodb://localhost:27017')).to.be.frozen;
+  it('MongoClient should always freeze public options', function () {
+    const client = new MongoClient('mongodb://localhost:27017');
+    expect(client.options).to.be.frozen;
   });
 
   it('test simple', function () {
@@ -23,15 +26,18 @@ describe('MongoOptions', function () {
     expect(options.prototype).to.not.exist;
   });
 
-  it('tls renames', function () {
+  it('should rename tls options correctly', function () {
+    const filename = `${os.tmpdir()}/tmp.pem`;
+    fs.closeSync(fs.openSync(filename, 'w'));
     const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
-      tlsCertificateKeyFile: [{ pem: 'pem' }, { pem: 'pem2', passphrase: 'passphrase' }],
-      tlsCertificateFile: 'tlsCertificateFile',
-      tlsCAFile: 'tlsCAFile',
-      sslCRL: 'sslCRL',
+      tlsCertificateKeyFile: filename,
+      tlsCertificateFile: filename,
+      tlsCAFile: filename,
+      sslCRL: filename,
       tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword',
       sslValidate: false
     });
+    fs.unlinkSync(filename);
 
     /*
      * If set TLS enabled, equivalent to setting the ssl option.
@@ -52,11 +58,11 @@ describe('MongoOptions', function () {
     expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('sslCRL');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
-    expect(options).has.property('ca', 'tlsCAFile');
-    expect(options).has.property('crl', 'sslCRL');
-    expect(options).has.property('cert', 'tlsCertificateFile');
+    expect(options).has.property('ca', '');
+    expect(options).has.property('crl', '');
+    expect(options).has.property('cert', '');
     expect(options).has.property('key');
-    expect(options.key).has.length(2);
+    expect(options.key).has.length(0);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
     expect(options).has.property('rejectUnauthorized', false);
     expect(options).has.property('tls', true);
@@ -71,7 +77,6 @@ describe('MongoOptions', function () {
     autoEncryption: { bypassAutoEncryption: true },
     checkKeys: true,
     checkServerIdentity: false,
-    compression: 'zlib',
     compressors: 'snappy', // TODO
     connectTimeoutMS: 123,
     directConnection: true,
@@ -97,7 +102,6 @@ describe('MongoOptions', function () {
     minPoolSize: 1,
     monitorCommands: true,
     noDelay: true,
-    numberOfRetries: 3,
     pkFactory: {
       createPk() {
         return 'very unique';
@@ -117,23 +121,15 @@ describe('MongoOptions', function () {
     retryWrites: true,
     serializeFunctions: true,
     serverSelectionTimeoutMS: 3,
-    serverSelectionTryOnce: true,
     servername: 'some tls option',
     socketTimeoutMS: 3,
     ssl: true,
-    sslCA: 'ca',
-    sslCert: 'cert',
-    sslCRL: 'crl',
-    sslKey: 'key',
     sslPass: 'pass',
     sslValidate: true,
     tls: false,
     tlsAllowInvalidCertificates: true,
     tlsAllowInvalidHostnames: true,
-    tlsCAFile: 'tls-ca',
-    tlsCertificateKeyFile: 'tls-key',
     tlsCertificateKeyFilePassword: 'tls-pass',
-    // tlsInsecure: true,
     w: 'majority',
     waitQueueTimeoutMS: 3,
     writeConcern: new WriteConcern(2),
@@ -175,18 +171,12 @@ describe('MongoOptions', function () {
       'retryReads=true',
       'retryWrites=true',
       'serverSelectionTimeoutMS=2',
-      'serverSelectionTryOnce=true',
       'socketTimeoutMS=2',
       'ssl=true',
       'tls=true',
       'tlsAllowInvalidCertificates=true',
       'tlsAllowInvalidHostnames=true',
-      'tlsCAFile=CA_FILE',
-      'tlsCertificateKeyFile=KEY_FILE',
       'tlsCertificateKeyFilePassword=PASSWORD',
-      // 'tlsDisableCertificateRevocationCheck=true', // not implemented
-      // 'tlsDisableOCSPEndpointCheck=true', // not implemented
-      // 'tlsInsecure=true',
       'w=majority',
       'waitQueueTimeoutMS=2',
       'wTimeoutMS=2',
@@ -202,9 +192,9 @@ describe('MongoOptions', function () {
     expect(options.writeConcern).has.property('wtimeout', 2);
   });
 
-  it('srv', function () {
+  it('srvHost saved to options for later resolution', function () {
     const options = parseOptions('mongodb+srv://server.example.com/');
-    expect(options).has.property('srv', true);
+    expect(options).has.property('srvHost', 'server.example.com');
   });
 
   it('supports ReadPreference option in url', function () {
@@ -287,23 +277,20 @@ describe('MongoOptions', function () {
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
+    expect(options.credentials.source).to.equal('admin');
+  });
+
+  it('supports Credentials option in url with db', function () {
+    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/foo');
+    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
+    expect(options.credentials.username).to.equal('USERNAME');
+    expect(options.credentials.password).to.equal('PASSWORD');
+    expect(options.credentials.source).to.equal('foo');
   });
 
   it('supports Credentials option in auth object plain', function () {
     const options = parseOptions('mongodb://localhost/', {
       auth: { username: 'USERNAME', password: 'PASSWORD' }
-    });
-    expect(options.credentials).to.be.an.instanceof(MongoCredentials);
-    expect(options.credentials.username).to.equal('USERNAME');
-    expect(options.credentials.password).to.equal('PASSWORD');
-  });
-
-  it('supports Credentials option in object plain', function () {
-    // top-level username and password are supported because
-    // they represent the authority section of connection string
-    const options = parseOptions('mongodb://localhost/', {
-      username: 'USERNAME',
-      password: 'PASSWORD'
     });
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
     expect(options.credentials.username).to.equal('USERNAME');

@@ -5,7 +5,7 @@ const { loadSpecTests } = require('../../spec');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const { EventEmitter } = require('events');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const cmapEvents = require('../../../src/cmap/events');
 const sinon = require('sinon');
 const { expect } = require('chai');
@@ -52,7 +52,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(Object.assign({ maxPoolSize: 1 }, server.address()));
+    const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
 
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
@@ -93,9 +93,11 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(
-      Object.assign({ maxPoolSize: 1, socketTimeout: 200 }, server.address())
-    );
+    const pool = new ConnectionPool({
+      maxPoolSize: 1,
+      socketTimeout: 200,
+      hostAddress: server.hostAddress()
+    });
 
     pool.withConnection(
       (err, conn, cb) => {
@@ -119,9 +121,11 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(
-      Object.assign({ maxPoolSize: 1, waitQueueTimeoutMS: 200 }, server.address())
-    );
+    const pool = new ConnectionPool({
+      maxPoolSize: 1,
+      waitQueueTimeoutMS: 200,
+      hostAddress: server.hostAddress()
+    });
 
     pool.checkOut((err, conn) => {
       expect(err).to.not.exist;
@@ -153,7 +157,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({}, server.address()));
+      const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
       const callback = (err, result) => {
         expect(err).to.not.exist;
         expect(result).to.exist;
@@ -178,7 +182,10 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({ waitQueueTimeoutMS: 200 }, server.address()));
+      const pool = new ConnectionPool({
+        waitQueueTimeoutMS: 200,
+        hostAddress: server.hostAddress()
+      });
 
       const callback = err => {
         expect(err).to.exist;
@@ -201,7 +208,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({}, server.address()));
+      const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
       const callback = (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
@@ -223,7 +230,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool(Object.assign({ maxPoolSize: 1 }, server.address()));
+      const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
 
       const events = [];
       pool.on('connectionCheckedOut', event => events.push(event));
@@ -252,7 +259,7 @@ describe('Connection Pool', function () {
     let pool = undefined;
 
     function createPool(options) {
-      options = Object.assign({}, options, {}, server.address());
+      options = Object.assign({}, options, { hostAddress: server.hostAddress() });
       pool = new ConnectionPool(options);
       ALL_POOL_EVENTS.forEach(ev => {
         pool.on(ev, x => {

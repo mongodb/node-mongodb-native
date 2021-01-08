@@ -147,15 +147,15 @@ export class MongoCredentials {
   }
 
   static merge(
-    creds: MongoCredentials,
+    creds: MongoCredentials | undefined,
     options: Partial<MongoCredentialsOptions>
   ): MongoCredentials {
     return new MongoCredentials({
-      username: options.username ?? creds.username,
-      password: options.password ?? creds.password,
-      mechanism: options.mechanism ?? creds.mechanism,
-      mechanismProperties: options.mechanismProperties ?? creds.mechanismProperties,
-      source: options.source ?? creds.source ?? options.db
+      username: options.username ?? creds?.username ?? '',
+      password: options.password ?? creds?.password ?? '',
+      mechanism: options.mechanism ?? creds?.mechanism ?? AuthMechanism.MONGODB_DEFAULT,
+      mechanismProperties: options.mechanismProperties ?? creds?.mechanismProperties ?? {},
+      source: options.source ?? options.db ?? creds?.source ?? 'admin'
     });
   }
 }

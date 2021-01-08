@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { MongoError, AnyError } from './error';
+import { MongoError, AnyError, MongoParseError } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -12,12 +12,13 @@ import type { OperationOptions, Hint } from './operations/operation';
 import type { ClientSession } from './sessions';
 import { ReadConcern } from './read_concern';
 import type { Connection } from './cmap/connection';
-import { Document, resolveBSONOptions } from './bson';
+import { Document, ObjectId, resolveBSONOptions } from './bson';
 import type { IndexSpecification, IndexDirection } from './operations/indexes';
 import type { Explain } from './explain';
 import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import { ReadPreference } from './read_preference';
+import { URL } from 'url';
 
 /**
  * MongoDB Driver style callback
@@ -593,8 +594,8 @@ export class MongoDBNamespace {
       throw new Error(`Cannot parse namespace from "${namespace}"`);
     }
 
-    const index = namespace.indexOf('.');
-    return new MongoDBNamespace(namespace.substring(0, index), namespace.substring(index + 1));
+    const [db, ...collection] = namespace.split('.');
+    return new MongoDBNamespace(db, collection.join('.'));
   }
 }
 
@@ -623,7 +624,7 @@ export function maybePromise<T>(
   const Promise = PromiseProvider.get();
   let result: Promise<T> | void;
   if (typeof callback !== 'function') {
-    result = new Promise((resolve, reject) => {
+    result = new Promise<any>((resolve, reject) => {
       callback = (err, res) => {
         if (err) return reject(err);
         resolve(res);
@@ -885,13 +886,13 @@ export interface ClientMetadataOptions {
     version?: string;
     platform?: string;
   };
-  appname?: string;
+  appName?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../package.json').version;
 
-export function makeClientMetadata(options: ClientMetadataOptions): ClientMetadata {
+export function makeClientMetadata(options?: ClientMetadataOptions): ClientMetadata {
   options = options ?? {};
 
   const metadata: ClientMetadata = {
@@ -905,7 +906,7 @@ export function makeClientMetadata(options: ClientMetadataOptions): ClientMetada
       architecture: process.arch,
       version: os.release()
     },
-    platform: `'Node.js ${process.version}, ${os.endianness} (unified)`
+    platform: `Node.js ${process.version}, ${os.endianness()} (unified)`
   };
 
   // support optionally provided wrapping driver info
@@ -923,31 +924,15 @@ export function makeClientMetadata(options: ClientMetadataOptions): ClientMetada
     }
   }
 
-  if (options.appname) {
-    // MongoDB requires the appname not exceed a byte length of 128
-    const buffer = Buffer.from(options.appname);
+  if (options.appName) {
+    // MongoDB requires the appName not exceed a byte length of 128
+    const buffer = Buffer.from(options.appName);
     metadata.application = {
-      name: buffer.length > 128 ? buffer.slice(0, 128).toString('utf8') : options.appname
+      name: buffer.byteLength > 128 ? buffer.slice(0, 128).toString('utf8') : options.appName
     };
   }
 
   return metadata;
-}
-
-/**
- * Loops over deprecated keys, will emit warning if key matched in options.
- * @internal
- *
- * @param options - an object of options
- * @param list - deprecated option keys
- */
-export function emitDeprecatedOptionWarning(options: AnyOptions | undefined, list: string[]): void {
-  if (!options) return;
-  list.forEach(option => {
-    if (typeof options[option] !== 'undefined') {
-      emitDeprecationWarning(`option [${option}] is deprecated`);
-    }
-  });
 }
 
 /** @internal */
@@ -1143,6 +1128,14 @@ export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boo
   return true;
 }
 
+export function setDifference(setA: Iterable<any>, setB: Iterable<any>): Set<any> {
+  const difference = new Set(setA);
+  for (const elem of setB) {
+    difference.delete(elem);
+  }
+  return difference;
+}
+
 export function isRecord<T extends readonly string[]>(
   value: unknown,
   requiredKeys: T
@@ -1312,3 +1305,72 @@ export class BufferPool {
     return result;
   }
 }
+
+/** @public */
+export class HostAddress {
+  host;
+  port;
+  // Driver only works with unix socket path to connect
+  // SDAM operates only on tcp addresses
+  socketPath;
+  isIPv6;
+
+  constructor(hostString: string) {
+    const escapedHost = hostString.split(' ').join('%20'); // escape spaces, for socket path hosts
+    const { hostname, port } = new URL(`mongodb://${escapedHost}`);
+
+    if (hostname.endsWith('.sock')) {
+      // heuristically determine if we're working with a domain socket
+      this.socketPath = decodeURIComponent(hostname);
+    } else if (typeof hostname === 'string') {
+      this.isIPv6 = false;
+
+      let normalized = decodeURIComponent(hostname).toLowerCase();
+      if (normalized.startsWith('[') && normalized.endsWith(']')) {
+        this.isIPv6 = true;
+        normalized = normalized.substring(1, hostname.length - 1);
+      }
+
+      this.host = normalized.toLowerCase();
+
+      if (typeof port === 'number') {
+        this.port = port;
+      } else if (typeof port === 'string' && port !== '') {
+        this.port = Number.parseInt(port, 10);
+      } else {
+        this.port = 27017;
+      }
+
+      if (this.port === 0) {
+        throw new MongoParseError('Invalid port (zero) with hostname');
+      }
+    } else {
+      throw new Error('Either socketPath or host must be defined.');
+    }
+    Object.freeze(this);
+  }
+
+  /**
+   * @param ipv6Brackets - optionally request ipv6 bracket notation required for connection strings
+   */
+  toString(ipv6Brackets = false): string {
+    if (typeof this.host === 'string') {
+      if (this.isIPv6 && ipv6Brackets) {
+        return `[${this.host}]:${this.port}`;
+      }
+      return `${this.host}:${this.port}`;
+    }
+    return `${this.socketPath}`;
+  }
+
+  static fromString(s: string): HostAddress {
+    return new HostAddress(s);
+  }
+}
+
+export const DEFAULT_PK_FACTORY = {
+  // We prefer not to rely on ObjectId having a createPk method
+  createPk(): ObjectId {
+    return new ObjectId();
+  }
+};

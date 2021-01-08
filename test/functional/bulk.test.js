@@ -1201,7 +1201,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeoutMS: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);
@@ -1303,7 +1303,7 @@ describe('Bulk', function () {
         batch.insert({ a: 1 });
         batch.insert({ a: 2 });
 
-        batch.execute({ writeConcern: { w: 2, wtimeout: 1000 } }, function (err) {
+        batch.execute({ writeConcern: { w: 2, wtimeoutMS: 1000 } }, function (err) {
           test.ok(err != null);
           test.ok(err.code != null);
           test.ok(err.errmsg != null);

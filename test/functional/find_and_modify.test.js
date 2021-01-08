@@ -216,8 +216,8 @@ describe('Find and Modify', function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ readPreference: 'secondary' }, { maxPoolSize: 1 });
       client.connect((err, client) => {
-        const db = client.db(configuration.db);
         expect(err).to.not.exist;
+        const db = client.db(configuration.db);
 
         const collection = db.collection('findAndModifyTEST');
         // Execute findOneAndUpdate

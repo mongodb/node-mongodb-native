@@ -1,6 +1,6 @@
 'use strict';
 var expect = require('chai').expect,
-  mock = require('mongodb-mock-server'),
+  mock = require('../tools/mock'),
   co = require('co');
 const { Long } = require('../../src');
 

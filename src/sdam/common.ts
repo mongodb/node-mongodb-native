@@ -36,16 +36,6 @@ export enum ServerType {
   Unknown = 'Unknown'
 }
 
-export const TOPOLOGY_DEFAULTS = {
-  localThresholdMS: 15,
-  serverSelectionTimeoutMS: 30000,
-  heartbeatFrequencyMS: 10000,
-  minHeartbeatFrequencyMS: 500,
-
-  // TODO: remove in v4
-  useRecoveryToken: true
-};
-
 /** @internal */
 export type TimerQueue = Set<NodeJS.Timeout>;
 

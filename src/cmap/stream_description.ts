@@ -14,9 +14,7 @@ const RESPONSE_FIELDS = [
 
 /** @public */
 export interface StreamDescriptionOptions {
-  compression: {
-    compressors: CompressorName[];
-  };
+  compressors?: CompressorName[];
 }
 
 /** @public */
@@ -32,7 +30,7 @@ export class StreamDescription {
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
 
-  __nodejs_mock_server__ = false;
+  __nodejs_mock_server__?: boolean;
 
   zlibCompressionLevel?: number;
 
@@ -45,8 +43,8 @@ export class StreamDescription {
     this.maxMessageSizeBytes = 48000000;
     this.maxWriteBatchSize = 100000;
     this.compressors =
-      options && options.compression && Array.isArray(options.compression.compressors)
-        ? options.compression.compressors
+      options && options.compressors && Array.isArray(options.compressors)
+        ? options.compressors
         : [];
   }
 

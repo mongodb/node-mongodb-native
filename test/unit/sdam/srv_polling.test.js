@@ -10,7 +10,8 @@ const dns = require('dns');
 const EventEmitter = require('events').EventEmitter;
 const chai = require('chai');
 const sinon = require('sinon');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
+const { HostAddress } = require('../../../src/utils');
 
 const expect = chai.expect;
 chai.use(require('sinon-chai'));
@@ -242,7 +243,9 @@ describe('Mongos SRV Polling', function () {
     it('should not make an srv poller if there is no srv host', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(['localhost:27017,localhost:27018'], { srvPoller });
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+        srvPoller
+      });
 
       expect(topology).to.not.have.property('srvPoller');
     });
@@ -250,7 +253,7 @@ describe('Mongos SRV Polling', function () {
     it('should make an srvPoller if there is an srvHost', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(['localhost:27017,localhost:27018'], {
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });
@@ -262,7 +265,7 @@ describe('Mongos SRV Polling', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
       sinon.stub(srvPoller, 'start');
 
-      const topology = new Topology(['localhost:27017,localhost:27018'], {
+      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });
@@ -331,7 +334,9 @@ describe('Mongos SRV Polling', function () {
         });
 
         const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
-        const seedlist = recordSets[0].map(record => `${record.name}:${record.port}`).join(',');
+        const seedlist = recordSets[0].map(record =>
+          HostAddress.fromString(`${record.name}:${record.port}`)
+        );
 
         context.topology = new Topology(seedlist, { srvPoller, srvHost: SRV_HOST });
         const topology = context.topology;

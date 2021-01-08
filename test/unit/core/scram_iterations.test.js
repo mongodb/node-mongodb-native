@@ -1,16 +1,16 @@
 'use strict';
 
 const { expect } = require('chai');
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { Topology } = require('../../../src/sdam/topology');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 
 describe('SCRAM Iterations Tests', function () {
-  const test = {};
+  let server;
 
   beforeEach(() => {
     return mock.createServer().then(mockServer => {
-      test.server = mockServer;
+      server = mockServer;
     });
   });
 
@@ -21,7 +21,7 @@ describe('SCRAM Iterations Tests', function () {
       'r=IE+xNFeOcslsupAA+zkDVzHd5HfwoRuP7Wi8S4py+erf8PcNm7XIdXQyT52Nj3+M,s=AzomrlMs99A7oFxDLpgFvVb+CSvdyXuNagoWVw==,i=4000';
 
     const credentials = new MongoCredentials({
-      mechanism: 'default',
+      mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
       password: 'pencil'
@@ -32,7 +32,7 @@ describe('SCRAM Iterations Tests', function () {
       return _done(e);
     };
 
-    test.server.setMessageHandler(request => {
+    server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
@@ -47,7 +47,7 @@ describe('SCRAM Iterations Tests', function () {
       }
     });
 
-    const client = new Topology(test.server.uri(), { credentials });
+    const client = new Topology(server.hostAddress(), { credentials });
     client.on('error', err => {
       let testErr;
       try {
@@ -67,7 +67,7 @@ describe('SCRAM Iterations Tests', function () {
 
   it('should error if server digest is invalid', function (_done) {
     const credentials = new MongoCredentials({
-      mechanism: 'default',
+      mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
       password: 'pencil'
@@ -78,7 +78,7 @@ describe('SCRAM Iterations Tests', function () {
       return _done(e);
     };
 
-    test.server.setMessageHandler(request => {
+    server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
@@ -99,7 +99,7 @@ describe('SCRAM Iterations Tests', function () {
       }
     });
 
-    const client = new Topology(test.server.uri(), { credentials });
+    const client = new Topology(server.hostAddress(), { credentials });
     client.on('error', err => {
       expect(err).to.not.be.null;
       expect(err)
@@ -114,7 +114,7 @@ describe('SCRAM Iterations Tests', function () {
 
   it('should properly handle network errors on `saslContinue`', function (_done) {
     const credentials = new MongoCredentials({
-      mechanism: 'default',
+      mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
       password: 'pencil'
@@ -125,7 +125,7 @@ describe('SCRAM Iterations Tests', function () {
       return _done(e);
     };
 
-    test.server.setMessageHandler(request => {
+    server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
@@ -142,7 +142,7 @@ describe('SCRAM Iterations Tests', function () {
       }
     });
 
-    const client = new Topology(test.server.uri(), { credentials });
+    const client = new Topology(server.hostAddress(), { credentials });
     client.on('error', err => {
       expect(err).to.not.be.null;
       expect(err)

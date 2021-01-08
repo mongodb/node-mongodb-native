@@ -34,6 +34,7 @@ class TestRunnerContext {
     const defaults = {
       password: undefined,
       user: undefined,
+      authSource: undefined,
       useSessions: true,
       skipPrepareDatabase: false
     };
@@ -42,6 +43,7 @@ class TestRunnerContext {
     this.useSessions = opts.useSessions;
     this.user = opts.user;
     this.password = opts.password;
+    this.authSource = opts.authSource;
     this.sharedClient = null;
     this.failPointClients = [];
     this.appliedFailPoints = [];
@@ -70,7 +72,7 @@ class TestRunnerContext {
       resolveConnectionString(config, { useMultipleMongoses: true }, this)
     );
     if (config.topologyType === 'Sharded') {
-      this.failPointClients = config.options.hosts.map(proxy =>
+      this.failPointClients = config.options.hostAddresses.map(proxy =>
         config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
       );
     }

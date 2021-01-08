@@ -37,7 +37,7 @@ import type { SerializeOptions } from 'bson';
  * BSON Serialization options.
  * @public
  */
-export interface BSONSerializeOptions extends SerializeOptions {
+export interface BSONSerializeOptions extends Omit<SerializeOptions, 'index'> {
   /** Return document results as raw BSON buffers */
   fieldsAsRaw?: { [key: string]: boolean };
   /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */

@@ -1,6 +1,5 @@
-import { arrayStrictEqual, errorStrictEqual } from '../utils';
+import { arrayStrictEqual, errorStrictEqual, now, HostAddress } from '../utils';
 import { ServerType } from './common';
-import { now } from '../utils';
 import type { ObjectId, Long, Document } from '../bson';
 import type { ClusterTime } from './common';
 
@@ -45,6 +44,7 @@ export interface ServerDescriptionOptions {
  * @public
  */
 export class ServerDescription {
+  private _hostAddress: HostAddress;
   address: string;
   type: ServerType;
   hosts: string[];
@@ -77,8 +77,18 @@ export class ServerDescription {
    * @param address - The address of the server
    * @param ismaster - An optional ismaster response for this server
    */
-  constructor(address: string, ismaster?: Document, options?: ServerDescriptionOptions) {
-    this.address = address;
+  constructor(
+    address: HostAddress | string,
+    ismaster?: Document,
+    options?: ServerDescriptionOptions
+  ) {
+    if (typeof address === 'string') {
+      this._hostAddress = new HostAddress(address);
+      this.address = this._hostAddress.toString();
+    } else {
+      this._hostAddress = address;
+      this.address = this._hostAddress.toString();
+    }
     this.type = parseServerType(ismaster);
     this.hosts = ismaster?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
     this.passives = ismaster?.passives?.map((host: string) => host.toLowerCase()) ?? [];
@@ -127,6 +137,11 @@ export class ServerDescription {
     if (ismaster?.$clusterTime) {
       this.$clusterTime = ismaster.$clusterTime;
     }
+  }
+
+  get hostAddress(): HostAddress {
+    if (this._hostAddress) return this._hostAddress;
+    else return new HostAddress(this.address);
   }
 
   get allHosts(): string[] {

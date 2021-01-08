@@ -1,16 +1,16 @@
 import { deprecate } from 'util';
 import {
-  emitDeprecatedOptionWarning,
   Callback,
   resolveOptions,
   filterOptions,
   deprecateOptions,
   MongoDBNamespace,
-  getTopology
+  getTopology,
+  DEFAULT_PK_FACTORY
 } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor } from './cursor/aggregation_cursor';
-import { ObjectId, Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
+import { Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -54,7 +54,7 @@ import type { MongoClient, PkFactory } from './mongo_client';
 import type { Admin } from './admin';
 
 // Allowed parameters
-const legalOptionNames = [
+const DB_OPTIONS_ALLOW_LIST = [
   'writeConcern',
   'readPreference',
   'readPreferenceTags',
@@ -146,10 +146,9 @@ export class Db {
    */
   constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
     options = options ?? {};
-    emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Filter the options
-    options = filterOptions(options, legalOptionNames);
+    options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
 
     // Ensure we have a valid db name
     validateDatabaseName(databaseName);
@@ -167,12 +166,7 @@ export class Db {
       // Merge bson options
       bsonOptions: resolveBSONOptions(options, client),
       // Set up the primary key factory or fallback to ObjectId
-      pkFactory: options?.pkFactory ?? {
-        createPk() {
-          // We prefer not to rely on ObjectId having a createPk method
-          return new ObjectId();
-        }
-      },
+      pkFactory: options?.pkFactory ?? DEFAULT_PK_FACTORY,
       // ReadConcern
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
