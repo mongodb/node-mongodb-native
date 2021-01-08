@@ -77,7 +77,7 @@ export class AggregationCursor extends AbstractCursor {
   /** Execute the explain for the cursor */
   explain(): Promise<Document>;
   explain(callback: Callback): void;
-  explain(verbosity?: ExplainVerbosityLike): Promise<Document>;
+  explain(verbosity: ExplainVerbosityLike): Promise<Document>;
   explain(
     verbosity?: ExplainVerbosityLike | Callback,
     callback?: Callback<Document>

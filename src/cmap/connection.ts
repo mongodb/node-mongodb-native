@@ -263,9 +263,9 @@ export class Connection extends EventEmitter {
   }
 
   destroy(): void;
-  destroy(callback?: Callback): void;
-  destroy(options?: DestroyOptions): void;
-  destroy(options?: DestroyOptions, callback?: Callback): void;
+  destroy(callback: Callback): void;
+  destroy(options: DestroyOptions): void;
+  destroy(options: DestroyOptions, callback: Callback): void;
   destroy(options?: DestroyOptions | Callback, callback?: Callback): void {
     if (typeof options === 'function') {
       callback = options;
