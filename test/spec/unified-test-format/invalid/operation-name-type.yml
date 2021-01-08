@@ -1,0 +1,13 @@
+description: "operation-name-type"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+
+tests:
+  - description: "foo"
+    operations:
+      - name: 0
+        object: *client0

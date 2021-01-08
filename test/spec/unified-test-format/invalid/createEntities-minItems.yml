@@ -1,0 +1,9 @@
+description: "createEntities-minItems"
+
+schemaVersion: "1.0"
+
+createEntities: []
+
+tests:
+  - description: "foo"
+    operations: []

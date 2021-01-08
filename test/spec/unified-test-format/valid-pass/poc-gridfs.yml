@@ -1,0 +1,155 @@
+description: "poc-gridfs"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name gridfs-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+  - collection:
+      id: &bucket0_files_collection bucket0_files_collection
+      database: *database0
+      collectionName: &bucket0_files_collectionName fs.files
+  - collection:
+      id: &bucket0_chunks_collection bucket0_chunks_collection
+      database: *database0
+      collectionName: &bucket0_chunks_collectionName fs.chunks
+
+initialData:
+  - collectionName: *bucket0_files_collectionName
+    databaseName: *database0Name
+    documents:
+      - _id: { $oid: "000000000000000000000005" }
+        length: 10
+        chunkSize: 4
+        uploadDate: { $date: "1970-01-01T00:00:00.000Z" }
+        md5: "57d83cd477bfb1ccd975ab33d827a92b"
+        filename: "length-10"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+  - collectionName: *bucket0_chunks_collectionName
+    databaseName: *database0Name
+    documents:
+      - _id: { $oid: "000000000000000000000005" }
+        files_id: { $oid: "000000000000000000000005" }
+        n: 0
+        data: { $binary: { base64: "ESIzRA==", subType: "00" } } # hex: 11223344
+      - _id: { $oid: "000000000000000000000006" }
+        files_id: { $oid: "000000000000000000000005" }
+        n: 1
+        data: { $binary: { base64: "VWZ3iA==", subType: "00" } } # hex: 55667788
+      - _id: { $oid: "000000000000000000000007" }
+        files_id: { $oid: "000000000000000000000005" }
+        n: 2
+        data: { $binary: { base64: "mao=", subType: "00" } } # hex: 99aa
+
+tests:
+  # Changed from original test ("length is 8") to operate on same initialData
+  - description: "Delete when length is 10"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+    # Original test uses "assert.data" syntax to modify outcome collection for
+    # comparison. This can be accomplished using "outcome" directly.
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents: []
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents: []
+
+  - description: "Download when there are three chunks"
+    operations:
+      # Original test uses "download" operation. We use an explicit operation
+      # that returns a stream and then assert the contents of that stream.
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectResult: { $$matchesHexBytes: "112233445566778899aa" }
+
+  - description: "Download when files entry does not exist"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000000" }
+        # Original test expects "FileNotFound" error, which isn't specified
+        expectError: { isError: true }
+
+  - description: "Download when an intermediate chunk is missing"
+    operations:
+      # Original test uses "arrange" syntax to modify initialData. This can be
+      # accomplished as a delete operation on the chunks collection.
+      - name: deleteOne
+        object: *bucket0_chunks_collection
+        arguments:
+          filter:
+            files_id: { $oid: "000000000000000000000005" }
+            n: 1
+        expectResult:
+          deletedCount: 1
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        # Original test expects "ChunkIsMissing" error, which isn't specified
+        expectError: { isError: true }
+
+  - description: "Upload when length is 5"
+    operations:
+      # Original test uses "upload" operation. We use an explicit operation
+      # that takes a stream, which has been created from the expected hex bytes.
+      - name: upload
+        object: *bucket0
+        arguments:
+          filename: filename
+          source: { $$hexBytes: "1122334455" }
+          chunkSizeBytes: 4
+        # Original test references the result directly in "assert.data". Here,
+        # we need to save the result as an entity, which we can later reference.
+        expectResult: { $$type: objectId }
+        saveResultAsEntity: &oid0 oid0
+      # "outcome" does not allow operators, but we can perform the assertions
+      # with separate find operations.
+      - name: find
+        object: *bucket0_files_collection
+        arguments:
+          filter: {}
+          sort: { uploadDate: -1 }
+          limit: 1
+        expectResult:
+          - _id: { $$matchesEntity: *oid0 }
+            length: 5
+            chunkSize: 4
+            uploadDate: { $$type: date }
+            # The md5 field is deprecated so some drivers do not calculate it when uploading files.
+            md5: { $$unsetOrMatches: "283d4fea5dded59cf837d3047328f5af" }
+            filename: filename
+      - name: find
+        object: *bucket0_chunks_collection
+        arguments:
+          # We cannot use the saved ObjectId when querying, but filtering by a
+          # non-zero timestamp will exclude initialData and sort can return the
+          # expected chunks in order.
+          filter: { _id: { $gt: { $oid: "000000000000000000000007" } } }
+          sort: { n: 1 }
+        expectResult:
+          - _id: { $$type: objectId }
+            files_id: { $$matchesEntity: *oid0 }
+            n: 0
+            data: { $binary: { base64: "ESIzRA==", subType: "00" } } # hex 11223344
+          - _id: { $$type: objectId }
+            files_id: { $$matchesEntity: *oid0 }
+            n: 1
+            data: { $binary: { base64: "VQ==", subType: "00" } } # hex 55

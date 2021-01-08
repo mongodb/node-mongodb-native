@@ -1,0 +1,16 @@
+{
+  "description": "runOnRequirement-additionalProperties",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "foo": 0
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

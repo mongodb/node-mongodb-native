@@ -1,0 +1,5 @@
+description: "schemaVersion-required"
+
+tests:
+  - description: "foo"
+    operations: []

@@ -1,0 +1,15 @@
+{
+  "description": "entity-client-id-required",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {}
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

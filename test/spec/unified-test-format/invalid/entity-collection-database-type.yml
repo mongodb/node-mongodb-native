@@ -1,0 +1,19 @@
+description: "entity-collection-database-type"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+  - database:
+      id: &database0 "database0"
+      client: *client0
+      databaseName: "foo"
+  - collection:
+      id: &collection0 "collection0"
+      database: 0
+      collectionName: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

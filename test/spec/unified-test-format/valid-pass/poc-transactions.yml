@@ -1,0 +1,170 @@
+description: "poc-transactions"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: [ replicaset ]
+  - minServerVersion: "4.1.8"
+    topologies: [ sharded-replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name transaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "Client side error in command starting transaction"
+    operations:
+      - name: startTransaction
+        object: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: { .: . } }
+        # Original test only asserted a generic error
+        expectError: { isClientError: true }
+      - name: assertSessionTransactionState
+        object: testRunner
+        arguments:
+          session: *session0
+          state: starting
+
+  - description: "explicitly create collection using create command"
+    runOnRequirements:
+      - minServerVersion: "4.3.4"
+        topologies: [ replicaset, sharded-replicaset ]
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: startTransaction
+        object: *session0
+      - name: createCollection
+        object: *database0
+        arguments:
+          session: *session0
+          collection: *collection0Name
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+      - name: commitTransaction
+        object: *session0
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+                writeConcern: { $$exists: false }
+              commandName: drop
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0Name
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: create
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+
+  - description: "create index on a non-existing collection"
+    runOnRequirements:
+      - minServerVersion: "4.3.4"
+        topologies: [ replicaset, sharded-replicaset ]
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: startTransaction
+        object: *session0
+      - name: createIndex
+        object: *collection0
+        arguments:
+          session: *session0
+          name: &indexName "x_1"
+          keys: { x: 1 }
+      - name: assertIndexNotExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+          indexName: *indexName
+      - name: commitTransaction
+        object: *session0
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+          indexName: *indexName
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+                writeConcern: { $$exists: false }
+              commandName: drop
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                createIndexes: *collection0Name
+                indexes:
+                  - name: *indexName
+                    key: { x: 1 }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: createIndexes
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin

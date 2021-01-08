@@ -1,0 +1,39 @@
+{
+  "description": "collectionData-documents-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "foo"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "foo",
+        "foo": 0
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "foo",
+      "databaseName": "foo",
+      "documents": 0
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

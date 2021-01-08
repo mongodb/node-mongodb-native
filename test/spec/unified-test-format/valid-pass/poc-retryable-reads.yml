@@ -1,0 +1,193 @@
+description: "poc-retryable-reads"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: [ single, replicaset ]
+  - minServerVersion: "4.1.7"
+    topologies: [ sharded ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - client:
+      id: &client1 client1
+      uriOptions: { retryReads: false }
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-reads-tests
+  - database:
+      id: &database1 database1
+      client: *client1
+      databaseName: *databaseName
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName coll
+  - collection:
+      id: &collection1 collection1
+      database: *database1
+      collectionName: *collectionName
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - {_id: 1, x: 11}
+      - {_id: 2, x: 22}
+      - {_id: 3, x: 33}
+
+tests:
+  - description: "Aggregate succeeds after InterruptedAtShutdown"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ aggregate ]
+              errorCode: 11600 # InterruptedAtShutdown
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline
+            - $match: { _id: { $gt: 1 } }
+            - $sort: { x: 1 }
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collectionName
+                pipeline: *pipeline
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                aggregate: *collectionName
+                pipeline: *pipeline
+              databaseName: *databaseName
+
+  - description: "Find succeeds on second attempt"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ find ]
+              closeConnection: true
+      # Find options and expected result changed to use common initialData
+      - name: find
+        object: collection0
+        arguments:
+          filter: {}
+          sort: { _id: 1 }
+          limit: 2
+        expectResult:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client0
+        events:
+          - &findAttempt
+            commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: {}
+                sort: { _id: 1 }
+                limit: 2
+              databaseName: *databaseName
+          - *findAttempt
+
+  - description: "Find fails on first attempt"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ find ]
+              closeConnection: true
+      - name: find
+        object: collection1 # client uses retryReads=false
+        arguments:
+          filter: {}
+          # Other arguments in the original test are not relevant
+        expectError: { isError: true }
+    expectEvents:
+      - client: *client1
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: {}
+              databaseName: *databaseName
+
+  - description: "Find fails on second attempt"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ find ]
+              closeConnection: true
+      - name: find
+        object: collection0
+        arguments:
+          filter: {}
+          # Other arguments in the original test are not relevant
+        expectError: { isError: true }
+    expectEvents:
+      - client: *client0
+        events:
+          - &findAttempt
+            commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: {}
+              databaseName: *databaseName
+          - *findAttempt
+
+  - description: "ListDatabases succeeds on second attempt"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ listDatabases ]
+              closeConnection: true
+      - name: listDatabases
+        object: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command: { listDatabases: 1 }
+          - commandStartedEvent:
+              command: { listDatabases: 1 }

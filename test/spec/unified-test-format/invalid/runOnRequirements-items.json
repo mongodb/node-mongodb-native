@@ -1,0 +1,13 @@
+{
+  "description": "runOnRequirements-items",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    0
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+description: "entity-collection-database-undefined"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - collection:
+      id: &collection0 "collection0"
+      database: "foo"
+      collectionName: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

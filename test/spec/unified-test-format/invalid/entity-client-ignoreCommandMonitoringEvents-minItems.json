@@ -1,0 +1,18 @@
+{
+  "description": "entity-client-ignoreCommandMonitoringEvents-minItems",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "ignoreCommandMonitoringEvents": []
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

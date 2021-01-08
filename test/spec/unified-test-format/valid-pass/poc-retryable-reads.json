@@ -1,0 +1,433 @@
+{
+  "description": "poc-retryable-reads",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "single",
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topologies": [
+        "sharded"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "uriOptions": {
+          "retryReads": false
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-reads-tests"
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client1",
+        "databaseName": "retryable-reads-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database1",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-reads-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate succeeds after InterruptedAtShutdown",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "x": 1
+                }
+              }
+            ]
+          },
+          "expectResult": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    }
+                  ]
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    }
+                  ]
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find succeeds on second attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "_id": 1
+            },
+            "limit": 2
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll",
+                  "filter": {},
+                  "sort": {
+                    "_id": 1
+                  },
+                  "limit": 2
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll",
+                  "filter": {},
+                  "sort": {
+                    "_id": 1
+                  },
+                  "limit": 2
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find fails on first attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection1",
+          "arguments": {
+            "filter": {}
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll",
+                  "filter": {}
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find fails on second attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {}
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll",
+                  "filter": {}
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll",
+                  "filter": {}
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds on second attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "listDatabases",
+          "object": "client0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
