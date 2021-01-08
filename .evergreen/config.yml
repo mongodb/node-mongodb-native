@@ -137,6 +137,14 @@ functions:
         script: |
           ${PREPARE_SHELL}
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+  run mongosh integration tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
   cleanup:
     - command: shell.exec
       params:
@@ -1132,6 +1140,15 @@ tasks:
         vars:
           NODE_LTS_NAME: erbium
       - func: run checks
+  - name: run-mongosh-integration-tests
+    tags:
+      - run-mongosh-integration-tests
+    exec_timeout_secs: 3600
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: fermium
+      - func: run mongosh integration tests
 buildvariants:
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
@@ -1359,6 +1376,11 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
+  - name: mongosh_integration_tests
+    display_name: mongosh integration tests
+    run_on: ubuntu1804-test
+    tasks:
+      - run-mongosh-integration-tests
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
