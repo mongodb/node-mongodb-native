@@ -2,7 +2,7 @@ import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document } from '../bson';
+import type { Document, ObjectId } from '../bson';
 import type { AnyError } from '../error';
 
 /**
@@ -174,6 +174,7 @@ export class CommandStartedEvent {
   command: Document;
   address: string;
   connectionId?: string | number;
+  serverId?: ObjectId;
 
   /**
    * Create a started event
@@ -212,6 +213,7 @@ export class CommandSucceededEvent {
   duration: number;
   commandName: string;
   reply: unknown;
+  serverId?: ObjectId;
 
   /**
    * Create a succeeded event
@@ -251,6 +253,7 @@ export class CommandFailedEvent {
   duration: number;
   commandName: string;
   failure: Error;
+  serverId?: ObjectId;
   /**
    * Create a failure event
    *

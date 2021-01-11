@@ -66,6 +66,7 @@ export class ServerDescription {
   setVersion?: number;
   electionId?: ObjectId;
   logicalSessionTimeoutMinutes?: number;
+  serverId?: ObjectId;
 
   // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
   $clusterTime?: ClusterTime;

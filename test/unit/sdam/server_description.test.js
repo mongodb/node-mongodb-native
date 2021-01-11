@@ -47,4 +47,8 @@ describe('ServerDescription', function () {
     expect(description.host).to.equal('abcd:f::abcd:abcd:abcd:abcd');
     expect(description.port).to.equal(27017);
   });
+
+  it('must allow serverId to be nullable', function () {
+    expect(new ServerDescription().serverId).to.be.undefined;
+  });
 });
