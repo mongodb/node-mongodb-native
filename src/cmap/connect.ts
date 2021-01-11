@@ -41,7 +41,7 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     ismaster.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
     ismaster &&
-    (typeof ismaster.maxWireVersion === 'number' || ismaster.maxWireVersion instanceof Int32) &&
+    (typeof ismaster.minWireVersion === 'number' || ismaster.minWireVersion instanceof Int32) &&
     ismaster.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
