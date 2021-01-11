@@ -56,12 +56,9 @@ async function runOne(
       const collection = db.collection(collData.collectionName, {
         writeConcern: { w: 'majority' }
       });
-      try {
+      const collectionList = await db.listCollections({ name: collData.collectionName }).toArray();
+      if (collectionList.length !== 0) {
         expect(await collection.drop()).to.be.true;
-      } catch (error) {
-        // fresh run of the tests maybe?
-        expect(error).to.be.instanceof(MongoError);
-        expect(error.code).to.equal(26); // ns not found
       }
 
       if (collData.documents.length === 0) {
