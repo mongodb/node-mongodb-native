@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-topologies-type",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "topologies": 0
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

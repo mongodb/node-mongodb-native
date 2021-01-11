@@ -1,0 +1,13 @@
+description: "entity-database-client-undefined"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - database:
+      id: &database0 "database0"
+      client: "foo"
+      databaseName: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

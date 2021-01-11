@@ -1,0 +1,23 @@
+{
+  "description": "operation-saveResultAsEntity-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "client0",
+          "saveResultAsEntity": 0
+        }
+      ]
+    }
+  ]
+}

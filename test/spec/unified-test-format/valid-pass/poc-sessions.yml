@@ -1,0 +1,214 @@
+description: "poc-sessions"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "3.6.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name session-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+
+tests:
+  - description: "Server supports explicit sessions"
+    operations:
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: endSession
+        object: *session0
+      - &find_with_implicit_session
+        name: find
+        object: *collection0
+        arguments:
+          filter: { _id: -1 }
+        expectResult: []
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents: [ { _id: 2 } ]
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                lsid: { $$sessionLsid: *session0 }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+
+  - description: "Server supports implicit sessions"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - *find_with_implicit_session
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                # Original test did not include any assertion, but we can use
+                # $$type to expect an arbitrary lsid document
+                lsid: { $$type: object }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                lsid: { $$type: object }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+
+  - description: "Dirty explicit session is discarded"
+    # Original test specified retryWrites=true, but that is now the default.
+    # Retryable writes will require a sharded-replicaset, though.
+    runOnRequirements:
+      - minServerVersion: "4.0"
+        topologies: [ replicaset ]
+      - minServerVersion: "4.1.8"
+        topologies: [ sharded-replicaset ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - name: assertSessionDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 3 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } } }
+      - name: assertSessionDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: endSession
+        object: *session0
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          # ajv's YAML parser is unable to handle anchors on array elements, so
+          # we define an anchor on the commandStartedEvent object instead
+          - commandStartedEvent: &insert_attempt
+              command:
+                insert: *collection0Name
+                documents: 
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent: *insert_attempt
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents: 
+                  - { _id: 3 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 2
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                lsid: { $$type: object }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }

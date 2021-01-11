@@ -1,0 +1,17 @@
+{
+  "description": "runOnRequirement-topologies-enum",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "foo"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

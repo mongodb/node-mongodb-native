@@ -1,0 +1,12 @@
+description: "entity-session-client-undefined"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - session:
+      id: &session0 "session0"
+      client: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

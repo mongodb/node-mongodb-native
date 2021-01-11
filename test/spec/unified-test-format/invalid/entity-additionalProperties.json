@@ -1,0 +1,15 @@
+{
+  "description": "entity-additionalProperties",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "foo": 0
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

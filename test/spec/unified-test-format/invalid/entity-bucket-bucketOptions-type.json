@@ -1,0 +1,31 @@
+{
+  "description": "entity-bucket-bucketOptions-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "foo"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0",
+        "bucketOptions": 0
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

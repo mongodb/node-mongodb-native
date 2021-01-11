@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-topologies-minItems",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "topologies": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

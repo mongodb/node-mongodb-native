@@ -1,0 +1,24 @@
+{
+  "description": "entity-session-additionalProperties",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0",
+        "foo": 0
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

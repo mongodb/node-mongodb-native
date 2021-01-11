@@ -1,0 +1,301 @@
+{
+  "description": "poc-gridfs",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "gridfs-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_files_collection",
+        "database": "database0",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_chunks_collection",
+        "database": "database0",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "length": 10,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "md5": "57d83cd477bfb1ccd975ab33d827a92b",
+          "filename": "length-10",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "ESIzRA==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000006"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 1,
+          "data": {
+            "$binary": {
+              "base64": "VWZ3iA==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000007"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 2,
+          "data": {
+            "$binary": {
+              "base64": "mao=",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Delete when length is 10",
+      "operations": [
+        {
+          "name": "delete",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000005"
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": []
+        },
+        {
+          "collectionName": "fs.chunks",
+          "databaseName": "gridfs-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "Download when there are three chunks",
+      "operations": [
+        {
+          "name": "download",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000005"
+            }
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "112233445566778899aa"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Download when files entry does not exist",
+      "operations": [
+        {
+          "name": "download",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000000"
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "Download when an intermediate chunk is missing",
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {
+              "files_id": {
+                "$oid": "000000000000000000000005"
+              },
+              "n": 1
+            }
+          },
+          "expectResult": {
+            "deletedCount": 1
+          }
+        },
+        {
+          "name": "download",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000005"
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "Upload when length is 5",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "oid0"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "uploadDate": -1
+            },
+            "limit": 1
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "oid0"
+              },
+              "length": 5,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "283d4fea5dded59cf837d3047328f5af"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": {
+                  "$oid": "000000000000000000000007"
+                }
+              }
+            },
+            "sort": {
+              "n": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "oid0"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESIzRA==",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "oid0"
+              },
+              "n": 1,
+              "data": {
+                "$binary": {
+                  "base64": "VQ==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
