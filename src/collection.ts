@@ -1242,8 +1242,6 @@ export class Collection {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch(): ChangeStream;
-  watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
     options = options ?? {};

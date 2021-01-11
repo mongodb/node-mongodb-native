@@ -346,7 +346,7 @@ export class MongoClient extends EventEmitter {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<MongoClient>;
-  connect(callback?: Callback<MongoClient>): void;
+  connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
       throw new TypeError('`connect` only accepts a callback');
@@ -457,7 +457,11 @@ export class MongoClient extends EventEmitter {
       // Create client
       const mongoClient = new MongoClient(url, options);
       // Execute the connect method
-      return mongoClient.connect(callback);
+      if (callback) {
+        return mongoClient.connect(callback);
+      } else {
+        return mongoClient.connect();
+      }
     } catch (error) {
       if (callback) return callback(error);
       else return PromiseProvider.get().reject(error);
