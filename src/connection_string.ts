@@ -344,11 +344,11 @@ export function parseOptions(
 
   for (const key of allKeys) {
     const values = [];
-    if (urlOptions.has(key)) {
-      values.push(...urlOptions.get(key));
-    }
     if (objectOptions.has(key)) {
       values.push(objectOptions.get(key));
+    }
+    if (urlOptions.has(key)) {
+      values.push(...urlOptions.get(key));
     }
     if (DEFAULT_OPTIONS.has(key)) {
       values.push(DEFAULT_OPTIONS.get(key));

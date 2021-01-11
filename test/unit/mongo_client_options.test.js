@@ -16,11 +16,11 @@ describe('MongoOptions', function () {
     expect(client.options).to.be.frozen;
   });
 
-  it('test simple', function () {
+  it('programmatic options should override URI options', function () {
     const options = parseOptions('mongodb://localhost:27017/test?directConnection=true', {
       directConnection: false
     });
-    expect(options.directConnection).to.be.true;
+    expect(options.directConnection).to.be.false;
     expect(options.hosts).has.length(1);
     expect(options.dbName).to.equal('test');
     expect(options.prototype).to.not.exist;

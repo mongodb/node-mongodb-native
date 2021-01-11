@@ -242,6 +242,9 @@ const kOptions = Symbol('options');
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  * @public
  *
+ * @remarks
+ * The programmatically provided options take precedent over the URI options.
+ *
  * @example
  * ```js
  * // Connect using a MongoClient instance
@@ -438,6 +441,9 @@ export class MongoClient extends EventEmitter {
 
   /**
    * Connect to MongoDB using a url
+   *
+   * @remarks
+   * The programmatically provided options take precedent over the URI options.
    *
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
