@@ -347,20 +347,36 @@ export class Topology extends EventEmitter {
     // connect all known servers, then attempt server selection to connect
     connectServers(this, Array.from(this.s.description.servers.values()));
 
-    const readPreference = options.readPreference ?? ReadPreference.primary;
-    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
-      if (err) {
-        this.close();
-
-        typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
-        return;
-      }
-
-      // TODO: NODE-2471
-      if (server && this.s.credentials) {
-        server.command(ns('admin.$cmd'), { ping: 1 }, err => {
+    // need to store the validated options for the closure or typescript complains
+    const closureOptions = options;
+    const readPreference = closureOptions.readPreference ?? ReadPreference.primary;
+    process.nextTick(() => {
+      this.selectServer(
+        readPreferenceServerSelector(readPreference),
+        closureOptions,
+        (err, server) => {
           if (err) {
+            this.close();
+
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
+            return;
+          }
+
+          // TODO: NODE-2471
+          if (server && this.s.credentials) {
+            server.command(ns('admin.$cmd'), { ping: 1 }, err => {
+              if (err) {
+                typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
+                return;
+              }
+
+              stateTransition(this, STATE_CONNECTED);
+              this.emit(Topology.OPEN, err, this);
+              this.emit(Topology.CONNECT, this);
+
+              if (typeof callback === 'function') callback(undefined, this);
+            });
+
             return;
           }
 
@@ -369,16 +385,8 @@ export class Topology extends EventEmitter {
           this.emit(Topology.CONNECT, this);
 
           if (typeof callback === 'function') callback(undefined, this);
-        });
-
-        return;
-      }
-
-      stateTransition(this, STATE_CONNECTED);
-      this.emit(Topology.OPEN, err, this);
-      this.emit(Topology.CONNECT, this);
-
-      if (typeof callback === 'function') callback(undefined, this);
+        }
+      );
     });
   }
 
