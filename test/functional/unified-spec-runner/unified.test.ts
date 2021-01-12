@@ -6,7 +6,6 @@ import { getUnmetRequirements, matchesEvents, patchVersion, zip, log } from './u
 import { EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
-import { MongoError } from '../../../src';
 import { satisfies as semverSatisfies } from 'semver';
 
 export type TestConfiguration = InstanceType<
