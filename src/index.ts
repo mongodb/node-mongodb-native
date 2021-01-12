@@ -39,19 +39,10 @@ export {
   MaxKey,
   ObjectId,
   Timestamp,
-  Decimal128
+  Decimal128,
+  BSONRegExp,
+  BSONSymbol
 } from './bson';
-
-// NOTE: fix this up after ts-bson lands
-/** @public */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const Map = require('bson').Map;
-/** @public */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const BSONSymbol = require('bson').BSONSymbol;
-/** @public */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const BSONRegExp = require('bson').BSONRegExp;
 
 export {
   MongoError,
