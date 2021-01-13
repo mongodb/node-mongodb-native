@@ -64,7 +64,7 @@ describe('Write Concern', function () {
 
   let server;
   before(() => {
-    mock.createServer().then(s => {
+    return mock.createServer().then(s => {
       server = s;
     });
   });
@@ -74,21 +74,27 @@ describe('Write Concern', function () {
   });
 
   it('should pipe writeConcern from client down to API call', function () {
-    server.setMessageHandler(msg => {
-      if (msg.document && msg.document.ismaster) {
-        return msg.reply(mock.DEFAULT_ISMASTER);
+    server.setMessageHandler(request => {
+      if (request.document && request.document.ismaster) {
+        return request.reply(mock.DEFAULT_ISMASTER);
       }
-      expect(msg.document.writeConcern).to.exist;
-      expect(msg.document.writeConcern.w).to.equal('majority');
+      expect(request.document.writeConcern).to.exist;
+      expect(request.document.writeConcern.w).to.equal('majority');
+      return request.reply({ ok: 1 });
     });
 
     const uri = `mongodb://${server.uri()}`;
     const client = new MongoClient(uri, { writeConcern: 'majority' });
-    return client.connect().then(() => {
-      const db = client.db('wc_test');
-      const collection = db.collection('wc');
+    return client
+      .connect()
+      .then(() => {
+        const db = client.db('wc_test');
+        const collection = db.collection('wc');
 
-      collection.insertMany([{ a: 2 }]);
-    });
+        return collection.insertMany([{ a: 2 }]);
+      })
+      .then(() => {
+        return client.close();
+      });
   });
 });
