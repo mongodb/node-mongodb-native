@@ -4,6 +4,18 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
+const EJSON = require('mongodb-extjson');
+const getKmsProviders = localKey => {
+  const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+  if (localKey) {
+    result.local = { key: localKey };
+  }
+
+  return result;
+};
+
+const noop = () => {};
+
 // Tests for the ClientEncryption type are not included as part of the YAML tests.
 
 // In the prose tests LOCAL_MASTERKEY refers to the following base64:
@@ -25,7 +37,7 @@ describe('Client Side Encryption Prose Tests', function() {
   const dropCollection = shared.dropCollection;
   const APMEventCollector = shared.APMEventCollector;
 
-  const localKey = Buffer.from(
+  const LOCAL_KEY = Buffer.from(
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
@@ -97,7 +109,7 @@ describe('Client Side Encryption Prose Tests', function() {
           //   Configure ``client_encryption`` with the ``keyVaultClient`` of the previously created ``client``.
           .then(() => {
             this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
-              kmsProviders: this.configuration.kmsProviders(null, localKey),
+              kmsProviders: getKmsProviders(),
               keyVaultNamespace
             });
           })
@@ -109,7 +121,7 @@ describe('Client Side Encryption Prose Tests', function() {
                 useUnifiedTopology: true,
                 autoEncryption: {
                   keyVaultNamespace,
-                  kmsProviders: this.configuration.kmsProviders(null, localKey),
+                  kmsProviders: getKmsProviders(),
                   schemaMap
                 }
               }
@@ -321,11 +333,24 @@ describe('Client Side Encryption Prose Tests', function() {
         { useNewUrlParser: true, useUnifiedTopology: true }
       );
 
+      const customKmsProviders = getKmsProviders();
+      customKmsProviders.azure.identityPlatformEndpoint = 'login.microsoftonline.com:443';
+      customKmsProviders.gcp.endpoint = 'oauth2.googleapis.com:443';
+
+      const invalidKmsProviders = getKmsProviders();
+      invalidKmsProviders.azure.identityPlatformEndpoint = 'example.com:443';
+      invalidKmsProviders.gcp.endpoint = 'example.com:443';
+
       return this.client.connect().then(() => {
         const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
         this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
           keyVaultNamespace,
-          kmsProviders: this.configuration.kmsProviders('aws')
+          kmsProviders: customKmsProviders
+        });
+
+        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
+          keyVaultNamespace,
+          kmsProviders: invalidKmsProviders
         });
       });
     });
@@ -333,9 +358,11 @@ describe('Client Side Encryption Prose Tests', function() {
     afterEach(function() {
       return this.client && this.client.close();
     });
+
     const testCases = [
       {
         description: 'no custom endpoint',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
@@ -344,6 +371,7 @@ describe('Client Side Encryption Prose Tests', function() {
       },
       {
         description: 'custom endpoint',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -353,6 +381,7 @@ describe('Client Side Encryption Prose Tests', function() {
       },
       {
         description: 'custom endpoint with port',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -362,6 +391,7 @@ describe('Client Side Encryption Prose Tests', function() {
       },
       {
         description: 'custom endpoint with bad url',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -377,6 +407,7 @@ describe('Client Side Encryption Prose Tests', function() {
       },
       {
         description: 'custom endpoint that does not match region',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -393,18 +424,61 @@ describe('Client Side Encryption Prose Tests', function() {
       },
       {
         description: 'custom endpoint with parse error',
+        provider: 'aws',
         masterKey: {
           region: 'us-east-1',
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
           endpoint: 'example.com'
         },
-        suceed: false,
+        succeed: false,
         errorValidator: err => {
           //    Expect this to fail with an exception with a message containing the string: "parse error"
           expect(err)
             .to.be.an.instanceOf(Error)
             .and.to.have.property('message')
             .that.matches(/parse error/);
+        }
+      },
+      {
+        description: 'azure custom endpoint',
+        provider: 'azure',
+        masterKey: {
+          keyVaultEndpoint: 'key-vault-csfle.vault.azure.net',
+          keyName: 'key-name-csfle'
+        },
+        succeed: true,
+        checkAgainstInvalid: true
+      },
+      {
+        description: 'gcp custom endpoint',
+        provider: 'gcp',
+        masterKey: {
+          projectId: 'devprod-drivers',
+          location: 'global',
+          keyRing: 'key-ring-csfle',
+          keyName: 'key-name-csfle',
+          endpoint: 'cloudkms.googleapis.com:443'
+        },
+        succeed: true,
+        checkAgainstInvalid: true
+      },
+      {
+        description: 'gcp invalid custom endpoint',
+        provider: 'gcp',
+        masterKey: {
+          projectId: 'devprod-drivers',
+          location: 'global',
+          keyRing: 'key-ring-csfle',
+          keyName: 'key-name-csfle',
+          endpoint: 'example.com:443'
+        },
+        succeed: false,
+        errorValidator: err => {
+          //    Expect this to fail with an exception with a message containing the string: "parse error"
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/Invalid KMS response/);
         }
       }
     ];
@@ -418,32 +492,53 @@ describe('Client Side Encryption Prose Tests', function() {
         //    }
         // Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
         const masterKey = testCase.masterKey;
-        return this.clientEncryption.createDataKey('aws', { masterKey }).then(
-          keyId => {
-            if (!testCase.succeed) {
-              throw new Error('Expected test case to fail to create data key, but it succeeded');
-            }
-            return this.clientEncryption
-              .encrypt('test', {
-                keyId,
-                algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-              })
-              .then(encrypted => this.clientEncryption.decrypt(encrypted))
-              .then(result => {
-                expect(result).to.equal('test');
-              });
-          },
-          err => {
-            if (testCase.succeed) {
-              throw err;
-            }
-            if (!testCase.errorValidator) {
-              throw new Error('Invalid Error validator');
-            }
 
-            testCase.errorValidator(err);
-          }
+        const promises = [];
+        promises.push(
+          this.clientEncryption.createDataKey(testCase.provider, { masterKey }).then(
+            keyId => {
+              if (!testCase.succeed) {
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
+              }
+              return this.clientEncryption
+                .encrypt('test', {
+                  keyId,
+                  algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+                })
+                .then(encrypted => this.clientEncryption.decrypt(encrypted))
+                .then(result => {
+                  expect(result).to.equal('test');
+                });
+            },
+            err => {
+              if (testCase.succeed) {
+                throw err;
+              }
+              if (!testCase.errorValidator) {
+                throw new Error('Invalid Error validator');
+              }
+
+              testCase.errorValidator(err);
+            }
+          )
         );
+
+        if (testCase.checkAgainstInvalid) {
+          promises.push(
+            this.clientEncryptionInvalid.createDataKey(testCase.provider, { masterKey }).then(
+              () => {
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
+              },
+              err => {
+                expect(err)
+                  .property('message')
+                  .to.match(/parse error/);
+              }
+            )
+          );
+        }
+
+        return Promise.all(promises);
       });
     });
   });
@@ -506,7 +601,7 @@ describe('Client Side Encryption Prose Tests', function() {
           monitorCommands: true,
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders: this.configuration.kmsProviders('local', localKey)
+            kmsProviders: getKmsProviders(LOCAL_KEY)
           }
         }
       );
@@ -673,8 +768,9 @@ describe('Client Side Encryption Prose Tests', function() {
         .then(() => {
           return this.client
             .db(dataDbName)
-            .createCollection('view', { viewOn: dataCollName, pipeline: [] });
-        });
+            .createCollection('view', { viewOn: dataCollName, pipeline: [] })
+            .then(noop, noop);
+        }, noop);
     });
 
     after(function() {
@@ -689,7 +785,7 @@ describe('Client Side Encryption Prose Tests', function() {
           useUnifiedTopology: true,
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders: this.configuration.kmsProviders(null, localKey)
+            kmsProviders: getKmsProviders(LOCAL_KEY)
           }
         }
       );
@@ -808,7 +904,7 @@ describe('Client Side Encryption Prose Tests', function() {
               .then(() => {
                 const options = {
                   keyVaultNamespace,
-                  kmsProviders: this.configuration.kmsProviders('local', localKey)
+                  kmsProviders: getKmsProviders(LOCAL_KEY)
                 };
 
                 if (withExternalKeyVault) {

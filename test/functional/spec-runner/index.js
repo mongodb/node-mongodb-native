@@ -46,23 +46,12 @@ function translateClientOptions(options) {
       }
 
       if (options.autoEncryptOpts.kmsProviders) {
-        delete options.kmsProviders;
-        options.autoEncryption.kmsProviders = options.autoEncryptOpts.kmsProviders;
-
-        const kmsProviders = options.autoEncryption.kmsProviders;
-        if (kmsProviders.aws) {
-          const awsProvider = kmsProviders.aws;
-          awsProvider.accessKeyId = process.env.AWS_ACCESS_KEY_ID || 'NOT_PROVIDED';
-          awsProvider.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || 'NOT_PROVIDED';
+        const kmsProviders = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+        if (options.autoEncryptOpts.kmsProviders.local) {
+          kmsProviders.local = options.autoEncryptOpts.kmsProviders.local;
         }
 
-        if (kmsProviders.local && kmsProviders.local.key) {
-          const localKey = kmsProviders.local.key;
-          if (localKey._bsontype && localKey._bsontype === 'Binary' && localKey.sub_type === 0) {
-            // this is read in as BSON Binary subtype 0, extract the Buffer
-            kmsProviders.local.key = kmsProviders.local.key.buffer;
-          }
-        }
+        options.autoEncryption.kmsProviders = kmsProviders;
       }
 
       delete options.autoEncryptOpts;

@@ -61,7 +61,7 @@ describe('Connection', function() {
     });
   });
 
-  it('should support socket timeouts', {
+  it.skip('should support socket timeouts', {
     metadata: {
       requires: {
         os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows

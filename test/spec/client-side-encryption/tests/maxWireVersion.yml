@@ -12,6 +12,8 @@ tests:
       autoEncryptOpts:
         kmsProviders:
           aws: {} # Credentials filled in from environment.
+        extraOptions:
+          mongocryptdBypassSpawn: true # mongocryptd probably won't be on the path
     operations:
       - name: insertOne
         arguments:
