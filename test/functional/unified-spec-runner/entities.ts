@@ -87,7 +87,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     if (!ctor) {
       throw new Error(`Unknown type ${type}`);
     }
-    return new EntitiesMap(Array.from(this.entries()).filter(e => e instanceof ctor));
+    return new EntitiesMap(Array.from(this.entries()).filter(([, e]) => e instanceof ctor));
   }
 
   getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
