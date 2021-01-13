@@ -9,7 +9,6 @@ import type {
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { TestConfiguration } from './unified.test';
-import { EntryType } from 'perf_hooks';
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
