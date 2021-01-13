@@ -596,8 +596,8 @@ describe('Bulk', function () {
         var col = db.collection('batch_write_ordered_ops_8');
 
         col.initializeOrderedBulkOp().execute(function (err) {
-          test.equal(err instanceof Error, true);
-          test.equal(err.message, 'Invalid Operation, no operations specified');
+          expect(err).to.be.instanceOf(TypeError);
+          expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
           client.close(done);
         });
@@ -1105,8 +1105,8 @@ describe('Bulk', function () {
         col
           .initializeUnorderedBulkOp()
           .execute(self.configuration.writeConcernMax(), function (err) {
-            test.equal(err instanceof Error, true);
-            test.equal(err.message, 'Invalid Operation, no operations specified');
+            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
             client.close(done);
           });
@@ -1516,8 +1516,9 @@ describe('Bulk', function () {
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], function (err) {
-            test.equal(err instanceof Error, true);
-            test.equal(err.message, 'Invalid Operation, no operations specified');
+            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
+
             client.close(done);
           });
         });
@@ -1536,8 +1537,9 @@ describe('Bulk', function () {
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], { ordered: false }, function (err) {
-            test.equal(err instanceof Error, true);
-            test.equal(err.message, 'Invalid Operation, no operations specified');
+            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
+
             client.close(done);
           });
         });
@@ -1559,8 +1561,8 @@ describe('Bulk', function () {
         test.equal(false, true); // this should not happen!
       })
       .catch(function (err) {
-        test.equal(err instanceof Error, true);
-        test.equal(err.message, 'Invalid Operation, no operations specified');
+        expect(err).to.be.instanceOf(TypeError);
+        expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
       })
       .then(function () {
         return client.close();
