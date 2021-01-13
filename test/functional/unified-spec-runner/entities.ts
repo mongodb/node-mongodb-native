@@ -9,6 +9,7 @@ import type {
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { TestConfiguration } from './unified.test';
+import { EntryType } from 'perf_hooks';
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
@@ -57,104 +58,66 @@ export type Entity =
   | GridFSBucket
   | Document; // Results from operations
 
-export class EntitiesMap extends Map<string, Entity> {
-  clients(): Map<string, UnifiedMongoClient> {
-    const m = new Map<string, UnifiedMongoClient>();
-    for (const [id, e] of this) {
-      if (e instanceof UnifiedMongoClient) {
-        m.set(id, e);
-      }
+export type EntityCtor =
+  | typeof UnifiedMongoClient
+  | typeof Db
+  | typeof Collection
+  | typeof ClientSession
+  | typeof ChangeStream
+  | typeof GridFSBucket;
+
+export type EntityTypeId = 'client' | 'db' | 'collection' | 'session' | 'bucket' | 'stream';
+
+const ENTITY_CTORS = new Map<EntityTypeId, EntityCtor>();
+ENTITY_CTORS.set('client', UnifiedMongoClient);
+ENTITY_CTORS.set('db', Db);
+ENTITY_CTORS.set('collection', Collection);
+ENTITY_CTORS.set('session', ClientSession);
+ENTITY_CTORS.set('bucket', GridFSBucket);
+ENTITY_CTORS.set('stream', ChangeStream);
+
+export class EntitiesMap<E = Entity> extends Map<string, E> {
+  mapOf(type: 'client'): EntitiesMap<UnifiedMongoClient>;
+  mapOf(type: 'db'): EntitiesMap<Db>;
+  mapOf(type: 'collection'): EntitiesMap<Collection>;
+  mapOf(type: 'session'): EntitiesMap<ClientSession>;
+  mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
+  mapOf(type: 'stream'): EntitiesMap<ChangeStream>;
+  mapOf(type: EntityTypeId): EntitiesMap<Entity> {
+    const ctor = ENTITY_CTORS.get(type);
+    if (!ctor) {
+      throw new Error(`Unknown type ${type}`);
     }
-    return m;
+    return new EntitiesMap(Array.from(this.entries()).filter(e => e instanceof ctor));
   }
 
-  getClient(key: string): UnifiedMongoClient {
-    const e = this.get(key);
-    if (!(e instanceof UnifiedMongoClient)) {
-      throw new Error(`Entity ${key} is not a UnifiedMongoClient`);
+  getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
+  getEntity(type: 'db', key: string, assertExists?: boolean): Db;
+  getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
+  getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
+  getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
+  getEntity(type: 'stream', key: string, assertExists?: boolean): ChangeStream;
+  getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
+    const entity = this.get(key);
+    if (!entity) {
+      if (assertExists) throw new Error(`Entity ${key} does not exist`);
+      return;
     }
-    return e;
-  }
-
-  databases(): Map<string, Db> {
-    const m = new Map<string, Db>();
-    for (const [id, e] of this) {
-      if (e instanceof Db) {
-        m.set(id, e);
-      }
+    const ctor = ENTITY_CTORS.get(type);
+    if (!ctor) {
+      throw new Error(`Unknown type ${type}`);
     }
-    return m;
-  }
-
-  getDatabase(key: string): Db {
-    const e = this.get(key);
-    if (!(e instanceof Db)) {
-      throw new Error(`Entity ${key} is not a Db`);
+    if (!(entity instanceof ctor)) {
+      throw new Error(`${key} is not an instance of ${type}`);
     }
-    return e;
-  }
-
-  collections(): Map<string, Collection> {
-    const m = new Map<string, Collection>();
-    for (const [id, e] of this) {
-      if (e instanceof Collection) {
-        m.set(id, e);
-      }
-    }
-    return m;
-  }
-
-  getCollection(key: string): Collection {
-    const e = this.get(key);
-    if (!(e instanceof Collection)) {
-      throw new Error(`Entity ${key} is not a Collection`);
-    }
-    return e;
-  }
-
-  sessions(): Map<string, ClientSession> {
-    const m = new Map<string, ClientSession>();
-    for (const [id, e] of this) {
-      if (e instanceof ClientSession) {
-        m.set(id, e);
-      }
-    }
-    return m;
-  }
-
-  getSession(key: string): ClientSession {
-    const e = this.get(key);
-    if (!(e instanceof ClientSession)) {
-      throw new Error(`Entity ${key} is not a ClientSession`);
-    }
-    return e;
-  }
-
-  buckets(): Map<string, GridFSBucket> {
-    const m = new Map<string, GridFSBucket>();
-    for (const [id, e] of this) {
-      if (e instanceof GridFSBucket) {
-        m.set(id, e);
-      }
-    }
-    return m;
-  }
-
-  streams(): Map<string, ChangeStream> {
-    const m = new Map<string, ChangeStream>();
-    for (const [id, e] of this) {
-      if (e instanceof ChangeStream) {
-        m.set(id, e);
-      }
-    }
-    return m;
+    return entity;
   }
 
   async cleanup(): Promise<void> {
-    for (const [, client] of this.clients()) {
+    for (const [, client] of this.mapOf('client')) {
       await client.close();
     }
-    for (const [, session] of this.sessions()) {
+    for (const [, session] of this.mapOf('session')) {
       await session.endSession();
     }
     this.clear();
@@ -171,14 +134,14 @@ export class EntitiesMap extends Map<string, Entity> {
         await client.connect();
         map.set(entity.client.id, client);
       } else if ('database' in entity) {
-        const client = map.getClient(entity.database.client);
+        const client = map.getEntity('client', entity.database.client);
         const db = client.db(
           entity.database.databaseName,
           patchDbOptions(entity.database.databaseOptions)
         );
         map.set(entity.database.id, db);
       } else if ('collection' in entity) {
-        const db = map.getDatabase(entity.collection.database);
+        const db = map.getEntity('db', entity.collection.database);
         const collection = db.collection(
           entity.collection.collectionName,
           patchCollectionOptions(entity.collection.collectionOptions)

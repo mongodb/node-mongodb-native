@@ -82,7 +82,7 @@ async function runOne(
     ctx.topologyType === uni.TopologyType.sharded ||
     ctx.topologyType === uni.TopologyType.shardedReplicaset
   ) {
-    for (const [, collection] of entities.collections()) {
+    for (const [, collection] of entities.mapOf('collection')) {
       await UTIL_CLIENT.db(ns(collection.namespace).db).command({
         distinct: collection.collectionName,
         key: '_id'
@@ -97,7 +97,7 @@ async function runOne(
   const clientEvents = new Map();
   // If any event listeners were enabled on any client entities,
   // the test runner MUST now disable those event listeners.
-  for (const [id, client] of entities.clients()) {
+  for (const [id, client] of entities.mapOf('client')) {
     clientEvents.set(id, client.stopCapturingEvents());
   }
 

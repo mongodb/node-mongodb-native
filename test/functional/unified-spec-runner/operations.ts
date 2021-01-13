@@ -175,8 +175,8 @@ async function insertOneOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  const collection = entities.getCollection(op.object);
-  const session = entities.get(op.arguments.session);
+  const collection = entities.getEntity('collection', op.object);
+  const session = entities.getEntity('session', op.arguments.session, false);
   const result = await collection.insertOne(op.arguments.document);
   return result;
 }
@@ -184,8 +184,8 @@ async function insertManyOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  const collection = entities.getCollection(op.object);
-  const session = entities.get(op.arguments.session);
+  const collection = entities.getEntity('collection', op.object);
+  const session = entities.getEntity('session', op.arguments.session, false);
   const options = {
     ordered: op.arguments.ordered ?? true
   };
