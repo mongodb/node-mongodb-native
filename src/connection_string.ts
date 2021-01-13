@@ -1003,7 +1003,7 @@ export const OPTIONS = {
 
       throw new MongoParseError(`Invalid WriteConcern cannot parse: ${JSON.stringify(value)}`);
     }
-  },
+  } as OptionDescriptor,
   wtimeout: {
     deprecated: 'Please use wtimeoutMS instead',
     target: 'writeConcern',
