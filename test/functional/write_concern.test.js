@@ -7,6 +7,9 @@ const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
 const { withMonitoredClient } = require('./shared');
 
+const mock = require('../tools/mock');
+const { MongoClient } = require('../../src');
+
 describe('Write Concern', function () {
   describe('spec tests', function () {
     const testContext = new TestRunnerContext();
@@ -57,5 +60,35 @@ describe('Write Concern', function () {
       'should set write concern with journal=true connection string option',
       withMonitoredClient('insert', { queryOptions: { journal: true } }, journalOptionTest)
     );
+  });
+
+  let server;
+  before(() => {
+    mock.createServer().then(s => {
+      server = s;
+    });
+  });
+
+  after(() => {
+    mock.cleanup();
+  });
+
+  it('should pipe writeConcern from client down to API call', function () {
+    server.setMessageHandler(msg => {
+      if (msg.document && msg.document.ismaster) {
+        return msg.reply(mock.DEFAULT_ISMASTER);
+      }
+      expect(msg.document.writeConcern).to.exist;
+      expect(msg.document.writeConcern.w).to.equal('majority');
+    });
+
+    const uri = `mongodb://${server.uri()}`;
+    const client = new MongoClient(uri, { writeConcern: 'majority' });
+    return client.connect().then(() => {
+      const db = client.db('wc_test');
+      const collection = db.collection('wc');
+
+      collection.insertMany([{ a: 2 }]);
+    });
   });
 });
