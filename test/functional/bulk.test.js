@@ -9,9 +9,12 @@ const {
 const test = require('./shared').assert;
 const { MongoError } = require('../../src/error');
 const { Long } = require('../../src');
+const crypto = require('crypto');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
+
+const MAX_BSON_SIZE = 16777216;
 
 describe('Bulk', function () {
   before(function () {
@@ -1618,6 +1621,64 @@ describe('Bulk', function () {
         const coll = db.collection('doesnt_matter');
 
         coll.insertMany(documents, { ordered: true }, err => {
+          client.close(() => {
+            done(err);
+          });
+        });
+      });
+  });
+
+  it('properly accounts for bson size in bytes in bulk ordered inserts', function (done) {
+    const client = this.configuration.newClient();
+    const size = MAX_BSON_SIZE / 2;
+    const largeString = crypto.randomBytes(size - 100).toString('hex');
+    const documents = [{ s: largeString }, { s: largeString }];
+
+    let db;
+
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insertMany(documents, { ordered: true }, err => {
+          client.close(() => {
+            done(err);
+          });
+        });
+      });
+  });
+
+  it('properly accounts for bson size in bytes in bulk unordered inserts', function (done) {
+    const client = this.configuration.newClient();
+    const size = MAX_BSON_SIZE / 2;
+    const largeString = crypto.randomBytes(size - 100).toString('hex');
+    const documents = [{ s: largeString }, { s: largeString }];
+
+    let db;
+
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insertMany(documents, { ordered: false }, err => {
           client.close(() => {
             done(err);
           });
