@@ -8,7 +8,7 @@ import {
 } from '../utils';
 import { EventEmitter } from 'events';
 import { connect } from '../cmap/connect';
-import { Connection } from '../cmap/connection';
+import { Connection, ConnectionOptions } from '../cmap/connection';
 import { MongoNetworkError, AnyError } from '../error';
 import { Long, Document } from '../bson';
 import {
@@ -20,7 +20,6 @@ import {
 import { Server } from './server';
 import type { InterruptibleAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
-import type { ConnectionOptions } from '../cmap/connection';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
@@ -49,7 +48,8 @@ export interface MonitorPrivate {
 }
 
 /** @public */
-export interface MonitorOptions {
+export interface MonitorOptions
+  extends Omit<ConnectionOptions, 'id' | 'generation' | 'hostAddress'> {
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
@@ -60,7 +60,9 @@ export class Monitor extends EventEmitter {
   /** @internal */
   s: MonitorPrivate;
   address: string;
-  options: MonitorOptions;
+  options: Readonly<
+    Pick<MonitorOptions, 'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS'>
+  >;
   connectOptions: ConnectionOptions;
   [kServer]: Server;
   [kConnection]?: Connection;
@@ -69,7 +71,7 @@ export class Monitor extends EventEmitter {
   [kMonitorId]?: InterruptibleAsyncInterval;
   [kRTTPinger]?: RTTPinger;
 
-  constructor(server: Server, options?: Partial<MonitorOptions>) {
+  constructor(server: Server, options: MonitorOptions) {
     super();
 
     this[kServer] = server;
@@ -83,25 +85,22 @@ export class Monitor extends EventEmitter {
 
     this.address = server.description.address;
     this.options = Object.freeze({
-      connectTimeoutMS:
-        typeof options?.connectTimeoutMS === 'number' ? options.connectTimeoutMS : 10000,
-      heartbeatFrequencyMS:
-        typeof options?.heartbeatFrequencyMS === 'number' ? options.heartbeatFrequencyMS : 10000,
-      minHeartbeatFrequencyMS:
-        typeof options?.minHeartbeatFrequencyMS === 'number' ? options.minHeartbeatFrequencyMS : 500
+      connectTimeoutMS: options.connectTimeoutMS ?? 10000,
+      heartbeatFrequencyMS: options.heartbeatFrequencyMS ?? 10000,
+      minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
     });
 
+    const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
     const connectOptions = Object.assign(
       {
-        id: '<monitor>',
-        host: server.description.host,
-        port: server.description.port,
-        connectionType: Connection
+        id: '<monitor>' as const,
+        generation: server.s.pool.generation,
+        connectionType: Connection,
+        cancellationToken,
+        hostAddress: server.description.hostAddress
       },
-      server.s.options,
-      this.options,
-
+      options,
       // force BSON serialization options
       {
         raw: false,
@@ -273,7 +272,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
   }
 
   // connecting does an implicit `ismaster`
-  connect(monitor.connectOptions, monitor[kCancellationToken], (err, conn) => {
+  connect(monitor.connectOptions, (err, conn) => {
     if (err) {
       monitor[kConnection] = undefined;
 
@@ -395,7 +394,7 @@ export class RTTPinger {
 
 function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
   const start = now();
-  const cancellationToken = rttPinger[kCancellationToken];
+  options.cancellationToken = rttPinger[kCancellationToken];
   const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
 
   if (rttPinger.closed) {
@@ -421,7 +420,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const connection = rttPinger[kConnection];
   if (connection == null) {
-    connect(options, cancellationToken, (err, conn) => {
+    connect(options, (err, conn) => {
       if (err) {
         rttPinger[kConnection] = undefined;
         rttPinger[kRoundTripTime] = 0;

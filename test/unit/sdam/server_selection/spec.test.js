@@ -142,24 +142,6 @@ describe('Max Staleness (spec)', function () {
   });
 });
 
-function normalizeSeed(seed) {
-  let host = seed;
-  let port = 27017;
-
-  // is this a host + port combo?
-  if (seed.indexOf(':') !== -1) {
-    host = seed.split(':')[0];
-    port = parseInt(seed.split(':')[1], 10);
-  }
-
-  // support IPv6
-  if (host.startsWith('[')) {
-    host = host.slice(1, host.length - 1);
-  }
-
-  return { host, port };
-}
-
 function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
 
@@ -223,7 +205,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
-      result.seedlist.push(normalizeSeed(seed.address));
+      result.seedlist.push(seed.address);
       result.hosts.push(seed.address);
       return result;
     },

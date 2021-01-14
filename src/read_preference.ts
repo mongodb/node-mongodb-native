@@ -155,11 +155,19 @@ export class ReadPreference {
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
       const mode = readPreference.mode || readPreference.preference;
       if (mode && typeof mode === 'string') {
-        return new ReadPreference(mode as ReadPreferenceModeId, readPreference.tags, {
-          maxStalenessSeconds: readPreference.maxStalenessSeconds,
-          hedge: options.hedge
-        });
+        return new ReadPreference(
+          mode as ReadPreferenceModeId,
+          readPreference.tags ?? readPreferenceTags,
+          {
+            maxStalenessSeconds: readPreference.maxStalenessSeconds,
+            hedge: options.hedge
+          }
+        );
       }
+    }
+
+    if (readPreferenceTags) {
+      readPreference.tags = readPreferenceTags;
     }
 
     return readPreference as ReadPreference;

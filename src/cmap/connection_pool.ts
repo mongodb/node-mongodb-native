@@ -30,80 +30,8 @@ const kCancellationToken = Symbol('cancellationToken');
 const kWaitQueue = Symbol('waitQueue');
 const kCancelled = Symbol('cancelled');
 
-const VALID_POOL_OPTION_NAMES = [
-  // `connect` options
-  'ssl',
-  'connectionType',
-  'monitorCommands',
-  'socketTimeout',
-  'credentials',
-  'compression',
-
-  // node Net options
-  'host',
-  'port',
-  'localAddress',
-  'localPort',
-  'family',
-  'hints',
-  'lookup',
-  'path',
-
-  // node TLS options
-  'ca',
-  'cert',
-  'sigalgs',
-  'ciphers',
-  'clientCertEngine',
-  'crl',
-  'dhparam',
-  'ecdhCurve',
-  'honorCipherOrder',
-  'key',
-  'privateKeyEngine',
-  'privateKeyIdentifier',
-  'maxVersion',
-  'minVersion',
-  'passphrase',
-  'pfx',
-  'secureOptions',
-  'secureProtocol',
-  'sessionIdContext',
-  'allowHalfOpen',
-  'rejectUnauthorized',
-  'pskCallback',
-  'ALPNProtocols',
-  'servername',
-  'checkServerIdentity',
-  'session',
-  'minDHSize',
-  'secureContext',
-
-  // spec options
-  'maxPoolSize',
-  'minPoolSize',
-  'maxIdleTimeMS',
-  'waitQueueTimeoutMS'
-] as const;
-
-const VALID_POOL_OPTIONS = new Set(VALID_POOL_OPTION_NAMES);
-
-function resolveOptions(
-  options: Partial<ConnectionPoolOptions>,
-  defaults: Partial<ConnectionPoolOptions>
-): Readonly<ConnectionPoolOptions> {
-  const newOptions = {};
-  for (const key of VALID_POOL_OPTIONS) {
-    if (key in options) {
-      (newOptions as { [key: string]: unknown })[key] = options[key];
-    }
-  }
-
-  return Object.freeze(Object.assign({}, defaults, newOptions)) as ConnectionPoolOptions;
-}
-
 /** @public */
-export interface ConnectionPoolOptions extends ConnectionOptions {
+export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
   maxPoolSize: number;
   /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
@@ -207,11 +135,12 @@ export class ConnectionPool extends EventEmitter {
    */
   static readonly CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
 
-  constructor(options: Partial<ConnectionPoolOptions>) {
+  constructor(options: ConnectionPoolOptions) {
     super();
 
     this.closed = false;
-    this.options = resolveOptions(options, {
+    this.options = Object.freeze({
+      ...options,
       connectionType: Connection,
       maxPoolSize: options.maxPoolSize ?? 100,
       minPoolSize: options.minPoolSize ?? 0,
@@ -227,7 +156,7 @@ export class ConnectionPool extends EventEmitter {
       );
     }
 
-    this[kLogger] = new Logger('ConnectionPool', options);
+    this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPermits] = this.options.maxPoolSize;
     this[kMinPoolSizeTimer] = undefined;
@@ -245,7 +174,7 @@ export class ConnectionPool extends EventEmitter {
 
   /** The address of the endpoint the pool is connected to */
   get address(): string {
-    return `${this.options.host}:${this.options.port}`;
+    return this.options.hostAddress.toString();
   }
 
   /** An integer representing the SDAM generation of the pool */
@@ -482,16 +411,15 @@ function connectionIsIdle(pool: ConnectionPool, connection: Connection) {
 }
 
 function createConnection(pool: ConnectionPool, callback?: Callback<Connection>) {
-  const connectOptions = Object.assign(
-    {
-      id: pool[kConnectionCounter].next().value,
-      generation: pool[kGeneration]
-    },
-    pool.options
-  );
+  const connectOptions: ConnectionOptions = {
+    ...pool.options,
+    id: pool[kConnectionCounter].next().value,
+    generation: pool[kGeneration],
+    cancellationToken: pool[kCancellationToken]
+  };
 
   pool[kPermits]--;
-  connect(connectOptions, pool[kCancellationToken], (err, connection) => {
+  connect(connectOptions, (err, connection) => {
     if (err || !connection) {
       pool[kPermits]++;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);

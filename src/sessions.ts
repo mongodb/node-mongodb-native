@@ -291,7 +291,7 @@ class ClientSession extends EventEmitter {
   /**
    * This is here to ensure that ClientSession is never serialized to BSON.
    */
-  toBSON(): void {
+  toBSON(): never {
     throw new Error('ClientSession cannot be serialized to BSON.');
   }
 

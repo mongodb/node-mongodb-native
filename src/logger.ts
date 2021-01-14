@@ -10,7 +10,7 @@ let level: LoggerLevel;
 const pid = process.pid;
 
 // current logger
-let currentLogger: LoggerFunction;
+let currentLogger: LoggerFunction = console.warn;
 
 /** @public */
 export enum LoggerLevel {
@@ -48,10 +48,8 @@ export class Logger {
     this.className = className;
 
     // Current logger
-    if (options.logger) {
+    if (!(options.logger instanceof Logger) && typeof options.logger === 'function') {
       currentLogger = options.logger;
-    } else if (currentLogger == null) {
-      currentLogger = console.log;
     }
 
     // Set level of logging, default is error

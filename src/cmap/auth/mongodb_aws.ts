@@ -45,7 +45,7 @@ export class MongoDBAWS extends AuthProvider {
 
     if (credentials.username == null) {
       makeTempCredentials(credentials, (err, tempCredentials) => {
-        if (err) return callback(err);
+        if (err || !tempCredentials) return callback(err);
 
         authContext.credentials = tempCredentials;
         this.auth(authContext, callback);

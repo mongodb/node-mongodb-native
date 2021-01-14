@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const mock = require('mongodb-mock-server');
+const mock = require('../tools/mock');
 
 describe('Bulk Writes', function () {
   const test = {};

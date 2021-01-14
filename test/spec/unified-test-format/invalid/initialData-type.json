@@ -1,0 +1,11 @@
+{
+  "description": "initialData-type",
+  "schemaVersion": "1.0",
+  "initialData": 0,
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

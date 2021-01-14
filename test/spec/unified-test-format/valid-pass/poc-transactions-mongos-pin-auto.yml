@@ -1,0 +1,169 @@
+description: "poc-transactions-mongos-pin-auto"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.1.8"
+    topologies: [ sharded-replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name transaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  - description: "remain pinned after non-transient Interrupted error on insertOne"
+    operations:
+      - &startTransaction
+        name: startTransaction
+        object: *session0
+      - &firstInsert
+        name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 3 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } } }
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 11601 # Interrupted
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 4 }
+        expectError:
+          errorLabelsOmit: [ TransientTransactionError, UnknownTransactionCommitResult ]
+          errorCodeName: Interrupted
+      - name: assertSessionPinned
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: commitTransaction
+        object: *session0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &firstInsertEvent
+              command:
+                insert: *collection0Name
+                documents: [ { _id: 3 } ]
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent: &secondInsertEvent
+              command:
+                insert: *collection0Name
+                documents: [ { _id: 4 } ]
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+                # Original test expected any value, but we can assert an object
+                recoveryToken: { $$type: object }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+
+  - description: "unpin after transient error within a transaction"
+    operations:
+      - *startTransaction
+      - *firstInsert
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 4 }
+        expectError:
+          errorLabelsContain: [ TransientTransactionError ]
+          errorLabelsOmit: [ UnknownTransactionCommitResult ]
+      - name: assertSessionUnpinned
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: abortTransaction
+        object: *session0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: *firstInsertEvent
+          - commandStartedEvent: *secondInsertEvent
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+                # Original test expected any value, but we can assert an object
+                recoveryToken: { $$type: object }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }

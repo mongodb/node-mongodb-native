@@ -1899,7 +1899,7 @@ describe('Cursor', function () {
 
           let closeCount = 0;
           const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
-          collection.insertMany(docs, { w: 'majority', wtimeout: 5000 }, err => {
+          collection.insertMany(docs, { w: 'majority', wtimeoutMS: 5000 }, err => {
             expect(err).to.not.exist;
 
             const cursor = collection.find({}, { tailable: true, awaitData: true });

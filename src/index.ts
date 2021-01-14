@@ -118,7 +118,7 @@ export type {
   OpGetMoreOptions,
   OpQueryOptions
 } from './cmap/commands';
-export type { Stream } from './cmap/connect';
+export type { Stream, LEGAL_TLS_SOCKET_OPTIONS, LEGAL_TCP_SOCKET_OPTIONS } from './cmap/connect';
 export type {
   Connection,
   ConnectionOptions,
@@ -173,13 +173,15 @@ export type {
   MongoClientOptions,
   WithSessionCallback,
   PkFactory,
-  MongoURIOptions,
   LogLevel,
   LogLevelId,
   Auth,
   DriverInfo,
   MongoOptions,
-  HostAddress
+  SupportedNodeConnectionOptions,
+  SupportedTLSConnectionOptions,
+  SupportedTLSSocketOptions,
+  SupportedSocketOptions
 } from './mongo_client';
 export type { AddUserOptions } from './operations/add_user';
 export type {
@@ -277,8 +279,7 @@ export type {
   ServerCapabilities,
   ConnectOptions,
   SelectServerOptions,
-  ServerSelectionCallback,
-  ServerAddress
+  ServerSelectionCallback
 } from './sdam/topology';
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {
@@ -296,7 +297,8 @@ export type {
   ClientMetadataOptions,
   MongoDBNamespace,
   InterruptibleAsyncInterval,
-  BufferPool
+  BufferPool,
+  HostAddress
 } from './utils';
 export type { WriteConcern, W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';

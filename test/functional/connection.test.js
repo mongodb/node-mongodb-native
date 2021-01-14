@@ -14,8 +14,11 @@ describe('Connection - functional', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1 },
-        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', heartbeatFrequencyMS: 250 }
+        `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
+        {
+          maxPoolSize: 1,
+          heartbeatFrequencyMS: 250
+        }
       );
 
       client.connect(function (err, client) {
@@ -34,8 +37,8 @@ describe('Connection - functional', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1 },
-        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock' }
+        `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
+        { maxPoolSize: 1 }
       );
 
       client.connect(function (err, client) {
@@ -96,40 +99,6 @@ describe('Connection - functional', function () {
     }
   });
 
-  it('should connect to server using domain socket with undefined port', {
-    metadata: { requires: { topology: 'single', os: '!win32' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
-        { w: 1 },
-        { maxPoolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
-      );
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-
-        db.collection('domainSocketCollection1').insert(
-          { x: 1 },
-          { writeConcern: { w: 1 } },
-          function (err) {
-            expect(err).to.not.exist;
-
-            db.collection('domainSocketCollection1')
-              .find({ x: 1 })
-              .toArray(function (err, items) {
-                expect(err).to.not.exist;
-                test.equal(1, items.length);
-
-                client.close(done);
-              });
-          }
-        );
-      });
-    }
-  });
-
   /**
    * @param {any} configuration
    * @param {any} testName
@@ -137,8 +106,8 @@ describe('Connection - functional', function () {
    */
   function connectionTester(configuration, testName, callback) {
     return function (err, client) {
-      var db = client.db(configuration.db);
       expect(err).to.not.exist;
+      var db = client.db(configuration.db);
 
       db.collection(testName, function (err, collection) {
         expect(err).to.not.exist;
@@ -217,19 +186,16 @@ describe('Connection - functional', function () {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
-        db.addUser(username, password, function (err) {
+        db.addUser(username, password, { roles: ['read'] }, function (err) {
           expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
 
       function restOfTest() {
-        var opts = { auth: { username, password } };
+        var opts = { auth: { username, password }, authSource: configuration.db };
 
-        const testClient = configuration.newClient(
-          configuration.url('baduser', 'badpassword'),
-          opts
-        );
+        const testClient = configuration.newClient(opts);
 
         testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuthAsOption', function (client) {

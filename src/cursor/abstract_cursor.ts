@@ -1,4 +1,4 @@
-import { Callback, maybePromise, MongoDBNamespace } from '../utils';
+import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
 import { MongoError } from '../error';
@@ -637,7 +637,7 @@ function next(
               : response.cursor.id;
 
           if (response.cursor.ns) {
-            cursor[kNamespace] = MongoDBNamespace.fromString(response.cursor.ns);
+            cursor[kNamespace] = ns(response.cursor.ns);
           }
 
           cursor[kDocuments] = response.cursor.firstBatch;

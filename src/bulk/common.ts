@@ -1202,7 +1202,7 @@ export abstract class BulkOperationBase {
     }
     // If we have no operations in the bulk raise an error
     if (this.s.batches.length === 0) {
-      const emptyBatchError = new TypeError('Invalid Operation, no operations specified');
+      const emptyBatchError = new TypeError('Invalid BulkOperation, Batch cannot be empty');
       return handleEarlyError(emptyBatchError, callback);
     }
 

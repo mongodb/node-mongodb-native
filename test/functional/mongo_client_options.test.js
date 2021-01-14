@@ -25,11 +25,29 @@ describe('MongoClient Options', function () {
         function (err, client) {
           expect(err)
             .property('message')
-            .to.match(/option notlegal is not supported/);
+            .to.match(/options notlegal, validateoptions are not supported/);
           expect(client).to.not.exist;
           done();
         }
       );
+    }
+  });
+
+  it('should error on unexpected options (promise)', {
+    metadata: { requires: { topology: 'single' } },
+
+    test() {
+      MongoClient.connect(this.configuration.url(), {
+        maxPoolSize: 4,
+        notlegal: {},
+        validateOptions: true
+      })
+        .then(() => expect().fail())
+        .catch(err => {
+          expect(err)
+            .property('message')
+            .to.match(/options notlegal, validateoptions are not supported/);
+        });
     }
   });
 

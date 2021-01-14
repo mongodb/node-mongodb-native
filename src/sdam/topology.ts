@@ -19,10 +19,9 @@ import {
   relayEvents,
   makeStateMachine,
   eachAsync,
-  makeClientMetadata,
-  emitDeprecatedOptionWarning,
   ClientMetadata,
   Callback,
+  HostAddress,
   ns
 } from '../utils';
 import {
@@ -36,8 +35,7 @@ import {
   STATE_CLOSED,
   STATE_CLOSING,
   STATE_CONNECTING,
-  STATE_CONNECTED,
-  TOPOLOGY_DEFAULTS
+  STATE_CONNECTED
 } from './common';
 import {
   ServerOpeningEvent,
@@ -51,9 +49,9 @@ import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
-import type { LoggerOptions } from '../logger';
 import { DestroyOptions, Connection } from '../cmap/connection';
 import type { MongoClientOptions } from '../mongo_client';
+import { DEFAULT_OPTIONS } from '../connection_string';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -103,7 +101,7 @@ export interface TopologyPrivate {
   /** passed in options */
   options: TopologyOptions;
   /** initial seedlist of servers to connect to */
-  seedlist: ServerAddress[];
+  seedlist: HostAddress[];
   /** initial state */
   state: string;
   /** the topology description */
@@ -129,32 +127,18 @@ export interface TopologyPrivate {
 }
 
 /** @public */
-export interface ServerAddress {
-  host: string;
-  port: number;
-  domain_socket?: string;
-}
-
-/** @public */
-export interface TopologyOptions extends ServerOptions, BSONSerializeOptions, LoggerOptions {
-  reconnect: boolean;
-  retryWrites?: boolean;
-  retryReads?: boolean;
-  host: string;
-  port?: number;
-  credentials?: MongoCredentials;
+export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
+  hosts: HostAddress[];
+  retryWrites: boolean;
+  retryReads: boolean;
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS: number;
-  /** The frequency with which topology updates are scheduled */
-  heartbeatFrequencyMS: number;
-  minHeartbeatFrequencyMS: number;
   /** The name of the replica set to connect to */
   replicaSet?: string;
   srvHost?: string;
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
-
   metadata: ClientMetadata;
   useRecoveryToken: boolean;
 }
@@ -206,38 +190,56 @@ export class Topology extends EventEmitter {
   static readonly CONNECT = 'connect' as const;
 
   /**
-   * @param seedlist - a string list, or array of ServerAddress instances to connect to
+   * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(seedlist: string | ServerAddress[], options?: TopologyOptions) {
+  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
-    emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
-    seedlist = seedlist || [];
-    if (typeof seedlist === 'string') {
-      seedlist = parseStringSeedlist(seedlist);
-    } else if (!Array.isArray(seedlist)) {
-      seedlist = [seedlist];
+    // Options should only be undefined in tests, MongoClient will always have defined options
+    options = options ?? {
+      hosts: [HostAddress.fromString('localhost:27017')],
+      retryReads: DEFAULT_OPTIONS.get('retryReads'),
+      retryWrites: DEFAULT_OPTIONS.get('retryWrites'),
+      serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
+      directConnection: DEFAULT_OPTIONS.get('directConnection'),
+      metadata: DEFAULT_OPTIONS.get('metadata'),
+      useRecoveryToken: DEFAULT_OPTIONS.get('useRecoveryToken'),
+      monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
+      tls: DEFAULT_OPTIONS.get('tls'),
+      maxPoolSize: DEFAULT_OPTIONS.get('maxPoolSize'),
+      minPoolSize: DEFAULT_OPTIONS.get('minPoolSize'),
+      waitQueueTimeoutMS: DEFAULT_OPTIONS.get('waitQueueTimeoutMS'),
+      connectionType: DEFAULT_OPTIONS.get('connectionType'),
+      connectTimeoutMS: DEFAULT_OPTIONS.get('connectTimeoutMS'),
+      maxIdleTimeMS: DEFAULT_OPTIONS.get('maxIdleTimeMS'),
+      heartbeatFrequencyMS: DEFAULT_OPTIONS.get('heartbeatFrequencyMS'),
+      minHeartbeatFrequencyMS: DEFAULT_OPTIONS.get('minHeartbeatFrequencyMS')
+    };
+
+    if (typeof seeds === 'string') {
+      seeds = [HostAddress.fromString(seeds)];
+    } else if (!Array.isArray(seeds)) {
+      seeds = [seeds];
     }
 
-    options = Object.assign({}, TOPOLOGY_DEFAULTS, options);
-    options = Object.freeze(
-      Object.assign(options, {
-        metadata: makeClientMetadata(options),
-        compression: { compressors: makeCompressionInfo(options) }
-      })
-    );
+    const seedlist: HostAddress[] = [];
+    for (const seed of seeds) {
+      if (typeof seed === 'string') {
+        seedlist.push(HostAddress.fromString(seed));
+      } else if (seed instanceof HostAddress) {
+        seedlist.push(seed);
+      } else {
+        throw new Error(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
+      }
+    }
 
     const topologyType = topologyTypeFromOptions(options);
     const topologyId = globalTopologyCounter++;
-    const serverDescriptions = seedlist.reduce(
-      (result: Map<string, ServerDescription>, seed: ServerAddress) => {
-        if (seed.domain_socket) seed.host = seed.domain_socket;
-        const address = seed.port ? `${seed.host}:${seed.port}` : `${seed.host}:27017`;
-        result.set(address, new ServerDescription(address));
-        return result;
-      },
-      new Map<string, ServerDescription>()
-    );
+
+    const serverDescriptions = new Map();
+    for (const hostAddress of seedlist) {
+      serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
+    }
 
     this[kWaitQueue] = new Denque();
     this.s = {
@@ -345,8 +347,7 @@ export class Topology extends EventEmitter {
     // connect all known servers, then attempt server selection to connect
     connectServers(this, Array.from(this.s.description.servers.values()));
 
-    ReadPreference.translate(options);
-    const readPreference = options.readPreference || ReadPreference.primary;
+    const readPreference = options.readPreference ?? ReadPreference.primary;
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
         this.close();
@@ -746,25 +747,13 @@ function destroyServer(
   });
 }
 
-/**
- * Parses a basic seedlist in string form
- *
- * @param seedlist - The seedlist to parse
- */
-function parseStringSeedlist(seedlist: string): ServerAddress[] {
-  return seedlist.split(',').map((seed: string) => ({
-    host: seed.split(':')[0],
-    port: parseInt(seed.split(':')[1], 10) || 27017
-  }));
-}
-
 /** Predicts the TopologyType from options */
-function topologyTypeFromOptions(options: TopologyOptions) {
-  if (options.directConnection) {
+function topologyTypeFromOptions(options?: TopologyOptions) {
+  if (options?.directConnection) {
     return TopologyType.Single;
   }
 
-  if (options.replicaSet) {
+  if (options?.replicaSet) {
     return TopologyType.ReplicaSetNoPrimary;
   }
 
@@ -965,23 +954,12 @@ function processWaitQueue(topology: Topology) {
 
   if (topology[kWaitQueue].length > 0) {
     // ensure all server monitors attempt monitoring soon
-    topology.s.servers.forEach((server: Server) => process.nextTick(() => server.requestCheck()));
-  }
-}
-
-function makeCompressionInfo(options: TopologyOptions) {
-  if (!options.compression || !options.compression.compressors) {
-    return [];
-  }
-
-  // Check that all supplied compressors are valid
-  options.compression.compressors.forEach((compressor: string) => {
-    if (compressor !== 'snappy' && compressor !== 'zlib') {
-      throw new Error('compressors must be at least one of snappy or zlib');
+    for (const [, server] of topology.s.servers) {
+      process.nextTick(function scheduleServerCheck() {
+        return server.requestCheck();
+      });
     }
-  });
-
-  return options.compression.compressors;
+  }
 }
 
 /** @public */

@@ -1,0 +1,10 @@
+{
+  "description": "schemaVersion-type",
+  "schemaVersion": 0,
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

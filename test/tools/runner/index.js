@@ -3,10 +3,9 @@
 const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../src');
-const TestConfiguration = require('./config');
-const { parseConnectionString } = require('../../../src/connection_string');
+const { TestConfiguration } = require('./config');
 const { eachAsync } = require('../../../src/utils');
-const mock = require('mongodb-mock-server');
+const mock = require('../mock');
 const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -78,16 +77,8 @@ before(function (_done) {
 
       // replace this when mocha supports dynamic skipping with `afterEach`
       filterOutTests(this._runnable.parent);
-
-      parseConnectionString(MONGODB_URI, (err, parsedURI) => {
-        if (err) {
-          done(err);
-          return;
-        }
-
-        this.configuration = new TestConfiguration(parsedURI, context);
-        done();
-      });
+      this.configuration = new TestConfiguration(MONGODB_URI, context);
+      done();
     });
   });
 });

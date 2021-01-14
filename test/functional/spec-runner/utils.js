@@ -5,10 +5,13 @@ function resolveConnectionString(configuration, spec, context) {
   const useMultipleMongoses = spec && !!spec.useMultipleMongoses;
   const user = context && context.user;
   const password = context && context.password;
+  const authSource = context && context.authSource;
   const connectionString =
     isShardedEnvironment && !useMultipleMongoses
-      ? `mongodb://${configuration.host}:${configuration.port}/${configuration.db}?directConnection=false`
-      : configuration.url(user, password);
+      ? `mongodb://${configuration.host}:${configuration.port}/${
+          configuration.db
+        }?directConnection=false${authSource ? '&authSource=${authSource}' : ''}`
+      : configuration.url(user, password, { authSource });
   return connectionString;
 }
 

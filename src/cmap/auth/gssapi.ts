@@ -60,16 +60,10 @@ export class GSSAPI extends AuthProvider {
   }
 }
 function makeKerberosClient(authContext: AuthContext, callback: Callback<KerberosClient>): void {
-  const { host, port } = authContext.options;
+  const { hostAddress } = authContext.options;
   const { credentials } = authContext;
-  if (!host || !port || !credentials) {
-    return callback(
-      new MongoError(
-        `Connection must specify: ${host ? 'host' : ''}, ${port ? 'port' : ''}, ${
-          credentials ? 'host' : 'credentials'
-        }.`
-      )
-    );
+  if (!hostAddress || typeof hostAddress.host !== 'string' || !credentials) {
+    return callback(new MongoError('Connection must have host and port and credentials defined.'));
   }
 
   if ('kModuleError' in Kerberos) {
@@ -83,7 +77,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
     'mongodb';
 
   performGssapiCanonicalizeHostName(
-    host,
+    hostAddress.host,
     mechanismProperties as MechanismProperties,
     (err?: Error | MongoError, host?: string) => {
       if (err) return callback(err);

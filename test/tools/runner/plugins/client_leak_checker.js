@@ -1,6 +1,6 @@
 'use strict';
 
-const TestConfiguration = require('../config');
+const { TestConfiguration } = require('../config');
 const chalk = require('chalk');
 
 let activeClients = [];

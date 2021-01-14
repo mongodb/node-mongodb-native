@@ -1,0 +1,322 @@
+{
+  "description": "poc-transactions",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded-replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Client side error in command starting transaction",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": {
+                ".": "."
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        },
+        {
+          "name": "assertSessionTransactionState",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "state": "starting"
+          }
+        }
+      ]
+    },
+    {
+      "description": "explicitly create collection using create command",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.3.4",
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "session": "session0",
+            "collection": "test"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test",
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "drop",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "create",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "create index on a non-existing collection",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.3.4",
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "createIndex",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "name": "x_1",
+            "keys": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "assertIndexNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "x_1"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertIndexExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "x_1"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test",
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "drop",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "test",
+                  "indexes": [
+                    {
+                      "name": "x_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "createIndexes",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

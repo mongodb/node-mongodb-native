@@ -4,7 +4,7 @@ const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
 const { setupDatabase } = require('../../functional/shared');
-const { ns } = require('../../../src/utils');
+const { ns, HostAddress } = require('../../../src/utils');
 
 describe('Connection - functional/cmap', function () {
   before(function () {
@@ -55,18 +55,19 @@ describe('Connection - functional/cmap', function () {
     });
   });
 
-  it('should support socket timeouts', {
+  it.skip('should support socket timeouts', {
+    // FIXME: NODE-2941
     metadata: {
       requires: {
         os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
       }
     },
     test: function (done) {
-      const connectOptions = Object.assign({
-        host: '240.0.0.1',
+      const connectOptions = {
+        hostAddress: new HostAddress('240.0.0.1'),
         connectionType: Connection,
         connectionTimeout: 500
-      });
+      };
 
       connect(connectOptions, err => {
         expect(err).to.exist;

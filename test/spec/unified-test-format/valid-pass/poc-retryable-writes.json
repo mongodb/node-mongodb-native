@@ -1,0 +1,485 @@
+{
+  "description": "poc-retryable-writes",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "uriOptions": {
+          "retryWrites": false
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-writes-tests"
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client1",
+        "databaseName": "retryable-writes-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database1",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-writes-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndUpdate is committed on first attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate is not committed on first attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate is never committed",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "InsertMany succeeds after PrimarySteppedDown",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.1.7",
+          "topologies": [
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 189,
+                "errorLabels": [
+                  "RetryableWriteError"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3,
+                "x": 33
+              },
+              {
+                "_id": 4,
+                "x": 44
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedCount": {
+                "$$unsetOrMatches": 2
+              },
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 3,
+                  "1": 4
+                }
+              }
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "InsertOne fails after connection failure when retryWrites option is false",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.1.7",
+          "topologies": [
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client1",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection1",
+          "arguments": {
+            "document": {
+              "_id": 3,
+              "x": 33
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "InsertOne fails after multiple retryable writeConcernErrors",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.1.7",
+          "topologies": [
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "writeConcernError": {
+                  "code": 91,
+                  "errmsg": "Replication is being shut down"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 3,
+              "x": 33
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

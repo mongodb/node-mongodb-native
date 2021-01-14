@@ -116,7 +116,7 @@ describe('URI', function () {
       client.connect((err, client) => {
         expect(err).to.not.exist;
         expect(client).to.exist;
-        expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
+        expect(client.options.replicaSet).to.exist.and.equal(config.replicasetName);
         client.close(done);
       });
     }

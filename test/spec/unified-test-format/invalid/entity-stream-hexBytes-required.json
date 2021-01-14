@@ -1,0 +1,17 @@
+{
+  "description": "entity-stream-hexBytes-required",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "stream": {
+        "id": "stream0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

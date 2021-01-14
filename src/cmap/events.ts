@@ -51,7 +51,7 @@ export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
  */
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** A monotonically increasing, per-pool id for the newly created connection */
-  connectionId: number;
+  connectionId: number | '<monitor>';
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -65,7 +65,7 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
  */
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: number;
+  connectionId: number | '<monitor>';
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -79,7 +79,7 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
  */
 export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: number;
+  connectionId: number | '<monitor>';
   /** The reason the connection was closed */
   reason: string;
 
@@ -117,7 +117,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
  */
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: number;
+  connectionId: number | '<monitor>';
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
@@ -131,7 +131,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
  */
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
-  connectionId: number;
+  connectionId: number | '<monitor>';
 
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);

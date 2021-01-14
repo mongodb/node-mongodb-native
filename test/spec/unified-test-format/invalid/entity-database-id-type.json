@@ -1,0 +1,24 @@
+{
+  "description": "entity-database-id-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": 0,
+        "client": "client0",
+        "databaseName": "foo"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

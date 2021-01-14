@@ -66,10 +66,7 @@ describe('SASLPrep', function () {
     { username: '\u2168', password: 'IV' },
     { username: '\u2168', password: 'I\u00ADV' },
     { username: '\u2168', password: '\u2163' }
-  ].forEach(user => {
-    const username = user.username;
-    const password = user.password;
-
+  ].forEach(({ username, password }) => {
     it(`should be able to login with username "${username}" and password "${password}"`, {
       metadata: {
         requires: {
@@ -79,8 +76,7 @@ describe('SASLPrep', function () {
       },
       test: function () {
         const options = {
-          username: username,
-          password: password,
+          auth: { username, password },
           authSource: 'admin',
           authMechanism: 'SCRAM-SHA-256'
         };

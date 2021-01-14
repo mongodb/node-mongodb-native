@@ -1,0 +1,13 @@
+description: "entity-client-apiVersion-unsupported"
+
+schemaVersion: "1.1"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      serverApi:
+        version: "server_will_never_support_this_api_version"
+
+tests:
+  - description: "foo"
+    operations: []

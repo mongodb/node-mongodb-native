@@ -1,4 +1,4 @@
-import { emitDeprecatedOptionWarning, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { deprecate } from 'util';
 import {
@@ -9,7 +9,7 @@ import {
   Callback,
   getTopology
 } from './utils';
-import { ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
+import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -176,19 +176,13 @@ export class Collection {
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {
     checkCollectionName(name);
-    emitDeprecatedOptionWarning(options, ['promiseLibrary']);
 
     // Internal state
     this.s = {
       db,
       options,
       namespace: new MongoDBNamespace(db.databaseName, name),
-      pkFactory: db.options?.pkFactory ?? {
-        createPk() {
-          // We prefer not to rely on ObjectId having a createPk method
-          return new ObjectId();
-        }
-      },
+      pkFactory: db.options?.pkFactory ?? DEFAULT_PK_FACTORY,
       readPreference: ReadPreference.fromOptions(options),
       bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
@@ -1248,8 +1242,6 @@ export class Collection {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch(): ChangeStream;
-  watch(pipeline?: Document[]): ChangeStream;
   watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
     pipeline = pipeline || [];
     options = options ?? {};

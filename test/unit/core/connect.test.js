@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('mongodb-mock-server');
+const mock = require('../../tools/mock');
 const { expect } = require('chai');
 const EventEmitter = require('events');
 
@@ -8,6 +8,7 @@ const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 const { genClusterTime } = require('./common');
 const { MongoNetworkError } = require('../../../src/error');
+const { HostAddress } = require('../../../src/utils');
 
 describe('Connect Tests', function () {
   const test = {};
@@ -15,8 +16,7 @@ describe('Connect Tests', function () {
     return mock.createServer().then(mockServer => {
       test.server = mockServer;
       test.connectOptions = {
-        host: test.server.host,
-        port: test.server.port,
+        hostAddress: test.server.hostAddress(),
         credentials: new MongoCredentials({
           username: 'testUser',
           password: 'pencil',
@@ -92,13 +92,14 @@ describe('Connect Tests', function () {
   });
 
   it('should emit `MongoNetworkError` for network errors', function (done) {
-    connect({ host: 'non-existent', port: 27018 }, err => {
+    connect({ hostAddress: new HostAddress('non-existent:27018') }, err => {
       expect(err).to.be.instanceOf(MongoNetworkError);
       done();
     });
   });
 
-  it('should allow a cancellaton token', {
+  it.skip('should allow a cancellaton token', {
+    // FIXME: NODE-2941
     metadata: {
       requires: {
         os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
@@ -109,7 +110,7 @@ describe('Connect Tests', function () {
       setTimeout(() => cancellationToken.emit('cancel'), 500);
       // set no response handler for mock server, effecively blackhole requests
 
-      connect({ host: '240.0.0.1' }, cancellationToken, (err, conn) => {
+      connect({ hostAddress: new HostAddress('240.0.0.1'), cancellationToken }, (err, conn) => {
         expect(err).to.exist;
         expect(err).to.match(/connection establishment was cancelled/);
         expect(conn).to.not.exist;
