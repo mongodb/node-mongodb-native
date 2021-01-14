@@ -137,7 +137,7 @@ Another tip is to ensure your user has write permission to wherever the Node.js 
 
 ## Quick Start
 
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [tutorials](docs/reference/content/tutorials/main.md).
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://docs.mongodb.com/drivers/node/).
 
 ### Create the `package.json` file
 
@@ -481,11 +481,12 @@ MongoClient.connect(url, function(err, client) {
 });
 ```
 
-For more detailed information, see the [tutorials](docs/reference/content/tutorials/main.md).
+For more detailed information, see the [official documentation](https://docs.mongodb.com/drivers/node/).
 
 ## Next Steps
 
  * [MongoDB Documentation](http://mongodb.org)
+ * [MongoDB Node Driver Offical Documentation](https://docs.mongodb.com/drivers/node/)
  * [Read about Schemas](http://learnmongodbthehardway.com)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
