@@ -19,6 +19,9 @@ export {
   Int32,
   Double,
   DBRef,
+  BSONRegExp,
+  BSONSymbol,
+  Map,
   deserialize,
   serialize,
   calculateObjectSize
