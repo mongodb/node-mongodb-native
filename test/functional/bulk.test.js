@@ -1718,10 +1718,7 @@ describe('Bulk', function() {
             }
           );
         } catch (err) {
-          expect(err).to.be.instanceOf(
-            TypeError,
-            'Replacement document must not use atomic operators'
-          );
+          expect.fail(); // shouldn't throw any error
         }
       })
       .finally(() => {
