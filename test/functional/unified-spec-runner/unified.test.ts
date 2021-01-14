@@ -75,7 +75,7 @@ async function runOne(
   ctx.defer(async () => await entities.cleanup());
 
   // Workaround for SERVER-39704:
-  // a test runners MUST execute a non-transactional distinct command on
+  // test runners MUST execute a non-transactional distinct command on
   // each mongos server before running any test that might execute distinct within a transaction.
   // To ease the implementation, test runners MAY execute distinct before every test.
   if (
@@ -139,7 +139,6 @@ describe('Unified test format', function unifiedTestRunner() {
     context(String(unifiedSuite.description), function runUnifiedTest() {
       for (const test of unifiedSuite.tests) {
         it(String(test.description), async function runOneUnifiedTest() {
-          // Function call for indentation sake...
           try {
             await runOne(this as MongoDBMochaTestContext, unifiedSuite, test);
           } catch (error) {

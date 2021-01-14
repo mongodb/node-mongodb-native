@@ -309,7 +309,7 @@ export async function executeOperationAndCheck(
         specialCheck(result, operation.expectResult);
       } else {
         for (const [resultKey, resultValue] of Object.entries(operation.expectResult)) {
-          // each key/value expectation can be is a special op
+          // each key/value expectation can be a special op
           if (isSpecialOperator(resultValue)) {
             specialCheck(result, resultValue);
           } else {
