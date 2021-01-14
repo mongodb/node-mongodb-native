@@ -69,9 +69,7 @@ describe('Write Concern', function () {
     });
   });
 
-  after(() => {
-    mock.cleanup();
-  });
+  after(() => mock.cleanup());
 
   it('should pipe writeConcern from client down to API call', function () {
     server.setMessageHandler(request => {
