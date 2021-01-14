@@ -4,7 +4,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 **NOTE: v4.x was recently released with breaking API changes. You can find a list of changes [here](docs/CHANGES_4.0.0.md).**
 
-## MongoDB Node.JS Driver
+## Quick Links
 
 | what          | where                                                                                                            |
 |---------------|------------------------------------------------------------------------------------------------------------------|
