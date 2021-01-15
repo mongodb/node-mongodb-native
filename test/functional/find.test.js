@@ -1195,19 +1195,23 @@ describe('Find', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.createCollection('timeoutFalse', function(err, collection) {
+          expect(err).to.not.exist;
           collection.find({}, { timeout: false }, function(err, cursor) {
-            test.equal(false, cursor.cmd.noCursorTimeout);
+            expect(err).to.not.exist;
+            expect(cursor.cmd.noCursorTimeout).to.be.true;
 
             collection.find({}, { timeout: true }, function(err, cursor) {
-              test.equal(true, cursor.cmd.noCursorTimeout);
+              expect(err).to.not.exist;
+              expect(cursor.cmd.noCursorTimeout).to.be.false;
 
               collection.find({}, {}, function(err, cursor) {
-                test.ok(!cursor.cmd.noCursorTimeout);
+                expect(err).to.not.exist;
+                expect(cursor.cmd.noCursorTimeout).to.not.exist;
 
                 client.close(done);
               });
