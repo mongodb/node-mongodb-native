@@ -41,7 +41,8 @@ export {
   Timestamp,
   Decimal128,
   BSONRegExp,
-  BSONSymbol
+  BSONSymbol,
+  Map
 } from './bson';
 
 export {
