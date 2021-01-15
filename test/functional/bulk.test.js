@@ -1648,12 +1648,9 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-
-        coll.insertMany(documents, { ordered: true }, err => {
-          client.close(() => {
-            done(err);
-          });
-        });
+        coll.insertMany(documents, { ordered: true })
+      .then(() => {
+        client.close(done);
       });
   });
 
@@ -1677,12 +1674,9 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-
-        coll.insertMany(documents, { ordered: false }, err => {
-          client.close(() => {
-            done(err);
-          });
-        });
+        coll.insertMany(documents, { ordered: false })
+      .then(() => {
+        client.close(done);
       });
   });
 
