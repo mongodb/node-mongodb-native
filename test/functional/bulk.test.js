@@ -1649,9 +1649,7 @@ describe('Bulk', function () {
         const coll = db.collection('doesnt_matter');
         coll.insertMany(documents, { ordered: true });
       })
-      .then(() => {
-        client.close();
-      });
+      .finally(() => client.close());
   });
 
   it('properly accounts for bson size in bytes in bulk unordered inserts', function () {
@@ -1675,9 +1673,7 @@ describe('Bulk', function () {
         const coll = db.collection('doesnt_matter');
         coll.insertMany(documents, { ordered: false });
       })
-      .then(() => {
-        client.close();
-      });
+      .finally(() => client.close());
   });
 
   function testPropagationOfBulkWriteError(bulk) {
