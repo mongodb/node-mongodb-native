@@ -1,6 +1,13 @@
 {
-  "extension": ["js"],
-  "require": ["ts-node/register", "source-map-support/register"],
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
+  "extension": [
+    "js",
+    "ts"
+  ],
+  "require": [
+    "ts-node/register",
+    "source-map-support/register"
+  ],
   "file": "test/tools/runner",
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
