@@ -1628,7 +1628,7 @@ describe('Bulk', function () {
       });
   });
 
-  it('properly accounts for bson size in bytes in bulk ordered inserts', function (done) {
+  it('properly accounts for bson size in bytes in bulk ordered inserts', function () {
     const client = this.configuration.newClient();
     const size = MAX_BSON_SIZE / 2;
     const largeString = crypto.randomBytes(size - 100).toString('hex');
@@ -1636,9 +1636,8 @@ describe('Bulk', function () {
 
     let db;
 
-    client
+    return client
       .connect()
-      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
       .then(() => {
         db = client.db(this.configuration.db);
         return db.dropCollection('doesnt_matter').catch(() => {});
@@ -1648,13 +1647,14 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-        coll.insertMany(documents, { ordered: true })
+        coll.insertMany(documents, { ordered: true });
+      })
       .then(() => {
-        client.close(done);
+        client.close();
       });
   });
 
-  it('properly accounts for bson size in bytes in bulk unordered inserts', function (done) {
+  it('properly accounts for bson size in bytes in bulk unordered inserts', function () {
     const client = this.configuration.newClient();
     const size = MAX_BSON_SIZE / 2;
     const largeString = crypto.randomBytes(size - 100).toString('hex');
@@ -1662,9 +1662,8 @@ describe('Bulk', function () {
 
     let db;
 
-    client
+    return client
       .connect()
-      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
       .then(() => {
         db = client.db(this.configuration.db);
         return db.dropCollection('doesnt_matter').catch(() => {});
@@ -1674,9 +1673,10 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-        coll.insertMany(documents, { ordered: false })
+        coll.insertMany(documents, { ordered: false });
+      })
       .then(() => {
-        client.close(done);
+        client.close();
       });
   });
 
