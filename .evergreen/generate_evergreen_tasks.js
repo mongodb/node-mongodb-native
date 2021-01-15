@@ -484,8 +484,30 @@ BUILD_VARIANTS.push({
   tasks: ['run-checks']
 });
 
-// special case for MONGODB-AWS authentication
+// singleton build variant for mongosh integration tests
+SINGLETON_TASKS.push({
+  name: 'run-mongosh-integration-tests',
+  tags: ['run-mongosh-integration-tests'],
+  exec_timeout_secs: 3600,
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'fermium'
+      }
+    },
+    { func: 'run mongosh integration tests' }
+  ]
+});
 
+BUILD_VARIANTS.push({
+  name: 'mongosh_integration_tests',
+  display_name: 'mongosh integration tests',
+  run_on: 'ubuntu1804-test',
+  tasks: ['run-mongosh-integration-tests']
+});
+
+// special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
