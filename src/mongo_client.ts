@@ -171,7 +171,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
 
-  /** The write concern */
+  /** The write concern w value */
   w?: W;
   /** The write concern timeout */
   wtimeoutMS?: number;

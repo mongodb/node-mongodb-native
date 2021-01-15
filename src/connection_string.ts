@@ -992,9 +992,16 @@ export const OPTIONS = {
             ...value
           }
         });
+      } else if (value === 'majority' || typeof value === 'number') {
+        return WriteConcern.fromOptions({
+          writeConcern: {
+            ...options.writeConcern,
+            w: value
+          }
+        });
       }
 
-      throw new MongoParseError(`WriteConcern must be an object, got ${JSON.stringify(value)}`);
+      throw new MongoParseError(`Invalid WriteConcern cannot parse: ${JSON.stringify(value)}`);
     }
   } as OptionDescriptor,
   wtimeout: {
