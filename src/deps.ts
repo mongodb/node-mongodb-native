@@ -87,14 +87,45 @@ export interface AutoEncryptionOptions {
     /** Configuration options for using 'aws' as your KMS provider */
     aws?: {
       /** The access key used for the AWS KMS provider */
-      accessKeyId?: string;
+      accessKeyId: string;
       /** The secret access key used for the AWS KMS provider */
-      secretAccessKey?: string;
+      secretAccessKey: string;
     };
     /** Configuration options for using 'local' as your KMS provider */
     local?: {
-      /** The master key used to encrypt/decrypt data keys. A 96-byte long Buffer. */
-      key?: Buffer;
+      /**
+       * The master key used to encrypt/decrypt data keys.
+       * A 96-byte long Buffer or base64 encoded string.
+       */
+      key: Buffer | string;
+    };
+    /** Configuration options for using 'azure' as your KMS provider */
+    azure?: {
+      /** The tenant ID identifies the organization for the account */
+      tenantId: string;
+      /** The client ID to authenticate a registered application */
+      clientId: string;
+      /** The client secret to authenticate a registered application */
+      clientSecret: string;
+      /**
+       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+       * This is optional, and only needed if customer is using a non-commercial Azure instance
+       * (e.g. a government or China account, which use different URLs).
+       * Defaults to "login.microsoftonline.com"
+       */
+      identityPlatformEndpoint?: string | undefined;
+    };
+    /** Configuration options for using 'gcp' as your KMS provider */
+    gcp?: {
+      /** The service account email to authenticate */
+      email: string;
+      /** A PKCS#8 encrypted key. This can either be a base64 string or a binary representation */
+      privateKey: string | Buffer;
+      /**
+       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+       * Defaults to "oauth2.googleapis.com"
+       */
+      endpoint?: string | undefined;
     };
   };
   /**
