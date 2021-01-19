@@ -1662,4 +1662,67 @@ describe('Bulk', function() {
         );
     });
   });
+
+  it('should enforce no atomic operators', function() {
+    const client = this.configuration.newClient();
+    return client
+      .connect()
+      .then(() => {
+        const collection = client.db().collection('noAtomicOp');
+        return collection
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() => collection);
+      })
+      .then(collection => {
+        return collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }]).then(() => collection);
+      })
+      .then(collection => {
+        try {
+          return collection.replaceOne({ a: 1 }, { $atomic: 1 });
+        } catch (err) {
+          expect(err).to.be.instanceOf(
+            TypeError,
+            'Replacement document must not use atomic operators'
+          );
+        }
+      })
+      .finally(() => {
+        return client.close();
+      });
+  });
+
+  it('should respect toBSON conversion when checking for atomic operators', function() {
+    const client = this.configuration.newClient();
+    return client
+      .connect()
+      .then(() => {
+        const collection = client.db().collection('noAtomicOp');
+        return collection
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() => collection);
+      })
+      .then(collection => {
+        return collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }]).then(() => collection);
+      })
+      .then(collection => {
+        try {
+          return collection.replaceOne(
+            { a: 1 },
+            {
+              $atomic: 1,
+              toBSON() {
+                return { atomic: this.$atomic };
+              }
+            }
+          );
+        } catch (err) {
+          expect.fail(); // shouldn't throw any error
+        }
+      })
+      .finally(() => {
+        return client.close();
+      });
+  });
 });

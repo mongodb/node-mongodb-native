@@ -2,6 +2,7 @@
 const eachAsync = require('../../lib/core/utils').eachAsync;
 const makeInterruptableAsyncInterval = require('../../lib/utils').makeInterruptableAsyncInterval;
 const now = require('../../lib/utils').now;
+const hasAtomicOperators = require('../../lib/utils').hasAtomicOperators;
 const expect = require('chai').expect;
 const sinon = require('sinon');
 
@@ -162,5 +163,18 @@ describe('utils', function() {
       }, 250);
       this.clock.tick(250);
     });
+  });
+
+  it('should assert hasAtomicOperators and respect toBSON conversion', function() {
+    expect(hasAtomicOperators({ $key: 2.3 })).to.be.true;
+    expect(hasAtomicOperators({ nonAtomic: 1, $key: 2.3 })).to.be.true;
+    expect(
+      hasAtomicOperators({
+        $key: 2.3,
+        toBSON() {
+          return { key: this.$key };
+        }
+      })
+    ).to.be.false;
   });
 });
