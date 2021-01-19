@@ -264,7 +264,7 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
   }
 
   if (typeof options.timeout === 'boolean') {
-    findCommand.noCursorTimeout = options.timeout;
+    findCommand.noCursorTimeout = !options.timeout;
   } else if (typeof options.noCursorTimeout === 'boolean') {
     findCommand.noCursorTimeout = options.noCursorTimeout;
   }

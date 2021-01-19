@@ -439,7 +439,7 @@ export class Connection extends EventEmitter {
     }
 
     if (typeof options.timeout === 'boolean') {
-      query.noCursorTimeout = options.timeout;
+      query.noCursorTimeout = !options.timeout;
     } else if (typeof options.noCursorTimeout === 'boolean') {
       query.noCursorTimeout = options.noCursorTimeout;
     }
