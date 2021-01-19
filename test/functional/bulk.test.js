@@ -1649,7 +1649,7 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-        coll.insertMany(documents, { ordered: true });
+        return coll.insertMany(documents, { ordered: true });
       })
       .finally(() => client.close());
   });
@@ -1673,7 +1673,7 @@ describe('Bulk', function () {
       })
       .then(() => {
         const coll = db.collection('doesnt_matter');
-        coll.insertMany(documents, { ordered: false });
+        return coll.insertMany(documents, { ordered: false });
       })
       .finally(() => client.close());
   });
