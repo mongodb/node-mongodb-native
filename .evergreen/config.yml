@@ -144,6 +144,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+          export DISTRO_ID=${distro_id}
           bash ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
   cleanup:
     - command: shell.exec
