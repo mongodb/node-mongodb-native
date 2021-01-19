@@ -2768,7 +2768,7 @@ this collection, will be inherited from the parent DB</p>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1850">line 1850</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1893">line 1893</a>
         </div>
         
     </div>
@@ -3061,42 +3061,6 @@ this collection, will be inherited from the parent DB</p>
 	</tbody>
 </table>
             </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>explain</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Explain returns the aggregation execution plan (requires mongodb 2.6 &gt;).</p></td>
         </tr>
 	
 	
@@ -3492,6 +3456,52 @@ this collection, will be inherited from the parent DB</p>
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -3620,7 +3630,7 @@ this collection, will be inherited from the parent DB</p>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line608">line 608</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line611">line 611</a>
         </div>
         
     </div>
@@ -3885,7 +3895,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3919,7 +3929,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3955,7 +3965,44 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -4200,7 +4247,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1496">line 1496</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1515">line 1515</a>
         </div>
         
     </div>
@@ -4648,7 +4695,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1563">line 1563</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1582">line 1582</a>
         </div>
         
     </div>
@@ -5053,7 +5100,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1225">line 1225</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1242">line 1242</a>
         </div>
         
     </div>
@@ -5207,7 +5254,7 @@ Promise if no callback passed.
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -5241,7 +5288,7 @@ Promise if no callback passed.
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -5277,7 +5324,44 @@ Promise if no callback passed.
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -5852,7 +5936,7 @@ await collection.createIndex(['j', ['k', -1], { l: '2d' }])</p></code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1278">line 1278</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1295">line 1295</a>
         </div>
         
     </div>
@@ -6154,7 +6238,7 @@ name: 'tanagra'<br>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line945">line 945</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line959">line 959</a>
         </div>
         
     </div>
@@ -6336,7 +6420,7 @@ name: 'tanagra'<br>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6370,7 +6454,7 @@ name: 'tanagra'<br>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6406,7 +6490,44 @@ name: 'tanagra'<br>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -6515,6 +6636,52 @@ name: 'tanagra'<br>
                     
                 
                 <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
         </tr>
 	
 	
@@ -6688,7 +6855,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line911">line 911</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line923">line 923</a>
         </div>
         
     </div>
@@ -6870,7 +7037,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6904,7 +7071,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6940,7 +7107,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -7049,6 +7253,52 @@ Promise if no callback passed
                     
                 
                 <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
         </tr>
 	
 	
@@ -7222,7 +7472,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1587">line 1587</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1607">line 1607</a>
         </div>
         
     </div>
@@ -7461,6 +7711,48 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -7587,7 +7879,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1133">line 1133</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1149">line 1149</a>
         </div>
         
     </div>
@@ -7665,42 +7957,14 @@ Promise if no callback passed
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
 	</thead>
 	
 	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>writeConcern</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>A full WriteConcern object</p></td>
-        </tr>
-	
 	
 	
         <tr>
@@ -7721,6 +7985,10 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7731,7 +7999,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7751,6 +8019,10 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7761,7 +8033,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7781,6 +8053,12 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7791,7 +8069,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>The journal write concern</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -7810,6 +8125,10 @@ Promise if no callback passed
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -7924,7 +8243,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1348">line 1348</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1366">line 1366</a>
         </div>
         
     </div>
@@ -8051,7 +8370,7 @@ Promise if no [callback] passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1308">line 1308</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1326">line 1326</a>
         </div>
         
     </div>
@@ -8199,7 +8518,7 @@ Promise if no [callback] passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8233,7 +8552,7 @@ Promise if no [callback] passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8269,7 +8588,44 @@ Promise if no [callback] passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -8440,7 +8796,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1330">line 1330</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1348">line 1348</a>
         </div>
         
     </div>
@@ -8684,7 +9040,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1415">line 1415</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1434">line 1434</a>
         </div>
         
     </div>
@@ -8835,7 +9191,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8869,7 +9225,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8905,7 +9261,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -9392,7 +9785,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1522">line 1522</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1541">line 1541</a>
         </div>
         
     </div>
@@ -9943,42 +10336,6 @@ Promise if no callback passed.
                     
                 
                 <p>Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>explain</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Explain the query instead of returning the data.</p></td>
         </tr>
 	
 	
@@ -10760,6 +11117,52 @@ Promise if no callback passed.
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -10871,7 +11274,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1765">line 1765</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1807">line 1807</a>
         </div>
         
     </div>
@@ -11075,7 +11478,7 @@ Promise if no callback passed.
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -11109,7 +11512,7 @@ Promise if no callback passed.
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -11145,7 +11548,44 @@ Promise if no callback passed.
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -11494,7 +11934,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1809">line 1809</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1852">line 1852</a>
         </div>
         
     </div>
@@ -11670,7 +12110,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -11704,7 +12144,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -11740,7 +12180,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -11879,7 +12356,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1070">line 1070</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1086">line 1086</a>
         </div>
         
     </div>
@@ -12202,42 +12679,6 @@ Promise if no callback passed
                     
                 
                 <p>Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>explain</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Explain the query instead of returning the data.</p></td>
         </tr>
 	
 	
@@ -12881,6 +13322,52 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -13011,7 +13498,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1666">line 1666</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1687">line 1687</a>
         </div>
         
     </div>
@@ -13373,6 +13860,52 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -13503,7 +14036,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1699">line 1699</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1727">line 1727</a>
         </div>
         
     </div>
@@ -14038,6 +14571,52 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -14168,7 +14747,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1733">line 1733</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1768">line 1768</a>
         </div>
         
     </div>
@@ -14737,6 +15316,52 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -14867,7 +15492,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1990">line 1990</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2033">line 2033</a>
         </div>
         
     </div>
@@ -15286,7 +15911,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2017">line 2017</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2060">line 2060</a>
         </div>
         
     </div>
@@ -15718,7 +16343,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1606">line 1606</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1626">line 1626</a>
         </div>
         
     </div>
@@ -15932,7 +16557,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1436">line 1436</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1455">line 1455</a>
         </div>
         
     </div>
@@ -16177,7 +16802,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1454">line 1454</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1473">line 1473</a>
         </div>
         
     </div>
@@ -16433,7 +17058,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2158">line 2158</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2204">line 2204</a>
         </div>
         
     </div>
@@ -16553,7 +17178,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -16587,7 +17212,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -16623,7 +17248,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -16790,7 +17452,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2134">line 2134</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2179">line 2179</a>
         </div>
         
     </div>
@@ -16910,7 +17572,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -16944,7 +17606,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -16980,7 +17642,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -17119,7 +17818,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line690">line 690</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line694">line 694</a>
         </div>
         
     </div>
@@ -17272,7 +17971,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -17306,7 +18005,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -17342,7 +18041,44 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -17589,7 +18325,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line541">line 541</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line543">line 543</a>
         </div>
         
     </div>
@@ -17847,7 +18583,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -17881,7 +18617,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -17917,7 +18653,44 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -18162,7 +18935,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line505">line 505</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line506">line 506</a>
         </div>
         
     </div>
@@ -18384,7 +19157,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -18418,7 +19191,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -18454,7 +19227,44 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -18699,7 +19509,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1173">line 1173</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1189">line 1189</a>
         </div>
         
     </div>
@@ -18913,7 +19723,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1382">line 1382</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1400">line 1400</a>
         </div>
         
     </div>
@@ -19172,7 +19982,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2097">line 2097</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2141">line 2141</a>
         </div>
         
     </div>
@@ -19712,6 +20522,52 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>session</code></td>
             
             
@@ -19857,7 +20713,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1155">line 1155</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1171">line 1171</a>
         </div>
         
     </div>
@@ -20071,7 +20927,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1949">line 1949</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1992">line 1992</a>
         </div>
         
     </div>
@@ -20403,7 +21259,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1363">line 1363</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1381">line 1381</a>
         </div>
         
     </div>
@@ -20620,7 +21476,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line977">line 977</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line992">line 992</a>
         </div>
         
     </div>
@@ -20802,7 +21658,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -20836,7 +21692,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -20872,7 +21728,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -21047,7 +21940,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1111">line 1111</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1127">line 1127</a>
         </div>
         
     </div>
@@ -21331,7 +22224,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line783">line 783</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line790">line 790</a>
         </div>
         
     </div>
@@ -21647,7 +22540,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -21681,7 +22574,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -21717,7 +22610,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -21962,7 +22892,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1009">line 1009</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1025">line 1025</a>
         </div>
         
     </div>
@@ -22111,7 +23041,7 @@ operators and update instead for more efficient operations.</p>
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -22145,7 +23075,7 @@ operators and update instead for more efficient operations.</p>
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -22181,7 +23111,44 @@ operators and update instead for more efficient operations.</p>
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -22320,7 +23287,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1625">line 1625</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1645">line 1645</a>
         </div>
         
     </div>
@@ -22564,7 +23531,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line859">line 859</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line869">line 869</a>
         </div>
         
     </div>
@@ -22740,7 +23707,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -22774,7 +23741,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -22810,7 +23777,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -23174,7 +24178,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line821">line 821</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line830">line 830</a>
         </div>
         
     </div>
@@ -23524,7 +24528,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -23558,7 +24562,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -23594,7 +24598,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -23703,6 +24744,52 @@ Promise if no callback passed
                     
                 
                 <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
         </tr>
 	
 	
@@ -23839,7 +24926,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line746">line 746</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line752">line 752</a>
         </div>
         
     </div>
@@ -24189,7 +25276,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -24223,7 +25310,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -24259,7 +25346,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -24368,6 +25492,52 @@ Promise if no callback passed
                     
                 
                 <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>explain</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The verbosity mode for the explain output.</p></td>
         </tr>
 	
 	
@@ -24504,7 +25674,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1917">line 1917</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1960">line 1960</a>
         </div>
         
     </div>
@@ -24975,7 +26145,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1029">line 1029</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1045">line 1045</a>
         </div>
         
     </div>
@@ -25114,7 +26284,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line562">line 562</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line564">line 564</a>
         </div>
         
     </div>
@@ -25506,7 +26676,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1093">line 1093</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1109">line 1109</a>
         </div>
         
     </div>
@@ -25645,7 +26815,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1468">line 1468</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1487">line 1487</a>
         </div>
         
     </div>
@@ -25784,7 +26954,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line887">line 887</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line897">line 897</a>
         </div>
         
     </div>
@@ -26131,7 +27301,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1642">line 1642</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1662">line 1662</a>
         </div>
         
     </div>
@@ -26460,7 +27630,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line664">line 664</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line667">line 667</a>
         </div>
         
     </div>
@@ -26853,7 +28023,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line657">line 657</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line660">line 660</a>
         </div>
         
     </div>
@@ -27246,7 +28416,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1930">line 1930</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1973">line 1973</a>
         </div>
         
     </div>
@@ -27385,7 +28555,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1022">line 1022</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1038">line 1038</a>
         </div>
         
     </div>
@@ -27524,7 +28694,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line718">line 718</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line722">line 722</a>
         </div>
         
     </div>
@@ -28108,7 +29278,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line628">line 628</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line631">line 631</a>
         </div>
         
     </div>
@@ -28387,7 +29557,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Jul 30 2020 16:08:49 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Jan 19 2021 17:15:06 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

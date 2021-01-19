@@ -2356,7 +2356,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line159">line 159</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line160">line 160</a>
         </div>
         
     </div>
@@ -3228,7 +3228,7 @@
             
                 <td class="default">
                 
-                    360000
+                    0
                 
                 </td>
             
@@ -3634,7 +3634,7 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>The write concern</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3668,7 +3668,7 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>The write concern timeout</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3704,7 +3704,80 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>Specify a journal write concern</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fsync</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Deprecated</strong> Specify a file sync write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -4542,42 +4615,6 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
 	
         <tr>
             
-                <td class="name"><code>fsync</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify a file sync write concern</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
                 <td class="name"><code>readPreferenceTags</code></td>
             
             
@@ -5293,7 +5330,7 @@ MongoClient instance
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line433">line 433</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line436">line 436</a>
         </div>
         
     </div>
@@ -6167,7 +6204,7 @@ MongoClient instance
             
                 <td class="default">
                 
-                    360000
+                    0
                 
                 </td>
             
@@ -6573,7 +6610,7 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>The write concern</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6607,7 +6644,7 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>The write concern timeout</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6643,7 +6680,80 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>Specify a journal write concern</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fsync</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p><strong>Deprecated</strong> Specify a file sync write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -7481,42 +7591,6 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
 	
         <tr>
             
-                <td class="name"><code>fsync</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify a file sync write concern</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
                 <td class="name"><code>readPreferenceTags</code></td>
             
             
@@ -8213,7 +8287,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line242">line 242</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line244">line 244</a>
         </div>
         
     </div>
@@ -8387,7 +8461,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line213">line 213</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line215">line 215</a>
         </div>
         
     </div>
@@ -8521,7 +8595,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line293">line 293</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line295">line 295</a>
         </div>
         
     </div>
@@ -8778,7 +8852,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line335">line 335</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line337">line 337</a>
         </div>
         
     </div>
@@ -9002,7 +9076,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line451">line 451</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line454">line 454</a>
         </div>
         
     </div>
@@ -9134,7 +9208,7 @@ newly established session
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line519">line 519</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line522">line 522</a>
         </div>
         
     </div>
@@ -9600,7 +9674,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line474">line 474</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line477">line 477</a>
         </div>
         
     </div>
@@ -9764,7 +9838,7 @@ will be handled without the need for user interaction.</p>
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line195">line 195</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line197">line 197</a>
         </div>
         
     </div>
@@ -9905,7 +9979,7 @@ will be handled without the need for user interaction.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Jul 30 2020 16:08:49 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Jan 19 2021 17:15:07 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

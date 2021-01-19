@@ -2356,7 +2356,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line140">line 140</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line142">line 142</a>
         </div>
         
     </div>
@@ -2572,7 +2572,7 @@
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -2606,7 +2606,7 @@
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -2642,7 +2642,44 @@
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -3505,7 +3542,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line812">line 812</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line827">line 827</a>
         </div>
         
     </div>
@@ -3681,7 +3718,7 @@ Db instance.
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3715,7 +3752,7 @@ Db instance.
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -3751,7 +3788,44 @@ Db instance.
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -3956,7 +4030,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line355">line 355</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line365">line 365</a>
         </div>
         
     </div>
@@ -4036,7 +4110,7 @@ the new Admin db instance
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line323">line 323</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line333">line 333</a>
         </div>
         
     </div>
@@ -4341,6 +4415,18 @@ the new Admin db instance
             <td class="type">
             
                 
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
 <span class="param-type">boolean</span>
 
 
@@ -4349,8 +4435,6 @@ the new Admin db instance
             
             
                 <td class="default">
-                
-                    false
                 
                 </td>
             
@@ -4364,7 +4448,7 @@ the new Admin db instance
                         
                     
                 
-                <p>Explain returns the aggregation execution plan (requires mongodb 2.6 &gt;).</p></td>
+                <p>The verbosity mode for the explain output.</p></td>
         </tr>
 	
 	
@@ -4888,7 +4972,7 @@ the new Admin db instance
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line407">line 407</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line418">line 418</a>
         </div>
         
     </div>
@@ -5037,7 +5121,7 @@ can use it without a callback in the following way: <code>const collection = db.
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -5071,7 +5155,7 @@ can use it without a callback in the following way: <code>const collection = db.
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -5107,7 +5191,44 @@ can use it without a callback in the following way: <code>const collection = db.
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -5483,7 +5604,7 @@ the new Collection instance if not in strict mode
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line690">line 690</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line702">line 702</a>
         </div>
         
     </div>
@@ -5697,7 +5818,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line289">line 289</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line299">line 299</a>
         </div>
         
     </div>
@@ -5972,7 +6093,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line513">line 513</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line525">line 525</a>
         </div>
         
     </div>
@@ -6121,7 +6242,7 @@ More information about command options available at https://docs.mongodb.com/man
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6155,7 +6276,7 @@ More information about command options available at https://docs.mongodb.com/man
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -6191,7 +6312,44 @@ More information about command options available at https://docs.mongodb.com/man
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -6370,7 +6528,7 @@ More information about command options available at https://docs.mongodb.com/man
                         
                     
                 
-                <p>Returns an error if the collection does not exist</p></td>
+                <p>DEPRECATED: Returns an error if the collection does not exist</p></td>
         </tr>
 	
 	
@@ -6953,7 +7111,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line747">line 747</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line760">line 760</a>
         </div>
         
     </div>
@@ -7132,7 +7290,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7166,7 +7324,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7202,7 +7360,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -7724,7 +7919,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line654">line 654</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line666">line 666</a>
         </div>
         
     </div>
@@ -7830,42 +8025,14 @@ Promise if no callback passed
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
 	</thead>
 	
 	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>writeConcern</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>A full WriteConcern object</p></td>
-        </tr>
-	
 	
 	
         <tr>
@@ -7886,6 +8053,10 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7896,7 +8067,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7916,6 +8087,10 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7926,7 +8101,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -7946,6 +8121,12 @@ Promise if no callback passed
             </td>
             
             
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -7956,7 +8137,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>The journal write concern</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -7975,6 +8193,10 @@ Promise if no callback passed
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -8089,7 +8311,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line672">line 672</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line684">line 684</a>
         </div>
         
     </div>
@@ -8303,7 +8525,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line779">line 779</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line793">line 793</a>
         </div>
         
     </div>
@@ -8482,7 +8704,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8516,7 +8738,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -8552,7 +8774,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -9005,7 +9264,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line597">line 597</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line609">line 609</a>
         </div>
         
     </div>
@@ -9322,7 +9581,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line709">line 709</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line721">line 721</a>
         </div>
         
     </div>
@@ -9597,7 +9856,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line910">line 910</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line926">line 926</a>
         </div>
         
     </div>
@@ -9918,7 +10177,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line573">line 573</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line585">line 585</a>
         </div>
         
     </div>
@@ -10255,7 +10514,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line890">line 890</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line906">line 906</a>
         </div>
         
     </div>
@@ -10469,7 +10728,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line839">line 839</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line855">line 855</a>
         </div>
         
     </div>
@@ -10617,7 +10876,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern.</p></td>
+                <p><strong>Deprecated</strong> The write concern. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -10651,7 +10910,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>The write concern timeout.</p></td>
+                <p><strong>Deprecated</strong> The write concern timeout. Use writeConcern instead.</p></td>
         </tr>
 	
 	
@@ -10687,7 +10946,44 @@ Promise if no callback passed
                         
                     
                 
-                <p>Specify a journal write concern.</p></td>
+                <p><strong>Deprecated</strong> Specify a journal write concern. Use writeConcern instead.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>writeConcern</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type"><a href="global.html#WriteConcern">WriteConcern</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify write concern settings.</p></td>
         </tr>
 	
 	
@@ -10824,7 +11120,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line624">line 624</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line636">line 636</a>
         </div>
         
     </div>
@@ -11136,7 +11432,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line857">line 857</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line873">line 873</a>
         </div>
         
     </div>
@@ -11378,7 +11674,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line542">line 542</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line554">line 554</a>
         </div>
         
     </div>
@@ -11622,7 +11918,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line923">line 923</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line939">line 939</a>
         </div>
         
     </div>
@@ -11693,7 +11989,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line943">line 943</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line959">line 959</a>
         </div>
         
     </div>
@@ -12164,7 +12460,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line361">line 361</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line371">line 371</a>
         </div>
         
     </div>
@@ -12309,7 +12605,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line966">line 966</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line982">line 982</a>
         </div>
         
     </div>
@@ -12391,7 +12687,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line986">line 986</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1002">line 1002</a>
         </div>
         
     </div>
@@ -12473,7 +12769,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1013">line 1013</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1029">line 1029</a>
         </div>
         
     </div>
@@ -12559,7 +12855,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1004">line 1004</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1020">line 1020</a>
         </div>
         
     </div>
@@ -12641,7 +12937,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line975">line 975</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line991">line 991</a>
         </div>
         
     </div>
@@ -12727,7 +13023,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line995">line 995</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1011">line 1011</a>
         </div>
         
     </div>
@@ -12809,7 +13105,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Jul 30 2020 16:08:49 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Jan 19 2021 17:15:06 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

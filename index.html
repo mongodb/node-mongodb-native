@@ -82,10 +82,8 @@
         <h2>Introduction</h2>
 
 <p>
-  The official MongoDB Node.js driver provides both callback-based
-  and Promise-based interaction with MongoDB, allowing applications to
-  take full advantage of the new features in ES6. The 2.x series of the
-  driver is powered by a brand new core driver and BSON library.
+  The official MongoDB Node.js driver allows Node.js applications to connect to MongoDB and work with data.
+  The driver features an asynchronous API which allows you to interact with MongoDB using Promises or via traditional callbacks.
 </p>
 
 
@@ -93,17 +91,26 @@
 
 <dl>
   <dt>MongoDB Driver</dt>
-  <dd>A brand new MongoDB driver for Node.js that keeps compatibility
-	  with the 1.4.x driver series, only breaking behavior where the
-	  1.4.x branch had significant problems. The driver also includes
-	  support for the shared CRUD API specification and the Server
-	  Discovery and Monitoring Specification (SDAM).</dd>
-  <dt>Core driver</dt>
-  <dd>The MongoDB Node.js core driver is the new underpinning for the
-	  driver and is meant for framework developers that do not need the
-	  helpers and abstractions available in the full driver. This driver
-	  is not meant for end users, as it offers none of the conveniences
-	  of the higher level APIs</dd>.
+  <dd>
+	Whether you are new to MongoDB or you just want to brush up on the core concepts, you can check out the Fundamentals section which features material on using the Node.js driver for the following:
+	<ul>
+		<li><a href="/drivers/node/fundamentals/connection">Connection Guide</a>: connect to a MongoDB
+		instance or replica set</li>
+		<li><a href="/drivers/node/fundamentals/authentication">Authentication</a>: configure
+		authentication and log a user in</li>
+		<li><a href="/drivers/node/fundamentals/crud">CRUD Operations</a>: read and write data to MongoDB</li>
+		<li><a class="reference internal" href="/drivers/node/fundamentals/promises">Promises and Callbacks</a>: access return
+		values using asynchronous Javascript</li>
+		<li><a href="/drivers/node/fundamentals/indexes">Indexes</a>: create and design indexes to make
+		your queries efficient</li>
+		<li><a href="/drivers/node/fundamentals/collations">Collations</a>: apply language-specific
+		sorting rules to your query results</li>
+		<li><a href="/drivers/node/fundamentals/logging">Logging</a>: configure the driver to log
+		MongoDB operations</li>
+		<li><a href="/drivers/node/fundamentals/monitoring">Monitoring</a>: configure the driver to
+		monitor MongoDB server events</li>
+	</ul>
+  </dd>
 </dl>
 
 
@@ -128,48 +135,153 @@ This will download the MongoDB driver and add a dependency entry in your `packag
     <tbody>
     
       <tr>
+        <th class="">4.0 Driver</th>
+        <td>
+
+          
+            <a href="https://docs.mongodb.com/drivers/node/" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./4.0">API</a>
+
+        </td>
+      </tr>
+    
+      <tr>
         <th class="">3.6 Driver</th>
-        <td><a href="./3.6" class="reference">Reference</a> &#124; <a href="./3.6/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.6" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.6/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.5 Driver</th>
-        <td><a href="./3.5" class="reference">Reference</a> &#124; <a href="./3.5/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.5" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.5/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.4 Driver</th>
-        <td><a href="./3.4" class="reference">Reference</a> &#124; <a href="./3.4/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.4" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.4/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.3 Driver</th>
-        <td><a href="./3.3" class="reference">Reference</a> &#124; <a href="./3.3/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.3" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.3/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="current">3.2 Driver</th>
-        <td><a href="./3.2" class="reference">Reference</a> &#124; <a href="./3.2/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.2" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.2/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.1 Driver</th>
-        <td><a href="./3.1" class="reference">Reference</a> &#124; <a href="./3.1/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.1" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.1/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.0 Driver</th>
-        <td><a href="./3.0" class="reference">Reference</a> &#124; <a href="./3.0/api">API</a></td>
+        <td>
+
+          
+            <a href="./3.0" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./3.0/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">2.2 Driver</th>
-        <td><a href="./2.2" class="reference">Reference</a> &#124; <a href="./2.2/api">API</a></td>
+        <td>
+
+          
+            <a href="./2.2" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./2.2/api">API</a>
+
+        </td>
       </tr>
     
       <tr>
         <th class="">3.x Core Driver</th>
-        <td><a href="./core" class="reference">Reference</a> &#124; <a href="./core/api">API</a></td>
+        <td>
+
+          
+            <a href="./core" class="reference">Reference</a>
+          
+
+          &#124; 
+
+          <a href="./core/api">API</a>
+
+        </td>
       </tr>
     
   </tbody>

@@ -2356,7 +2356,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line62">line 62</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line64">line 64</a>
         </div>
         
     </div>
@@ -2599,7 +2599,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line410">line 410</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line412">line 412</a>
         </div>
         
     </div>
@@ -2758,7 +2758,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line438">line 438</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line440">line 440</a>
         </div>
         
     </div>
@@ -2923,7 +2923,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line585">line 585</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line587">line 587</a>
         </div>
         
     </div>
@@ -3061,7 +3061,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line675">line 675</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line677">line 677</a>
         </div>
         
     </div>
@@ -3137,7 +3137,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line910">line 910</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line912">line 912</a>
         </div>
         
     </div>
@@ -3351,7 +3351,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line613">line 613</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line615">line 615</a>
         </div>
         
     </div>
@@ -3487,7 +3487,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line463">line 463</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line465">line 465</a>
         </div>
         
     </div>
@@ -3623,7 +3623,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line879">line 879</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line881">line 881</a>
         </div>
         
     </div>
@@ -4006,7 +4006,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line700">line 700</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line702">line 702</a>
         </div>
         
     </div>
@@ -4144,12 +4144,12 @@ for making sure that the entire result can fit the memory.</p>
     <div class="nameContainer">
         <h4 class="name" id="explain">
             
-            explain<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            explain<span class="signature">(<span class="optional">verbosity</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1006">line 1006</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1014">line 1014</a>
         </div>
         
     </div>
@@ -4161,6 +4161,9 @@ for making sure that the entire result can fit the memory.</p>
     
     <div class="description">
         <p>Execute the explain for the cursor</p>
+<p>For backwards compatibility, a verbosity of true is interpreted as &quot;allPlansExecution&quot;<br>
+and false as &quot;queryPlanner&quot;. Prior to server version 3.6, aggregate()<br>
+ignores the verbosity parameter and executes in &quot;queryPlanner&quot;.</p>
     </div>
     
 
@@ -4181,12 +4184,62 @@ for making sure that the entire result can fit the memory.</p>
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
 	</thead>
 	
 	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>verbosity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'queryPlanner'</span>
+|
+
+<span class="param-type">'queryPlannerExtended'</span>
+|
+
+<span class="param-type">'executionStats'</span>
+|
+
+<span class="param-type">'allPlansExecution'</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>An optional mode in which to run the explain.</p></td>
+        </tr>
+	
 	
 	
         <tr>
@@ -4203,6 +4256,10 @@ for making sure that the entire result can fit the memory.</p>
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -4281,7 +4338,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line261">line 261</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line263">line 263</a>
         </div>
         
     </div>
@@ -4402,7 +4459,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line729">line 729</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line731">line 731</a>
         </div>
         
     </div>
@@ -4565,7 +4622,7 @@ no callback supplied
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line194">line 194</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line196">line 196</a>
         </div>
         
     </div>
@@ -4712,7 +4769,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line292">line 292</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line294">line 294</a>
         </div>
         
     </div>
@@ -4833,7 +4890,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line952">line 952</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line954">line 954</a>
         </div>
         
     </div>
@@ -4909,7 +4966,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line625">line 625</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line627">line 627</a>
         </div>
         
     </div>
@@ -5045,7 +5102,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line934">line 934</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line936">line 936</a>
         </div>
         
     </div>
@@ -5173,7 +5230,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line322">line 322</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line324">line 324</a>
         </div>
         
     </div>
@@ -5294,7 +5351,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line479">line 479</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line481">line 481</a>
         </div>
         
     </div>
@@ -5430,7 +5487,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line277">line 277</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line279">line 279</a>
         </div>
         
     </div>
@@ -5553,7 +5610,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line499">line 499</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line501">line 501</a>
         </div>
         
     </div>
@@ -5689,7 +5746,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line307">line 307</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line309">line 309</a>
         </div>
         
     </div>
@@ -5810,7 +5867,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line231">line 231</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line233">line 233</a>
         </div>
         
     </div>
@@ -5959,7 +6016,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1100">line 1100</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1102">line 1102</a>
         </div>
         
     </div>
@@ -6037,7 +6094,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1106">line 1106</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1108">line 1108</a>
         </div>
         
     </div>
@@ -6193,7 +6250,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line519">line 519</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line521">line 521</a>
         </div>
         
     </div>
@@ -6331,7 +6388,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1080">line 1080</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1082">line 1082</a>
         </div>
         
     </div>
@@ -6454,7 +6511,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1094">line 1094</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1096">line 1096</a>
         </div>
         
     </div>
@@ -6530,7 +6587,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line337">line 337</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line339">line 339</a>
         </div>
         
     </div>
@@ -6653,7 +6710,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line681">line 681</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line683">line 683</a>
         </div>
         
     </div>
@@ -6729,7 +6786,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line385">line 385</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line387">line 387</a>
         </div>
         
     </div>
@@ -6890,7 +6947,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1087">line 1087</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1089">line 1089</a>
         </div>
         
     </div>
@@ -7011,7 +7068,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line778">line 778</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line780">line 780</a>
         </div>
         
     </div>
@@ -7150,7 +7207,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line352">line 352</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line354">line 354</a>
         </div>
         
     </div>
@@ -7271,7 +7328,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line650">line 650</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line652">line 652</a>
         </div>
         
     </div>
@@ -7407,7 +7464,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line368">line 368</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line370">line 370</a>
         </div>
         
     </div>
@@ -7530,7 +7587,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line536">line 536</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line538">line 538</a>
         </div>
         
     </div>
@@ -7707,7 +7764,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line970">line 970</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line972">line 972</a>
         </div>
         
     </div>
@@ -7891,7 +7948,7 @@ replace this method with transformStream in next major release
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line814">line 814</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line816">line 816</a>
         </div>
         
     </div>
@@ -8041,7 +8098,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line983">line 983</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line985">line 985</a>
         </div>
         
     </div>
@@ -8224,7 +8281,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1114">line 1114</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1116">line 1116</a>
         </div>
         
     </div>
@@ -8354,7 +8411,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1121">line 1121</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1123">line 1123</a>
         </div>
         
     </div>
@@ -8480,7 +8537,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1128">line 1128</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -8607,7 +8664,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line859">line 859</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line861">line 861</a>
         </div>
         
     </div>
@@ -8746,7 +8803,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line715">line 715</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line717">line 717</a>
         </div>
         
     </div>
@@ -8862,7 +8919,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line709">line 709</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line711">line 711</a>
         </div>
         
     </div>
@@ -8978,7 +9035,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line668">line 668</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line670">line 670</a>
         </div>
         
     </div>
@@ -9123,7 +9180,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line797">line 797</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line799">line 799</a>
         </div>
         
     </div>
@@ -9268,7 +9325,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1051">line 1051</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1053">line 1053</a>
         </div>
         
     </div>
@@ -9349,7 +9406,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1037">line 1037</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1039">line 1039</a>
         </div>
         
     </div>
@@ -9430,7 +9487,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1044">line 1044</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1046">line 1046</a>
         </div>
         
     </div>
@@ -9511,7 +9568,7 @@ returns a stream of unmodified docs.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1058">line 1058</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1060">line 1060</a>
         </div>
         
     </div>
@@ -9592,7 +9649,7 @@ returns a stream of unmodified docs.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Jul 30 2020 16:08:49 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Jan 19 2021 17:15:06 GMT-0500 (Eastern Standard Time)
                     </footer>
                 </div>
             </td>

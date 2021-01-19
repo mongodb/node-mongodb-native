@@ -1763,7 +1763,7 @@ This tutorial covers both the basic CRUD methods and the specialized <code>findA
 as well as the new Bulk API methods for efficient bulk write operations.</p>
 
 <div class="pull-right">
-  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2015" data-off="ES2017" data-offstyle="success">
+  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2017" data-off="ES2015" data-offstyle="success">
 </div>
 
 <h2 id="write-methods">Write Methods</h2>
@@ -1775,7 +1775,7 @@ documents in a collection, and those which remove documents from a collection.</
 
 <p>The <code>insertOne</code> and <code>insertMany</code> methods exist on the <code>Collection</code> class and are used to insert documents into MongoDB.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -1811,7 +1811,7 @@ client.connect(function(err, client) {
 });
 
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -1897,7 +1897,7 @@ than the defaults are necessary.</p>
 <p>The following example shows how to serialize a passed-in function when writing to a
 <a href="https://docs.mongodb.org/manual/core/replica-set-members/">replica set</a>.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -1932,7 +1932,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -1982,7 +1982,7 @@ when inserting documents with the <code>insertMany</code> method.</p>
 </div>
 
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const Long = require('mongodb').Long;
 const Decimal = require('mongodb').Decimal128;
 
@@ -2017,7 +2017,7 @@ client.connect(function(err, client) {
 });
 
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const Long = require('mongodb').Long;
 const Decimal = require('mongodb').Decimal128;
 
@@ -2063,7 +2063,7 @@ const client = new MongoClient(url);
 
 <p>The <code>updateOne</code> and <code>updateMany</code> methods exist on the <code>Collection</code> class and are used to update and upsert documents.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2115,7 +2115,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2213,7 +2213,7 @@ const client = new MongoClient(url);
 
 <p>The <code>deleteOne</code> and <code>deleteMany</code> methods exist on the <code>Collection</code> class and are used to remove documents from MongoDB.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2254,7 +2254,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2340,7 +2340,7 @@ allow the user to update or upsert a document and have the modified or existing 
 methods, the operation takes a write lock for the duration of the operation in order to ensure the modification is
 <a href="https://docs.mongodb.org/manual/core/write-operations-atomicity/">atomic</a>.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2385,7 +2385,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2486,7 +2486,7 @@ const client = new MongoClient(url);
 
 <p>The <code>findOneAndDelete</code> function is designed to help remove a document.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2524,7 +2524,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2603,7 +2603,7 @@ const client = new MongoClient(url);
 
 <p>The <code>bulkWrite</code> function allows a simple set of bulk operations to run in a non-fluent way, in comparison to the bulk API discussed next.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2647,7 +2647,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2732,7 +2732,7 @@ const client = new MongoClient(url);
 
 <p>Bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB version 2.6 or higher, which supports the new write commands. Bulk operations are split into <em>ordered</em> and <em>unordered</em> bulk operations. An <em>ordered</em> bulk operation guarantees the order of execution of writes while the <em>unordered</em> bulk operation makes no assumptions about the order of execution. In the Node.js driver the <em>unordered</em> bulk operations will group operations according to type and write them in parallel.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2775,7 +2775,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2868,7 +2868,7 @@ Remove Command with {b:1}
 
 <p>The following example materializes all the documents from a query using the <code>toArray</code> method, but limits the number of returned results to two documents.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2903,7 +2903,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden"><pre><code class="hljs">
+<section class="javascript6"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -2971,7 +2971,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
 
 <p>The following example uses the <code>next</code> method.</p>
 
-<section class="javascript5"><pre><code class="hljs">
+<section class="javascript5 hidden"><pre><code class="hljs">
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
@@ -3006,7 +3006,7 @@ client.connect(function(err, client) {
   });
 });
 </code></pre></section>
-<section class="javascript6 hidden">
+<section class="javascript6">
 In ECMAScript 6, The new `generator` functions allow for what is arguably a
 much cleaner and easier way to read iteration code.
 
