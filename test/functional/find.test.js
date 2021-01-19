@@ -1131,7 +1131,7 @@ describe('Find', function () {
       const db = client.db(this.configuration.db);
       db.createCollection('cursor_timeout_false_0', (err, collection) => {
         expect(err).to.not.exist;
-        const cursor = collection.find({}, { timeout: true });
+        const cursor = collection.find({}, { timeout: false });
         cursor.toArray(err => {
           expect(err).to.not.exist;
           expect(events[0]).nested.property('command.noCursorTimeout').to.equal(true);
