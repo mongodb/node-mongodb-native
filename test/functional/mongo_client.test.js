@@ -170,6 +170,27 @@ describe('MongoClient', function () {
     }
   });
 
+  it('Should provide the same package version in metadata and on the MongoClient class', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded']
+      }
+    },
+
+    test: function (done) {
+      var configuration = this.configuration;
+      var url = configuration.url();
+
+      const client = configuration.newClient(url, { appname: 'hello world' });
+      client.connect(err => {
+        expect(err).to.not.exist;
+        test.equal(client.topology.clientMetadata.driver.version, client.constructor.version);
+
+        client.close(done);
+      });
+    }
+  });
+
   it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', {
     metadata: {
       requires: {

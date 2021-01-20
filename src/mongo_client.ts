@@ -11,7 +11,8 @@ import {
   resolveOptions,
   ClientMetadata,
   ns,
-  HostAddress
+  HostAddress,
+  NODE_DRIVER_VERSION
 } from './utils';
 import { deprecate } from 'util';
 import { connect } from './operations/connect';
@@ -579,6 +580,11 @@ export class MongoClient extends EventEmitter {
     if (typeof options === 'function') (callback = options), (options = {});
     if (typeof callback === 'function') callback(undefined, true);
   }, 'Multiple authentication is prohibited on a connected client, please only authenticate once per MongoClient');
+
+  /** Provides the version of the 'mongodb' package. */
+  static get version(): string {
+    return NODE_DRIVER_VERSION;
+  }
 }
 
 /**
