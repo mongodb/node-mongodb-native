@@ -418,7 +418,7 @@ export function parseOptions(
 
   checkTLSOptions(mongoOptions);
   if (mongoClient && options.autoEncryption) {
-    mongoOptions.autoEncrypter = createAutoEncrypter(mongoClient);
+    mongoOptions.autoEncrypter = createAutoEncrypter(mongoClient, options);
   }
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
