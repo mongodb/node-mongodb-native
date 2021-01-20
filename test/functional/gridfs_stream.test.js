@@ -99,6 +99,39 @@ describe('GridFS Stream', function() {
     }
   });
 
+  it('destroy publishes provided error', {
+    metadata: { requires: { topology: ['single'] } },
+    test: function(done) {
+      var configuration = this.configuration;
+      var GridFSBucket = configuration.require.GridFSBucket;
+
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        db.dropDatabase(function(error) {
+          test.equal(error, null);
+
+          var bucket = new GridFSBucket(db);
+          var readStream = fs.createReadStream('./LICENSE.md');
+          var uploadStream = bucket.openUploadStream('test.dat');
+          var errorMessage = 'error';
+
+          uploadStream.once('error', function(e) {
+            test.equal(e, errorMessage);
+            client.close(done);
+          });
+
+          uploadStream.once('finish', function() {
+            uploadStream.destroy(errorMessage);
+          });
+
+          readStream.pipe(uploadStream);
+        });
+      });
+    }
+  });
+
   /**
    * Correctly stream a file from disk into GridFS using openUploadStream
    *
