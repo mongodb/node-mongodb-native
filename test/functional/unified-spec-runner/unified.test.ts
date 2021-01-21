@@ -2,11 +2,12 @@ import { expect } from 'chai';
 import { ReadPreference } from '../../../src/read_preference';
 import { loadSpecTests } from '../../spec/index';
 import * as uni from './schema';
-import { getUnmetRequirements, matchesEvents, patchVersion, zip, log } from './unified-utils';
-import { EntitiesMap } from './entities';
+import { getUnmetRequirements, patchVersion, zip, log } from './unified-utils';
+import { CommandEvent, EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
 import { satisfies as semverSatisfies } from 'semver';
+import { matchesEvents } from './match';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
@@ -36,6 +37,9 @@ async function runOne(
   const UTIL_CLIENT = ctx.configuration.newClient();
   await UTIL_CLIENT.connect();
   ctx.defer(async () => await UTIL_CLIENT.close());
+
+  // Must fetch parameters before checking runOnRequirements
+  ctx.configuration.parameters = await UTIL_CLIENT.db().admin().command({ getParameter: '*' });
 
   // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
   // runOnRequirement objects are satisfied.
@@ -94,7 +98,7 @@ async function runOne(
     await executeOperationAndCheck(operation, entities);
   }
 
-  const clientEvents = new Map();
+  const clientEvents = new Map<string, CommandEvent[]>();
   // If any event listeners were enabled on any client entities,
   // the test runner MUST now disable those event listeners.
   for (const [id, client] of entities.mapOf('client')) {
@@ -107,7 +111,7 @@ async function runOne(
       const actualEvents = clientEvents.get(clientId);
 
       expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
-      matchesEvents(expectedEventList.events, actualEvents);
+      matchesEvents(expectedEventList.events, actualEvents, entities);
     }
   }
 
@@ -144,6 +148,7 @@ describe('Unified test format', function unifiedTestRunner() {
           } catch (error) {
             if (error.message.includes('not implemented.')) {
               log(`${test.description}: was skipped due to missing functionality`);
+              log(error.stack);
               this.skip();
             } else {
               throw error;
