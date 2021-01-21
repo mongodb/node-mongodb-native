@@ -21,6 +21,16 @@ describe('Write Concern', function() {
     generateTopologyTests(testSuites, testContext);
   });
 
+  it('should respect writeConcern from uri', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(`${configuration.url()}?w=0`);
+    client.connect(err => {
+      expect(err).to.not.exist;
+      expect(client.writeConcern).to.eql({ w: 0 });
+      client.close(done);
+    });
+  });
+
   // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
   describe('test journal connection string option', function() {
     function journalOptionTest(client, events, done) {

@@ -729,4 +729,14 @@ describe('ReadPreference', function() {
       });
     });
   });
+
+  it('should respect readPreference from uri', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(`${configuration.url()}?readPreference=secondary`);
+    client.connect(err => {
+      expect(err).to.not.exist;
+      expect(client.readPreference.mode).to.equal('secondary');
+      client.close(done);
+    });
+  });
 });
