@@ -1,15 +1,6 @@
 import { expect } from 'chai';
 import { isDeepStrictEqual } from 'util';
-import {
-  Binary,
-  BSONRegExp,
-  Document,
-  Double,
-  Int32,
-  Long,
-  ObjectId,
-  Timestamp
-} from '../../../src';
+import { Binary, Document, Double, Int32, Long, ObjectId, Timestamp } from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
