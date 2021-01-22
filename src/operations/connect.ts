@@ -4,7 +4,7 @@ import { resolveSRVRecord } from '../connection_string';
 import { emitDeprecationWarning, Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import * as BSON from '../bson';
-import type { MongoClient, MongoOptions } from '../mongo_client';
+import type { MongoClient, MongoOptions, MongoClientOptions } from '../mongo_client';
 import { Connection } from '../cmap/connection';
 import { Server } from '../sdam/server';
 import type { AutoEncrypter } from '../deps';
@@ -114,8 +114,11 @@ function registerDeprecatedEventNotifiers(client: MongoClient) {
  * returns undefined if CSFLE is not enabled.
  * @throws if optional 'mongodb-client-encryption' dependency missing
  */
-export function createAutoEncrypter(client: MongoClient): AutoEncrypter | undefined {
-  if (!client.options.autoEncryption) {
+export function createAutoEncrypter(
+  client: MongoClient,
+  options: MongoClientOptions
+): AutoEncrypter | undefined {
+  if (!options.autoEncryption) {
     return;
   }
   try {
@@ -135,10 +138,12 @@ export function createAutoEncrypter(client: MongoClient): AutoEncrypter | undefi
         'Please make sure you are loading the correct version of `mongodb-client-encryption`'
     );
   }
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { AutoEncrypterClass } = mongodbClientEncryption.extension(require('../../lib/index'));
+  const { AutoEncrypter: AutoEncrypterClass } = mongodbClientEncryption.extension(
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../lib/index')
+  );
 
-  const mongoCryptOptions = Object.assign({ bson: BSON }, client.options.autoEncryption);
+  const mongoCryptOptions = Object.assign({ bson: BSON }, options.autoEncryption);
   return new AutoEncrypterClass(client, mongoCryptOptions);
 }
 
