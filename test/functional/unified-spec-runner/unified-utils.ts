@@ -10,7 +10,7 @@ export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
 }
 
-export function getUnmetRequirements(config: TestConfiguration, r: RunOnRequirement): boolean {
+export function topologySatisfies(config: TestConfiguration, r: RunOnRequirement): boolean {
   let ok = true;
   if (r.minServerVersion) {
     const minVersion = patchVersion(r.minServerVersion);

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ReadPreference } from '../../../src/read_preference';
 import { loadSpecTests } from '../../spec/index';
 import * as uni from './schema';
-import { getUnmetRequirements, patchVersion, zip, log } from './unified-utils';
+import { patchVersion, zip, log, topologySatisfies } from './unified-utils';
 import { CommandEvent, EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
@@ -43,8 +43,12 @@ async function runOne(
 
   // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
   // runOnRequirement objects are satisfied.
-  if (test.runOnRequirements) {
-    if (!test.runOnRequirements.some(r => getUnmetRequirements(ctx.configuration, r))) {
+  const allRequirements = [
+    ...(unifiedSuite.runOnRequirements ?? []),
+    ...(test.runOnRequirements ?? [])
+  ];
+  for (const requirement of allRequirements) {
+    if (!topologySatisfies(ctx.configuration, requirement)) {
       ctx.skip();
     }
   }
