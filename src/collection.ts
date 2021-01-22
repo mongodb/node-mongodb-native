@@ -278,7 +278,16 @@ export class Collection {
     options?: InsertOneOptions | Callback<InsertOneResult>,
     callback?: Callback<InsertOneResult>
   ): Promise<InsertOneResult> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // CSFLE passes in { w: 'majority' } to ensure the lib works in both 3.x and 4.x
+    // we support that option style here only
+    if (options && Reflect.get(options, 'w')) {
+      options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));
+    }
 
     return executeOperation(
       getTopology(this),

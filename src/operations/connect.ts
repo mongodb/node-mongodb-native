@@ -4,7 +4,7 @@ import { resolveSRVRecord } from '../connection_string';
 import { emitDeprecationWarning, Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import * as BSON from '../bson';
-import type { MongoClient, MongoOptions, MongoClientOptions } from '../mongo_client';
+import type { MongoClient, MongoOptions } from '../mongo_client';
 import { Connection } from '../cmap/connection';
 import { Server } from '../sdam/server';
 import type { AutoEncrypter } from '../deps';
@@ -116,7 +116,7 @@ function registerDeprecatedEventNotifiers(client: MongoClient) {
  */
 export function createAutoEncrypter(
   client: MongoClient,
-  options: MongoClientOptions
+  options: MongoOptions
 ): AutoEncrypter | undefined {
   if (!options.autoEncryption) {
     return;

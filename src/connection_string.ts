@@ -418,7 +418,7 @@ export function parseOptions(
 
   checkTLSOptions(mongoOptions);
   if (mongoClient && options.autoEncryption) {
-    mongoOptions.autoEncrypter = createAutoEncrypter(mongoClient, options);
+    mongoOptions.autoEncrypter = createAutoEncrypter(mongoClient, mongoOptions);
   }
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
@@ -1062,7 +1062,10 @@ export const OPTIONS = {
   passphrase: { type: 'any' },
   pfx: { type: 'any' },
   secureProtocol: { type: 'any' },
-  index: { type: 'any' }
+  index: { type: 'any' },
+  // Legacy Options, these are unused but left here to avoid errors with CSFLE lib
+  useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
+  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
