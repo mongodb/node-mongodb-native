@@ -75,7 +75,7 @@ export class WriteConcern {
     options?: WriteConcernOptions | WriteConcern | W,
     inherit?: WriteConcernOptions | WriteConcern
   ): WriteConcern | undefined {
-    if (typeof options === 'undefined') return undefined;
+    if (options == null) return undefined;
     inherit = inherit ?? {};
     let opts;
     if (typeof options === 'string' || typeof options === 'number') {
