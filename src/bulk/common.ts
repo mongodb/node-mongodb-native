@@ -165,50 +165,51 @@ export class Batch<T = Document> {
 export class BulkWriteResult {
   result: BulkResult;
 
-  /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
-  // acknowledged: Boolean;
-  /** Number of documents inserted. */
-  insertedCount: number;
-  /** Number of documents matched for update. */
-  matchedCount: number;
-  /** Number of documents modified. */
-  modifiedCount: number;
-  /** Number of documents deleted. */
-  deletedCount: number;
-  /** Number of documents upserted. */
-  upsertedCount: number;
-  /** Inserted document generated Id's, hash key is the index of the originating operation */
-  insertedIds: { [key: number]: ObjectId };
-  /** Upserted document generated Id's, hash key is the index of the originating operation */
-  upsertedIds: { [key: number]: ObjectId };
-
   /**
    * Create a new BulkWriteResult instance
    * @internal
    */
   constructor(bulkResult: BulkResult) {
     this.result = bulkResult;
-    this.insertedCount = bulkResult.nInserted;
-    this.matchedCount = bulkResult.nMatched;
-    this.modifiedCount = bulkResult.nModified || 0;
-    this.deletedCount = bulkResult.nRemoved;
-    this.upsertedCount = bulkResult.upserted.length;
-    this.upsertedIds = {};
-    this.insertedIds = {};
+  }
 
-    // Inserted documents
-    const inserted = bulkResult.insertedIds;
-    // Map inserted ids
-    for (let i = 0; i < inserted.length; i++) {
-      this.insertedIds[inserted[i].index] = inserted[i]._id;
-    }
+  /** Number of documents inserted. */
+  get insertedCount(): number {
+    return this.result.nInserted ?? 0;
+  }
+  /** Number of documents matched for update. */
+  get matchedCount(): number {
+    return this.result.nMatched ?? 0;
+  }
+  /** Number of documents modified. */
+  get modifiedCount(): number {
+    return this.result.nModified ?? 0;
+  }
+  /** Number of documents deleted. */
+  get deletedCount(): number {
+    return this.result.nRemoved ?? 0;
+  }
+  /** Number of documents upserted. */
+  get upsertedCount(): number {
+    return this.result.upserted.length ?? 0;
+  }
 
-    // Upserted documents
-    const upserted = bulkResult.upserted;
-    // Map upserted ids
-    for (let i = 0; i < upserted.length; i++) {
-      this.upsertedIds[upserted[i].index] = upserted[i]._id;
+  /** Upserted document generated Id's, hash key is the index of the originating operation */
+  get upsertedIds(): { [key: number]: any } {
+    const upserted: { [index: number]: any } = {};
+    for (const doc of this.result.upserted ?? []) {
+      upserted[doc.index] = doc._id;
     }
+    return upserted;
+  }
+
+  /** Inserted document generated Id's, hash key is the index of the originating operation */
+  get insertedIds(): { [key: number]: any } {
+    const inserted: { [index: number]: any } = {};
+    for (const doc of this.result.insertedIds ?? []) {
+      inserted[doc.index] = doc._id;
+    }
+    return inserted;
   }
 
   /** Evaluates to true if the bulk operation correctly executes */
@@ -674,21 +675,6 @@ function handleMongoWriteConcernError(
 export class MongoBulkWriteError extends MongoError {
   result: BulkWriteResult;
 
-  /** Number of documents inserted. */
-  insertedCount: number;
-  /** Number of documents matched for update. */
-  matchedCount: number;
-  /** Number of documents modified. */
-  modifiedCount: number;
-  /** Number of documents deleted. */
-  deletedCount: number;
-  /** Number of documents upserted. */
-  upsertedCount: number;
-  /** Inserted document generated Id's, hash key is the index of the originating operation */
-  insertedIds: { [key: number]: ObjectId };
-  /** Upserted document generated Id's, hash key is the index of the originating operation */
-  upsertedIds: { [key: number]: ObjectId };
-
   /** Creates a new MongoBulkWriteError */
   constructor(error: AnyError, result: BulkWriteResult) {
     super(error as Error);
@@ -696,14 +682,35 @@ export class MongoBulkWriteError extends MongoError {
 
     this.name = 'MongoBulkWriteError';
     this.result = result;
+  }
 
-    this.insertedCount = result.insertedCount;
-    this.matchedCount = result.matchedCount;
-    this.modifiedCount = result.modifiedCount;
-    this.deletedCount = result.deletedCount;
-    this.upsertedCount = result.upsertedCount;
-    this.insertedIds = result.insertedIds;
-    this.upsertedIds = result.upsertedIds;
+  /** Number of documents inserted. */
+  get insertedCount(): number {
+    return this.result.insertedCount;
+  }
+  /** Number of documents matched for update. */
+  get matchedCount(): number {
+    return this.result.matchedCount;
+  }
+  /** Number of documents modified. */
+  get modifiedCount(): number {
+    return this.result.modifiedCount;
+  }
+  /** Number of documents deleted. */
+  get deletedCount(): number {
+    return this.result.deletedCount;
+  }
+  /** Number of documents upserted. */
+  get upsertedCount(): number {
+    return this.result.upsertedCount;
+  }
+  /** Inserted document generated Id's, hash key is the index of the originating operation */
+  get insertedIds(): { [key: number]: any } {
+    return this.result.insertedIds;
+  }
+  /** Upserted document generated Id's, hash key is the index of the originating operation */
+  get upsertedIds(): { [key: number]: any } {
+    return this.result.upsertedIds;
   }
 }
 
