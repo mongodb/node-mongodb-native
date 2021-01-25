@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { isDeepStrictEqual } from 'util';
-import { Binary, Document, Double, Int32, Long, ObjectId, Timestamp } from '../../../src';
+import { Binary, Document, Long, ObjectId } from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
@@ -78,91 +78,34 @@ export function isSpecialOperator(value: unknown): value is SpecialOperator {
 }
 
 const TYPE_MAP = new Map();
-function typeof_double(actual): actual is number | Double {
-  return typeof actual === 'number' || actual._bsontype === 'Double';
-}
-function typeof_string(actual: unknown): actual is string {
-  return typeof actual === 'string';
-}
-function typeof_object(actual: unknown): actual is Document {
-  return typeof actual === 'object' && actual !== null;
-}
-function typeof_array(actual: unknown): actual is unknown[] {
-  return Array.isArray(actual);
-}
-function typeof_binData(actual) {
-  return actual instanceof Binary;
-}
-function typeof_undefined(actual) {
-  return actual === undefined;
-}
-function typeof_objectId(actual) {
-  return actual instanceof ObjectId;
-}
-function typeof_bool(actual) {
-  return typeof actual === 'boolean';
-}
-function typeof_date(actual) {
-  return actual instanceof Date;
-}
-function typeof_null(actual) {
-  return actual === null;
-}
-function typeof_regex(actual) {
-  return actual instanceof RegExp || actual._bsontype === 'BSONRegExp';
-}
-function typeof_dbPointer(actual) {
-  return actual._bsontype === 'DBRef';
-}
-function typeof_javascript(actual) {
-  return actual._bsontype === 'Code';
-}
-function typeof_symbol(actual) {
-  return actual._bsontype === 'Symbol';
-}
-function typeof_javascriptWithScope(actual) {
-  return actual._bsontype === 'Code' && actual.scope;
-}
-function typeof_int(actual): actual is number | Int32 {
-  return (typeof actual === 'number' && Number.isInteger(actual)) || actual._bsontype === 'Int32';
-}
-function typeof_timestamp(actual: Timestamp, expected: Timestamp) {
-  expect(actual.equals(expected)).to.be.true;
-}
-function typeof_long(actual: unknown): actual is number | Long {
-  return (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual);
-}
-function typeof_decimal(actual) {
-  return actual._bsontype === 'Decimal128';
-}
-function typeof_minKey(actual) {
-  return actual._bsontype === 'MinKey';
-}
-function typeof_maxKey(actual) {
-  return actual._bsontype === 'MaxKey';
-}
 
-TYPE_MAP.set('double', typeof_double);
-TYPE_MAP.set('string', typeof_string);
-TYPE_MAP.set('object', typeof_object);
-TYPE_MAP.set('array', typeof_array);
-TYPE_MAP.set('binData', typeof_binData);
-TYPE_MAP.set('undefined', typeof_undefined);
-TYPE_MAP.set('objectId', typeof_objectId);
-TYPE_MAP.set('bool', typeof_bool);
-TYPE_MAP.set('date', typeof_date);
-TYPE_MAP.set('null', typeof_null);
-TYPE_MAP.set('regex', typeof_regex);
-TYPE_MAP.set('dbPointer', typeof_dbPointer);
-TYPE_MAP.set('javascript', typeof_javascript);
-TYPE_MAP.set('symbol', typeof_symbol);
-TYPE_MAP.set('javascriptWithScope', typeof_javascriptWithScope);
-TYPE_MAP.set('int', typeof_int);
-TYPE_MAP.set('timestamp', typeof_timestamp);
-TYPE_MAP.set('long', typeof_long);
-TYPE_MAP.set('decimal', typeof_decimal);
-TYPE_MAP.set('minKey', typeof_minKey);
-TYPE_MAP.set('maxKey', typeof_maxKey);
+TYPE_MAP.set('double', actual => typeof actual === 'number' || actual._bsontype === 'Double');
+TYPE_MAP.set('string', actual => typeof actual === 'string');
+TYPE_MAP.set('object', actual => typeof actual === 'object' && actual !== null);
+TYPE_MAP.set('array', actual => Array.isArray(actual));
+TYPE_MAP.set('binData', actual => actual instanceof Binary);
+TYPE_MAP.set('undefined', actual => actual === undefined);
+TYPE_MAP.set('objectId', actual => actual instanceof ObjectId);
+TYPE_MAP.set('bool', actual => typeof actual === 'boolean');
+TYPE_MAP.set('date', actual => actual instanceof Date);
+TYPE_MAP.set('null', actual => actual === null);
+TYPE_MAP.set('regex', actual => actual instanceof RegExp || actual._bsontype === 'BSONRegExp');
+TYPE_MAP.set('dbPointer', actual => actual._bsontype === 'DBRef');
+TYPE_MAP.set('javascript', actual => actual._bsontype === 'Code');
+TYPE_MAP.set('symbol', actual => actual._bsontype === 'Symbol');
+TYPE_MAP.set('javascriptWithScope', actual => actual._bsontype === 'Code' && actual.scope);
+TYPE_MAP.set('timestamp', actual => actual._bsontype === 'Timestamp');
+TYPE_MAP.set('decimal', actual => actual._bsontype === 'Decimal128');
+TYPE_MAP.set('minKey', actual => actual._bsontype === 'MinKey');
+TYPE_MAP.set('maxKey', actual => actual._bsontype === 'MaxKey');
+TYPE_MAP.set(
+  'int',
+  actual => (typeof actual === 'number' && Number.isInteger(actual)) || actual._bsontype === 'Int32'
+);
+TYPE_MAP.set(
+  'long',
+  actual => (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual)
+);
 
 export function expectResultCheck(
   actual: Document,
