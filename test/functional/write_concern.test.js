@@ -23,6 +23,28 @@ describe('Write Concern', function () {
     generateTopologyTests(testSuites, testContext);
   });
 
+  it(
+    'should respect writeConcern from uri',
+    withMonitoredClient('insert', { queryOptions: { w: 0 } }, function (client, events, done) {
+      expect(client.writeConcern).to.eql({ w: 0 });
+      client
+        .db('test')
+        .collection('test')
+        .insertOne({ a: 1 }, (err, result) => {
+          expect(err).to.not.exist;
+          expect(result).to.exist;
+          expect(events).to.be.an('array').with.lengthOf(1);
+          expect(events[0]).to.containSubset({
+            commandName: 'insert',
+            command: {
+              writeConcern: { w: 0 }
+            }
+          });
+          done();
+        });
+    })
+  );
+
   // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
   describe('test journal connection string option', function () {
     function journalOptionTest(client, events, done) {
