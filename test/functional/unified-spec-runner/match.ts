@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { isDeepStrictEqual } from 'util';
-import { Binary, Document, Long, ObjectId } from '../../../src';
+import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/events';
 import { CommandEvent, EntitiesMap } from './entities';
-import { ExpectedEvent } from './schema';
+import { ExpectedError, ExpectedEvent } from './schema';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -239,6 +239,63 @@ export function matchesEvents(
       expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
     } else {
       expect.fail(`Events must be one of the known types, got ${actualEvent}`);
+    }
+  }
+}
+
+export function expectErrorCheck(
+  error: Error | MongoError,
+  expected: ExpectedError,
+  entities: EntitiesMap
+): boolean {
+  if (Object.keys(expected)[0] === 'isClientError' || Object.keys(expected)[0] === 'isError') {
+    // FIXME: We cannot tell if Error arose from driver and not from server
+    return;
+  }
+
+  if (expected.errorContains) {
+    if (error.message.includes(expected.errorContains)) {
+      throw new Error(
+        `Error message was supposed to contain '${expected.errorContains}' but had '${error.message}'`
+      );
+    }
+  }
+
+  if (!(error instanceof MongoError)) {
+    throw new Error(`Assertions need ${error} to be a MongoError`);
+  }
+
+  if (expected.errorCode) {
+    if (error.code !== expected.errorCode) {
+      throw new Error(`${error} was supposed to have code '${expected.errorCode}'`);
+    }
+  }
+
+  if (expected.errorCodeName) {
+    if (error.codeName !== expected.errorCodeName) {
+      throw new Error(`${error} was supposed to have '${expected.errorCodeName}' codeName`);
+    }
+  }
+
+  if (expected.errorLabelsContain) {
+    for (const errorLabel of expected.errorLabelsContain) {
+      if (!error.hasErrorLabel(errorLabel)) {
+        throw new Error(`${error} was supposed to have '${errorLabel}'`);
+      }
+    }
+  }
+
+  if (expected.errorLabelsOmit) {
+    for (const errorLabel of expected.errorLabelsOmit) {
+      if (error.hasErrorLabel(errorLabel)) {
+        throw new Error(`${error} was not supposed to have '${errorLabel}'`);
+      }
+    }
+  }
+
+  if (expected.expectResult) {
+    if (!expectResultCheck(error, expected.expectResult, entities)) {
+      throw new Error(`${error} supposed to match result ${JSON.stringify(expected.expectResult)}`);
     }
   }
 }
