@@ -168,24 +168,26 @@ export function expectResultCheck(
   actual: Document,
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
-  path: string[] = []
+  path: string[] = [],
+  depth = 0
 ): boolean {
-  const result = resultCheck(actual, expected, entities, path);
-  if (result[0] === false) {
-    const path = result[1].join('');
+  const ok = resultCheck(actual, expected, entities, path, depth);
+  if (ok === false) {
+    const pathString = path.join('');
     const expectedJSON = JSON.stringify(expected, undefined, 2);
     const actualJSON = JSON.stringify(actual, undefined, 2);
-    expect.fail(`Unable to match ${expectedJSON} to ${actualJSON} at ${path}`);
+    expect.fail(`Unable to match ${expectedJSON} to ${actualJSON} at ${pathString}`);
   }
-  return result[0];
+  return ok;
 }
 
 export function resultCheck(
   actual: Document,
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
-  path: string[]
-): [ok: boolean, path: string[]] {
+  path: string[],
+  depth = 0
+): boolean {
   if (typeof expected === 'object' && expected !== null) {
     // Expected is an object
     // either its a special operator or just an object to check equality against
@@ -193,23 +195,30 @@ export function resultCheck(
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      return [specialCheck(actual, expected, entities, path), path];
+      return specialCheck(actual, expected, entities, path, depth);
     } else {
       // Just a plain object, however this object can contain special operations
       // So we need to recurse over each key,value
       let ok = true;
       const expectedEntries = Object.entries(expected);
+
+      if (depth > 1 && Object.keys(actual).length !== Object.keys(expected).length) {
+        throw new Error(`[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`);
+      }
+
       for (const [key, value] of expectedEntries) {
         path.push(Array.isArray(expected) ? `[${key}]` : `.${key}`); // record what key we're at
-        ok &&= expectResultCheck(actual[key], value, entities, path);
+        depth += 1;
+        ok &&= expectResultCheck(actual[key], value, entities, path, depth);
+        depth -= 1;
         path.pop(); // if the recursion was successful we can drop the tested key
       }
-      return [ok, path];
+      return ok;
     }
   } else {
     // Here's our recursion base case
     // expected is: number | string | boolean | null
-    return [isDeepStrictEqual(actual, expected), path];
+    return isDeepStrictEqual(actual, expected);
   }
 }
 
@@ -217,14 +226,19 @@ export function specialCheck(
   actual: Document,
   expected: SpecialOperator,
   entities: EntitiesMap,
-  path: string[] = []
+  path: string[] = [],
+  depth = 0
 ): boolean {
   let ok = false;
   if (isUnsetOrMatchesOperator(expected)) {
     // $$unsetOrMatches
     ok = true; // start with true assumption
     if (actual === null || actual === undefined) ok = true;
-    else ok &&= expectResultCheck(actual, expected.$$unsetOrMatches, entities, path);
+    else {
+      depth += 1;
+      ok &&= expectResultCheck(actual, expected.$$unsetOrMatches, entities, path, depth);
+      depth -= 1;
+    }
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
