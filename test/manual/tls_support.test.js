@@ -20,13 +20,13 @@ describe('TLS Support', function() {
     makeConnectionTest(connectionString, tlsSettings)
   );
 
-  const queryString = Object.keys(tlsSettings)
-    .map(key => `${key}=${tlsSettings[key]}`)
-    .join('&');
-  console.log({ tlsSettings, url: `${connectionString}?${queryString}` });
   it(
     'should connect with tls via url options',
-    makeConnectionTest(`${connectionString}?${queryString}`)
+    makeConnectionTest(
+      `${connectionString}?${Object.keys(tlsSettings)
+        .map(key => `${key}=${tlsSettings[key]}`)
+        .join('&')}`
+    )
   );
 });
 
