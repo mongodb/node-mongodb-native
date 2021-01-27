@@ -2585,7 +2585,7 @@ describe('Insert', function () {
     }
   });
 
-  it('MongoBulkWriteError.insertedCount should respect BulkWriteResult.insertedCount should respect BulkWrite.nInserted', function () {
+  it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', function () {
     const client = this.configuration.newClient();
     return client
       .connect()
