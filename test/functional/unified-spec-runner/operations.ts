@@ -1,18 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
-import { Document, MongoError } from '../../../src';
-import type { EntitiesMap } from './entities';
+import { ChangeStream, Document, InsertOneOptions, MongoError } from '../../../src';
+import { EventCollector } from '../../tools/utils';
+import { EntitiesMap } from './entities';
+import { expectResultCheck } from './match';
 import type * as uni from './schema';
-import {
-  isExistsOperator,
-  isMatchesEntityOperator,
-  isMatchesHexBytesOperator,
-  isSessionLsidOperator,
-  isSpecialOperator,
-  isTypeOperator,
-  isUnsetOrMatchesOperator,
-  SpecialOperator
-} from './unified-utils';
 
 export class UnifiedOperation {
   name: string;
@@ -114,8 +106,31 @@ async function commitTransactionOperation(
 async function createChangeStreamOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
+): Promise<ChangeStream> {
+  const watchable = entities.get(op.object);
+  if (!('watch' in watchable)) {
+    throw new Error(`Entity ${op.object} must be watchable`);
+  }
+  const changeStream = watchable.watch(op.arguments.pipeline, {
+    fullDocument: op.arguments.fullDocument,
+    maxAwaitTimeMS: op.arguments.maxAwaitTimeMS,
+    resumeAfter: op.arguments.resumeAfter,
+    startAfter: op.arguments.startAfter,
+    startAtOperationTime: op.arguments.startAtOperationTime,
+    batchSize: op.arguments.batchSize
+  });
+  changeStream.eventCollector = new EventCollector(changeStream, ['init', 'change', 'error']);
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Change stream never started'));
+    }, 2000);
+
+    changeStream.cursor.once('init', () => {
+      clearTimeout(timeout);
+      resolve(changeStream);
+    });
+  });
 }
 async function createCollectionOperation(
   entities: EntitiesMap,
@@ -151,7 +166,9 @@ async function findOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const collection = entities.getEntity('collection', op.object);
+  const { filter, sort, batchSize, limit } = op.arguments;
+  return await collection.find(filter, { sort, batchSize, limit }).toArray();
 }
 async function findOneAndReplaceOperation(
   entities: EntitiesMap,
@@ -169,34 +186,48 @@ async function failPointOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const client = entities.getEntity('client', op.arguments.client);
+  return client.enableFailPoint(op.arguments.failPoint);
 }
 async function insertOneOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
   const collection = entities.getEntity('collection', op.object);
+
   const session = entities.getEntity('session', op.arguments.session, false);
-  const result = await collection.insertOne(op.arguments.document);
-  return result;
+
+  const options = {
+    session
+  } as InsertOneOptions;
+
+  return await collection.insertOne(op.arguments.document, options);
 }
 async function insertManyOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
   const collection = entities.getEntity('collection', op.object);
+
   const session = entities.getEntity('session', op.arguments.session, false);
+
   const options = {
+    session,
     ordered: op.arguments.ordered ?? true
   };
-  const result = await collection.insertMany(op.arguments.documents, options);
-  return result;
+
+  return await collection.insertMany(op.arguments.documents, options);
 }
 async function iterateUntilDocumentOrErrorOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const changeStream = entities.getEntity('stream', op.object);
+  // Either change or error promise will finish
+  return Promise.race([
+    changeStream.eventCollector.waitAndShiftEvent('change'),
+    changeStream.eventCollector.waitAndShiftEvent('error')
+  ]);
 }
 async function listDatabasesOperation(
   entities: EntitiesMap,
@@ -294,71 +325,34 @@ export async function executeOperationAndCheck(
   operation: uni.OperationDescription,
   entities: EntitiesMap
 ): Promise<void> {
-  const operationName = operation.name;
-  const opFunc = operations.get(operationName);
-  expect(opFunc, `Unknown operation: ${operationName}`).to.exist;
+  const opFunc = operations.get(operation.name);
+  expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
+
+  let result;
+
   try {
-    const result = await opFunc(entities, operation);
-
-    if (operation.expectError) {
-      expect.fail(`Operation ${operationName} succeeded but was not supposed to`);
-    }
-
-    if (operation.expectResult) {
-      if (isSpecialOperator(operation.expectResult)) {
-        specialCheck(result, operation.expectResult);
-      } else {
-        for (const [resultKey, resultValue] of Object.entries(operation.expectResult)) {
-          // each key/value expectation can be a special op
-          if (isSpecialOperator(resultValue)) {
-            specialCheck(result, resultValue);
-          } else {
-            expect(result[resultKey]).to.deep.equal(resultValue);
-          }
-        }
-      }
-    }
-
-    if (operation.saveResultAsEntity) {
-      entities.set(operation.saveResultAsEntity, result);
-    }
+    result = await opFunc(entities, operation);
   } catch (error) {
     if (operation.expectError) {
       expect(error).to.be.instanceof(MongoError);
-      // TODO more checking of the error
+      // expectErrorCheck(error, operation.expectError);
     } else {
-      expect.fail(`Operation ${operationName} failed with ${error.message}`);
+      expect.fail(`Operation ${operation.name} failed with ${error.message}`);
     }
+    return;
   }
-}
 
-export function specialCheck(result: Document, check: SpecialOperator): void {
-  if (isUnsetOrMatchesOperator(check)) {
-    if (result == null) return; // acceptable unset
-    if (typeof check.$$unsetOrMatches === 'object') {
-      // We need to a "deep equals" check but the props can also point to special checks
-      for (const [k, v] of Object.entries(check.$$unsetOrMatches)) {
-        expect(result).to.have.property(k);
-        if (isSpecialOperator(v)) {
-          specialCheck(result[k], v);
-        } else {
-          expect(v).to.equal(check.$$unsetOrMatches);
-        }
-      }
-    } else {
-      expect(result).to.equal(check.$$unsetOrMatches);
-    }
-  } else if (isExistsOperator(check)) {
-    throw new Error('not implemented.');
-  } else if (isMatchesEntityOperator(check)) {
-    throw new Error('not implemented.');
-  } else if (isMatchesHexBytesOperator(check)) {
-    throw new Error('not implemented.');
-  } else if (isSessionLsidOperator(check)) {
-    throw new Error('not implemented.');
-  } else if (isTypeOperator(check)) {
-    throw new Error('not implemented.');
-  } else {
-    throw new Error('not implemented.');
+  // We check the positive outcome here so the try-catch above doesn't catch our chai assertions
+
+  if (operation.expectError) {
+    expect.fail(`Operation ${operation.name} succeeded but was not supposed to`);
+  }
+
+  if (operation.expectResult) {
+    expect(expectResultCheck(result, operation.expectResult, entities)).to.be.true;
+  }
+
+  if (operation.saveResultAsEntity) {
+    entities.set(operation.saveResultAsEntity, result);
   }
 }

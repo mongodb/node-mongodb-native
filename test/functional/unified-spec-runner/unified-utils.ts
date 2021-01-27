@@ -1,21 +1,16 @@
 import { expect } from 'chai';
-import {
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent
-} from '../../../src/cmap/events';
-import type { CommandEvent } from './entities';
-import type { CollectionOrDatabaseOptions, ExpectedEvent, RunOnRequirement } from './schema';
+import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
 import type { TestConfiguration } from './unified.test';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions } from '../../../src';
+import { isDeepStrictEqual } from 'util';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
 }
 
-export function getUnmetRequirements(config: TestConfiguration, r: RunOnRequirement): boolean {
+export function topologySatisfies(config: TestConfiguration, r: RunOnRequirement): boolean {
   let ok = true;
   if (r.minServerVersion) {
     const minVersion = patchVersion(r.minServerVersion);
@@ -38,9 +33,12 @@ export function getUnmetRequirements(config: TestConfiguration, r: RunOnRequirem
   }
 
   if (r.serverParameters) {
-    // for (const [name, value] of Object.entries(r.serverParameters)) {
-    //   // TODO
-    // }
+    if (!config.parameters) throw new Error('Configuration does not have server parameters');
+    for (const [name, value] of Object.entries(r.serverParameters)) {
+      if (name in config.parameters) {
+        ok &&= isDeepStrictEqual(config.parameters[name], value);
+      }
+    }
   }
 
   return ok;
@@ -55,30 +53,6 @@ export function* zip<T = unknown, U = unknown>(
   const longerArrayLength = Math.max(iter1.length, iter2.length);
   for (let index = 0; index < longerArrayLength; index++) {
     yield [iter1[index], iter2[index]];
-  }
-}
-
-export function matchesEvents(expected: ExpectedEvent[], actual: CommandEvent[]): void {
-  expect(expected).to.have.lengthOf(actual.length);
-
-  for (const [index, actualEvent] of actual.entries()) {
-    const expectedEvent = expected[index];
-
-    if (expectedEvent.commandStartedEvent && actualEvent instanceof CommandStartedEvent) {
-      expect(actualEvent.commandName).to.equal(expectedEvent.commandStartedEvent.commandName);
-      expect(actualEvent.command).to.containSubset(expectedEvent.commandStartedEvent.command);
-      expect(actualEvent.databaseName).to.equal(expectedEvent.commandStartedEvent.databaseName);
-    } else if (
-      expectedEvent.commandSucceededEvent &&
-      actualEvent instanceof CommandSucceededEvent
-    ) {
-      expect(actualEvent.commandName).to.equal(expectedEvent.commandSucceededEvent.commandName);
-      expect(actualEvent.reply).to.containSubset(expectedEvent.commandSucceededEvent.reply);
-    } else if (expectedEvent.commandFailedEvent && actualEvent instanceof CommandFailedEvent) {
-      expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
-    } else {
-      expect.fail(`Events must be one of the known types, got ${actualEvent}`);
-    }
   }
 }
 
@@ -97,72 +71,4 @@ export function patchDbOptions(options: CollectionOrDatabaseOptions): DbOptions 
 export function patchCollectionOptions(options: CollectionOrDatabaseOptions): CollectionOptions {
   // TODO
   return { ...options } as CollectionOptions;
-}
-
-export interface ExistsOperator {
-  $$exists: boolean;
-}
-export function isExistsOperator(value: unknown): value is ExistsOperator {
-  return typeof value === 'object' && value != null && '$$exists' in value;
-}
-export interface TypeOperator {
-  $$type: boolean;
-}
-export function isTypeOperator(value: unknown): value is TypeOperator {
-  return typeof value === 'object' && value != null && '$$type' in value;
-}
-export interface MatchesEntityOperator {
-  $$matchesEntity: string;
-}
-export function isMatchesEntityOperator(value: unknown): value is MatchesEntityOperator {
-  return typeof value === 'object' && value != null && '$$matchesEntity' in value;
-}
-export interface MatchesHexBytesOperator {
-  $$matchesHexBytes: string;
-}
-export function isMatchesHexBytesOperator(value: unknown): value is MatchesHexBytesOperator {
-  return typeof value === 'object' && value != null && '$$matchesHexBytes' in value;
-}
-export interface UnsetOrMatchesOperator {
-  $$unsetOrMatches: unknown;
-}
-export function isUnsetOrMatchesOperator(value: unknown): value is UnsetOrMatchesOperator {
-  return typeof value === 'object' && value != null && '$$unsetOrMatches' in value;
-}
-export interface SessionLsidOperator {
-  $$sessionLsid: unknown;
-}
-export function isSessionLsidOperator(value: unknown): value is SessionLsidOperator {
-  return typeof value === 'object' && value != null && '$$sessionLsid' in value;
-}
-
-export const SpecialOperatorKeys = [
-  '$$exists',
-  '$$type',
-  '$$matchesEntity',
-  '$$matchesHexBytes',
-  '$$unsetOrMatches',
-  '$$sessionLsid'
-];
-
-export type SpecialOperator =
-  | ExistsOperator
-  | TypeOperator
-  | MatchesEntityOperator
-  | MatchesHexBytesOperator
-  | UnsetOrMatchesOperator
-  | SessionLsidOperator;
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-type KeysOfUnion<T> = T extends object ? keyof T : never;
-export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
-export function isSpecialOperator(value: unknown): value is SpecialOperator {
-  return (
-    isExistsOperator(value) ||
-    isTypeOperator(value) ||
-    isMatchesEntityOperator(value) ||
-    isMatchesHexBytesOperator(value) ||
-    isUnsetOrMatchesOperator(value) ||
-    isSessionLsidOperator(value)
-  );
 }

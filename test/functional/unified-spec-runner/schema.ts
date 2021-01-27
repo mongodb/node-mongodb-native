@@ -46,7 +46,7 @@ export interface ClientEntity {
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: ObservableEventId[];
-  ignoreCommandMonitoringEvents?: [string, ...string[]];
+  ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
 }
 export interface DatabaseEntity {

@@ -9,11 +9,18 @@ import type {
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { TestConfiguration } from './unified.test';
+import { expect } from 'chai';
+
+interface UnifiedChangeStream extends ChangeStream {
+  eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
+}
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
 export class UnifiedMongoClient extends MongoClient {
   events: CommandEvent[];
+  failPoints: Document[];
+  ignoredEvents: string[];
   observedEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
 
   static EVENT_NAME_LOOKUP = {
@@ -25,6 +32,11 @@ export class UnifiedMongoClient extends MongoClient {
   constructor(url: string, description: ClientEntity) {
     super(url, { monitorCommands: true, ...description.uriOptions });
     this.events = [];
+    this.failPoints = [];
+    this.ignoredEvents = [
+      ...(description.ignoreCommandMonitoringEvents ?? []),
+      'configureFailPoint'
+    ];
     // apm
     this.observedEvents = (description.observeEvents ?? []).map(
       e => UnifiedMongoClient.EVENT_NAME_LOOKUP[e]
@@ -34,9 +46,11 @@ export class UnifiedMongoClient extends MongoClient {
     }
   }
 
-  // NOTE: this must be an arrow function for `this` to work.
+  // NOTE: pushEvent must be an arrow function
   pushEvent: (e: CommandEvent) => void = e => {
-    this.events.push(e);
+    if (!this.ignoredEvents.includes(e.commandName)) {
+      this.events.push(e);
+    }
   };
 
   /** Disables command monitoring for the client and returns a list of the captured events. */
@@ -46,6 +60,25 @@ export class UnifiedMongoClient extends MongoClient {
     }
     return this.events;
   }
+
+  async enableFailPoint(failPoint: Document): Promise<Document> {
+    const admin = this.db().admin();
+    const result = await admin.command(failPoint);
+    expect(result).to.have.property('ok', 1);
+    this.failPoints.push(failPoint.configureFailPoint);
+    return result;
+  }
+
+  async disableFailPoints(): Promise<Document[]> {
+    return Promise.all(
+      this.failPoints.map(configureFailPoint =>
+        this.db().admin().command({
+          configureFailPoint,
+          mode: 'off'
+        })
+      )
+    );
+  }
 }
 
 export type Entity =
@@ -53,7 +86,7 @@ export type Entity =
   | Db
   | Collection
   | ClientSession
-  | ChangeStream
+  | UnifiedChangeStream
   | GridFSBucket
   | Document; // Results from operations
 
@@ -81,7 +114,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   mapOf(type: 'collection'): EntitiesMap<Collection>;
   mapOf(type: 'session'): EntitiesMap<ClientSession>;
   mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
-  mapOf(type: 'stream'): EntitiesMap<ChangeStream>;
+  mapOf(type: 'stream'): EntitiesMap<UnifiedChangeStream>;
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
     const ctor = ENTITY_CTORS.get(type);
     if (!ctor) {
@@ -95,7 +128,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
   getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
-  getEntity(type: 'stream', key: string, assertExists?: boolean): ChangeStream;
+  getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
     const entity = this.get(key);
     if (!entity) {
@@ -114,6 +147,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
   async cleanup(): Promise<void> {
     for (const [, client] of this.mapOf('client')) {
+      await client.disableFailPoints();
       await client.close();
     }
     for (const [, session] of this.mapOf('session')) {

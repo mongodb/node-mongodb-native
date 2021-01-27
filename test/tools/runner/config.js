@@ -28,6 +28,7 @@ class TestConfiguration {
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.parameters = undefined;
     this.options = {
       hosts,
       hostAddresses,
