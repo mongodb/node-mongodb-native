@@ -243,6 +243,14 @@ functions:
               "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}"
           }
           EOF
+  upgrade boto3 aws library for python:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        silent: true
+        script: |
+          pip install --upgrade boto3
   run aws auth test with regular aws credentials:
     - command: shell.exec
       type: test
@@ -1342,6 +1350,7 @@ tasks:
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
       - func: add aws auth variables to file
+      - func: upgrade boto3 aws library for python
       - func: run aws auth test with regular aws credentials
       - func: run aws auth test with assume role credentials
       - func: run aws auth test with aws EC2 credentials
@@ -1358,6 +1367,7 @@ tasks:
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
       - func: add aws auth variables to file
+      - func: upgrade boto3 aws library for python
       - func: run aws auth test with regular aws credentials
       - func: run aws auth test with assume role credentials
       - func: run aws auth test with aws EC2 credentials
