@@ -185,7 +185,7 @@ class TestConfiguration {
       } else {
         multipleHosts = this.options.hostAddresses
           .reduce((built, host) => {
-            built.push(host.type === 'tcp' ? `${host.host}:${host.port}` : host.host);
+            built.push(typeof host.port === 'number' ? `${host.host}:${host.port}` : host.host);
             return built;
           }, [])
           .join(',');
