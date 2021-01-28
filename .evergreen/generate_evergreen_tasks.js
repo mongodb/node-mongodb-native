@@ -303,7 +303,6 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
         }
       },
       { func: 'add aws auth variables to file' },
-      { func: 'upgrade boto3 aws library for python' },
       { func: 'run aws auth test with regular aws credentials' },
       { func: 'run aws auth test with assume role credentials' },
       { func: 'run aws auth test with aws EC2 credentials' },
