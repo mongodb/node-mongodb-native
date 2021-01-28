@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, withClient } = require('./shared');
+const { assert: test, withClient, ignoreNsNotFound } = require('./shared');
 const { setupDatabase } = require('./shared');
 const Script = require('vm');
 const { expect } = require('chai');
@@ -15,7 +15,8 @@ const {
   Binary,
   MinKey,
   MaxKey,
-  Code
+  Code,
+  MongoBulkWriteError
 } = require('../../src');
 
 /**
@@ -2582,5 +2583,46 @@ describe('Insert', function () {
         });
       });
     }
+  });
+
+  it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', function () {
+    const client = this.configuration.newClient();
+    return client
+      .connect()
+      .then(() => {
+        return client.db().collection('test_insertMany_bulkResult').drop();
+      })
+      .catch(ignoreNsNotFound)
+      .then(() => {
+        const collection = client.db().collection('test_insertMany_bulkResult');
+        return collection.insertMany(
+          [
+            { _id: 2, x: 22 },
+            { _id: 2, x: 22 },
+            { _id: 3, x: 33 }
+          ],
+          { ordered: false }
+        );
+      })
+      .then(() => {
+        expect.fail('InsertMany should fail with multi key error');
+      })
+      .catch(error => {
+        expect(error).to.be.instanceOf(MongoBulkWriteError);
+        expect(
+          error.insertedCount,
+          'MongoBulkWriteError.insertedCount did not respect BulkResult.nInserted'
+        ).to.equal(error.result.result.nInserted);
+        expect(
+          error.result.insertedCount,
+          'BulkWriteResult.insertedCount did not respect BulkResult.nInserted'
+        ).to.equal(error.result.result.nInserted);
+        expect(
+          error.result.result.nInserted,
+          'BulkWrite did not correctly represent the operation'
+        ).to.equal(2);
+      })
+      .finally(() => client.db().collection('test_insertMany_bulkResult').drop())
+      .finally(() => client.close());
   });
 });
