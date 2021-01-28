@@ -13,10 +13,20 @@ describe('TLS Support', function () {
   const connectionString = process.env.MONGODB_URI;
   const tlsCertificateKeyFile = process.env.SSL_KEY_FILE;
   const tlsCAFile = process.env.SSL_CA_FILE;
+  const tlsSettings = { tls: true, tlsCertificateKeyFile, tlsCAFile };
 
   it(
-    'should connect with tls',
-    makeConnectionTest(connectionString, { tls: true, tlsCertificateKeyFile, tlsCAFile })
+    'should connect with tls via client options',
+    makeConnectionTest(connectionString, tlsSettings)
+  );
+
+  it(
+    'should connect with tls via url options',
+    makeConnectionTest(
+      `${connectionString}?${Object.keys(tlsSettings)
+        .map(key => `${key}=${tlsSettings[key]}`)
+        .join('&')}`
+    )
   );
 });
 

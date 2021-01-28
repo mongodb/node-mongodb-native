@@ -802,17 +802,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
-  - name: test-tls-support
-    tags:
-      - tls-support
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          SSL: ssl
-          VERSION: latest
-          TOPOLOGY: server
-      - func: run tls tests
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -909,6 +898,28 @@ tasks:
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-tls-support-latest
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
+  - name: test-tls-support-4.2
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1188,7 +1199,6 @@ buildvariants:
       - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
-      - test-tls-support
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -1196,6 +1206,8 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1221,19 +1233,73 @@ buildvariants:
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: *ref_0
+    tasks: &ref_1
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-atlas-connectivity
+      - test-atlas-data-lake
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-4.2
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: rhel70-erbium
     display_name: RHEL 7.0 Node Erbium
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_0
+    tasks: *ref_1
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-large
     expansions:
       NODE_LTS_NAME: dubnium
-    tasks: &ref_1
+    tasks: &ref_2
       - test-4.0-server
       - test-4.0-replica_set
       - test-4.0-sharded_cluster
@@ -1261,14 +1327,14 @@ buildvariants:
     run_on: ubuntu1404-large
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_1
+    tasks: *ref_2
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
-    tasks: &ref_2
+    tasks: &ref_3
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
@@ -1294,7 +1360,6 @@ buildvariants:
       - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
-      - test-tls-support
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -1302,6 +1367,8 @@ buildvariants:
       - test-ocsp-soft-fail
       - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
       - test-latest-ocsp-valid-cert-server-does-not-staple
@@ -1322,14 +1389,14 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_2
+    tasks: *ref_3
   - name: windows-64-vs2015-dubnium
     display_name: Windows (VS2015) Node Dubnium
     run_on: windows-64-vs2015-large
     expansions:
       NODE_LTS_NAME: dubnium
       MSVS_VERSION: 2015
-    tasks: &ref_3
+    tasks: &ref_4
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
@@ -1351,27 +1418,29 @@ buildvariants:
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-atlas-data-lake
+      - test-tls-support-4.2
   - name: windows-64-vs2015-erbium
     display_name: Windows (VS2015) Node Erbium
     run_on: windows-64-vs2015-large
     expansions:
       NODE_LTS_NAME: erbium
       MSVS_VERSION: 2015
-    tasks: *ref_3
+    tasks: *ref_4
   - name: windows-64-vs2017-dubnium
     display_name: Windows (VS2017) Node Dubnium
     run_on: windows-64-vs2017-large
     expansions:
       NODE_LTS_NAME: dubnium
       MSVS_VERSION: 2017
-    tasks: *ref_3
+    tasks: *ref_4
   - name: windows-64-vs2017-erbium
     display_name: Windows (VS2017) Node Erbium
     run_on: windows-64-vs2017-large
     expansions:
       NODE_LTS_NAME: erbium
       MSVS_VERSION: 2017
-    tasks: *ref_3
+    tasks: *ref_4
   - name: lint
     display_name: lint
     run_on: rhel70
