@@ -275,15 +275,6 @@ functions:
           }
           EOF
 
-  "upgrade boto3 aws library for python":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        script: |
-          pip install --upgrade boto3
-
   "run aws auth test with regular aws credentials":
     - command: shell.exec
       type: test
