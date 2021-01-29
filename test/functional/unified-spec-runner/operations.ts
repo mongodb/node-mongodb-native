@@ -1,17 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
-import { ChangeStream, Document, InsertOneOptions, MongoError } from '../../../src';
+import { Collection, Db } from '../../../src';
+import { ChangeStream, Document, InsertOneOptions } from '../../../src';
+import { BulkWriteResult } from '../../../src/bulk/common';
 import { EventCollector } from '../../tools/utils';
 import { EntitiesMap } from './entities';
-import { expectResultCheck } from './match';
+import { expectErrorCheck, expectResultCheck } from './match';
 import type * as uni from './schema';
-
-export class UnifiedOperation {
-  name: string;
-  constructor(op: uni.OperationDescription) {
-    this.name = op.name;
-  }
-}
 
 async function abortTransactionOperation(
   entities: EntitiesMap,
@@ -23,7 +18,22 @@ async function aggregateOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const dbOrCollection = entities.get(op.object) as Db | Collection;
+  if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
+    throw new Error(`Operation object '${op.object}' must be a db or collection`);
+  }
+  return dbOrCollection
+    .aggregate(op.arguments.pipeline, {
+      allowDiskUse: op.arguments.allowDiskUse,
+      batchSize: op.arguments.batchSize,
+      bypassDocumentValidation: op.arguments.bypassDocumentValidation,
+      maxTimeMS: op.arguments.maxTimeMS,
+      maxAwaitTimeMS: op.arguments.maxAwaitTimeMS,
+      collation: op.arguments.collation,
+      hint: op.arguments.hint,
+      out: op.arguments.out
+    })
+    .toArray();
 }
 async function assertCollectionExistsOperation(
   entities: EntitiesMap,
@@ -94,14 +104,16 @@ async function assertSessionTransactionStateOperation(
 async function bulkWriteOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
+): Promise<BulkWriteResult> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.bulkWrite(op.arguments.requests);
 }
 async function commitTransactionOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const session = entities.getEntity('session', op.object);
+  return session.commitTransaction();
 }
 async function createChangeStreamOperation(
   entities: EntitiesMap,
@@ -148,7 +160,8 @@ async function deleteOneOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const collection = entities.getEntity('collection', op.object);
+  return collection.deleteOne(op.arguments.filter);
 }
 async function dropCollectionOperation(
   entities: EntitiesMap,
@@ -168,19 +181,24 @@ async function findOperation(
 ): Promise<Document> {
   const collection = entities.getEntity('collection', op.object);
   const { filter, sort, batchSize, limit } = op.arguments;
-  return await collection.find(filter, { sort, batchSize, limit }).toArray();
+  return collection.find(filter, { sort, batchSize, limit }).toArray();
 }
 async function findOneAndReplaceOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const collection = entities.getEntity('collection', op.object);
+  return collection.findOneAndReplace(op.arguments.filter, op.arguments.replacement);
 }
 async function findOneAndUpdateOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const collection = entities.getEntity('collection', op.object);
+  const returnOriginal = op.arguments.returnDocument === 'Before';
+  return (
+    await collection.findOneAndUpdate(op.arguments.filter, op.arguments.update, { returnOriginal })
+  ).value;
 }
 async function failPointOperation(
   entities: EntitiesMap,
@@ -201,7 +219,7 @@ async function insertOneOperation(
     session
   } as InsertOneOptions;
 
-  return await collection.insertOne(op.arguments.document, options);
+  return collection.insertOne(op.arguments.document, options);
 }
 async function insertManyOperation(
   entities: EntitiesMap,
@@ -216,7 +234,7 @@ async function insertManyOperation(
     ordered: op.arguments.ordered ?? true
   };
 
-  return await collection.insertMany(op.arguments.documents, options);
+  return collection.insertMany(op.arguments.documents, options);
 }
 async function iterateUntilDocumentOrErrorOperation(
   entities: EntitiesMap,
@@ -239,13 +257,20 @@ async function replaceOneOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
 ): Promise<Document> {
-  throw new Error('not implemented.');
+  const collection = entities.getEntity('collection', op.object);
+  return collection.replaceOne(op.arguments.filter, op.arguments.replacement, {
+    bypassDocumentValidation: op.arguments.bypassDocumentValidation,
+    collation: op.arguments.collation,
+    hint: op.arguments.hint,
+    upsert: op.arguments.upsert
+  });
 }
 async function startTransactionOperation(
   entities: EntitiesMap,
   op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
+): Promise<void> {
+  const session = entities.getEntity('session', op.object);
+  session.startTransaction();
 }
 async function targetedFailPointOperation(
   entities: EntitiesMap,
@@ -277,8 +302,67 @@ async function withTransactionOperation(
 ): Promise<Document> {
   throw new Error('not implemented.');
 }
+async function countDocumentsOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<number> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.countDocuments(op.arguments.filter as Document);
+}
+async function deleteManyOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.deleteMany(op.arguments.filter);
+}
+async function distinctOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.distinct(op.arguments.fieldName as string, op.arguments.filter as Document);
+}
+async function estimatedDocumentCountOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<number> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.estimatedDocumentCount();
+}
+async function findOneAndDeleteOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.findOneAndDelete(op.arguments.filter);
+}
+async function runCommandOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const db = entities.getEntity('db', op.object);
+  return db.command(op.arguments.command);
+}
+async function updateManyOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.updateMany(op.arguments.filter, op.arguments.update);
+}
+async function updateOneOperation(
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+): Promise<Document> {
+  const collection = entities.getEntity('collection', op.object);
+  return collection.updateOne(op.arguments.filter, op.arguments.update);
+}
 
-type RunOperationFn = (entities: EntitiesMap, op: uni.OperationDescription) => Promise<Document>;
+type RunOperationFn = (
+  entities: EntitiesMap,
+  op: uni.OperationDescription
+) => Promise<Document | number | void>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('abortTransaction', abortTransactionOperation);
@@ -321,6 +405,16 @@ operations.set('download', downloadOperation);
 operations.set('upload', uploadOperation);
 operations.set('withTransaction', withTransactionOperation);
 
+// Versioned API adds these:
+operations.set('countDocuments', countDocumentsOperation);
+operations.set('deleteMany', deleteManyOperation);
+operations.set('distinct', distinctOperation);
+operations.set('estimatedDocumentCount', estimatedDocumentCountOperation);
+operations.set('findOneAndDelete', findOneAndDeleteOperation);
+operations.set('runCommand', runCommandOperation);
+operations.set('updateMany', updateManyOperation);
+operations.set('updateOne', updateOneOperation);
+
 export async function executeOperationAndCheck(
   operation: uni.OperationDescription,
   entities: EntitiesMap
@@ -333,9 +427,12 @@ export async function executeOperationAndCheck(
   try {
     result = await opFunc(entities, operation);
   } catch (error) {
+    // FIXME: Remove when project is done:
+    if (error.message === 'not implemented.') {
+      throw error;
+    }
     if (operation.expectError) {
-      expect(error).to.be.instanceof(MongoError);
-      // expectErrorCheck(error, operation.expectError);
+      expectErrorCheck(error, operation.expectError, entities);
     } else {
       expect.fail(`Operation ${operation.name} failed with ${error.message}`);
     }

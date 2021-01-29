@@ -140,7 +140,7 @@ export interface ExpectedError {
   errorContains?: string;
   errorCode?: number;
   errorCodeName?: string;
-  errorLabelsContain?: [string, ...string[]];
-  errorLabelsOmit?: [string, ...string[]];
+  errorLabelsContain?: string[];
+  errorLabelsOmit?: string[];
   expectResult?: unknown;
 }
