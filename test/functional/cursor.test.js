@@ -4668,4 +4668,30 @@ describe('Cursor', function() {
       });
     });
   });
+
+  describe('#clone', function() {
+    it('removes the existing session from the cloned cursor', function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect(error => {
+        expect(error).to.not.exist;
+        this.defer(() => client.close());
+
+        const docs = [{ name: 'test1' }, { name: 'test2' }];
+        const coll = client.db(configuration.db).collection('cursor_session_mapping');
+        coll.insertMany(docs, err => {
+          expect(err).to.not.exist;
+          const cursor = coll.find({}, { batchSize: 1 });
+          cursor.next((er, doc) => {
+            expect(er).to.not.exist;
+            expect(doc).to.exist;
+            const clonedCursor = cursor.clone();
+            expect(clonedCursor.cursorState.session).to.not.exist;
+            cursor.close();
+            done();
+          });
+        });
+      });
+    });
+  });
 });
