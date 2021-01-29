@@ -8,6 +8,7 @@ const NODE_VERSIONS = ['dubnium', 'erbium'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '4.4'];
 const OCSP_VERSIONS = ['latest', '4.4'];
+const TLS_VERSIONS = ['latest', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
 
 const OPERATING_SYSTEMS = [
   {
@@ -59,6 +60,8 @@ const OPERATING_SYSTEMS = [
   )
 );
 
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth']);
+
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
@@ -109,22 +112,6 @@ Array.prototype.push.apply(TASKS, [
     name: 'test-auth-ldap',
     tags: ['auth', 'ldap'],
     commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-  },
-  {
-    name: 'test-tls-support',
-    tags: ['tls-support'],
-    commands: [
-      { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          SSL: 'ssl',
-          VERSION: 'latest',
-          TOPOLOGY: 'server'
-        }
-      },
-      { func: 'run tls tests' }
-    ]
   },
   {
     name: 'test-ocsp-valid-cert-server-staples',
@@ -244,6 +231,25 @@ Array.prototype.push.apply(TASKS, [
     ]
   }
 ]);
+
+TLS_VERSIONS.forEach(VERSION => {
+  TASKS.push({
+    name: `test-tls-support-${VERSION}`,
+    tags: ['tls-support'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION,
+          SSL: 'ssl',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'run tls tests' }
+    ]
+  });
+});
 
 OCSP_VERSIONS.forEach(VERSION => {
   // manually added tasks
@@ -401,18 +407,27 @@ const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
   const memo = {};
-  return function (mongoVersion, onlyBaseTasks = false) {
-    const key = mongoVersion + (onlyBaseTasks ? 'b' : '');
+  return function (mongoVersion, os) {
+    const key = mongoVersion + os;
 
     if (memo[key]) {
       return memo[key];
     }
-    const taskList = onlyBaseTasks ? BASE_TASKS : BASE_TASKS.concat(TASKS);
+    const taskList = BASE_TASKS.concat(TASKS);
     const ret = taskList
       .filter(task => {
-        const tasksWithVars = task.commands.filter(task => !!task.vars);
         if (task.name.match(/^aws/)) return false;
 
+        // skip unsupported tasks on windows
+        if (
+          os.match(/^windows/) &&
+          task.tags &&
+          task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length
+        ) {
+          return false;
+        }
+
+        const tasksWithVars = task.commands.filter(task => !!task.vars);
         if (!tasksWithVars.length) {
           return true;
         }
@@ -442,7 +457,7 @@ OPERATING_SYSTEMS.forEach(
     msvsVersion
   }) => {
     const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
-    const tasks = getTaskList(mongoVersion, !!msvsVersion);
+    const tasks = getTaskList(mongoVersion, osName.split('-')[0]);
 
     testedNodeVersions.forEach(NODE_LTS_NAME => {
       const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.substr(1)}`;
