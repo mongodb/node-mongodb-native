@@ -1,6 +1,7 @@
 import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { mergeOptions } from '../utils';
 import type { Document } from '../bson';
 import type { Sort } from '../sort';
 import type { Topology } from '../sdam/topology';
@@ -52,9 +53,9 @@ export class AggregationCursor extends AbstractCursor {
   }
 
   clone(): AggregationCursor {
+    const clonedOptions = mergeOptions({}, this[kOptions]);
     return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {
-      ...this[kOptions],
-      ...this.cursorOptions
+      ...clonedOptions
     });
   }
 
