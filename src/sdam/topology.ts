@@ -52,6 +52,7 @@ import type { CloseOptions } from '../cmap/connection_pool';
 import { DestroyOptions, Connection } from '../cmap/connection';
 import type { MongoClientOptions } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
+import { serialize, deserialize } from '../bson';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -188,12 +189,26 @@ export class Topology extends EventEmitter {
   static readonly OPEN = 'open' as const;
   /** @event */
   static readonly CONNECT = 'connect' as const;
+  /**
+   * @internal
+   *
+   * @privateRemarks
+   * mongodb-client-encryption's class ClientEncryption falls back to finding the bson lib
+   * defined on client.topology.bson, in order to maintain compatibility with any version
+   * of mongodb-client-encryption we keep a reference to serialize and deserialize here.
+   */
+  bson: { serialize: typeof serialize; deserialize: typeof deserialize };
 
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
   constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
+
+    // Legacy CSFLE support
+    this.bson = Object.create(null);
+    this.bson.serialize = serialize;
+    this.bson.deserialize = deserialize;
 
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
