@@ -4,6 +4,7 @@ import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { FindOperation, FindOptions } from '../operations/find';
+import { mergeOptions } from '../utils';
 import type { Hint } from '../operations/operation';
 import type { CollationOptions } from '../operations/command';
 import type { Topology } from '../sdam/topology';
@@ -52,9 +53,9 @@ export class FindCursor extends AbstractCursor {
   }
 
   clone(): FindCursor {
+    const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
     return new FindCursor(this.topology, this.namespace, this[kFilter], {
-      ...this[kBuiltOptions],
-      ...this.cursorOptions
+      ...clonedOptions
     });
   }
 
