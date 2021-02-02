@@ -18,7 +18,7 @@ export class InsertOperation extends CommandOperation<Document> {
 
   constructor(ns: MongoDBNamespace, documents: Document[], options: BulkWriteOptions) {
     super(undefined, options);
-    this.options = { ...options, checkKeys: true };
+    this.options = { ...options };
     this.ns = ns;
     this.documents = documents;
   }
