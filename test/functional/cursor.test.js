@@ -12,7 +12,6 @@ const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 const { formatSort } = require('../../src/sort');
 const { FindCursor } = require('../../src/cursor/find_cursor');
-const kSession = Symbol('session');
 
 describe('Cursor', function () {
   before(function () {
@@ -3785,7 +3784,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor[kSession]).to.not.exist;
+              expect(clonedCursor.session).to.not.exist;
             })
             .finally(() => {
               return cursor.close();
@@ -3805,7 +3804,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor[kSession]).to.not.exist;
+              expect(clonedCursor.session).to.not.exist;
             })
             .finally(() => {
               return cursor.close();
