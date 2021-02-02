@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.1](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.0...v4.0.0-beta.1) (2021-02-02)
+
+
+### Bug Fixes
+
+* **find:** correctly translate timeout option into noCursorTimeout ([#2708](https://github.com/mongodb/node-mongodb-native/issues/2708)) ([16a22c4](https://github.com/mongodb/node-mongodb-native/commit/16a22c4688bd1b4fba83fe54ea4eb24b7778eb86))
+* Compatibility with mongodb-client-encryption ([#2713](https://github.com/mongodb/node-mongodb-native/issues/2713)) ([d08ddb9](https://github.com/mongodb/node-mongodb-native/commit/d08ddb95984606c681b781052827e40ccdc8ef3d))
+* restore `createAutoEncrypter()` functionality ([#2710](https://github.com/mongodb/node-mongodb-native/issues/2710)) ([25ef870](https://github.com/mongodb/node-mongodb-native/commit/25ef87026bca935b00d30ad943ddd28784f801e8))
+* Support bson property on Topology class ([#2721](https://github.com/mongodb/node-mongodb-native/issues/2721)) ([00b1374](https://github.com/mongodb/node-mongodb-native/commit/00b1374454f5614879a5ecec5b4aae871e31222c))
+* Use getters to sync BulkWriteResult wrappers ([#2716](https://github.com/mongodb/node-mongodb-native/issues/2716)) ([c94b54a](https://github.com/mongodb/node-mongodb-native/commit/c94b54ad35dfe65d45f730f9e78169d169608a34))
+* **operations:** avoid hardcoding `checkKeys` for insert operations ([#2726](https://github.com/mongodb/node-mongodb-native/issues/2726)) ([5ce9b25](https://github.com/mongodb/node-mongodb-native/commit/5ce9b25c965e2be633bf4095647e73a152d9914c))
+* **operations:** make every CollationOptions property optional except `locale` ([#2727](https://github.com/mongodb/node-mongodb-native/issues/2727)) ([8a678e9](https://github.com/mongodb/node-mongodb-native/commit/8a678e9f1d323700773ab2530a137f0346036dce))
+* **WriteConcern:** avoid throwing error when options is null ([#2714](https://github.com/mongodb/node-mongodb-native/issues/2714)) ([ea142bc](https://github.com/mongodb/node-mongodb-native/commit/ea142bc78ce9f6b2b97fd8998734d3d698aa2f38))
+
 ## [4.0.0-beta.0](https://github.com/mongodb/node-mongodb-native/compare/v3.5.4...v4.0.0-beta.0) (2021-01-19)
 
 
