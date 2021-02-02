@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.6.3",
+  "version": "3.6.4",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "files": [
@@ -73,7 +73,7 @@
     "sinon-chai": "^3.2.0",
     "snappy": "^6.3.4",
     "spec-xunit-file": "0.0.1-3",
-    "standard-version": "^4.4.0",
+    "standard-version": "^8.0.2",
     "util.promisify": "^1.0.1",
     "worker-farm": "^1.5.0",
     "wtfnode": "^0.8.0",

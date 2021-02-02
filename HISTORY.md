@@ -1,6 +1,32 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [3.6.4](https://github.com/mongodb/node-mongodb-native/compare/v3.6.3...v3.6.4) (2021-02-02)
+
+
+### Features
+
+* add explain support ([#2626](https://github.com/mongodb/node-mongodb-native/issues/2626)) ([a827807](https://github.com/mongodb/node-mongodb-native/commit/a8278070992d2de4134dc0841b4027a6cc745a93))
+* Deprecate top-level write concern option keys  ([#2624](https://github.com/mongodb/node-mongodb-native/issues/2624)) ([0516d93](https://github.com/mongodb/node-mongodb-native/commit/0516d93f74de4b58a99e8455e59678d4b09cd4a7))
+
+
+### Bug Fixes
+
+* Allow GridFS write stream to destroy ([#2702](https://github.com/mongodb/node-mongodb-native/issues/2702)) ([b5e9d67](https://github.com/mongodb/node-mongodb-native/commit/b5e9d67d5cd9b1912a349789cf2a122e00a46d1b))
+* awaitable isMaster timeout must respect connectTimeoutMS ([#2627](https://github.com/mongodb/node-mongodb-native/issues/2627)) ([b365c50](https://github.com/mongodb/node-mongodb-native/commit/b365c5061ded832e1682167edac58e8a04b05fc4))
+* don't add empty query string items to connection string ([8897259](https://github.com/mongodb/node-mongodb-native/commit/889725980ec1e3b4be4a74170bea0a3e3d23cf13))
+* don't reset monitor if we aren't streaming topology changes ([a10171b](https://github.com/mongodb/node-mongodb-native/commit/a10171b57d2414f6df2aa8ffe9c2d3938ad838d1))
+* dont parse tls/ssl file paths in uri ([#2718](https://github.com/mongodb/node-mongodb-native/issues/2718)) ([f89e4c1](https://github.com/mongodb/node-mongodb-native/commit/f89e4c1bd59c64664e8c9aa218bcb856be325d34))
+* hasAtomicOperator check respects toBSON transformation ([#2696](https://github.com/mongodb/node-mongodb-native/issues/2696)) ([60936dc](https://github.com/mongodb/node-mongodb-native/commit/60936dca74167de239d1bb51a23cc9870860bdc4))
+* honor ignoreUndefined on findAndModify commands ([#2671](https://github.com/mongodb/node-mongodb-native/issues/2671)) ([a25b67c](https://github.com/mongodb/node-mongodb-native/commit/a25b67c6ac13b6347cb78c4fc56613f3daf44300))
+* ignore ENOTFOUND during TXT record lookup ([2036fe7](https://github.com/mongodb/node-mongodb-native/commit/2036fe7b298b9678e29ede87c1035c748ff89fcd))
+* respect readPreference and writeConcern from connection string ([#2711](https://github.com/mongodb/node-mongodb-native/issues/2711)) ([b657c8c](https://github.com/mongodb/node-mongodb-native/commit/b657c8c4f3f86018cc4824f84cb22e1527d9f9af))
+* restore auto direct connection behavior ([#2719](https://github.com/mongodb/node-mongodb-native/issues/2719)) ([617d9de](https://github.com/mongodb/node-mongodb-native/commit/617d9dec5180c5f7b67bd8c944c168d4cbd27e1c))
+* support empty TXT records in legacy url parser ([2fa5c5f](https://github.com/mongodb/node-mongodb-native/commit/2fa5c5f2a113920baa8e67a1c0d65432690d37fc))
+* transition topology state before async calls ([#2637](https://github.com/mongodb/node-mongodb-native/issues/2637)) ([9df093c](https://github.com/mongodb/node-mongodb-native/commit/9df093c1d46e1f8616c7a979324923205ac3dcd2))
+* **cursor:** don't use other operation's session for cloned cursor operation ([#2705](https://github.com/mongodb/node-mongodb-native/issues/2705)) ([8082c89](https://github.com/mongodb/node-mongodb-native/commit/8082c89f8ef3624d22f4bdd6066b6f72c44f763d))
+* **find:** correctly translate timeout option into noCursorTimeout ([#2700](https://github.com/mongodb/node-mongodb-native/issues/2700)) ([e257e6b](https://github.com/mongodb/node-mongodb-native/commit/e257e6b19d810920bafc579e725e09bd0607b74b))
 
 <a name="3.6.3"></a>
 ## [3.6.3](https://github.com/mongodb/node-mongodb-native/compare/v3.6.1...v3.6.3) (2020-11-06)
