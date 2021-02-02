@@ -12,6 +12,7 @@ const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 const { formatSort } = require('../../src/sort');
 const { FindCursor } = require('../../src/cursor/find_cursor');
+const kSession = Symbol('session');
 
 describe('Cursor', function () {
   before(function () {
@@ -107,7 +108,6 @@ describe('Cursor', function () {
       });
     }
   });
-
 
   it('cursor should trigger getMore', {
     // Add a tag that our runner can trigger on
@@ -3785,7 +3785,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.not.exist;
+              expect(clonedCursor[kSession]).to.not.exist;
             })
             .finally(() => {
               return cursor.close();
@@ -3805,7 +3805,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.not.exist;
+              expect(clonedCursor[kSession]).to.not.exist;
             })
             .finally(() => {
               return cursor.close();
@@ -3914,6 +3914,66 @@ describe('Cursor', function () {
     const expectedDocs = [
       { _id: 0, b: 1, c: 0 },
       { _id: 1, b: 1, c: 0 },
+      { _id: 2, b: 1, c: 0 }
+    ];
+    const config = {
+      client: client,
+      configuration: configuration,
+      collectionName: 'stream-test-transform',
+      transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
+      expectedSet: new Set(expectedDocs)
+    };
+
+    testTransformStream(config, done);
+  });
+
+  it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    const expectedDocs = [
+      { _id: 0, a: { b: 1, c: 0 } },
+      { _id: 1, a: { b: 1, c: 0 } },
+      { _id: 2, a: { b: 1, c: 0 } }
+    ];
+    const config = {
+      client: client,
+      configuration: configuration,
+      collectionName: 'transformStream-test-notransform',
+      transformFunc: null,
+      expectedSet: new Set(expectedDocs)
+    };
+
+    testTransformStream(config, done);
+  });
+
+  it.skip('should apply parent read preference to count command', function (done) {
+    // NOTE: this test is skipped because mongo orchestration does not test sharded clusters
+    // with secondaries. This behavior should be unit tested
+
+    const configuration = this.configuration;
+    const client = configuration.newClient(
+      { w: 1, readPreference: ReadPreference.SECONDARY },
+      { maxPoolSize: 1, connectWithNoPrimary: true }
+    );
+
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
+
+      const db = client.db(configuration.db);
+      let collection, cursor, spy;
+      const close = e => cursor.close(() => client.close(() => done(e)));
+
+      Promise.resolve()
+        .then(() => new Promise(resolve => setTimeout(() => resolve(), 500)))
+        .then(() => db.createCollection('test_count_readPreference'))
+        .then(() => (collection = db.collection('test_count_readPreference')))
+        .then(() => collection.find())
+        .then(_cursor => (cursor = _cursor))
+        .then(() => (spy = sinon.spy(cursor.topology, 'command')))
+        .then(() => cursor.count())
+        .then(() =>
+          expect(spy.firstCall.args[2])
             .to.have.nested.property('readPreference.mode')
             .that.equals('secondary')
         )
@@ -3963,113 +4023,6 @@ describe('Cursor', function () {
         });
       });
     });
-  });
-
-  describe('#stream', function () {
-    context('when the stream is closed', function () {
-      it('emits the close event once only', function () {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
-        return client.connect(err => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const collection = client.db().collection('documents');
-          collection.drop(() => {
-            const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-            collection.insertMany(docs, err => {
-              expect(err).to.not.exist;
-
-              const cursor = collection.find({}, { sort: { a: 1 } });
-              cursor.hasNext((err, hasNext) => {
-                expect(err).to.not.exist;
-                expect(hasNext).to.be.true;
-
-                const collected = [];
-                const stream = new Writable({
-                  objectMode: true,
-                  write: (chunk, encoding, next) => {
-                    collected.push(chunk);
-                    next(undefined, chunk);
-                  }
-                });
-
-                const cursorStream = cursor.stream();
-
-                cursorStream.on('end', () => {
-                  expect(collected).to.have.length(3);
-                  expect(collected).to.eql(docs);
-                  done();
-                });
-
-                cursorStream.pipe(stream);
-              });
-            });
-          });
-        });
-      });
-    });
-  });
-
-  describe('transforms', function () {
-    it('should correctly apply map transform to cursor as readable stream', function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
-        const coll = client.db(configuration.db).collection('cursor_stream_mapping');
-        coll.insertMany(docs, err => {
-          expect(err).to.not.exist;
-
-          const bag = [];
-          const stream = coll
-            .find()
-            .project({ _id: 0, name: 1 })
-            .map(doc => ({ mapped: doc }))
-            .stream()
-            .on('data', doc => bag.push(doc));
-
-          stream.on('error', done).on('end', () => {
-            expect(bag.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
-            done();
-          });
-        });
-      });
-    });
-
-    it('should correctly apply map transform when converting cursor to array', function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
-        const coll = client.db(configuration.db).collection('cursor_toArray_mapping');
-        coll.insertMany(docs, err => {
-          expect(err).to.not.exist;
-
-          coll
-            .find()
-            .project({ _id: 0, name: 1 })
-            .map(doc => ({ mapped: doc }))
-            .toArray((err, mappedDocs) => {
-              expect(err).to.not.exist;
-              expect(mappedDocs.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
-              done();
-            });
-        });
-      });
-    });
-  });
-
-  context('sort', function () {
-    const findSort = (input, output) =>
-      withMonitoredClient('find', function (client, events, done) {
   });
 
   describe('transforms', function () {
@@ -4151,6 +4104,66 @@ describe('Cursor', function () {
           cursor.next(err => {
             expect(err).to.not.exist;
             expect(events[0].command.sort).to.deep.equal(output);
+            cursor.close(done);
+          });
+        });
+      });
+
+    it('should use find options object', findSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use find options string', findSort('alpha', { alpha: 1 }));
+    it('should use find options shallow array', findSort(['alpha', 1], { alpha: 1 }));
+    it('should use find options deep array', findSort([['alpha', 1]], { alpha: 1 }));
+
+    it('should use cursor.sort object', cursorSort({ alpha: 1 }, { alpha: 1 }));
+    it('should use cursor.sort string', cursorSort('alpha', { alpha: 1 }));
+    it('should use cursor.sort shallow array', cursorSort(['alpha', 1], { alpha: 1 }));
+    it('should use cursor.sort deep array', cursorSort([['alpha', 1]], { alpha: 1 }));
+
+    it('formatSort - one key', () => {
+      expect(formatSort('alpha')).to.deep.equal({ alpha: 1 });
+      expect(formatSort(['alpha'])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 1)).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'asc')).to.deep.equal({ alpha: 1 });
+      expect(formatSort([['alpha', 'asc']])).to.deep.equal({ alpha: 1 });
+      expect(formatSort('alpha', 'ascending')).to.deep.equal({ alpha: 1 });
+      expect(formatSort({ alpha: 1 })).to.deep.equal({ alpha: 1 });
+      expect(formatSort('beta')).to.deep.equal({ beta: 1 });
+      expect(formatSort(['beta'])).to.deep.equal({ beta: 1 });
+      expect(formatSort('beta', -1)).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'desc')).to.deep.equal({ beta: -1 });
+      expect(formatSort('beta', 'descending')).to.deep.equal({ beta: -1 });
+      expect(formatSort({ beta: -1 })).to.deep.equal({ beta: -1 });
+      expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal({
+        alpha: { $meta: 'hi' }
+      });
+    });
+
+    it('formatSort - multi key', () => {
+      expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(
+        formatSort([
+          ['alpha', 'asc'],
+          ['beta', 'ascending']
+        ])
+      ).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
+        alpha: { $meta: 'hi' },
+        beta: 1
+      });
+    });
+
+    it('should use allowDiskUse option on sort', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withMonitoredClient('find', function (client, events, done) {
+        const db = client.db('test');
+        db.collection('test_sort_allow_disk_use', (err, collection) => {
+          expect(err).to.not.exist;
+          const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
+          cursor.next(err => {
+            expect(err).to.not.exist;
+            const { command } = events.shift();
+            expect(command.sort).to.deep.equal({ alpha: 1 });
             expect(command.allowDiskUse).to.be.true;
             cursor.close(done);
           });
