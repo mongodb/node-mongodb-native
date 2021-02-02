@@ -13,7 +13,12 @@ describe('Sharding (Connection)', function() {
   it('Should use sharded topology', {
     metadata: { requires: { topology: 'sharded' } },
     test: function() {
-      const client = this.configuration.newClient({}, { useUnifiedTopology: true });
+      const client = this.configuration.newClient(
+        {},
+        // note: auto-discovery will be the default behavior in 4.0,
+        // for now we must supply directConnection: false
+        { useUnifiedTopology: true, directConnection: false }
+      );
       return withClient(client, (client, done) => {
         expect(client).to.exist;
         expect(client)

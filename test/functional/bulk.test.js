@@ -1687,9 +1687,10 @@ describe('Bulk', function() {
           );
         }
       })
-      .finally(() => {
-        return client.close();
-      });
+      .then(
+        () => client.close(),
+        () => client.close()
+      );
   });
 
   it('should respect toBSON conversion when checking for atomic operators', function() {
@@ -1721,8 +1722,9 @@ describe('Bulk', function() {
           expect.fail(); // shouldn't throw any error
         }
       })
-      .finally(() => {
-        return client.close();
-      });
+      .then(
+        () => client.close(),
+        () => client.close()
+      );
   });
 });

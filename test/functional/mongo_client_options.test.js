@@ -168,6 +168,24 @@ describe('MongoClient Options', function() {
     }
   });
 
+  it('should directConnect when no replicaSet name is specified', {
+    metadata: { requires: { topology: 'replicaset' } },
+    test: function(done) {
+      const urlNoReplicaSet = this.configuration
+        .url()
+        // strip the replicaSet parameter from the url if present
+        .replace(/([&?])replicaSet=.+?[&$]/, '$1')
+        // reduce down to a single host if multiple are provided
+        .replace(new RegExp('(^mongodb://[^,]+)[^/]+'), '$1');
+      const client = this.configuration.newClient(urlNoReplicaSet);
+      client.connect(err => {
+        expect(err).to.not.exist;
+        expect(client.s.options.directConnection).to.be.true;
+        client.close(done);
+      });
+    }
+  });
+
   /**
    * @ignore
    */
