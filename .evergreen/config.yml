@@ -251,6 +251,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_regular_aws.js
     - command: shell.exec
       type: test
@@ -279,6 +280,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
@@ -311,6 +313,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
       type: test
@@ -383,6 +386,7 @@ functions:
           EOF
 
           cat setup.js
+          . ./activate_venv.sh
           mongo --nodb setup.js aws_e2e_ecs.js
   run-ocsp-test:
     - command: shell.exec
