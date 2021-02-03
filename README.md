@@ -2,7 +2,7 @@
 
 [![npm](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/)
 
-The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
+The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 **Looking for the latest?** We're working on the next major version of the driver now in beta.
 Check out our [beta version 4.0 here](https://github.com/mongodb/node-mongodb-native/tree/4.0).
@@ -65,10 +65,10 @@ You can also use the [Yarn](https://yarnpkg.com/en) package manager.
 
 The MongoDB driver depends on several other packages. These are:
 
-- [mongodb-core](https://github.com/mongodb-js/mongodb-core)
 - [bson](https://github.com/mongodb/js-bson)
+- [bson-ext](https://github.com/mongodb-js/bson-ext)
 - [kerberos](https://github.com/mongodb-js/kerberos)
-- [node-gyp](https://github.com/nodejs/node-gyp)
+- [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself in order to compile and install the `kerberos` module. Furthermore, the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager for what libraries to install.
 
