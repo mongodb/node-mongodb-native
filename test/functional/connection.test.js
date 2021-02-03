@@ -144,9 +144,9 @@ describe('Connection - functional', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var user = 'testConnectGoodAuth',
-        password = 'password';
+      const configuration = this.configuration;
+      const username = 'testConnectGoodAuth';
+      const password = 'password';
 
       const setupClient = configuration.newClient();
 
@@ -155,14 +155,14 @@ describe('Connection - functional', function () {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
-        db.addUser(user, password, function (err) {
+        db.addUser(username, password, function (err) {
           expect(err).to.not.exist;
           client.close(restOfTest);
         });
       });
 
       function restOfTest() {
-        const testClient = configuration.newClient(configuration.url(user, password));
+        const testClient = configuration.newClient(configuration.url({ username, password }));
         testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuth', function (client) {
             client.close(done);
@@ -176,7 +176,7 @@ describe('Connection - functional', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const username = 'testConnectGoodAuthAsOption';
       const password = 'password';
 
@@ -211,7 +211,9 @@ describe('Connection - functional', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient(configuration.url('slithy', 'toves'));
+      const client = configuration.newClient(
+        configuration.url({ username: 'slithy', password: 'toves' })
+      );
       client.connect(function (err, client) {
         expect(err).to.exist;
         expect(client).to.not.exist;
