@@ -4,10 +4,12 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Looking for the latest?** We're working on the next major version of the driver now in beta.
-Check out our [beta version 4.0 here](https://github.com/mongodb/node-mongodb-native/tree/4.0).
+**NOTE: v3.x released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
 
-**NOTE: v3.x was recently released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
+## Version 4.0
+
+**Looking for the latest?** We're working on the next major version of the driver, now in beta.
+Check out our [beta version 4.0 here](https://github.com/mongodb/node-mongodb-native/tree/4.0), which includes a full migration of the driver to TypeScript.
 
 ## Quick Links
 
@@ -47,7 +49,7 @@ For version compatibility matrices, please refer to the following links:
 
 ## Installation
 
-The recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js driver is by using `npm` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
