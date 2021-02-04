@@ -187,7 +187,7 @@ function matchMongoSpec(chai, utils) {
       'expected #{act} to not match spec #{exp}',
       result.expected,
       result.actual,
-      chai.config.showDiff
+      chai.config.showDiff || true
     );
   });
 
