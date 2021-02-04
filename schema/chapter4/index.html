@@ -19,140 +19,140 @@
   </head>
 
   <body>
-  
+
   <section id="container" class="">
 
-      
+
       <header class="header black-bg">
             <div class="toggle-nav">
                 <i class="fa fa-bars"></i>
                 <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
             </div>
 
-            
+
             <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
 
             <div class="nav title-row" id="top_menu">
                 <h1 class="nav top-menu"> Indexes </h1>
-            </div>            
+            </div>
       </header>
-      
+
 
 
 <aside>
     <div id="sidebar"  class="nav-collapse ">
-        
+
         <ul class="sidebar-menu">
-          
-          
-              
+
+
+
 
             <li class="sub-menu active">
             <a href="javascript:;" class="">
                 <i class='fa fa-book'></i>
-                
+
                 <span>schema design</span>
                 <span class="menu-arrow fa fa-angle-down"></span>
             </a>
                 <ul class="sub open">
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
-                    
+
                     <li class="active"><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
-                    
+
                     <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
-                    
+
                 </ul>
-              
+
               </li>
-          
-              
+
+
                 <li>
-                <a class="" href="http://mongodb.github.com/node-mongodb-native/2.0">
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
                     <i class='fa fa-file-text'></i>
-                    
+
                     <span>2.0 driver docs</span>
                 </a>
-              
+
               </li>
-          
-              
+
+
                 <li>
-                <a class="" href="http://mongodb.github.com/node-mongodb-native/1.4">
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
                     <i class='fa fa-file-text'></i>
-                    
+
                     <span>1.4 driver docs</span>
                 </a>
-              
+
               </li>
-          
-              
+
+
                 <li>
-                <a class="" href="http://mongodb.github.com/node-mongodb-native/core">
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
                     <i class='fa fa-file-text'></i>
-                    
+
                     <span>Core driver docs</span>
                 </a>
-              
+
               </li>
-          
+
             <li> <a href="https://groups.google.com/forum/#!forum/learn-mongo-db-the-hardway" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
-            
-            
+
+
         </ul>
-        
+
     </div>
 </aside>
 
 
 
-      
+
       <section id="main-content">
           <section class="wrapper">
 
-              
-                  
-                      
-                      
-                          
-                          
-                          
-                      
-                      
-                  
-              
+
+
+
+
+
+
+
+
+
+
+
 
               <div class="row">
                   <div class="col-md-1">
-                      
-                      
+
+
                       <a class="navigation prev" href="/schema/chapter3">
                       <i class="fa fa-angle-left"></i>
                       </a>
-                      
-                      
+
+
                   </div>
                 <div class="col-md-10">
                     <section class="panel">
-                          
-                              
-                          
+
+
+
                     <div class="panel-body">
 
 
@@ -314,7 +314,7 @@ comics.ensureIndex({&quot;issues.number&quot;:1, &quot;issues.published_on&quot;
 
 <pre><code class="language-js">var comics = db.getSisterDB(&quot;store&quot;).comics;
 comics.find({
-  &quot;issues.number&quot;:1, 
+  &quot;issues.number&quot;:1,
   &quot;issues.published_on&quot;: &quot;June 1938&quot;}).toArray()
 </code></pre>
 
@@ -388,10 +388,10 @@ houses.ensureIndex({price_room: &quot;2d&quot;}, { min: 0, max: 200000, bits: 32
 <p>Now let&rsquo;s look for all houses that fall inside the range of 2000 to 20000 in price and has 0 to 5 rooms.</p>
 
 <pre><code class="language-js">db.houses.find( { price_room :
-  { $geoWithin : { 
-      $box : [ [ 2000 , 0 ] , [ 20000 , 5 ] ] 
-    } 
-  } 
+  { $geoWithin : {
+      $box : [ [ 2000 , 0 ] , [ 20000 , 5 ] ]
+    }
+  }
 }).toArray();
 </code></pre>
 
@@ -408,18 +408,18 @@ houses.ensureIndex({price_room: &quot;2d&quot;}, { min: 0, max: 200000, bits: 32
 <p>Let&rsquo;s insert some sample documents.</p>
 
 <pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
-entries.insert( { 
-  title : &quot;my blog post&quot;, 
+entries.insert( {
+  title : &quot;my blog post&quot;,
   text : &quot;i am writing a blog. yay&quot;,
   site: &quot;home&quot;,
   language: &quot;english&quot; });
 entries.insert( {
-  title : &quot;my 2nd post&quot;, 
+  title : &quot;my 2nd post&quot;,
   text : &quot;this is a new blog i am typing. yay&quot;,
   site: &quot;work&quot;,
   language: &quot;english&quot; });
 entries.insert( {
-  title : &quot;knives are Fun&quot;, 
+  title : &quot;knives are Fun&quot;,
   text : &quot;this is a new blog i am writing. yay&quot;,
   site: &quot;home&quot;,
   language: &quot;english&quot; });
@@ -431,9 +431,9 @@ entries.insert( {
 entries.ensureIndex({title: &quot;text&quot;, text: &quot;text&quot;}, { weights: {
     title: 10,
     text: 5
-  }, 
-  name: &quot;TextIndex&quot;, 
-  default_language: &quot;english&quot;, 
+  },
+  name: &quot;TextIndex&quot;,
+  default_language: &quot;english&quot;,
   language_override: &quot;language&quot; });
 </code></pre>
 
@@ -448,7 +448,7 @@ entries.find({$text: {$search: &quot;blog&quot;}, site: &quot;home&quot;})
 <p>The query matches all the documents that contain the word <strong>blog</strong> in either the <strong>title</strong> or <strong>text</strong> field and then filters them by the <strong>site</strong> field. To include the individual search scores modify the query slightly.</p>
 
 <pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
-entries.find({$text: {$search: &quot;blog&quot;}, site: &quot;home&quot;}, 
+entries.find({$text: {$search: &quot;blog&quot;}, site: &quot;home&quot;},
   {score: {$meta: &quot;textScore&quot;}}).sort({score: {$meta: &quot;textScore&quot;}});
 </code></pre>
 
@@ -573,46 +573,29 @@ covered.find({text: &quot;hello&quot;}, {_id: 0, text:1, site:1}).explain();
 <p>Noticed how <strong>{_id: 0, text:1, site:1}</strong> excludes <strong>_id</strong>. A covered index query cannot include the <strong>_id</strong> field.</p>
 </blockquote>
 
-                      
-                      <div id="disqus_thread"></div>
-                      <script type="text/javascript">
-                           
-                          var disqus_shortname = 'learnmongodbthehardway'; 
 
-                           
-                          (function() {
-                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                          })();
-                      </script>
-                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-                      
-                    </div>
-                    </section>
-                </div>
+
                 <div class="col-md-1">
-                    
-                    
+
+
                     <a class="navigation next" href="/schema/chapter5">
                         <i class="fa fa-angle-right"> </i>
                     </a>
-                    
-                    
+
+
                 </div>
               </div>
-              
+
           </section>
       </section>
-     
+
   </section>
-  
-    
+
+
     <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
     <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
     <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
-    
+
     <script src="/node-mongodb-native/js/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <script src="/node-mongodb-native/js/scripts.js"></script>
@@ -629,4 +612,3 @@ covered.find({text: &quot;hello&quot;}, {_id: 0, text:1, site:1}).explain();
 </script>
   </body>
 </html>
-
