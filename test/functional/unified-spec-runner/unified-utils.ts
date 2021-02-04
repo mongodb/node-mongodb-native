@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
-import type { TestConfiguration } from './unified.test';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
+import { TestConfiguration } from './runner';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {

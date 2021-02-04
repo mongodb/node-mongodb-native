@@ -1,13 +1,12 @@
 import { expect } from 'chai';
 import { ReadPreference } from '../../../src/read_preference';
-import { loadSpecTests } from '../../spec/index';
 import * as uni from './schema';
-import { patchVersion, zip, topologySatisfies } from './unified-utils';
+import { zip, topologySatisfies, patchVersion } from './unified-utils';
 import { CommandEvent, EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
-import { satisfies as semverSatisfies } from 'semver';
 import { matchesEvents } from './match';
+import { satisfies as semverSatisfies } from 'semver';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
@@ -36,16 +35,19 @@ const SKIPPED_TESTS = [
   'InsertOne fails after multiple retryable writeConcernErrors'
 ];
 
-async function runOne(
+export async function runUnifiedTest(
   ctx: MongoDBMochaTestContext,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test
-) {
+): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
   expect(unifiedSuite).to.exist;
   expect(ctx).to.exist;
   expect(ctx.configuration).to.exist;
+
+  const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
+  expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
 
   // If test.skipReason is specified, the test runner MUST skip this
   // test and MAY use the string value to log a message.
@@ -185,30 +187,17 @@ async function runOne(
   }
 }
 
-describe('Unified test format', function unifiedTestRunner() {
-  // Valid tests that should pass
-  for (const unifiedSuite of loadSpecTests('unified-test-format/valid-pass')) {
-    const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
-    expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
-    context(String(unifiedSuite.description), function runUnifiedTest() {
+export async function runUnifiedSuite(specTests: uni.UnifiedSuite[]): Promise<void> {
+  for (const unifiedSuite of specTests) {
+    context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },
-          test: async function runOneUnifiedTest() {
-            await runOne(this as MongoDBMochaTestContext, unifiedSuite, test);
+          test: async function () {
+            await runUnifiedTest(this, unifiedSuite, test);
           }
         });
       }
     });
   }
-
-  // Valid tests that should fail
-  // for (const unifiedSuite of loadSpecTests('unified-test-format/valid-fail')) {
-  //   // TODO
-  // }
-
-  // Tests that are invalid, would be good to gracefully fail on
-  // for (const unifiedSuite of loadSpecTests('unified-test-format/invalid')) {
-  //   // TODO
-  // }
-});
+}

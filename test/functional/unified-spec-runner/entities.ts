@@ -11,8 +11,8 @@ import type {
   CommandSucceededEvent
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
-import { TestConfiguration } from './unified.test';
 import { expect } from 'chai';
+import { TestConfiguration } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
