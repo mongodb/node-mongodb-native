@@ -187,7 +187,7 @@ export async function runUnifiedTest(
   }
 }
 
-export async function runUnifiedSuite(specTests: uni.UnifiedSuite[]): Promise<void> {
+export function runUnifiedSuite(specTests: uni.UnifiedSuite[]): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
