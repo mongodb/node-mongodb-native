@@ -171,16 +171,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const map = new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
-        let uri = config.url();
-        const { hosts, url } = parseURI(uri);
-
-        if (entity.client.useMultipleMongoses) {
-          expect(hosts).to.have.length.greaterThan(1);
-        } else if (entity.client.useMultipleMongoses === false) {
-          url.host = hosts[0];
-          uri = url.toString();
-        }
-
+        const uri = config.url({ useMultipleMongoses: entity.client.useMultipleMongoses });
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);

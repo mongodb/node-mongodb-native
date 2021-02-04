@@ -1,6 +1,7 @@
 'use strict';
 const url = require('url');
 const qs = require('querystring');
+const { expect } = require('chai');
 
 const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
@@ -17,6 +18,7 @@ const { HostAddress } = require('../../../src/utils');
  * @property {string} [authMechanism] - Authmechanism name
  * @property {Record<string, any>} [authMechanismProperties] - additional options for auth mechanism
  * @property {string} [authSource] - authSource override in searchParams of URI
+ * @property {boolean} [useMultipleMongoses] - if set will use concatenate all known HostAddresses in URI
  */
 
 /**
@@ -217,7 +219,13 @@ class TestConfiguration {
       }
     }
 
-    const actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+    let actualHostsString;
+    if (options.useMultipleMongoses) {
+      expect(this.options.hostAddresses).to.have.length.greaterThan(1);
+      actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+    } else {
+      actualHostsString = this.options.hostAddresses[0].toString();
+    }
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);
 
