@@ -13,7 +13,6 @@ import type {
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { TestConfiguration } from './unified.test';
 import { expect } from 'chai';
-import { parseURI } from '../../../src/connection_string';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
