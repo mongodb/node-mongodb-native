@@ -1,21 +1,24 @@
-[![npm](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![npm](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
+# MongoDB NodeJS Driver
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![npm](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/)
 
-# Description
+The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
+**NOTE: v3.x released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
 
-**NOTE: v3.x was recently released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
+## Version 4.0
 
-## MongoDB Node.JS Driver
+**Looking for the latest?** We're working on the next major version of the driver, now in beta.
+Check out our [beta version 4.0 here](https://github.com/mongodb/node-mongodb-native/tree/4.0), which includes a full migration of the driver to TypeScript.
 
-| what          | where                                          |
-|---------------|------------------------------------------------|
-| documentation | http://mongodb.github.io/node-mongodb-native  |
-| api-doc        | http://mongodb.github.io/node-mongodb-native/3.6/api  |
-| source        | https://github.com/mongodb/node-mongodb-native |
-| mongodb       | http://www.mongodb.org                        |
+## Quick Links
+
+| what          | where                                                |
+| ------------- | ---------------------------------------------------- |
+| documentation | http://mongodb.github.io/node-mongodb-native         |
+| api-doc       | http://mongodb.github.io/node-mongodb-native/3.6/api |
+| source        | https://github.com/mongodb/node-mongodb-native       |
+| mongodb       | http://www.mongodb.org                               |
 
 ### Bugs / Feature Requests
 
@@ -41,12 +44,12 @@ Change history can be found in [`HISTORY.md`](HISTORY.md).
 
 For version compatibility matrices, please refer to the following links:
 
- * [MongoDB](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-node)
- * [NodeJS](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-language-node)
+- [MongoDB](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-node)
+- [NodeJS](https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-language-node)
 
-# Installation
+## Installation
 
-The recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js driver is by using `npm` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
@@ -64,10 +67,10 @@ You can also use the [Yarn](https://yarnpkg.com/en) package manager.
 
 The MongoDB driver depends on several other packages. These are:
 
-* [mongodb-core](https://github.com/mongodb-js/mongodb-core)
-* [bson](https://github.com/mongodb/js-bson)
-* [kerberos](https://github.com/mongodb-js/kerberos)
-* [node-gyp](https://github.com/nodejs/node-gyp)
+- [bson](https://github.com/mongodb/js-bson)
+- [bson-ext](https://github.com/mongodb-js/bson-ext)
+- [kerberos](https://github.com/mongodb-js/kerberos)
+- [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself in order to compile and install the `kerberos` module. Furthermore, the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager for what libraries to install.
 
@@ -108,9 +111,9 @@ This will print out all the steps npm is performing while trying to install the 
 
 A compiler tool chain known to work for compiling `kerberos` on Windows is the following.
 
-* Visual Studio C++ 2010 (do not use higher versions)
-* Windows 7 64bit SDK
-* Python 2.7 or higher
+- Visual Studio C++ 2010 (do not use higher versions)
+- Windows 7 64bit SDK
+- Python 2.7 or higher
 
 Open the Visual Studio command prompt. Ensure `node.exe` is in your path and install `node-gyp`.
 
@@ -168,7 +171,7 @@ For complete MongoDB installation instructions, see [the manual](https://docs.mo
 
 1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
 2. Create a database directory (in this case under **/data**).
-3. Install and start a ``mongod`` process.
+3. Install and start a `mongod` process.
 
 ```bash
 mongod --dbpath=/data
@@ -192,11 +195,11 @@ const url = 'mongodb://localhost:27017';
 
 // Database Name
 const dbName = 'myproject';
-
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected successfully to server');
 
   const db = client.db(dbName);
 
@@ -222,23 +225,21 @@ const insertDocuments = function(db, callback) {
   // Get the documents collection
   const collection = db.collection('documents');
   // Insert some documents
-  collection.insertMany([
-    {a : 1}, {a : 2}, {a : 3}
-  ], function(err, result) {
+  collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(err, result) {
     assert.equal(err, null);
     assert.equal(3, result.result.n);
     assert.equal(3, result.ops.length);
-    console.log("Inserted 3 documents into the collection");
+    console.log('Inserted 3 documents into the collection');
     callback(result);
   });
-}
+};
 ```
 
 The **insert** command returns an object with the following fields:
 
-* **result** Contains the result document from MongoDB
-* **ops** Contains the documents inserted with added **_id** fields
-* **connection** Contains the connection used to perform the insert
+- **result** Contains the result document from MongoDB
+- **ops** Contains the documents inserted with added **\_id** fields
+- **connection** Contains the connection used to perform the insert
 
 Add the following code to call the **insertDocuments** function:
 
@@ -255,7 +256,7 @@ const dbName = 'myproject';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected successfully to server');
 
   const db = client.db(dbName);
 
@@ -289,11 +290,11 @@ const findDocuments = function(db, callback) {
   // Find some documents
   collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
-    console.log("Found the following records");
-    console.log(docs)
+    console.log('Found the following records');
+    console.log(docs);
     callback(docs);
   });
-}
+};
 ```
 
 This query returns all the documents in the **documents** collection. Add the **findDocument** method to the **MongoClient.connect** callback:
@@ -311,7 +312,7 @@ const dbName = 'myproject';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
+  console.log('Connected correctly to server');
 
   const db = client.db(dbName);
 
@@ -332,16 +333,16 @@ const findDocuments = function(db, callback) {
   // Get the documents collection
   const collection = db.collection('documents');
   // Find some documents
-  collection.find({'a': 3}).toArray(function(err, docs) {
+  collection.find({ a: 3 }).toArray(function(err, docs) {
     assert.equal(err, null);
-    console.log("Found the following records");
+    console.log('Found the following records');
     console.log(docs);
     callback(docs);
   });
-}
+};
 ```
 
-Only the documents which match ``'a' : 3`` should be returned.
+Only the documents which match `'a' : 3` should be returned.
 
 ### Update a document
 
@@ -352,14 +353,13 @@ const updateDocument = function(db, callback) {
   // Get the documents collection
   const collection = db.collection('documents');
   // Update document where a is 2, set b equal to 1
-  collection.updateOne({ a : 2 }
-    , { $set: { b : 1 } }, function(err, result) {
+  collection.updateOne({ a: 2 }, { $set: { b: 1 } }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
-    console.log("Updated the document with the field a equal to 2");
+    console.log('Updated the document with the field a equal to 2');
     callback(result);
   });
-}
+};
 ```
 
 The method updates the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Next, update the callback function from **MongoClient.connect** to include the update method.
@@ -377,7 +377,7 @@ const dbName = 'myproject';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected successfully to server');
 
   const db = client.db(dbName);
 
@@ -398,13 +398,13 @@ const removeDocument = function(db, callback) {
   // Get the documents collection
   const collection = db.collection('documents');
   // Delete document where a is 3
-  collection.deleteOne({ a : 3 }, function(err, result) {
+  collection.deleteOne({ a: 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
-    console.log("Removed the document with the field a equal to 3");
+    console.log('Removed the document with the field a equal to 3');
     callback(result);
   });
-}
+};
 ```
 
 Add the new method to the **MongoClient.connect** callback function.
@@ -422,7 +422,7 @@ const dbName = 'myproject';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected successfully to server');
 
   const db = client.db(dbName);
 
@@ -444,18 +444,14 @@ performance. The following function creates an index on the **a** field in the
 
 ```js
 const indexCollection = function(db, callback) {
-  db.collection('documents').createIndex(
-    { "a": 1 },
-      null,
-      function(err, results) {
-        console.log(results);
-        callback();
-    }
-  );
+  db.collection('documents').createIndex({ a: 1 }, null, function(err, results) {
+    console.log(results);
+    callback();
+  });
 };
 ```
 
-Add the ``indexCollection`` method to your app:
+Add the `indexCollection` method to your app:
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -469,7 +465,7 @@ const dbName = 'myproject';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected successfully to server');
 
   const db = client.db(dbName);
 
@@ -485,13 +481,13 @@ For more detailed information, see the [tutorials](docs/reference/content/tutori
 
 ## Next Steps
 
- * [MongoDB Documentation](http://mongodb.org)
- * [Read about Schemas](http://learnmongodbthehardway.com)
- * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
+- [MongoDB Documentation](http://mongodb.org)
+- [Read about Schemas](http://learnmongodbthehardway.com)
+- [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
 ## License
 
 [Apache 2.0](LICENSE.md)
 
-© 2009-2012 Christian Amor Kvalheim  
+© 2009-2012 Christian Amor Kvalheim
 © 2012-present MongoDB [Contributors](CONTRIBUTORS.md)
