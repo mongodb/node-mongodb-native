@@ -1,4 +1,7 @@
 import { MongoClient, Db, Collection, GridFSBucket, Document } from '../../../src/index';
+import { ReadConcern } from '../../../src/read_concern';
+import { WriteConcern } from '../../../src/write_concern';
+import { ReadPreference } from '../../../src/read_preference';
 import { ClientSession } from '../../../src/sessions';
 import { ChangeStream } from '../../../src/change_stream';
 import type { ClientEntity, EntityDescription } from './schema';
@@ -8,11 +11,15 @@ import type {
   CommandSucceededEvent
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
-import { TestConfiguration } from './unified.test';
 import { expect } from 'chai';
+import { TestConfiguration } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
+}
+
+interface UnifiedClientSession extends ClientSession {
+  client: UnifiedMongoClient;
 }
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
@@ -85,7 +92,7 @@ export type Entity =
   | UnifiedMongoClient
   | Db
   | Collection
-  | ClientSession
+  | UnifiedClientSession
   | UnifiedChangeStream
   | GridFSBucket
   | Document; // Results from operations
@@ -112,7 +119,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   mapOf(type: 'client'): EntitiesMap<UnifiedMongoClient>;
   mapOf(type: 'db'): EntitiesMap<Db>;
   mapOf(type: 'collection'): EntitiesMap<Collection>;
-  mapOf(type: 'session'): EntitiesMap<ClientSession>;
+  mapOf(type: 'session'): EntitiesMap<UnifiedClientSession>;
   mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
   mapOf(type: 'stream'): EntitiesMap<UnifiedChangeStream>;
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
@@ -126,13 +133,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
   getEntity(type: 'db', key: string, assertExists?: boolean): Db;
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
-  getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
+  getEntity(type: 'session', key: string, assertExists?: boolean): UnifiedClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
     const entity = this.get(key);
     if (!entity) {
-      if (assertExists) throw new Error(`Entity ${key} does not exist`);
+      if (assertExists) throw new Error(`Entity '${key}' does not exist`);
       return;
     }
     const ctor = ENTITY_CTORS.get(type);
@@ -163,7 +170,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const map = new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
-        const client = new UnifiedMongoClient(config.url(), entity.client);
+        const uri = config.url({ useMultipleMongoses: entity.client.useMultipleMongoses });
+        const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);
       } else if ('database' in entity) {
@@ -181,11 +189,60 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         );
         map.set(entity.collection.id, collection);
       } else if ('session' in entity) {
-        map.set(entity.session.id, null);
+        const client = map.getEntity('client', entity.session.client);
+
+        const options = Object.create(null);
+
+        if (entity.session.sessionOptions?.causalConsistency) {
+          options.causalConsistency = entity.session.sessionOptions?.causalConsistency;
+        }
+
+        if (entity.session.sessionOptions?.defaultTransactionOptions) {
+          options.defaultTransactionOptions = Object.create(null);
+          const defaultOptions = entity.session.sessionOptions.defaultTransactionOptions;
+          if (defaultOptions.readConcern) {
+            options.defaultTransactionOptions.readConcern = ReadConcern.fromOptions(
+              defaultOptions.readConcern
+            );
+          }
+          if (defaultOptions.writeConcern) {
+            options.defaultTransactionOptions.writeConcern = WriteConcern.fromOptions(
+              defaultOptions
+            );
+          }
+          if (defaultOptions.readPreference) {
+            options.defaultTransactionOptions.readPreference = ReadPreference.fromOptions(
+              defaultOptions.readPreference
+            );
+          }
+          if (typeof defaultOptions.maxCommitTimeMS === 'number') {
+            options.defaultTransactionOptions.maxCommitTimeMS = defaultOptions.maxCommitTimeMS;
+          }
+        }
+
+        const session = client.startSession(options) as UnifiedClientSession;
+        // targetedFailPoint operations need to access the client the session came from
+        session.client = client;
+
+        map.set(entity.session.id, session);
       } else if ('bucket' in entity) {
-        map.set(entity.bucket.id, null);
+        const db = map.getEntity('db', entity.bucket.database);
+
+        const options = Object.create(null);
+
+        if (entity.bucket.bucketOptions?.bucketName) {
+          options.bucketName = entity.bucket.bucketOptions?.bucketName;
+        }
+        if (entity.bucket.bucketOptions?.chunkSizeBytes) {
+          options.chunkSizeBytes = entity.bucket.bucketOptions?.chunkSizeBytes;
+        }
+        if (entity.bucket.bucketOptions?.readPreference) {
+          options.readPreference = entity.bucket.bucketOptions?.readPreference;
+        }
+
+        map.set(entity.bucket.id, new GridFSBucket(db, options));
       } else if ('stream' in entity) {
-        map.set(entity.stream.id, null);
+        throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       }

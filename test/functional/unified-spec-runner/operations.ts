@@ -1,135 +1,186 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
-import { Collection, Db } from '../../../src';
-import { ChangeStream, Document, InsertOneOptions } from '../../../src';
-import { BulkWriteResult } from '../../../src/bulk/common';
+import { Collection, Db, GridFSFile, MongoClient, ObjectId } from '../../../src';
+import { ReadConcern } from '../../../src/read_concern';
+import { ReadPreference } from '../../../src/read_preference';
+import { WriteConcern } from '../../../src/write_concern';
+import { Document, InsertOneOptions } from '../../../src';
 import { EventCollector } from '../../tools/utils';
-import { EntitiesMap } from './entities';
-import { expectErrorCheck, expectResultCheck } from './match';
-import type * as uni from './schema';
+import { EntitiesMap, UnifiedMongoClient } from './entities';
+import { expectErrorCheck, resultCheck } from './match';
+import type { OperationDescription } from './schema';
+import { CommandStartedEvent } from '../../../src/cmap/events';
 
-async function abortTransactionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
+interface OperationFunctionParams {
+  client: MongoClient;
+  operation: OperationDescription;
+  entities: EntitiesMap;
 }
-async function aggregateOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const dbOrCollection = entities.get(op.object) as Db | Collection;
+
+type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
+export const operations = new Map<string, RunOperationFn>();
+
+operations.set('abortTransaction', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
+  return session.abortTransaction();
+});
+
+operations.set('aggregate', async ({ entities, operation }) => {
+  const dbOrCollection = entities.get(operation.object) as Db | Collection;
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
-    throw new Error(`Operation object '${op.object}' must be a db or collection`);
+    throw new Error(`Operation object '${operation.object}' must be a db or collection`);
   }
   return dbOrCollection
-    .aggregate(op.arguments.pipeline, {
-      allowDiskUse: op.arguments.allowDiskUse,
-      batchSize: op.arguments.batchSize,
-      bypassDocumentValidation: op.arguments.bypassDocumentValidation,
-      maxTimeMS: op.arguments.maxTimeMS,
-      maxAwaitTimeMS: op.arguments.maxAwaitTimeMS,
-      collation: op.arguments.collation,
-      hint: op.arguments.hint,
-      out: op.arguments.out
+    .aggregate(operation.arguments.pipeline, {
+      allowDiskUse: operation.arguments.allowDiskUse,
+      batchSize: operation.arguments.batchSize,
+      bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
+      maxTimeMS: operation.arguments.maxTimeMS,
+      maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
+      collation: operation.arguments.collation,
+      hint: operation.arguments.hint,
+      out: operation.arguments.out
     })
     .toArray();
-}
-async function assertCollectionExistsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertCollectionNotExistsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertIndexExistsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertIndexNotExistsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertDifferentLsidOnLastTwoCommandsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSameLsidOnLastTwoCommandsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSessionDirtyOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSessionNotDirtyOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSessionPinnedOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSessionUnpinnedOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function assertSessionTransactionStateOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function bulkWriteOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<BulkWriteResult> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.bulkWrite(op.arguments.requests);
-}
-async function commitTransactionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const session = entities.getEntity('session', op.object);
-  return session.commitTransaction();
-}
-async function createChangeStreamOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<ChangeStream> {
-  const watchable = entities.get(op.object);
-  if (!('watch' in watchable)) {
-    throw new Error(`Entity ${op.object} must be watchable`);
+});
+
+operations.set('assertCollectionExists', async ({ operation, client }) => {
+  const collections = (
+    await client
+      .db(operation.arguments.databaseName)
+      .listCollections({}, { nameOnly: true })
+      .toArray()
+  ).map(({ name }) => name);
+  expect(collections).to.include(operation.arguments.collectionName);
+});
+
+operations.set('assertCollectionNotExists', async ({ operation, client }) => {
+  const collections = (
+    await client
+      .db(operation.arguments.databaseName)
+      .listCollections({}, { nameOnly: true })
+      .toArray()
+  ).map(({ name }) => name);
+  expect(collections).to.not.include(operation.arguments.collectionName);
+});
+
+operations.set('assertIndexExists', async ({ operation, client }) => {
+  const collection = client
+    .db(operation.arguments.databaseName)
+    .collection(operation.arguments.collectionName);
+  const indexes = (await collection.listIndexes().toArray()).map(({ name }) => name);
+  expect(indexes).to.include(operation.arguments.indexName);
+});
+
+operations.set('assertIndexNotExists', async ({ operation, client }) => {
+  const collection = client
+    .db(operation.arguments.databaseName)
+    .collection(operation.arguments.collectionName);
+  try {
+    expect(await collection.indexExists(operation.arguments.indexName)).to.be.true;
+  } catch (error) {
+    if (error.code === 26 || error.message.includes('ns does not exist')) {
+      return;
+    }
+    throw error;
   }
-  const changeStream = watchable.watch(op.arguments.pipeline, {
-    fullDocument: op.arguments.fullDocument,
-    maxAwaitTimeMS: op.arguments.maxAwaitTimeMS,
-    resumeAfter: op.arguments.resumeAfter,
-    startAfter: op.arguments.startAfter,
-    startAtOperationTime: op.arguments.startAtOperationTime,
-    batchSize: op.arguments.batchSize
+});
+
+operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.arguments.client);
+  expect(client.observedEvents.includes('commandStarted')).to.be.true;
+
+  const startedEvents = client.events.filter(
+    ev => ev instanceof CommandStartedEvent
+  ) as CommandStartedEvent[];
+
+  expect(startedEvents).to.have.length.gte(2);
+
+  const last = startedEvents[startedEvents.length - 1];
+  const secondLast = startedEvents[startedEvents.length - 2];
+
+  expect(last.command).to.have.property('lsid');
+  expect(secondLast.command).to.have.property('lsid');
+
+  expect(last.command.lsid.id.buffer.equals(secondLast.command.lsid.id.buffer)).to.be.false;
+});
+
+operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.arguments.client);
+  expect(client.observedEvents.includes('commandStarted')).to.be.true;
+
+  const startedEvents = client.events.filter(
+    ev => ev instanceof CommandStartedEvent
+  ) as CommandStartedEvent[];
+
+  expect(startedEvents).to.have.length.gte(2);
+
+  const last = startedEvents[startedEvents.length - 1];
+  const secondLast = startedEvents[startedEvents.length - 2];
+
+  expect(last.command).to.have.property('lsid');
+  expect(secondLast.command).to.have.property('lsid');
+
+  expect(last.command.lsid.id.buffer.equals(secondLast.command.lsid.id.buffer)).to.be.true;
+});
+
+operations.set('assertSessionDirty', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+  expect(session.serverSession.isDirty).to.be.true;
+});
+
+operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+  expect(session.serverSession.isDirty).to.be.false;
+});
+
+operations.set('assertSessionPinned', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+  expect(session.transaction.isPinned).to.be.false;
+});
+
+operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+  expect(session.transaction.isPinned).to.be.false;
+});
+
+operations.set('assertSessionTransactionState', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+
+  const transactionStateTranslation = {
+    none: 'NO_TRANSACTION',
+    starting: 'STARTING_TRANSACTION',
+    in_progress: 'TRANSACTION_IN_PROGRESS',
+    committed: 'TRANSACTION_COMMITTED',
+    aborted: 'TRANSACTION_ABORTED'
+  };
+
+  const driverTransactionStateName = transactionStateTranslation[operation.arguments.state];
+  expect(session.transaction.state).to.equal(driverTransactionStateName);
+});
+
+operations.set('bulkWrite', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.bulkWrite(operation.arguments.requests);
+});
+
+operations.set('commitTransaction', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
+  return session.commitTransaction();
+});
+
+operations.set('createChangeStream', async ({ entities, operation }) => {
+  const watchable = entities.get(operation.object);
+  if (!('watch' in watchable)) {
+    throw new Error(`Entity ${operation.object} must be watchable`);
+  }
+  const changeStream = watchable.watch(operation.arguments.pipeline, {
+    fullDocument: operation.arguments.fullDocument,
+    maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
+    resumeAfter: operation.arguments.resumeAfter,
+    startAfter: operation.arguments.startAfter,
+    startAtOperationTime: operation.arguments.startAtOperationTime,
+    batchSize: operation.arguments.batchSize
   });
   changeStream.eventCollector = new EventCollector(changeStream, ['init', 'change', 'error']);
 
@@ -143,281 +194,221 @@ async function createChangeStreamOperation(
       resolve(changeStream);
     });
   });
-}
-async function createCollectionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function createIndexOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function deleteOneOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.deleteOne(op.arguments.filter);
-}
-async function dropCollectionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function endSessionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function findOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  const { filter, sort, batchSize, limit } = op.arguments;
-  return collection.find(filter, { sort, batchSize, limit }).toArray();
-}
-async function findOneAndReplaceOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.findOneAndReplace(op.arguments.filter, op.arguments.replacement);
-}
-async function findOneAndUpdateOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  const returnOriginal = op.arguments.returnDocument === 'Before';
-  return (
-    await collection.findOneAndUpdate(op.arguments.filter, op.arguments.update, { returnOriginal })
-  ).value;
-}
-async function failPointOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const client = entities.getEntity('client', op.arguments.client);
-  return client.enableFailPoint(op.arguments.failPoint);
-}
-async function insertOneOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
+});
 
-  const session = entities.getEntity('session', op.arguments.session, false);
+operations.set('createCollection', async ({ entities, operation }) => {
+  const db = entities.getEntity('db', operation.object);
+  const session = entities.getEntity('session', operation.arguments.session, false);
+  await db.createCollection(operation.arguments.collection, { session });
+});
+
+operations.set('createIndex', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const session = entities.getEntity('session', operation.arguments.session, false);
+  await collection.createIndex(operation.arguments.keys, {
+    session,
+    name: operation.arguments.name
+  });
+});
+
+operations.set('deleteOne', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.deleteOne(operation.arguments.filter);
+});
+
+operations.set('dropCollection', async ({ entities, operation }) => {
+  const db = entities.getEntity('db', operation.object);
+  return await db.dropCollection(operation.arguments.collection);
+});
+
+operations.set('endSession', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
+  return session.endSession();
+});
+
+operations.set('find', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, sort, batchSize, limit } = operation.arguments;
+  return collection.find(filter, { sort, batchSize, limit }).toArray();
+});
+
+operations.set('findOneAndReplace', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.findOneAndReplace(operation.arguments.filter, operation.arguments.replacement);
+});
+
+operations.set('findOneAndUpdate', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const returnOriginal = operation.arguments.returnDocument === 'Before';
+  return (
+    await collection.findOneAndUpdate(operation.arguments.filter, operation.arguments.update, {
+      returnOriginal
+    })
+  ).value;
+});
+
+operations.set('failPoint', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.arguments.client);
+  return client.enableFailPoint(operation.arguments.failPoint);
+});
+
+operations.set('insertOne', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+
+  const session = entities.getEntity('session', operation.arguments.session, false);
 
   const options = {
     session
   } as InsertOneOptions;
 
-  return collection.insertOne(op.arguments.document, options);
-}
-async function insertManyOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
+  return collection.insertOne(operation.arguments.document, options);
+});
 
-  const session = entities.getEntity('session', op.arguments.session, false);
+operations.set('insertMany', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+
+  const session = entities.getEntity('session', operation.arguments.session, false);
 
   const options = {
     session,
-    ordered: op.arguments.ordered ?? true
+    ordered: operation.arguments.ordered ?? true
   };
 
-  return collection.insertMany(op.arguments.documents, options);
-}
-async function iterateUntilDocumentOrErrorOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const changeStream = entities.getEntity('stream', op.object);
+  return collection.insertMany(operation.arguments.documents, options);
+});
+
+operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
+  const changeStream = entities.getEntity('stream', operation.object);
   // Either change or error promise will finish
   return Promise.race([
     changeStream.eventCollector.waitAndShiftEvent('change'),
     changeStream.eventCollector.waitAndShiftEvent('error')
   ]);
-}
-async function listDatabasesOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function replaceOneOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.replaceOne(op.arguments.filter, op.arguments.replacement, {
-    bypassDocumentValidation: op.arguments.bypassDocumentValidation,
-    collation: op.arguments.collation,
-    hint: op.arguments.hint,
-    upsert: op.arguments.upsert
+});
+
+operations.set('listDatabases', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.object);
+  return client.db().admin().listDatabases();
+});
+
+operations.set('replaceOne', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.replaceOne(operation.arguments.filter, operation.arguments.replacement, {
+    bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
+    collation: operation.arguments.collation,
+    hint: operation.arguments.hint,
+    upsert: operation.arguments.upsert
   });
-}
-async function startTransactionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<void> {
-  const session = entities.getEntity('session', op.object);
+});
+
+operations.set('startTransaction', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
   session.startTransaction();
-}
-async function targetedFailPointOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function deleteOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function downloadOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function uploadOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function withTransactionOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  throw new Error('not implemented.');
-}
-async function countDocumentsOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<number> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.countDocuments(op.arguments.filter as Document);
-}
-async function deleteManyOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.deleteMany(op.arguments.filter);
-}
-async function distinctOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.distinct(op.arguments.fieldName as string, op.arguments.filter as Document);
-}
-async function estimatedDocumentCountOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<number> {
-  const collection = entities.getEntity('collection', op.object);
+});
+
+operations.set('targetedFailPoint', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.arguments.session);
+  expect(session.transaction.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
+  const client = session.client;
+  client.enableFailPoint(operation.arguments.failPoint);
+});
+
+operations.set('delete', async ({ entities, operation }) => {
+  const bucket = entities.getEntity('bucket', operation.object);
+  return bucket.delete(operation.arguments.id);
+});
+
+operations.set('download', async ({ entities, operation }) => {
+  const bucket = entities.getEntity('bucket', operation.object);
+
+  const stream = bucket.openDownloadStream(operation.arguments.id);
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on('data', chunk => chunks.push(...chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(chunks));
+  });
+});
+
+operations.set('upload', async ({ entities, operation }) => {
+  const bucket = entities.getEntity('bucket', operation.object);
+
+  const stream = bucket.openUploadStream(operation.arguments.filename, {
+    chunkSizeBytes: operation.arguments.chunkSizeBytes
+  });
+
+  return new Promise<ObjectId>((resolve, reject) => {
+    stream.end(Buffer.from(operation.arguments.source.$$hexBytes, 'hex'), (error, file) => {
+      if (error) reject(error);
+      resolve((file as GridFSFile)._id as ObjectId);
+    });
+  });
+});
+
+operations.set('withTransaction', async ({ entities, operation, client }) => {
+  const session = entities.getEntity('session', operation.object);
+
+  const options = {
+    readConcern: ReadConcern.fromOptions(operation.arguments),
+    writeConcern: WriteConcern.fromOptions(operation.arguments),
+    readPreference: ReadPreference.fromOptions(operation.arguments),
+    maxCommitTimeMS: operation.arguments.maxCommitTimeMS
+  };
+
+  return session.withTransaction(async () => {
+    for (const callbackOperation of operation.arguments.callback) {
+      await executeOperationAndCheck(callbackOperation, entities, client);
+    }
+  }, options);
+});
+
+operations.set('countDocuments', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.countDocuments(operation.arguments.filter as Document);
+});
+
+operations.set('deleteMany', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.deleteMany(operation.arguments.filter);
+});
+
+operations.set('distinct', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.distinct(
+    operation.arguments.fieldName as string,
+    operation.arguments.filter as Document
+  );
+});
+
+operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
   return collection.estimatedDocumentCount();
-}
-async function findOneAndDeleteOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.findOneAndDelete(op.arguments.filter);
-}
-async function runCommandOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const db = entities.getEntity('db', op.object);
-  return db.command(op.arguments.command);
-}
-async function updateManyOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.updateMany(op.arguments.filter, op.arguments.update);
-}
-async function updateOneOperation(
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-): Promise<Document> {
-  const collection = entities.getEntity('collection', op.object);
-  return collection.updateOne(op.arguments.filter, op.arguments.update);
-}
+});
 
-type RunOperationFn = (
-  entities: EntitiesMap,
-  op: uni.OperationDescription
-) => Promise<Document | number | void>;
-export const operations = new Map<string, RunOperationFn>();
+operations.set('findOneAndDelete', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.findOneAndDelete(operation.arguments.filter);
+});
 
-operations.set('abortTransaction', abortTransactionOperation);
-operations.set('aggregate', aggregateOperation);
-operations.set('assertCollectionExists', assertCollectionExistsOperation);
-operations.set('assertCollectionNotExists', assertCollectionNotExistsOperation);
-operations.set('assertIndexExists', assertIndexExistsOperation);
-operations.set('assertIndexNotExists', assertIndexNotExistsOperation);
-operations.set(
-  'assertDifferentLsidOnLastTwoCommands',
-  assertDifferentLsidOnLastTwoCommandsOperation
-);
-operations.set('assertSameLsidOnLastTwoCommands', assertSameLsidOnLastTwoCommandsOperation);
-operations.set('assertSessionDirty', assertSessionDirtyOperation);
-operations.set('assertSessionNotDirty', assertSessionNotDirtyOperation);
-operations.set('assertSessionPinned', assertSessionPinnedOperation);
-operations.set('assertSessionUnpinned', assertSessionUnpinnedOperation);
-operations.set('assertSessionTransactionState', assertSessionTransactionStateOperation);
-operations.set('bulkWrite', bulkWriteOperation);
-operations.set('commitTransaction', commitTransactionOperation);
-operations.set('createChangeStream', createChangeStreamOperation);
-operations.set('createCollection', createCollectionOperation);
-operations.set('createIndex', createIndexOperation);
-operations.set('deleteOne', deleteOneOperation);
-operations.set('dropCollection', dropCollectionOperation);
-operations.set('endSession', endSessionOperation);
-operations.set('find', findOperation);
-operations.set('findOneAndReplace', findOneAndReplaceOperation);
-operations.set('findOneAndUpdate', findOneAndUpdateOperation);
-operations.set('failPoint', failPointOperation);
-operations.set('insertOne', insertOneOperation);
-operations.set('insertMany', insertManyOperation);
-operations.set('iterateUntilDocumentOrError', iterateUntilDocumentOrErrorOperation);
-operations.set('listDatabases', listDatabasesOperation);
-operations.set('replaceOne', replaceOneOperation);
-operations.set('startTransaction', startTransactionOperation);
-operations.set('targetedFailPoint', targetedFailPointOperation);
-operations.set('delete', deleteOperation);
-operations.set('download', downloadOperation);
-operations.set('upload', uploadOperation);
-operations.set('withTransaction', withTransactionOperation);
+operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
+  const db = entities.getEntity('db', operation.object);
+  return db.command(operation.arguments.command);
+});
 
-// Versioned API adds these:
-operations.set('countDocuments', countDocumentsOperation);
-operations.set('deleteMany', deleteManyOperation);
-operations.set('distinct', distinctOperation);
-operations.set('estimatedDocumentCount', estimatedDocumentCountOperation);
-operations.set('findOneAndDelete', findOneAndDeleteOperation);
-operations.set('runCommand', runCommandOperation);
-operations.set('updateMany', updateManyOperation);
-operations.set('updateOne', updateOneOperation);
+operations.set('updateMany', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.updateMany(operation.arguments.filter, operation.arguments.update);
+});
+
+operations.set('updateOne', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.updateOne(operation.arguments.filter, operation.arguments.update);
+});
 
 export async function executeOperationAndCheck(
-  operation: uni.OperationDescription,
-  entities: EntitiesMap
+  operation: OperationDescription,
+  entities: EntitiesMap,
+  client: MongoClient
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
@@ -425,18 +416,14 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc(entities, operation);
+    result = await opFunc({ entities, operation, client });
   } catch (error) {
-    // FIXME: Remove when project is done:
-    if (error.message === 'not implemented.') {
-      throw error;
-    }
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
+      return;
     } else {
-      expect.fail(`Operation ${operation.name} failed with ${error.message}`);
+      throw error;
     }
-    return;
   }
 
   // We check the positive outcome here so the try-catch above doesn't catch our chai assertions
@@ -446,7 +433,7 @@ export async function executeOperationAndCheck(
   }
 
   if (operation.expectResult) {
-    expect(expectResultCheck(result, operation.expectResult, entities)).to.be.true;
+    resultCheck(result, operation.expectResult, entities);
   }
 
   if (operation.saveResultAsEntity) {

@@ -1,13 +1,25 @@
 'use strict';
 const url = require('url');
 const qs = require('querystring');
-const util = require('util');
+const { expect } = require('chai');
 
 const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
 const { parseURI } = require('../../../src/connection_string');
 const { HostAddress } = require('../../../src/utils');
+
+/**
+ * @typedef {Object} UrlOptions
+ * @property {string} [db] - dbName to put in the path section override
+ * @property {string} [replicaSet] - replicaSet name override
+ * @property {string} [username] - Username for auth section
+ * @property {string} [password] - Password for auth section
+ * @property {string} [authMechanism] - Authmechanism name
+ * @property {Record<string, any>} [authMechanismProperties] - additional options for auth mechanism
+ * @property {string} [authSource] - authSource override in searchParams of URI
+ * @property {boolean} [useMultipleMongoses] - if set will use concatenate all known HostAddresses in URI
+ */
 
 /**
  * @param {Record<string, any>} obj
@@ -168,75 +180,56 @@ class TestConfiguration {
     return new Topology(hosts, options);
   }
 
-  url(username, password, options) {
-    options = options || {};
+  /**
+   * Construct a connection URL using nodejs's whatwg URL similar to how connection_string.ts
+   * works
+   *
+   * @param {UrlOptions} [options] - overrides and settings for URI generation
+   */
+  url(options) {
+    options = { db: this.options.db, replicaSet: this.options.replicaSet, ...options };
 
-    const query = {};
-    if (this.options.replicaSet) {
-      Object.assign(query, { replicaSet: this.options.replicaSet });
+    const FILLER_HOST = 'fillerHost';
+
+    const url = new URL(`mongodb://${FILLER_HOST}`);
+
+    if (options.replicaSet) {
+      url.searchParams.append('replicaSet', options.replicaSet);
     }
 
-    let multipleHosts;
-    if (this.options.hosts.length > 1) {
-      // NOTE: The only way to force a sharded topology with the driver is to duplicate
-      //       the host entry. This will eventually be solved by autodetection.
-      if (this.topologyType === TopologyType.Sharded) {
-        const firstHost = this.options.hostAddresses[0];
-        multipleHosts = `${firstHost.host}:${firstHost.port}`;
-      } else {
-        multipleHosts = this.options.hostAddresses
-          .reduce((built, host) => {
-            built.push(typeof host.port === 'number' ? `${host.host}:${host.port}` : host.host);
-            return built;
-          }, [])
-          .join(',');
-      }
-    }
+    url.pathname = `/${options.db}`;
 
-    /** @type {Record<string, any>} */
-    const urlObject = {
-      protocol: 'mongodb',
-      slashes: true,
-      pathname: `/${this.options.db}`,
-      query
-    };
+    if (options.username) url.username = options.username;
+    if (options.password) url.password = options.password;
 
-    if (multipleHosts) {
-      Object.assign(urlObject, { hostname: '%s' });
-    } else {
-      Object.assign(urlObject, {
-        hostname: this.options.host,
-        port: this.options.port
-      });
-    }
-
-    if (username || password) {
-      urlObject.auth = password == null ? username : `${username}:${password}`;
-
-      if (options.authMechanism || this.options.authMechanism) {
-        Object.assign(query, {
-          authMechanism: options.authMechanism || this.options.authMechanism
-        });
+    if (options.username || options.password) {
+      if (options.authMechanism) {
+        url.searchParams.append('authMechanism', options.authMechanism);
       }
 
-      if (options.authMechanismProperties || this.options.authMechanismProperties) {
-        Object.assign(query, {
-          authMechanismProperties: convertToConnStringMap(
-            options.authMechanismProperties || this.options.authMechanismProperties
-          )
-        });
+      if (options.authMechanismProperties) {
+        url.searchParams.append(
+          'authMechanismProperties',
+          convertToConnStringMap(options.authMechanismProperties)
+        );
       }
 
       if (options.authSource) {
-        query.authSource = options.authSource;
+        url.searchParams.append('authSource', options.authSource);
       }
     }
 
-    if (multipleHosts) {
-      return util.format(url.format(urlObject), multipleHosts);
+    let actualHostsString;
+    if (options.useMultipleMongoses) {
+      expect(this.options.hostAddresses).to.have.length.greaterThan(1);
+      actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+    } else {
+      actualHostsString = this.options.hostAddresses[0].toString();
     }
 
-    return url.format(urlObject);
+    const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);
+
+    return connectionString;
   }
 
   writeConcernMax() {

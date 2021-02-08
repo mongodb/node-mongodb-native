@@ -1,16 +1,20 @@
 import { expect } from 'chai';
 import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
-import type { TestConfiguration } from './unified.test';
 import { gte as semverGte, lte as semverLte } from 'semver';
-import { CollectionOptions, DbOptions } from '../../../src';
+import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
+import { TestConfiguration } from './runner';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
 }
 
-export function topologySatisfies(config: TestConfiguration, r: RunOnRequirement): boolean {
+export async function topologySatisfies(
+  config: TestConfiguration,
+  r: RunOnRequirement,
+  utilClient: MongoClient
+): Promise<boolean> {
   let ok = true;
   if (r.minServerVersion) {
     const minVersion = patchVersion(r.minServerVersion);
@@ -28,8 +32,14 @@ export function topologySatisfies(config: TestConfiguration, r: RunOnRequirement
       ReplicaSetWithPrimary: 'replicaset',
       Sharded: 'sharded'
     }[config.topologyType];
-    if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
-    ok &&= r.topologies.includes(topologyType);
+
+    if (r.topologies.includes('sharded-replicaset')) {
+      const shards = await utilClient.db('config').collection('shards').find({}).toArray();
+      ok &&= shards.every(shard => shard.host.split(',').length > 1);
+    } else {
+      if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
+      ok &&= r.topologies.includes(topologyType);
+    }
   }
 
   if (r.serverParameters) {
