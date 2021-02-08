@@ -100,7 +100,7 @@ describe('GridFS Stream', function() {
   });
 
   it('destroy publishes provided error', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], node: '>=8' } },
     test: function(done) {
       var configuration = this.configuration;
       var GridFSBucket = configuration.require.GridFSBucket;
