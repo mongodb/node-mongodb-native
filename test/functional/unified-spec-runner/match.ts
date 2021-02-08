@@ -257,7 +257,7 @@ export function expectErrorCheck(
     return;
   }
 
-  if (expected.errorContains) {
+  if (expected.errorContains != null) {
     expect(error.message).to.include(expected.errorContains);
   }
 
@@ -267,15 +267,15 @@ export function expectErrorCheck(
     return;
   }
 
-  if (expected.errorCode) {
+  if (expected.errorCode != null) {
     expect(error).to.have.property('code', expected.errorCode);
   }
 
-  if (expected.errorCodeName) {
+  if (expected.errorCodeName != null) {
     expect(error).to.have.property('codeName', expected.errorCodeName);
   }
 
-  if (expected.errorLabelsContain) {
+  if (expected.errorLabelsContain != null) {
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         error.hasErrorLabel(errorLabel),
@@ -284,7 +284,7 @@ export function expectErrorCheck(
     }
   }
 
-  if (expected.errorLabelsOmit) {
+  if (expected.errorLabelsOmit != null) {
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
         error.hasErrorLabel(errorLabel),
@@ -293,7 +293,7 @@ export function expectErrorCheck(
     }
   }
 
-  if (expected.expectResult) {
+  if (expected.expectResult != null) {
     resultCheck(error, expected.expectResult, entities);
   }
 }
