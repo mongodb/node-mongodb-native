@@ -41,8 +41,8 @@ class ReplSetFixture {
         arbiters: [this.arbiterServer.uri()]
       });
 
-      this.defineReplSetStates();
-      // this.configureMessageHandlers();
+      if (!options.doNotInitStates) this.defineReplSetStates();
+      if (!options.doNotInitHandlers) this.configureMessageHandlers();
     });
   }
 
