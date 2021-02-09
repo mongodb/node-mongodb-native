@@ -1374,3 +1374,10 @@ export const DEFAULT_PK_FACTORY = {
     return new ObjectId();
   }
 };
+
+export function applyServerApiVersion(finalCmd: Document, serverApi: Document): void {
+  const { version, strict, deprecationErrors } = serverApi;
+  finalCmd.apiVersion = version;
+  if (strict != null) finalCmd.apiStrict = strict;
+  if (deprecationErrors != null) finalCmd.apiDeprecationErrors = deprecationErrors;
+}

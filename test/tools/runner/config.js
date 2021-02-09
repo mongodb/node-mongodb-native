@@ -22,11 +22,12 @@ function convertToConnStringMap(obj) {
 }
 
 class TestConfiguration {
-  constructor(uri, context) {
+  constructor(uri, context, serverApiVersion) {
     const { url, hosts } = parseURI(uri);
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.topologyType = context.topologyType;
     this.version = context.version;
+    this.serverApiVersion = serverApiVersion;
     this.clientSideEncryption = context.clientSideEncryption;
     this.parameters = undefined;
     this.options = {
@@ -88,7 +89,8 @@ class TestConfiguration {
     if (typeof dbOptions === 'string') {
       return new MongoClient(
         dbOptions,
-        Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions)
+        Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions),
+        { version: this.serverApiVersion }
       );
     }
 

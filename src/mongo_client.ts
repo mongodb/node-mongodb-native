@@ -42,6 +42,17 @@ export const LogLevel = {
 } as const;
 
 /** @public */
+export enum ServerApiVersion {
+  v1 = '1'
+}
+
+export interface ServerApi {
+  version: string | ServerApiVersion;
+  strict?: boolean;
+  deprecationErrors?: boolean;
+}
+
+/** @public */
 export type LogLevelId = typeof LogLevel[keyof typeof LogLevel];
 
 /** @public */
@@ -237,6 +248,7 @@ export interface MongoClientPrivate {
 }
 
 const kOptions = Symbol('options');
+const kServerApi = Symbol('serverApi');
 
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -289,17 +301,24 @@ export class MongoClient extends EventEmitter {
    */
   [kOptions]: MongoOptions;
 
+  /**
+   * The MongoDB Server API version
+   * @internal
+   * */
+  [kServerApi]: ServerApi;
+
   // debugging
   originalUri;
   originalOptions;
 
-  constructor(url: string, options?: MongoClientOptions) {
+  constructor(url: string, options?: MongoClientOptions, serverApi?: ServerApi) {
     super();
 
     this.originalUri = url;
     this.originalOptions = options;
 
     this[kOptions] = parseOptions(url, this, options);
+    this[kServerApi] = Object.freeze({ version: ServerApiVersion.v1, ...serverApi });
 
     // The internal state
     this.s = {
@@ -317,6 +336,10 @@ export class MongoClient extends EventEmitter {
 
   get options(): Readonly<MongoOptions> {
     return Object.freeze({ ...this[kOptions] });
+  }
+
+  get serverApi(): Readonly<ServerApi> {
+    return this[kServerApi];
   }
 
   get autoEncrypter(): AutoEncrypter | undefined {

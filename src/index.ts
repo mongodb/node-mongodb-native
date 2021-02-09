@@ -170,6 +170,8 @@ export type {
   Auth,
   DriverInfo,
   MongoOptions,
+  ServerApi,
+  ServerApiVersion,
   SupportedNodeConnectionOptions,
   SupportedTLSConnectionOptions,
   SupportedTLSSocketOptions,

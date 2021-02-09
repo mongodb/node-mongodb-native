@@ -60,6 +60,7 @@ const OPERATING_SYSTEMS = [
   )
 );
 
+// TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth']);
 
 const TASKS = [];

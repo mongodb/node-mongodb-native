@@ -131,6 +131,8 @@ export class Server extends EventEmitter {
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
 
+    options.serverApi = topology.serverApi;
+
     const poolOptions = { hostAddress: description.hostAddress, ...options };
 
     this.s = {

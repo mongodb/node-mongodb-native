@@ -11,7 +11,8 @@ import {
   Callback,
   MongoDBNamespace,
   maxWireVersion,
-  HostAddress
+  HostAddress,
+  applyServerApiVersion
 } from '../utils';
 import {
   AnyError,
@@ -38,7 +39,7 @@ import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_pr
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { isTransactionCommand } from '../transactions';
 import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
-import type { SupportedNodeConnectionOptions } from '../mongo_client';
+import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -107,6 +108,7 @@ export interface ConnectionOptions
   hostAddress: HostAddress;
   // Settings
   autoEncrypter?: AutoEncrypter;
+  serverApi?: ServerApi;
   monitorCommands: boolean;
   connectionType: typeof Connection;
   credentials?: MongoCredentials;
@@ -136,6 +138,7 @@ export class Connection extends EventEmitter {
   closed: boolean;
   destroyed: boolean;
   lastIsMasterMS?: number;
+  serverApi?: ServerApi;
   /** @internal */
   [kDescription]: StreamDescription;
   /** @internal */
@@ -168,6 +171,7 @@ export class Connection extends EventEmitter {
     this.address = streamIdentifier(stream);
     this.socketTimeout = options.socketTimeout ?? 0;
     this.monitorCommands = options.monitorCommands;
+    this.serverApi = options.serverApi;
     this.closed = false;
     this.destroyed = false;
 
@@ -362,6 +366,11 @@ export class Connection extends EventEmitter {
       : new Query(cmdNs, finalCmd, commandOptions);
 
     const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
+
+    if (!inTransaction && !finalCmd.getMore && this.serverApi) {
+      applyServerApiVersion(finalCmd, this.serverApi);
+    }
+
     const commandResponseHandler = inTransaction
       ? (err?: AnyError, ...args: Document[]) => {
           // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.

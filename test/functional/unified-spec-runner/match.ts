@@ -145,8 +145,8 @@ export function resultCheck(
       let ok = true;
       const expectedEntries = Object.entries(expected);
 
-      if (depth > 1 && Object.keys(actual).length !== Object.keys(expected).length) {
-        throw new Error(`[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`);
+      if (depth > 1 && Object.keys(actual).length < Object.keys(expected).length) {
+        throw new Error(`[${Object.keys(actual)}] length < [${Object.keys(expected)}]`);
       }
 
       for (const [key, value] of expectedEntries) {

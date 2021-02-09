@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
-import type { TestConfiguration } from './unified.test';
+import type { TestConfiguration } from './runner';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions } from '../../../src';
 import { isDeepStrictEqual } from 'util';

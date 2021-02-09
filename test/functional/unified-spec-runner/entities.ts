@@ -8,7 +8,7 @@ import type {
   CommandSucceededEvent
 } from '../../../src/cmap/events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
-import { TestConfiguration } from './unified.test';
+import { TestConfiguration } from './runner';
 import { expect } from 'chai';
 
 interface UnifiedChangeStream extends ChangeStream {
@@ -30,7 +30,7 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(url: string, description: ClientEntity) {
-    super(url, { monitorCommands: true, ...description.uriOptions });
+    super(url, { monitorCommands: true, ...description.uriOptions }, description.serverApi);
     this.events = [];
     this.failPoints = [];
     this.ignoredEvents = [

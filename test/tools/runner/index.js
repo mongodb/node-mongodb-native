@@ -9,6 +9,7 @@ const mock = require('../mock');
 const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const filters = [];
 
 function initializeFilters(client, callback) {
@@ -77,7 +78,7 @@ before(function (_done) {
 
       // replace this when mocha supports dynamic skipping with `afterEach`
       filterOutTests(this._runnable.parent);
-      this.configuration = new TestConfiguration(MONGODB_URI, context);
+      this.configuration = new TestConfiguration(MONGODB_URI, context, MONGODB_API_VERSION);
       done();
     });
   });

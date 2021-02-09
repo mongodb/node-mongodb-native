@@ -153,7 +153,7 @@ function createTopology(
   callback: Callback<Topology>
 ) {
   // Create the topology
-  const topology = new Topology(options.hosts, options);
+  const topology = new Topology(options.hosts, options, mongoClient.serverApi);
   // Events can be emitted before initialization is complete so we have to
   // save the reference to the topology on the client ASAP if the event handlers need to access it
   mongoClient.topology = topology;
