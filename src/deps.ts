@@ -90,6 +90,11 @@ export interface AutoEncryptionOptions {
       accessKeyId: string;
       /** The secret access key used for the AWS KMS provider */
       secretAccessKey: string;
+      /**
+       * An optional AWS session token that will be used as the
+       * X-Amz-Security-Token header for AWS requests.
+       */
+      sessionToken?: string;
     };
     /** Configuration options for using 'local' as your KMS provider */
     local?: {
