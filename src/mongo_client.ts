@@ -46,6 +46,7 @@ export enum ServerApiVersion {
   v1 = '1'
 }
 
+/** @public */
 export interface ServerApi {
   version: string | ServerApiVersion;
   strict?: boolean;

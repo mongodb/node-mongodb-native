@@ -3755,6 +3755,65 @@ describe('Cursor', function () {
     }
   );
 
+  describe('#clone', function () {
+    let client;
+    let db;
+    let collection;
+
+    beforeEach(function () {
+      client = this.configuration.newClient({ w: 1 });
+
+      return client.connect().then(client => {
+        db = client.db(this.configuration.db);
+        collection = db.collection('test_coll');
+      });
+    });
+
+    afterEach(function () {
+      return client.close();
+    });
+
+    context('when executing on a find cursor', function () {
+      it('removes the existing session from the cloned cursor', function () {
+        const docs = [{ name: 'test1' }, { name: 'test2' }];
+        return collection.insertMany(docs).then(() => {
+          const cursor = collection.find({}, { batchSize: 1 });
+          return cursor
+            .next()
+            .then(doc => {
+              expect(doc).to.exist;
+              const clonedCursor = cursor.clone();
+              expect(clonedCursor.cursorOptions.session).to.not.exist;
+              expect(clonedCursor.session).to.not.exist;
+            })
+            .finally(() => {
+              return cursor.close();
+            });
+        });
+      });
+    });
+
+    context('when executing on an aggregation cursor', function () {
+      it('removes the existing session from the cloned cursor', function () {
+        const docs = [{ name: 'test1' }, { name: 'test2' }];
+        return collection.insertMany(docs).then(() => {
+          const cursor = collection.aggregate([{ $match: {} }], { batchSize: 1 });
+          return cursor
+            .next()
+            .then(doc => {
+              expect(doc).to.exist;
+              const clonedCursor = cursor.clone();
+              expect(clonedCursor.cursorOptions.session).to.not.exist;
+              expect(clonedCursor.session).to.not.exist;
+            })
+            .finally(() => {
+              return cursor.close();
+            });
+        });
+      });
+    });
+  });
+
   it('should return a promise when no callback supplied to forEach method', function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });

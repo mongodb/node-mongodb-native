@@ -269,6 +269,16 @@ describe('Collection', function () {
       });
     });
 
+    it('should permit insert of dot and dollar keys if requested', function () {
+      const collection = db.collection('test_invalid_key_names');
+      return Promise.all([
+        collection.insertOne({ hel$lo: 0 }, { checkKeys: false }),
+        collection.insertOne({ hello: { $hello: 0 } }, { checkKeys: false }), // embedded document can have a leading dollar
+        collection.insertOne({ 'hel.lo': 0 }, { checkKeys: false }),
+        collection.drop()
+      ]);
+    });
+
     it('should fail due to illegal listCollections', function (done) {
       db.collection(5, err => {
         expect(err.message).to.equal('collection name must be a String');
