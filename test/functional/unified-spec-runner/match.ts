@@ -129,11 +129,10 @@ export function resultCheck(
 
       if (depth > 1) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
-        // expect(
-        //   Object.keys(actual),
-        //   `[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`
-        // ).to.have.lengthOf(Object.keys(expected).length);
-        expect(Object.keys(actual)).to.include.members(Object.keys(expected));
+        expect(
+          Object.keys(actual),
+          `[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`
+        ).to.have.lengthOf(Object.keys(expected).length);
       }
 
       for (const [key, value] of expectedEntries) {

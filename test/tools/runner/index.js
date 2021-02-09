@@ -61,7 +61,8 @@ before(function (_done) {
   //   )} topology`
   // );
 
-  const client = new MongoClient(MONGODB_URI);
+  const options = MONGODB_API_VERSION ? { serverApi: MONGODB_API_VERSION } : {};
+  const client = new MongoClient(MONGODB_URI, options);
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
@@ -76,9 +77,14 @@ before(function (_done) {
         return;
       }
 
+      // Ensure test MongoClients set a serverApi parameter when required
+      if (MONGODB_API_VERSION) {
+        Object.assign(context, { serverApi: MONGODB_API_VERSION });
+      }
+
       // replace this when mocha supports dynamic skipping with `afterEach`
       filterOutTests(this._runnable.parent);
-      this.configuration = new TestConfiguration(MONGODB_URI, context, MONGODB_API_VERSION);
+      this.configuration = new TestConfiguration(MONGODB_URI, context);
       done();
     });
   });

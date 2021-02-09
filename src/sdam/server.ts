@@ -44,6 +44,7 @@ import type { ServerHeartbeatSucceededEvent } from './events';
 import type { ClientSession } from '../sessions';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
+import type { ServerApi } from '../mongo_client';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -106,6 +107,7 @@ export interface ServerPrivate {
 export class Server extends EventEmitter {
   /** @internal */
   s: ServerPrivate;
+  serverApi?: ServerApi;
   clusterTime?: ClusterTime;
   ismaster?: Document;
   [kMonitor]: Monitor;
@@ -131,7 +133,7 @@ export class Server extends EventEmitter {
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
 
-    options.serverApi = topology.serverApi;
+    this.serverApi = options.serverApi = topology.serverApi;
 
     const poolOptions = { hostAddress: description.hostAddress, ...options };
 

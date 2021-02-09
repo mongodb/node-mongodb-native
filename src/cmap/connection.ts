@@ -11,8 +11,7 @@ import {
   Callback,
   MongoDBNamespace,
   maxWireVersion,
-  HostAddress,
-  applyServerApiVersion
+  HostAddress
 } from '../utils';
 import {
   AnyError,
@@ -366,10 +365,6 @@ export class Connection extends EventEmitter {
       : new Query(cmdNs, finalCmd, commandOptions);
 
     const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
-
-    if (!inTransaction && !finalCmd.getMore && this.serverApi) {
-      applyServerApiVersion(finalCmd, this.serverApi);
-    }
 
     const commandResponseHandler = inTransaction
       ? (err?: AnyError, ...args: Document[]) => {

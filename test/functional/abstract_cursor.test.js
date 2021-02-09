@@ -143,9 +143,9 @@ describe('AbstractCursor', function () {
   });
 
   context('#tryNext', function () {
-    it(
-      'should return control to the user if an empty batch is returned',
-      withClientV2(function (client, done) {
+    it('should return control to the user if an empty batch is returned', {
+      metadata: { requires: { apiVersion: false } },
+      test: withClientV2(function (client, done) {
         const db = client.db();
         db.createCollection('try_next', { capped: true, size: 10000000 }, () => {
           const coll = db.collection('try_next');
@@ -173,7 +173,7 @@ describe('AbstractCursor', function () {
           });
         });
       })
-    );
+    });
   });
 
   context('#clone', function () {

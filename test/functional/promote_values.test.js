@@ -208,6 +208,7 @@ describe('Promote Values', function () {
   it('Should correctly promoteValues when calling getMore on queries', {
     metadata: {
       requires: {
+        apiVersion: false,
         topology: ['single', 'ssl', 'wiredtiger']
       }
     },

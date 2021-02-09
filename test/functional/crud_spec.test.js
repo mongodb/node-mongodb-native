@@ -69,6 +69,10 @@ describe('CRUD spec', function () {
       describe(scenarioName, function () {
         scenario.tests.forEach(scenarioTest => {
           beforeEach(() => testContext.db.dropDatabase());
+          // FIXME: NODE-2950
+          if (scenarioTest.description.match(/Find with limit, sort, and batchsize/)) {
+            metadata.requires.apiVersion = false;
+          }
           it(scenarioTest.description, {
             metadata,
             test: function () {

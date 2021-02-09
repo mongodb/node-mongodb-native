@@ -21,7 +21,8 @@ import {
   MongoClient,
   MongoClientOptions,
   MongoOptions,
-  PkFactory
+  PkFactory,
+  ServerApi
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
@@ -571,6 +572,15 @@ export const OPTIONS = {
   },
   autoEncryption: {
     type: 'record'
+  },
+  serverApi: {
+    target: 'serverApi',
+    transform({ values: [version] }): ServerApi {
+      if (typeof version === 'string') {
+        return { version };
+      }
+      return version as ServerApi;
+    }
   },
   checkKeys: {
     type: 'boolean'

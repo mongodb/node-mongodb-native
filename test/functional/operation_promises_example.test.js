@@ -33,7 +33,7 @@ describe('Operation (Promises)', function () {
   it('aggregationExample2WithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
+    metadata: { requires: { apiVersion: false, mongodb: '>2.1.0', topology: ['single'] } },
 
     test: function () {
       var configuration = this.configuration;

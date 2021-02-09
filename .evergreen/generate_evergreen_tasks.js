@@ -88,6 +88,28 @@ const BASE_TASKS = [];
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology => BASE_TASKS.push(makeTask({ mongoVersion, topology })));
 });
+BASE_TASKS.push({
+  name: `test-latest-server-v1-api`,
+  tags: ['latest', 'server', 'v1-api'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        TOPOLOGY: 'server',
+        REQUIRE_API_VERSION: '1'
+      }
+    },
+    {
+      func: 'run tests',
+      vars: {
+        MONGODB_API_VERSION: '1',
+        NO_EXIT: ''
+      }
+    }
+  ]
+});
 
 // manually added tasks
 Array.prototype.push.apply(TASKS, [

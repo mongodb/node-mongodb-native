@@ -4,7 +4,14 @@ import { Connection, ConnectionOptions, CryptoConnection } from './connection';
 import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType, ns } from '../utils';
+import {
+  makeClientMetadata,
+  ClientMetadata,
+  Callback,
+  CallbackWithType,
+  ns,
+  applyServerApiVersion
+} from '../utils';
 import {
   MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
@@ -94,6 +101,10 @@ function performInitialHandshake(
     if (typeof options.connectTimeoutMS === 'number') {
       // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
       handshakeOptions.socketTimeout = options.connectTimeoutMS;
+    }
+
+    if (conn.serverApi) {
+      applyServerApiVersion(handshakeDoc, conn.serverApi);
     }
 
     const start = new Date().getTime();

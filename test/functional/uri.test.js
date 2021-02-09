@@ -74,7 +74,7 @@ describe('URI', function () {
   it('should correctly connect using uri encoded username and password', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function (done) {
       var self = this;

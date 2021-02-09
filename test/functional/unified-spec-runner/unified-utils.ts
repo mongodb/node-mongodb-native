@@ -33,9 +33,9 @@ export async function topologySatisfies(
       Sharded: 'sharded'
     }[config.topologyType];
 
-    if (r.topologies.includes('sharded-replicaset')) {
+    if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
       const shards = await utilClient.db('config').collection('shards').find({}).toArray();
-      ok &&= shards.every(shard => shard.host.split(',').length > 1);
+      ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
     } else {
       if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
       ok &&= r.topologies.includes(topologyType);

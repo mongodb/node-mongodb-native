@@ -63,7 +63,7 @@ describe('Max Staleness', function () {
           .find({})
           .toArray(function (err) {
             expect(err).to.not.exist;
-            expect(test.checkCommand).to.eql({
+            expect(test.checkCommand).to.containSubset({
               $query: { find: 'test', filter: {} },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
@@ -98,7 +98,7 @@ describe('Max Staleness', function () {
           .find({})
           .toArray(function (err) {
             expect(err).to.not.exist;
-            expect(test.checkCommand).to.eql({
+            expect(test.checkCommand).to.containSubset({
               $query: { find: 'test', filter: {} },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
@@ -134,7 +134,7 @@ describe('Max Staleness', function () {
             .find({})
             .toArray(function (err) {
               expect(err).to.not.exist;
-              expect(test.checkCommand).to.eql({
+              expect(test.checkCommand).to.containSubset({
                 $query: { find: 'test', filter: {} },
                 $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
@@ -169,7 +169,7 @@ describe('Max Staleness', function () {
           .withReadPreference(readPreference)
           .toArray(function (err) {
             expect(err).to.not.exist;
-            expect(test.checkCommand).to.eql({
+            expect(test.checkCommand).to.containSubset({
               $query: { find: 'test', filter: {} },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });

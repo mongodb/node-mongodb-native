@@ -34,13 +34,13 @@ function convertToConnStringMap(obj) {
 }
 
 class TestConfiguration {
-  constructor(uri, context, serverApiVersion) {
+  constructor(uri, context) {
     const { url, hosts } = parseURI(uri);
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.topologyType = context.topologyType;
     this.version = context.version;
-    this.serverApiVersion = serverApiVersion;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.serverApi = context.serverApi;
     this.parameters = undefined;
     this.options = {
       hosts,
@@ -97,17 +97,17 @@ class TestConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
+    const defaultOptions = { minHeartbeatFrequencyMS: 100 };
+    if (this.serverApi) {
+      Object.assign(defaultOptions, { serverApi: this.serverApi });
+    }
     // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new MongoClient(
-        dbOptions,
-        Object.assign({ minHeartbeatFrequencyMS: 100 }, serverOptions),
-        { version: this.serverApiVersion }
-      );
+      return new MongoClient(dbOptions, Object.assign(defaultOptions, serverOptions));
     }
 
     dbOptions = dbOptions || {};
-    serverOptions = Object.assign({}, { minHeartbeatFrequencyMS: 100 }, serverOptions);
+    serverOptions = Object.assign({}, defaultOptions, serverOptions);
 
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
@@ -166,6 +166,7 @@ class TestConfiguration {
     if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
       throw new Error(`Cannot use options to specify host/port, must be in ${connectionString}`);
     }
+
     return new MongoClient(connectionString, serverOptions);
   }
 

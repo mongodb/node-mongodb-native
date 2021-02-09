@@ -117,6 +117,7 @@ describe('Operation Examples', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
+        apiVersion: false,
         mongodb: '>2.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
@@ -203,6 +204,7 @@ describe('Operation Examples', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
+        apiVersion: false,
         mongodb: '>2.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
@@ -378,6 +380,7 @@ describe('Operation Examples', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
+        apiVersion: false,
         mongodb: '>2.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
@@ -466,6 +469,7 @@ describe('Operation Examples', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
+        apiVersion: false,
         mongodb: '>2.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
@@ -560,6 +564,7 @@ describe('Operation Examples', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
+        apiVersion: false,
         mongodb: '>2.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
@@ -3513,7 +3518,7 @@ describe('Operation Examples', function () {
    * @example-method removeUser
    */
   it('shouldCorrectlyAddAndRemoveUser', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { apiVersion: false, topology: 'single' } },
 
     test: function (done) {
       var configuration = this.configuration;

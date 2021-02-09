@@ -274,7 +274,7 @@ export function makeUpdateStatement(
     op.upsert = options.upsert;
   }
 
-  if (typeof options.multi === 'boolean') {
+  if (options.multi) {
     op.multi = options.multi;
   }
 
