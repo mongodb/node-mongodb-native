@@ -1,10 +1,7 @@
 'use strict';
 
 const mock = require('../../tools/mock');
-const ObjectId = require('bson').ObjectId;
-const Timestamp = require('bson').Timestamp;
-const Binary = require('bson').Binary;
-const Buffer = require('safe-buffer').Buffer;
+const { ObjectId, Timestamp, Binary } = require('bson');
 
 class ReplSetFixture {
   constructor() {
