@@ -95,18 +95,29 @@ export class TopologyDescription {
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
     // set to null.
-    const readableServers = Array.from(this.servers.values()).filter(
-      (s: ServerDescription) => s.isReadable
-    );
+    this.logicalSessionTimeoutMinutes = undefined;
+    for (const [, server] of this.servers) {
+      if (server.isReadable) {
+        if (server.logicalSessionTimeoutMinutes == null) {
+          // If any of the servers have a null logicalSessionsTimeout, then the whole topology does
+          this.logicalSessionTimeoutMinutes = undefined;
+          break;
+        }
 
-    this.logicalSessionTimeoutMinutes = readableServers.reduce(
-      (result: number | undefined, server: ServerDescription) => {
-        if (server.logicalSessionTimeoutMinutes == null) return;
-        if (result == null) return server.logicalSessionTimeoutMinutes;
-        return Math.min(result, server.logicalSessionTimeoutMinutes);
-      },
-      undefined
-    );
+        if (this.logicalSessionTimeoutMinutes === undefined) {
+          // First server with a non null logicalSessionsTimeout
+          this.logicalSessionTimeoutMinutes = server.logicalSessionTimeoutMinutes;
+          continue;
+        }
+
+        // Always select the smaller of the:
+        // current server logicalSessionsTimeout and the topologies logicalSessionsTimeout
+        this.logicalSessionTimeoutMinutes = Math.min(
+          this.logicalSessionTimeoutMinutes,
+          server.logicalSessionTimeoutMinutes
+        );
+      }
+    }
   }
 
   /**
