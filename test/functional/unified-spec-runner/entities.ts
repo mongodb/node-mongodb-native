@@ -40,9 +40,11 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      serverApi:
-        description.serverApi ||
-        (process.env.MONGODB_API_VERSION && { version: process.env.MONGODB_API_VERSION })
+      serverApi: description.serverApi
+        ? description.serverApi
+        : process.env.MONGODB_API_VERSION
+        ? { version: process.env.MONGODB_API_VERSION }
+        : null
     });
     this.events = [];
     this.failPoints = [];
