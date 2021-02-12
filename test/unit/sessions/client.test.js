@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('../../tools/mock');
+const { ReplSetFixture } = require('../core/common');
 
 const test = {};
 describe('Sessions - client/unit', function () {
@@ -34,6 +35,75 @@ describe('Sessions - client/unit', function () {
 
           client.close(done);
         });
+      }
+    });
+
+    it('should throw an exception if sessions are not supported on some servers', {
+      metadata: { requires: { topology: 'single' } },
+      test() {
+        const replicaSetMock = new ReplSetFixture();
+        let testClient;
+        return replicaSetMock
+          .setup({ doNotInitHandlers: true })
+          .then(() => {
+            replicaSetMock.firstSecondaryServer.setMessageHandler(request => {
+              var doc = request.document;
+              if (doc.ismaster) {
+                const ismaster = replicaSetMock.firstSecondaryStates[0];
+                ismaster.logicalSessionTimeoutMinutes = 20;
+                request.reply(ismaster);
+              } else if (doc.endSessions) {
+                request.reply({ ok: 1 });
+              }
+            });
+
+            replicaSetMock.secondSecondaryServer.setMessageHandler(request => {
+              var doc = request.document;
+              if (doc.ismaster) {
+                const ismaster = replicaSetMock.secondSecondaryStates[0];
+                ismaster.logicalSessionTimeoutMinutes = 10;
+                request.reply(ismaster);
+              } else if (doc.endSessions) {
+                request.reply({ ok: 1 });
+              }
+            });
+
+            replicaSetMock.arbiterServer.setMessageHandler(request => {
+              var doc = request.document;
+              if (doc.ismaster) {
+                const ismaster = replicaSetMock.arbiterStates[0];
+                ismaster.logicalSessionTimeoutMinutes = 30;
+                request.reply(ismaster);
+              } else if (doc.endSessions) {
+                request.reply({ ok: 1 });
+              }
+            });
+
+            replicaSetMock.primaryServer.setMessageHandler(request => {
+              var doc = request.document;
+              if (doc.ismaster) {
+                const ismaster = replicaSetMock.primaryStates[0];
+                ismaster.logicalSessionTimeoutMinutes = null;
+                request.reply(ismaster);
+              } else if (doc.endSessions) {
+                request.reply({ ok: 1 });
+              }
+            });
+
+            return replicaSetMock.uri();
+          })
+          .then(uri => {
+            const client = this.configuration.newClient(uri);
+            return client.connect();
+          })
+          .then(client => {
+            testClient = client;
+            expect(client.topology.s.description.logicalSessionTimeoutMinutes).to.not.exist;
+            expect(() => {
+              client.startSession();
+            }).to.throw(/Current topology does not support sessions/);
+          })
+          .finally(() => (testClient ? testClient.close() : null));
       }
     });
 
