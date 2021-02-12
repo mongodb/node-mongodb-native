@@ -16,8 +16,7 @@ const semver = require('semver');
 
 class ClientSideEncryptionFilter {
   initializeFilter(client, context, callback) {
-    const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
-    const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+    const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
       mongodbClientEncryption = require('mongodb-client-encryption').extension(mongodb);
@@ -25,14 +24,13 @@ class ClientSideEncryptionFilter {
       // Do Nothing
     }
 
-    this.enabled = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && mongodbClientEncryption);
+    this.enabled = !!(CSFLE_KMS_PROVIDERS && mongodbClientEncryption);
 
     // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,
-      AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY
+      CSFLE_KMS_PROVIDERS
     };
 
     callback();
