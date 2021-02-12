@@ -249,7 +249,11 @@ function replaceIllegalXMLCharacters(string) {
 const ANSI_ESCAPE_REGEX = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function outputToXML(output) {
   function cdata(str) {
-    return `<![CDATA[${str.split(ANSI_ESCAPE_REGEX).join('').split(']]>').join('\\]\\]\\>')}]]>`;
+    return `<![CDATA[${String(str)
+      .split(ANSI_ESCAPE_REGEX)
+      .join('')
+      .split(']]>')
+      .join('\\]\\]\\>')}]]>`;
   }
 
   function makeTag(name, attributes, selfClose, content) {

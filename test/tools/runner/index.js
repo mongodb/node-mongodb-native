@@ -97,8 +97,6 @@ const chai = require('chai');
 chai.use(require('sinon-chai'));
 chai.use(require('chai-subset'));
 chai.use(require('../../functional/spec-runner/matcher').default);
-chai.config.includeStack = true;
-chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 
 // install signal handlers for printing open/active handles

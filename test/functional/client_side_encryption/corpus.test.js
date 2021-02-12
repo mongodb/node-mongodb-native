@@ -6,11 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const BSON = require('bson');
 const { EJSON } = require('bson');
-const chai = require('chai');
-const expect = chai.expect;
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
+const { expect } = require('chai');
 
 describe('Client Side Encryption Corpus', function () {
   const metadata = {

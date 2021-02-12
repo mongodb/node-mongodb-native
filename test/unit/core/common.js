@@ -8,30 +8,40 @@ class ReplSetFixture {
     this.electionIds = [new ObjectId(), new ObjectId()];
   }
 
+  uri(dbName) {
+    return `mongodb://${this.primaryServer.uri()},${this.firstSecondaryServer.uri()},${this.secondSecondaryServer.uri()}/${
+      dbName || 'test'
+    }?replicaSet=rs`;
+  }
+
   setup(options) {
     options = options || {};
     const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER_36;
 
-    return Promise.all([mock.createServer(), mock.createServer(), mock.createServer()]).then(
-      servers => {
-        this.servers = servers;
-        this.primaryServer = servers[0];
-        this.firstSecondaryServer = servers[1];
-        this.arbiterServer = servers[2];
+    return Promise.all([
+      mock.createServer(),
+      mock.createServer(),
+      mock.createServer(),
+      mock.createServer()
+    ]).then(servers => {
+      this.servers = servers;
+      this.primaryServer = servers[0];
+      this.firstSecondaryServer = servers[1];
+      this.secondSecondaryServer = servers[2];
+      this.arbiterServer = servers[3];
 
-        this.defaultFields = Object.assign({}, ismaster, {
-          __nodejs_mock_server__: true,
-          setName: 'rs',
-          setVersion: 1,
-          electionId: this.electionIds[0],
-          hosts: this.servers.map(server => server.uri()),
-          arbiters: [this.arbiterServer.uri()]
-        });
+      this.defaultFields = Object.assign({}, ismaster, {
+        __nodejs_mock_server__: true,
+        setName: 'rs',
+        setVersion: 1,
+        electionId: this.electionIds[0],
+        hosts: this.servers.map(server => server.uri()),
+        arbiters: [this.arbiterServer.uri()]
+      });
 
-        this.defineReplSetStates();
-        this.configureMessageHandlers();
-      }
-    );
+      if (!options.doNotInitStates) this.defineReplSetStates();
+      if (!options.doNotInitHandlers) this.configureMessageHandlers();
+    });
   }
 
   defineReplSetStates() {
@@ -52,6 +62,16 @@ class ReplSetFixture {
         me: this.firstSecondaryServer.uri(),
         primary: this.primaryServer.uri(),
         tags: { loc: 'sf' }
+      })
+    ];
+
+    this.secondSecondaryStates = [
+      Object.assign({}, this.defaultFields, {
+        ismaster: false,
+        secondary: true,
+        me: this.secondSecondaryServer.uri(),
+        primary: this.primaryServer.uri(),
+        tags: { loc: 'la' }
       })
     ];
 

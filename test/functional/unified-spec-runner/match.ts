@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { isDeepStrictEqual } from 'util';
 import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
 import {
   CommandFailedEvent,
@@ -107,61 +106,55 @@ TYPE_MAP.set(
   actual => (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual)
 );
 
-export function expectResultCheck(
+export function resultCheck(
   actual: Document,
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
   path: string[] = [],
   depth = 0
-): boolean {
-  const ok = resultCheck(actual, expected, entities, path, depth);
-  if (ok === false) {
-    const pathString = path.join('');
-    const expectedJSON = JSON.stringify(expected, undefined, 2);
-    const actualJSON = JSON.stringify(actual, undefined, 2);
-    expect.fail(`Unable to match ${expectedJSON} to ${actualJSON} at ${pathString}`);
-  }
-  return ok;
-}
-
-export function resultCheck(
-  actual: Document,
-  expected: Document | number | string | boolean,
-  entities: EntitiesMap,
-  path: string[],
-  depth = 0
-): boolean {
-  if (typeof expected === 'object' && expected !== null) {
+): void {
+  if (typeof expected === 'object' && expected) {
     // Expected is an object
     // either its a special operator or just an object to check equality against
 
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      return specialCheck(actual, expected, entities, path, depth);
+      specialCheck(actual, expected, entities, path, depth);
+      return;
     } else {
       // Just a plain object, however this object can contain special operations
       // So we need to recurse over each key,value
-      let ok = true;
       const expectedEntries = Object.entries(expected);
 
-      if (depth > 1 && Object.keys(actual).length !== Object.keys(expected).length) {
-        throw new Error(`[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`);
+      if (depth > 1) {
+        expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
+        expect(
+          Object.keys(actual),
+          `[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`
+        ).to.have.lengthOf(Object.keys(expected).length);
       }
 
       for (const [key, value] of expectedEntries) {
         path.push(Array.isArray(expected) ? `[${key}]` : `.${key}`); // record what key we're at
         depth += 1;
-        ok &&= expectResultCheck(actual[key], value, entities, path, depth);
+        resultCheck(actual[key], value, entities, path, depth);
         depth -= 1;
         path.pop(); // if the recursion was successful we can drop the tested key
       }
-      return ok;
     }
   } else {
     // Here's our recursion base case
-    // expected is: number | string | boolean | null
-    return isDeepStrictEqual(actual, expected);
+    // expected is: number | Long | string | boolean | null
+    if (Long.isLong(actual) && typeof expected === 'number') {
+      // Long requires special equality check
+      expect(actual.equals(expected)).to.be.true;
+    } else if (Long.isLong(expected) && typeof actual === 'number') {
+      // Long requires special equality check
+      expect(expected.equals(actual)).to.be.true;
+    } else {
+      expect(actual).to.equal(expected);
+    }
   }
 }
 
@@ -172,45 +165,56 @@ export function specialCheck(
   path: string[] = [],
   depth = 0
 ): boolean {
-  let ok = false;
   if (isUnsetOrMatchesOperator(expected)) {
     // $$unsetOrMatches
-    ok = true; // start with true assumption
-    if (actual === null || actual === undefined) ok = true;
+    if (actual === null || actual === undefined) return;
     else {
       depth += 1;
-      ok &&= expectResultCheck(actual, expected.$$unsetOrMatches, entities, path, depth);
+      resultCheck(actual, expected.$$unsetOrMatches, entities, path, depth);
       depth -= 1;
     }
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
-    if (!entity) ok = false;
-    else ok = isDeepStrictEqual(actual, entity);
+    if (
+      typeof actual === 'object' && // an object
+      actual && // that isn't null
+      'equals' in actual && // with an equals
+      typeof actual.equals === 'function' // method
+    ) {
+      expect(actual.equals(entity)).to.be.true;
+    } else {
+      expect(actual).to.equal(entity);
+    }
   } else if (isMatchesHexBytesOperator(expected)) {
     // $$matchesHexBytes
     const expectedBuffer = Buffer.from(expected.$$matchesHexBytes, 'hex');
-    ok = expectedBuffer.every((byte, index) => byte === actual[index]);
+    expect(expectedBuffer.every((byte, index) => byte === actual[index])).to.be.true;
   } else if (isSessionLsidOperator(expected)) {
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
-    if (!session) ok = false;
-    else ok = session.id.id.buffer.equals(actual.lsid.id.buffer);
+    expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
+    const entitySessionHex = session.id.id.buffer.toString('hex').toUpperCase();
+    const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
+    expect(
+      entitySessionHex,
+      `Session entity ${expected.$$sessionLsid} does not match lsid`
+    ).to.equal(actualSessionHex);
   } else if (isTypeOperator(expected)) {
     // $$type
+    let ok: boolean;
     const types = Array.isArray(expected.$$type) ? expected.$$type : [expected.$$type];
     for (const type of types) {
       ok ||= TYPE_MAP.get(type)(actual);
     }
+    expect(ok, `Expected [${actual}] to be one of [${types}]`).to.be.true;
   } else if (isExistsOperator(expected)) {
-    // $$exists - unique, this op uses the path to check if the key is (not) in actual
+    // $$exists
     const actualExists = actual !== undefined && actual !== null;
-    ok = (expected.$$exists && actualExists) || (!expected.$$exists && !actualExists);
+    expect((expected.$$exists && actualExists) || (!expected.$$exists && !actualExists)).to.be.true;
   } else {
-    throw new Error(`Unknown special operator: ${JSON.stringify(expected)}`);
+    expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
-
-  return ok;
 }
 
 export function matchesEvents(
@@ -225,14 +229,14 @@ export function matchesEvents(
     const expectedEvent = expected[index];
 
     if (expectedEvent.commandStartedEvent && actualEvent instanceof CommandStartedEvent) {
-      expectResultCheck(actualEvent, expectedEvent.commandStartedEvent, entities, [
+      resultCheck(actualEvent, expectedEvent.commandStartedEvent, entities, [
         `events[${index}].commandStartedEvent`
       ]);
     } else if (
       expectedEvent.commandSucceededEvent &&
       actualEvent instanceof CommandSucceededEvent
     ) {
-      expectResultCheck(actualEvent, expectedEvent.commandSucceededEvent, entities, [
+      resultCheck(actualEvent, expectedEvent.commandSucceededEvent, entities, [
         `events[${index}].commandSucceededEvent`
       ]);
     } else if (expectedEvent.commandFailedEvent && actualEvent instanceof CommandFailedEvent) {
@@ -253,49 +257,43 @@ export function expectErrorCheck(
     return;
   }
 
-  if (expected.errorContains) {
-    if (error.message.includes(expected.errorContains)) {
-      throw new Error(
-        `Error message was supposed to contain '${expected.errorContains}' but had '${error.message}'`
-      );
-    }
+  if (expected.errorContains != null) {
+    expect(error.message).to.include(expected.errorContains);
   }
 
   if (!(error instanceof MongoError)) {
-    throw new Error(`Assertions need ${error} to be a MongoError`);
+    // if statement asserts type for TS, expect will always fail
+    expect(error).to.be.instanceOf(MongoError);
+    return;
   }
 
-  if (expected.errorCode) {
-    if (error.code !== expected.errorCode) {
-      throw new Error(`${error} was supposed to have code '${expected.errorCode}'`);
-    }
+  if (expected.errorCode != null) {
+    expect(error).to.have.property('code', expected.errorCode);
   }
 
-  if (expected.errorCodeName) {
-    if (error.codeName !== expected.errorCodeName) {
-      throw new Error(`${error} was supposed to have '${expected.errorCodeName}' codeName`);
-    }
+  if (expected.errorCodeName != null) {
+    expect(error).to.have.property('codeName', expected.errorCodeName);
   }
 
-  if (expected.errorLabelsContain) {
+  if (expected.errorLabelsContain != null) {
     for (const errorLabel of expected.errorLabelsContain) {
-      if (!error.hasErrorLabel(errorLabel)) {
-        throw new Error(`${error} was supposed to have '${errorLabel}'`);
-      }
+      expect(
+        error.hasErrorLabel(errorLabel),
+        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}]`
+      ).to.be.true;
     }
   }
 
-  if (expected.errorLabelsOmit) {
+  if (expected.errorLabelsOmit != null) {
     for (const errorLabel of expected.errorLabelsOmit) {
-      if (error.hasErrorLabel(errorLabel)) {
-        throw new Error(`${error} was not supposed to have '${errorLabel}'`);
-      }
+      expect(
+        error.hasErrorLabel(errorLabel),
+        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}]`
+      ).to.be.false;
     }
   }
 
-  if (expected.expectResult) {
-    if (!expectResultCheck(error, expected.expectResult, entities)) {
-      throw new Error(`${error} supposed to match result ${JSON.stringify(expected.expectResult)}`);
-    }
+  if (expected.expectResult != null) {
+    resultCheck(error, expected.expectResult, entities);
   }
 }

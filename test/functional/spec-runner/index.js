@@ -21,9 +21,6 @@ function promiseTry(callback) {
 
 chai.use(require('chai-subset'));
 chai.use(require('./matcher').default);
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
 
 function escape(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
