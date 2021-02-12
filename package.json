@@ -61,6 +61,7 @@
     "madge": "^3.9.0",
     "mocha": "^7.1.1",
     "mocha-sinon": "^2.1.0",
+    "mongodb-extjson": "^2.1.5",
     "mongodb-mock-server": "^2.0.1",
     "nyc": "^15.1.0",
     "prettier": "^2.0.5",
