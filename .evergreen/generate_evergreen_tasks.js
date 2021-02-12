@@ -396,9 +396,10 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
       { func: 'run aws auth test with regular aws credentials' },
       { func: 'run aws auth test with assume role credentials' },
       { func: 'run aws auth test with aws EC2 credentials' },
-      { func: 'run aws auth test with aws credentials as environment variables' },
-      { func: 'run aws auth test with aws credentials and session token as environment variables' },
-      { func: 'run aws ECS auth test' }
+      // FIXME: NODE-3113
+      // { func: 'run aws auth test with aws credentials as environment variables' },
+      // { func: 'run aws auth test with aws credentials and session token as environment variables' },
+      // { func: 'run aws ECS auth test' }
     ]
   });
 });

@@ -27,7 +27,7 @@ describe('MONGODB-AWS', function () {
 
   it('should authorize when successfully authenticated', function (done) {
     const config = this.configuration;
-    const client = config.newClient(); // use the URI built by the test environment
+    const client = config.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
     client.connect(err => {
       expect(err).to.not.exist;
       this.defer(() => client.close());
