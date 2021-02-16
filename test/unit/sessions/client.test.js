@@ -16,7 +16,7 @@ describe('Sessions', function() {
 
     it('should throw an exception if sessions are not supported', {
       metadata: { requires: { topology: 'single' } },
-      test: function(done) {
+      test() {
         test.server.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -27,14 +27,24 @@ describe('Sessions', function() {
         });
 
         const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
-        client.connect(function(err, client) {
-          expect(err).to.not.exist;
-          expect(() => {
-            client.startSession();
-          }).to.throw(/Current topology does not support sessions/);
-
-          client.close(done);
-        });
+        return client
+          .connect()
+          .then(function(client) {
+            const session = client.startSession();
+            return client
+              .db()
+              .collection('t')
+              .insertOne({ a: 1 }, { session });
+          })
+          .then(() => {
+            expect.fail('Expected an error to be thrown about not supporting sessions');
+          })
+          .catch(error => {
+            expect(error.message).to.equal('Current topology does not support sessions');
+          })
+          .then(() => {
+            return client.close();
+          });
       }
     });
 
@@ -42,6 +52,7 @@ describe('Sessions', function() {
       metadata: { requires: { topology: 'single' } },
       test() {
         const replicaSetMock = new ReplSetFixture();
+        let client;
         return replicaSetMock
           .setup({ doNotInitHandlers: true })
           .then(() => {
@@ -92,14 +103,23 @@ describe('Sessions', function() {
             return replicaSetMock.uri();
           })
           .then(uri => {
-            const client = this.configuration.newClient(uri);
+            client = this.configuration.newClient(uri);
             return client.connect();
           })
           .then(client => {
-            expect(client.topology.s.description.logicalSessionTimeoutMinutes).to.not.exist;
-            expect(() => {
-              client.startSession();
-            }).to.throw(/Current topology does not support sessions/);
+            const session = client.startSession();
+            return client
+              .db()
+              .collection('t')
+              .insertOne({ a: 1 }, { session });
+          })
+          .then(() => {
+            expect.fail('Expected an error to be thrown about not supporting sessions');
+          })
+          .catch(error => {
+            expect(error.message).to.equal('Current topology does not support sessions');
+          })
+          .then(() => {
             return client.close();
           });
       }
