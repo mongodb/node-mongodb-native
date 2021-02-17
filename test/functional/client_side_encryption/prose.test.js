@@ -4,9 +4,8 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const EJSON = require('mongodb-extjson');
 const getKmsProviders = localKey => {
-  const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
   if (localKey) {
     result.local = { key: localKey };
   }
