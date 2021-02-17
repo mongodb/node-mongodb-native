@@ -16,7 +16,7 @@ import {
 import { deprecate } from 'util';
 import { connect } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
-import type { Logger } from './logger';
+import type { Logger, LoggerLevelId } from './logger';
 import type { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
@@ -32,17 +32,6 @@ import type { TcpNetConnectOpts } from 'net';
 import type { SrvPoller } from './sdam/srv_polling';
 import type { Connection } from './cmap/connection';
 import type { LEGAL_TLS_SOCKET_OPTIONS, LEGAL_TCP_SOCKET_OPTIONS } from './cmap/connect';
-
-/** @public */
-export const LogLevel = {
-  error: 'error',
-  warn: 'warn',
-  info: 'info',
-  debug: 'debug'
-} as const;
-
-/** @public */
-export type LogLevelId = typeof LogLevel[keyof typeof LogLevel];
 
 /** @public */
 export interface DriverInfo {
@@ -205,7 +194,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
   promiseLibrary?: any;
   /** The logging level */
-  loggerLevel?: LogLevelId;
+  loggerLevel?: LoggerLevelId;
   /** Custom logger object */
   logger?: Logger;
   /** Enable command monitoring for this client */

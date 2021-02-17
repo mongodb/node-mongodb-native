@@ -68,13 +68,16 @@ try {
 } catch {} // eslint-disable-line
 
 /** @public */
-export const enum AutoEncryptionLoggerLevels {
-  FatalError = 0,
-  Error = 1,
-  Warning = 2,
-  Info = 3,
-  Trace = 4
-}
+export const AutoEncryptionLoggerLevel = Object.freeze({
+  FatalError: 0,
+  Error: 1,
+  Warning: 2,
+  Info: 3,
+  Trace: 4
+} as const);
+
+/** @public */
+export type AutoEncryptionLoggerLevelId = typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -146,7 +149,7 @@ export interface AutoEncryptionOptions {
   bypassAutoEncryption?: boolean;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
-    logger?: (level: AutoEncryptionLoggerLevels, message: string) => void;
+    logger?: (level: AutoEncryptionLoggerLevelId, message: string) => void;
   };
   extraOptions?: {
     /**

@@ -1,10 +1,10 @@
-import { format as f } from 'util';
+import { format } from 'util';
 import { MongoError } from './error';
 
 // Filters for classes
 const classFilters: any = {};
 let filteredClasses: any = {};
-let level: LoggerLevel;
+let level: LoggerLevelId;
 
 // Save the process id
 const pid = process.pid;
@@ -13,12 +13,19 @@ const pid = process.pid;
 let currentLogger: LoggerFunction = console.warn;
 
 /** @public */
-export enum LoggerLevel {
-  ERROR = 'error',
-  WARN = 'warn',
-  INFO = 'info',
-  DEBUG = 'debug'
-}
+export const LoggerLevel = Object.freeze({
+  ERROR: 'error',
+  WARN: 'warn',
+  INFO: 'info',
+  DEBUG: 'debug',
+  error: 'error',
+  warn: 'warn',
+  info: 'info',
+  debug: 'debug'
+} as const);
+
+/** @public */
+export type LoggerLevelId = typeof LoggerLevel[keyof typeof LoggerLevel];
 
 /** @public */
 export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
@@ -26,7 +33,7 @@ export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 /** @public */
 export interface LoggerOptions {
   logger?: LoggerFunction;
-  loggerLevel?: LoggerLevel;
+  loggerLevel?: LoggerLevelId;
 }
 
 /**
@@ -76,7 +83,7 @@ export class Logger {
         (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       const dateTime = new Date().getTime();
-      const msg = f('[%s-%s:%s] %s %s', 'DEBUG', this.className, pid, dateTime, message);
+      const msg = format('[%s-%s:%s] %s %s', 'DEBUG', this.className, pid, dateTime, message);
       const state = {
         type: LoggerLevel.DEBUG,
         message,
@@ -103,7 +110,7 @@ export class Logger {
         (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       const dateTime = new Date().getTime();
-      const msg = f('[%s-%s:%s] %s %s', 'WARN', this.className, pid, dateTime, message);
+      const msg = format('[%s-%s:%s] %s %s', 'WARN', this.className, pid, dateTime, message);
       const state = {
         type: LoggerLevel.WARN,
         message,
@@ -130,7 +137,7 @@ export class Logger {
         (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       const dateTime = new Date().getTime();
-      const msg = f('[%s-%s:%s] %s %s', 'INFO', this.className, pid, dateTime, message);
+      const msg = format('[%s-%s:%s] %s %s', 'INFO', this.className, pid, dateTime, message);
       const state = {
         type: LoggerLevel.INFO,
         message,
@@ -157,7 +164,7 @@ export class Logger {
         (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       const dateTime = new Date().getTime();
-      const msg = f('[%s-%s:%s] %s %s', 'ERROR', this.className, pid, dateTime, message);
+      const msg = format('[%s-%s:%s] %s %s', 'ERROR', this.className, pid, dateTime, message);
       const state = {
         type: LoggerLevel.ERROR,
         message,
@@ -238,7 +245,7 @@ export class Logger {
    *
    * @param newLevel - Set current log level (debug, warn, info, error)
    */
-  static setLevel(newLevel: LoggerLevel): void {
+  static setLevel(newLevel: LoggerLevelId): void {
     if (
       newLevel !== LoggerLevel.INFO &&
       newLevel !== LoggerLevel.ERROR &&
