@@ -1,4 +1,6 @@
 'use strict';
+const MongoClient = require('../../index').MongoClient;
+const MONGODB_WARNING_CODE = require('../../lib/utils').MONGODB_WARNING_CODE;
 const exec = require('child_process').exec;
 const chai = require('chai');
 const expect = chai.expect;
@@ -35,6 +37,19 @@ describe('Deprecation Warnings', function() {
     }
   });
 
+  it('should carry the driver warning code', function() {
+    const client = new MongoClient(this.configuration.url(), { madeUpOption: 3 });
+    let warning;
+    process.once('warning', w => {
+      warning = w;
+    });
+    return client.connect().then(() => {
+      expect(warning).to.exist;
+      expect(warning.code).to.equal(MONGODB_WARNING_CODE);
+      return client.close();
+    });
+  });
+
   it('node --trace-deprecation flag should print stack trace to stderr', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
@@ -54,7 +69,8 @@ describe('Deprecation Warnings', function() {
 
           // ensure warning message matches expected
           expect(warning).to.equal(
-            'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
+            '[MONGODB DRIVER] DeprecationWarning: testDeprecationFlags option [maxScan]' +
+              defaultMessage
           );
 
           // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
