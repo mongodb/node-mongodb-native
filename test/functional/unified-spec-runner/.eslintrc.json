@@ -6,7 +6,6 @@
     "plugins": [
         "@typescript-eslint",
         "prettier",
-        "promise",
         "eslint-plugin-tsdoc"
     ],
     "extends": [

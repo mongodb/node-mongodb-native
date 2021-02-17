@@ -2245,7 +2245,7 @@ describe('Cursor', function () {
         collection.insert(docs, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
-          collection.ensureIndex({ _keywords: 1 }, configuration.writeConcernMax(), err => {
+          collection.createIndex({ _keywords: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
 
             collection
@@ -2633,7 +2633,7 @@ describe('Cursor', function () {
         col.insert([{ i: 1 }, { i: 2 }], { writeConcern: { w: 1 } }, err => {
           expect(err).to.not.exist;
 
-          col.ensureIndex({ i: 1 }, err => {
+          col.createIndex({ i: 1 }, err => {
             expect(err).to.not.exist;
 
             col.find({ i: 1 }, { hint: '_id_' }).count((err, count) => {
@@ -2647,7 +2647,7 @@ describe('Cursor', function () {
                 col.find({ i: 1 }, { hint: 'BAD HINT' }).count(err => {
                   test.ok(err != null);
 
-                  col.ensureIndex({ x: 1 }, { sparse: true }, err => {
+                  col.createIndex({ x: 1 }, { sparse: true }, err => {
                     expect(err).to.not.exist;
 
                     col.find({ i: 1 }, { hint: 'x_1' }).count((err, count) => {
@@ -3330,7 +3330,7 @@ describe('Cursor', function () {
           expect(err).to.not.exist;
 
           // ensure index of createdAt index
-          collection.ensureIndex({ createdAt: 1 }, err => {
+          collection.createIndex({ createdAt: 1 }, err => {
             expect(err).to.not.exist;
 
             // insert all docs

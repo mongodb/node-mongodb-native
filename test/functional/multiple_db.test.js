@@ -78,7 +78,9 @@ describe('Multiple Databases', function () {
 
         db_instance.collection('counters', function (err, collection) {
           expect(err).to.not.exist;
-          collection.findAndModify({}, {}, { $inc: { db: 1 } }, { new: true }, function (err) {
+          collection.findOneAndUpdate({}, { $inc: { db: 1 } }, { returnOriginal: false }, function (
+            err
+          ) {
             expect(err).to.not.exist;
             client.close(done);
           });

@@ -4,6 +4,7 @@ import type { Document } from '../bson';
 
 /**
  * Emitted when server description changes, but does NOT include changes to the RTT.
+ * @public
  * @category Event
  */
 export class ServerDescriptionChangedEvent {
@@ -32,6 +33,7 @@ export class ServerDescriptionChangedEvent {
 
 /**
  * Emitted when server is initialized.
+ * @public
  * @category Event
  */
 export class ServerOpeningEvent {
@@ -49,6 +51,7 @@ export class ServerOpeningEvent {
 
 /**
  * Emitted when server is closed.
+ * @public
  * @category Event
  */
 export class ServerClosedEvent {
@@ -91,6 +94,7 @@ export class TopologyDescriptionChangedEvent {
 
 /**
  * Emitted when topology is initialized.
+ * @public
  * @category Event
  */
 export class TopologyOpeningEvent {
@@ -105,6 +109,7 @@ export class TopologyOpeningEvent {
 
 /**
  * Emitted when topology is closed.
+ * @public
  * @category Event
  */
 export class TopologyClosedEvent {
@@ -121,6 +126,7 @@ export class TopologyClosedEvent {
  * Emitted when the server monitor’s ismaster command is started - immediately before
  * the ismaster command is serialized into raw BSON and written to the socket.
  *
+ * @public
  * @category Event
  */
 export class ServerHeartbeatStartedEvent {
@@ -135,6 +141,7 @@ export class ServerHeartbeatStartedEvent {
 
 /**
  * Emitted when the server monitor’s ismaster succeeds.
+ * @public
  * @category Event
  */
 export class ServerHeartbeatSucceededEvent {
@@ -155,6 +162,7 @@ export class ServerHeartbeatSucceededEvent {
 
 /**
  * Emitted when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception.
+ * @public
  * @category Event
  */
 export class ServerHeartbeatFailedEvent {

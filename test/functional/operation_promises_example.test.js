@@ -484,12 +484,12 @@ describe('Operation (Promises)', function () {
   });
 
   /**
-   * Example of a how to drop all the indexes on a collection using dropAllIndexes with a Promise
+   * Example of a how to drop all the indexes on a collection using dropIndexes with a Promise
    *
    * @example-class Collection
-   * @example-method dropAllIndexes
+   * @example-method dropIndexes
    */
-  it('dropAllIndexesExample1WithPromises', {
+  it('dropIndexesExample1WithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function () {
@@ -512,7 +512,7 @@ describe('Operation (Promises)', function () {
             test.ok(r);
 
             // Drop the collection
-            return db.collection('dropExample1_with_promise').dropAllIndexes();
+            return db.collection('dropExample1_with_promise').dropIndexes();
           })
           .then(function (reply) {
             test.ok(reply);
@@ -565,7 +565,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex(
+            return collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
             );
@@ -633,7 +633,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return db.ensureIndex(
+            return db.createIndex(
               'ensureIndexExample1_with_promise',
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
@@ -700,7 +700,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex(
+            return collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
             );
@@ -915,11 +915,10 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Simple findAndModify command returning the new document
-            return collection.findAndModify(
+            return collection.findOneAndUpdate(
               { a: 1 },
-              [['a', 1]],
               { $set: { b1: 1 } },
-              { new: true }
+              { returnOriginal: false }
             );
           })
           .then(function (doc) {
@@ -928,12 +927,7 @@ describe('Operation (Promises)', function () {
 
             // Simple findAndModify command returning the new document and
             // removing it at the same time
-            return collection.findAndModify(
-              { b: 1 },
-              [['b', 1]],
-              { $set: { b: 2 } },
-              { remove: true }
-            );
+            return collection.findOneAndUpdate({ b: 1 }, { $set: { b: 2 } }, { remove: true });
           })
           .then(function (doc) {
             test.ok(doc);
@@ -946,11 +940,10 @@ describe('Operation (Promises)', function () {
 
             // Simple findAndModify command performing an upsert and returning the new document
             // executing the command safely
-            return collection.findAndModify(
+            return collection.findOneAndUpdate(
               { d: 1 },
-              [['b', 1]],
-              { d: 1, f: 1 },
-              { new: true, upsert: true, writeConcern: { w: 1 } }
+              { $set: { d: 1, f: 1 } },
+              { returnOriginal: false, upsert: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (doc) {
@@ -964,12 +957,12 @@ describe('Operation (Promises)', function () {
   });
 
   /**
-   * An example of using findAndRemove using a Promise.
+   * An example of using findOneAndDelete using a Promise.
    *
    * @example-class Collection
-   * @example-method findAndRemove
+   * @example-method findOneAndDelete
    */
-  it('shouldPerformSimpleFindAndRemoveWithPromises', {
+  it('shouldPerformSimplefindOneAndDeleteWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function () {
@@ -1000,7 +993,7 @@ describe('Operation (Promises)', function () {
 
             // Simple findAndModify command returning the old document and
             // removing it at the same time
-            return collection.findAndRemove({ b: 1 }, [['b', 1]]);
+            return collection.findOneAndDelete({ b: 1 }, [['b', 1]]);
           })
           .then(function (doc) {
             test.equal(1, doc.value.b);
@@ -1420,12 +1413,12 @@ describe('Operation (Promises)', function () {
 
         // Create a geo 2d index
         return collection
-          .ensureIndex({ loc: '2d' }, configuration.writeConcernMax())
+          .createIndex({ loc: '2d' }, configuration.writeConcernMax())
           .then(function (result) {
             test.ok(result);
 
             // Create a simple single field index
-            return collection.ensureIndex({ a: 1 }, configuration.writeConcernMax());
+            return collection.createIndex({ a: 1 }, configuration.writeConcernMax());
           })
           .then(function (result) {
             test.ok(result);
@@ -1548,7 +1541,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex(
+            return collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
             );
@@ -1624,7 +1617,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex(
+            return collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
             );
@@ -1835,7 +1828,7 @@ describe('Operation (Promises)', function () {
           .catch(function () {})
           .then(function () {
             // Add an unique index to title to force errors in the batch insert
-            return collection.ensureIndex({ title: 1 }, { unique: true });
+            return collection.createIndex({ title: 1 }, { unique: true });
           })
           .then(function (indexName) {
             test.ok(indexName);
@@ -1991,7 +1984,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Remove all the document
-            return collection.removeMany();
+            return collection.deleteMany();
           })
           .then(function () {
             // Fetch all results
@@ -2040,7 +2033,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Remove all the document
-            return collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } });
+            return collection.deleteOne({ a: 1 }, { writeConcern: { w: 1 } });
           })
           .then(function (r) {
             expect(r).property('deletedCount').to.equal(1);
@@ -2422,7 +2415,7 @@ describe('Operation (Promises)', function () {
             test.ok(result);
 
             // Create an index on the a field
-            return collection.ensureIndex(
+            return collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
             );
@@ -2430,7 +2423,7 @@ describe('Operation (Promises)', function () {
           .then(function (indexName) {
             test.ok(indexName);
             // Create an additional index
-            return collection.ensureIndex(
+            return collection.createIndex(
               { c: 1 },
               { unique: true, background: true, sparse: true, writeConcern: { w: 1 } }
             );
@@ -2438,7 +2431,7 @@ describe('Operation (Promises)', function () {
           .then(function (indexName) {
             test.ok(indexName);
             // Drop the index
-            return collection.dropAllIndexes();
+            return collection.dropIndexes();
           })
           .then(function (result) {
             test.ok(result);
@@ -3130,7 +3123,7 @@ describe('Operation (Promises)', function () {
           .then(function (result) {
             test.ok(result);
             // Create an index on the a field
-            return db.ensureIndex(
+            return db.createIndex(
               'more_complex_ensure_index_db_test_with_promise',
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } }
@@ -3525,73 +3518,6 @@ describe('Operation (Promises)', function () {
           .catch(function (err) {
             test.ok(err instanceof Error);
             test.equal('Error: illegal profiling level value medium', err.message);
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of how to use the profilingInfo using a Promise.
-   * Use this command to pull back the profiling information currently set for Mongodb
-   *
-   * @example-class Admin
-   * @example-method profilingInfo
-   */
-  it('shouldCorrectlySetAndExtractProfilingInfoWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      return client.connect().then(function (client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Grab a collection object
-        var collection = db.collection('test_with_promise');
-
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        return collection
-          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
-          .then(function (doc) {
-            test.ok(doc);
-            // Use the admin database for the operation
-            // Set the profiling level to all
-            return db.setProfilingLevel('all');
-          })
-          .then(function (level) {
-            test.ok(level);
-            // Execute a query command
-            return collection.find().toArray();
-          })
-          .then(function (items) {
-            test.ok(items.length > 0);
-
-            // Turn off profiling
-            return db.setProfilingLevel('off');
-          })
-          .then(function (level) {
-            test.ok(level);
-            // Retrieve the profiling information
-            return db.profilingInfo();
-          })
-          .then(function (infos) {
-            test.ok(infos.constructor === Array);
-            test.ok(infos.length >= 1);
-            test.ok(infos[0].ts.constructor === Date);
-            test.ok(infos[0].millis.constructor === Number);
             return client.close();
           });
       });
@@ -4580,12 +4506,12 @@ describe('Operation (Promises)', function () {
   });
 
   /**
-   * Example of a simple removeOne operation using a Promise.
+   * Example of a simple deleteOne operation using a Promise.
    *
    * @example-class Collection
-   * @example-method removeOne
+   * @example-method deleteOne
    */
-  it('Should correctly execute removeOne operation With Promises', {
+  it('Should correctly execute deleteOne operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function () {
@@ -4611,7 +4537,7 @@ describe('Operation (Promises)', function () {
           .then(function (r) {
             test.equal(2, r.insertedCount);
 
-            return col.removeOne({ a: 1 });
+            return col.deleteOne({ a: 1 });
           })
           .then(function (r) {
             test.equal(1, r.deletedCount);
@@ -4624,12 +4550,12 @@ describe('Operation (Promises)', function () {
   });
 
   /**
-   * Example of a simple removeMany operation using a Promise.
+   * Example of a simple deleteMany operation using a Promise.
    *
    * @example-class Collection
-   * @example-method removeMany
+   * @example-method deleteMany
    */
-  it('Should correctly execute removeMany operation With Promises', {
+  it('Should correctly execute deleteMany operation With Promises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function () {
@@ -4656,7 +4582,7 @@ describe('Operation (Promises)', function () {
             test.equal(2, r.insertedCount);
 
             // Update all documents
-            return col.removeMany({ a: 1 });
+            return col.deleteMany({ a: 1 });
           })
           .then(function (r) {
             test.equal(2, r.deletedCount);

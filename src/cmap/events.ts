@@ -1,12 +1,13 @@
 import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
+import { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { Connection } from './connection';
 import type { Document } from '../bson';
 import type { AnyError } from '../error';
 
 /**
  * The base export class for all monitoring events published from the connection pool
+ * @public
  * @category Event
  */
 export class ConnectionPoolMonitoringEvent {
@@ -23,6 +24,7 @@ export class ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection pool is created
+ * @public
  * @category Event
  */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
@@ -37,6 +39,7 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection pool is closed
+ * @public
  * @category Event
  */
 export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
@@ -47,6 +50,7 @@ export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection pool creates a new connection
+ * @public
  * @category Event
  */
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
@@ -61,6 +65,7 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection is ready for use
+ * @public
  * @category Event
  */
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
@@ -75,6 +80,7 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection is closed
+ * @public
  * @category Event
  */
 export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
@@ -90,7 +96,11 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   }
 }
 
-/** An event published when a request to check a connection out begins @category Event */
+/**
+ * An event published when a request to check a connection out begins
+ * @public
+ * @category Event
+ */
 export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
@@ -99,6 +109,7 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
 
 /**
  * An event published when a request to check a connection out fails
+ * @public
  * @category Event
  */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
@@ -113,6 +124,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
 
 /**
  * An event published when a connection is checked out of the connection pool
+ * @public
  * @category Event
  */
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
@@ -127,6 +139,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection is checked into the connection pool
+ * @public
  * @category Event
  */
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
@@ -141,6 +154,7 @@ export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
 
 /**
  * An event published when a connection pool is cleared
+ * @public
  * @category Event
  */
 export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
@@ -150,20 +164,21 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
 }
 
 export const CMAP_EVENT_NAMES = [
-  'connectionPoolCreated',
-  'connectionPoolClosed',
-  'connectionCreated',
-  'connectionReady',
-  'connectionClosed',
-  'connectionCheckOutStarted',
-  'connectionCheckOutFailed',
-  'connectionCheckedOut',
-  'connectionCheckedIn',
-  'connectionPoolCleared'
-];
+  ConnectionPool.CONNECTION_POOL_CREATED,
+  ConnectionPool.CONNECTION_POOL_CLOSED,
+  ConnectionPool.CONNECTION_CREATED,
+  ConnectionPool.CONNECTION_READY,
+  ConnectionPool.CONNECTION_CLOSED,
+  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
+  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+  ConnectionPool.CONNECTION_CHECKED_OUT,
+  ConnectionPool.CONNECTION_CHECKED_IN,
+  ConnectionPool.CONNECTION_POOL_CLEARED
+] as const;
 
 /**
  * An event indicating the start of a given
+ * @public
  * @category Event
  */
 export class CommandStartedEvent {
@@ -178,6 +193,7 @@ export class CommandStartedEvent {
   /**
    * Create a started event
    *
+   * @internal
    * @param pool - the pool that originated the command
    * @param command - the command
    */
@@ -203,6 +219,7 @@ export class CommandStartedEvent {
 
 /**
  * An event indicating the success of a given command
+ * @public
  * @category Event
  */
 export class CommandSucceededEvent {
@@ -216,6 +233,7 @@ export class CommandSucceededEvent {
   /**
    * Create a succeeded event
    *
+   * @internal
    * @param pool - the pool that originated the command
    * @param command - the command
    * @param reply - the reply for this command from the server
@@ -242,6 +260,7 @@ export class CommandSucceededEvent {
 
 /**
  * An event indicating the failure of a given command
+ * @public
  * @category Event
  */
 export class CommandFailedEvent {
@@ -254,6 +273,7 @@ export class CommandFailedEvent {
   /**
    * Create a failure event
    *
+   * @internal
    * @param pool - the pool that originated the command
    * @param command - the command
    * @param error - the generated error or a server error response

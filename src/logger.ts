@@ -10,6 +10,7 @@ let level: LoggerLevelId;
 const pid = process.pid;
 
 // current logger
+// eslint-disable-next-line no-console
 let currentLogger: LoggerFunction = console.warn;
 
 /** @public */

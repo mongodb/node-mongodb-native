@@ -547,8 +547,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     callback(e, r);
   }
 
-  if (session.transaction.recoveryToken && supportsRecoveryToken(session)) {
-    // Assumption here that commandName is "commitTransaction" or "abortTransaction"
+  // Assumption here that commandName is "commitTransaction" or "abortTransaction"
+  if (session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
@@ -586,11 +586,6 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
       commandHandler(err as MongoError, reply);
     }
   );
-}
-
-function supportsRecoveryToken(session: ClientSession) {
-  const topology = session.topology;
-  return !!topology.s.options.useRecoveryToken;
 }
 
 /** @public */

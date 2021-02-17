@@ -166,15 +166,9 @@ export class TopologyDescription {
    */
   update(serverDescription: ServerDescription): TopologyDescription {
     const address = serverDescription.address;
-    // NOTE: there are a number of prime targets for refactoring here
-    //       once we support destructuring assignments
 
     // potentially mutated values
-    let topologyType = this.type;
-    let setName = this.setName;
-    let maxSetVersion = this.maxSetVersion;
-    let maxElectionId = this.maxElectionId;
-    let commonWireVersion = this.commonWireVersion;
+    let { type: topologyType, setName, maxSetVersion, maxElectionId, commonWireVersion } = this;
 
     if (serverDescription.setName && setName && serverDescription.setName !== setName) {
       serverDescription = new ServerDescription(address, undefined);

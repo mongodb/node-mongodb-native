@@ -231,7 +231,7 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
  * @param args - Arguments to apply the provided operation
  * @param options - Options that modify the behavior of the method
  */
-export function executeLegacyOperation<T>(
+export function executeLegacyOperation(
   topology: Topology,
   operation: (...args: any[]) => void | Promise<Document>,
   args: any[],
@@ -473,11 +473,6 @@ export function getTopology(provider: MongoClient | Db | Collection): Topology {
   throw new MongoError('MongoClient must be connected to perform this operation');
 }
 
-/** @internal */
-export function emitDeprecationWarning(msg: string): void {
-  return process.emitWarning(msg, 'DeprecationWarning');
-}
-
 /**
  * Default message handler for generating deprecation warnings.
  * @internal
@@ -535,7 +530,7 @@ export function deprecateOptions(
       if (deprecatedOption in options && !optionsWarned.has(deprecatedOption)) {
         optionsWarned.add(deprecatedOption);
         const msg = msgHandler(config.name, deprecatedOption);
-        emitDeprecationWarning(msg);
+        emitWarning(msg);
         if (this && 'getLogger' in this) {
           const logger = this.getLogger();
           if (logger) {
@@ -1374,3 +1369,35 @@ export const DEFAULT_PK_FACTORY = {
     return new ObjectId();
   }
 };
+
+/**
+ * When the driver used emitWarning the code will be equal to this.
+ * @public
+ *
+ * @example
+ * ```js
+ * process.on('warning', (warning) => {
+ *  if (warning.code === MONGODB_WARNING_CODE) console.error('Ah an important warning! :)')
+ * })
+ * ```
+ */
+export const MONGODB_WARNING_CODE = 'MONGODB DRIVER' as const;
+
+/** @internal */
+export function emitWarning(message: string): void {
+  return process.emitWarning(message, { code: MONGODB_WARNING_CODE } as any);
+}
+
+const emittedWarnings = new Set();
+/**
+ * Will emit a warning once for the duration of the application.
+ * Uses the message to identify if it has already been emitted
+ * so using string interpolation can cause multiple emits
+ * @internal
+ */
+export function emitWarningOnce(message: string): void {
+  if (!emittedWarnings.has(message)) {
+    emittedWarnings.add(message);
+    return emitWarning(message);
+  }
+}
