@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
-import { databaseNamespace, emitWarningOnce } from '../utils';
+import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
@@ -834,7 +834,7 @@ export class BinMsg {
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
-        throw new MongoError('OP_MSG Payload Type 1 detected unsupported protocol')
+        throw new MongoError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
 
