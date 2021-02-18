@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
-import { databaseNamespace } from '../utils';
+import { databaseNamespace, emitWarningOnce } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
@@ -826,14 +826,15 @@ export class BinMsg {
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
-      if (payloadType === 1) {
-        throw new MongoError('Type 1 payload'); // ???
-      } else if (payloadType === 0) {
+      if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
         this.documents.push(raw ? bin : BSON.deserialize(bin, _options));
 
         this.index += bsonSize;
+      } else if (payloadType === 1) {
+        // It was decided that no driver makes use of payload type 1
+        throw new MongoError('OP_MSG Payload Type 1 detected unsupported protocol')
       }
     }
 
