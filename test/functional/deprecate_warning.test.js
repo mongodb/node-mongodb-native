@@ -37,17 +37,20 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('should carry the driver warning code', function() {
-    const client = new MongoClient(this.configuration.url(), { madeUpOption: 3 });
-    let warning;
-    process.once('warning', w => {
-      warning = w;
-    });
-    return client.connect().then(() => {
-      expect(warning).to.exist;
-      expect(warning.code).to.equal(MONGODB_WARNING_CODE);
-      return client.close();
-    });
+  it('should carry the driver warning code', {
+    metadata: { requires: { node: '>=8.0.0' } },
+    test() {
+      const client = new MongoClient(this.configuration.url(), { madeUpOption: 3 });
+      let warning;
+      process.once('warning', w => {
+        warning = w;
+      });
+      return client.connect().then(() => {
+        expect(warning).to.exist;
+        expect(warning.code).to.equal(MONGODB_WARNING_CODE);
+        return client.close();
+      });
+    }
   });
 
   it('node --trace-deprecation flag should print stack trace to stderr', {
