@@ -5,11 +5,13 @@ import type { OperationDescription } from '../message_stream';
 import { Snappy } from '../../deps';
 
 /** @public */
-export enum Compressor {
-  none = 0,
-  snappy = 1,
-  zlib = 2
-}
+export const Compressor = Object.freeze({
+  none: 0,
+  snappy: 1,
+  zlib: 2
+} as const);
+
+export type CompressorId = typeof Compressor[keyof typeof Compressor];
 
 /** @public */
 export type CompressorName = keyof typeof Compressor;
@@ -59,7 +61,7 @@ export function compress(
 
 // Decompress a message using the given compressor
 export function decompress(
-  compressorID: Compressor,
+  compressorID: CompressorId,
   compressedData: Buffer,
   callback: Callback<Buffer>
 ): void {

@@ -1,15 +1,15 @@
 import { arrayStrictEqual, errorStrictEqual, now, HostAddress } from '../utils';
-import { ServerType } from './common';
+import { ServerType, ServerTypeId } from './common';
 import type { ObjectId, Long, Document } from '../bson';
 import type { ClusterTime } from './common';
 
-const WRITABLE_SERVER_TYPES = new Set([
+const WRITABLE_SERVER_TYPES = new Set<ServerTypeId>([
   ServerType.RSPrimary,
   ServerType.Standalone,
   ServerType.Mongos
 ]);
 
-const DATA_BEARING_SERVER_TYPES = new Set([
+const DATA_BEARING_SERVER_TYPES = new Set<ServerTypeId>([
   ServerType.RSPrimary,
   ServerType.RSSecondary,
   ServerType.Mongos,
@@ -46,7 +46,7 @@ export interface ServerDescriptionOptions {
 export class ServerDescription {
   private _hostAddress: HostAddress;
   address: string;
-  type: ServerType;
+  type: ServerTypeId;
   hosts: string[];
   passives: string[];
   arbiters: string[];
@@ -205,7 +205,7 @@ export class ServerDescription {
 }
 
 // Parses an `ismaster` message and determines the server type
-export function parseServerType(ismaster?: Document): ServerType {
+export function parseServerType(ismaster?: Document): ServerTypeId {
   if (!ismaster || !ismaster.ok) {
     return ServerType.Unknown;
   }

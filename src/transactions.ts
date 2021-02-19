@@ -7,16 +7,19 @@ import type { CommandOperationOptions } from './operations/command';
 import type { Document } from './bson';
 
 /** @internal */
-export enum TxnState {
-  NO_TRANSACTION = 'NO_TRANSACTION',
-  STARTING_TRANSACTION = 'STARTING_TRANSACTION',
-  TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS',
-  TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED',
-  TRANSACTION_COMMITTED_EMPTY = 'TRANSACTION_COMMITTED_EMPTY',
-  TRANSACTION_ABORTED = 'TRANSACTION_ABORTED'
-}
+export const TxnState = Object.freeze({
+  NO_TRANSACTION: 'NO_TRANSACTION',
+  STARTING_TRANSACTION: 'STARTING_TRANSACTION',
+  TRANSACTION_IN_PROGRESS: 'TRANSACTION_IN_PROGRESS',
+  TRANSACTION_COMMITTED: 'TRANSACTION_COMMITTED',
+  TRANSACTION_COMMITTED_EMPTY: 'TRANSACTION_COMMITTED_EMPTY',
+  TRANSACTION_ABORTED: 'TRANSACTION_ABORTED'
+} as const);
 
-const stateMachine = {
+/** @internal */
+export type TxnStateId = typeof TxnState[keyof typeof TxnState];
+
+const stateMachine: { [state in TxnStateId]: TxnStateId[] } = {
   [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],
   [TxnState.STARTING_TRANSACTION]: [
     TxnState.TRANSACTION_IN_PROGRESS,
@@ -63,7 +66,7 @@ export interface TransactionOptions extends CommandOperationOptions {
  */
 export class Transaction {
   /** @internal */
-  state: TxnState;
+  state: TxnStateId;
   options: TransactionOptions;
   _pinnedServer?: Server;
   _recoveryToken?: Document;
@@ -117,9 +120,11 @@ export class Transaction {
    * @returns Whether this session is presently in a transaction
    */
   get isActive(): boolean {
-    return (
-      [TxnState.STARTING_TRANSACTION, TxnState.TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1
-    );
+    const activeStates: TxnStateId[] = [
+      TxnState.STARTING_TRANSACTION,
+      TxnState.TRANSACTION_IN_PROGRESS
+    ];
+    return activeStates.includes(this.state);
   }
 
   /**
@@ -127,9 +132,9 @@ export class Transaction {
    * @internal
    * @param nextState - The new state to transition to
    */
-  transition(nextState: TxnState): void {
+  transition(nextState: TxnStateId): void {
     const nextStates = stateMachine[this.state];
-    if (nextStates && nextStates.indexOf(nextState) !== -1) {
+    if (nextStates && nextStates.includes(nextState)) {
       this.state = nextState;
       if (this.state === TxnState.NO_TRANSACTION || this.state === TxnState.STARTING_TRANSACTION) {
         this.unpinServer();

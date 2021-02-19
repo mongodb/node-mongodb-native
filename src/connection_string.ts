@@ -25,7 +25,7 @@ import {
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
-import { Logger, LoggerLevel } from './logger';
+import { Logger, LoggerLevelId } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { createAutoEncrypter } from './operations/connect';
 
@@ -713,7 +713,7 @@ export const OPTIONS = {
   loggerLevel: {
     target: 'logger',
     transform({ values: [value] }) {
-      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
+      return new Logger('MongoClient', { loggerLevel: value as LoggerLevelId });
     }
   },
   maxIdleTimeMS: {

@@ -12,29 +12,35 @@ export const STATE_CONNECTED = 'connected';
  * An enumeration of topology types we know about
  * @public
  */
-export enum TopologyType {
-  Single = 'Single',
-  ReplicaSetNoPrimary = 'ReplicaSetNoPrimary',
-  ReplicaSetWithPrimary = 'ReplicaSetWithPrimary',
-  Sharded = 'Sharded',
-  Unknown = 'Unknown'
-}
+export const TopologyType = Object.freeze({
+  Single: 'Single',
+  ReplicaSetNoPrimary: 'ReplicaSetNoPrimary',
+  ReplicaSetWithPrimary: 'ReplicaSetWithPrimary',
+  Sharded: 'Sharded',
+  Unknown: 'Unknown'
+} as const);
+
+/** @public */
+export type TopologyTypeId = typeof TopologyType[keyof typeof TopologyType];
 
 /**
  * An enumeration of server types we know about
  * @public
  */
-export enum ServerType {
-  Standalone = 'Standalone',
-  Mongos = 'Mongos',
-  PossiblePrimary = 'PossiblePrimary',
-  RSPrimary = 'RSPrimary',
-  RSSecondary = 'RSSecondary',
-  RSArbiter = 'RSArbiter',
-  RSOther = 'RSOther',
-  RSGhost = 'RSGhost',
-  Unknown = 'Unknown'
-}
+export const ServerType = Object.freeze({
+  Standalone: 'Standalone',
+  Mongos: 'Mongos',
+  PossiblePrimary: 'PossiblePrimary',
+  RSPrimary: 'RSPrimary',
+  RSSecondary: 'RSSecondary',
+  RSArbiter: 'RSArbiter',
+  RSOther: 'RSOther',
+  RSGhost: 'RSGhost',
+  Unknown: 'Unknown'
+} as const);
+
+/** @public */
+export type ServerTypeId = typeof ServerType[keyof typeof ServerType];
 
 /** @internal */
 export type TimerQueue = Set<NodeJS.Timeout>;

@@ -32,7 +32,15 @@
     "strict": ["error", "global"],
     "promise/no-native": "error",
 
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSEnumDeclaration",
+        "message": "Don't declare enums"
+      }
+    ]
   },
   "overrides": [{
     "files": ["*.d.ts"],
