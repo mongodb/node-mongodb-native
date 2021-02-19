@@ -1,16 +1,14 @@
-import { deprecate } from 'util';
 import {
   Callback,
   resolveOptions,
   filterOptions,
-  deprecateOptions,
   MongoDBNamespace,
   getTopology,
   DEFAULT_PK_FACTORY
 } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor } from './cursor/aggregation_cursor';
-import { Code, Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
+import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -27,7 +25,6 @@ import { RunCommandOperation, RunCommandOptions } from './operations/run_command
 import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
 import {
   CreateIndexOperation,
-  EnsureIndexOperation,
   IndexInformationOperation,
   CreateIndexesOptions,
   IndexSpecification
@@ -48,7 +45,6 @@ import {
   ProfilingLevelId
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
-import { EvalOperation, EvalOptions } from './operations/eval';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { Admin } from './admin';
@@ -752,118 +748,7 @@ export class Db {
   get logger(): Logger {
     return this.s.logger;
   }
-
-  /**
-   * Evaluate JavaScript on the server
-   *
-   * @deprecated Eval is deprecated on MongoDB 3.2 and forward
-   * @param code - JavaScript to execute on server.
-   * @param parameters - The parameters for the call.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  eval(code: Code, parameters: Document | Document[]): Promise<Document>;
-  eval(code: Code, parameters: Document | Document[], callback: Callback<Document>): void;
-  eval(code: Code, parameters: Document | Document[], options: EvalOptions): Promise<Document>;
-  eval(
-    code: Code,
-    parameters: Document | Document[],
-    options: EvalOptions,
-    callback: Callback<Document>
-  ): Promise<Document>;
-  eval(
-    code: Code,
-    parameters: Document | Document[],
-    options?: EvalOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
-    return executeOperation(
-      getTopology(this),
-      new EvalOperation(this, code, parameters, resolveOptions(this, options)),
-      callback
-    );
-  }
-
-  /**
-   * Ensures that an index exists, if it does not it creates it
-   *
-   * @deprecated since version 2.0
-   * @param name - The index name
-   * @param fieldOrSpec - Defines the index.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  ensureIndex(name: string, fieldOrSpec: string | Document): Promise<Document>;
-  ensureIndex(name: string, fieldOrSpec: string | Document, callback: Callback<Document>): void;
-  ensureIndex(
-    name: string,
-    fieldOrSpec: string | Document,
-    options: CreateIndexesOptions
-  ): Promise<Document>;
-  ensureIndex(
-    name: string,
-    fieldOrSpec: string | Document,
-    options: CreateIndexesOptions,
-    callback: Callback<Document>
-  ): void;
-  ensureIndex(
-    name: string,
-    fieldOrSpec: string | Document,
-    options?: CreateIndexesOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
-    return executeOperation(
-      getTopology(this),
-      new EnsureIndexOperation(this, name, fieldOrSpec, resolveOptions(this, options)),
-      callback
-    );
-  }
-
-  /**
-   * Retrieve the current profiling information for MongoDB
-   *
-   * @deprecated Query the `system.profile` collection directly.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  profilingInfo(): Promise<Document[]>;
-  profilingInfo(callback: Callback<Document[]>): void;
-  profilingInfo(options: ProfilingLevelOptions): Promise<Document[]>;
-  profilingInfo(options: ProfilingLevelOptions, callback: Callback<Document[]>): void;
-  profilingInfo(
-    options?: ProfilingLevelOptions | Callback<Document[]>,
-    callback?: Callback<Document[]>
-  ): Promise<Document[]> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
-
-    const cursor = this.collection('system.profile').find({}, options);
-    return callback ? cursor.toArray(callback) : cursor.toArray();
-  }
 }
-
-Db.prototype.createCollection = deprecateOptions(
-  {
-    name: 'Db.createCollection',
-    deprecatedOptions: ['autoIndexId'],
-    optionsIndex: 1
-  },
-  Db.prototype.createCollection
-);
-
-Db.prototype.eval = deprecate(Db.prototype.eval, 'Db.eval is deprecated as of MongoDB version 3.2');
-Db.prototype.ensureIndex = deprecate(
-  Db.prototype.ensureIndex,
-  'Db.ensureIndex is deprecated as of MongoDB version 3.0 / driver version 2.0'
-);
-Db.prototype.profilingInfo = deprecate(
-  Db.prototype.profilingInfo,
-  'Db.profilingInfo is deprecated. Query the system.profile collection directly.'
-);
 
 // Validate the database name
 function validateDatabaseName(databaseName: string) {

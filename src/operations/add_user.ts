@@ -2,18 +2,29 @@ import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { MongoError } from '../error';
-import { Callback, getTopology } from '../utils';
+import { Callback, emitWarningOnce, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 
 /** @public */
+export interface RoleSpecification {
+  /**
+   * A role grants privileges to perform sets of actions on defined resources.
+   * A given role applies to the database on which it is defined and can grant access down to a collection level of granularity.
+   */
+  role: string;
+  /** The database this user's role should effect. */
+  db: string;
+}
+
+/** @public */
 export interface AddUserOptions extends CommandOperationOptions {
   /** @deprecated Please use db.command('createUser', ...) instead for this option */
   digestPassword?: null;
-  /** Roles associated with the created user (only Mongodb 2.6 or higher) */
-  roles?: string | string[];
+  /** Roles associated with the created user */
+  roles?: string | string[] | RoleSpecification | RoleSpecification[];
   /** Custom data associated with the user (only Mongodb 2.6 or higher) */
   customData?: Document;
 }
@@ -27,12 +38,6 @@ export class AddUserOperation extends CommandOperation<Document> {
 
   constructor(db: Db, username: string, password: string | undefined, options?: AddUserOptions) {
     super(db, options);
-
-    // Special case where there is no password ($external users)
-    if (typeof username === 'string' && password != null && typeof password === 'object') {
-      options = password;
-      password = undefined;
-    }
 
     this.db = db;
     this.username = username;
@@ -56,25 +61,18 @@ export class AddUserOperation extends CommandOperation<Document> {
       );
     }
 
-    // Get additional values
-    let roles: string[] = [];
-    if (Array.isArray(options.roles)) roles = options.roles;
-    if (typeof options.roles === 'string') roles = [options.roles];
-
-    // If not roles defined print deprecated message
-    // TODO: handle deprecation properly
-    if (roles.length === 0) {
-      console.warn('Creating a user without roles is deprecated in MongoDB >= 2.6');
-    }
-
-    // Check the db name and add roles if needed
-    if (
-      (db.databaseName.toLowerCase() === 'admin' || options.dbName === 'admin') &&
-      !Array.isArray(options.roles)
-    ) {
-      roles = ['root'];
-    } else if (!Array.isArray(options.roles)) {
-      roles = ['dbOwner'];
+    let roles;
+    if (!options.roles || (Array.isArray(options.roles) && options.roles.length === 0)) {
+      emitWarningOnce(
+        'Creating a user without roles is deprecated. Defaults to "root" if db is "admin" or "dbOwner" otherwise'
+      );
+      if (db.databaseName.toLowerCase() === 'admin') {
+        roles = ['root'];
+      } else {
+        roles = ['dbOwner'];
+      }
+    } else {
+      roles = Array.isArray(options.roles) ? options.roles : [options.roles];
     }
 
     const digestPassword = getTopology(db).lastIsMaster().maxWireVersion >= 7;

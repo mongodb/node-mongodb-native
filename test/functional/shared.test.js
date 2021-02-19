@@ -18,15 +18,12 @@ describe('shared test utilities', function () {
     });
 
     it('should call done and close connection with callback', function (done) {
-      var c = null;
       var e = [];
       const fakeDone = () => {
-        expect(c.isConnected()).to.be.false;
         expect(e.length).to.equal(1);
         done();
       };
       const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
-        c = client;
         e = events;
         client
           .db('integration_test')
@@ -40,16 +37,13 @@ describe('shared test utilities', function () {
     });
 
     it('should propagate passed error to done', function (done) {
-      var c = null;
       var e = [];
       const fakeDone = err => {
         expect(err).to.be.instanceOf(Error);
-        expect(c.isConnected()).to.be.false;
         expect(e.length).to.equal(1);
         done();
       };
       const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
-        c = client;
         e = events;
         client
           .db('integration_test')
@@ -63,15 +57,12 @@ describe('shared test utilities', function () {
     });
 
     it('should call done and close connection with promise', function (done) {
-      var c = null;
       var e = [];
       const fakeDone = () => {
-        expect(c.isConnected()).to.be.false;
         expect(e.length).to.equal(1);
         done();
       };
       const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
-        c = client;
         e = events;
         client
           .db('integration_test')
@@ -86,17 +77,14 @@ describe('shared test utilities', function () {
     });
 
     it('should propagate passed error to done from promise', function (done) {
-      var c = null;
       var e = [];
       const fakeDone = err => {
         expect(err).to.be.instanceOf(Error);
-        expect(c.isConnected()).to.be.false;
         expect(e.length).to.equal(1);
         done();
       };
       const encapsulatedTest = withMonitoredClient(['find'], function (client, events, innerDone) {
         e = events;
-        c = client;
         client
           .db('integration_test')
           .collection('test')

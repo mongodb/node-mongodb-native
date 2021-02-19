@@ -241,7 +241,7 @@ describe('Indexes', function () {
               function (err, indexName) {
                 test.equal('a_1', indexName);
                 // Drop all the indexes
-                collection.dropAllIndexes(function (err, result) {
+                collection.dropIndexes(function (err, result) {
                   test.equal(true, result);
 
                   collection.indexInformation(function (err, result) {
@@ -308,7 +308,7 @@ describe('Indexes', function () {
         db.createCollection('test_ensure_index', function (err, collection) {
           expect(err).to.not.exist;
           // Create an index on the collection
-          db.ensureIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function (
+          db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function (
             err,
             indexName
           ) {
@@ -321,7 +321,7 @@ describe('Indexes', function () {
               test.ok(collectionInfo['a_1'] != null);
               test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
-              db.ensureIndex(
+              db.createIndex(
                 collection.collectionName,
                 'a',
                 configuration.writeConcernMax(),
@@ -359,7 +359,7 @@ describe('Indexes', function () {
           expect(err).to.not.exist;
           db.collection('create_and_use_sparse_index_test', function (err, collection) {
             expect(err).to.not.exist;
-            collection.ensureIndex(
+            collection.createIndex(
               { title: 1 },
               { sparse: true, writeConcern: { w: 1 } },
               function (err) {
@@ -411,7 +411,7 @@ describe('Indexes', function () {
         db.createCollection('geospatial_index_test', function (err) {
           expect(err).to.not.exist;
           db.collection('geospatial_index_test', function (err, collection) {
-            collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
+            collection.createIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
               expect(err).to.not.exist;
               collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (
                 err
@@ -452,7 +452,7 @@ describe('Indexes', function () {
         db.createCollection('geospatial_index_altered_test', function (err) {
           expect(err).to.not.exist;
           db.collection('geospatial_index_altered_test', function (err, collection) {
-            collection.ensureIndex(
+            collection.createIndex(
               { loc: '2d' },
               { min: 0, max: 1024, writeConcern: { w: 1 } },
               function (err) {
@@ -502,7 +502,7 @@ describe('Indexes', function () {
           collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
+            collection.createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
               err
             ) {
               test.ok(err != null);
@@ -531,7 +531,7 @@ describe('Indexes', function () {
           collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
+            collection.createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
               err
             ) {
               test.ok(err != null);
@@ -560,7 +560,7 @@ describe('Indexes', function () {
         ) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex(
+          collection.createIndex(
             { loc: '2d' },
             { min: 200, max: 1400, writeConcern: { w: 1 } },
             function (err) {
@@ -596,7 +596,7 @@ describe('Indexes', function () {
         ) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex('name', { name: 'myfunky_name' }, function (err) {
+          collection.createIndex('name', { name: 'myfunky_name' }, function (err) {
             expect(err).to.not.exist;
 
             // Fetch full index information
@@ -622,11 +622,11 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         var shared = require('./contexts');
 
-        db.collection('indexcontext').ensureIndex(shared.object, { background: true }, function (
+        db.collection('indexcontext').createIndex(shared.object, { background: true }, function (
           err
         ) {
           expect(err).to.not.exist;
-          db.collection('indexcontext').ensureIndex(shared.array, { background: true }, function (
+          db.collection('indexcontext').createIndex(shared.array, { background: true }, function (
             err
           ) {
             expect(err).to.not.exist;
@@ -654,7 +654,7 @@ describe('Indexes', function () {
           function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true }, function (
+            collection.createIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true }, function (
               err
             ) {
               test.ok(err != null);
@@ -680,7 +680,7 @@ describe('Indexes', function () {
         collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
+          collection.createIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
             collection
               .dropIndex('a_1')
@@ -711,7 +711,7 @@ describe('Indexes', function () {
         collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
+          collection.createIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
             collection.indexInformation({ full: false }, function (err) {
@@ -748,7 +748,7 @@ describe('Indexes', function () {
         ) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex(
+          collection.createIndex(
             { text: 'text' },
             { language_override: 'langua', name: 'language_override_index' },
             function (err) {
@@ -780,7 +780,7 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('testListIndexes').ensureIndex({ a: 1 }, function (err) {
+        db.collection('testListIndexes').createIndex({ a: 1 }, function (err) {
           expect(err).to.not.exist;
 
           // Get the list of indexes
@@ -807,7 +807,7 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('testListIndexes_2').ensureIndex({ a: 1 }, function (err) {
+        db.collection('testListIndexes_2').createIndex({ a: 1 }, function (err) {
           expect(err).to.not.exist;
 
           // Get the list of indexes
@@ -834,7 +834,7 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('ensureIndexWithNestedStyleIndex').ensureIndex({ 'c.d': 1 }, function (err) {
+        db.collection('ensureIndexWithNestedStyleIndex').createIndex({ 'c.d': 1 }, function (err) {
           expect(err).to.not.exist;
 
           // Get the list of indexes
@@ -1038,7 +1038,7 @@ describe('Indexes', function () {
           function (err) {
             expect(err).to.not.exist;
 
-            collection.ensureIndex({ 'a.a': 1 }, function (err) {
+            collection.createIndex({ 'a.a': 1 }, function (err) {
               expect(err).to.not.exist;
               client.close(done);
             });
@@ -1185,12 +1185,12 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('messed_up_options');
 
-        collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function (
+        collection.createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function (
           err
         ) {
           expect(err).to.not.exist;
 
-          collection.ensureIndex(
+          collection.createIndex(
             { 'a.one': 1, 'a.two': 1 },
             { name: 'n2', sparse: true },
             function (err) {

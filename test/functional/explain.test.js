@@ -128,7 +128,7 @@ describe('Explain', function () {
         expect(err).to.not.exist;
         expect(res).to.exist;
 
-        collection.removeOne({ a: 1 }, { explain: true }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: true }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -152,7 +152,7 @@ describe('Explain', function () {
         expect(err).to.not.exist;
         expect(res).to.exist;
 
-        collection.removeMany({ a: 1 }, { explain: true }, (err, explanation) => {
+        collection.deleteMany({ a: 1 }, { explain: true }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;
@@ -362,7 +362,7 @@ describe('Explain', function () {
         expect(res).to.exist;
 
         // Verify explanation result contains properties of allPlansExecution output
-        collection.removeOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
+        collection.deleteOne({ a: 1 }, { explain: 'allPlansExecution' }, (err, explanation) => {
           expect(err).to.not.exist;
           expect(explanation).to.exist;
           expect(explanation).property('queryPlanner').to.exist;

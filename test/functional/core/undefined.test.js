@@ -75,7 +75,7 @@ describe('A server', function () {
             expect(err).to.not.exist;
             expect(res).property('insertedCount').to.equal(2);
 
-            coll.removeMany({ b: undefined }, { ignoreUndefined: true }, (err, res) => {
+            coll.deleteMany({ b: undefined }, { ignoreUndefined: true }, (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('deletedCount').to.equal(2);
               done();
@@ -101,7 +101,7 @@ describe('A server', function () {
             expect(err).to.not.exist;
             expect(res).property('insertedCount').to.equal(2);
 
-            coll.removeMany({ b: null }, (err, res) => {
+            coll.deleteMany({ b: null }, (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('deletedCount').to.equal(1);
               done();

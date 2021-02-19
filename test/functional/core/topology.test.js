@@ -9,7 +9,7 @@ describe('Topology', function () {
     topology.on('stateChanged', (_, newState) => states.push(newState));
     topology.connect(err => {
       expect(err).to.not.exist;
-      topology.destroy(err => {
+      topology.close(err => {
         expect(err).to.not.exist;
         expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
         done();

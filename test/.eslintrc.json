@@ -3,7 +3,7 @@
   "parserOptions": {
     "ecmaVersion": 2018
   },
-  "plugins": ["prettier", "promise", "jsdoc"],
+  "plugins": ["prettier", "jsdoc"],
   "extends": ["eslint:recommended", "plugin:prettier/recommended", "plugin:jsdoc/recommended"],
   "env": {
     "node": true,
@@ -34,8 +34,7 @@
 
     "no-console": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
-    "strict": ["error", "global"],
-    "promise/no-native": "off"
+    "strict": ["error", "global"]
   },
   "settings": {
     "jsdoc": {

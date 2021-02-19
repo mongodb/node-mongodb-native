@@ -475,12 +475,12 @@ describe('Operation (Generators)', function () {
   });
 
   /**
-   * Example of a how to drop all the indexes on a collection using dropAllIndexes with a Generator and the co module
+   * Example of a how to drop all the indexes on a collection using dropIndexes with a Generator and the co module
    *
    * @example-class Collection
-   * @example-method dropAllIndexes
+   * @example-method dropIndexes
    */
-  it('dropAllIndexesExample1WithGenerators', {
+  it('dropIndexesExample1WithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     test: function () {
@@ -506,7 +506,7 @@ describe('Operation (Generators)', function () {
         // BEGIN
         yield db.createCollection('dropExample1_with_generators');
         // Drop the collection
-        yield db.collection('dropExample1_with_generators').dropAllIndexes();
+        yield db.collection('dropExample1_with_generators').dropIndexes();
         // Let's close the db
         yield client.close();
       });
@@ -557,7 +557,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
         );
@@ -620,7 +620,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield db.ensureIndex(
+        yield db.createIndex(
           'ensureIndexExample1_with_generators',
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
@@ -683,7 +683,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
         );
@@ -903,23 +903,17 @@ describe('Operation (Generators)', function () {
         );
 
         // Simple findAndModify command returning the new document
-        var doc = yield collection.findAndModify(
+        var doc = yield collection.findOneAndUpdate(
           { a: 1 },
-          [['a', 1]],
           { $set: { b1: 1 } },
-          { new: true }
+          { returnOriginal: false }
         );
         test.equal(1, doc.value.a);
         test.equal(1, doc.value.b1);
 
         // Simple findAndModify command returning the new document and
         // removing it at the same time
-        doc = yield collection.findAndModify(
-          { b: 1 },
-          [['b', 1]],
-          { $set: { b: 2 } },
-          { remove: true }
-        );
+        doc = yield collection.findOneAndUpdate({ b: 1 }, { $set: { b: 2 } }, { remove: true });
 
         // Verify that the document is gone
         var item = yield collection.findOne({ b: 1 });
@@ -927,11 +921,10 @@ describe('Operation (Generators)', function () {
 
         // Simple findAndModify command performing an upsert and returning the new document
         // executing the command safely
-        doc = yield collection.findAndModify(
+        doc = yield collection.findOneAndUpdate(
           { d: 1 },
-          [['b', 1]],
-          { d: 1, f: 1 },
-          { new: true, upsert: true, writeConcern: { w: 1 } }
+          { $set: { d: 1, f: 1 } },
+          { returnOriginal: false, upsert: true, writeConcern: { w: 1 } }
         );
         test.equal(1, doc.value.d);
         test.equal(1, doc.value.f);
@@ -982,9 +975,9 @@ describe('Operation (Generators)', function () {
           configuration.writeConcernMax()
         );
 
-        // Simple findAndModify command returning the old document and
+        // Simple findOneAndDelete command returning the old document and
         // removing it at the same time
-        var doc = yield collection.findAndRemove({ b: 1 }, [['b', 1]]);
+        var doc = yield collection.findOneAndDelete({ b: 1 });
         test.equal(1, doc.value.b);
         test.equal(1, doc.value.d);
 
@@ -1402,10 +1395,10 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('simple_key_based_distinct_with_generators');
 
         // Create a geo 2d index
-        yield collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax());
+        yield collection.createIndex({ loc: '2d' }, configuration.writeConcernMax());
 
         // Create a simple single field index
-        yield collection.ensureIndex({ a: 1 }, configuration.writeConcernMax());
+        yield collection.createIndex({ a: 1 }, configuration.writeConcernMax());
 
         // List all of the indexes on the collection
         var indexes = yield collection.indexes();
@@ -1520,7 +1513,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
         );
@@ -1595,7 +1588,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
         );
@@ -1803,7 +1796,7 @@ describe('Operation (Generators)', function () {
         var collection = db.collection('keepGoingExample_with_generators');
 
         // Add an unique index to title to force errors in the batch insert
-        yield collection.ensureIndex({ title: 1 }, { unique: true });
+        yield collection.createIndex({ title: 1 }, { unique: true });
 
         // Insert some intial data into the collection
         yield collection.insertMany(
@@ -1967,7 +1960,7 @@ describe('Operation (Generators)', function () {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
 
         // Remove all the document
-        yield collection.removeMany();
+        yield collection.deleteMany();
 
         // Fetch all results
         var items = yield collection.find().toArray();
@@ -2014,7 +2007,7 @@ describe('Operation (Generators)', function () {
         // Insert a bunch of documents
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
         // Remove all the document
-        var r = yield collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } });
+        var r = yield collection.deleteOne({ a: 1 }, { writeConcern: { w: 1 } });
         expect(r).property('deletedCount').to.equal(1);
         yield client.close();
       });
@@ -2386,19 +2379,19 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
         );
 
         // Create an additional index
-        yield collection.ensureIndex(
+        yield collection.createIndex(
           { c: 1 },
           { unique: true, background: true, sparse: true, writeConcern: { w: 1 } }
         );
 
         // Drop the index
-        yield collection.dropAllIndexes();
+        yield collection.dropIndexes();
 
         // Verify that the index is gone
         var indexInformation = yield collection.indexInformation();
@@ -2937,7 +2930,7 @@ describe('Operation (Generators)', function () {
         );
 
         // Create an index on the a field
-        yield db.ensureIndex(
+        yield db.createIndex(
           'more_complex_ensure_index_db_test_with_generators',
           { a: 1, b: 1 },
           { unique: true, background: true, writeConcern: { w: 1 } }
@@ -3207,141 +3200,6 @@ describe('Operation (Generators)', function () {
 
         // Retrieve the build information using the admin command
         yield adminDb.command({ buildInfo: 1 });
-
-        yield client.close();
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of how to use the setProfilingInfo using a Generator and the co module.
-   * Use this command to set the Profiling level on the MongoDB server
-   *
-   * @example-class Db
-   * @example-method setProfilingLevel
-   */
-  it('shouldCorrectlyChangeProfilingLevelWithGenerators', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      var configuration = this.configuration;
-      var co = require('co');
-
-      return co(function* () {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE   yield client.connect();
-        // LINE
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Grab a collection object
-        var collection = db.collection('test_with_generators');
-
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
-
-        // Set the profiling level to only profile slow queries
-        yield db.setProfilingLevel('slow_only');
-
-        // Retrieve the profiling level and verify that it's set to slow_only
-        var level = yield db.profilingLevel();
-        test.equal('slow_only', level);
-
-        // Turn profiling off
-        yield db.setProfilingLevel('off');
-
-        // Retrieve the profiling level and verify that it's set to off
-        level = yield db.profilingLevel();
-        test.equal('off', level);
-
-        // Set the profiling level to log all queries
-        yield db.setProfilingLevel('all');
-
-        // Retrieve the profiling level and verify that it's set to all
-        level = yield db.profilingLevel();
-        test.equal('all', level);
-
-        try {
-          // Attempt to set an illegal profiling level
-          yield db.setProfilingLevel('medium');
-        } catch (err) {
-          test.ok(err instanceof Error);
-          test.equal('Error: illegal profiling level value medium', err.message);
-
-          yield client.close();
-        }
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of how to use the profilingInfo using a Generator and the co module.
-   * Use this command to pull back the profiling information currently set for Mongodb
-   *
-   * @example-class Db
-   * @example-method profilingInfo
-   */
-  it('shouldCorrectlySetAndExtractProfilingInfoWithGenerators', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      var configuration = this.configuration;
-      var co = require('co');
-
-      return co(function* () {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { maxPoolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE   yield client.connect();
-        // LINE
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Grab a collection object
-        var collection = db.collection('test_with_generators');
-
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        yield collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } });
-
-        // Set the profiling level to all
-        yield db.setProfilingLevel('all');
-
-        // Execute a query command
-        yield collection.find().toArray();
-
-        // Turn off profiling
-        yield db.setProfilingLevel('off');
-
-        // Retrieve the profiling information
-        var infos = yield db.profilingInfo();
-        test.ok(infos.constructor === Array);
-        test.ok(infos.length >= 1);
-        test.ok(infos[0].ts.constructor === Date);
-        test.ok(infos[0].millis.constructor === Number);
 
         yield client.close();
       });
@@ -4279,12 +4137,12 @@ describe('Operation (Generators)', function () {
   });
 
   /**
-   * Example of a simple removeOne operation using a Generator and the co module.
+   * Example of a simple deleteOne operation using a Generator and the co module.
    *
    * @example-class Collection
-   * @example-method removeOne
+   * @example-method deleteOne
    */
-  it('Should correctly execute removeOne operation with Generators', {
+  it('Should correctly execute deleteOne operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     test: function () {
@@ -4313,7 +4171,7 @@ describe('Operation (Generators)', function () {
         var r = yield col.insertMany([{ a: 1 }, { a: 1 }]);
         test.equal(2, r.insertedCount);
 
-        r = yield col.removeOne({ a: 1 });
+        r = yield col.deleteOne({ a: 1 });
         test.equal(1, r.deletedCount);
         // Finish up test
         yield client.close();
@@ -4323,12 +4181,12 @@ describe('Operation (Generators)', function () {
   });
 
   /**
-   * Example of a simple removeMany operation using a Generator and the co module.
+   * Example of a simple deleteMany operation using a Generator and the co module.
    *
    * @example-class Collection
-   * @example-method removeMany
+   * @example-method deleteMany
    */
-  it('Should correctly execute removeMany operation with Generators', {
+  it('Should correctly execute deleteMany operation with Generators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     test: function () {
@@ -4358,7 +4216,7 @@ describe('Operation (Generators)', function () {
         test.equal(2, r.insertedCount);
 
         // Update all documents
-        r = yield col.removeMany({ a: 1 });
+        r = yield col.deleteMany({ a: 1 });
         test.equal(2, r.deletedCount);
 
         // Finish up test

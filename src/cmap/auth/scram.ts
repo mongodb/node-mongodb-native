@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
 import { MongoError, AnyError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import { Callback, ns } from '../../utils';
+import { Callback, emitWarning, ns } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
@@ -25,7 +25,7 @@ class ScramSHA extends AuthProvider {
       return callback(new MongoError('AuthContext must provide credentials.'));
     }
     if (cryptoMethod === 'sha256' && saslprep == null) {
-      console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
+      emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
     crypto.randomBytes(24, (err, nonce) => {

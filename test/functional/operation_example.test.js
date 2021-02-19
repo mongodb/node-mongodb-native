@@ -1071,12 +1071,12 @@ describe('Operation Examples', function () {
   });
 
   /**
-   * Example of a how to drop all the indexes on a collection using dropAllIndexes
+   * Example of a how to drop all the indexes on a collection using dropIndexes
    *
    * @example-class Collection
-   * @example-method dropAllIndexes
+   * @example-method dropIndexes
    */
-  it('dropAllIndexesExample1', {
+  it('dropIndexesExample1', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1101,7 +1101,7 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Drop the collection
-          db.collection('dropExample1').dropAllIndexes(function (err, reply) {
+          db.collection('dropExample1').dropIndexes(function (err, reply) {
             test.ok(reply);
             expect(err).to.not.exist;
 
@@ -1155,7 +1155,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            collection.ensureIndex(
+            collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
@@ -1225,7 +1225,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            db.ensureIndex(
+            db.createIndex(
               'ensureIndexExample1',
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
@@ -1296,7 +1296,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            collection.ensureIndex(
+            collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
@@ -1488,16 +1488,16 @@ describe('Operation Examples', function () {
   });
 
   /**
-   * A whole set of different ways to use the findAndModify command.
+   * A whole set of different ways to use the findOneAndUpdate command.
    *
-   * The first findAndModify command modifies a document and returns the modified document back.
-   * The second findAndModify command removes the document.
-   * The second findAndModify command upserts a document and returns the new document.
+   * The first findOneAndUpdate command modifies a document and returns the modified document back.
+   * The second findOneAndUpdate command removes the document.
+   * The second findOneAndUpdate command upserts a document and returns the new document.
    *
    * @example-class Collection
-   * @example-method findAndModify
+   * @example-method findOneAndUpdate
    */
-  it('shouldPerformSimpleFindAndModifyOperations', {
+  it('shouldPerformSimplefindOneAndUpdateOperations', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1528,22 +1528,20 @@ describe('Operation Examples', function () {
             test.ok(result);
             expect(err).to.not.exist;
 
-            // Simple findAndModify command returning the new document
-            collection.findAndModify(
+            // Simple findOneAndUpdate command returning the new document
+            collection.findOneAndUpdate(
               { a: 1 },
-              [['a', 1]],
               { $set: { b1: 1 } },
-              { new: true },
+              { returnOriginal: false },
               function (err, doc) {
                 expect(err).to.not.exist;
                 test.equal(1, doc.value.a);
                 test.equal(1, doc.value.b1);
 
-                // Simple findAndModify command returning the new document and
+                // Simple findOneAndUpdate command returning the new document and
                 // removing it at the same time
-                collection.findAndModify(
+                collection.findOneAndUpdate(
                   { b: 1 },
-                  [['b', 1]],
                   { $set: { b: 2 } },
                   { remove: true },
                   function (err, doc) {
@@ -1555,13 +1553,12 @@ describe('Operation Examples', function () {
                       expect(err).to.not.exist;
                       expect(item).to.not.exist;
 
-                      // Simple findAndModify command performing an upsert and returning the new document
+                      // Simple findOneAndUpdate command performing an upsert and returning the new document
                       // executing the command safely
-                      collection.findAndModify(
+                      collection.findOneAndUpdate(
                         { d: 1 },
-                        [['b', 1]],
-                        { d: 1, f: 1 },
-                        { new: true, upsert: true, writeConcern: { w: 1 } },
+                        { $set: { d: 1, f: 1 } },
+                        { returnOriginal: false, upsert: true, writeConcern: { w: 1 } },
                         function (err, doc) {
                           expect(err).to.not.exist;
                           test.equal(1, doc.value.d);
@@ -1583,12 +1580,12 @@ describe('Operation Examples', function () {
   });
 
   /**
-   * An example of using findAndRemove
+   * An example of using findOneAndDelete
    *
    * @example-class Collection
-   * @example-method findAndRemove
+   * @example-method findOneAndDelete
    */
-  it('shouldPerformSimpleFindAndRemove', {
+  it('shouldPerformSimplefindOneAndDelete', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1618,9 +1615,9 @@ describe('Operation Examples', function () {
             test.ok(result);
             expect(err).to.not.exist;
 
-            // Simple findAndModify command returning the old document and
+            // Simple findOneAndDelete command returning the old document and
             // removing it at the same time
-            collection.findAndRemove({ b: 1 }, [['b', 1]], function (err, doc) {
+            collection.findOneAndDelete({ b: 1 }, [['b', 1]], function (err, doc) {
               expect(err).to.not.exist;
               test.equal(1, doc.value.b);
               test.equal(1, doc.value.d);
@@ -2065,7 +2062,7 @@ describe('Operation Examples', function () {
         // Crete the collection for the distinct example
         var collection = db.collection('simple_key_based_distinct');
         // Create a geo 2d index
-        collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function (
+        collection.createIndex({ loc: '2d' }, configuration.writeConcernMax(), function (
           err,
           result
         ) {
@@ -2073,7 +2070,7 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Create a simple single field index
-          collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
+          collection.createIndex({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             test.ok(result);
             expect(err).to.not.exist;
 
@@ -2194,7 +2191,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            collection.ensureIndex(
+            collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
@@ -2274,7 +2271,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            collection.ensureIndex(
+            collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
@@ -2498,7 +2495,7 @@ describe('Operation Examples', function () {
         var collection = db.collection('keepGoingExample');
 
         // Add an unique index to title to force errors in the batch insert
-        collection.ensureIndex({ title: 1 }, { unique: true }, function (err, indexName) {
+        collection.createIndex({ title: 1 }, { unique: true }, function (err, indexName) {
           test.ok(indexName);
           expect(err).to.not.exist;
 
@@ -2722,7 +2719,7 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           // Remove all the document
-          collection.removeOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, r) {
+          collection.deleteOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, r) {
             expect(err).to.not.exist;
             expect(r).property('deletedCount').to.equal(1);
             client.close(done);
@@ -3105,7 +3102,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            collection.ensureIndex(
+            collection.createIndex(
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
               function (err, indexName) {
@@ -3113,12 +3110,12 @@ describe('Operation Examples', function () {
                 expect(err).to.not.exist;
 
                 // Create an additional index
-                collection.ensureIndex(
+                collection.createIndex(
                   { c: 1 },
                   { unique: true, background: true, writeConcern: { w: 1 } },
                   function () {
                     // Drop the index
-                    collection.dropAllIndexes(function (err, result) {
+                    collection.dropIndexes(function (err, result) {
                       test.ok(result);
                       expect(err).to.not.exist;
 
@@ -3507,77 +3504,6 @@ describe('Operation Examples', function () {
   });
 
   /**
-   * An example of removing a user.
-   *
-   * @example-class Db
-   * @example-method removeUser
-   */
-  it('shouldCorrectlyAddAndRemoveUser', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-        expect(err).to.not.exist;
-
-        // Add a user to the database
-        db.addUser('user', 'name', function (err, result) {
-          test.ok(result);
-          expect(err).to.not.exist;
-          client.close();
-
-          const secondClient = configuration.newClient(
-            'mongodb://user:name@localhost:27017/integration_tests'
-          );
-
-          secondClient.connect(function (err) {
-            expect(err).to.not.exist;
-            var db = secondClient.db(configuration.db);
-
-            // Logout the db
-            secondClient.logout(function (err, result) {
-              test.equal(true, result);
-
-              // Remove the user from the db
-              db.removeUser('user', function (err, result) {
-                test.ok(result);
-                expect(err).to.not.exist;
-
-                const oldClient = secondClient;
-                const thirdClient = configuration.newClient(
-                  'mongodb://user:name@localhost:27017/integration_tests',
-                  { serverSelectionTimeoutMS: 10 }
-                );
-
-                // Authenticate
-                thirdClient.connect(function (err) {
-                  expect(err).to.exist;
-                  oldClient.close();
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
-      // END
-    }
-  });
-
-  /**
    * A simple example showing the creation of a collection.
    *
    * @example-class Db
@@ -3936,7 +3862,7 @@ describe('Operation Examples', function () {
             expect(err).to.not.exist;
 
             // Create an index on the a field
-            db.ensureIndex(
+            db.createIndex(
               'more_complex_ensure_index_db_test',
               { a: 1, b: 1 },
               { unique: true, background: true, writeConcern: { w: 1 } },
@@ -4254,126 +4180,6 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
 
           client.close(done);
-        });
-      });
-      // END
-    }
-  });
-
-  /**
-   * Retrieve the current profiling level set for the MongoDB instance
-   *
-   * @example-class Db
-   * @example-method profilingLevel
-   */
-  it('shouldCorrectlySetDefaultProfilingLevel', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-
-        // Grab a collection object
-        var collection = db.collection('test');
-
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
-          test.ok(doc);
-          expect(err).to.not.exist;
-
-          // Use the admin database for the operation
-          var adminDb = client.db('admin');
-
-          // Retrieve the profiling level
-          adminDb.profilingLevel(function (err, level) {
-            test.ok(level);
-            expect(err).to.not.exist;
-
-            client.close(done);
-          });
-        });
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of how to use the profilingInfo
-   * Use this command to pull back the profiling information currently set for Mongodb
-   *
-   * @example-class Db
-   * @example-method profilingInfo
-   */
-  it('shouldCorrectlySetAndExtractProfilingInfo', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-
-        // Grab a collection object
-        var collection = db.collection('test');
-
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        collection.insertOne({ a: 1 }, { writeConcern: { w: 1 } }, function (err, doc) {
-          test.ok(doc);
-          expect(err).to.not.exist;
-
-          // Use the admin database for the operation
-          // Set the profiling level to all
-          db.setProfilingLevel('all', function (err, level) {
-            test.ok(level);
-            expect(err).to.not.exist;
-
-            // Execute a query command
-            collection.find().toArray(function (err, items) {
-              expect(err).to.not.exist;
-              test.ok(items.length > 0);
-
-              // Turn off profiling
-              db.setProfilingLevel('off', function (err, level) {
-                test.ok(level);
-                expect(err).to.not.exist;
-
-                // Retrieve the profiling information
-                db.profilingInfo(function (err, infos) {
-                  expect(err).to.not.exist;
-                  test.ok(infos.constructor === Array);
-                  test.ok(infos.length >= 1);
-                  test.ok(infos[0].ts.constructor === Date);
-                  test.ok(infos[0].millis.constructor === Number);
-
-                  client.close(done);
-                });
-              });
-            });
-          });
         });
       });
       // END
@@ -6363,12 +6169,12 @@ describe('Operation Examples', function () {
   });
 
   /**
-   * Example of a simple removeOne operation
+   * Example of a simple deleteOne operation
    *
    * @example-class Collection
-   * @example-method removeOne
+   * @example-method deleteOne
    */
-  it('Should correctly execute removeOne operation', {
+  it('Should correctly execute deleteOne operation', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -6394,7 +6200,7 @@ describe('Operation Examples', function () {
           expect(err).to.not.exist;
           test.equal(2, r.insertedCount);
 
-          col.removeOne({ a: 1 }, function (err, r) {
+          col.deleteOne({ a: 1 }, function (err, r) {
             expect(err).to.not.exist;
             test.equal(1, r.deletedCount);
             // Finish up test
@@ -6439,7 +6245,7 @@ describe('Operation Examples', function () {
           test.equal(2, r.insertedCount);
 
           // Update all documents
-          col.removeMany({ a: 1 }, function (err, r) {
+          col.deleteMany({ a: 1 }, function (err, r) {
             expect(err).to.not.exist;
             test.equal(2, r.deletedCount);
 

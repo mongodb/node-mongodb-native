@@ -157,10 +157,7 @@ export class Server extends EventEmitter {
     relayEvents(this[kMonitor], this, [
       Server.SERVER_HEARTBEAT_STARTED,
       Server.SERVER_HEARTBEAT_SUCCEEDED,
-      Server.SERVER_HEARTBEAT_FAILED,
-
-      // legacy events
-      'monitoring'
+      Server.SERVER_HEARTBEAT_FAILED
     ]);
 
     this[kMonitor].on('resetConnectionPool', () => {

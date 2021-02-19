@@ -599,20 +599,10 @@ describe('Collection', function () {
         });
     });
 
-    const collectionTTLtests = [
-      {
-        title: 'should correctly create TTL collection with index using createIndex',
-        collectionName: 'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex'
-      },
-      {
-        title: 'should correctly create TTL collection with index using ensureIndex',
-        collectionName: 'shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex'
-      }
-    ];
-
-    collectionTTLtests.forEach(test => {
-      it(test.title, function (done) {
-        db.createCollection(test.collectionName, (err, collection) => {
+    it('should correctly create TTL collection with index using createIndex', function (done) {
+      db.createCollection(
+        'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex',
+        (err, collection) => {
           const errorCallBack = err => {
             expect(err).to.not.exist;
 
@@ -638,25 +628,13 @@ describe('Collection', function () {
               }
             );
           };
-          if (
-            test.title === 'should correctly create TTL collection with index using createIndex'
-          ) {
-            collection.createIndex(
-              { createdAt: 1 },
-              { expireAfterSeconds: 1, writeConcern: { w: 1 } },
-              errorCallBack
-            );
-          } else if (
-            test.title === 'should correctly create TTL collection with index using ensureIndex'
-          ) {
-            collection.ensureIndex(
-              { createdAt: 1 },
-              { expireAfterSeconds: 1, writeConcern: { w: 1 } },
-              errorCallBack
-            );
-          }
-        });
-      });
+          collection.createIndex(
+            { createdAt: 1 },
+            { expireAfterSeconds: 1, writeConcern: { w: 1 } },
+            errorCallBack
+          );
+        }
+      );
     });
 
     it('should support createIndex with no options', function (done) {
