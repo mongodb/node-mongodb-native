@@ -107,8 +107,7 @@ functions:
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             cat <<EOT > prepare_client_encryption.sh
             export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
-            export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
-            export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+            export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
           EOT
           fi
     - command: shell.exec
@@ -283,6 +282,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_regular_aws.js
     - command: shell.exec
       type: test
@@ -311,6 +311,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
@@ -343,6 +344,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
       type: test
@@ -415,6 +417,7 @@ functions:
           EOF
 
           cat setup.js
+          . ./activate_venv.sh
           mongo --nodb setup.js aws_e2e_ecs.js
   run-ocsp-test:
     - command: shell.exec
@@ -1125,9 +1128,6 @@ tasks:
       - func: run aws auth test with regular aws credentials
       - func: run aws auth test with assume role credentials
       - func: run aws auth test with aws EC2 credentials
-      - func: run aws auth test with aws credentials as environment variables
-      - func: run aws auth test with aws credentials and session token as environment variables
-      - func: run aws ECS auth test
   - name: aws-4.4-auth-test
     commands:
       - func: install dependencies
@@ -1141,9 +1141,6 @@ tasks:
       - func: run aws auth test with regular aws credentials
       - func: run aws auth test with assume role credentials
       - func: run aws auth test with aws EC2 credentials
-      - func: run aws auth test with aws credentials as environment variables
-      - func: run aws auth test with aws credentials and session token as environment variables
-      - func: run aws ECS auth test
   - name: run-checks
     tags:
       - run-checks

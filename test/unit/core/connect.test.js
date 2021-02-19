@@ -98,11 +98,11 @@ describe('Connect Tests', function () {
     });
   });
 
+  // FIXME: NODE-2941
   it.skip('should allow a cancellaton token', {
-    // FIXME: NODE-2941
     metadata: {
       requires: {
-        os: '!win32' // NODE-2941: 240.0.0.1 doesnt work for windows
+        os: '!win32' // 240.0.0.1 doesnt work for windows
       }
     },
     test: function (done) {
