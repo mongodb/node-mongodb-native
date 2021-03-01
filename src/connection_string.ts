@@ -575,16 +575,6 @@ export const OPTIONS = {
   checkKeys: {
     type: 'boolean'
   },
-  checkServerIdentity: {
-    target: 'checkServerIdentity',
-    transform({
-      values: [value]
-    }): boolean | ((hostname: string, cert: Document) => Error | undefined) {
-      if (typeof value !== 'boolean' && typeof value !== 'function')
-        throw new MongoParseError('check server identity must be a boolean or custom function');
-      return value as boolean | ((hostname: string, cert: Document) => Error | undefined);
-    }
-  },
   compressors: {
     default: 'none',
     target: 'compressors',
@@ -1041,6 +1031,7 @@ export const OPTIONS = {
   enableTrace: { type: 'any' },
   requestCert: { type: 'any' },
   rejectUnauthorized: { type: 'any' },
+  checkServerIdentity: { type: 'any' },
   ALPNProtocols: { type: 'any' },
   SNICallback: { type: 'any' },
   session: { type: 'any' },
