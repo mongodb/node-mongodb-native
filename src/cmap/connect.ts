@@ -289,18 +289,14 @@ function makeConnection(options: ConnectionOptions, _callback: CallbackWithType<
     _callback(err, ret);
   };
 
-  try {
-    if (useTLS) {
-      const tlsSocket = tls.connect(parseSslOptions(options));
-      if (typeof tlsSocket.disableRenegotiation === 'function') {
-        tlsSocket.disableRenegotiation();
-      }
-      socket = tlsSocket;
-    } else {
-      socket = net.createConnection(parseConnectOptions(options));
+  if (useTLS) {
+    const tlsSocket = tls.connect(parseSslOptions(options));
+    if (typeof tlsSocket.disableRenegotiation === 'function') {
+      tlsSocket.disableRenegotiation();
     }
-  } catch (err) {
-    return callback(err);
+    socket = tlsSocket;
+  } else {
+    socket = net.createConnection(parseConnectOptions(options));
   }
 
   socket.setKeepAlive(keepAlive, keepAliveInitialDelay);
