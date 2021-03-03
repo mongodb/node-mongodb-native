@@ -5,9 +5,7 @@ const BSON = require('bson');
 const bson = new BSON();
 const chai = require('chai');
 const expect = chai.expect;
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
+
 chai.use(require('chai-subset'));
 
 describe('Client Side Encryption Functional', function() {

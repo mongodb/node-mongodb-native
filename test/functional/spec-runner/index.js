@@ -10,9 +10,6 @@ const resolveConnectionString = require('./utils').resolveConnectionString;
 
 chai.use(require('chai-subset'));
 chai.use(require('./matcher').default);
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
