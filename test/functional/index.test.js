@@ -1264,7 +1264,7 @@ describe('Indexes', function() {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>=3.0.0'
+        mongodb: '>=3.0.0 <=4.8.0'
       }
     },
 
