@@ -7,9 +7,6 @@ const path = require('path');
 const EJSON = require('mongodb-extjson');
 const chai = require('chai');
 const expect = chai.expect;
-chai.config.includeStack = true;
-chai.config.showDiff = true;
-chai.config.truncateThreshold = 0;
 
 describe('Client Side Encryption Corpus', function() {
   const metadata = {

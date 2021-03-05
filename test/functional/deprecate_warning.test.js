@@ -71,10 +71,17 @@ describe('Deprecation Warnings', function() {
             .trim();
 
           // ensure warning message matches expected
-          expect(warning).to.equal(
-            '[MONGODB DRIVER] DeprecationWarning: testDeprecationFlags option [maxScan]' +
-              defaultMessage
-          );
+          const majorVersion = +process.version.split('.')[0].substring(1);
+          if (majorVersion <= 6) {
+            expect(warning).to.equal(
+              'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
+            );
+          } else {
+            expect(warning).to.equal(
+              '[MONGODB DRIVER] DeprecationWarning: testDeprecationFlags option [maxScan]' +
+                defaultMessage
+            );
+          }
 
           // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
           split.pop();
