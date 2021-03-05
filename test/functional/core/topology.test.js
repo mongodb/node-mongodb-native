@@ -13,11 +13,9 @@ describe('Topology', function () {
         expect(err).to.not.exist;
         topology.close(err => {
           expect(err).to.not.exist;
-          topology.destroy(err => {
-            expect(err).to.not.exist;
-            expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
-            done();
-          });
+          expect(topology.isDestroyed()).to.be.true;
+          expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
+          done();
         });
       });
     }

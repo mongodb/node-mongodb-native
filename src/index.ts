@@ -213,6 +213,7 @@ export type {
   MongoOptions,
   ServerApi,
   ServerApiVersion,
+  ServerApiVersionId,
   SupportedNodeConnectionOptions,
   SupportedTLSConnectionOptions,
   SupportedTLSSocketOptions,
