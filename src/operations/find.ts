@@ -4,8 +4,7 @@ import {
   MongoDBNamespace,
   Callback,
   normalizeHintField,
-  decorateWithExplain,
-  applyServerApiVersion
+  decorateWithExplain
 } from '../utils';
 import { MongoError } from '../error';
 import type { Document } from '../bson';
@@ -153,9 +152,6 @@ export class FindOperation extends CommandOperation<Document> {
     let findCommand = makeFindCommand(this.ns, this.filter, options);
     if (this.explain) {
       findCommand = decorateWithExplain(findCommand, this.explain);
-    }
-    if (server.serverApi) {
-      applyServerApiVersion(findCommand, server.serverApi);
     }
 
     server.command(

@@ -246,7 +246,6 @@ export interface MongoClientPrivate {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   readPreference: ReadPreference;
-  serverApi: ServerApi;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   logger: Logger;
@@ -325,7 +324,6 @@ export class MongoClient extends EventEmitter {
       readConcern: this[kOptions].readConcern,
       writeConcern: this[kOptions].writeConcern,
       readPreference: this[kOptions].readPreference,
-      serverApi: this[kOptions].serverApi,
       bsonOptions: resolveBSONOptions(this[kOptions]),
       namespace: ns('admin'),
       logger: this[kOptions].logger

@@ -1,13 +1,7 @@
 import { Aspect, AbstractOperation, OperationOptions } from './operation';
 import { ReadConcern } from '../read_concern';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
-import {
-  applyServerApiVersion,
-  maxWireVersion,
-  MongoDBNamespace,
-  Callback,
-  decorateWithExplain
-} from '../utils';
+import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import type { ReadPreference } from '../read_preference';
 import { ClientSession, commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
@@ -177,18 +171,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       } else {
         cmd = decorateWithExplain(cmd, this.explain);
       }
-    }
-
-    // if an API version was declared, add the apiVersion option to every command, except:
-    // a. only in the initial command of a transaction
-    // b. only in a Cursor's initiating command, not subsequent getMore commands
-    if (
-      server.serverApi &&
-      (!inTransaction || this.session.transaction.isStarting) &&
-      !cmd.commitTransaction &&
-      !cmd.getMore
-    ) {
-      applyServerApiVersion(cmd, server.serverApi);
     }
 
     server.command(this.ns, cmd, { fullResult: !!this.fullResponse, ...options }, callback);

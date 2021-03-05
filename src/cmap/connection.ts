@@ -320,6 +320,23 @@ export class Connection extends EventEmitter {
 
     let clusterTime = this.clusterTime;
     let finalCmd = Object.assign({}, cmd);
+    const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
+
+    // if an API version was declared, add the apiVersion option to every command, except:
+    // a. only in the initial command of a transaction
+    // b. only in a Cursor's initiating command, not subsequent getMore commands
+    if (
+      this.serverApi &&
+      (!inTransaction || session?.transaction.isStarting) &&
+      !cmd.commitTransaction &&
+      !cmd.getMore
+    ) {
+      const { version, strict, deprecationErrors } = this.serverApi;
+      finalCmd.apiVersion = version;
+      if (strict != null) finalCmd.apiStrict = strict;
+      if (deprecationErrors != null) finalCmd.apiDeprecationErrors = deprecationErrors;
+    }
+
     if (hasSessionSupport(this) && session) {
       if (
         session.clusterTime &&
@@ -363,8 +380,6 @@ export class Connection extends EventEmitter {
     const message = shouldUseOpMsg
       ? new Msg(cmdNs, finalCmd, commandOptions)
       : new Query(cmdNs, finalCmd, commandOptions);
-
-    const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
 
     const commandResponseHandler = inTransaction
       ? (err?: AnyError, ...args: Document[]) => {

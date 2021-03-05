@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
 import { MongoError, AnyError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import { Callback, ns, applyServerApiVersion, emitWarning } from '../../utils';
+import { Callback, ns, emitWarning } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 
@@ -112,9 +112,6 @@ function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, call
   const db = credentials.source;
 
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-  if (connection.serverApi) {
-    applyServerApiVersion(saslStartCmd, connection.serverApi);
-  }
   connection.command(ns(`${db}.$cmd`), saslStartCmd, undefined, (_err, result) => {
     const err = resolveError(_err, result);
     if (err) {
@@ -200,9 +197,6 @@ function continueScramConversation(
     conversationId: response.conversationId,
     payload: new Binary(Buffer.from(clientFinal))
   };
-  if (connection.serverApi) {
-    applyServerApiVersion(saslContinueCmd, connection.serverApi);
-  }
 
   connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined, (_err, r) => {
     const err = resolveError(_err, r);
@@ -225,9 +219,6 @@ function continueScramConversation(
       conversationId: r.conversationId,
       payload: Buffer.alloc(0)
     };
-    if (connection.serverApi) {
-      applyServerApiVersion(retrySaslContinueCmd, connection.serverApi);
-    }
 
     connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined, callback);
   });

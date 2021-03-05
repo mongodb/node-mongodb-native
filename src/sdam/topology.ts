@@ -22,7 +22,6 @@ import {
   Callback,
   HostAddress,
   ns,
-  applyServerApiVersion,
   emitWarning
 } from '../utils';
 import {
@@ -379,9 +378,6 @@ export class Topology extends EventEmitter {
       // TODO: NODE-2471
       if (server && this.s.credentials) {
         const pingCmd = { ping: 1 };
-        if (server.serverApi) {
-          applyServerApiVersion(pingCmd, server.serverApi);
-        }
         server.command(ns('admin.$cmd'), pingCmd, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);

@@ -572,10 +572,6 @@ export abstract class AbstractCursor extends EventEmitter {
       return;
     }
 
-    if (!this[kSession]) {
-      throw new Error('Should have a session when calling getMore');
-    }
-
     server.getMore(
       cursorNs,
       cursorId,
@@ -624,7 +620,7 @@ function next(
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    if (cursor[kSession] == null /*&& cursor[kTopology].hasSessionSupport()*/) {
+    if (cursor[kSession] == null && cursor[kTopology].hasSessionSupport()) {
       cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
     }
 
