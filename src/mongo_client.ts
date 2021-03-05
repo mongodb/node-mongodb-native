@@ -33,14 +33,6 @@ import type { Connection } from './cmap/connection';
 import type { LEGAL_TLS_SOCKET_OPTIONS, LEGAL_TCP_SOCKET_OPTIONS } from './cmap/connect';
 
 /** @public */
-export const LogLevel = {
-  error: 'error',
-  warn: 'warn',
-  info: 'info',
-  debug: 'debug'
-} as const;
-
-/** @public */
 export const ServerApiVersion = {
   v1: '1'
 };
@@ -54,9 +46,6 @@ export interface ServerApi {
   strict?: boolean;
   deprecationErrors?: boolean;
 }
-
-/** @public */
-export type LogLevelId = typeof LogLevel[keyof typeof LogLevel];
 
 /** @public */
 export interface DriverInfo {
