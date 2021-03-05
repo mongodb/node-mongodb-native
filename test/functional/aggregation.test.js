@@ -53,7 +53,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -172,7 +172,7 @@ describe('Aggregation', function () {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -260,7 +260,7 @@ describe('Aggregation', function () {
           'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
         );
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -346,7 +346,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(err).to.not.exist;
           expect(result).to.exist;
 
@@ -426,7 +426,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -515,7 +515,7 @@ describe('Aggregation', function () {
         // Create a collection
         const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, (err, result) => {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, (err, result) => {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -604,7 +604,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -689,7 +689,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -885,7 +885,7 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
         // Insert the docs
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
           expect(result).to.exist;
           expect(err).to.not.exist;
 
@@ -1027,7 +1027,7 @@ describe('Aggregation', function () {
           // Create a collection
           const collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
-          collection.insert(docs, { writeConcern: { w: 1 } }, (err, result) => {
+          collection.insertMany(docs, { writeConcern: { w: 1 } }, (err, result) => {
             expect(result).to.exist;
             expect(err).to.not.exist;
 

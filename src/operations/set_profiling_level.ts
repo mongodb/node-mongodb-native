@@ -6,22 +6,25 @@ import type { ClientSession } from '../sessions';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 /** @public */
-export enum ProfilingLevel {
-  off = 'off',
-  slowOnly = 'slow_only',
-  all = 'all'
-}
+export const ProfilingLevel = Object.freeze({
+  off: 'off',
+  slowOnly: 'slow_only',
+  all: 'all'
+} as const);
+
+/** @public */
+export type ProfilingLevelId = typeof ProfilingLevel[keyof typeof ProfilingLevel];
 
 /** @public */
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
+export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevelId> {
   options: SetProfilingLevelOptions;
-  level: ProfilingLevel;
+  level: ProfilingLevelId;
   profile: 0 | 1 | 2;
 
-  constructor(db: Db, level: ProfilingLevel, options: SetProfilingLevelOptions) {
+  constructor(db: Db, level: ProfilingLevelId, options: SetProfilingLevelOptions) {
     super(db, options);
     this.options = options;
     switch (level) {
@@ -42,7 +45,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     this.level = level;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<ProfilingLevel>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<ProfilingLevelId>): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {

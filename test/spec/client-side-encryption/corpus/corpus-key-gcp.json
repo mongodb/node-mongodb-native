@@ -1,0 +1,35 @@
+{
+    "_id": {
+        "$binary": {
+            "base64": "GCPAAAAAAAAAAAAAAAAAAA==",
+            "subType": "04"
+        }
+    },
+    "keyMaterial": {
+        "$binary": {
+            "base64": "CiQAIgLj0WyktnB4dfYHo5SLZ41K4ASQrjJUaSzl5vvVH0G12G0SiQEAjlV8XPlbnHDEDFbdTO4QIe8ER2/172U1ouLazG0ysDtFFIlSvWX5ZnZUrRMmp/R2aJkzLXEt/zf8Mn4Lfm+itnjgo5R9K4pmPNvvPKNZX5C16lrPT+aA+rd+zXFSmlMg3i5jnxvTdLHhg3G7Q/Uv1ZIJskKt95bzLoe0tUVzRWMYXLIEcohnQg==",
+            "subType": "00"
+        }
+    },
+    "creationDate": {
+        "$date": {
+            "$numberLong": "1601574333107"
+        }
+    },
+    "updateDate": {
+        "$date": {
+            "$numberLong": "1601574333107"
+        }
+    },
+    "status": {
+        "$numberInt": "0"
+    },
+    "masterKey": {
+        "provider": "gcp",
+        "projectId": "devprod-drivers",
+        "location": "global",
+        "keyRing": "key-ring-csfle",
+        "keyName": "key-name-csfle"
+    },
+    "keyAltNames": ["gcp"]
+}

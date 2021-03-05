@@ -37,7 +37,7 @@ describe('Bulk', function () {
         var col = db.collection('batch_write_ordered_ops_10');
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
+        col.createIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
@@ -286,7 +286,7 @@ describe('Bulk', function () {
         var col = db.collection('batch_write_ordered_ops_2');
 
         // Add unique index on field `a` causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
+        col.createIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           expect(err).to.not.exist;
 
           var batch = col.initializeOrderedBulkOp();
@@ -433,7 +433,7 @@ describe('Bulk', function () {
           var col = db.collection('batch_write_ordered_ops_6');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
+          col.createIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
@@ -489,7 +489,7 @@ describe('Bulk', function () {
           var col = db.collection('batch_write_ordered_ops_7');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
+          col.createIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             expect(err).to.not.exist;
 
             var batch = col.initializeOrderedBulkOp();
@@ -660,7 +660,7 @@ describe('Bulk', function () {
         var col = db.collection('batch_write_unordered_ops_legacy_1');
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
+        col.createIndex({ a: 1 }, { unique: true, sparse: false }, function (err) {
           expect(err).to.not.exist;
 
           // Initialize the unordered Batch
@@ -724,7 +724,7 @@ describe('Bulk', function () {
       const col = db.collection('batch_write_unordered_ops_legacy_2');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, err => {
+      col.createIndex({ a: 1 }, { unique: true, sparse: false }, err => {
         expect(err).to.not.exist;
 
         // Initialize the unordered Batch
@@ -854,7 +854,7 @@ describe('Bulk', function () {
         writeConcern.sparse = false;
 
         // Add unique index on b field causing all updates to fail
-        col.ensureIndex({ b: 1 }, writeConcern, function (err) {
+        col.createIndex({ b: 1 }, writeConcern, function (err) {
           expect(err).to.not.exist;
 
           // Initialize the unordered Batch
@@ -960,7 +960,7 @@ describe('Bulk', function () {
           var col = db.collection('batch_write_unordered_ops_legacy_7');
 
           // Add unique index on b field causing all updates to fail
-          col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
+          col.createIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
             expect(err).to.not.exist;
 
             // Initialize the unordered Batch

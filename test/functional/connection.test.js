@@ -2,6 +2,7 @@
 const { withClient, setupDatabase } = require('./shared');
 const test = require('./shared').assert;
 const { expect } = require('chai');
+const { ServerHeartbeatStartedEvent } = require('../../src');
 
 describe('Connection - functional', function () {
   before(function () {
@@ -10,8 +11,7 @@ describe('Connection - functional', function () {
 
   it('should correctly start monitoring for single server connection', {
     metadata: { requires: { topology: 'single', os: '!win32' } },
-
-    test: function (done) {
+    test() {
       var configuration = this.configuration;
       var client = configuration.newClient(
         `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
@@ -21,13 +21,18 @@ describe('Connection - functional', function () {
         }
       );
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-
-        client.topology.once('monitoring', function () {
-          client.close(done);
-        });
+      let isMonitoring = false;
+      client.once('serverHeartbeatStarted', event => {
+        // just to be sure we get what we expect, checking the instanceof
+        isMonitoring = event instanceof ServerHeartbeatStartedEvent;
       });
+
+      return client
+        .connect()
+        .then(() => {
+          expect(isMonitoring);
+        })
+        .finally(() => client.close());
     }
   });
 
@@ -231,22 +236,9 @@ describe('Connection - functional', function () {
     }
   });
 
-  it('should correctly return false on `isConnected` before connection happened', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-      test.equal(false, client.isConnected());
-      done();
-    }
-  });
-
   it(
     'should be able to connect again after close',
     withClient(function (client, done) {
-      expect(client.isConnected()).to.be.true;
-
       const collection = client.db('shouldConnectAfterClose').collection('test');
       collection.insertOne({ a: 1, b: 2 }, (err, result) => {
         expect(err).to.not.exist;
@@ -254,11 +246,9 @@ describe('Connection - functional', function () {
 
         client.close(err => {
           expect(err).to.not.exist;
-          expect(client.isConnected()).to.be.false;
 
           client.connect(err => {
             expect(err).to.not.exist;
-            expect(client.isConnected()).to.be.true;
 
             collection.findOne({ a: 1 }, (err, result) => {
               expect(err).to.not.exist;
@@ -277,7 +267,6 @@ describe('Connection - functional', function () {
   it(
     'should correctly fail on retry when client has been closed',
     withClient(function (client, done) {
-      expect(client.isConnected()).to.be.true;
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       collection.insertOne({ a: 1 }, (err, result) => {
         expect(err).to.not.exist;
@@ -285,7 +274,6 @@ describe('Connection - functional', function () {
 
         client.close(true, function (err) {
           expect(err).to.not.exist;
-          expect(client.isConnected()).to.be.false;
 
           expect(() => {
             collection.insertOne({ a: 2 });

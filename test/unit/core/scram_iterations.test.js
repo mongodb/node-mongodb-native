@@ -58,7 +58,7 @@ describe('SCRAM Iterations Tests', function () {
       } catch (e) {
         testErr = e;
       }
-      client.destroy();
+      client.close();
       done(testErr);
     });
 
@@ -106,7 +106,7 @@ describe('SCRAM Iterations Tests', function () {
         .to.have.property('message')
         .that.matches(/Server returned an invalid signature/);
 
-      client.destroy(done);
+      client.close(done);
     });
 
     client.connect();
@@ -149,7 +149,7 @@ describe('SCRAM Iterations Tests', function () {
         .to.have.property('message')
         .that.matches(/connection(.+)closed/);
 
-      client.destroy(done);
+      client.close(done);
     });
 
     client.connect();

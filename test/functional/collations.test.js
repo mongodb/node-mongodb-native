@@ -15,47 +15,6 @@ describe('Collation', function () {
     return mock.createServer().then(mockServer => (testContext.server = mockServer));
   });
 
-  it('Successfully pass through collation to findAndModify command', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
-
-      let commandResult;
-      testContext.server.setMessageHandler(request => {
-        var doc = request.document;
-        if (doc.ismaster) {
-          request.reply(primary[0]);
-        } else if (doc.findAndModify) {
-          commandResult = doc;
-          request.reply({ ok: 1, result: {} });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .findAndModify(
-            { a: 1 },
-            [['a', 1]],
-            { $set: { b1: 1 } },
-            { new: true, collation: { caseLevel: true } }
-          )
-          .then(() => {
-            expect(commandResult).to.have.property('collation');
-            expect(commandResult.collation).to.eql({ caseLevel: true });
-            return client.close();
-          });
-      });
-    }
-  });
-
   it('Successfully pass through collation to count command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 

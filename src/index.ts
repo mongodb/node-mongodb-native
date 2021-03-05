@@ -73,6 +73,50 @@ export {
   GridFSBucket
 };
 
+// enums
+export { ProfilingLevel } from './operations/set_profiling_level';
+export { ServerType, TopologyType } from './sdam/common';
+export { LoggerLevel } from './logger';
+export { AutoEncryptionLoggerLevel } from './deps';
+export { BatchType } from './bulk/common';
+export { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+export { CURSOR_FLAGS } from './cursor/abstract_cursor';
+export { Compressor } from './cmap/wire_protocol/compression';
+export { ExplainVerbosity } from './explain';
+export { ReadConcernLevel } from './read_concern';
+export { ReadPreferenceMode } from './read_preference';
+
+// events
+export {
+  CommandStartedEvent,
+  CommandSucceededEvent,
+  CommandFailedEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolMonitoringEvent,
+  ConnectionReadyEvent
+} from './cmap/events';
+export {
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
+  ServerHeartbeatFailedEvent,
+  ServerClosedEvent,
+  ServerDescriptionChangedEvent,
+  ServerOpeningEvent,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
+} from './sdam/events';
+export { SrvPollingEvent } from './sdam/srv_polling';
+
+// type only exports below, these are removed from emitted JS
 export type { AdminPrivate } from './admin';
 export type { Instrumentation } from './apm';
 export type { Document, BSONSerializeOptions } from './bson';
@@ -99,7 +143,7 @@ export type {
   OperationTime,
   ResumeOptions
 } from './change_stream';
-export type { AuthMechanism, AuthMechanismId } from './cmap/auth/defaultAuthProviders';
+export type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
@@ -132,20 +176,19 @@ export type {
   MessageStreamOptions
 } from './cmap/message_stream';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
-export type { CompressorName, Compressor } from './cmap/wire_protocol/compression';
+export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { CollectionPrivate, CollectionOptions } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
   CursorCloseOptions,
   CursorStreamOptions,
   AbstractCursorOptions,
-  CURSOR_FLAGS,
   CursorFlag
 } from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
-export type { AutoEncryptionOptions, AutoEncryptionLoggerLevels, AutoEncrypter } from './deps';
+export type { AutoEncryptionOptions, AutoEncryptionLoggerLevelId, AutoEncrypter } from './deps';
 export type { AnyError, ErrorDescription } from './error';
-export type { Explain, ExplainOptions, ExplainVerbosity, ExplainVerbosityLike } from './explain';
+export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
@@ -159,14 +202,12 @@ export type {
   TFileId,
   GridFSBucketWriteStream
 } from './gridfs-stream/upload';
-export type { LoggerOptions, LoggerFunction, LoggerLevel } from './logger';
+export type { LoggerOptions, LoggerFunction, LoggerLevelId } from './logger';
 export type {
   MongoClientPrivate,
   MongoClientOptions,
   WithSessionCallback,
   PkFactory,
-  LogLevel,
-  LogLevelId,
   Auth,
   DriverInfo,
   MongoOptions,
@@ -177,7 +218,7 @@ export type {
   SupportedTLSSocketOptions,
   SupportedSocketOptions
 } from './mongo_client';
-export type { AddUserOptions } from './operations/add_user';
+export type { AddUserOptions, RoleSpecification } from './operations/add_user';
 export type {
   AggregateOptions,
   AggregateOperation,
@@ -223,7 +264,7 @@ export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
-export type { ProfilingLevel, SetProfilingLevelOptions } from './operations/set_profiling_level';
+export type { ProfilingLevelId, SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
 export type {
   UpdateResult,
@@ -232,23 +273,16 @@ export type {
   UpdateStatement
 } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type {
-  ReadConcern,
-  ReadConcernLike,
-  ReadConcernLevel,
-  ReadConcernLevelId
-} from './read_concern';
+export type { ReadConcern, ReadConcernLike, ReadConcernLevelId } from './read_concern';
 export type {
   ReadPreferenceLike,
   ReadPreferenceModeId,
-  ReadPreferenceMode,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
   ReadPreferenceFromOptions,
   HedgeOptions
 } from './read_preference';
-export type { ClusterTime, ServerType, TimerQueue, TopologyType } from './sdam/common';
-export type { TopologyDescriptionChangedEvent } from './sdam/events';
+export type { ClusterTime, ServerTypeId, TimerQueue, TopologyTypeId } from './sdam/common';
 export type {
   Monitor,
   MonitorPrivate,
@@ -264,7 +298,7 @@ export type {
   ServerDescriptionOptions
 } from './sdam/server_description';
 export type { ServerSelector } from './sdam/server_selection';
-export type { SrvPoller, SrvPollingEvent, SrvPollerOptions } from './sdam/srv_polling';
+export type { SrvPoller, SrvPollerOptions } from './sdam/srv_polling';
 export type {
   Topology,
   TopologyPrivate,
@@ -284,7 +318,7 @@ export type {
   ServerSessionId,
   WithTransactionCallback
 } from './sessions';
-export type { TransactionOptions, Transaction, TxnState } from './transactions';
+export type { TransactionOptions, Transaction, TxnState, TxnStateId } from './transactions';
 export type {
   Callback,
   ClientMetadata,
@@ -300,7 +334,6 @@ export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type {
   BulkOperationBase,
   BulkOperationPrivate,
-  BatchType,
   BatchTypeId,
   FindOperators,
   Batch

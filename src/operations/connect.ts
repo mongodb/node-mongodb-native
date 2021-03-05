@@ -1,25 +1,13 @@
 import { MongoError } from '../error';
 import { Topology } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
-import { emitDeprecationWarning, Callback } from '../utils';
+import type { Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import * as BSON from '../bson';
 import type { MongoClient, MongoOptions } from '../mongo_client';
 import { Connection } from '../cmap/connection';
 import { Server } from '../sdam/server';
 import type { AutoEncrypter } from '../deps';
-
-function addListeners(mongoClient: MongoClient, topology: Topology) {
-  topology.on('authenticated', createListener(mongoClient, 'authenticated'));
-  topology.on('error', createListener(mongoClient, 'error'));
-  topology.on('timeout', createListener(mongoClient, 'timeout'));
-  topology.on('close', createListener(mongoClient, 'close'));
-  topology.on('parseError', createListener(mongoClient, 'parseError'));
-  topology.once('open', createListener(mongoClient, 'open'));
-  topology.once('fullsetup', createListener(mongoClient, 'fullsetup'));
-  topology.once('all', createListener(mongoClient, 'all'));
-  topology.on('reconnect', createListener(mongoClient, 'reconnect'));
-}
 
 export function connect(
   mongoClient: MongoClient,
@@ -35,7 +23,6 @@ export function connect(
     return callback(undefined, mongoClient);
   }
 
-  const didRequestAuthentication = false;
   const logger = mongoClient.logger;
   const connectCallback: Callback = err => {
     const warningMessage =
@@ -49,10 +36,6 @@ export function connect(
 
       // Return a more specific error message for MongoClient.connect
       return callback(new MongoError(warningMessage));
-    }
-
-    if (didRequestAuthentication) {
-      mongoClient.emit('authenticated', null, true);
     }
 
     callback(err, mongoClient);
@@ -83,30 +66,6 @@ function createListener<V1, V2>(mongoClient: MongoClient, event: string): Listen
 
     return mongoClient.emit(event, v1, v2);
   };
-}
-
-const DEPRECATED_UNIFIED_EVENTS = new Set([
-  'reconnect',
-  'reconnectFailed',
-  'attemptReconnect',
-  'joined',
-  'left',
-  'ping',
-  'ha',
-  'all',
-  'fullsetup',
-  'open'
-]);
-
-function registerDeprecatedEventNotifiers(client: MongoClient) {
-  client.on('newListener', (eventName: string) => {
-    if (DEPRECATED_UNIFIED_EVENTS.has(eventName)) {
-      emitDeprecationWarning(
-        `The \`${eventName}\` event is no longer supported by the unified topology, ` +
-          'please read more by visiting http://bit.ly/2D8WfT6'
-      );
-    }
-  });
 }
 
 /**
@@ -158,10 +117,11 @@ function createTopology(
   // save the reference to the topology on the client ASAP if the event handlers need to access it
   mongoClient.topology = topology;
 
-  registerDeprecatedEventNotifiers(mongoClient);
-
   // Add listeners
-  addListeners(mongoClient, topology);
+  topology.on('error', createListener(mongoClient, 'error'));
+  topology.on('timeout', createListener(mongoClient, 'timeout'));
+  topology.on('close', createListener(mongoClient, 'close'));
+  topology.once('open', createListener(mongoClient, 'open'));
 
   // Propagate the events to the client
   relayEvents(mongoClient, topology);
@@ -217,17 +177,12 @@ function relayEvents(mongoClient: MongoClient, topology: Topology) {
     Topology.TOPOLOGY_OPENING,
     Topology.TOPOLOGY_CLOSED,
     Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+    ...CMAP_EVENT_NAMES
+  ];
 
-    // Legacy
-    'joined',
-    'left',
-    'ping',
-    'ha'
-  ].concat(CMAP_EVENT_NAMES);
-
-  serverOrCommandEvents.forEach(event => {
+  for (const event of serverOrCommandEvents) {
     topology.on(event, (object1, object2) => {
       mongoClient.emit(event, object1, object2);
     });
-  });
+  }
 }

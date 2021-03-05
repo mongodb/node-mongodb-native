@@ -7,7 +7,8 @@ import {
   decompress,
   uncompressibleCommands,
   Compressor,
-  CompressorName
+  CompressorName,
+  CompressorId
 } from './wire_protocol/compression';
 import type { Document, BSONSerializeOptions } from '../bson';
 import { BufferPool, Callback } from '../utils';
@@ -177,7 +178,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
   messageHeader.fromCompressed = true;
   messageHeader.opCode = message.readInt32LE(MESSAGE_HEADER_SIZE);
   messageHeader.length = message.readInt32LE(MESSAGE_HEADER_SIZE + 4);
-  const compressorID = message[MESSAGE_HEADER_SIZE + 8];
+  const compressorID: CompressorId = message[MESSAGE_HEADER_SIZE + 8] as CompressorId;
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);
 
   // recalculate based on wrapped opcode

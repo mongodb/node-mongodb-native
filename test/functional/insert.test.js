@@ -964,11 +964,10 @@ describe('Insert', function () {
                 expect(item.d).to.not.exist;
 
                 // Execute a safe insert with replication to two servers
-                collection.findAndModify(
+                collection.findOneAndUpdate(
                   { str: 'String' },
-                  [['a', 1]],
                   { $set: { f: function () {} } },
-                  { new: true, safe: true, serializeFunctions: true },
+                  { returnOriginal: false, safe: true, serializeFunctions: true },
                   function (err, result) {
                     test.ok(result.value.f._bsontype === 'Code');
                     client.close(done);
@@ -1841,7 +1840,6 @@ describe('Insert', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        apiVersion: false,
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },

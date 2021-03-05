@@ -202,17 +202,4 @@ describe('Command Write Concern', function () {
       db.admin().removeUser('kay:kay', writeConcernTestOptions, done);
     })
   });
-
-  it('successfully pass through writeConcern to findAndModify command', {
-    metadata,
-    test: writeConcernTest('findAndModify', function (db, writeConcernTestOptions, done) {
-      db.collection('test').findAndModify(
-        { a: 1 },
-        [['a', 1]],
-        { $set: { b1: 1 } },
-        Object.assign({ new: true }, writeConcernTestOptions),
-        done
-      );
-    })
-  });
 });

@@ -1,6 +1,6 @@
 import { ServerDescription } from './server_description';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { TopologyType, ServerType } from './common';
+import { TopologyType, ServerType, TopologyTypeId, ServerTypeId } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
 
@@ -9,6 +9,14 @@ const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION
 const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION;
 const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
 const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
+
+const MONGOS_OR_UNKNOWN = new Set<ServerTypeId>([ServerType.Mongos, ServerType.Unknown]);
+const MONGOS_OR_STANDALONE = new Set<ServerTypeId>([ServerType.Mongos, ServerType.Standalone]);
+const NON_PRIMARY_RS_MEMBERS = new Set<ServerTypeId>([
+  ServerType.RSSecondary,
+  ServerType.RSArbiter,
+  ServerType.RSOther
+]);
 
 /** @public */
 export interface TopologyDescriptionOptions {
@@ -21,7 +29,7 @@ export interface TopologyDescriptionOptions {
  * @public
  */
 export class TopologyDescription {
-  type: TopologyType;
+  type: TopologyTypeId;
   setName?: string;
   maxSetVersion?: number;
   maxElectionId?: ObjectId;
@@ -38,7 +46,7 @@ export class TopologyDescription {
    * Create a TopologyDescription
    */
   constructor(
-    topologyType: TopologyType,
+    topologyType: TopologyTypeId,
     serverDescriptions?: Map<string, ServerDescription>,
     setName?: string,
     maxSetVersion?: number,
@@ -158,15 +166,9 @@ export class TopologyDescription {
    */
   update(serverDescription: ServerDescription): TopologyDescription {
     const address = serverDescription.address;
-    // NOTE: there are a number of prime targets for refactoring here
-    //       once we support destructuring assignments
 
     // potentially mutated values
-    let topologyType = this.type;
-    let setName = this.setName;
-    let maxSetVersion = this.maxSetVersion;
-    let maxElectionId = this.maxElectionId;
-    let commonWireVersion = this.commonWireVersion;
+    let { type: topologyType, setName, maxSetVersion, maxElectionId, commonWireVersion } = this;
 
     if (serverDescription.setName && setName && serverDescription.setName !== setName) {
       serverDescription = new ServerDescription(address, undefined);
@@ -209,13 +211,13 @@ export class TopologyDescription {
     }
 
     if (topologyType === TopologyType.Sharded) {
-      if ([ServerType.Mongos, ServerType.Unknown].indexOf(serverType) === -1) {
+      if (!MONGOS_OR_UNKNOWN.has(serverType)) {
         serverDescriptions.delete(address);
       }
     }
 
     if (topologyType === TopologyType.ReplicaSetNoPrimary) {
-      if ([ServerType.Standalone, ServerType.Mongos].indexOf(serverType) >= 0) {
+      if (MONGOS_OR_STANDALONE.has(serverType)) {
         serverDescriptions.delete(address);
       }
 
@@ -232,9 +234,7 @@ export class TopologyDescription {
         setName = result[1];
         maxSetVersion = result[2];
         maxElectionId = result[3];
-      } else if (
-        [ServerType.RSSecondary, ServerType.RSArbiter, ServerType.RSOther].indexOf(serverType) >= 0
-      ) {
+      } else if (NON_PRIMARY_RS_MEMBERS.has(serverType)) {
         const result = updateRsNoPrimaryFromMember(serverDescriptions, serverDescription, setName);
         topologyType = result[0];
         setName = result[1];
@@ -242,7 +242,7 @@ export class TopologyDescription {
     }
 
     if (topologyType === TopologyType.ReplicaSetWithPrimary) {
-      if ([ServerType.Standalone, ServerType.Mongos].indexOf(serverType) >= 0) {
+      if (MONGOS_OR_STANDALONE.has(serverType)) {
         serverDescriptions.delete(address);
         topologyType = checkHasPrimary(serverDescriptions);
       } else if (serverType === ServerType.RSPrimary) {
@@ -258,9 +258,7 @@ export class TopologyDescription {
         setName = result[1];
         maxSetVersion = result[2];
         maxElectionId = result[3];
-      } else if (
-        [ServerType.RSSecondary, ServerType.RSArbiter, ServerType.RSOther].indexOf(serverType) >= 0
-      ) {
+      } else if (NON_PRIMARY_RS_MEMBERS.has(serverType)) {
         topologyType = updateRsWithPrimaryFromMember(
           serverDescriptions,
           serverDescription,
@@ -316,7 +314,7 @@ export class TopologyDescription {
   }
 }
 
-function topologyTypeForServerType(serverType: ServerType): TopologyType {
+function topologyTypeForServerType(serverType: ServerTypeId): TopologyTypeId {
   switch (serverType) {
     case ServerType.Standalone:
       return TopologyType.Single;
@@ -359,7 +357,7 @@ function updateRsFromPrimary(
   setName?: string,
   maxSetVersion?: number,
   maxElectionId?: ObjectId
-): [TopologyType, string?, number?, ObjectId?] {
+): [TopologyTypeId, string?, number?, ObjectId?] {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
@@ -427,7 +425,7 @@ function updateRsWithPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
   setName?: string
-): TopologyType {
+): TopologyTypeId {
   if (setName == null) {
     throw new TypeError('setName is required');
   }
@@ -446,7 +444,7 @@ function updateRsNoPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
   setName?: string
-): [TopologyType, string?] {
+): [TopologyTypeId, string?] {
   const topologyType = TopologyType.ReplicaSetNoPrimary;
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
@@ -467,7 +465,7 @@ function updateRsNoPrimaryFromMember(
   return [topologyType, setName];
 }
 
-function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): TopologyType {
+function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): TopologyTypeId {
   for (const serverDescription of serverDescriptions.values()) {
     if (serverDescription.type === ServerType.RSPrimary) {
       return TopologyType.ReplicaSetWithPrimary;

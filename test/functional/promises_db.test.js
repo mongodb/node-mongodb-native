@@ -325,7 +325,7 @@ describe('Promises (Db)', function () {
         // Create an index
         client
           .db(configuration.db)
-          .ensureIndex('promiseCollectionCollections2', { a: 1 })
+          .createIndex('promiseCollectionCollections2', { a: 1 })
           .then(function (r) {
             test.ok(r != null);
 

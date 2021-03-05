@@ -127,8 +127,8 @@ describe('bypass document validation', function () {
     testMapReduce(this.configuration, { expected: undefined, actual: false }, done);
   });
 
-  // general test for findAndModify function
-  function testFindAndModify(testConfiguration, config, done) {
+  // general test for findOneAndUpdate function
+  function testFindOneAndUpdate(testConfiguration, config, done) {
     const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -162,27 +162,21 @@ describe('bypass document validation', function () {
 
       const options = { bypassDocumentValidation: config.actual };
 
-      collection.findAndModify(
-        { name: 'Andy' },
-        { rating: 1 },
-        { $inc: { score: 1 } },
-        options,
-        e => {
-          close(e);
-        }
-      );
+      collection.findOneAndUpdate({ name: 'Andy' }, { $inc: { score: 1 } }, options, e => {
+        close(e);
+      });
     });
   }
-  // find and modify
-  it('should only set bypass document validation if strictly true in findAndModify', function (done) {
-    testFindAndModify(this.configuration, { expected: true, actual: true }, done);
+  // find one and update
+  it('should only set bypass document validation if strictly true in findOneAndUpdate', function (done) {
+    testFindOneAndUpdate(this.configuration, { expected: true, actual: true }, done);
   });
 
-  it('should not set bypass document validation if not strictly true in findAndModify', function (done) {
-    testFindAndModify(this.configuration, { expected: undefined, actual: false }, done);
+  it('should not set bypass document validation if not strictly true in findOneAndUpdate', function (done) {
+    testFindOneAndUpdate(this.configuration, { expected: undefined, actual: false }, done);
   });
 
-  // general test for BlukWrite to test changes made in ordered.js and unordered.js
+  // general test for BulkWrite to test changes made in ordered.js and unordered.js
   function testBulkWrite(testConfiguration, config, done) {
     const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {

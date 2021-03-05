@@ -14,7 +14,6 @@ import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENT_NAMES } from '../cmap/events';
 import { MongoError, MongoServerSelectionError, AnyError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
-import { deprecate } from 'util';
 import {
   relayEvents,
   makeStateMachine,
@@ -23,7 +22,8 @@ import {
   Callback,
   HostAddress,
   ns,
-  applyServerApiVersion
+  applyServerApiVersion,
+  emitWarning
 } from '../utils';
 import {
   TopologyType,
@@ -66,10 +66,8 @@ const SERVER_RELAY_EVENTS = [
   Connection.COMMAND_STARTED,
   Connection.COMMAND_SUCCEEDED,
   Connection.COMMAND_FAILED,
-
-  // NOTE: Legacy events
-  'monitoring'
-].concat(CMAP_EVENT_NAMES);
+  ...CMAP_EVENT_NAMES
+];
 
 // all events we listen to from `Server` instances
 const LOCAL_SERVER_EVENTS = ['connect', 'descriptionReceived', 'closed', 'ended'];
@@ -142,7 +140,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   metadata: ClientMetadata;
-  useRecoveryToken: boolean;
 }
 
 /** @public */
@@ -227,7 +224,6 @@ export class Topology extends EventEmitter {
       serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
       directConnection: DEFAULT_OPTIONS.get('directConnection'),
       metadata: DEFAULT_OPTIONS.get('metadata'),
-      useRecoveryToken: DEFAULT_OPTIONS.get('useRecoveryToken'),
       monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
       tls: DEFAULT_OPTIONS.get('tls'),
       maxPoolSize: DEFAULT_OPTIONS.get('maxPoolSize'),
@@ -699,10 +695,6 @@ export class Topology extends EventEmitter {
     if (typeof callback === 'function') callback(undefined, true);
   }
 
-  logout(callback: Callback): void {
-    if (typeof callback === 'function') callback(undefined, true);
-  }
-
   get clientMetadata(): ClientMetadata {
     return this.s.options.metadata;
   }
@@ -716,7 +708,7 @@ export class Topology extends EventEmitter {
   }
 
   unref(): void {
-    console.log('not implemented: `unref`');
+    emitWarning('not implemented: `unref`');
   }
 
   // NOTE: There are many places in code where we explicitly check the last isMaster
@@ -744,12 +736,6 @@ export class Topology extends EventEmitter {
   set clusterTime(clusterTime: ClusterTime | undefined) {
     this.s.clusterTime = clusterTime;
   }
-
-  // legacy aliases
-  destroy = deprecate(
-    Topology.prototype.close,
-    'destroy() is deprecated, please use close() instead'
-  );
 }
 
 /** Destroys a server, and removes all event listeners from the instance */

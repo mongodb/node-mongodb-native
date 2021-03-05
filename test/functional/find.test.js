@@ -789,9 +789,9 @@ describe('Find', function () {
   });
 
   /**
-   * Test findAndModify a document
+   * Test findOneAndUpdate a document
    */
-  it('shouldCorrectlyFindAndModifyDocument', {
+  it('shouldCorrectlyfindOneAndUpdateDocument', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -807,11 +807,10 @@ describe('Find', function () {
             expect(err).to.not.exist;
 
             // Let's modify the document in place
-            collection.findAndModify(
+            collection.findOneAndUpdate(
               { a: 1 },
-              [['a', 1]],
               { $set: { b: 3 } },
-              { new: true },
+              { returnOriginal: false },
               function (err, updated_doc) {
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);
@@ -821,9 +820,8 @@ describe('Find', function () {
                   expect(err).to.not.exist;
 
                   // Let's modify the document in place
-                  collection.findAndModify(
+                  collection.findOneAndUpdate(
                     { a: 2 },
-                    [['a', 1]],
                     { $set: { b: 3 } },
                     configuration.writeConcernMax(),
                     function (err, result) {
@@ -836,9 +834,8 @@ describe('Find', function () {
                       ) {
                         expect(err).to.not.exist;
                         // Let's modify the document in place
-                        collection.findAndModify(
+                        collection.findOneAndUpdate(
                           { a: 3 },
-                          [],
                           { $set: { b: 3 } },
                           { remove: true },
                           function (err, updated_doc) {
@@ -846,11 +843,10 @@ describe('Find', function () {
                             test.equal(2, updated_doc.value.b);
 
                             // Let's upsert!
-                            collection.findAndModify(
+                            collection.findOneAndUpdate(
                               { a: 4 },
-                              [],
                               { $set: { b: 3 } },
-                              { new: true, upsert: true },
+                              { returnOriginal: false, upsert: true },
                               function (err, updated_doc) {
                                 test.equal(4, updated_doc.value.a);
                                 test.equal(3, updated_doc.value.b);
@@ -862,11 +858,10 @@ describe('Find', function () {
                                   function (err, r) {
                                     expect(err).to.not.exist;
 
-                                    collection.findAndModify(
+                                    collection.findOneAndUpdate(
                                       { a: 100 },
-                                      [],
                                       { $set: { b: 5 } },
-                                      { new: true, projection: { b: 1 } },
+                                      { returnOriginal: false, projection: { b: 1 } },
                                       function (err, updated_doc) {
                                         test.equal(2, Object.keys(updated_doc.value).length);
                                         test.equal(
@@ -897,9 +892,9 @@ describe('Find', function () {
   });
 
   /**
-   * Test findAndModify a document with fields
+   * Test findOneAndUpdate a document with fields
    */
-  it('shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly', {
+  it('shouldCorrectlyfindOneAndUpdateDocumentAndReturnSelectedFieldsOnly', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -915,11 +910,10 @@ describe('Find', function () {
             expect(err).to.not.exist;
 
             // Let's modify the document in place
-            collection.findAndModify(
+            collection.findOneAndUpdate(
               { a: 1 },
-              [['a', 1]],
               { $set: { b: 3 } },
-              { new: true, projection: { a: 1 } },
+              { returnOriginal: false, projection: { a: 1 } },
               function (err, updated_doc) {
                 test.equal(2, Object.keys(updated_doc.value).length);
                 test.equal(1, updated_doc.value.a);
@@ -981,9 +975,9 @@ describe('Find', function () {
   });
 
   /**
-   * Test findAndModify a document
+   * Test findOneAndUpdate a document
    */
-  it('Should Correctly Handle FindAndModify Duplicate Key Error', {
+  it('Should Correctly Handle findOneAndUpdate Duplicate Key Error', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -994,9 +988,9 @@ describe('Find', function () {
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        db.createCollection('FindAndModifyDuplicateKeyError', function (err, collection) {
+        db.createCollection('findOneAndUpdateDuplicateKeyError', function (err, collection) {
           expect(err).to.not.exist;
-          collection.ensureIndex(['name', 1], { unique: true, writeConcern: { w: 1 } }, function (
+          collection.createIndex(['name', 1], { unique: true, writeConcern: { w: 1 } }, function (
             err
           ) {
             expect(err).to.not.exist;
@@ -1007,9 +1001,8 @@ describe('Find', function () {
               function (err) {
                 expect(err).to.not.exist;
                 // Let's modify the document in place
-                collection.findAndModify(
+                collection.findOneAndUpdate(
                   { name: 'test1' },
-                  [],
                   { $set: { name: 'test2' } },
                   {},
                   function (err, updated_doc) {
@@ -1036,22 +1029,19 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('AttemptToFindAndModifyNonExistingDocument', function (
+        db.createCollection('AttemptTofindOneAndUpdateNonExistingDocument', function (
           err,
           collection
         ) {
           // Let's modify the document in place
-          collection.findAndModify(
-            { name: 'test1' },
-            [],
-            { $set: { name: 'test2' } },
-            {},
-            function (err, updated_doc) {
-              expect(updated_doc.value).to.not.exist;
-              test.ok(err == null || err.errmsg.match('No matching object found'));
-              client.close(done);
-            }
-          );
+          collection.findOneAndUpdate({ name: 'test1' }, { $set: { name: 'test2' } }, {}, function (
+            err,
+            updated_doc
+          ) {
+            expect(updated_doc.value).to.not.exist;
+            test.ok(err == null || err.errmsg.match('No matching object found'));
+            client.close(done);
+          });
         });
       });
     }
@@ -1142,9 +1132,9 @@ describe('Find', function () {
   );
 
   /**
-   * Test findAndModify a document with strict mode enabled
+   * Test findOneAndUpdate a document with strict mode enabled
    */
-  it('shouldCorrectlyFindAndModifyDocumentWithDBStrict', {
+  it('shouldCorrectlyfindOneAndUpdateDocumentWithDBStrict', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1158,7 +1148,7 @@ describe('Find', function () {
       p_client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function (
+        db.createCollection('shouldCorrectlyfindOneAndUpdateDocumentWithDBStrict', function (
           err,
           collection
         ) {
@@ -1167,11 +1157,10 @@ describe('Find', function () {
             expect(err).to.not.exist;
 
             // Let's modify the document in place
-            collection.findAndModify(
+            collection.findOneAndUpdate(
               { a: 2 },
-              [['a', 1]],
               { $set: { b: 3 } },
-              { new: true },
+              { returnOriginal: false },
               function (err, result) {
                 test.equal(2, result.value.a);
                 test.equal(3, result.value.b);
@@ -1185,9 +1174,9 @@ describe('Find', function () {
   });
 
   /**
-   * Test findAndModify a document that fails in first step before safe
+   * Test findOneAndUpdate a document that fails in first step before safe
    */
-  it('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', {
+  it('shouldCorrectlyfindOneAndUpdateDocumentThatFailsInFirstStep', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1198,44 +1187,43 @@ describe('Find', function () {
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-          // Set up an index to force duplicate index erro
-          collection.ensureIndex(
-            [['failIndex', 1]],
-            { unique: true, writeConcern: { w: 1 } },
-            function (err) {
-              expect(err).to.not.exist;
+        db.createCollection(
+          'shouldCorrectlyfindOneAndUpdateDocumentThatFailsInFirstStep',
+          function (err, collection) {
+            expect(err).to.not.exist;
+            // Set up an index to force duplicate index erro
+            collection.createIndex(
+              [['failIndex', 1]],
+              { unique: true, writeConcern: { w: 1 } },
+              function (err) {
+                expect(err).to.not.exist;
 
-              // Setup a new document
-              collection.insert(
-                { a: 2, b: 2, failIndex: 2 },
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
+                // Setup a new document
+                collection.insert(
+                  { a: 2, b: 2, failIndex: 2 },
+                  configuration.writeConcernMax(),
+                  function (err) {
+                    expect(err).to.not.exist;
 
-                  // Let's attempt to upsert with a duplicate key error
-                  collection.findAndModify(
-                    { c: 2 },
-                    [['a', 1]],
-                    { a: 10, b: 10, failIndex: 2 },
-                    { writeConcern: { w: 1 }, upsert: true },
-                    function (err, result) {
-                      expect(result).to.not.exist;
-                      expect(err)
-                        .property('errmsg')
-                        .to.match(/duplicate key/);
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            }
-          );
-        });
+                    // Let's attempt to upsert with a duplicate key error
+                    collection.findOneAndUpdate(
+                      { c: 2 },
+                      { $set: { a: 10, b: 10, failIndex: 2 } },
+                      { writeConcern: { w: 1 }, upsert: true },
+                      function (err, result) {
+                        expect(result).to.not.exist;
+                        expect(err)
+                          .property('errmsg')
+                          .to.match(/duplicate key/);
+                        client.close(done);
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1261,11 +1249,10 @@ describe('Find', function () {
             expect(err).to.not.exist;
 
             // Find and modify returning the new object
-            collection.findAndModify(
+            collection.findOneAndUpdate(
               { _id: id },
-              [],
               { $set: { 'c.c': 100 } },
-              { new: true },
+              { returnOriginal: false },
               function (err, item) {
                 test.equal(doc._id.toString(), item.value._id.toString());
                 test.equal(doc.a, item.value.a);
@@ -1283,9 +1270,9 @@ describe('Find', function () {
   });
 
   /**
-   * Should correctly execute findAndModify that is breaking in prod
+   * Should correctly execute findOneAndUpdate that is breaking in prod
    */
-  it('shouldCorrectlyExecuteFindAndModify', {
+  it('shouldCorrectlyExecutefindOneAndUpdate', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1299,11 +1286,10 @@ describe('Find', function () {
           var self = { _id: new ObjectId() };
           var _uuid = 'sddffdss';
 
-          collection.findAndModify(
+          collection.findOneAndUpdate(
             { _id: self._id, 'plays.uuid': _uuid },
-            [],
             { $set: { 'plays.$.active': true } },
-            { new: true, projection: { plays: 0, results: 0 }, safe: true },
+            { returnOriginal: false, projection: { plays: 0, results: 0 }, safe: true },
             function (err) {
               expect(err).to.not.exist;
               client.close(done);
@@ -1435,7 +1421,7 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', {
+  it('shouldCorrectlyHandlerErrorForfindOneAndUpdateWhenNoRecordExists', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1446,23 +1432,25 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection(
-          'shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists',
+          'shouldCorrectlyHandlerErrorForfindOneAndUpdateWhenNoRecordExists',
           function (err, collection) {
-            collection.findAndModify({ a: 1 }, [], { $set: { b: 3 } }, { new: true }, function (
-              err,
-              updated_doc
-            ) {
-              expect(err).to.not.exist;
-              expect(updated_doc.value).to.not.exist;
-              client.close(done);
-            });
+            collection.findOneAndUpdate(
+              { a: 1 },
+              { $set: { b: 3 } },
+              { returnOriginal: false },
+              function (err, updated_doc) {
+                expect(err).to.not.exist;
+                expect(updated_doc.value).to.not.exist;
+                client.close(done);
+              }
+            );
           }
         );
       });
     }
   });
 
-  it('shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON', {
+  it('shouldCorrectlyExecutefindOneAndUpdateShouldGenerateCorrectBSON', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1505,15 +1493,14 @@ describe('Find', function () {
               function (err, item) {
                 test.ok(item != null);
 
-                collection.findAndModify(
+                collection.findOneAndUpdate(
                   {
                     _id: r.insertedIds[0],
                     'funds.remaining': { $gte: 3.0 },
                     'transactions.id': { $ne: transaction.transactionId }
                   },
-                  [],
                   { $push: { transactions: transaction } },
-                  { new: true, safe: true },
+                  { returnOriginal: false, safe: true },
                   function (err) {
                     expect(err).to.not.exist;
                     client.close(done);
@@ -1585,7 +1572,7 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', {
+  it('shouldCorrectlyReturnErrorFromMongodbOnfindOneAndUpdateForcedError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1596,18 +1583,18 @@ describe('Find', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.createCollection(
-          'shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError',
+          'shouldCorrectlyReturnErrorFromMongodbOnfindOneAndUpdateForcedError',
           function (err, collection) {
             var q = { x: 1 };
             var set = { y: 2, _id: new ObjectId() };
-            var opts = { new: true, upsert: true };
+            var opts = { returnOriginal: false, upsert: true };
             // Original doc
             var doc = { _id: new ObjectId(), x: 1 };
 
             // Insert original doc
             collection.insert(doc, configuration.writeConcernMax(), function (err) {
               expect(err).to.not.exist;
-              collection.findAndModify(q, [], set, opts, function (/* err */) {
+              collection.findOneAndUpdate(q, { $set: set }, opts, function (/* err */) {
                 client.close(done);
               });
             });
@@ -1617,7 +1604,7 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad', {
+  it('shouldCorrectlyExecutefindOneAndUpdateUnderConcurrentLoad', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1714,7 +1701,7 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', {
+  it('shouldCorrectlyErrorOutfindOneAndUpdateOnDuplicateRecord', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1728,7 +1715,7 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
 
-        db.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function (
+        db.createCollection('shouldCorrectlyErrorOutfindOneAndUpdateOnDuplicateRecord', function (
           err,
           collection
         ) {
@@ -1742,15 +1729,14 @@ describe('Find', function () {
               expect(err).to.not.exist;
               var id = r.insertedIds[1];
               // Set an index
-              collection.ensureIndex('login', { unique: true, writeConcern: { w: 1 } }, function (
+              collection.createIndex('login', { unique: true, writeConcern: { w: 1 } }, function (
                 err
               ) {
                 expect(err).to.not.exist;
 
                 // Attemp to modify document
-                collection.findAndModify(
+                collection.findOneAndUpdate(
                   { _id: id },
-                  [],
                   { $set: { login: 'user1' } },
                   {},
                   function (err) {
@@ -2261,7 +2247,7 @@ describe('Find', function () {
 
         // Get the collection
         var collection = db.collection('textSearchWithSort');
-        collection.ensureIndex({ s: 'text' }, function (err) {
+        collection.createIndex({ s: 'text' }, function (err) {
           expect(err).to.not.exist;
 
           collection.insert(
@@ -2311,7 +2297,7 @@ describe('Find', function () {
   /**
    * Find and modify should allow for a write Concern without failing
    */
-  it('should correctly execute a findAndModifyWithAWriteConcern', {
+  it('should correctly execute a findOneAndUpdateWithAWriteConcern', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -2327,11 +2313,10 @@ describe('Find', function () {
             expect(err).to.not.exist;
 
             // Let's modify the document in place
-            collection.findAndModify(
+            collection.findOneAndUpdate(
               { a: 1 },
-              [['a', 1]],
               { $set: { b: 3 } },
-              { new: true },
+              { returnOriginal: false },
               function (err, updated_doc) {
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);

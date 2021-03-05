@@ -332,7 +332,7 @@ describe('APM', function () {
   );
 
   it('should correctly receive the APM events for a find with getmore and killcursor', {
-    metadata: { requires: { apiVersion: false, topology: ['single', 'replicaset'] } },
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     test: function () {
       const self = this;
@@ -787,7 +787,7 @@ describe('APM', function () {
 
   it('should correctly decorate the apm result for listCollections with cursorId', {
     metadata: {
-      requires: { apiVersion: false, topology: ['single', 'replicaset'], mongodb: '>=3.0.0' }
+      requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' }
     },
     test: function () {
       const self = this;
@@ -1061,11 +1061,6 @@ describe('APM', function () {
             requirements.topology = requirements.topology.filter(
               top => test.ignore_if_topology_type.indexOf(top) < 0
             );
-          }
-
-          // FIXME: NODE-2950
-          if (test.description.match(/event with a getmore/)) {
-            requirements.apiVersion = false;
           }
 
           it(test.description, {

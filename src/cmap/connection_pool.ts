@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { Connection, ConnectionOptions, CommandOptions } from './connection';
+import { Connection, ConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
@@ -18,7 +18,6 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './events';
-import type { Document } from '../bson';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -359,33 +358,6 @@ export class ConnectionPool extends EventEmitter {
         }
       });
     });
-  }
-
-  // NOTE: remove `isConnected` and `write` as part of NODE-2745
-  // These functions only exist if makeServerTrampoline is
-  // called when using the wire protocol methods
-
-  /**
-   * @internal
-   * @deprecated Remove sever trampoline code. (NODE-2745)
-   */
-  isConnected(): boolean {
-    throw new TypeError('This is not a server trampoline instance');
-  }
-
-  /**
-   * @internal
-   * @deprecated Remove sever trampoline code. (NODE-2745)
-   */
-  write(
-    message: Document,
-    commandOptions: CommandOptions,
-    callback: (err: MongoError, ...args: Document[]) => void
-  ): void {
-    message;
-    commandOptions;
-    callback;
-    throw new TypeError('This is not a server trampoline instance');
   }
 }
 

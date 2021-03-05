@@ -13,7 +13,8 @@ import {
   isRecord,
   makeClientMetadata,
   setDifference,
-  HostAddress
+  HostAddress,
+  emitWarning
 } from './utils';
 import type { Document } from './bson';
 import {
@@ -26,7 +27,7 @@ import {
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
-import { Logger, LoggerLevel } from './logger';
+import { Logger, LoggerLevelId } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { createAutoEncrypter } from './operations/connect';
 
@@ -374,12 +375,11 @@ export function parseOptions(
   }
 
   if (mongoOptions.credentials) {
-    const gssapiOrX509 =
-      mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_GSSAPI ||
-      mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_X509;
-
+    const isGssapi = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_GSSAPI;
+    const isX509 = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_X509;
+    const isAws = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_AWS;
     if (
-      gssapiOrX509 &&
+      (isGssapi || isX509) &&
       allOptions.has('authSource') &&
       mongoOptions.credentials.source !== '$external'
     ) {
@@ -389,7 +389,7 @@ export function parseOptions(
       );
     }
 
-    if (!gssapiOrX509 && mongoOptions.dbName && !allOptions.has('authSource')) {
+    if (!(isGssapi || isX509 || isAws) && mongoOptions.dbName && !allOptions.has('authSource')) {
       // inherit the dbName unless GSSAPI or X509, then silently ignore dbName
       // and there was no specific authSource given
       mongoOptions.credentials = MongoCredentials.merge(mongoOptions.credentials, {
@@ -447,7 +447,7 @@ function setOption(
 
   if (deprecated) {
     const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
-    console.warn(`${key} is a deprecated option${deprecatedMsg}`);
+    emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
   }
 
   switch (type) {
@@ -716,7 +716,7 @@ export const OPTIONS = {
       if (value instanceof Logger) {
         return value;
       }
-      console.warn('Alternative loggers might not be supported');
+      emitWarning('Alternative loggers might not be supported');
       // TODO: make Logger an interface that others can implement, make usage consistent in driver
       // DRIVERS-1204
     }
@@ -724,7 +724,7 @@ export const OPTIONS = {
   loggerLevel: {
     target: 'logger',
     transform({ values: [value] }) {
-      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
+      return new Logger('MongoClient', { loggerLevel: value as LoggerLevelId });
     }
   },
   maxIdleTimeMS: {
@@ -977,10 +977,6 @@ export const OPTIONS = {
       }
       return tlsInsecure;
     }
-  },
-  useRecoveryToken: {
-    default: true,
-    type: 'boolean'
   },
   w: {
     target: 'writeConcern',

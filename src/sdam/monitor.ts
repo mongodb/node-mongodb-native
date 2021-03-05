@@ -317,8 +317,6 @@ function monitorServer(monitor: Monitor) {
       callback();
     }
 
-    // TODO: the next line is a legacy event, remove in v4
-    process.nextTick(() => monitor.emit('monitoring', monitor[kServer]));
     checkServer(monitor, (err, isMaster) => {
       if (err) {
         // otherwise an error occurred on initial discovery, also bail

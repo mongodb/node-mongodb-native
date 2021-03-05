@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
-    metadata: { requires: { apiVersion: false } },
+    metadata: { requires: { apiVersion: false } }, // apiVersion not supported by newTopology()
     test: function (done) {
       const topology = this.configuration.newTopology();
 
@@ -11,10 +11,13 @@ describe('Topology', function () {
       topology.on('stateChanged', (_, newState) => states.push(newState));
       topology.connect(err => {
         expect(err).to.not.exist;
-        topology.destroy(err => {
+        topology.close(err => {
           expect(err).to.not.exist;
-          expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
-          done();
+          topology.destroy(err => {
+            expect(err).to.not.exist;
+            expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
+            done();
+          });
         });
       });
     }

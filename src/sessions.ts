@@ -2,7 +2,13 @@ import { PromiseProvider } from './promise_provider';
 import { EventEmitter } from 'events';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
-import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
+import {
+  isTransactionCommand,
+  TxnState,
+  Transaction,
+  TransactionOptions,
+  TxnStateId
+} from './transactions';
 import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
@@ -374,7 +380,7 @@ function attemptTransactionCommit(
   });
 }
 
-const USER_EXPLICIT_TXN_END_STATES = new Set([
+const USER_EXPLICIT_TXN_END_STATES = new Set<TxnStateId>([
   TxnState.NO_TRANSACTION,
   TxnState.TRANSACTION_COMMITTED,
   TxnState.TRANSACTION_ABORTED
@@ -541,8 +547,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     callback(e, r);
   }
 
-  if (session.transaction.recoveryToken && supportsRecoveryToken(session)) {
-    // Assumption here that commandName is "commitTransaction" or "abortTransaction"
+  // Assumption here that commandName is "commitTransaction" or "abortTransaction"
+  if (session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
@@ -580,11 +586,6 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
       commandHandler(err as MongoError, reply);
     }
   );
-}
-
-function supportsRecoveryToken(session: ClientSession) {
-  const topology = session.topology;
-  return !!topology.s.options.useRecoveryToken;
 }
 
 /** @public */

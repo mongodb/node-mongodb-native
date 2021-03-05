@@ -1,10 +1,8 @@
-import { DEFAULT_PK_FACTORY, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { deprecate } from 'util';
 import {
   normalizeHintField,
   checkCollectionName,
-  deprecateOptions,
   MongoDBNamespace,
   Callback,
   getTopology
@@ -25,7 +23,6 @@ import {
   CreateIndexOperation,
   DropIndexOperation,
   DropIndexesOperation,
-  EnsureIndexOperation,
   IndexesOperation,
   IndexExistsOperation,
   IndexInformationOperation,
@@ -45,7 +42,6 @@ import {
 import type { FindOptions } from './operations/find';
 import { FindOneOperation } from './operations/find_one';
 import {
-  FindAndModifyOperation,
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
   FindOneAndUpdateOperation,
@@ -86,29 +82,11 @@ import { executeOperation } from './operations/execute_operation';
 import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
 import type { IndexInformationOptions } from './operations/common_functions';
-import type { CountOptions } from './operations/count';
 import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
-import type { Sort } from './sort';
 import { FindCursor } from './cursor/find_cursor';
-
-/** @public */
-export interface Collection {
-  /** @deprecated Use {@link Collection#dropIndexes} instead */
-  dropAllIndexes(): void;
-  removeMany(
-    filter: Document,
-    options?: DeleteOptions,
-    callback?: Callback<DeleteResult>
-  ): Promise<DeleteResult> | void;
-  removeOne(
-    filter: Document,
-    options?: DeleteOptions,
-    callback?: Callback<DeleteResult>
-  ): Promise<DeleteResult> | void;
-  findAndModify(this: any, query: any, sort: any, doc: any, options: any, callback: Callback): any;
-}
+import type { CountOptions } from './operations/count';
 
 /** @public */
 export interface CollectionOptions
@@ -1359,6 +1337,9 @@ export class Collection {
     options: BulkWriteOptions,
     callback: Callback<InsertManyResult>
   ): Promise<InsertManyResult> | void {
+    emitWarningOnce(
+      'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.'
+    );
     if (typeof options === 'function') (callback = options), (options = {});
     options = options || { ordered: false };
     docs = !Array.isArray(docs) ? [docs] : docs;
@@ -1385,6 +1366,9 @@ export class Collection {
     options: UpdateOptions,
     callback: Callback<Document>
   ): Promise<UpdateResult> | void {
+    emitWarningOnce(
+      'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.'
+    );
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
@@ -1404,37 +1388,13 @@ export class Collection {
     options: DeleteOptions,
     callback: Callback
   ): Promise<DeleteResult> | void {
+    emitWarningOnce(
+      'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.'
+    );
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
     return this.deleteMany(selector, options, callback);
-  }
-
-  /**
-   * Ensures that an index exists, if it does not it creates it
-   *
-   * @deprecated use createIndexes instead
-   * @param fieldOrSpec - Defines the index.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  ensureIndex(
-    fieldOrSpec: string | Document,
-    options: CreateIndexesOptions,
-    callback: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
-    return executeOperation(
-      getTopology(this),
-      new EnsureIndexOperation(
-        this.s.db,
-        this.collectionName,
-        fieldOrSpec,
-        resolveOptions(this, options)
-      ),
-      callback
-    );
   }
 
   /**
@@ -1474,168 +1434,4 @@ export class Collection {
       callback
     );
   }
-
-  /**
-   * Find and remove a document.
-   *
-   * @deprecated use findOneAndDelete instead
-   *
-   * @param query - Query object to locate the object to modify.
-   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  findAndRemove(query: Document, callback: Callback): void;
-  findAndRemove(query: Document): Promise<Document>;
-  findAndRemove(query: Document, sort: Sort, callback: Callback): void;
-  findAndRemove(query: Document, sort: Sort): Promise<Document>;
-  findAndRemove(
-    query: Document,
-    sort: Sort,
-    options: FindAndModifyOptions,
-    callback: Callback
-  ): void;
-  findAndRemove(query: Document, sort: Sort, options: FindAndModifyOptions): Promise<Document>;
-  findAndRemove(
-    query: Document,
-    sortOrOptionsOrCallback?: Sort | FindAndModifyOptions | Callback,
-    optionsOrCallback?: FindAndModifyOptions | Callback,
-    _callback?: Callback
-  ): Promise<Document> | void {
-    let sort = sortOrOptionsOrCallback ?? {};
-    let options = optionsOrCallback ?? {};
-    let callback = _callback;
-    if (typeof sort === 'function') {
-      callback = sort;
-      sort = {};
-    }
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-
-    options = resolveOptions(this, options);
-    // Add the remove option
-    options.remove = true;
-
-    return executeOperation(
-      getTopology(this),
-      new FindAndModifyOperation(this, query, sort as Sort, undefined, options),
-      callback
-    );
-  }
-
-  /**
-   * Find and modify a document.
-   *
-   * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
-   *
-   * @param query - Query object to locate the object to modify.
-   * @param sort - If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
-   * @param doc - The fields/values to be updated.
-   * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
-   */
-  _findAndModify(query: Document, sort: Document, doc: Document): Promise<Document>;
-  _findAndModify(
-    query: Document,
-    sort: Document,
-    doc: Document,
-    callback: Callback<Document>
-  ): void;
-  _findAndModify(
-    query: Document,
-    sort: Document,
-    doc: Document,
-    options: FindAndModifyOptions
-  ): Promise<Document>;
-  _findAndModify(
-    query: Document,
-    sort: Document,
-    doc: Document,
-    options: FindAndModifyOptions,
-    callback: Callback<Document>
-  ): Promise<Document> | void;
-  _findAndModify(
-    query: Document,
-    sort: Document,
-    doc: Document,
-    options?: FindAndModifyOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = resolveOptions(this, options);
-
-    // Force read preference primary
-    options.readPreference = ReadPreference.primary;
-
-    return executeOperation(
-      getTopology(this),
-      new FindAndModifyOperation(this, query, sort, doc, options),
-      callback
-    );
-  }
 }
-
-const DEPRECATED_FIND_OPTIONS = ['maxScan', 'fields', 'snapshot', 'oplogReplay'];
-Collection.prototype.find = deprecateOptions(
-  {
-    name: 'collection.find',
-    deprecatedOptions: DEPRECATED_FIND_OPTIONS,
-    optionsIndex: 1
-  },
-  Collection.prototype.find
-);
-
-Collection.prototype.findOne = deprecateOptions(
-  {
-    name: 'collection.find',
-    deprecatedOptions: DEPRECATED_FIND_OPTIONS,
-    optionsIndex: 1
-  },
-  Collection.prototype.findOne
-);
-
-Collection.prototype.insert = deprecate(
-  Collection.prototype.insert,
-  'collection.insert is deprecated. Use insertOne, insertMany or bulkWrite instead.'
-);
-
-Collection.prototype.update = deprecate(
-  Collection.prototype.update,
-  'collection.update is deprecated. Use updateOne, updateMany, or bulkWrite instead.'
-);
-
-Collection.prototype.removeOne = Collection.prototype.deleteOne;
-Collection.prototype.removeMany = Collection.prototype.deleteMany;
-
-Collection.prototype.remove = deprecate(
-  Collection.prototype.remove,
-  'collection.remove is deprecated. Use deleteOne, deleteMany, or bulkWrite instead.'
-);
-
-Collection.prototype.dropAllIndexes = deprecate(
-  Collection.prototype.dropIndexes,
-  'collection.dropAllIndexes is deprecated. Use dropIndexes instead.'
-);
-
-Collection.prototype.ensureIndex = deprecate(
-  Collection.prototype.ensureIndex,
-  'collection.ensureIndex is deprecated. Use createIndexes instead.'
-);
-
-Collection.prototype.count = deprecate(
-  Collection.prototype.count,
-  'collection.count is deprecated, and will be removed in a future version.' +
-    ' Use Collection.countDocuments or Collection.estimatedDocumentCount instead'
-);
-
-Collection.prototype.findAndModify = deprecate(
-  Collection.prototype._findAndModify,
-  'collection.findAndModify is deprecated. Use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead.'
-);
-
-Collection.prototype.findAndRemove = deprecate(
-  Collection.prototype.findAndRemove,
-  'collection.findAndRemove is deprecated. Use findOneAndDelete instead.'
-);
