@@ -24,9 +24,7 @@ describe('Operation (Generators)', function () {
   it('aggregationExample2WithGenerators', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] }
-    },
+    metadata: { requires: { generators: true, mongodb: '>2.1.0', topology: ['single'] } },
 
     test: function () {
       var configuration = this.configuration;

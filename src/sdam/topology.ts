@@ -377,8 +377,7 @@ export class Topology extends EventEmitter {
 
       // TODO: NODE-2471
       if (server && this.s.credentials) {
-        const pingCmd = { ping: 1 };
-        server.command(ns('admin.$cmd'), pingCmd, err => {
+        server.command(ns('admin.$cmd'), { ping: 1 }, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
             return;

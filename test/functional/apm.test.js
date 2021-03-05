@@ -786,9 +786,7 @@ describe('APM', function () {
   });
 
   it('should correctly decorate the apm result for listCollections with cursorId', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' }
-    },
+    metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
     test: function () {
       const self = this;
       const started = [];
