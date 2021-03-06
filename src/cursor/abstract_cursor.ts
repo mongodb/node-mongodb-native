@@ -628,9 +628,7 @@ function next(
       if (state) {
         const response = state.response;
         cursor[kServer] = state.server;
-        if (state.session) {
-          cursor[kSession] = state.session;
-        }
+        cursor[kSession] = state.session;
 
         if (response.cursor) {
           cursor[kId] =
