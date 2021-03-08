@@ -247,15 +247,6 @@ function parseSslOptions(options: ConnectionOptions): TLSConnectionOpts {
     }
   }
 
-  // Override checkServerIdentity behavior
-  if (!options.checkServerIdentity) {
-    // Skip the identity check by retuning undefined as per node documents
-    // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-    result.checkServerIdentity = () => undefined;
-  } else if (typeof options.checkServerIdentity === 'function') {
-    result.checkServerIdentity = options.checkServerIdentity;
-  }
-
   // Set default sni servername to be the same as host
   if (result.servername == null) {
     result.servername = result.host;
