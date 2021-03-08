@@ -230,14 +230,14 @@ export type WithSessionCallback = (session: ClientSession) => Promise<any> | voi
 /** @internal */
 export interface MongoClientPrivate {
   url: string;
-  options?: MongoClientOptions;
   sessions: Set<ClientSession>;
-  readConcern?: ReadConcern;
-  writeConcern?: WriteConcern;
-  readPreference: ReadPreference;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
-  logger: Logger;
+  readonly options?: MongoOptions;
+  readonly readConcern?: ReadConcern;
+  readonly writeConcern?: WriteConcern;
+  readonly readPreference: ReadPreference;
+  readonly logger: Logger;
 }
 
 const kOptions = Symbol('options');
@@ -293,29 +293,36 @@ export class MongoClient extends EventEmitter {
    */
   [kOptions]: MongoOptions;
 
-  // debugging
-  originalUri;
-  originalOptions;
-
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
-    this.originalUri = url;
-    this.originalOptions = options;
-
     this[kOptions] = parseOptions(url, this, options);
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const client = this;
 
     // The internal state
     this.s = {
       url,
-      options: this[kOptions],
       sessions: new Set(),
-      readConcern: this[kOptions].readConcern,
-      writeConcern: this[kOptions].writeConcern,
-      readPreference: this[kOptions].readPreference,
       bsonOptions: resolveBSONOptions(this[kOptions]),
       namespace: ns('admin'),
-      logger: this[kOptions].logger
+
+      get options() {
+        return client[kOptions];
+      },
+      get readConcern() {
+        return client[kOptions].readConcern;
+      },
+      get writeConcern() {
+        return client[kOptions].writeConcern;
+      },
+      get readPreference() {
+        return client[kOptions].readPreference;
+      },
+      get logger() {
+        return client[kOptions].logger;
+      }
     };
   }
 
@@ -325,6 +332,16 @@ export class MongoClient extends EventEmitter {
 
   get serverApi(): Readonly<ServerApi | undefined> {
     return this[kOptions].serverApi && Object.freeze({ ...this[kOptions].serverApi });
+  }
+  /**
+   * Intended for APM use only
+   * @internal
+   */
+  get monitorCommands(): boolean {
+    return this[kOptions].monitorCommands;
+  }
+  set monitorCommands(value: boolean) {
+    this[kOptions].monitorCommands = value;
   }
 
   get autoEncrypter(): AutoEncrypter | undefined {

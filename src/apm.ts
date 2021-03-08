@@ -30,7 +30,7 @@ export class Instrumentation extends EventEmitter {
     const instrumentation = this;
     mongoClientClass.prototype.connect = function (this: MongoClient, callback: Callback) {
       // override monitorCommands to be switched on
-      this.s.options = { ...(this.s.options ?? {}), monitorCommands: true };
+      this.monitorCommands = true;
 
       this.on(Connection.COMMAND_STARTED, event =>
         instrumentation.emit(Instrumentation.STARTED, event)

@@ -136,7 +136,7 @@ operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
 
 operations.set('assertSessionPinned', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.arguments.session);
-  expect(session.transaction.isPinned).to.be.false;
+  expect(session.transaction.isPinned).to.be.true;
 });
 
 operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
@@ -310,7 +310,7 @@ operations.set('targetedFailPoint', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.arguments.session);
   expect(session.transaction.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
   const client = session.client;
-  client.enableFailPoint(operation.arguments.failPoint);
+  return client.enableFailPoint(operation.arguments.failPoint);
 });
 
 operations.set('delete', async ({ entities, operation }) => {

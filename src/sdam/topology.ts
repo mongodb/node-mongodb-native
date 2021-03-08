@@ -50,7 +50,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import { DestroyOptions, Connection } from '../cmap/connection';
-import type { MongoClientOptions, ServerApi } from '../mongo_client';
+import type { MongoOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
 
@@ -566,7 +566,7 @@ export class Topology extends EventEmitter {
   }
 
   /** Start a logical session */
-  startSession(options: ClientSessionOptions, clientOptions?: MongoClientOptions): ClientSession {
+  startSession(options: ClientSessionOptions, clientOptions?: MongoOptions): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
     session.once('ended', () => {
       this.s.sessions.delete(session);

@@ -22,7 +22,7 @@ import {
   maybePromise
 } from './utils';
 import type { Topology } from './sdam/topology';
-import type { MongoClientOptions } from './mongo_client';
+import type { MongoOptions } from './mongo_client';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
@@ -76,7 +76,7 @@ class ClientSession extends EventEmitter {
   /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
-  clientOptions?: MongoClientOptions;
+  clientOptions?: MongoOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
@@ -98,7 +98,7 @@ class ClientSession extends EventEmitter {
     topology: Topology,
     sessionPool: ServerSessionPool,
     options: ClientSessionOptions,
-    clientOptions?: MongoClientOptions
+    clientOptions?: MongoOptions
   ) {
     super();
 
@@ -111,7 +111,6 @@ class ClientSession extends EventEmitter {
     }
 
     options = options ?? {};
-    clientOptions = clientOptions || {};
 
     this.topology = topology;
     this.sessionPool = sessionPool;
@@ -263,11 +262,22 @@ class ClientSession extends EventEmitter {
 
     // increment txnNumber
     this.incrementTransactionNumber();
-
     // create transaction state
-    this.transaction = new Transaction(
-      Object.assign({}, this.clientOptions, options || this.defaultTransactionOptions)
-    );
+    this.transaction = new Transaction({
+      readConcern:
+        options?.readConcern ??
+        this.defaultTransactionOptions.readConcern ??
+        this.clientOptions?.readConcern,
+      writeConcern:
+        options?.writeConcern ??
+        this.defaultTransactionOptions.writeConcern ??
+        this.clientOptions?.writeConcern,
+      readPreference:
+        options?.readPreference ??
+        this.defaultTransactionOptions.readPreference ??
+        this.clientOptions?.readPreference,
+      maxCommitTimeMS: options?.maxCommitTimeMS ?? this.defaultTransactionOptions.maxCommitTimeMS
+    });
 
     this.transaction.transition(TxnState.STARTING_TRANSACTION);
   }
@@ -503,8 +513,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   let writeConcern;
   if (session.transaction.options.writeConcern) {
     writeConcern = Object.assign({}, session.transaction.options.writeConcern);
-  } else if (session.clientOptions && session.clientOptions.w) {
-    writeConcern = { w: session.clientOptions.w };
+  } else if (session.clientOptions && session.clientOptions.writeConcern) {
+    writeConcern = { w: session.clientOptions.writeConcern.w };
   }
 
   if (txnState === TxnState.TRANSACTION_COMMITTED) {
