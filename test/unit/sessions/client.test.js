@@ -14,7 +14,7 @@ describe('Sessions', function() {
       });
     });
 
-    it('should throw an exception if sessions are not supported', {
+    it('should not throw a synchronous exception if sessions are not supported', {
       metadata: { requires: { topology: 'single' } },
       test() {
         test.server.setMessageHandler(request => {
@@ -27,24 +27,12 @@ describe('Sessions', function() {
         });
 
         const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
-        return client
-          .connect()
-          .then(function(client) {
-            const session = client.startSession();
-            return client
-              .db()
-              .collection('t')
-              .insertOne({ a: 1 }, { session });
-          })
-          .then(() => {
-            expect.fail('Expected an error to be thrown about not supporting sessions');
-          })
-          .catch(error => {
-            expect(error.message).to.equal('Current topology does not support sessions');
-          })
-          .then(() => {
-            return client.close();
-          });
+        return client.connect().then(() => {
+          expect(() => client.startSession()).to.not.throw(
+            'Current topology does not support sessions'
+          );
+          return client.close();
+        });
       }
     });
 
