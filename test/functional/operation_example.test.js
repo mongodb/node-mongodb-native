@@ -2657,7 +2657,7 @@ describe('Operation Examples', function() {
                 ],
                 { w: 1, keepGoing: true },
                 function(err, result) {
-                  test.equal(result, null);
+                  expect(result).to.not.exist;
                   test.ok(err);
                   test.ok(err.result);
 
@@ -3115,7 +3115,7 @@ describe('Operation Examples', function() {
 
               // Attemp to rename the first collection to the second one, this will fail
               collection1.rename('test_rename_collection2', function(err, collection) {
-                test.equal(null, collection);
+                expect(collection).to.not.exist;
                 test.ok(err instanceof Error);
                 test.ok(err.message.length > 0);
 
