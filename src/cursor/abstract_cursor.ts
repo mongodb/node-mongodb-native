@@ -730,6 +730,7 @@ export function assertUninitialized(cursor: AbstractCursor): void {
 function makeCursorStream(cursor: AbstractCursor) {
   const readable = new Readable({
     objectMode: true,
+    autoDestroy: false,
     highWaterMark: 1
   });
 
