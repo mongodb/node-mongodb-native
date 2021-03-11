@@ -54,6 +54,7 @@ export class AggregationCursor extends AbstractCursor {
 
   clone(): AggregationCursor {
     const clonedOptions = mergeOptions({}, this[kOptions]);
+    delete clonedOptions.session;
     return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {
       ...clonedOptions
     });

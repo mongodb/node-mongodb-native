@@ -54,6 +54,7 @@ export class FindCursor extends AbstractCursor {
 
   clone(): FindCursor {
     const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
+    delete clonedOptions.session;
     return new FindCursor(this.topology, this.namespace, this[kFilter], {
       ...clonedOptions
     });
