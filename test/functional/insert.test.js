@@ -1097,8 +1097,8 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
         collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
-          test.ok(err != null);
-          test.equal(null, result);
+          expect(err).to.exist;
+          expect(result).to.not.exist;
 
           client.close(done);
         });
@@ -1348,7 +1348,7 @@ describe('Insert', function() {
 
           // Update two fields
           collection.insert({ _id: 1 }, configuration.writeConcernMax(), function(err, r) {
-            test.equal(r, null);
+            expect(r).to.not.exist;
             test.ok(err != null);
             test.ok(err.result);
 
@@ -2560,7 +2560,7 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function(err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 
@@ -2601,7 +2601,7 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function(err, r) {
-                test.equal(r, null);
+                expect(r).to.not.exist;
                 test.ok(err != null);
                 test.ok(err.result);
 

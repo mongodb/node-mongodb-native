@@ -1067,7 +1067,7 @@ describe('Find', function() {
                   { $set: { name: 'test2' } },
                   {},
                   function(err, updated_doc) {
-                    test.equal(null, updated_doc);
+                    expect(updated_doc).to.not.exist;
                     test.ok(err != null);
                     client.close(done);
                   }
@@ -1305,7 +1305,7 @@ describe('Find', function() {
                   { a: 10, b: 10, failIndex: 2 },
                   { w: 1, upsert: true },
                   function(err, result) {
-                    test.equal(null, result);
+                    expect(result).to.not.exist;
                     test.ok(err.errmsg.match('duplicate key'));
                     client.close(done);
                   }
