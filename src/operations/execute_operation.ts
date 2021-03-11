@@ -61,33 +61,32 @@ export function executeOperation<
     throw new TypeError('This method requires a valid operation instance');
   }
 
-  if (topology.shouldCheckForSessionSupport()) {
-    return maybePromise(callback, cb => {
-      topology.selectServer(ReadPreference.primaryPreferred, err => {
-        if (err) {
-          cb(err);
-          return;
-        }
+  return maybePromise(callback, cb => {
+    if (topology.shouldCheckForSessionSupport()) {
+      return topology.selectServer(ReadPreference.primaryPreferred, err => {
+        if (err) return cb(err);
 
         executeOperation<T, TResult>(topology, operation, cb);
       });
-    });
-  }
-
-  // The driver sessions spec mandates that we implicitly create sessions for operations
-  // that are not explicitly provided with a session.
-  let session = operation.session;
-  let owner: symbol;
-  if (topology.hasSessionSupport()) {
-    if (session == null) {
-      owner = Symbol();
-      session = topology.startSession({ owner, explicit: false });
-    } else if (operation.session.hasEnded) {
-      throw new MongoError('Use of expired sessions is not permitted');
     }
-  }
 
-  return maybePromise(callback, cb => {
+    // The driver sessions spec mandates that we implicitly create sessions for operations
+    // that are not explicitly provided with a session.
+    let session: ClientSession | undefined = operation.session;
+    let owner: symbol | undefined;
+    if (topology.hasSessionSupport()) {
+      if (session == null) {
+        owner = Symbol();
+        session = topology.startSession({ owner, explicit: false });
+      } else if (session.hasEnded) {
+        return cb(new MongoError('Use of expired sessions is not permitted'));
+      }
+    } else if (session) {
+      // If the user passed an explicit session and we are still, after server selection,
+      // trying to run against a topology that doesn't support sessions we error out.
+      return cb(new MongoError('Current topology does not support sessions'));
+    }
+
     try {
       executeWithServerSelection(topology, session, operation, (err, result) => {
         if (session && session.owner && session.owner === owner) {
@@ -113,7 +112,7 @@ function supportsRetryableReads(server: Server) {
 function executeWithServerSelection(
   topology: Topology,
   session: ClientSession,
-  operation: any,
+  operation: AbstractOperation,
   callback: Callback
 ) {
   const readPreference = operation.readPreference || ReadPreference.primary;

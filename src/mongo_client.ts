@@ -464,10 +464,6 @@ export class MongoClient extends EventEmitter {
       throw new MongoError('Must connect to a server before calling this method');
     }
 
-    if (!this.topology.hasSessionSupport()) {
-      throw new MongoError('Current topology does not support sessions');
-    }
-
     return this.topology.startSession(options, this.s.options);
   }
 

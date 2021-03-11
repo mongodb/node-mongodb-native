@@ -571,7 +571,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           });
         }
 
-        executeOperation(
+        return executeOperation(
           session.topology,
           new RunAdminCommandOperation(undefined, command, {
             session,
@@ -579,8 +579,6 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           }),
           (_err, _reply) => commandHandler(_err as MongoError, _reply)
         );
-
-        return;
       }
 
       commandHandler(err as MongoError, reply);
