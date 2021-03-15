@@ -1693,38 +1693,32 @@ describe('Cursor', function () {
     }
   });
 
-  it('removes session wheen cloning a find cursor', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('removes session wheen cloning a find cursor', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      db.createCollection('clone_find_cursor_session', (err, collection) => {
         expect(err).to.not.exist;
 
-        const db = client.db(configuration.db);
-        db.createCollection('clone_find_cursor_session', (err, collection) => {
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
-          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
+          const cursor = collection.find();
+          const clonedCursor = cursor.clone();
+          cursor.toArray(err => {
             expect(err).to.not.exist;
-
-            const cursor = collection.find();
-            const clonedCursor = cursor.clone();
-            cursor.toArray(err => {
+            clonedCursor.toArray(err => {
               expect(err).to.not.exist;
-              clonedCursor.toArray(err => {
-                expect(err).to.not.exist;
-                client.close();
-                done();
-              });
+              client.close();
+              done();
             });
           });
         });
       });
-    }
+    });
   });
 
   it('removes session wheen cloning an aggregation cursor', {
