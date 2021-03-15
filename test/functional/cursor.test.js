@@ -1550,48 +1550,41 @@ describe('Cursor', function () {
     }
   });
 
-  it('does not auto destroy streams', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('does not auto destroy streams', function (done) {
+    const docs = [];
 
-    test: function (done) {
-      const docs = [];
+    for (var i = 0; i < 10; i++) {
+      docs.push({ a: i + 1 });
+    }
 
-      for (var i = 0; i < 10; i++) {
-        docs.push({ a: i + 1 });
-      }
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
 
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      db.createCollection('does_not_autodestroy_streams', (err, collection) => {
         expect(err).to.not.exist;
-        //this.defer(() => client.close());
 
-        const db = client.db(configuration.db);
-        db.createCollection('does_not_autodestroy_streams', (err, collection) => {
+        collection.insertMany(docs, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
 
-          collection.insertMany(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-
-            const cursor = collection.find();
-            const stream = cursor.stream();
-            stream.on('close', () => {
-              expect.fail('extra close event must not be called');
-            });
-            stream.on('end', () => {
-              client.close();
-              done();
-            });
-            stream.on('data', doc => {
-              expect(doc).to.exist;
-            });
-            stream.resume();
+          const cursor = collection.find();
+          const stream = cursor.stream();
+          stream.on('close', () => {
+            expect.fail('extra close event must not be called');
           });
+          stream.on('end', () => {
+            client.close();
+            done();
+          });
+          stream.on('data', doc => {
+            expect(doc).to.exist;
+          });
+          stream.resume();
         });
       });
-    }
+    });
   });
 
   it('should be able to stream documents', {
