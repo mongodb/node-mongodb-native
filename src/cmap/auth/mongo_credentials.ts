@@ -61,16 +61,19 @@ export class MongoCredentials {
     this.mechanismProperties = options.mechanismProperties || {};
 
     if (this.mechanism.match(/MONGODB-AWS/i)) {
-      if (this.username == null && process.env.AWS_ACCESS_KEY_ID) {
+      if (!this.username && process.env.AWS_ACCESS_KEY_ID) {
         this.username = process.env.AWS_ACCESS_KEY_ID;
       }
 
-      if (this.password == null && process.env.AWS_SECRET_ACCESS_KEY) {
+      if (!this.password && process.env.AWS_SECRET_ACCESS_KEY) {
         this.password = process.env.AWS_SECRET_ACCESS_KEY;
       }
 
-      if (this.mechanismProperties.AWS_SESSION_TOKEN == null && process.env.AWS_SESSION_TOKEN) {
-        this.mechanismProperties.AWS_SESSION_TOKEN = process.env.AWS_SESSION_TOKEN;
+      if (!this.mechanismProperties.AWS_SESSION_TOKEN && process.env.AWS_SESSION_TOKEN) {
+        this.mechanismProperties = {
+          ...this.mechanismProperties,
+          AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN
+        };
       }
     }
 
