@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.5](https://github.com/mongodb/node-mongodb-native/compare/v3.6.4...v3.6.5) (2021-03-16)
+
+
+### Bug Fixes
+
+* MongoError circular dependency warning ([#2734](https://github.com/mongodb/node-mongodb-native/issues/2734)) ([d67ffa7](https://github.com/mongodb/node-mongodb-native/commit/d67ffa7a2e3f86734c7e9b6944aab1d765b9e75e))
+* move session support check to operation layer ([#2739](https://github.com/mongodb/node-mongodb-native/issues/2739)) ([8b370a7](https://github.com/mongodb/node-mongodb-native/commit/8b370a7ad784f5759c964cdfaec62e06c896dc95))
+* session support detection spec compliance ([#2732](https://github.com/mongodb/node-mongodb-native/issues/2732)) ([9baec71](https://github.com/mongodb/node-mongodb-native/commit/9baec7128f612f2d9c290c85d24e33602f911499))
+* use emitWarning API for internal messages ([#2743](https://github.com/mongodb/node-mongodb-native/issues/2743)) ([8bd9777](https://github.com/mongodb/node-mongodb-native/commit/8bd9777b0aedd56b81675c3e79fae63432319982))
+
 ### [3.6.4](https://github.com/mongodb/node-mongodb-native/compare/v3.6.3...v3.6.4) (2021-02-02)
 
 
