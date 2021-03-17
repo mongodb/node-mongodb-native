@@ -1550,6 +1550,43 @@ describe('Cursor', function () {
     }
   });
 
+  it('does not auto destroy streams', function (done) {
+    const docs = [];
+
+    for (var i = 0; i < 10; i++) {
+      docs.push({ a: i + 1 });
+    }
+
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+
+      const db = client.db(configuration.db);
+      db.createCollection('does_not_autodestroy_streams', (err, collection) => {
+        expect(err).to.not.exist;
+
+        collection.insertMany(docs, configuration.writeConcernMax(), err => {
+          expect(err).to.not.exist;
+
+          const cursor = collection.find();
+          const stream = cursor.stream();
+          stream.on('close', () => {
+            expect.fail('extra close event must not be called');
+          });
+          stream.on('end', () => {
+            client.close();
+            done();
+          });
+          stream.on('data', doc => {
+            expect(doc).to.exist;
+          });
+          stream.resume();
+        });
+      });
+    });
+  });
+
   it('should be able to stream documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1689,6 +1726,68 @@ describe('Cursor', function () {
             });
           }
         );
+      });
+    }
+  });
+
+  it('removes session wheen cloning a find cursor', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+
+      const db = client.db(configuration.db);
+      db.createCollection('clone_find_cursor_session', (err, collection) => {
+        expect(err).to.not.exist;
+
+        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
+          expect(err).to.not.exist;
+
+          const cursor = collection.find();
+          const clonedCursor = cursor.clone();
+          cursor.toArray(err => {
+            expect(err).to.not.exist;
+            clonedCursor.toArray(err => {
+              expect(err).to.not.exist;
+              client.close();
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('removes session wheen cloning an aggregation cursor', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+
+        const db = client.db(configuration.db);
+        db.createCollection('clone_aggregation_cursor_session', (err, collection) => {
+          expect(err).to.not.exist;
+
+          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+
+            const cursor = collection.aggregate([{ $match: { a: 1 } }]);
+            const clonedCursor = cursor.clone();
+            cursor.toArray(err => {
+              expect(err).to.not.exist;
+              clonedCursor.toArray(err => {
+                expect(err).to.not.exist;
+                client.close();
+                done();
+              });
+            });
+          });
+        });
       });
     }
   });

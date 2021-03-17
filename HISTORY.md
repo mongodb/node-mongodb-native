@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.2](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2021-03-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove deprecated items (#2740)
+* remove enums in favor of const objects (#2741)
+
+### Bug Fixes
+
+* add FLE AWS sessionToken TypeScript definitions ([#2737](https://github.com/mongodb/node-mongodb-native/issues/2737)) ([f4698b5](https://github.com/mongodb/node-mongodb-native/commit/f4698b540add23a71ecfb31bd1f6694a0c49beed))
+* remove catch for synchronous socket errors and remove validation on nodejs option ([#2746](https://github.com/mongodb/node-mongodb-native/issues/2746)) ([a516903](https://github.com/mongodb/node-mongodb-native/commit/a516903bf91e34bb83a3bf565c2a39cdbfddd072))
+* session support detection spec compliance [PORT: 4.0] ([#2733](https://github.com/mongodb/node-mongodb-native/issues/2733)) ([1615be0](https://github.com/mongodb/node-mongodb-native/commit/1615be0dfcc2af570606aa27cd2d1b40219a389e))
+
+
+* remove deprecated items ([#2740](https://github.com/mongodb/node-mongodb-native/issues/2740)) ([ee1a4d3](https://github.com/mongodb/node-mongodb-native/commit/ee1a4d32ac95b7d143b08896bc486cfa8c2895a1))
+* remove enums in favor of const objects ([#2741](https://github.com/mongodb/node-mongodb-native/issues/2741)) ([d52c00e](https://github.com/mongodb/node-mongodb-native/commit/d52c00ee2a7da10f2369717eeb01a113a67dc57b))
+
 ## [4.0.0-beta.1](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.0...v4.0.0-beta.1) (2021-02-02)
 
 
