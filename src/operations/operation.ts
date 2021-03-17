@@ -38,7 +38,7 @@ const kSession = Symbol('session');
  * a specific aspect.
  * @internal
  */
-export abstract class AbstractOperation<T> {
+export abstract class AbstractOperation<TResult = any> {
   ns!: MongoDBNamespace;
   cmd!: Document;
   readPreference: ReadPreference;
@@ -47,6 +47,9 @@ export abstract class AbstractOperation<T> {
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
+
+  // TODO: Each operation defines its own options, there should be better typing here
+  options: Document;
 
   [kSession]: ClientSession;
 
@@ -61,9 +64,11 @@ export abstract class AbstractOperation<T> {
     if (options.session) {
       this[kSession] = options.session;
     }
+
+    this.options = options;
   }
 
-  abstract execute(server: Server, session: ClientSession, callback: Callback<T>): void;
+  abstract execute(server: Server, session: ClientSession, callback: Callback<TResult>): void;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
