@@ -101,6 +101,8 @@ export interface ServerPrivate {
   topology: Topology;
   /** A connection pool for this server */
   pool: ConnectionPool;
+  /** MongoDB server API version */
+  serverApi?: ServerApi;
 }
 
 /** @public */
@@ -133,7 +135,7 @@ export class Server extends EventEmitter {
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
 
-    this.serverApi = options.serverApi = topology.serverApi;
+    this.serverApi = options.serverApi;
 
     const poolOptions = { hostAddress: description.hostAddress, ...options };
 

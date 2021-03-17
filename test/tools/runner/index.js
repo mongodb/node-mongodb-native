@@ -79,7 +79,7 @@ before(function (_done) {
 
       // Ensure test MongoClients set a serverApi parameter when required
       if (MONGODB_API_VERSION) {
-        Object.assign(context, { serverApi: MONGODB_API_VERSION });
+        context.serverApi = MONGODB_API_VERSION;
       }
 
       // replace this when mocha supports dynamic skipping with `afterEach`

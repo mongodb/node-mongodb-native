@@ -139,6 +139,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   metadata: ClientMetadata;
+  /** MongoDB server API version */
+  serverApi?: ServerApi;
 }
 
 /** @public */
@@ -167,8 +169,6 @@ export class Topology extends EventEmitter {
   ismaster?: Document;
   /** @internal */
   _type?: string;
-  /** @internal */
-  serverApi?: ServerApi;
 
   /** @event */
   static readonly SERVER_OPENING = 'serverOpening' as const;
@@ -201,14 +201,8 @@ export class Topology extends EventEmitter {
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(
-    seeds: string | string[] | HostAddress | HostAddress[],
-    options: TopologyOptions,
-    serverApi?: ServerApi
-  ) {
+  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
-
-    this.serverApi = serverApi;
 
     // Legacy CSFLE support
     this.bson = Object.create(null);
