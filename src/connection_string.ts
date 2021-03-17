@@ -324,6 +324,12 @@ export function parseOptions(
       throw new MongoParseError('URI cannot contain options with no value');
     }
 
+    if (key.toLowerCase() === 'serverapi') {
+      throw new MongoParseError(
+        'URI cannot contain `serverApi`, it can only be passed to the client'
+      );
+    }
+
     if (key.toLowerCase() === 'authsource' && urlOptions.has('authSource')) {
       // If authSource is an explicit key in the urlOptions we need to remove the implicit dbName
       urlOptions.delete('authSource');
