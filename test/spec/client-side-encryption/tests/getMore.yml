@@ -38,13 +38,6 @@ tests:
             find: *collection_name
             batchSize: 2
           command_name: find
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
