@@ -68,6 +68,8 @@ export class GridFSBucketWriteStream extends Writable {
   writeConcern?: WriteConcern;
 
   /** @event */
+  static readonly CLOSE = 'close';
+  /** @event */
   static readonly ERROR = 'error';
   /**
    * `end()` was called and the write stream successfully wrote the file metadata and all the chunks to MongoDB.
@@ -325,6 +327,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
         return __handleError(stream, error, callback);
       }
       stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
+      stream.emit(GridFSBucketWriteStream.CLOSE);
     });
 
     return true;
