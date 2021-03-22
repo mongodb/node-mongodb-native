@@ -37,7 +37,15 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(url: string, description: ClientEntity) {
-    super(url, { monitorCommands: true, ...description.uriOptions });
+    super(url, {
+      monitorCommands: true,
+      ...description.uriOptions,
+      serverApi: description.serverApi
+        ? description.serverApi
+        : process.env.MONGODB_API_VERSION
+        ? { version: process.env.MONGODB_API_VERSION }
+        : null
+    });
     this.events = [];
     this.failPoints = [];
     this.ignoredEvents = [

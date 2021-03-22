@@ -81,6 +81,7 @@ functions:
           MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
           AUTH=${AUTH} SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
@@ -125,8 +126,10 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
@@ -780,6 +783,22 @@ tasks:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
       - func: run tests
+  - name: test-latest-server-v1-api
+    tags:
+      - latest
+      - server
+      - v1-api
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          REQUIRE_API_VERSION: '1'
+      - func: run tests
+        vars:
+          MONGODB_API_VERSION: '1'
+          NO_EXIT: ''
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -1192,6 +1211,7 @@ buildvariants:
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-atlas-data-lake
       - test-auth-kerberos
@@ -1258,6 +1278,7 @@ buildvariants:
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-atlas-data-lake
       - test-auth-kerberos
@@ -1353,6 +1374,7 @@ buildvariants:
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-atlas-data-lake
       - test-auth-kerberos

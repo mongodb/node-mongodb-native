@@ -98,6 +98,7 @@ functions:
           MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
           AUTH=${AUTH} SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update
@@ -145,8 +146,10 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run checks":

@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
 import { MongoError, AnyError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
-import { Callback, emitWarning, ns } from '../../utils';
+import { Callback, ns, emitWarning } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 

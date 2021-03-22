@@ -601,7 +601,7 @@ describe('GridFS Stream', function () {
    * @example-method abort
    */
   it('Destroying a download stream', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], apiVersion: false } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -669,7 +669,9 @@ describe('GridFS Stream', function () {
    * @example-method delete
    */
   it('Deleting a file using promises', {
-    metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
+    metadata: {
+      requires: { topology: ['single'], node: '>12.0.0', sessions: { skipLeakTests: true } }
+    },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -718,7 +720,7 @@ describe('GridFS Stream', function () {
   });
 
   it('find()', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], sessions: { skipLeakTests: true } } },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -759,7 +761,7 @@ describe('GridFS Stream', function () {
    * @example-method drop
    */
   it('drop example', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], sessions: { skipLeakTests: true } } },
 
     test: function (done) {
       var configuration = this.configuration;

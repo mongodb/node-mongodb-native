@@ -646,7 +646,7 @@ describe('Collation', function () {
           .collection('test')
           .createIndex({ a: 1 }, { collation: { caseLevel: true } })
           .then(() => {
-            expect(commandResult).to.eql({
+            expect(commandResult).to.containSubset({
               createIndexes: 'test',
               indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
             });

@@ -22,7 +22,8 @@ import {
   MongoClient,
   MongoClientOptions,
   MongoOptions,
-  PkFactory
+  PkFactory,
+  ServerApi
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
@@ -323,6 +324,12 @@ export function parseOptions(
       throw new MongoParseError('URI cannot contain options with no value');
     }
 
+    if (key.toLowerCase() === 'serverapi') {
+      throw new MongoParseError(
+        'URI cannot contain `serverApi`, it can only be passed to the client'
+      );
+    }
+
     if (key.toLowerCase() === 'authsource' && urlOptions.has('authSource')) {
       // If authSource is an explicit key in the urlOptions we need to remove the implicit dbName
       urlOptions.delete('authSource');
@@ -571,6 +578,15 @@ export const OPTIONS = {
   },
   autoEncryption: {
     type: 'record'
+  },
+  serverApi: {
+    target: 'serverApi',
+    transform({ values: [version] }): ServerApi {
+      if (typeof version === 'string') {
+        return { version };
+      }
+      return version as ServerApi;
+    }
   },
   checkKeys: {
     type: 'boolean'

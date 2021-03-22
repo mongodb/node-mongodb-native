@@ -114,7 +114,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
     environmentRequirementList.forEach(requires => {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
       describe(suiteName, {
-        metadata: { requires },
+        // FIXME: calling this.skip() inside tests triggers the leak checker, disable until fixed
+        metadata: { requires, sessions: { skipLeakTests: true } },
         test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());

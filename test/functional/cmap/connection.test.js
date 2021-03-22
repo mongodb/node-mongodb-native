@@ -11,48 +11,54 @@ describe('Connection - functional/cmap', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should execute a command against a server', function (done) {
-    const connectOptions = Object.assign(
-      { connectionType: Connection },
-      this.configuration.options
-    );
+  it('should execute a command against a server', {
+    metadata: { requires: { apiVersion: false } },
+    test: function (done) {
+      const connectOptions = Object.assign(
+        { connectionType: Connection },
+        this.configuration.options
+      );
 
-    connect(connectOptions, (err, conn) => {
-      expect(err).to.not.exist;
-      this.defer(_done => conn.destroy(_done));
-
-      conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+      connect(connectOptions, (err, conn) => {
         expect(err).to.not.exist;
-        expect(ismaster).to.exist;
-        expect(ismaster.ok).to.equal(1);
-        done();
+        this.defer(_done => conn.destroy(_done));
+
+        conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+          expect(err).to.not.exist;
+          expect(ismaster).to.exist;
+          expect(ismaster.ok).to.equal(1);
+          done();
+        });
       });
-    });
+    }
   });
 
-  it('should emit command monitoring events', function (done) {
-    const connectOptions = Object.assign(
-      { connectionType: Connection, monitorCommands: true },
-      this.configuration.options
-    );
+  it('should emit command monitoring events', {
+    metadata: { requires: { apiVersion: false } },
+    test: function (done) {
+      const connectOptions = Object.assign(
+        { connectionType: Connection, monitorCommands: true },
+        this.configuration.options
+      );
 
-    connect(connectOptions, (err, conn) => {
-      expect(err).to.not.exist;
-      this.defer(_done => conn.destroy(_done));
-
-      const events = [];
-      conn.on('commandStarted', event => events.push(event));
-      conn.on('commandSucceeded', event => events.push(event));
-      conn.on('commandFailed', event => events.push(event));
-
-      conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+      connect(connectOptions, (err, conn) => {
         expect(err).to.not.exist;
-        expect(ismaster).to.exist;
-        expect(ismaster.ok).to.equal(1);
-        expect(events).to.have.length(2);
-        done();
+        this.defer(_done => conn.destroy(_done));
+
+        const events = [];
+        conn.on('commandStarted', event => events.push(event));
+        conn.on('commandSucceeded', event => events.push(event));
+        conn.on('commandFailed', event => events.push(event));
+
+        conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+          expect(err).to.not.exist;
+          expect(ismaster).to.exist;
+          expect(ismaster.ok).to.equal(1);
+          expect(events).to.have.length(2);
+          done();
+        });
       });
-    });
+    }
   });
 
   it.skip('should support socket timeouts', {
@@ -78,7 +84,7 @@ describe('Connection - functional/cmap', function () {
   });
 
   it('should support calling back multiple times on exhaust commands', {
-    metadata: { requires: { mongodb: '>=4.2.0', topology: ['single'] } },
+    metadata: { requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] } },
     test: function (done) {
       const namespace = ns(`${this.configuration.db}.$cmd`);
       const connectOptions = Object.assign(

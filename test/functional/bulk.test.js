@@ -68,7 +68,7 @@ describe('Bulk', function () {
             var op = error.getOperation();
             test.equal(2, op.q.b);
             test.equal(1, op.u['$set'].a);
-            test.equal(false, op.multi);
+            expect(op.multi).to.not.be.true;
             test.equal(true, op.upsert);
 
             // Get the first error
@@ -324,7 +324,7 @@ describe('Bulk', function () {
             test.ok(error.errmsg != null);
             test.equal(2, error.getOperation().q.b);
             test.equal(1, error.getOperation().u['$set'].a);
-            test.equal(false, error.getOperation().multi);
+            expect(error.getOperation().multi).to.not.be.true;
             test.equal(true, error.getOperation().upsert);
 
             // Finish up test
@@ -698,7 +698,7 @@ describe('Bulk', function () {
             var op = error.getOperation();
             test.equal(2, op.q.b);
             test.equal(1, op.u['$set'].a);
-            test.equal(false, op.multi);
+            expect(op.multi).to.not.be.true;
             test.equal(true, op.upsert);
 
             // Get the first error
@@ -1180,7 +1180,6 @@ describe('Bulk', function () {
       expect(batches[1].operations[0]).to.containSubset({
         q: { b: 2 },
         u: { $set: { a: 1 } },
-        multi: false,
         upsert: true
       });
       expect(batches[2].operations[0]).to.containSubset({ b: 3, a: 2 });
@@ -1283,7 +1282,6 @@ describe('Bulk', function () {
       expect(batches[1].operations[0]).to.containSubset({
         q: { b: 2 },
         u: { $set: { a: 1 } },
-        multi: false,
         upsert: true
       });
       client.close(done);

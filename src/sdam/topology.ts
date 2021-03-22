@@ -50,7 +50,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
 import { DestroyOptions, Connection } from '../cmap/connection';
-import type { MongoClientOptions } from '../mongo_client';
+import type { MongoClientOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
 
@@ -139,6 +139,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   metadata: ClientMetadata;
+  /** MongoDB server API version */
+  serverApi?: ServerApi;
 }
 
 /** @public */

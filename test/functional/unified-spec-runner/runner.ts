@@ -76,11 +76,12 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
-    let doesNotMeetRunOnRequirement = allRequirements.length > 0;
+    let doesNotMeetRunOnRequirement = false;
 
     for (const requirement of allRequirements) {
-      if (await topologySatisfies(ctx.configuration, requirement, utilClient)) {
-        doesNotMeetRunOnRequirement = false; // it does meet a run on requirement!
+      const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
+      if (!met) {
+        doesNotMeetRunOnRequirement = true; // it doesn't meet a run on requirement
         break;
       }
     }

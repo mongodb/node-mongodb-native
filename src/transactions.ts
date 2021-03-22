@@ -116,6 +116,11 @@ export class Transaction {
     return !!this.server;
   }
 
+  /** @returns Whether the transaction has started */
+  get isStarting(): boolean {
+    return this.state === TxnState.STARTING_TRANSACTION;
+  }
+
   /**
    * @returns Whether this session is presently in a transaction
    */

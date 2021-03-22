@@ -85,6 +85,7 @@ export { Compressor } from './cmap/wire_protocol/compression';
 export { ExplainVerbosity } from './explain';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';
+export { ServerApiVersion } from './mongo_client';
 
 // events
 export {
@@ -211,6 +212,8 @@ export type {
   Auth,
   DriverInfo,
   MongoOptions,
+  ServerApi,
+  ServerApiVersionId,
   SupportedNodeConnectionOptions,
   SupportedTLSConnectionOptions,
   SupportedTLSSocketOptions,

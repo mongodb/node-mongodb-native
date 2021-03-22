@@ -58,7 +58,7 @@ describe('Views', function () {
           ) {
             expect(r).to.exist;
             expect(err).to.not.exist;
-            expect(commandResult).to.eql({
+            expect(commandResult).to.containSubset({
               create: 'test',
               viewOn: 'users',
               pipeline: [{ $match: {} }]
