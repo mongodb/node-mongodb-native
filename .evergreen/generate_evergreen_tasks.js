@@ -4,7 +4,7 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const NODE_VERSIONS = ['dubnium', 'erbium'];
+const NODE_VERSIONS = ['dubnium', 'erbium', 'fermium'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '4.4'];
 const OCSP_VERSIONS = ['latest', '4.4'];
