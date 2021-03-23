@@ -1,4 +1,11 @@
-import { MongoClient, Db, Collection, GridFSBucket, Document } from '../../../src/index';
+import {
+  MongoClient,
+  Db,
+  Collection,
+  GridFSBucket,
+  Document,
+  HostAddress
+} from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { WriteConcern } from '../../../src/write_concern';
 import { ReadPreference } from '../../../src/read_preference';
@@ -16,10 +23,6 @@ import { TestConfiguration } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
-}
-
-interface UnifiedClientSession extends ClientSession {
-  client: UnifiedMongoClient;
 }
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
@@ -75,23 +78,49 @@ export class UnifiedMongoClient extends MongoClient {
     }
     return this.events;
   }
+}
 
-  async enableFailPoint(failPoint: Document): Promise<Document> {
-    const admin = this.db().admin();
+export class FailPointMap extends Map<string, Document> {
+  async enableFailPoint(
+    addressOrClient: HostAddress | UnifiedMongoClient,
+    failPoint: Document
+  ): Promise<Document> {
+    let client: MongoClient;
+    let address: string;
+    if (addressOrClient instanceof MongoClient) {
+      client = addressOrClient;
+      address = client.topology.s.seedlist.join(',');
+    } else {
+      // create a new client
+      address = addressOrClient.toString();
+      client = new MongoClient(`mongodb://${address}`);
+      await client.connect();
+    }
+
+    const admin = client.db('admin');
     const result = await admin.command(failPoint);
+
+    if (!(addressOrClient instanceof MongoClient)) {
+      // we created this client
+      await client.close();
+    }
+
     expect(result).to.have.property('ok', 1);
-    this.failPoints.push(failPoint.configureFailPoint);
+    this.set(address, failPoint.configureFailPoint);
     return result;
   }
 
-  async disableFailPoints(): Promise<Document[]> {
-    return Promise.all(
-      this.failPoints.map(configureFailPoint =>
-        this.db().admin().command({
-          configureFailPoint,
-          mode: 'off'
-        })
-      )
+  async disableFailPoints(): Promise<void> {
+    const entries = Array.from(this.entries());
+    await Promise.all(
+      entries.map(async ([hostAddress, configureFailPoint]) => {
+        const client = new MongoClient(`mongodb://${hostAddress}`);
+        await client.connect();
+        const admin = client.db('admin');
+        const result = await admin.command({ configureFailPoint, mode: 'off' });
+        expect(result).to.have.property('ok', 1);
+        await client.close();
+      })
     );
   }
 }
@@ -100,7 +129,7 @@ export type Entity =
   | UnifiedMongoClient
   | Db
   | Collection
-  | UnifiedClientSession
+  | ClientSession
   | UnifiedChangeStream
   | GridFSBucket
   | Document; // Results from operations
@@ -124,10 +153,17 @@ ENTITY_CTORS.set('bucket', GridFSBucket);
 ENTITY_CTORS.set('stream', ChangeStream);
 
 export class EntitiesMap<E = Entity> extends Map<string, E> {
+  failPoints: FailPointMap;
+
+  constructor(entries?: readonly (readonly [string, E])[] | null) {
+    super(entries);
+    this.failPoints = new FailPointMap();
+  }
+
   mapOf(type: 'client'): EntitiesMap<UnifiedMongoClient>;
   mapOf(type: 'db'): EntitiesMap<Db>;
   mapOf(type: 'collection'): EntitiesMap<Collection>;
-  mapOf(type: 'session'): EntitiesMap<UnifiedClientSession>;
+  mapOf(type: 'session'): EntitiesMap<ClientSession>;
   mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
   mapOf(type: 'stream'): EntitiesMap<UnifiedChangeStream>;
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
@@ -141,7 +177,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
   getEntity(type: 'db', key: string, assertExists?: boolean): Db;
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
-  getEntity(type: 'session', key: string, assertExists?: boolean): UnifiedClientSession;
+  getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
@@ -161,8 +197,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   }
 
   async cleanup(): Promise<void> {
+    await this.failPoints.disableFailPoints();
     for (const [, client] of this.mapOf('client')) {
-      await client.disableFailPoints();
       await client.close();
     }
     for (const [, session] of this.mapOf('session')) {
@@ -178,7 +214,9 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const map = new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
-        const uri = config.url({ useMultipleMongoses: entity.client.useMultipleMongoses });
+        const useMultipleMongoses =
+          config.topologyType === 'Sharded' && entity.client.useMultipleMongoses;
+        const uri = config.url({ useMultipleMongoses });
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);
@@ -228,10 +266,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           }
         }
 
-        const session = client.startSession(options) as UnifiedClientSession;
-        // targetedFailPoint operations need to access the client the session came from
-        session.client = client;
-
+        const session = client.startSession(options);
         map.set(entity.session.id, session);
       } else if ('bucket' in entity) {
         const db = map.getEntity('db', entity.bucket.database);

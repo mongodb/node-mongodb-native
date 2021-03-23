@@ -15,30 +15,11 @@ interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
 }
 
-const SKIPPED_TESTS = [
-  // These were already skipped in our existing spec tests
-  'unpin after transient error within a transaction and commit',
-  'Dirty explicit session is discarded',
-
-  // TODO Un-skip these to complete unified runner
-  'withTransaction inherits transaction options from client',
-  'withTransaction inherits transaction options from defaultTransactionOptions',
-  'remain pinned after non-transient Interrupted error on insertOne',
-  'unpin after transient error within a transaction',
-  'Client side error in command starting transaction',
-  'explicitly create collection using create command',
-  'create index on a non-existing collection',
-  'InsertMany succeeds after PrimarySteppedDown',
-  'withTransaction and no transaction options set',
-  'withTransaction explicit transaction options',
-  'InsertOne fails after connection failure when retryWrites option is false',
-  'InsertOne fails after multiple retryable writeConcernErrors'
-];
-
 export async function runUnifiedTest(
   ctx: MongoDBMochaTestContext,
   unifiedSuite: uni.UnifiedSuite,
-  test: uni.Test
+  test: uni.Test,
+  testsToSkip?: string[]
 ): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
@@ -56,7 +37,7 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  if (SKIPPED_TESTS.includes(test.description)) {
+  if (testsToSkip?.includes(test.description)) {
     ctx.skip();
   }
 
@@ -76,18 +57,11 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
-    let doesNotMeetRunOnRequirement = false;
-
     for (const requirement of allRequirements) {
       const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
       if (!met) {
-        doesNotMeetRunOnRequirement = true; // it doesn't meet a run on requirement
-        break;
+        return ctx.skip();
       }
-    }
-
-    if (doesNotMeetRunOnRequirement) {
-      ctx.skip();
     }
 
     // If initialData is specified, for each collectionData therein the test runner MUST drop the
@@ -188,14 +162,14 @@ export async function runUnifiedTest(
   }
 }
 
-export function runUnifiedSuite(specTests: uni.UnifiedSuite[]): void {
+export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: string[]): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },
           test: async function () {
-            await runUnifiedTest(this, unifiedSuite, test);
+            await runUnifiedTest(this, unifiedSuite, test, testsToSkip);
           }
         });
       }
