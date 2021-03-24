@@ -2519,10 +2519,6 @@ describe('Find', function () {
     metadata: { requires: { topology: ['single'] } },
 
     test: function (done) {
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
       var configuration = this.configuration;
       const client = configuration.newClient({}, { ignoreUndefined: true });
       client.connect(function (err, client) {
@@ -2537,9 +2533,6 @@ describe('Find', function () {
 
           cursor.toArray(function (err, documents) {
             test.equal(2, documents.length);
-            // process.exit(0)
-            listener.uninstrument();
-
             // Let's close the db
             client.close(done);
           });
