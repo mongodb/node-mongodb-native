@@ -238,7 +238,10 @@ export type { CreateCollectionOptions } from './operations/create_collection';
 export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
-export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
+export type {
+  EstimatedDocumentCountOptions,
+  EstimatedDocumentCountOptionsV1
+} from './operations/estimated_document_count';
 export type { EvalOptions } from './operations/eval';
 export type { FindOptions } from './operations/find';
 export type { Sort, SortDirection } from './sort';

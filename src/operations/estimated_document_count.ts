@@ -1,16 +1,28 @@
 import { Aspect, defineAspects, Hint } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../utils';
+import { Callback, maxWireVersion } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
 
-/** @public */
-export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
+/**
+ * All supported options, including legacy options
+ * @public
+ */
+export interface EstimatedDocumentCountOptions extends EstimatedDocumentCountOptionsV1 {
   skip?: number;
   limit?: number;
   hint?: Hint;
+}
+
+/**
+ * Options supported by Server API Version 1
+ * @public
+ */
+export interface EstimatedDocumentCountOptionsV1 extends CommandOperationOptions {
+  /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
+  maxTimeMS?: number;
 }
 
 /** @internal */
@@ -41,22 +53,38 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
 
   execute(server: Server, session: ClientSession, callback: Callback<number>): void {
     const options = this.options;
-    const cmd: Document = { count: this.collectionName };
 
-    if (this.query) {
-      cmd.query = this.query;
-    }
+    let cmd: Document;
 
-    if (typeof options.skip === 'number') {
-      cmd.skip = options.skip;
-    }
+    if (maxWireVersion(server) > 11) {
+      const pipeline = [
+        { $collStats: { count: {} } },
+        { $group: { _id: 1, n: { $sum: '$count' } } }
+      ];
 
-    if (typeof options.limit === 'number') {
-      cmd.limit = options.limit;
-    }
+      cmd = { aggregate: this.collectionName, pipeline, cursor: {} };
 
-    if (options.hint) {
-      cmd.hint = options.hint;
+      if (typeof options.maxTimeMS === 'number') {
+        cmd.maxTimeMS = options.maxTimeMS;
+      }
+    } else {
+      cmd = { count: this.collectionName };
+
+      if (this.query) {
+        cmd.query = this.query;
+      }
+
+      if (typeof options.skip === 'number') {
+        cmd.skip = options.skip;
+      }
+
+      if (typeof options.limit === 'number') {
+        cmd.limit = options.limit;
+      }
+
+      if (options.hint) {
+        cmd.hint = options.hint;
+      }
     }
 
     super.executeCommand(server, session, cmd, (err, response) => {
