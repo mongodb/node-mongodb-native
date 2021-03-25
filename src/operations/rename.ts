@@ -1,9 +1,8 @@
 import { checkCollectionName, Callback } from '../utils';
-import { loadCollection } from '../dynamic_loaders';
 import { RunAdminCommandOperation } from './run_command';
 import { defineAspects, Aspect } from './operation';
 import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
+import { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
 import { MongoError } from '../error';
 import type { ClientSession } from '../sessions';
@@ -39,7 +38,6 @@ export class RenameOperation extends RunAdminCommandOperation {
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<Collection>): void {
-    const Collection = loadCollection();
     const coll = this.collection;
 
     super.execute(server, session, (err, doc) => {

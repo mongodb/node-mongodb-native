@@ -32,7 +32,7 @@ export interface GridFSFile {
   _id: GridFSBucketWriteStream['id'];
   length: GridFSBucketWriteStream['length'];
   chunkSize: GridFSBucketWriteStream['chunkSizeBytes'];
-  md5?: boolean | string;
+  md5?: string;
   filename: GridFSBucketWriteStream['filename'];
   contentType?: GridFSBucketWriteStream['options']['contentType'];
   aliases?: GridFSBucketWriteStream['options']['aliases'];

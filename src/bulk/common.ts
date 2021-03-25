@@ -19,6 +19,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
+import type { Query } from '../mongo_types';
 
 /** @public */
 export const BatchType = {
@@ -31,15 +32,15 @@ export const BatchType = {
 export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
-export interface InsertOneModel {
+export interface InsertOneModel<TSchema> {
   /** The document to insert. */
-  document: Document;
+  document: TSchema;
 }
 
 /** @public */
-export interface DeleteOneModel {
+export interface DeleteOneModel<TSchema> {
   /** The filter to limit the deleted documents. */
-  filter: Document;
+  filter: Query<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -47,9 +48,9 @@ export interface DeleteOneModel {
 }
 
 /** @public */
-export interface DeleteManyModel {
+export interface DeleteManyModel<TSchema> {
   /** The filter to limit the deleted documents. */
-  filter: Document;
+  filter: Query<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -57,11 +58,11 @@ export interface DeleteManyModel {
 }
 
 /** @public */
-export interface ReplaceOneModel {
+export interface ReplaceOneModel<TSchema> {
   /** The filter to limit the replaced document. */
-  filter: Document;
+  filter: Query<TSchema>;
   /** The document with which to replace the matched document. */
-  replacement: Document;
+  replacement: TSchema;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -103,13 +104,13 @@ export interface UpdateManyModel {
 }
 
 /** @public */
-export type AnyBulkWriteOperation =
-  | { insertOne: InsertOneModel }
-  | { replaceOne: ReplaceOneModel }
+export type AnyBulkWriteOperation<TSchema = Document> =
+  | { insertOne: InsertOneModel<TSchema> }
+  | { replaceOne: ReplaceOneModel<TSchema> }
   | { updateOne: UpdateOneModel }
   | { updateMany: UpdateManyModel }
-  | { deleteOne: DeleteOneModel }
-  | { deleteMany: DeleteManyModel };
+  | { deleteOne: DeleteOneModel<TSchema> }
+  | { deleteMany: DeleteManyModel<TSchema> };
 
 /** @public */
 export interface BulkResult {

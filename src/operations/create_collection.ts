@@ -1,14 +1,11 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { loadCollection } from '../dynamic_loaders';
+import { Collection } from '../collection';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
-
-// eslint-disable-next-line
-import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
@@ -82,7 +79,6 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     const db = this.db;
     const name = this.name;
     const options = this.options;
-    const Collection = loadCollection();
 
     const done: Callback = err => {
       if (err) {

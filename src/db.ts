@@ -6,7 +6,6 @@ import {
   getTopology,
   DEFAULT_PK_FACTORY
 } from './utils';
-import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
@@ -47,7 +46,8 @@ import {
 import { executeOperation } from './operations/execute_operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
-import type { Admin } from './admin';
+import { Admin } from './admin';
+import type { TODO_NODE_2648 } from './mongo_types';
 
 // Allowed parameters
 const DB_OPTIONS_ALLOW_LIST = [
@@ -222,26 +222,32 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createCollection(name: string): Promise<Collection>;
-  createCollection(name: string, callback: Callback<Collection>): void;
-  createCollection(name: string, options: CreateCollectionOptions): Promise<Collection>;
-  createCollection(
+  createCollection<TSchema extends Document = Document>(name: string): Promise<Collection<TSchema>>;
+  createCollection<TSchema extends Document = Document>(
+    name: string,
+    callback: Callback<Collection<TSchema>>
+  ): void;
+  createCollection<TSchema extends Document = Document>(
+    name: string,
+    options: CreateCollectionOptions
+  ): Promise<Collection<TSchema>>;
+  createCollection<TSchema extends Document = Document>(
     name: string,
     options: CreateCollectionOptions,
-    callback: Callback<Collection>
+    callback: Callback<Collection<TSchema>>
   ): void;
-  createCollection(
+  createCollection<TSchema extends Document = Document>(
     name: string,
     options?: CreateCollectionOptions | Callback<Collection>,
     callback?: Callback<Collection>
-  ): Promise<Collection> | void {
+  ): Promise<Collection<TSchema>> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
       getTopology(this),
-      new CreateCollectionOperation(this, name, resolveOptions(this, options)),
+      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_2648,
       callback
-    );
+    ) as TODO_NODE_2648;
   }
 
   /**
@@ -301,8 +307,7 @@ export class Db {
 
   /** Return the Admin db instance */
   admin(): Admin {
-    const AdminClass = loadAdmin();
-    return new AdminClass(this);
+    return new Admin(this);
   }
 
   /**
@@ -312,22 +317,32 @@ export class Db {
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance if not in strict mode
    */
-  collection(name: string): Collection;
-  collection(name: string, options: CollectionOptions): Collection;
-  collection(name: string, callback: Callback<Collection>): void;
-  collection(name: string, options: CollectionOptions, callback: Callback<Collection>): void;
-  collection(
+  collection<TSchema extends Document = Document>(name: string): Collection<TSchema>;
+  collection<TSchema extends Document = Document>(
     name: string,
-    options?: CollectionOptions | Callback<Collection>,
-    callback?: Callback<Collection>
-  ): Collection | void {
+    options: CollectionOptions
+  ): Collection<TSchema>;
+  collection<TSchema extends Document = Document>(
+    name: string,
+    callback: Callback<Collection<TSchema>>
+  ): void;
+  collection<TSchema extends Document = Document>(
+    name: string,
+    options: CollectionOptions,
+    callback: Callback<Collection<TSchema>>
+  ): void;
+  collection<TSchema extends Document = Document>(
+    name: string,
+    options?: CollectionOptions | Callback<Collection<TSchema>>,
+    callback?: Callback<Collection<TSchema>>
+  ): Collection<TSchema> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     const finalOptions = resolveOptions(this, options);
 
     // Execute
     if (!finalOptions.strict) {
       try {
-        const collection = new Collection(this, name, finalOptions);
+        const collection = new Collection<TSchema>(this, name, finalOptions);
         if (callback) callback(undefined, collection);
         return collection;
       } catch (err) {
@@ -412,29 +427,32 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  renameCollection(fromCollection: string, toCollection: string): Promise<Collection>;
-  renameCollection(
+  renameCollection<TSchema extends Document = Document>(
+    fromCollection: string,
+    toCollection: string
+  ): Promise<Collection<TSchema>>;
+  renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
-    callback: Callback<Collection>
+    callback: Callback<Collection<TSchema>>
   ): void;
-  renameCollection(
+  renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
     options: RenameOptions
-  ): Promise<Collection>;
-  renameCollection(
+  ): Promise<Collection<TSchema>>;
+  renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
     options: RenameOptions,
-    callback: Callback<Collection>
+    callback: Callback<Collection<TSchema>>
   ): void;
-  renameCollection(
+  renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
-    options?: RenameOptions | Callback<Collection>,
-    callback?: Callback<Collection>
-  ): Promise<Collection> | void {
+    options?: RenameOptions | Callback<Collection<TSchema>>,
+    callback?: Callback<Collection<TSchema>>
+  ): Promise<Collection<TSchema>> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
@@ -445,7 +463,11 @@ export class Db {
 
     return executeOperation(
       getTopology(this),
-      new RenameOperation(this.collection(fromCollection), toCollection, options),
+      new RenameOperation(
+        this.collection<TSchema>(fromCollection),
+        toCollection,
+        options
+      ) as TODO_NODE_2648,
       callback
     );
   }
@@ -725,10 +747,13 @@ export class Db {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch(): ChangeStream;
-  watch(pipeline?: Document[]): ChangeStream;
-  watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
-    pipeline = pipeline || [];
+  watch<TSchema = Document>(): ChangeStream<TSchema>;
+  watch<TSchema = Document>(pipeline?: Document[]): ChangeStream<TSchema>;
+  watch<TSchema = Document>(
+    pipeline?: Document[],
+    options?: ChangeStreamOptions
+  ): ChangeStream<TSchema> {
+    pipeline = pipeline ?? [];
     options = options ?? {};
 
     // Allow optionally not specifying a pipeline
@@ -737,7 +762,7 @@ export class Db {
       pipeline = [];
     }
 
-    return new ChangeStream(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TSchema>(this, pipeline, resolveOptions(this, options));
   }
 
   /** Return the db logger */

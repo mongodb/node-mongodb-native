@@ -583,10 +583,13 @@ export class MongoClient extends EventEmitter {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch(): ChangeStream;
-  watch(pipeline?: Document[]): ChangeStream;
-  watch(pipeline?: Document[], options?: ChangeStreamOptions): ChangeStream {
-    pipeline = pipeline || [];
+  watch<TSchema = Document>(): ChangeStream<TSchema>;
+  watch<TSchema = Document>(pipeline?: Document[]): ChangeStream<TSchema>;
+  watch<TSchema = Document>(
+    pipeline: Document[] = [],
+    options: ChangeStreamOptions = {}
+  ): ChangeStream<TSchema> {
+    pipeline = pipeline ?? [];
     options = options ?? {};
 
     // Allow optionally not specifying a pipeline
@@ -595,7 +598,7 @@ export class MongoClient extends EventEmitter {
       pipeline = [];
     }
 
-    return new ChangeStream(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TSchema>(this, pipeline, resolveOptions(this, options));
   }
 
   /** Return the mongo client logger */

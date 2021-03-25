@@ -1,10 +1,7 @@
 import { AbstractOperation, OperationOptions } from './operation';
-import { loadCollection } from '../dynamic_loaders';
+import { Collection } from '../collection';
 import type { Callback } from '../utils';
 import type { Db } from '../db';
-
-// eslint-disable-next-line
-import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 
@@ -25,7 +22,6 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
 
   execute(server: Server, session: ClientSession, callback: Callback<Collection[]>): void {
     const db = this.db;
-    const Collection = loadCollection();
 
     // Let's get the collection names
     db.listCollections(

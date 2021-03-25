@@ -55,6 +55,8 @@ yarn.lock
 lib/
 *.tgz
 *.d.ts
+# type definition tests
+!test/unit/types
 
 .vscode
 output

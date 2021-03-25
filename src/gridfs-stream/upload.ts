@@ -5,18 +5,16 @@ import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
 import type { Callback } from '../utils';
-import type { Collection } from '../collection';
 import type { Document } from '../bson';
 import type { GridFSBucket } from './index';
 import type { GridFSFile } from './download';
 import type { WriteConcernOptions } from '../write_concern';
+import type { Collection } from '../collection';
 
 /** @public */
-export type TFileId = string | number | Document | ObjectId;
-
-export interface ChunkDoc {
+export interface GridFSChunk {
   _id: ObjectId;
-  files_id: TFileId;
+  files_id: ObjectId;
   n: number;
   data: Buffer;
 }
@@ -26,7 +24,7 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
   /** Custom file id for the GridFS file. */
-  id?: TFileId;
+  id?: ObjectId;
   /** Object to store in the file document's `metadata` field */
   metadata?: Document;
   /** String to store in the file document's `contentType` field */
@@ -45,12 +43,12 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
  */
 export class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;
-  chunks: Collection;
+  chunks: Collection<GridFSChunk>;
   filename: string;
-  files: Collection;
+  files: Collection<GridFSFile>;
   options: GridFSBucketWriteStreamOptions;
   done: boolean;
-  id: TFileId;
+  id: ObjectId;
   chunkSizeBytes: number;
   bufToStore: Buffer;
   length: number;
@@ -240,7 +238,7 @@ function __handleError(
   stream.emit(GridFSBucketWriteStream.ERROR, error);
 }
 
-function createChunkDoc(filesId: TFileId, n: number, data: Buffer): ChunkDoc {
+function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk {
   return {
     _id: new ObjectId(),
     files_id: filesId,
@@ -309,7 +307,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       stream.id,
       stream.length,
       stream.chunkSizeBytes,
-      stream.md5 && stream.md5.digest('hex'),
+      stream.md5 ? stream.md5.digest('hex') : undefined,
       stream.filename,
       stream.options.contentType,
       stream.options.aliases,
@@ -472,7 +470,7 @@ function doWrite(
     inputBuf.copy(stream.bufToStore, stream.pos, inputBufPos, inputBufPos + numToCopy);
     stream.pos += numToCopy;
     spaceRemaining -= numToCopy;
-    let doc: ChunkDoc;
+    let doc: GridFSChunk;
     if (spaceRemaining === 0) {
       if (stream.md5) {
         stream.md5.update(stream.bufToStore);

@@ -67,7 +67,7 @@ export interface ClientSessionOptions {
 }
 
 /** @public */
-export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
+export type WithTransactionCallback<T> = (session: ClientSession) => Promise<T> | void;
 
 const kServerSession = Symbol('serverSession');
 
@@ -328,7 +328,7 @@ class ClientSession extends EventEmitter {
    * @param fn - A lambda to run within a transaction
    * @param options - Optional settings for the transaction
    */
-  withTransaction(fn: WithTransactionCallback, options?: TransactionOptions): Promise<any> {
+  withTransaction<T>(fn: WithTransactionCallback<T>, options?: TransactionOptions): Promise<void> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -368,12 +368,12 @@ function isMaxTimeMSExpiredError(err: MongoError) {
   );
 }
 
-function attemptTransactionCommit(
+function attemptTransactionCommit<T>(
   session: ClientSession,
   startTime: number,
-  fn: WithTransactionCallback,
+  fn: WithTransactionCallback<T>,
   options?: TransactionOptions
-): Promise<Document> {
+): Promise<T> {
   return session.commitTransaction().catch((err: MongoError) => {
     if (
       err instanceof MongoError &&
@@ -403,10 +403,10 @@ function userExplicitlyEndedTransaction(session: ClientSession) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction(
+function attemptTransaction<TSchema>(
   session: ClientSession,
   startTime: number,
-  fn: WithTransactionCallback,
+  fn: WithTransactionCallback<TSchema>,
   options?: TransactionOptions
 ): Promise<any> {
   const Promise = PromiseProvider.get();

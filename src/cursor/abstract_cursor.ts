@@ -9,6 +9,7 @@ import { Readable, Transform } from 'stream';
 import { EventEmitter } from 'events';
 import type { ExecutionResult } from '../operations/execute_operation';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
+import type { TODO_NODE_2648 } from '../mongo_types';
 
 const kId = Symbol('id');
 const kDocuments = Symbol('documents');
@@ -73,7 +74,7 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
 };
 
 /** @public */
-export abstract class AbstractCursor extends EventEmitter {
+export abstract class AbstractCursor<TSchema extends Document = any> extends EventEmitter {
   /** @internal */
   [kId]?: Long;
   /** @internal */
@@ -83,11 +84,11 @@ export abstract class AbstractCursor extends EventEmitter {
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: Document[];
+  [kDocuments]: TSchema[];
   /** @internal */
   [kTopology]: Topology;
   /** @internal */
-  [kTransform]?: (doc: Document) => Document;
+  [kTransform]?: (doc: TSchema) => Document;
   /** @internal */
   [kInitialized]: boolean;
   /** @internal */
@@ -190,11 +191,11 @@ export abstract class AbstractCursor extends EventEmitter {
   }
 
   /** Returns current buffered documents */
-  readBufferedDocuments(number?: number): Document[] {
+  readBufferedDocuments(number?: number): TSchema[] {
     return this[kDocuments].splice(0, number ?? this[kDocuments].length);
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<Document | null> {
+  [Symbol.asyncIterator](): AsyncIterator<TSchema | null> {
     return {
       next: () => this.next().then(value => ({ value, done: value === null }))
     };
@@ -251,9 +252,9 @@ export abstract class AbstractCursor extends EventEmitter {
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
-  next(): Promise<Document | null>;
-  next(callback: Callback<Document | null>): void;
-  next(callback?: Callback<Document | null>): Promise<Document | null> | void {
+  next(): Promise<TSchema | null>;
+  next(callback: Callback<TSchema | null>): void;
+  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoError('Cursor is exhausted'));
@@ -266,9 +267,9 @@ export abstract class AbstractCursor extends EventEmitter {
   /**
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
-  tryNext(): Promise<Document | null>;
-  tryNext(callback: Callback<Document | null>): void;
-  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+  tryNext(): Promise<TSchema | null>;
+  tryNext(callback: Callback<TSchema | null>): void;
+  tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoError('Cursor is exhausted'));
@@ -284,10 +285,10 @@ export abstract class AbstractCursor extends EventEmitter {
    * @param iterator - The iteration callback.
    * @param callback - The end callback.
    */
-  forEach(iterator: (doc: Document) => boolean | void): Promise<void>;
-  forEach(iterator: (doc: Document) => boolean | void, callback: Callback<void>): void;
+  forEach(iterator: (doc: TSchema) => boolean | void): Promise<void>;
+  forEach(iterator: (doc: TSchema) => boolean | void, callback: Callback<void>): void;
   forEach(
-    iterator: (doc: Document) => boolean | void,
+    iterator: (doc: TSchema) => boolean | void,
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
@@ -302,14 +303,16 @@ export abstract class AbstractCursor extends EventEmitter {
           if (doc == null) return done();
 
           // NOTE: no need to transform because `next` will do this automatically
-          let result = iterator(doc);
+          let result = iterator(doc as TSchema); // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
           const internalDocs = this[kDocuments].splice(0, this[kDocuments].length);
           if (internalDocs) {
             for (let i = 0; i < internalDocs.length; ++i) {
-              result = iterator(transform ? transform(internalDocs[i]) : internalDocs[i]);
+              result = iterator(
+                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
+              );
               if (result === false) return done();
             }
           }
@@ -380,11 +383,11 @@ export abstract class AbstractCursor extends EventEmitter {
    *
    * @param callback - The result callback.
    */
-  toArray(): Promise<Document[]>;
-  toArray(callback: Callback<Document[]>): void;
-  toArray(callback?: Callback<Document[]>): Promise<Document[]> | void {
+  toArray(): Promise<TSchema[]>;
+  toArray(callback: Callback<TSchema[]>): void;
+  toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
     return maybePromise(callback, done => {
-      const docs: Document[] = [];
+      const docs: TSchema[] = [];
       const transform = this[kTransform];
       const fetchDocs = () => {
         // NOTE: if we add a `nextBatch` then we should use it here
@@ -393,12 +396,12 @@ export abstract class AbstractCursor extends EventEmitter {
           if (doc == null) return done(undefined, docs);
 
           // NOTE: no need to transform because `next` will do this automatically
-          docs.push(doc);
+          docs.push(doc as TSchema);
 
           // these do need to be transformed since they are copying the rest of the batch
-          const internalDocs = transform
+          const internalDocs = (transform
             ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
-            : this[kDocuments].splice(0, this[kDocuments].length);
+            : this[kDocuments].splice(0, this[kDocuments].length)) as TSchema[]; // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
 
           if (internalDocs) {
             docs.push(...internalDocs);
@@ -434,12 +437,14 @@ export abstract class AbstractCursor extends EventEmitter {
 
   /**
    * Map all documents using the provided function
+   * If there is a transform set on the cursor, that will be called first and the result passed to
+   * this function's transform.
    *
    * @param transform - The mapping transformation method.
    */
-  map(transform: (doc: Document) => Document): this {
+  map<TResult>(transform: (doc: TSchema) => TResult): this {
     assertUninitialized(this);
-    const oldTransform = this[kTransform];
+    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
     if (oldTransform) {
       this[kTransform] = doc => {
         return transform(oldTransform(doc));
@@ -548,7 +553,7 @@ export abstract class AbstractCursor extends EventEmitter {
   /**
    * Returns a new uninitialized copy of this cursor, with options matching those that have been set on the current instance
    */
-  abstract clone(): AbstractCursor;
+  abstract clone(): AbstractCursor<TSchema>;
 
   /** @internal */
   abstract _initialize(
@@ -585,7 +590,9 @@ export abstract class AbstractCursor extends EventEmitter {
   }
 }
 
-function nextDocument(cursor: AbstractCursor): Document | null | undefined {
+function nextDocument<TSchema extends Document>(
+  cursor: AbstractCursor<TSchema>
+): TSchema | null | undefined {
   if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
     return null;
   }
@@ -594,7 +601,7 @@ function nextDocument(cursor: AbstractCursor): Document | null | undefined {
   if (doc) {
     const transform = cursor[kTransform];
     if (transform) {
-      return transform(doc);
+      return transform(doc) as TSchema; // TODO: How can user's parameterize this
     }
 
     return doc;
@@ -603,10 +610,10 @@ function nextDocument(cursor: AbstractCursor): Document | null | undefined {
   return null;
 }
 
-function next(
-  cursor: AbstractCursor,
+function next<TSchema>(
+  cursor: AbstractCursor<TSchema>,
   blocking: boolean,
-  callback: Callback<Document | null>
+  callback: Callback<TSchema | null>
 ): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
@@ -655,7 +662,7 @@ function next(
         // for example
         if (cursor[kId] == null) {
           cursor[kId] = Long.ZERO;
-          cursor[kDocuments] = [state.response];
+          cursor[kDocuments] = [state.response as TODO_NODE_2648];
         }
       }
 
@@ -727,7 +734,7 @@ export function assertUninitialized(cursor: AbstractCursor): void {
   }
 }
 
-function makeCursorStream(cursor: AbstractCursor) {
+function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSchema>) {
   const readable = new Readable({
     objectMode: true,
     autoDestroy: false,
