@@ -115,6 +115,6 @@
     "test": "npm run check:lint && npm run check:test"
   },
   "tsd": {
-    "directory": "test/unit/types"
+    "directory": "test/types"
   }
 }

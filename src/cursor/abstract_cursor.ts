@@ -74,7 +74,7 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
 };
 
 /** @public */
-export abstract class AbstractCursor<TSchema extends Document = any> extends EventEmitter {
+export abstract class AbstractCursor<TSchema = any> extends EventEmitter {
   /** @internal */
   [kId]?: Long;
   /** @internal */
@@ -303,7 +303,7 @@ export abstract class AbstractCursor<TSchema extends Document = any> extends Eve
           if (doc == null) return done();
 
           // NOTE: no need to transform because `next` will do this automatically
-          let result = iterator(doc as TSchema); // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
+          let result = iterator(doc as TSchema); // TODO_NODE_2648 - We need to work with the transform return type somehow
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
@@ -311,7 +311,7 @@ export abstract class AbstractCursor<TSchema extends Document = any> extends Eve
           if (internalDocs) {
             for (let i = 0; i < internalDocs.length; ++i) {
               result = iterator(
-                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
+                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO_NODE_2648 - We need to work with the transform return type somehow
               );
               if (result === false) return done();
             }
@@ -401,7 +401,7 @@ export abstract class AbstractCursor<TSchema extends Document = any> extends Eve
           // these do need to be transformed since they are copying the rest of the batch
           const internalDocs = (transform
             ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
-            : this[kDocuments].splice(0, this[kDocuments].length)) as TSchema[]; // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
+            : this[kDocuments].splice(0, this[kDocuments].length)) as TSchema[]; // TODO_NODE_2648 - We need to work with the transform return type somehow
 
           if (internalDocs) {
             docs.push(...internalDocs);
@@ -442,9 +442,9 @@ export abstract class AbstractCursor<TSchema extends Document = any> extends Eve
    *
    * @param transform - The mapping transformation method.
    */
-  map<TResult>(transform: (doc: TSchema) => TResult): this {
+  map<TResult = any>(transform: (doc: TSchema) => TResult): this {
     assertUninitialized(this);
-    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO_OPERATIONS_LAYER - We need to work with the transform return type somehow
+    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO_NODE_2648 - We need to work with the transform return type somehow
     if (oldTransform) {
       this[kTransform] = doc => {
         return transform(oldTransform(doc));

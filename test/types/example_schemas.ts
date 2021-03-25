@@ -1,4 +1,4 @@
-import { Double, Int32 } from '../../../src/bson';
+import type { Double, Int32 } from '../../src/bson';
 
 export type MediaType = 'movie' | 'tv' | 'web series';
 

@@ -1,14 +1,9 @@
-import { expectDeprecated, expectType, expectNotType, expectError, expectAssignable } from 'tsd';
+import { expectType, expectNotType, expectError, expectAssignable } from 'tsd';
 
-import { Collection } from '../../.../../../src/collection';
-import { ObjectId } from '../../../src/bson';
-import { Db } from '../../../src/db';
-import { MongoClient } from '../../../src/mongo_client';
-import type { InferIdType } from '../../../src/mongo_types';
-
-expectDeprecated(Collection.prototype.insert);
-expectDeprecated(Collection.prototype.update);
-expectDeprecated(Collection.prototype.remove);
+import { Collection } from '../../src/collection';
+import { ObjectId } from '../../src/bson';
+import { Db } from '../../src/db';
+import { MongoClient } from '../../src/mongo_client';
 
 const db = new Db(new MongoClient(''), '');
 

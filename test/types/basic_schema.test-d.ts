@@ -1,10 +1,10 @@
 import { expectType } from 'tsd';
 
-import { Collection } from '../../.../../../src/collection';
-import type { ObjectId } from '../../../src/bson';
-import { Db } from '../../../src/db';
-import { MongoClient } from '../../../src/mongo_client';
-import type { InferIdType } from '../../../src/mongo_types';
+import { Collection } from '../../src/collection';
+import type { ObjectId } from '../../src/bson';
+import { Db } from '../../src/db';
+import { MongoClient } from '../../src/mongo_client';
+import type { InferIdType } from '../../src/mongo_types';
 
 const db = new Db(new MongoClient(''), '');
 

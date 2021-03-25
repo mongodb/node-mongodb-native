@@ -340,7 +340,6 @@ export type {
   Query,
   Projection,
   InferIdType,
-  WithId as ObjectWithId,
   ProjectionOperators,
   MetaProjectionOperators,
   MetaSortOperators
