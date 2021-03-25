@@ -9,7 +9,7 @@ import {
 import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, GridFSChunk } from './upload';
 import { executeLegacyOperation, Callback, getTopology } from '../utils';
 import { WriteConcernOptions, WriteConcern } from '../write_concern';
-import type { Document, ObjectId } from '../bson';
+import type { ObjectId } from '../bson';
 import type { Db } from '../db';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';

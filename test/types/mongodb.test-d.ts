@@ -1,4 +1,4 @@
-import { expectDeprecated, expectType, expectNotType, expectError, expectAssignable } from 'tsd';
+import { expectDeprecated, expectType } from 'tsd';
 
 import { Collection } from '../../src//collection';
 import { AggregationCursor } from '../../src//cursor/aggregation_cursor';

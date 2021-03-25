@@ -1,4 +1,4 @@
-import { expectType, expectError, expectNotType } from 'tsd';
+import { expectType, expectError, expectNotType, expectNotAssignable } from 'tsd';
 
 import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
@@ -21,7 +21,8 @@ interface Rectangle {
 type Shape = Circle | Rectangle;
 
 type c = Collection<Shape>;
-type i = Parameters<c['insertOne']>[0];
+// should not insert a portion of a type
+expectNotAssignable<Parameters<c['insertOne']>[0]>({ height: 2 });
 
 const shapesC = new Collection<Shape>(db, '');
 expectType<InsertRes>(shapesC.insertOne({ radius: 4 }));

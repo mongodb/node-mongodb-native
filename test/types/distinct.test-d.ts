@@ -8,5 +8,5 @@ const db = new Db(new MongoClient(''), '');
 const collection = db.collection<Movie>('');
 
 // Ensure distinct takes all keys of the schema plus '_id'
-let x = (null as unknown) as Parameters<typeof collection.distinct>[0];
+const x = (null as unknown) as Parameters<typeof collection.distinct>[0];
 expectType<'_id' | keyof Movie>(x);

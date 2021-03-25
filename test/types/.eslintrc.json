@@ -1,0 +1,28 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "prettier",
+        "eslint-plugin-tsdoc"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier/@typescript-eslint",
+        "plugin:prettier/recommended"
+    ],
+    "env": {
+        "node": true,
+        "mocha": false,
+        "es6": true
+    },
+    "rules": {
+        "prettier/prettier": "error",
+        "tsdoc/syntax": "warn",
+        "typescript-eslint/no-explicit-any": "off"
+    }
+}
