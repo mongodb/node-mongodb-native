@@ -1,6 +1,6 @@
 'use strict';
 
-const tsd = require('tsd');
+const tsd = require('tsd').default;
 const { expect } = require('chai');
 
 describe('Exported Types', () => {
