@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>AutoEncryptionLoggerLevels | mongodb</title>
+	<title>ServerClosedEvent | mongodb</title>
 	<meta name="description" content="Documentation for mongodb">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,84 +55,117 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="autoencryptionloggerlevels.html">AutoEncryptionLoggerLevels</a>
+					<a href="serverclosedevent.html">ServerClosedEvent</a>
 				</li>
 			</ul>
-			<h1>Enumeration AutoEncryptionLoggerLevels</h1>
+			<h1>Class ServerClosedEvent</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Emitted when server is closed.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">ServerClosedEvent</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="autoencryptionloggerlevels.html#error" class="tsd-kind-icon">Error</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="autoencryptionloggerlevels.html#fatalerror" class="tsd-kind-icon">Fatal<wbr>Error</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="autoencryptionloggerlevels.html#info" class="tsd-kind-icon">Info</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="autoencryptionloggerlevels.html#trace" class="tsd-kind-icon">Trace</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="autoencryptionloggerlevels.html#warning" class="tsd-kind-icon">Warning</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="serverclosedevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="serverclosedevent.html#address" class="tsd-kind-icon">address</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="serverclosedevent.html#topologyid" class="tsd-kind-icon">topology<wbr>Id</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="error" class="tsd-anchor"></a>
-					<h3>Error</h3>
-					<div class="tsd-signature tsd-kind-icon">Error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = 1</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/deps.ts#L73">src/deps.ts:73</a></li>
-						</ul>
-					</aside>
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Server<wbr>Closed<wbr>Event<span class="tsd-signature-symbol">(</span>topologyId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, address<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="serverclosedevent.html" class="tsd-signature-type" data-tsd-kind="Class">ServerClosedEvent</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/events.ts#L61">src/sdam/events.ts:61</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>internal</dt>
+									<dd></dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>topologyId: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>address: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="serverclosedevent.html" class="tsd-signature-type" data-tsd-kind="Class">ServerClosedEvent</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="fatalerror" class="tsd-anchor"></a>
-					<h3>Fatal<wbr>Error</h3>
-					<div class="tsd-signature tsd-kind-icon">Fatal<wbr>Error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = 0</span></div>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="address" class="tsd-anchor"></a>
+					<h3>address</h3>
+					<div class="tsd-signature tsd-kind-icon">address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/deps.ts#L72">src/deps.ts:72</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/events.ts#L61">src/sdam/events.ts:61</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The address (host/port pair) of the server</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="info" class="tsd-anchor"></a>
-					<h3>Info</h3>
-					<div class="tsd-signature tsd-kind-icon">Info<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = 3</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="topologyid" class="tsd-anchor"></a>
+					<h3>topology<wbr>Id</h3>
+					<div class="tsd-signature tsd-kind-icon">topology<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/deps.ts#L75">src/deps.ts:75</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/events.ts#L59">src/sdam/events.ts:59</a></li>
 						</ul>
 					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="trace" class="tsd-anchor"></a>
-					<h3>Trace</h3>
-					<div class="tsd-signature tsd-kind-icon">Trace<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = 4</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/deps.ts#L76">src/deps.ts:76</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="warning" class="tsd-anchor"></a>
-					<h3>Warning</h3>
-					<div class="tsd-signature tsd-kind-icon">Warning<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = 2</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/deps.ts#L74">src/deps.ts:74</a></li>
-						</ul>
-					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A unique identifier for the topology</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -148,23 +181,17 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum">
-						<a href="autoencryptionloggerlevels.html" class="tsd-kind-icon">Auto<wbr>Encryption<wbr>Logger<wbr>Levels</a>
+					<li class="current tsd-kind-class">
+						<a href="serverclosedevent.html" class="tsd-kind-icon">Server<wbr>Closed<wbr>Event</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="autoencryptionloggerlevels.html#error" class="tsd-kind-icon">Error</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="serverclosedevent.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="autoencryptionloggerlevels.html#fatalerror" class="tsd-kind-icon">Fatal<wbr>Error</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="serverclosedevent.html#address" class="tsd-kind-icon">address</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="autoencryptionloggerlevels.html#info" class="tsd-kind-icon">Info</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="autoencryptionloggerlevels.html#trace" class="tsd-kind-icon">Trace</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="autoencryptionloggerlevels.html#warning" class="tsd-kind-icon">Warning</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="serverclosedevent.html#topologyid" class="tsd-kind-icon">topology<wbr>Id</a>
 							</li>
 						</ul>
 					</li>

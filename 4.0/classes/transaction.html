@@ -97,6 +97,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="transaction.html#isactive" class="tsd-kind-icon">is<wbr>Active</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="transaction.html#ispinned" class="tsd-kind-icon">is<wbr>Pinned</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="transaction.html#isstarting" class="tsd-kind-icon">is<wbr>Starting</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="transaction.html#recoverytoken" class="tsd-kind-icon">recovery<wbr>Token</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="transaction.html#server" class="tsd-kind-icon">server</a></li>
 							</ul>
@@ -124,7 +125,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L69">src/transactions.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L72">src/transactions.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -151,7 +152,7 @@
 					<div class="tsd-signature tsd-kind-icon">_pinned<wbr>Server<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="server.html" class="tsd-signature-type" data-tsd-kind="Class">Server</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L68">src/transactions.ts:68</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L71">src/transactions.ts:71</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -161,7 +162,7 @@
 					<div class="tsd-signature tsd-kind-icon">_recovery<wbr>Token<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L69">src/transactions.ts:69</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L72">src/transactions.ts:72</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -171,17 +172,17 @@
 					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/transactionoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">TransactionOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L67">src/transactions.ts:67</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L70">src/transactions.ts:70</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="state" class="tsd-anchor"></a>
 					<h3>state</h3>
-					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../enums/txnstate.html" class="tsd-signature-type" data-tsd-kind="Enumeration">TxnState</a></div>
+					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;NO_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;STARTING_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_IN_PROGRESS&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED_EMPTY&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_ABORTED&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L66">src/transactions.ts:66</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L69">src/transactions.ts:69</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -204,7 +205,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L119">src/transactions.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L127">src/transactions.ts:127</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -222,10 +223,28 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L112">src/transactions.ts:112</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L115">src/transactions.ts:115</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isstarting" class="tsd-anchor"></a>
+					<h3>is<wbr>Starting</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isStarting<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L120">src/transactions.ts:120</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+							<p>Whether the transaction has started</p>
 						</li>
 					</ul>
 				</section>
@@ -239,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L108">src/transactions.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L111">src/transactions.ts:111</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></h4>
@@ -256,7 +275,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L104">src/transactions.ts:104</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L107">src/transactions.ts:107</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="server.html" class="tsd-signature-type" data-tsd-kind="Class">Server</a></h4>
@@ -276,7 +295,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L145">src/transactions.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L155">src/transactions.ts:155</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -293,13 +312,13 @@
 					<a name="transition" class="tsd-anchor"></a>
 					<h3>transition</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">transition<span class="tsd-signature-symbol">(</span>nextState<span class="tsd-signature-symbol">: </span><a href="../enums/txnstate.html" class="tsd-signature-type" data-tsd-kind="Enumeration">TxnState</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">transition<span class="tsd-signature-symbol">(</span>nextState<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;NO_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;STARTING_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_IN_PROGRESS&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED_EMPTY&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_ABORTED&quot;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L130">src/transactions.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L140">src/transactions.ts:140</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -314,7 +333,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>nextState: <a href="../enums/txnstate.html" class="tsd-signature-type" data-tsd-kind="Enumeration">TxnState</a></h5>
+									<h5>nextState: <span class="tsd-signature-type">&quot;NO_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;STARTING_TRANSACTION&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_IN_PROGRESS&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED_EMPTY&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TRANSACTION_ABORTED&quot;</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The new state to transition to</p>
 									</div>
@@ -334,7 +353,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/transactions.ts#L151">src/transactions.ts:151</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L161">src/transactions.ts:161</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -378,6 +397,9 @@
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="transaction.html#ispinned" class="tsd-kind-icon">is<wbr>Pinned</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="transaction.html#isstarting" class="tsd-kind-icon">is<wbr>Starting</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="transaction.html#recoverytoken" class="tsd-kind-icon">recovery<wbr>Token</a>

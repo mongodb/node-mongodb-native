@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>TopologyType | mongodb</title>
+	<title>ConnectionPoolClearedEvent | mongodb</title>
 	<meta name="description" content="Documentation for mongodb">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,10 +55,10 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="topologytype.html">TopologyType</a>
+					<a href="connectionpoolclearedevent.html">ConnectionPoolClearedEvent</a>
 				</li>
 			</ul>
-			<h1>Enumeration TopologyType</h1>
+			<h1>Class ConnectionPoolClearedEvent</h1>
 		</div>
 	</div>
 </header>
@@ -68,78 +68,103 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>An enumeration of topology types we know about</p>
+						<p>An event published when a connection pool is cleared</p>
 					</div>
 				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="connectionpoolmonitoringevent.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPoolMonitoringEvent</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">ConnectionPoolClearedEvent</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="topologytype.html#replicasetnoprimary" class="tsd-kind-icon">Replica<wbr>Set<wbr>NoPrimary</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="topologytype.html#replicasetwithprimary" class="tsd-kind-icon">Replica<wbr>Set<wbr>With<wbr>Primary</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="topologytype.html#sharded" class="tsd-kind-icon">Sharded</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="topologytype.html#single" class="tsd-kind-icon">Single</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="topologytype.html#unknown" class="tsd-kind-icon">Unknown</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="connectionpoolclearedevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="connectionpoolclearedevent.html#address" class="tsd-kind-icon">address</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="connectionpoolclearedevent.html#time" class="tsd-kind-icon">time</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="replicasetnoprimary" class="tsd-anchor"></a>
-					<h3>Replica<wbr>Set<wbr>NoPrimary</h3>
-					<div class="tsd-signature tsd-kind-icon">Replica<wbr>Set<wbr>NoPrimary<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;ReplicaSetNoPrimary&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sdam/common.ts#L17">src/sdam/common.ts:17</a></li>
-						</ul>
-					</aside>
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Connection<wbr>Pool<wbr>Cleared<wbr>Event<span class="tsd-signature-symbol">(</span>pool<span class="tsd-signature-symbol">: </span><a href="connectionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="connectionpoolclearedevent.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPoolClearedEvent</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="connectionpoolmonitoringevent.html">ConnectionPoolMonitoringEvent</a>.<a href="connectionpoolmonitoringevent.html#constructor">constructor</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/events.ts#L160">src/cmap/events.ts:160</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>pool: <a href="connectionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="connectionpoolclearedevent.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPoolClearedEvent</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="replicasetwithprimary" class="tsd-anchor"></a>
-					<h3>Replica<wbr>Set<wbr>With<wbr>Primary</h3>
-					<div class="tsd-signature tsd-kind-icon">Replica<wbr>Set<wbr>With<wbr>Primary<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;ReplicaSetWithPrimary&quot;</span></div>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="address" class="tsd-anchor"></a>
+					<h3>address</h3>
+					<div class="tsd-signature tsd-kind-icon">address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="connectionpoolmonitoringevent.html">ConnectionPoolMonitoringEvent</a>.<a href="connectionpoolmonitoringevent.html#address">address</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sdam/common.ts#L18">src/sdam/common.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/events.ts#L17">src/cmap/events.ts:17</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The address (host/port pair) of the pool</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="sharded" class="tsd-anchor"></a>
-					<h3>Sharded</h3>
-					<div class="tsd-signature tsd-kind-icon">Sharded<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;Sharded&quot;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="time" class="tsd-anchor"></a>
+					<h3>time</h3>
+					<div class="tsd-signature tsd-kind-icon">time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="connectionpoolmonitoringevent.html">ConnectionPoolMonitoringEvent</a>.<a href="connectionpoolmonitoringevent.html#time">time</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sdam/common.ts#L19">src/sdam/common.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/events.ts#L15">src/cmap/events.ts:15</a></li>
 						</ul>
 					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="single" class="tsd-anchor"></a>
-					<h3>Single</h3>
-					<div class="tsd-signature tsd-kind-icon">Single<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;Single&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sdam/common.ts#L16">src/sdam/common.ts:16</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="unknown" class="tsd-anchor"></a>
-					<h3>Unknown</h3>
-					<div class="tsd-signature tsd-kind-icon">Unknown<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;Unknown&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sdam/common.ts#L20">src/sdam/common.ts:20</a></li>
-						</ul>
-					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A timestamp when the event was created</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -155,23 +180,17 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum">
-						<a href="topologytype.html" class="tsd-kind-icon">Topology<wbr>Type</a>
+					<li class="current tsd-kind-class">
+						<a href="connectionpoolclearedevent.html" class="tsd-kind-icon">Connection<wbr>Pool<wbr>Cleared<wbr>Event</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="topologytype.html#replicasetnoprimary" class="tsd-kind-icon">Replica<wbr>Set<wbr>NoPrimary</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+								<a href="connectionpoolclearedevent.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="topologytype.html#replicasetwithprimary" class="tsd-kind-icon">Replica<wbr>Set<wbr>With<wbr>Primary</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="connectionpoolclearedevent.html#address" class="tsd-kind-icon">address</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="topologytype.html#sharded" class="tsd-kind-icon">Sharded</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="topologytype.html#single" class="tsd-kind-icon">Single</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="topologytype.html#unknown" class="tsd-kind-icon">Unknown</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="connectionpoolclearedevent.html#time" class="tsd-kind-icon">time</a>
 							</li>
 						</ul>
 					</li>

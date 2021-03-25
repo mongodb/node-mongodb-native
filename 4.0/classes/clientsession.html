@@ -99,7 +99,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#___kserversession_7490" class="tsd-kind-icon">__@k<wbr>Server<wbr>Session@7490</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#___kserversession_7525" class="tsd-kind-icon">__@k<wbr>Server<wbr>Session@7525</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#clientoptions" class="tsd-kind-icon">client<wbr>Options</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#clustertime" class="tsd-kind-icon">cluster<wbr>Time</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#defaulttransactionoptions" class="tsd-kind-icon">default<wbr>Transaction<wbr>Options</a></li>
@@ -111,6 +111,8 @@
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#supports" class="tsd-kind-icon">supports</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#topology" class="tsd-kind-icon">topology</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="clientsession.html#transaction" class="tsd-kind-icon">transaction</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#capturerejectionsymbol" class="tsd-kind-icon">capture<wbr>Rejection<wbr>Symbol</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#capturerejections" class="tsd-kind-icon">capture<wbr>Rejections</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#defaultmaxlisteners" class="tsd-kind-icon">default<wbr>Max<wbr>Listeners</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#errormonitor" class="tsd-kind-icon">error<wbr>Monitor</a></li>
 							</ul>
@@ -151,6 +153,8 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="clientsession.html#tobson" class="tsd-kind-icon">toBSON</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="clientsession.html#withtransaction" class="tsd-kind-icon">with<wbr>Transaction</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#listenercount-1" class="tsd-kind-icon">listener<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#on-1" class="tsd-kind-icon">on</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="clientsession.html#once-1" class="tsd-kind-icon">once</a></li>
 							</ul>
 						</section>
 					</div>
@@ -162,13 +166,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Client<wbr>Session<span class="tsd-signature-symbol">(</span>topology<span class="tsd-signature-symbol">: </span><a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a>, sessionPool<span class="tsd-signature-symbol">: </span><a href="serversessionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/clientsessionoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">ClientSessionOptions</a>, clientOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/mongoclientoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoClientOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="clientsession.html" class="tsd-signature-type" data-tsd-kind="Class">ClientSession</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Client<wbr>Session<span class="tsd-signature-symbol">(</span>topology<span class="tsd-signature-symbol">: </span><a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a>, sessionPool<span class="tsd-signature-symbol">: </span><a href="serversessionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/clientsessionoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">ClientSessionOptions</a>, clientOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/mongooptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="clientsession.html" class="tsd-signature-type" data-tsd-kind="Class">ClientSession</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L81">src/sessions.ts:81</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L87">src/sessions.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -201,7 +205,7 @@
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> clientOptions: <a href="../interfaces/mongoclientoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoClientOptions</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> clientOptions: <a href="../interfaces/mongooptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoOptions</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Optional settings provided when creating a MongoClient</p>
 									</div>
@@ -215,22 +219,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="___kserversession_7490" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> __@k<wbr>Server<wbr>Session@7490</h3>
-					<div class="tsd-signature tsd-kind-icon">__@k<wbr>Server<wbr>Session@7490<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></div>
+					<a name="___kserversession_7525" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> __@k<wbr>Server<wbr>Session@7525</h3>
+					<div class="tsd-signature tsd-kind-icon">__@k<wbr>Server<wbr>Session@7525<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L81">src/sessions.ts:81</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L87">src/sessions.ts:87</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="clientoptions" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> client<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">client<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/mongoclientoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoClientOptions</a></div>
+					<div class="tsd-signature tsd-kind-icon">client<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/mongooptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MongoOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L73">src/sessions.ts:73</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L79">src/sessions.ts:79</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -240,7 +244,7 @@
 					<div class="tsd-signature tsd-kind-icon">cluster<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/clustertime.html" class="tsd-signature-type" data-tsd-kind="Interface">ClusterTime</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L75">src/sessions.ts:75</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L81">src/sessions.ts:81</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -250,7 +254,7 @@
 					<div class="tsd-signature tsd-kind-icon">default<wbr>Transaction<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/transactionoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">TransactionOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L79">src/sessions.ts:79</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L85">src/sessions.ts:85</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -260,7 +264,7 @@
 					<div class="tsd-signature tsd-kind-icon">explicit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L77">src/sessions.ts:77</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L83">src/sessions.ts:83</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -270,7 +274,7 @@
 					<div class="tsd-signature tsd-kind-icon">has<wbr>Ended<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L72">src/sessions.ts:72</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L78">src/sessions.ts:78</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -280,7 +284,7 @@
 					<div class="tsd-signature tsd-kind-icon">operation<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="timestamp.html" class="tsd-signature-type" data-tsd-kind="Class">Timestamp</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L76">src/sessions.ts:76</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L82">src/sessions.ts:82</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -290,7 +294,7 @@
 					<div class="tsd-signature tsd-kind-icon">owner<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol"> | </span><a href="abstractcursor.html" class="tsd-signature-type" data-tsd-kind="Class">AbstractCursor</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L78">src/sessions.ts:78</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L84">src/sessions.ts:84</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -300,7 +304,7 @@
 					<div class="tsd-signature tsd-kind-icon">session<wbr>Pool<span class="tsd-signature-symbol">:</span> <a href="serversessionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L71">src/sessions.ts:71</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L77">src/sessions.ts:77</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -316,7 +320,7 @@
 					<div class="tsd-signature tsd-kind-icon">supports<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>causalConsistency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L74">src/sessions.ts:74</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L80">src/sessions.ts:80</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -334,7 +338,7 @@
 					<div class="tsd-signature tsd-kind-icon">topology<span class="tsd-signature-symbol">:</span> <a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L69">src/sessions.ts:69</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L75">src/sessions.ts:75</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -344,9 +348,34 @@
 					<div class="tsd-signature tsd-kind-icon">transaction<span class="tsd-signature-symbol">:</span> <a href="transaction.html" class="tsd-signature-type" data-tsd-kind="Class">Transaction</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L80">src/sessions.ts:80</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L86">src/sessions.ts:86</a></li>
 						</ul>
 					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="capturerejectionsymbol" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> <span class="tsd-flag ts-flagStatic">Static</span> capture<wbr>Rejection<wbr>Symbol</h3>
+					<div class="tsd-signature tsd-kind-icon">capture<wbr>Rejection<wbr>Symbol<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="mongoclient.html#capturerejectionsymbol" class="tsd-signature-type" data-tsd-kind="Property">captureRejectionSymbol</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@types/node/events.d.ts:43</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="capturerejections" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> capture<wbr>Rejections</h3>
+					<div class="tsd-signature tsd-kind-icon">capture<wbr>Rejections<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@types/node/events.d.ts:49</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Sets or gets the default captureRejection value for all emitters.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
 					<a name="defaultmaxlisteners" class="tsd-anchor"></a>
@@ -354,7 +383,7 @@
 					<div class="tsd-signature tsd-kind-icon">default<wbr>Max<wbr>Listeners<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:45</li>
+							<li>Defined in node_modules/@types/node/events.d.ts:50</li>
 						</ul>
 					</aside>
 				</section>
@@ -364,7 +393,7 @@
 					<div class="tsd-signature tsd-kind-icon">error<wbr>Monitor<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="mongoclient.html#errormonitor" class="tsd-signature-type" data-tsd-kind="Property">errorMonitor</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:55</li>
+							<li>Defined in node_modules/@types/node/events.d.ts:42</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -391,7 +420,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L131">src/sessions.ts:131</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L136">src/sessions.ts:136</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -413,7 +442,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L135">src/sessions.ts:135</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L140">src/sessions.ts:140</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></h4>
@@ -434,7 +463,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L285">src/sessions.ts:285</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L301">src/sessions.ts:301</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -447,7 +476,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L286">src/sessions.ts:286</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L302">src/sessions.ts:302</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -470,7 +499,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:62</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:62</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -514,7 +543,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L197">src/sessions.ts:197</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L202">src/sessions.ts:202</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -546,7 +575,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L274">src/sessions.ts:274</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L290">src/sessions.ts:290</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -559,7 +588,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L275">src/sessions.ts:275</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L291">src/sessions.ts:291</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -582,7 +611,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:72</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:72</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -611,7 +640,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L150">src/sessions.ts:150</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L155">src/sessions.ts:155</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -624,7 +653,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L151">src/sessions.ts:151</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L156">src/sessions.ts:156</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -638,7 +667,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L152">src/sessions.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L157">src/sessions.ts:157</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -652,7 +681,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L153">src/sessions.ts:153</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L158">src/sessions.ts:158</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -678,7 +707,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L213">src/sessions.ts:213</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L218">src/sessions.ts:218</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -709,7 +738,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:77</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:77</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -726,7 +755,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:69</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:69</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -743,7 +772,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L234">src/sessions.ts:234</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L239">src/sessions.ts:239</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -761,7 +790,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L226">src/sessions.ts:226</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L231">src/sessions.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -777,19 +806,19 @@
 					<a name="listenercount" class="tsd-anchor"></a>
 					<h3>listener<wbr>Count</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">listener<wbr>Count<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+						<li class="tsd-signature tsd-kind-icon">listener<wbr>Count<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:73</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:73</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>type: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span></h5>
+									<h5>event: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -806,7 +835,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:70</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:70</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -829,7 +858,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:66</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:66</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -873,7 +902,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:63</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:63</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -917,7 +946,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:64</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:64</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -961,7 +990,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:75</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:75</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1005,7 +1034,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:76</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:76</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1049,7 +1078,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:71</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:71</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1072,7 +1101,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:67</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:67</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1095,7 +1124,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:65</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:65</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1139,7 +1168,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:68</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:68</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1162,7 +1191,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L243">src/sessions.ts:243</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L248">src/sessions.ts:248</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1193,7 +1222,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L294">src/sessions.ts:294</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L310">src/sessions.ts:310</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1215,7 +1244,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/sessions.ts#L309">src/sessions.ts:309</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L325">src/sessions.ts:325</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1256,7 +1285,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/@types/node/ts3.1/events.d.ts:44</li>
+									<li>Defined in node_modules/@types/node/events.d.ts:31</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1276,6 +1305,76 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="on-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> on</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">on<span class="tsd-signature-symbol">(</span>emitter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventEmitter</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in node_modules/@types/node/events.d.ts:28</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>emitter: <span class="tsd-signature-type">EventEmitter</span></h5>
+								</li>
+								<li>
+									<h5>event: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="once-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> once</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">once<span class="tsd-signature-symbol">(</span>emitter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeEventTarget</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">once<span class="tsd-signature-symbol">(</span>emitter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DOMEventTarget</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in node_modules/@types/node/events.d.ts:26</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>emitter: <span class="tsd-signature-type">NodeEventTarget</span></h5>
+								</li>
+								<li>
+									<h5>event: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in node_modules/@types/node/events.d.ts:27</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>emitter: <span class="tsd-signature-type">DOMEventTarget</span></h5>
+								</li>
+								<li>
+									<h5>event: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1300,7 +1399,7 @@
 								<a href="clientsession.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="clientsession.html#___kserversession_7490" class="tsd-kind-icon">__@k<wbr>Server<wbr>Session@7490</a>
+								<a href="clientsession.html#___kserversession_7525" class="tsd-kind-icon">__@k<wbr>Server<wbr>Session@7525</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="clientsession.html#clientoptions" class="tsd-kind-icon">client<wbr>Options</a>
@@ -1334,6 +1433,12 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="clientsession.html#transaction" class="tsd-kind-icon">transaction</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="clientsession.html#capturerejectionsymbol" class="tsd-kind-icon">capture<wbr>Rejection<wbr>Symbol</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="clientsession.html#capturerejections" class="tsd-kind-icon">capture<wbr>Rejections</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static tsd-is-external">
 								<a href="clientsession.html#defaultmaxlisteners" class="tsd-kind-icon">default<wbr>Max<wbr>Listeners</a>
@@ -1424,6 +1529,12 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
 								<a href="clientsession.html#listenercount-1" class="tsd-kind-icon">listener<wbr>Count</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="clientsession.html#on-1" class="tsd-kind-icon">on</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="clientsession.html#once-1" class="tsd-kind-icon">once</a>
 							</li>
 						</ul>
 					</li>

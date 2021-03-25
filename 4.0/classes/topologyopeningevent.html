@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ProfilingLevel | mongodb</title>
+	<title>TopologyOpeningEvent | mongodb</title>
 	<meta name="description" content="Documentation for mongodb">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,62 +55,98 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="profilinglevel.html">ProfilingLevel</a>
+					<a href="topologyopeningevent.html">TopologyOpeningEvent</a>
 				</li>
 			</ul>
-			<h1>Enumeration ProfilingLevel</h1>
+			<h1>Class TopologyOpeningEvent</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Emitted when topology is initialized.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">TopologyOpeningEvent</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="profilinglevel.html#all" class="tsd-kind-icon">all</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="profilinglevel.html#off" class="tsd-kind-icon">off</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="profilinglevel.html#slowonly" class="tsd-kind-icon">slow<wbr>Only</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="topologyopeningevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="topologyopeningevent.html#topologyid" class="tsd-kind-icon">topology<wbr>Id</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="all" class="tsd-anchor"></a>
-					<h3>all</h3>
-					<div class="tsd-signature tsd-kind-icon">all<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;all&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/operations/set_profiling_level.ts#L12">src/operations/set_profiling_level.ts:12</a></li>
-						</ul>
-					</aside>
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Topology<wbr>Opening<wbr>Event<span class="tsd-signature-symbol">(</span>topologyId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="topologyopeningevent.html" class="tsd-signature-type" data-tsd-kind="Class">TopologyOpeningEvent</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/events.ts#L102">src/sdam/events.ts:102</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>internal</dt>
+									<dd></dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>topologyId: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="topologyopeningevent.html" class="tsd-signature-type" data-tsd-kind="Class">TopologyOpeningEvent</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="off" class="tsd-anchor"></a>
-					<h3>off</h3>
-					<div class="tsd-signature tsd-kind-icon">off<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;off&quot;</span></div>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="topologyid" class="tsd-anchor"></a>
+					<h3>topology<wbr>Id</h3>
+					<div class="tsd-signature tsd-kind-icon">topology<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/operations/set_profiling_level.ts#L10">src/operations/set_profiling_level.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/events.ts#L102">src/sdam/events.ts:102</a></li>
 						</ul>
 					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="slowonly" class="tsd-anchor"></a>
-					<h3>slow<wbr>Only</h3>
-					<div class="tsd-signature tsd-kind-icon">slow<wbr>Only<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;slow_only&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/operations/set_profiling_level.ts#L11">src/operations/set_profiling_level.ts:11</a></li>
-						</ul>
-					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A unique identifier for the topology</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -126,17 +162,14 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum">
-						<a href="profilinglevel.html" class="tsd-kind-icon">Profiling<wbr>Level</a>
+					<li class="current tsd-kind-class">
+						<a href="topologyopeningevent.html" class="tsd-kind-icon">Topology<wbr>Opening<wbr>Event</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="profilinglevel.html#all" class="tsd-kind-icon">all</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="topologyopeningevent.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="profilinglevel.html#off" class="tsd-kind-icon">off</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="profilinglevel.html#slowonly" class="tsd-kind-icon">slow<wbr>Only</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="topologyopeningevent.html#topologyid" class="tsd-kind-icon">topology<wbr>Id</a>
 							</li>
 						</ul>
 					</li>

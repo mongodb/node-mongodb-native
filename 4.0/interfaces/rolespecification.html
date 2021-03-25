@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>LoggerLevel | mongodb</title>
+	<title>RoleSpecification | mongodb</title>
 	<meta name="description" content="Documentation for mongodb">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,73 +55,70 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="loggerlevel.html">LoggerLevel</a>
+					<a href="rolespecification.html">RoleSpecification</a>
 				</li>
 			</ul>
-			<h1>Enumeration LoggerLevel</h1>
+			<h1>Interface RoleSpecification</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">RoleSpecification</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="loggerlevel.html#debug" class="tsd-kind-icon">DEBUG</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="loggerlevel.html#error" class="tsd-kind-icon">ERROR</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="loggerlevel.html#info" class="tsd-kind-icon">INFO</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="loggerlevel.html#warn" class="tsd-kind-icon">WARN</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="rolespecification.html#db" class="tsd-kind-icon">db</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="rolespecification.html#role" class="tsd-kind-icon">role</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="debug" class="tsd-anchor"></a>
-					<h3>DEBUG</h3>
-					<div class="tsd-signature tsd-kind-icon">DEBUG<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;debug&quot;</span></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="db" class="tsd-anchor"></a>
+					<h3>db</h3>
+					<div class="tsd-signature tsd-kind-icon">db<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/logger.ts#L20">src/logger.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/add_user.ts#L19">src/operations/add_user.ts:19</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The database this user&#39;s role should effect.</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="error" class="tsd-anchor"></a>
-					<h3>ERROR</h3>
-					<div class="tsd-signature tsd-kind-icon">ERROR<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;error&quot;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="role" class="tsd-anchor"></a>
+					<h3>role</h3>
+					<div class="tsd-signature tsd-kind-icon">role<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/logger.ts#L17">src/logger.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/add_user.ts#L17">src/operations/add_user.ts:17</a></li>
 						</ul>
 					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="info" class="tsd-anchor"></a>
-					<h3>INFO</h3>
-					<div class="tsd-signature tsd-kind-icon">INFO<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;info&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/logger.ts#L19">src/logger.ts:19</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="warn" class="tsd-anchor"></a>
-					<h3>WARN</h3>
-					<div class="tsd-signature tsd-kind-icon">WARN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;warn&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/9a5e962b/src/logger.ts#L18">src/logger.ts:18</a></li>
-						</ul>
-					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A role grants privileges to perform sets of actions on defined resources.
+							A given role applies to the database on which it is defined and can grant access down to a collection level of granularity.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -137,20 +134,14 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum">
-						<a href="loggerlevel.html" class="tsd-kind-icon">Logger<wbr>Level</a>
+					<li class="current tsd-kind-interface">
+						<a href="rolespecification.html" class="tsd-kind-icon">Role<wbr>Specification</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="loggerlevel.html#debug" class="tsd-kind-icon">DEBUG</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="rolespecification.html#db" class="tsd-kind-icon">db</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="loggerlevel.html#error" class="tsd-kind-icon">ERROR</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="loggerlevel.html#info" class="tsd-kind-icon">INFO</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="loggerlevel.html#warn" class="tsd-kind-icon">WARN</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="rolespecification.html#role" class="tsd-kind-icon">role</a>
 							</li>
 						</ul>
 					</li>
