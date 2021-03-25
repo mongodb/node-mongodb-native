@@ -2,14 +2,14 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**NOTE: v4.x was recently released with breaking API changes. You can find a list of changes [here](docs/CHANGES_4.0.0.md).**
+**NOTE: v4.x was recently released with breaking API changes. You can find a list of changes [here](https://github.com/mongodb/node-mongodb-native/blob/4.0/HISTORY.md).**
 
 ## Quick Links
 
 | what          | where                                                                                                            |
 |---------------|------------------------------------------------------------------------------------------------------------------|
 | documentation | [https://docs.mongodb.com/drivers/node](https://docs.mongodb.com/drivers/node)                                   |
-| api-doc       | [https://mongodb.github.io/node-mongodb-native/4.0/api/](https://mongodb.github.io/node-mongodb-native/4.0/api/) |
+| api-doc       | [https://mongodb.github.io/node-mongodb-native/4.0/](https://mongodb.github.io/node-mongodb-native/4.0/) |
 | npm package   | [https://www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                   |
 | source        | [https://github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                 |
 | mongodb       | [https://www.mongodb.com](https://www.mongodb.com)                                                               |
@@ -32,7 +32,7 @@ For issues with, questions about, or feedback for the Node.js driver, please loo
 
 ### Change Log
 
-Change history can be found in [`HISTORY.md`](HISTORY.md).
+Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/4.0/HISTORY.md).
 
 ### Compatibility
 
@@ -64,7 +64,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions, consult the [trouble shooting guide here](docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
@@ -235,4 +235,4 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 [Apache 2.0](LICENSE.md)
 
 © 2009-2012 Christian Amor Kvalheim
-© 2012-present MongoDB [Contributors](CONTRIBUTORS.md)
+© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.0/CONTRIBUTORS.md)

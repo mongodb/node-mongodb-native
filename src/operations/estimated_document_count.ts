@@ -22,10 +22,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
   options: EstimatedDocumentCountOptions;
   collectionName: string;
 
-  constructor(collection: Collection, options?: EstimatedDocumentCountOptions) {
-    if (typeof options === 'undefined') {
-      options = {} as EstimatedDocumentCountOptions;
-    }
+  constructor(collection: Collection, options: EstimatedDocumentCountOptions = {}) {
     super(collection, options);
     this.options = options;
     this.collectionName = collection.collectionName;

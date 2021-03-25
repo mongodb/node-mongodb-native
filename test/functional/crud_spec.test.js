@@ -445,17 +445,7 @@ describe('CRUD unified', function () {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },
           test: async function () {
-            try {
-              await runUnifiedTest(this, crudSpecTest, test);
-            } catch (error) {
-              if (error.message.includes('not implemented.')) {
-                console.log(`${test.description}: was skipped due to missing functionality`);
-                console.log(error.stack);
-                this.skip();
-              } else {
-                throw error;
-              }
-            }
+            await runUnifiedTest(this, crudSpecTest, test);
           }
         });
       }
