@@ -54,7 +54,7 @@ describe('Sessions - unit/sessions', function () {
       }
     });
 
-    it('does not mutate command options', {
+    it.skip('does not mutate command options', {
       metadata: { requires: { topology: 'single' } },
 
       test: function () {

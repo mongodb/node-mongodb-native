@@ -939,7 +939,6 @@ export class Collection {
     callback?: Callback<number>
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
-
     return executeOperation(
       getTopology(this),
       new EstimatedDocumentCountOperation(this, resolveOptions(this, options)),
@@ -1430,7 +1429,7 @@ export class Collection {
     query = query || {};
     return executeOperation(
       getTopology(this),
-      new EstimatedDocumentCountOperation(this, query, resolveOptions(this, options)),
+      new CountDocumentsOperation(this, query, resolveOptions(this, options)),
       callback
     );
   }
