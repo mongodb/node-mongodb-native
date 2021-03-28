@@ -3,7 +3,7 @@
   "schemaVersion": "1.1",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.7",
+      "minServerVersion": "4.9",
       "topologies": [
         "replicaset",
         "sharded-replicaset"
@@ -382,7 +382,138 @@
           ]
         }
       ]
+    },
+    {
+      "description": "abortTransaction does not include an API version",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 6,
+              "x": 66
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 6
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 7,
+              "x": 77
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 7
+              }
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "startTransaction": true,
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 7,
+                      "x": 77
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": {
+                    "$$exists": false
+                  },
+                  "apiStrict": {
+                    "$$exists": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": {
+                    "$$exists": false
+                  },
+                  "apiStrict": {
+                    "$$exists": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
-

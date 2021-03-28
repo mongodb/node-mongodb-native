@@ -3,7 +3,7 @@ description: "Transaction handling"
 schemaVersion: "1.1"
 
 runOnRequirements:
-  - minServerVersion: "4.7"
+  - minServerVersion: "4.9"
     topologies: [ replicaset, sharded-replicaset ]
 
 createEntities:
@@ -137,4 +137,44 @@ tests:
                 commitTransaction: 1
                 lsid: { $$sessionLsid: *session }
                 <<: *noApiVersion
-
+  - description: "abortTransaction does not include an API version"
+    runOnRequirements:
+      - topologies: [ replicaset, sharded-replicaset ]
+    operations:
+      - name: startTransaction
+        object: *session
+      - name: insertOne
+        object: *collection
+        arguments:
+          session: *session
+          document: { _id: 6, x: 66 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 6 } } }
+      - name: insertOne
+        object: *collection
+        arguments:
+          session: *session
+          document: { _id: 7, x: 77 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 7 } } }
+      - name: abortTransaction
+        object: *session
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [ { _id: 6, x: 66 } ]
+                lsid: { $$sessionLsid: *session }
+                startTransaction: true
+                <<: *expectedApiVersion
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [ { _id: 7, x: 77 } ]
+                lsid: { $$sessionLsid: *session }
+                <<: *noApiVersion
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session }
+                <<: *noApiVersion
