@@ -1046,7 +1046,7 @@ describe('APM', function () {
     }
 
     loadSpecTests('apm').forEach(scenario => {
-      if (scenario.name === 'command') return; // FIXME: remove when `count` spec tests have been fixed
+      if (scenario.name === 'command') return; // FIXME(NODE-3074): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
