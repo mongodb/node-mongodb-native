@@ -1,6 +1,6 @@
 import { arrayStrictEqual, errorStrictEqual, now, HostAddress } from '../utils';
 import { ServerType, ServerTypeId } from './common';
-import type { ObjectId, Long, Document } from '../bson';
+import { ObjectId, Long, Document } from '../bson';
 import type { ClusterTime } from './common';
 
 const WRITABLE_SERVER_TYPES = new Set<ServerTypeId>([
@@ -256,14 +256,10 @@ export function compareTopologyVersion(lhs?: TopologyVersion, rhs?: TopologyVers
   }
 
   if (lhs.processId.equals(rhs.processId)) {
-    // TODO: handle counters as Longs
-    if (lhs.counter === rhs.counter) {
-      return 0;
-    } else if (lhs.counter < rhs.counter) {
-      return -1;
-    }
-
-    return 1;
+    // tests mock counter as just number, but in a real situation counter should always be a Long
+    const lhsCounter = Long.isLong(lhs.counter) ? lhs.counter : Long.fromNumber(lhs.counter);
+    const rhsCounter = Long.isLong(rhs.counter) ? lhs.counter : Long.fromNumber(rhs.counter);
+    return lhsCounter.compare(rhsCounter);
   }
 
   return -1;

@@ -40,6 +40,7 @@ ERR_CODES = {
     'ShutdownInProgress': (91,),
     'NotMaster': (10107,),
     'NotMasterNoSlaveOk': (13435,),
+    'LegacyNotPrimary': (10058,),
 }
 
 
@@ -129,6 +130,7 @@ def create_stale_generation_tests():
     # Stale network errors
     for network_error_type, when in itertools.product(
             ['network', 'timeout'], WHEN):
+        error_name = network_error_type
         test_name = f'stale-generation-{when}-{network_error_type}'
         stale_error = STALE_GENERATION_NETWORK_ERROR.format(**locals())
         data = tmp.format(**locals())

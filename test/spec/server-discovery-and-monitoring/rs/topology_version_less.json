@@ -1,0 +1,95 @@
+{
+  "description": "Primary with older topologyVersion",
+  "uri": "mongodb://a/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017"
+            ],
+            "setName": "rs",
+            "minWireVersion": 0,
+            "maxWireVersion": 9,
+            "topologyVersion": {
+              "processId": {
+                "$oid": "000000000000000000000001"
+              },
+              "counter": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "topologyVersion": {
+              "processId": {
+                "$oid": "000000000000000000000001"
+              },
+              "counter": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    },
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "rs",
+            "minWireVersion": 0,
+            "maxWireVersion": 9,
+            "topologyVersion": {
+              "processId": {
+                "$oid": "000000000000000000000001"
+              },
+              "counter": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "topologyVersion": {
+              "processId": {
+                "$oid": "000000000000000000000001"
+              },
+              "counter": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
+}

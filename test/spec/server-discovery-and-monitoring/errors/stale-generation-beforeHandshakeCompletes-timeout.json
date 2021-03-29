@@ -1,5 +1,5 @@
 {
-  "description": "Stale generation NotMasterNoSlaveOk error beforeHandshakeCompletes",
+  "description": "Stale generation timeout error beforeHandshakeCompletes",
   "uri": "mongodb://a/?replicaSet=rs",
   "phases": [
     {
@@ -124,7 +124,7 @@
       }
     },
     {
-      "description": "Ignore stale NotMasterNoSlaveOk error (stale generation)",
+      "description": "Ignore stale timeout error (stale generation)",
       "applicationErrors": [
         {
           "address": "a:27017",

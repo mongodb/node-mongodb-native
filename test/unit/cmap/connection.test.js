@@ -48,7 +48,7 @@ describe('Connection - unit/cmap', function () {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
-      conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeout: 50 }, (err, result) => {
+      conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 }, (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
 

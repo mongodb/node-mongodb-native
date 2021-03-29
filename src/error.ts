@@ -7,26 +7,55 @@ export type AnyError = MongoError | Error;
 
 const kErrorLabels = Symbol('errorLabels');
 
+/** @internal MongoDB Error Codes */
+export const MONGODB_ERROR_CODES = Object.freeze({
+  HostUnreachable: 6,
+  HostNotFound: 7,
+  NetworkTimeout: 89,
+  ShutdownInProgress: 91,
+  PrimarySteppedDown: 189,
+  ExceededTimeLimit: 262,
+  SocketException: 9001,
+  NotMaster: 10107,
+  InterruptedAtShutdown: 11600,
+  InterruptedDueToReplStateChange: 11602,
+  NotMasterNoSlaveOk: 13435,
+  NotMasterOrSecondary: 13436,
+  StaleShardVersion: 63,
+  StaleEpoch: 150,
+  StaleConfig: 13388,
+  RetryChangeStream: 234,
+  FailedToSatisfyReadPreference: 133,
+  CursorNotFound: 43,
+  LegacyNotPrimary: 10058,
+  WriteConcernFailed: 64,
+  NamespaceNotFound: 26,
+  IllegalOperation: 20,
+  MaxTimeMSExpired: 50,
+  UnknownReplWriteConcern: 79,
+  UnsatisfiableWriteConcern: 100
+} as const);
+
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
-export const GET_MORE_RESUMABLE_CODES = new Set([
-  6, // HostUnreachable
-  7, // HostNotFound
-  89, // NetworkTimeout
-  91, // ShutdownInProgress
-  189, // PrimarySteppedDown
-  262, // ExceededTimeLimit
-  9001, // SocketException
-  10107, // NotMaster
-  11600, // InterruptedAtShutdown
-  11602, // InterruptedDueToReplStateChange
-  13435, // NotMasterNoSlaveOk
-  13436, // NotMasterOrSecondary
-  63, // StaleShardVersion
-  150, // StaleEpoch
-  13388, // StaleConfig
-  234, // RetryChangeStream
-  133, // FailedToSatisfyReadPreference
-  43 // CursorNotFound
+export const GET_MORE_RESUMABLE_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.HostUnreachable,
+  MONGODB_ERROR_CODES.HostNotFound,
+  MONGODB_ERROR_CODES.NetworkTimeout,
+  MONGODB_ERROR_CODES.ShutdownInProgress,
+  MONGODB_ERROR_CODES.PrimarySteppedDown,
+  MONGODB_ERROR_CODES.ExceededTimeLimit,
+  MONGODB_ERROR_CODES.SocketException,
+  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.InterruptedAtShutdown,
+  MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
+  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
+  MONGODB_ERROR_CODES.NotMasterOrSecondary,
+  MONGODB_ERROR_CODES.StaleShardVersion,
+  MONGODB_ERROR_CODES.StaleEpoch,
+  MONGODB_ERROR_CODES.StaleConfig,
+  MONGODB_ERROR_CODES.RetryChangeStream,
+  MONGODB_ERROR_CODES.FailedToSatisfyReadPreference,
+  MONGODB_ERROR_CODES.CursorNotFound
 ]);
 
 /** @public */
@@ -244,33 +273,33 @@ export class MongoWriteConcernError extends MongoError {
 }
 
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
-const RETRYABLE_ERROR_CODES = new Set([
-  6, // HostUnreachable
-  7, // HostNotFound
-  89, // NetworkTimeout
-  91, // ShutdownInProgress
-  189, // PrimarySteppedDown
-  9001, // SocketException
-  10107, // NotMaster
-  11600, // InterruptedAtShutdown
-  11602, // InterruptedDueToReplStateChange
-  13435, // NotMasterNoSlaveOk
-  13436 // NotMasterOrSecondary
+const RETRYABLE_ERROR_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.HostUnreachable,
+  MONGODB_ERROR_CODES.HostNotFound,
+  MONGODB_ERROR_CODES.NetworkTimeout,
+  MONGODB_ERROR_CODES.ShutdownInProgress,
+  MONGODB_ERROR_CODES.PrimarySteppedDown,
+  MONGODB_ERROR_CODES.SocketException,
+  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.InterruptedAtShutdown,
+  MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
+  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
+  MONGODB_ERROR_CODES.NotMasterOrSecondary
 ]);
 
-const RETRYABLE_WRITE_ERROR_CODES = new Set([
-  11600, // InterruptedAtShutdown
-  11602, // InterruptedDueToReplStateChange
-  10107, // NotMaster
-  13435, // NotMasterNoSlaveOk
-  13436, // NotMasterOrSecondary
-  189, // PrimarySteppedDown
-  91, // ShutdownInProgress
-  7, // HostNotFound
-  6, // HostUnreachable
-  89, // NetworkTimeout
-  9001, // SocketException
-  262 // ExceededTimeLimit
+const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.InterruptedAtShutdown,
+  MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
+  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
+  MONGODB_ERROR_CODES.NotMasterOrSecondary,
+  MONGODB_ERROR_CODES.PrimarySteppedDown,
+  MONGODB_ERROR_CODES.ShutdownInProgress,
+  MONGODB_ERROR_CODES.HostNotFound,
+  MONGODB_ERROR_CODES.HostUnreachable,
+  MONGODB_ERROR_CODES.NetworkTimeout,
+  MONGODB_ERROR_CODES.SocketException,
+  MONGODB_ERROR_CODES.ExceededTimeLimit
 ]);
 
 export function isRetryableWriteError(error: MongoError): boolean {
@@ -291,42 +320,45 @@ export function isRetryableError(error: MongoError): boolean {
   );
 }
 
-const SDAM_RECOVERING_CODES = new Set([
-  91, // ShutdownInProgress
-  189, // PrimarySteppedDown
-  11600, // InterruptedAtShutdown
-  11602, // InterruptedDueToReplStateChange
-  13436 // NotMasterOrSecondary
+const SDAM_RECOVERING_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.ShutdownInProgress,
+  MONGODB_ERROR_CODES.PrimarySteppedDown,
+  MONGODB_ERROR_CODES.InterruptedAtShutdown,
+  MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
+  MONGODB_ERROR_CODES.NotMasterOrSecondary
 ]);
 
-const SDAM_NOTMASTER_CODES = new Set([
-  10107, // NotMaster
-  13435 // NotMasterNoSlaveOk
+const SDAM_NOTMASTER_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
+  MONGODB_ERROR_CODES.LegacyNotPrimary
 ]);
 
-const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set([
-  11600, // InterruptedAtShutdown
-  91 // ShutdownInProgress
+const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.InterruptedAtShutdown,
+  MONGODB_ERROR_CODES.ShutdownInProgress
 ]);
 
 function isRecoveringError(err: MongoError) {
-  if (err.code && SDAM_RECOVERING_CODES.has(err.code)) {
-    return true;
+  if (typeof err.code !== 'undefined') {
+    // If any error code exists, we ignore the error.message
+    return SDAM_RECOVERING_CODES.has(err.code);
   }
 
-  return err.message.match(/not master or secondary/) || err.message.match(/node is recovering/);
+  return /not master or secondary/.test(err.message) || /node is recovering/.test(err.message);
 }
 
 function isNotMasterError(err: MongoError) {
-  if (err.code && SDAM_NOTMASTER_CODES.has(err.code)) {
-    return true;
+  if (typeof err.code !== 'undefined') {
+    // If any error code exists, we ignore the error.message
+    return SDAM_NOTMASTER_CODES.has(err.code);
   }
 
   if (isRecoveringError(err)) {
     return false;
   }
 
-  return err.message.match(/not master/);
+  return /not master/.test(err.message);
 }
 
 export function isNodeShuttingDownError(err: MongoError): boolean {
@@ -347,6 +379,9 @@ export function isSDAMUnrecoverableError(error: MongoError): boolean {
     return true;
   }
 
+  if (typeof error.code !== 'undefined') {
+    return isRecoveringError(error) || isNotMasterError(error);
+  }
   if (isRecoveringError(error) || isNotMasterError(error)) {
     return true;
   }

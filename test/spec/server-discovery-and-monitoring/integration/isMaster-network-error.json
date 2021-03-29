@@ -39,14 +39,6 @@
           }
         },
         {
-          "name": "waitForEvent",
-          "object": "testRunner",
-          "arguments": {
-            "event": "PoolClearedEvent",
-            "count": 1
-          }
-        },
-        {
           "name": "insertMany",
           "object": "collection",
           "arguments": {

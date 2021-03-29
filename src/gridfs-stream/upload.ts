@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { Writable } from 'stream';
-import { MongoError, AnyError } from '../error';
+import { MongoError, AnyError, MONGODB_ERROR_CODES } from '../error';
 import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
@@ -10,8 +10,6 @@ import type { Document } from '../bson';
 import type { GridFSBucket } from './index';
 import type { GridFSFile } from './download';
 import type { WriteConcernOptions } from '../write_concern';
-
-const ERROR_NAMESPACE_NOT_FOUND = 26;
 
 /** @public */
 export type TFileId = string | number | Document | ObjectId;
@@ -256,7 +254,7 @@ function checkChunksIndex(stream: GridFSBucketWriteStream, callback: Callback): 
     let index: { files_id: number; n: number };
     if (error) {
       // Collection doesn't exist so create index
-      if (error instanceof MongoError && error.code === ERROR_NAMESPACE_NOT_FOUND) {
+      if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
         index = { files_id: 1, n: 1 };
         stream.chunks.createIndex(index, { background: false, unique: true }, error => {
           if (error) {
@@ -349,7 +347,7 @@ function checkIndexes(stream: GridFSBucketWriteStream, callback: Callback): void
       let index: { filename: number; uploadDate: number };
       if (error) {
         // Collection doesn't exist so create index
-        if (error instanceof MongoError && error.code === ERROR_NAMESPACE_NOT_FOUND) {
+        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
           index = { filename: 1, uploadDate: 1 };
           stream.files.createIndex(index, { background: false }, (error?: AnyError) => {
             if (error) {

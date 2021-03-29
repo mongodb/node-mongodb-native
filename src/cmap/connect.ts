@@ -93,7 +93,7 @@ function performInitialHandshake(
     const handshakeOptions: Document = Object.assign({}, options);
     if (typeof options.connectTimeoutMS === 'number') {
       // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
-      handshakeOptions.socketTimeout = options.connectTimeoutMS;
+      handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
     }
 
     const start = new Date().getTime();
@@ -262,13 +262,13 @@ const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 function makeConnection(options: ConnectionOptions, _callback: CallbackWithType<AnyError, Stream>) {
   const useTLS = options.tls ?? false;
   const keepAlive = options.keepAlive ?? true;
-  const socketTimeout = options.socketTimeout ?? 0;
+  const socketTimeoutMS = options.socketTimeoutMS ?? Reflect.get(options, 'socketTimeout') ?? 0;
   const noDelay = options.noDelay ?? true;
   const connectionTimeout = options.connectTimeoutMS ?? 30000;
   const rejectUnauthorized = options.rejectUnauthorized ?? true;
   const keepAliveInitialDelay =
-    ((options.keepAliveInitialDelay ?? 120000) > socketTimeout
-      ? Math.round(socketTimeout / 2)
+    ((options.keepAliveInitialDelay ?? 120000) > socketTimeoutMS
+      ? Math.round(socketTimeoutMS / 2)
       : options.keepAliveInitialDelay) ?? 120000;
 
   let socket: Stream;
@@ -320,7 +320,7 @@ function makeConnection(options: ConnectionOptions, _callback: CallbackWithType<
       }
     }
 
-    socket.setTimeout(socketTimeout);
+    socket.setTimeout(socketTimeoutMS);
     callback(undefined, socket);
   }
 

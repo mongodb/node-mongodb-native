@@ -61,7 +61,7 @@ const DEBUG_FIELDS = [
   'noDelay',
   'connectionTimeout',
   'checkServerIdentity',
-  'socketTimeout',
+  'socketTimeoutMS',
   'ssl',
   'ca',
   'crl',

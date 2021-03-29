@@ -1,0 +1,73 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.4"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "find-network-timeout-error"
+
+data: &data
+  - {_id: 1}
+  - {_id: 2}
+
+tests:
+  - description: Ignore network timeout error on find
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 1 }
+      data:
+          failCommands: ["find"]
+          blockConnection: true
+          blockTimeMS: 500
+          appName: findNetworkTimeoutErrorTest
+    clientOptions:
+      retryWrites: false
+      retryReads: false
+      appname: findNetworkTimeoutErrorTest
+      # Set a short socket timeout to ensure the find command times out.
+      socketTimeoutMS: 250
+    operations:
+      - name: find
+        object: collection
+        arguments:
+          filter:
+            _id: 1
+        error: true
+      # Perform another operation to ensure the node is still usable.
+      - name: insertOne
+        object: collection
+        arguments:
+          document:
+            _id: 3
+      # Assert the server was not marked Unknown and the pool was not cleared.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 0
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 0
+
+    expectations:
+      - command_started_event:
+          command:
+            find: *collection_name
+          command_name: find
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 3
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 3}

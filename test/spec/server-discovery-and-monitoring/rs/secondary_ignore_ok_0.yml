@@ -1,4 +1,4 @@
-description: "New primary"
+description: "New primary secondary ignore ok equal 0"
 
 uri: "mongodb://a,b/?replicaSet=rs"
 
