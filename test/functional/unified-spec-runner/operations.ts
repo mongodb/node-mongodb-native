@@ -9,7 +9,7 @@ import { EventCollector } from '../../tools/utils';
 import { EntitiesMap, UnifiedMongoClient } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
-import { CommandStartedEvent } from '../../../src/cmap/events';
+import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 
 interface OperationFunctionParams {
   client: MongoClient;

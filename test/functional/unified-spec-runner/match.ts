@@ -4,7 +4,7 @@ import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
-} from '../../../src/cmap/events';
+} from '../../../src/cmap/command_monitoring_events';
 import { CommandEvent, EntitiesMap } from './entities';
 import { ExpectedError, ExpectedEvent } from './schema';
 

@@ -69,12 +69,13 @@ export { ExplainVerbosity } from './explain';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';
 export { ServerApiVersion } from './mongo_client';
-
 // events
 export {
   CommandStartedEvent,
   CommandSucceededEvent,
-  CommandFailedEvent,
+  CommandFailedEvent
+} from './cmap/command_monitoring_events';
+export {
   ConnectionCheckOutFailedEvent,
   ConnectionCheckOutStartedEvent,
   ConnectionCheckedInEvent,
@@ -86,7 +87,7 @@ export {
   ConnectionPoolCreatedEvent,
   ConnectionPoolMonitoringEvent,
   ConnectionReadyEvent
-} from './cmap/events';
+} from './cmap/connection_pool_events';
 export {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,

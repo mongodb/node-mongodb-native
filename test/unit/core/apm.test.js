@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const { Query, KillCursor, GetMore } = require('../../../src/cmap/commands');
-const { CommandStartedEvent } = require('../../../src/cmap/events');
+const { CommandStartedEvent } = require('../../../src/cmap/command_monitoring_events');
 
 const conn = { id: '<some id>', address: '<some address>' };
 

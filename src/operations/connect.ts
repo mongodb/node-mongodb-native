@@ -2,7 +2,7 @@ import { MongoError } from '../error';
 import { Topology } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
-import { CMAP_EVENT_NAMES } from '../cmap/events';
+import { CMAP_EVENT_NAMES } from '../cmap/connection_pool';
 import * as BSON from '../bson';
 import type { MongoClient, MongoOptions } from '../mongo_client';
 import { Connection } from '../cmap/connection';

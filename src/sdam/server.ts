@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { ConnectionPool, ConnectionPoolOptions } from '../cmap/connection_pool';
-import { CMAP_EVENT_NAMES } from '../cmap/events';
+import { ConnectionPool, ConnectionPoolOptions, CMAP_EVENT_NAMES } from '../cmap/connection_pool';
 import { ServerDescription, compareTopologyVersion } from './server_description';
 import { Monitor, MonitorOptions } from './monitor';
 import { isTransactionCommand } from '../transactions';

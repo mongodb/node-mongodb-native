@@ -11,7 +11,7 @@ import {
   ClientSessionOptions
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
-import { CMAP_EVENT_NAMES } from '../cmap/events';
+import { CMAP_EVENT_NAMES } from '../cmap/connection_pool';
 import { MongoError, MongoServerSelectionError, AnyError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
