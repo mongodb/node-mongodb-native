@@ -815,10 +815,6 @@ function testOperations(testData, operationContext, options) {
         );
       }
 
-      if (operation.name === 'waitForEvent') {
-        if (operation.arguments.event === 'PoolReadyEvent') testData.skip();
-      }
-
       return testOperation(operation, operationContext[object], operationContext, options);
     });
   }, Promise.resolve());
