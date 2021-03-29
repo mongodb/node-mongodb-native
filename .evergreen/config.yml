@@ -436,6 +436,36 @@ functions:
             -p 8100 \
             -v \
             --fault revoked
+  run custom csfle tests:
+    - command: shell.exec
+      type: test
+      params:
+        silent: true
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          cat <<EOT > prepare_client_encryption.sh
+          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
+          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_client_encryption.sh
+          rm -f ./prepare_client_encryption.sh
+
+          UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
   upload test results:
     - command: attach.xunit_results
       params:
@@ -1387,6 +1417,18 @@ tasks:
         vars:
           NODE_LTS_NAME: erbium
       - func: run checks
+  - name: run-custom-csfle-tests
+    tags:
+      - run-custom-csfle-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run custom csfle tests
 buildvariants:
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
@@ -1468,12 +1510,6 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: macos-1014-fermium
-    display_name: macOS 10.14 Node Fermium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: fermium
-    tasks: *ref_0
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1578,12 +1614,6 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: rhel70-fermium
-    display_name: RHEL 7.0 Node Fermium
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: fermium
-    tasks: *ref_1
   - name: rhel70-dubnium
     display_name: RHEL 7.0 Node Dubnium
     run_on: rhel70-small
@@ -1654,12 +1684,6 @@ buildvariants:
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified
       - test-auth-ldap
-  - name: ubuntu-14.04-fermium
-    display_name: Ubuntu 14.04 Node Fermium
-    run_on: ubuntu1404-test
-    expansions:
-      NODE_LTS_NAME: fermium
-    tasks: *ref_2
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
@@ -1753,13 +1777,6 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
-    run_on: ubuntu1804-test
-    expansions:
-      NODE_LTS_NAME: fermium
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_3
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
@@ -1852,13 +1869,6 @@ buildvariants:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2013
     tasks: *ref_4
-  - name: windows-64-vs2015-fermium
-    display_name: Windows (VS2015) Node Fermium
-    run_on: windows-64-vs2015-large
-    expansions:
-      NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2015
-    tasks: *ref_4
   - name: windows-64-vs2015-erbium
     display_name: Windows (VS2015) Node Erbium
     run_on: windows-64-vs2015-large
@@ -1893,13 +1903,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2015
-    tasks: *ref_4
-  - name: windows-64-vs2017-fermium
-    display_name: Windows (VS2017) Node Fermium
-    run_on: windows-64-vs2017-large
-    expansions:
-      NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2017
     tasks: *ref_4
   - name: windows-64-vs2017-erbium
     display_name: Windows (VS2017) Node Erbium
@@ -1941,6 +1944,11 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
+  - name: ubuntu1804-custom-csfle-tests
+    display_name: Custom FLE Version Test
+    run_on: ubuntu1804-test
+    tasks:
+      - run-custom-csfle-tests
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test

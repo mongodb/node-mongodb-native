@@ -1,5 +1,6 @@
 'use strict';
 
+const deadlockTests = require('./deadlock_tests.js').deadlockTests;
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -1026,4 +1027,6 @@ describe('Client Side Encryption Prose Tests', function() {
     defineTest(true);
     defineTest(false);
   });
+
+  deadlockTests(metadata);
 });
