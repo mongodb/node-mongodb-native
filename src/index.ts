@@ -1,4 +1,3 @@
-import { Instrumentation } from './apm';
 import { AbstractCursor } from './cursor/abstract_cursor';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
@@ -12,21 +11,6 @@ import { Collection } from './collection';
 import { ReadPreference } from './read_preference';
 import { Logger } from './logger';
 import { GridFSBucket } from './gridfs-stream';
-import type { Callback } from './utils';
-
-// Set up the instrumentation method
-/** @public */
-function instrument(callback: Callback): Instrumentation;
-function instrument(options?: unknown, callback?: Callback): Instrumentation {
-  if (typeof options === 'function') {
-    callback = options as Callback;
-    options = {};
-  }
-
-  const instrumentation = new Instrumentation();
-  instrumentation.instrument(MongoClient, callback);
-  return instrumentation;
-}
 
 export {
   Binary,
@@ -56,7 +40,6 @@ export {
 export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {
   // Utils
-  instrument,
   PromiseProvider as Promise,
   // Actual driver classes exported
   Admin,
@@ -86,12 +69,13 @@ export { ExplainVerbosity } from './explain';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';
 export { ServerApiVersion } from './mongo_client';
-
 // events
 export {
   CommandStartedEvent,
   CommandSucceededEvent,
-  CommandFailedEvent,
+  CommandFailedEvent
+} from './cmap/command_monitoring_events';
+export {
   ConnectionCheckOutFailedEvent,
   ConnectionCheckOutStartedEvent,
   ConnectionCheckedInEvent,
@@ -103,7 +87,7 @@ export {
   ConnectionPoolCreatedEvent,
   ConnectionPoolMonitoringEvent,
   ConnectionReadyEvent
-} from './cmap/events';
+} from './cmap/connection_pool_events';
 export {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
@@ -119,7 +103,6 @@ export { SrvPollingEvent } from './sdam/srv_polling';
 
 // type only exports below, these are removed from emitted JS
 export type { AdminPrivate } from './admin';
-export type { Instrumentation } from './apm';
 export type { Document, BSONSerializeOptions } from './bson';
 export type {
   InsertOneModel,

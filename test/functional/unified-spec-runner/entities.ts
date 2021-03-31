@@ -16,7 +16,7 @@ import type {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
-} from '../../../src/cmap/events';
+} from '../../../src/cmap/command_monitoring_events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration } from './runner';

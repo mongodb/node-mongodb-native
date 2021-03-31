@@ -3563,16 +3563,12 @@ describe('Cursor', function () {
 
     test: function (done) {
       var started = [];
-      var listener = require('../../src').instrument(err => {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
 
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3592,8 +3588,6 @@ describe('Cursor', function () {
             test.equal(5, started[0].command.skip);
             test.equal(5, started[0].command.limit);
 
-            listener.uninstrument();
-
             done();
           });
       });
@@ -3610,16 +3604,12 @@ describe('Cursor', function () {
     test: function (done) {
       var started = [];
 
-      var listener = require('../../src').instrument(err => {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
 
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3643,8 +3633,6 @@ describe('Cursor', function () {
             test.deepEqual({ project: 1 }, started[0].command.hint);
             test.equal(5, started[0].command.skip);
             test.equal(5, started[0].command.limit);
-
-            listener.uninstrument();
 
             done();
           }

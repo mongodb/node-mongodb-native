@@ -20,20 +20,16 @@ describe('Find and Modify', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -68,7 +64,6 @@ describe('Find and Modify', function () {
                 expect(err).to.not.exist;
                 test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
-                listener.uninstrument();
                 client.close(done);
               });
             });
@@ -89,20 +84,16 @@ describe('Find and Modify', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -131,7 +122,6 @@ describe('Find and Modify', function () {
               expect(err).to.not.exist;
               test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
-              listener.uninstrument();
               client.close(done);
             });
           });
@@ -152,23 +142,19 @@ describe('Find and Modify', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
-        if (event.commandName === 'findAndModify') started.push(event);
-      });
-
-      listener.on('succeeded', function (event) {
-        if (event.commandName === 'findAndModify') succeeded.push(event);
-      });
-
       var url = configuration.url();
       url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
       const client = configuration.newClient(url, { sslValidate: false });
+      client.on('commandStarted', function (event) {
+        if (event.commandName === 'findAndModify') started.push(event);
+      });
+
+      client.on('commandSucceeded', function (event) {
+        if (event.commandName === 'findAndModify') succeeded.push(event);
+      });
+
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
@@ -196,7 +182,6 @@ describe('Find and Modify', function () {
               expect(err).to.not.exist;
               test.deepEqual({ fsync: true }, started[0].command.writeConcern);
 
-              listener.uninstrument();
               client.close(done);
             });
           });

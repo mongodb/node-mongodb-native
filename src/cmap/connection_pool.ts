@@ -17,7 +17,7 @@ import {
   ConnectionCheckedOutEvent,
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
-} from './events';
+} from './connection_pool_events';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -521,6 +521,19 @@ function processWaitQueue(pool: ConnectionPool) {
     return;
   }
 }
+
+export const CMAP_EVENT_NAMES = [
+  ConnectionPool.CONNECTION_POOL_CREATED,
+  ConnectionPool.CONNECTION_POOL_CLOSED,
+  ConnectionPool.CONNECTION_CREATED,
+  ConnectionPool.CONNECTION_READY,
+  ConnectionPool.CONNECTION_CLOSED,
+  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
+  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+  ConnectionPool.CONNECTION_CHECKED_OUT,
+  ConnectionPool.CONNECTION_CHECKED_IN,
+  ConnectionPool.CONNECTION_POOL_CLEARED
+] as const;
 
 /**
  * A callback provided to `withConnection`

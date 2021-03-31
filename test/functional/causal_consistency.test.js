@@ -1,6 +1,5 @@
 'use strict';
-const mongo = require('../../src'),
-  setupDatabase = require('./shared').setupDatabase,
+const setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
 const ignoredCommands = ['ismaster', 'endSessions'];
@@ -12,21 +11,19 @@ describe('Causal Consistency', function () {
 
   beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
-    test.listener = mongo.instrument(err => expect(err).to.not.exist);
-    test.listener.on('started', event => {
+    test.client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    test.client.on('commandStarted', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.started.push(event);
     });
 
-    test.listener.on('succeeded', event => {
+    test.client.on('commandSucceeded', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
     });
 
-    test.client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     return test.client.connect();
   });
 
   afterEach(() => {
-    test.listener.uninstrument();
     return test.client.close();
   });
 

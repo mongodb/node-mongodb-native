@@ -2399,20 +2399,16 @@ describe('Insert', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -2421,7 +2417,6 @@ describe('Insert', function () {
           .insertOne({ a: 1 }, { forceServerObjectId: true })
           .then(function () {
             expect(started[0].command.documents[0]._id).to.not.exist;
-            listener.uninstrument();
 
             client.close(done);
           });
@@ -2436,20 +2431,16 @@ describe('Insert', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -2459,7 +2450,6 @@ describe('Insert', function () {
           .then(function () {
             expect(started[0].command.documents[0]._id).to.not.exist;
 
-            listener.uninstrument();
             client.close(done);
           });
       });
@@ -2473,20 +2463,16 @@ describe('Insert', function () {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
@@ -2496,7 +2482,6 @@ describe('Insert', function () {
           .then(function () {
             expect(started[0].command.documents[0]._id).to.not.exist;
 
-            listener.uninstrument();
             client.close(done);
           });
       });

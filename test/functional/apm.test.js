@@ -1,6 +1,5 @@
 'use strict';
 
-const { instrument } = require('../../src');
 const {
   setupDatabase,
   filterForCommands,
@@ -14,107 +13,6 @@ const { ReadPreference } = require('../../src/read_preference');
 describe('APM', function () {
   before(function () {
     return setupDatabase(this.configuration);
-  });
-
-  it(
-    'should support legacy `instrument`/`uninstrument` methods with MongoClient.prototype.connect',
-    {
-      metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
-
-      test: function () {
-        let started = [];
-        let succeeded = [];
-
-        const instrumentation = instrument();
-        instrumentation.on('started', filterForCommands('insert', started));
-        instrumentation.on('succeeded', filterForCommands('insert', succeeded));
-
-        let client = this.configuration.newClient(
-          { writeConcern: { w: 1 } },
-          { maxPoolSize: 1, monitorCommands: true }
-        );
-
-        return client
-          .connect()
-          .then(client =>
-            client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 })
-          )
-          .then(r => {
-            expect(r).property('insertedId').to.exist;
-            expect(started.length).to.equal(1);
-            expect(started[0].commandName).to.equal('insert');
-            expect(started[0].command.insert).to.equal('apm_test');
-            expect(succeeded.length).to.equal(1);
-            instrumentation.uninstrument();
-            return client.close();
-          })
-          .then(() => {
-            started = [];
-            succeeded = [];
-            client = this.configuration.newClient(
-              { writeConcern: { w: 1 } },
-              { maxPoolSize: 1, monitorCommands: true }
-            );
-
-            return client.connect();
-          })
-          .then(() => client.db(this.configuration.db).collection('apm_test').insertOne({ a: 1 }))
-          .then(r => {
-            expect(r).property('insertedId').to.exist;
-            expect(started.length).to.equal(0);
-            expect(succeeded.length).to.equal(0);
-            return client.close();
-          });
-      }
-    }
-  );
-
-  it('should support legacy `instrument`/`uninstrument` methods with MongoClient `connect`', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
-
-    test: function () {
-      let started = [];
-      let succeeded = [];
-
-      const instrumentation = instrument();
-      instrumentation.on('started', filterForCommands('insert', started));
-      instrumentation.on('succeeded', filterForCommands('insert', succeeded));
-
-      const firstClient = this.configuration.newClient({}, { monitorCommands: true });
-      const secondClient = this.configuration.newClient({}, { monitorCommands: true });
-      return firstClient.connect().then(client => {
-        return client
-          .db(this.configuration.db)
-          .collection('apm_test')
-          .insertOne({ a: 1 })
-          .then(r => {
-            expect(r).property('insertedId').to.exist;
-            expect(started.length).to.equal(1);
-            expect(started[0].commandName).to.equal('insert');
-            expect(started[0].command.insert).to.equal('apm_test');
-            expect(succeeded.length).to.equal(1);
-            instrumentation.uninstrument();
-            return client.close();
-          })
-          .then(() => {
-            started = [];
-            succeeded = [];
-            return secondClient.connect();
-          })
-          .then(newClient => {
-            return newClient
-              .db(this.configuration.db)
-              .collection('apm_test')
-              .insertOne({ a: 1 })
-              .then(r => {
-                expect(r).property('insertedId').to.exist;
-                expect(started.length).to.equal(0);
-                expect(succeeded.length).to.equal(0);
-                return newClient.close();
-              });
-          });
-      });
-    }
   });
 
   it('should correctly receive the APM events for an insert', {
@@ -261,75 +159,6 @@ describe('APM', function () {
       });
     }
   });
-
-  it.skip(
-    'should correctly receive the APM events for an insert using custom operationId and time generator',
-    {
-      metadata: { requires: { topology: ['single', 'replicaset'] } },
-
-      test: function () {
-        const self = this;
-        const started = [];
-        const succeeded = [];
-        const callbackTriggered = false;
-
-        // testListener = require('../../src').instrument(
-        //   {
-        //     operationIdGenerator: {
-        //       next: function() {
-        //         return 10000;
-        //       }
-        //     },
-        //     timestampGenerator: {
-        //       current: function() {
-        //         return 1;
-        //       },
-        //       duration: function(start, end) {
-        //         return end - start;
-        //       }
-        //     }
-        //   },
-        //   function(err) {
-        //     expect(err).to.not.exist;
-        //     callbackTriggered = true;
-        //   }
-        // );
-
-        // testListener.on('started', function(event) {
-        //   if (event.commandName === 'insert') started.push(event);
-        // });
-
-        // testListener.on('succeeded', function(event) {
-        //   if (event.commandName === 'insert') succeeded.push(event);
-        // });
-
-        const client = self.configuration.newClient(
-          { writeConcern: { w: 1 } },
-          { maxPoolSize: 1, monitorCommands: true }
-        );
-
-        return client.connect().then(client => {
-          const db = client.db(self.configuration.db);
-
-          return db
-            .collection('apm_test_1')
-            .insertOne({ a: 1 })
-            .then(() => {
-              expect(started).to.have.length(1);
-              expect(succeeded).to.have.length(1);
-              expect(started[0].commandName).to.equal('insert');
-              expect(started[0].command.insert).to.equal('apm_test_1');
-              expect(started[0].operationId).to.equal(10000);
-              expect(succeeded[0].duration).to.equal(0);
-              expect(callbackTriggered).to.be.true;
-
-              // testListener.uninstrument();
-              return client.close();
-            });
-        });
-      }
-    }
-  );
 
   it('should correctly receive the APM events for a find with getmore and killcursor', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },

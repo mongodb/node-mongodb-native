@@ -1,7 +1,11 @@
 import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
-import { CommandStartedEvent, CommandFailedEvent, CommandSucceededEvent } from './events';
+import {
+  CommandStartedEvent,
+  CommandFailedEvent,
+  CommandSucceededEvent
+} from './command_monitoring_events';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   uuidV4,

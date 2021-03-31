@@ -955,15 +955,11 @@ describe('Indexes', function () {
       var succeeded = [];
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
-      var listener = require('../../src').instrument(function (err) {
-        expect(err).to.not.exist;
-      });
-
-      listener.on('started', function (event) {
+      client.on('commandStarted', function (event) {
         if (event.commandName === 'createIndexes') started.push(event);
       });
 
-      listener.on('succeeded', function (event) {
+      client.on('commandSucceeded', function (event) {
         if (event.commandName === 'createIndexes') succeeded.push(event);
       });
 
@@ -976,7 +972,6 @@ describe('Indexes', function () {
           function (err) {
             expect(err).to.not.exist;
             test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
-            listener.uninstrument();
             client.close(done);
           }
         );
