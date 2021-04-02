@@ -121,7 +121,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
           afterEach(() => testContext.cleanupAfterSuite());
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
-              if (requires.authEnabled) {
+              if (requires.authEnabled && process.env.AUTH !== 'auth') {
                 // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
                 // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
                 this.skip();
