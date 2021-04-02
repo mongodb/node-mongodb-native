@@ -1,6 +1,6 @@
 import { MongoError } from './error';
 import type { MongoClient } from './mongo_client';
-import type { Document } from './bson';
+import type { deserialize, Document, serialize } from './bson';
 import type { Callback } from './utils';
 
 function makeErrorModule(error: any) {
@@ -81,6 +81,10 @@ export type AutoEncryptionLoggerLevelId = typeof AutoEncryptionLoggerLevel[keyof
 
 /** @public */
 export interface AutoEncryptionOptions {
+  /** @internal */
+  bson?: { serialize: typeof serialize; deserialize: typeof deserialize };
+  /** @internal client for metadata lookups */
+  metadataClient?: MongoClient;
   /** A `MongoClient` used to fetch keys from a key vault */
   keyVaultClient?: MongoClient;
   /** The namespace where keys are stored in the key vault */
@@ -168,6 +172,8 @@ export interface AutoEncryptionOptions {
 
 /** @public */
 export interface AutoEncrypter {
+  // eslint-disable-next-line @typescript-eslint/no-misused-new
+  new (client: MongoClient, options: AutoEncryptionOptions): AutoEncrypter;
   init(cb: Callback): void;
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;

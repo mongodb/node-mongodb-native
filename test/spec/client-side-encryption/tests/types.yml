@@ -27,13 +27,6 @@ tests:
           filter: { _id: 1 }
         result: *doc0
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -75,13 +68,6 @@ tests:
           filter: { _id: 1 }
         result: *doc1
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -123,13 +109,6 @@ tests:
           filter: { _id: 1 }
         result: *doc2
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -197,13 +176,6 @@ tests:
           filter: { _id: 1 }
         result: *doc6
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -245,13 +217,6 @@ tests:
           filter: { _id: 1 }
         result: *doc7
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -319,13 +284,6 @@ tests:
           filter: { _id: 1 }
         result: *doc10
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -367,13 +325,6 @@ tests:
           filter: { _id: 1 }
         result: *doc11
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -415,13 +366,6 @@ tests:
           filter: { _id: 1 }
         result: *doc13
     expectations:
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:

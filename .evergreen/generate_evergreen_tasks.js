@@ -521,6 +521,11 @@ BUILD_VARIANTS.push({
   display_name: 'lint',
   run_on: 'rhel70',
   tasks: ['run-checks']
+}, {
+  name: 'ubuntu1804-custom-csfle-tests',
+  display_name: 'Custom FLE Version Test',
+  run_on: 'ubuntu1804-test',
+  tasks: ['run-custom-csfle-tests']
 });
 
 // singleton build variant for mongosh integration tests
@@ -555,6 +560,28 @@ BUILD_VARIANTS.push({
     NODE_LTS_NAME: 'dubnium'
   },
   tasks: AWS_AUTH_TASKS
+});
+
+// special case for custom CSFLE test
+SINGLETON_TASKS.push({
+  name: 'run-custom-csfle-tests',
+  tags: ['run-custom-csfle-tests'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'erbium',
+      },
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: '4.4',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'run custom csfle tests' }
+  ]
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));

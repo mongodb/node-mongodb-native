@@ -470,6 +470,36 @@ functions:
             -p 8100 \
             -v \
             --fault revoked
+  run custom csfle tests:
+    - command: shell.exec
+      type: test
+      params:
+        silent: true
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          cat <<EOT > prepare_client_encryption.sh
+          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
+          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_client_encryption.sh
+          rm -f ./prepare_client_encryption.sh
+
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
   upload test results:
     - command: attach.xunit_results
       params:
@@ -1177,6 +1207,18 @@ tasks:
         vars:
           NODE_LTS_NAME: fermium
       - func: run mongosh integration tests
+  - name: run-custom-csfle-tests
+    tags:
+      - run-custom-csfle-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run custom csfle tests
 buildvariants:
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
@@ -1504,6 +1546,11 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
+  - name: ubuntu1804-custom-csfle-tests
+    display_name: Custom FLE Version Test
+    run_on: ubuntu1804-test
+    tasks:
+      - run-custom-csfle-tests
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test
