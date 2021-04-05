@@ -4534,45 +4534,49 @@ describe('Cursor', function() {
     });
   });
 
-  it('should not consume first document on hasNext when streaming', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+  it('should not consume first document on hasNext when streaming', {
+    // FIXME: NODE-3184
+    metadata: { requires: { node: '<14' } },
+    test(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-    client.connect(err => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+      client.connect(err => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-      const collection = client.db().collection('documents');
-      collection.drop(() => {
-        const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-        collection.insertMany(docs, err => {
-          expect(err).to.not.exist;
-
-          const cursor = collection.find({}, { sort: { a: 1 } });
-          cursor.hasNext((err, hasNext) => {
+        const collection = client.db().collection('documents');
+        collection.drop(() => {
+          const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+          collection.insertMany(docs, err => {
             expect(err).to.not.exist;
-            expect(hasNext).to.be.true;
 
-            const collected = [];
-            const stream = new Writable({
-              objectMode: true,
-              write: (chunk, encoding, next) => {
-                collected.push(chunk);
-                next(undefined, chunk);
-              }
+            const cursor = collection.find({}, { sort: { a: 1 } });
+            cursor.hasNext((err, hasNext) => {
+              expect(err).to.not.exist;
+              expect(hasNext).to.be.true;
+
+              const collected = [];
+              const stream = new Writable({
+                objectMode: true,
+                write: (chunk, encoding, next) => {
+                  collected.push(chunk);
+                  next(undefined, chunk);
+                }
+              });
+
+              cursor.on('close', () => {
+                expect(collected).to.have.length(3);
+                expect(collected).to.eql(docs);
+                done();
+              });
+
+              cursor.pipe(stream);
             });
-
-            cursor.on('close', () => {
-              expect(collected).to.have.length(3);
-              expect(collected).to.eql(docs);
-              done();
-            });
-
-            cursor.pipe(stream);
           });
         });
       });
-    });
+    }
   });
 
   it('should correctly iterate all documents with a limit set', function(done) {

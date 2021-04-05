@@ -1430,11 +1430,11 @@ tasks:
           TOPOLOGY: server
       - func: run custom csfle tests
 buildvariants:
-  - name: macos-1014-erbium
-    display_name: macOS 10.14 Node Erbium
+  - name: macos-1014-fermium
+    display_name: macOS 10.14 Node Fermium
     run_on: macos-1014
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
     tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
@@ -1510,6 +1510,12 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: macos-1014-erbium
+    display_name: macOS 10.14 Node Erbium
+    run_on: macos-1014
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_0
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
     run_on: macos-1014
@@ -1534,11 +1540,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: rhel70-erbium
-    display_name: RHEL 7.0 Node Erbium
+  - name: rhel70-fermium
+    display_name: RHEL 7.0 Node Fermium
     run_on: rhel70-small
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
     tasks: &ref_1
       - test-latest-server
       - test-latest-replica_set
@@ -1614,6 +1620,12 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: rhel70-erbium
+    display_name: RHEL 7.0 Node Erbium
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_1
   - name: rhel70-dubnium
     display_name: RHEL 7.0 Node Dubnium
     run_on: rhel70-small
@@ -1638,11 +1650,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
-  - name: ubuntu-14.04-erbium
-    display_name: Ubuntu 14.04 Node Erbium
+  - name: ubuntu-14.04-fermium
+    display_name: Ubuntu 14.04 Node Fermium
     run_on: ubuntu1404-test
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
     tasks: &ref_2
       - test-4.0-server
       - test-4.0-replica_set
@@ -1684,6 +1696,12 @@ buildvariants:
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified
       - test-auth-ldap
+  - name: ubuntu-14.04-erbium
+    display_name: Ubuntu 14.04 Node Erbium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks: *ref_2
   - name: ubuntu-14.04-dubnium
     display_name: Ubuntu 14.04 Node Dubnium
     run_on: ubuntu1404-test
@@ -1708,11 +1726,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2
-  - name: ubuntu-18.04-erbium
-    display_name: Ubuntu 18.04 Node Erbium
+  - name: ubuntu-18.04-fermium
+    display_name: Ubuntu 18.04 Node Fermium
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
     tasks: &ref_3
       - test-latest-server
@@ -1777,6 +1795,13 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: ubuntu-18.04-erbium
+    display_name: Ubuntu 18.04 Node Erbium
+    run_on: ubuntu1804-test
+    expansions:
+      NODE_LTS_NAME: erbium
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_3
   - name: ubuntu-18.04-dubnium
     display_name: Ubuntu 18.04 Node Dubnium
     run_on: ubuntu1804-test
@@ -1869,6 +1894,13 @@ buildvariants:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2013
     tasks: *ref_4
+  - name: windows-64-vs2015-fermium
+    display_name: Windows (VS2015) Node Fermium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: fermium
+      MSVS_VERSION: 2015
+    tasks: *ref_4
   - name: windows-64-vs2015-erbium
     display_name: Windows (VS2015) Node Erbium
     run_on: windows-64-vs2015-large
@@ -1903,6 +1935,13 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2015
+    tasks: *ref_4
+  - name: windows-64-vs2017-fermium
+    display_name: Windows (VS2017) Node Fermium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: fermium
+      MSVS_VERSION: 2017
     tasks: *ref_4
   - name: windows-64-vs2017-erbium
     display_name: Windows (VS2017) Node Erbium

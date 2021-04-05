@@ -9,7 +9,7 @@ const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3
 const AWS_AUTH_VERSIONS = ['latest', '4.4'];
 const OCSP_VERSIONS = ['latest', '4.4'];
 const TLS_VERSIONS = ['latest', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
-const NODE_VERSIONS = ['erbium', 'dubnium', 'carbon', 'boron', 'argon'];
+const NODE_VERSIONS = ['fermium', 'erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
   'server-unified',
   'replica_set-unified',
