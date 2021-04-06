@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.6](https://github.com/mongodb/node-mongodb-native/compare/v3.6.5...v3.6.6) (2021-04-06)
+
+
+### Bug Fixes
+
+* always close gridfs upload stream on finish ([#2758](https://github.com/mongodb/node-mongodb-native/issues/2758)) ([c976a01](https://github.com/mongodb/node-mongodb-native/commit/c976a01bf385941bee07fa7f021adf1d425109a8))
+* **csfle:** ensure that monitoring connections are not encrypted ([#2749](https://github.com/mongodb/node-mongodb-native/issues/2749)) ([86bddf1](https://github.com/mongodb/node-mongodb-native/commit/86bddf1ef516d6b8c752082e33c15624753579ab))
+* ensure cursor readPreference is applied to find operations ([#2751](https://github.com/mongodb/node-mongodb-native/issues/2751)) ([91ba19e](https://github.com/mongodb/node-mongodb-native/commit/91ba19efdc4713903584c6161cfdd7b91b0e61f9))
+* ensure monitor has rtt pinger in when calculating rtt ([#2757](https://github.com/mongodb/node-mongodb-native/issues/2757)) ([b94519b](https://github.com/mongodb/node-mongodb-native/commit/b94519ba894b4442d3dabbac59bd12784d8b7178))
+* no infinite loop on windows requiring optional deps ([f2a4ff8](https://github.com/mongodb/node-mongodb-native/commit/f2a4ff870178fbbe8de616c45891368665f29f4b))
+* **NODE-2995:** Add shared metadata MongoClient ([#2760](https://github.com/mongodb/node-mongodb-native/issues/2760)) ([9256242](https://github.com/mongodb/node-mongodb-native/commit/9256242d51c037059c0af5ada9639fc0a74ad033))
+* **NODE-3109:** prevent servername from being IP ([#2763](https://github.com/mongodb/node-mongodb-native/issues/2763)) ([312ffef](https://github.com/mongodb/node-mongodb-native/commit/312ffef18c66a0020f19bdc1d654987d9148d709))
+
 ### [3.6.5](https://github.com/mongodb/node-mongodb-native/compare/v3.6.4...v3.6.5) (2021-03-16)
 
 
