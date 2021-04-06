@@ -2356,7 +2356,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line160">line 160</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line189">line 189</a>
         </div>
         
     </div>
@@ -5117,7 +5117,7 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
             <td class="type">
             
                 
-<span class="param-type"><a href="AutoEncrypter.html#~AutoEncryptionOptions">AutoEncrypter~AutoEncryptionOptions</a></span>
+<span class="param-type"><a href="global.html#AutoEncryptionOptions">AutoEncryptionOptions</a></span>
 
 
             
@@ -5138,7 +5138,18 @@ If null, will attempt to connect with IPv6, and will fall back to IPv4 on failur
                         
                     
                 
-                <p>Optionally enable client side auto encryption</p></td>
+                <p>Optionally enable client side auto encryption.</p>
+<blockquote>
+<p>Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error<br>
+(see <a href="https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a>). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.</p>
+<p>Automatic encryption requires the authenticated user to have the <a href="https://docs.mongodb.com/manual/reference/command/listCollections/#dbcmd.listCollections">listCollections privilege action</a>.</p>
+<p>If a MongoClient with a limited connection pool size (i.e a non-zero maxPoolSize) is configured with AutoEncryptionOptions, a separate internal MongoClient is created if any of the following are true:</p>
+<ul>
+<li>AutoEncryptionOptions.keyVaultClient is not passed.</li>
+<li>AutoEncryptionOptions.bypassAutomaticEncryption is false.<br>
+If an internal MongoClient is created, it is configured with the same options as the parent MongoClient except minPoolSize is set to 0 and AutoEncryptionOptions is omitted.</li>
+</ul>
+</blockquote></td>
         </tr>
 	
 	
@@ -5330,7 +5341,7 @@ MongoClient instance
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line436">line 436</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line467">line 467</a>
         </div>
         
     </div>
@@ -8287,7 +8298,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line244">line 244</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line275">line 275</a>
         </div>
         
     </div>
@@ -8461,7 +8472,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line215">line 215</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line246">line 246</a>
         </div>
         
     </div>
@@ -8595,7 +8606,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line295">line 295</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line326">line 326</a>
         </div>
         
     </div>
@@ -8852,7 +8863,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line337">line 337</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line368">line 368</a>
         </div>
         
     </div>
@@ -9076,7 +9087,7 @@ You can control these behaviors with the options noListener and returnNonCachedI
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line454">line 454</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line485">line 485</a>
         </div>
         
     </div>
@@ -9208,7 +9219,7 @@ newly established session
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line522">line 522</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line549">line 549</a>
         </div>
         
     </div>
@@ -9674,7 +9685,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line477">line 477</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line504">line 504</a>
         </div>
         
     </div>
@@ -9838,7 +9849,7 @@ will be handled without the need for user interaction.</p>
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line197">line 197</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line228">line 228</a>
         </div>
         
     </div>
@@ -9979,7 +9990,7 @@ will be handled without the need for user interaction.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Wed Jan 20 2021 10:00:32 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Apr 06 2021 15:06:07 GMT-0400 (Eastern Daylight Time)
                     </footer>
                 </div>
             </td>

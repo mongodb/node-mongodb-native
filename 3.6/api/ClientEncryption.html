@@ -2358,7 +2358,7 @@
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line62">line 62</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line71">line 71</a>
         </div>
         
     </div>
@@ -2439,7 +2439,7 @@
             
             <td class="description last">
                 
-                <p>Optional settings</p>
+                <p>Additional settings</p>
                 
 
 <table class="params">
@@ -2654,7 +2654,7 @@ secretAccessKey: AWS_SECRET_KEY<br>
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line165">line 165</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line204">line 204</a>
         </div>
         
     </div>
@@ -2717,7 +2717,7 @@ secretAccessKey: AWS_SECRET_KEY<br>
                         
                     
                 
-                <p>The KMS provider used for this data key. Must be <code>'aws'</code> or <code>'local'</code></p></td>
+                <p>The KMS provider used for this data key. Must be <code>'aws'</code>, <code>'azure'</code>, <code>'gcp'</code>, or <code>'local'</code></p></td>
         </tr>
 	
 	
@@ -2776,7 +2776,13 @@ secretAccessKey: AWS_SECRET_KEY<br>
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="global.html#AWSEncryptionKeyOptions">AWSEncryptionKeyOptions</a></span>
+|
+
+<span class="param-type"><a href="global.html#AzureEncryptionKeyOptions">AzureEncryptionKeyOptions</a></span>
+|
+
+<span class="param-type"><a href="global.html#GCPEncryptionKeyOptions">GCPEncryptionKeyOptions</a></span>
 
 
             
@@ -2793,119 +2799,7 @@ secretAccessKey: AWS_SECRET_KEY<br>
                         
                     
                 
-                <p>Idenfities a new KMS-specific key used to encrypt the new data key. If the kmsProvider is &quot;aws&quot; it is required.</p>
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>region</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The AWS region of the KMS</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The Amazon Resource Name (ARN) to the AWS customer master key (CMK)</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>endpoint</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>An alternate host to send KMS requests to. May include port number.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
+                <p>Idenfities a new KMS-specific key used to encrypt the new data key</p></td>
         </tr>
 	
 	
@@ -3082,7 +2976,7 @@ keyAltNames: [ 'mySpecialKey' ]<br>
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line303">line 303</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line343">line 343</a>
         </div>
         
     </div>
@@ -3249,7 +3143,7 @@ return clientEncryption.decrypt(value);<br>
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line241">line 241</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line281">line 281</a>
         </div>
         
     </div>
@@ -3583,7 +3477,7 @@ return clientEncryption.encrypt(value, { keyAltName: 'mySpecialKey', algorithm: 
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line114">line 114</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line129">line 129</a>
         </div>
         
     </div>
@@ -3779,7 +3673,7 @@ query for the data key itself against the key vault namespace.</p>
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line278">line 278</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line318">line 318</a>
         </div>
         
     </div>
@@ -3928,7 +3822,7 @@ query for the data key itself against the key vault namespace.</p>
     
         
         <div class="tag-source">
-            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line198">line 198</a>
+            <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html">node_modules/mongodb-client-encryption/lib/clientEncryption.js</a>, <a href="node_modules_mongodb-client-encryption_lib_clientEncryption.js.html#line238">line 238</a>
         </div>
         
     </div>
@@ -4079,7 +3973,7 @@ query for the data key itself against the key vault namespace.</p>
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Wed Jan 20 2021 10:00:31 GMT-0500 (Eastern Standard Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Apr 06 2021 15:06:06 GMT-0400 (Eastern Daylight Time)
                     </footer>
                 </div>
             </td>

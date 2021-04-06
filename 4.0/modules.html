@@ -135,7 +135,6 @@
 								<li class="tsd-kind-class"><a href="classes/gridfsbucketreadstream.html" class="tsd-kind-icon">GridFSBucket<wbr>Read<wbr>Stream</a></li>
 								<li class="tsd-kind-class"><a href="classes/gridfsbucketwritestream.html" class="tsd-kind-icon">GridFSBucket<wbr>Write<wbr>Stream</a></li>
 								<li class="tsd-kind-class"><a href="classes/hostaddress.html" class="tsd-kind-icon">Host<wbr>Address</a></li>
-								<li class="tsd-kind-class"><a href="classes/instrumentation.html" class="tsd-kind-icon">Instrumentation</a></li>
 								<li class="tsd-kind-class tsd-is-external"><a href="classes/int32.html" class="tsd-kind-icon">Int32</a></li>
 								<li class="tsd-kind-class"><a href="classes/killcursor.html" class="tsd-kind-icon">Kill<wbr>Cursor</a></li>
 								<li class="tsd-kind-class"><a href="classes/listcollectionscursor.html" class="tsd-kind-icon">List<wbr>Collections<wbr>Cursor</a></li>
@@ -168,6 +167,7 @@
 								<li class="tsd-kind-class"><a href="classes/topology.html" class="tsd-kind-icon">Topology</a></li>
 								<li class="tsd-kind-class"><a href="classes/topologydescription.html" class="tsd-kind-icon">Topology<wbr>Description</a></li>
 								<li class="tsd-kind-class"><a href="classes/transaction.html" class="tsd-kind-icon">Transaction</a></li>
+								<li class="tsd-kind-class tsd-is-external"><a href="classes/uuid.html" class="tsd-kind-icon">UUID</a></li>
 								<li class="tsd-kind-class"><a href="classes/unorderedbulkoperation.html" class="tsd-kind-icon">Unordered<wbr>Bulk<wbr>Operation</a></li>
 								<li class="tsd-kind-class"><a href="classes/writeconcern.html" class="tsd-kind-icon">Write<wbr>Concern</a></li>
 							</ul>
@@ -381,12 +381,6 @@
 								<li class="tsd-kind-variable"><a href="modules.html#txnstate" class="tsd-kind-icon">Txn<wbr>State</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
-							<h3>Functions</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-function"><a href="modules.html#instrument" class="tsd-kind-icon">instrument</a></li>
-							</ul>
-						</section>
 					</div>
 				</section>
 			</section>
@@ -398,7 +392,7 @@
 					<div class="tsd-signature tsd-kind-icon">Any<wbr>Bulk<wbr>Write<wbr>Operation<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>insertOne<span class="tsd-signature-symbol">: </span><a href="interfaces/insertonemodel.html" class="tsd-signature-type" data-tsd-kind="Interface">InsertOneModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>insertMany<span class="tsd-signature-symbol">: </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>replaceOne<span class="tsd-signature-symbol">: </span><a href="interfaces/replaceonemodel.html" class="tsd-signature-type" data-tsd-kind="Interface">ReplaceOneModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>updateOne<span class="tsd-signature-symbol">: </span><a href="interfaces/updateonemodel.html" class="tsd-signature-type" data-tsd-kind="Interface">UpdateOneModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>updateMany<span class="tsd-signature-symbol">: </span><a href="interfaces/updatemanymodel.html" class="tsd-signature-type" data-tsd-kind="Interface">UpdateManyModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>removeOne<span class="tsd-signature-symbol">: </span><a href="interfaces/deleteonemodel.html" class="tsd-signature-type" data-tsd-kind="Interface">DeleteOneModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>removeMany<span class="tsd-signature-symbol">: </span><a href="interfaces/deletemanymodel.html" class="tsd-signature-type" data-tsd-kind="Interface">DeleteManyModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>deleteOne<span class="tsd-signature-symbol">: </span><a href="interfaces/deleteonemodel.html" class="tsd-signature-type" data-tsd-kind="Interface">DeleteOneModel</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>deleteMany<span class="tsd-signature-symbol">: </span><a href="interfaces/deletemanymodel.html" class="tsd-signature-type" data-tsd-kind="Interface">DeleteManyModel</a><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/bulk/common.ts#L109">src/bulk/common.ts:109</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bulk/common.ts#L109">src/bulk/common.ts:109</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -408,7 +402,7 @@
 					<div class="tsd-signature tsd-kind-icon">Any<wbr>Error<span class="tsd-signature-symbol">:</span> <a href="classes/mongoerror.html" class="tsd-signature-type" data-tsd-kind="Class">MongoError</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Error</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/error.ts#L6">src/error.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/error.ts#L6">src/error.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -418,7 +412,7 @@
 					<div class="tsd-signature tsd-kind-icon">Auth<wbr>Mechanism<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#authmechanism" class="tsd-signature-type" data-tsd-kind="Variable">AuthMechanism</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#authmechanism" class="tsd-signature-type" data-tsd-kind="Variable">AuthMechanism</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/auth/defaultAuthProviders.ts#L22">src/cmap/auth/defaultAuthProviders.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/auth/defaultAuthProviders.ts#L22">src/cmap/auth/defaultAuthProviders.ts:22</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -428,7 +422,7 @@
 					<div class="tsd-signature tsd-kind-icon">Auto<wbr>Encryption<wbr>Logger<wbr>Level<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/deps.ts#L80">src/deps.ts:80</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L80">src/deps.ts:80</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -438,7 +432,7 @@
 					<div class="tsd-signature tsd-kind-icon">Batch<wbr>Type<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#batchtype" class="tsd-signature-type" data-tsd-kind="Variable">BatchType</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#batchtype" class="tsd-signature-type" data-tsd-kind="Variable">BatchType</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/bulk/common.ts#L34">src/bulk/common.ts:34</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bulk/common.ts#L34">src/bulk/common.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -448,7 +442,7 @@
 					<div class="tsd-signature tsd-kind-icon">Callback&lt;T&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">?: </span><a href="modules.html#anyerror" class="tsd-signature-type" data-tsd-kind="Type alias">AnyError</a>, result<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/utils.ts#L27">src/utils.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/utils.ts#L27">src/utils.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -493,7 +487,7 @@
 					<div class="tsd-signature tsd-kind-icon">Compressor<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#compressor" class="tsd-signature-type" data-tsd-kind="Variable">Compressor</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/wire_protocol/compression.ts#L17">src/cmap/wire_protocol/compression.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/wire_protocol/compression.ts#L17">src/cmap/wire_protocol/compression.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -503,7 +497,7 @@
 					<div class="tsd-signature tsd-kind-icon">Cursor<wbr>Flag<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#cursor_flags" class="tsd-signature-type" data-tsd-kind="Variable">CURSOR_FLAGS</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cursor/abstract_cursor.ts#L48">src/cursor/abstract_cursor.ts:48</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cursor/abstract_cursor.ts#L48">src/cursor/abstract_cursor.ts:48</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -513,7 +507,7 @@
 					<div class="tsd-signature tsd-kind-icon">Distinct<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/distinct.ts#L11">src/operations/distinct.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/distinct.ts#L11">src/operations/distinct.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -523,7 +517,7 @@
 					<div class="tsd-signature tsd-kind-icon">Drop<wbr>Collection<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/drop.ts#L9">src/operations/drop.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/drop.ts#L9">src/operations/drop.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -533,7 +527,7 @@
 					<div class="tsd-signature tsd-kind-icon">Drop<wbr>Database<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/drop.ts#L32">src/operations/drop.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/drop.ts#L32">src/operations/drop.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -543,7 +537,7 @@
 					<div class="tsd-signature tsd-kind-icon">Drop<wbr>Indexes<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/indexes.ts#L301">src/operations/indexes.ts:301</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/indexes.ts#L301">src/operations/indexes.ts:301</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -553,7 +547,7 @@
 					<div class="tsd-signature tsd-kind-icon">Explain<wbr>Verbosity<wbr>Like<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#explainverbosity" class="tsd-signature-type" data-tsd-kind="Variable">ExplainVerbosity</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/explain.ts#L17">src/explain.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/explain.ts#L17">src/explain.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -570,7 +564,7 @@
 					<div class="tsd-signature tsd-kind-icon">Finalize<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, reducedValue<span class="tsd-signature-symbol">: </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/map_reduce.ts#L43">src/operations/map_reduce.ts:43</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/map_reduce.ts#L43">src/operations/map_reduce.ts:43</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -604,7 +598,7 @@
 					<div class="tsd-signature tsd-kind-icon">Hint<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/operation.ts#L16">src/operations/operation.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/operation.ts#L16">src/operations/operation.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -614,7 +608,7 @@
 					<div class="tsd-signature tsd-kind-icon">Index<wbr>Direction<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">-1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;2d&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;2dsphere&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;text&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;geoHaystack&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/indexes.ts#L60">src/operations/indexes.ts:60</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/indexes.ts#L60">src/operations/indexes.ts:60</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -624,7 +618,7 @@
 					<div class="tsd-signature tsd-kind-icon">Index<wbr>Specification<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="modules.html#indexdirection" class="tsd-signature-type" data-tsd-kind="Type alias">IndexDirection</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="modules.html#indexdirection" class="tsd-signature-type" data-tsd-kind="Type alias">IndexDirection</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><a href="modules.html#indexspecification" class="tsd-signature-type" data-tsd-kind="Type alias">IndexSpecification</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/indexes.ts#L62">src/operations/indexes.ts:62</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/indexes.ts#L62">src/operations/indexes.ts:62</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -634,7 +628,7 @@
 					<div class="tsd-signature tsd-kind-icon">Internal<wbr>Abstract<wbr>Cursor<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><a href="interfaces/abstractcursoroptions.html" class="tsd-signature-type" data-tsd-kind="Interface">AbstractCursorOptions</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;readPreference&quot;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>exhaust<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>oplogReplay<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>partial<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>readConcern<span class="tsd-signature-symbol">?: </span><a href="classes/readconcern.html" class="tsd-signature-type" data-tsd-kind="Class">ReadConcern</a><span class="tsd-signature-symbol">; </span>readPreference<span class="tsd-signature-symbol">: </span><a href="classes/readpreference.html" class="tsd-signature-type" data-tsd-kind="Class">ReadPreference</a><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cursor/abstract_cursor.ts#L64">src/cursor/abstract_cursor.ts:64</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cursor/abstract_cursor.ts#L64">src/cursor/abstract_cursor.ts:64</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -650,7 +644,7 @@
 					<div class="tsd-signature tsd-kind-icon">List<wbr>Databases<wbr>Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/list_databases.ts#L10">src/operations/list_databases.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/list_databases.ts#L10">src/operations/list_databases.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -660,7 +654,7 @@
 					<div class="tsd-signature tsd-kind-icon">Logger<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span>, <span class="tsd-signature-symbol">...</span>optionalParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/logger.ts#L32">src/logger.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/logger.ts#L32">src/logger.ts:32</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -694,7 +688,7 @@
 					<div class="tsd-signature tsd-kind-icon">Logger<wbr>Level<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#loggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">LoggerLevel</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#loggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">LoggerLevel</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/logger.ts#L29">src/logger.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/logger.ts#L29">src/logger.ts:29</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -704,7 +698,7 @@
 					<div class="tsd-signature tsd-kind-icon">Map<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/map_reduce.ts#L39">src/operations/map_reduce.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/map_reduce.ts#L39">src/operations/map_reduce.ts:39</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -729,7 +723,7 @@
 					<div class="tsd-signature tsd-kind-icon">Operation<wbr>Time<span class="tsd-signature-symbol">:</span> <a href="classes/timestamp.html" class="tsd-signature-type" data-tsd-kind="Class">Timestamp</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/change_stream.ts#L73">src/change_stream.ts:73</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/change_stream.ts#L73">src/change_stream.ts:73</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -749,7 +743,7 @@
 					<div class="tsd-signature tsd-kind-icon">Profiling<wbr>Level<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#profilinglevel" class="tsd-signature-type" data-tsd-kind="Variable">ProfilingLevel</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#profilinglevel" class="tsd-signature-type" data-tsd-kind="Variable">ProfilingLevel</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/set_profiling_level.ts#L16">src/operations/set_profiling_level.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/set_profiling_level.ts#L16">src/operations/set_profiling_level.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -759,7 +753,7 @@
 					<div class="tsd-signature tsd-kind-icon">Profiling<wbr>Level<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/profiling_level.ts#L8">src/operations/profiling_level.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/profiling_level.ts#L8">src/operations/profiling_level.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -769,7 +763,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Concern<wbr>Level<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#readconcernlevel" class="tsd-signature-type" data-tsd-kind="Variable">ReadConcernLevel</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_concern.ts#L13">src/read_concern.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_concern.ts#L13">src/read_concern.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -779,7 +773,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Concern<wbr>Like<span class="tsd-signature-symbol">:</span> <a href="classes/readconcern.html" class="tsd-signature-type" data-tsd-kind="Class">ReadConcern</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>level<span class="tsd-signature-symbol">: </span><a href="modules.html#readconcernlevelid" class="tsd-signature-type" data-tsd-kind="Type alias">ReadConcernLevelId</a><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><a href="modules.html#readconcernlevelid" class="tsd-signature-type" data-tsd-kind="Type alias">ReadConcernLevelId</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_concern.ts#L16">src/read_concern.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_concern.ts#L16">src/read_concern.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -789,7 +783,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Preference<wbr>Like<span class="tsd-signature-symbol">:</span> <a href="classes/readpreference.html" class="tsd-signature-type" data-tsd-kind="Class">ReadPreference</a><span class="tsd-signature-symbol"> | </span><a href="modules.html#readpreferencemodeid" class="tsd-signature-type" data-tsd-kind="Type alias">ReadPreferenceModeId</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_preference.ts#L6">src/read_preference.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_preference.ts#L6">src/read_preference.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -799,7 +793,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Preference<wbr>Mode<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#readpreferencemode" class="tsd-signature-type" data-tsd-kind="Variable">ReadPreferenceMode</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_preference.ts#L18">src/read_preference.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_preference.ts#L18">src/read_preference.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -809,7 +803,7 @@
 					<div class="tsd-signature tsd-kind-icon">Reduce<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, values<span class="tsd-signature-symbol">: </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/map_reduce.ts#L41">src/operations/map_reduce.ts:41</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/map_reduce.ts#L41">src/operations/map_reduce.ts:41</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -843,7 +837,7 @@
 					<div class="tsd-signature tsd-kind-icon">Remove<wbr>User<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/remove_user.ts#L9">src/operations/remove_user.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/remove_user.ts#L9">src/operations/remove_user.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -853,7 +847,7 @@
 					<div class="tsd-signature tsd-kind-icon">Resume<wbr>Token<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/change_stream.ts#L65">src/change_stream.ts:65</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/change_stream.ts#L65">src/change_stream.ts:65</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -868,7 +862,7 @@
 					<div class="tsd-signature tsd-kind-icon">Run<wbr>Command<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/run_command.ts#L8">src/operations/run_command.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/run_command.ts#L8">src/operations/run_command.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -878,7 +872,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Api<wbr>Version<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#serverapiversion" class="tsd-signature-type" data-tsd-kind="Variable">ServerApiVersion</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#serverapiversion" class="tsd-signature-type" data-tsd-kind="Variable">ServerApiVersion</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L41">src/mongo_client.ts:41</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L41">src/mongo_client.ts:41</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -888,7 +882,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><a href="interfaces/connectionpooloptions.html" class="tsd-signature-type" data-tsd-kind="Interface">ConnectionPoolOptions</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;id&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;generation&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;hostAddress&quot;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><a href="interfaces/monitoroptions.html" class="tsd-signature-type" data-tsd-kind="Interface">MonitorOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/server.ts#L87">src/sdam/server.ts:87</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/server.ts#L86">src/sdam/server.ts:86</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -898,7 +892,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Selection<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><a href="classes/server.html" class="tsd-signature-type" data-tsd-kind="Class">Server</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/topology.ts#L85">src/sdam/topology.ts:85</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/topology.ts#L85">src/sdam/topology.ts:85</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -908,7 +902,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Selector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>topologyDescription<span class="tsd-signature-symbol">: </span><a href="classes/topologydescription.html" class="tsd-signature-type" data-tsd-kind="Class">TopologyDescription</a>, servers<span class="tsd-signature-symbol">: </span><a href="classes/serverdescription.html" class="tsd-signature-type" data-tsd-kind="Class">ServerDescription</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="classes/serverdescription.html" class="tsd-signature-type" data-tsd-kind="Class">ServerDescription</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/server_selection.ts#L12">src/sdam/server_selection.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/server_selection.ts#L12">src/sdam/server_selection.ts:12</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -942,7 +936,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Session<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>id<span class="tsd-signature-symbol">: </span><a href="classes/binary.html" class="tsd-signature-type" data-tsd-kind="Class">Binary</a><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L600">src/sessions.ts:600</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sessions.ts#L600">src/sessions.ts:600</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -960,7 +954,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Type<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#servertype" class="tsd-signature-type" data-tsd-kind="Variable">ServerType</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#servertype" class="tsd-signature-type" data-tsd-kind="Variable">ServerType</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/common.ts#L43">src/sdam/common.ts:43</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/common.ts#L43">src/sdam/common.ts:43</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -970,7 +964,7 @@
 					<div class="tsd-signature tsd-kind-icon">Set<wbr>Profiling<wbr>Level<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="interfaces/commandoperationoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">CommandOperationOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/set_profiling_level.ts#L19">src/operations/set_profiling_level.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/set_profiling_level.ts#L19">src/operations/set_profiling_level.ts:19</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -980,7 +974,7 @@
 					<div class="tsd-signature tsd-kind-icon">Sort<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="modules.html#sortdirection" class="tsd-signature-type" data-tsd-kind="Type alias">SortDirection</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="modules.html#sortdirection" class="tsd-signature-type" data-tsd-kind="Type alias">SortDirection</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sort.ts#L12">src/sort.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sort.ts#L12">src/sort.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -990,7 +984,7 @@
 					<div class="tsd-signature tsd-kind-icon">Sort<wbr>Direction<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">-1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;asc&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;desc&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;ascending&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;descending&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>$meta<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sort.ts#L2">src/sort.ts:2</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sort.ts#L2">src/sort.ts:2</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1000,7 +994,7 @@
 					<div class="tsd-signature tsd-kind-icon">Stream<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">TLSSocket</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/connect.ts#L21">src/cmap/connect.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/connect.ts#L21">src/cmap/connect.ts:21</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1010,7 +1004,7 @@
 					<div class="tsd-signature tsd-kind-icon">Supported<wbr>Node<wbr>Connection<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="modules.html#supportedtlsconnectionoptions" class="tsd-signature-type" data-tsd-kind="Type alias">SupportedTLSConnectionOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="modules.html#supportedtlssocketoptions" class="tsd-signature-type" data-tsd-kind="Type alias">SupportedTLSSocketOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="modules.html#supportedsocketoptions" class="tsd-signature-type" data-tsd-kind="Type alias">SupportedSocketOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L91">src/mongo_client.ts:91</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L91">src/mongo_client.ts:91</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1020,7 +1014,7 @@
 					<div class="tsd-signature tsd-kind-icon">Supported<wbr>Socket<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">TcpNetConnectOpts</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#legal_tcp_socket_options" class="tsd-signature-type" data-tsd-kind="Variable">LEGAL_TCP_SOCKET_OPTIONS</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L85">src/mongo_client.ts:85</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L85">src/mongo_client.ts:85</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1030,7 +1024,7 @@
 					<div class="tsd-signature tsd-kind-icon">SupportedTLSConnection<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">TLSConnectionOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Extract</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-type">TLSConnectionOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#legal_tls_socket_options" class="tsd-signature-type" data-tsd-kind="Variable">LEGAL_TLS_SOCKET_OPTIONS</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L73">src/mongo_client.ts:73</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L73">src/mongo_client.ts:73</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1040,7 +1034,7 @@
 					<div class="tsd-signature tsd-kind-icon">SupportedTLSSocket<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">TLSSocketOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Extract</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-type">TLSSocketOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#legal_tls_socket_options" class="tsd-signature-type" data-tsd-kind="Variable">LEGAL_TLS_SOCKET_OPTIONS</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L79">src/mongo_client.ts:79</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L79">src/mongo_client.ts:79</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1050,7 +1044,7 @@
 					<div class="tsd-signature tsd-kind-icon">TFile<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><a href="interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol"> | </span><a href="classes/objectid.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/gridfs-stream/upload.ts#L17">src/gridfs-stream/upload.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/gridfs-stream/upload.ts#L17">src/gridfs-stream/upload.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1060,7 +1054,7 @@
 					<div class="tsd-signature tsd-kind-icon">Tag<wbr>Set<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/server_description.ts#L26">src/sdam/server_description.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/server_description.ts#L26">src/sdam/server_description.ts:26</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1078,7 +1072,7 @@
 					<div class="tsd-signature tsd-kind-icon">Timer<wbr>Queue<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeJS.Timeout</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/common.ts#L46">src/sdam/common.ts:46</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/common.ts#L46">src/sdam/common.ts:46</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1094,7 +1088,7 @@
 					<div class="tsd-signature tsd-kind-icon">Topology<wbr>Type<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#topologytype" class="tsd-signature-type" data-tsd-kind="Variable">TopologyType</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#topologytype" class="tsd-signature-type" data-tsd-kind="Variable">TopologyType</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/common.ts#L24">src/sdam/common.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/common.ts#L24">src/sdam/common.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1104,7 +1098,7 @@
 					<div class="tsd-signature tsd-kind-icon">Txn<wbr>State<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="modules.html#txnstate" class="tsd-signature-type" data-tsd-kind="Variable">TxnState</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="modules.html#txnstate" class="tsd-signature-type" data-tsd-kind="Variable">TxnState</a><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L20">src/transactions.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/transactions.ts#L20">src/transactions.ts:20</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1120,7 +1114,7 @@
 					<div class="tsd-signature tsd-kind-icon">W<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;majority&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/write_concern.ts#L2">src/write_concern.ts:2</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/write_concern.ts#L2">src/write_concern.ts:2</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1130,7 +1124,7 @@
 					<div class="tsd-signature tsd-kind-icon">With<wbr>Connection<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><a href="classes/mongoerror.html" class="tsd-signature-type" data-tsd-kind="Class">MongoError</a>, connection<span class="tsd-signature-symbol">: </span><a href="classes/connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span>, callback<span class="tsd-signature-symbol">: </span><a href="modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><a href="classes/connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/connection_pool.ts#L533">src/cmap/connection_pool.ts:533</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/connection_pool.ts#L546">src/cmap/connection_pool.ts:546</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1183,7 +1177,7 @@
 					<div class="tsd-signature tsd-kind-icon">With<wbr>Session<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>session<span class="tsd-signature-symbol">: </span><a href="classes/clientsession.html" class="tsd-signature-type" data-tsd-kind="Class">ClientSession</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L228">src/mongo_client.ts:228</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L228">src/mongo_client.ts:228</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1214,7 +1208,7 @@
 					<div class="tsd-signature tsd-kind-icon">With<wbr>Transaction<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>session<span class="tsd-signature-symbol">: </span><a href="classes/clientsession.html" class="tsd-signature-type" data-tsd-kind="Class">ClientSession</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sessions.ts#L64">src/sessions.ts:64</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sessions.ts#L64">src/sessions.ts:64</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1245,7 +1239,7 @@
 					<div class="tsd-signature tsd-kind-icon">Write<wbr>Protocol<wbr>Message<wbr>Type<span class="tsd-signature-symbol">:</span> <a href="classes/query.html" class="tsd-signature-type" data-tsd-kind="Class">Query</a><span class="tsd-signature-symbol"> | </span><a href="classes/msg.html" class="tsd-signature-type" data-tsd-kind="Class">Msg</a><span class="tsd-signature-symbol"> | </span><a href="classes/getmore.html" class="tsd-signature-type" data-tsd-kind="Class">GetMore</a><span class="tsd-signature-symbol"> | </span><a href="classes/killcursor.html" class="tsd-signature-type" data-tsd-kind="Class">KillCursor</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/commands.ts#L29">src/cmap/commands.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/commands.ts#L29">src/cmap/commands.ts:29</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1264,7 +1258,7 @@
 					<div class="tsd-signature tsd-kind-icon">Auth<wbr>Mechanism<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>MONGODB_AWS<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;MONGODB-AWS&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_CR<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;MONGODB-CR&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_DEFAULT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;DEFAULT&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_GSSAPI<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;GSSAPI&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_PLAIN<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;PLAIN&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_SCRAM_SHA1<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;SCRAM-SHA-1&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_SCRAM_SHA256<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;SCRAM-SHA-256&quot;</span><span class="tsd-signature-symbol">; </span>MONGODB_X509<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;MONGODB-X509&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/auth/defaultAuthProviders.ts#L10">src/cmap/auth/defaultAuthProviders.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/auth/defaultAuthProviders.ts#L10">src/cmap/auth/defaultAuthProviders.ts:10</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1303,7 +1297,7 @@
 					<div class="tsd-signature tsd-kind-icon">Auto<wbr>Encryption<wbr>Logger<wbr>Level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>Error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">1</span><span class="tsd-signature-symbol">; </span>FatalError<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">0</span><span class="tsd-signature-symbol">; </span>Info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">3</span><span class="tsd-signature-symbol">; </span>Trace<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">4</span><span class="tsd-signature-symbol">; </span>Warning<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">2</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/deps.ts#L71">src/deps.ts:71</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L71">src/deps.ts:71</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1313,7 +1307,7 @@
 					<div class="tsd-signature tsd-kind-icon">Batch<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>DELETE<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">3</span><span class="tsd-signature-symbol">; </span>INSERT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">1</span><span class="tsd-signature-symbol">; </span>UPDATE<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">2</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/bulk/common.ts#L27">src/bulk/common.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bulk/common.ts#L27">src/bulk/common.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1337,7 +1331,7 @@
 					<div class="tsd-signature tsd-kind-icon">CURSOR_<wbr>FLAGS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-type">&quot;tailable&quot;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cursor/abstract_cursor.ts#L26">src/cursor/abstract_cursor.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cursor/abstract_cursor.ts#L26">src/cursor/abstract_cursor.ts:26</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1347,7 +1341,7 @@
 					<div class="tsd-signature tsd-kind-icon">Compressor<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>none<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">0</span><span class="tsd-signature-symbol">; </span>snappy<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">1</span><span class="tsd-signature-symbol">; </span>zlib<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">2</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/wire_protocol/compression.ts#L8">src/cmap/wire_protocol/compression.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/wire_protocol/compression.ts#L8">src/cmap/wire_protocol/compression.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1357,7 +1351,7 @@
 					<div class="tsd-signature tsd-kind-icon">DB_<wbr>AGGREGATE_<wbr>COLLECTION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/aggregate.ts#L17">src/operations/aggregate.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/aggregate.ts#L17">src/operations/aggregate.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1373,7 +1367,7 @@
 					<div class="tsd-signature tsd-kind-icon">Explain<wbr>Verbosity<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>allPlansExecution<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;allPlansExecution&quot;</span><span class="tsd-signature-symbol">; </span>executionStats<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;executionStats&quot;</span><span class="tsd-signature-symbol">; </span>queryPlanner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;queryPlanner&quot;</span><span class="tsd-signature-symbol">; </span>queryPlannerExtended<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;queryPlannerExtended&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/explain.ts#L4">src/explain.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/explain.ts#L4">src/explain.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1400,7 +1394,7 @@
 					<div class="tsd-signature tsd-kind-icon">LEGAL_<wbr>TCP_<wbr>SOCKET_<wbr>OPTIONS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-type">&quot;family&quot;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/connect.ts#L208">src/cmap/connect.ts:208</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/connect.ts#L208">src/cmap/connect.ts:208</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1410,7 +1404,7 @@
 					<div class="tsd-signature tsd-kind-icon">LEGAL_<wbr>TLS_<wbr>SOCKET_<wbr>OPTIONS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-type">&quot;ALPNProtocols&quot;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/cmap/connect.ts#L188">src/cmap/connect.ts:188</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/cmap/connect.ts#L188">src/cmap/connect.ts:188</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1420,7 +1414,7 @@
 					<div class="tsd-signature tsd-kind-icon">Logger<wbr>Level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>DEBUG<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;debug&quot;</span><span class="tsd-signature-symbol">; </span>ERROR<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;error&quot;</span><span class="tsd-signature-symbol">; </span>INFO<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;info&quot;</span><span class="tsd-signature-symbol">; </span>WARN<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;warn&quot;</span><span class="tsd-signature-symbol">; </span>debug<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;debug&quot;</span><span class="tsd-signature-symbol">; </span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;error&quot;</span><span class="tsd-signature-symbol">; </span>info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;info&quot;</span><span class="tsd-signature-symbol">; </span>warn<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;warn&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/logger.ts#L17">src/logger.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/logger.ts#L17">src/logger.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1430,7 +1424,7 @@
 					<div class="tsd-signature tsd-kind-icon">Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MapConstructor</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:785</li>
+							<li>Defined in node_modules/bson/bson.d.ts:788</li>
 						</ul>
 					</aside>
 				</section>
@@ -1440,7 +1434,7 @@
 					<div class="tsd-signature tsd-kind-icon">Profiling<wbr>Level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>all<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;all&quot;</span><span class="tsd-signature-symbol">; </span>off<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;off&quot;</span><span class="tsd-signature-symbol">; </span>slowOnly<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;slow_only&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/operations/set_profiling_level.ts#L9">src/operations/set_profiling_level.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/operations/set_profiling_level.ts#L9">src/operations/set_profiling_level.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1450,7 +1444,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Concern<wbr>Level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>available<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;available&quot;</span><span class="tsd-signature-symbol">; </span>linearizable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;linearizable&quot;</span><span class="tsd-signature-symbol">; </span>local<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;local&quot;</span><span class="tsd-signature-symbol">; </span>majority<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;majority&quot;</span><span class="tsd-signature-symbol">; </span>snapshot<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;snapshot&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_concern.ts#L4">src/read_concern.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_concern.ts#L4">src/read_concern.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1480,7 +1474,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Preference<wbr>Mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>nearest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;nearest&quot;</span><span class="tsd-signature-symbol">; </span>primary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;primary&quot;</span><span class="tsd-signature-symbol">; </span>primaryPreferred<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;primaryPreferred&quot;</span><span class="tsd-signature-symbol">; </span>secondary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;secondary&quot;</span><span class="tsd-signature-symbol">; </span>secondaryPreferred<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;secondaryPreferred&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/read_preference.ts#L9">src/read_preference.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/read_preference.ts#L9">src/read_preference.ts:9</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1510,7 +1504,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Api<wbr>Version<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>v1<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/mongo_client.ts#L36">src/mongo_client.ts:36</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/mongo_client.ts#L36">src/mongo_client.ts:36</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -1528,7 +1522,7 @@
 					<div class="tsd-signature tsd-kind-icon">Server<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>Mongos<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Mongos&quot;</span><span class="tsd-signature-symbol">; </span>PossiblePrimary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;PossiblePrimary&quot;</span><span class="tsd-signature-symbol">; </span>RSArbiter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;RSArbiter&quot;</span><span class="tsd-signature-symbol">; </span>RSGhost<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;RSGhost&quot;</span><span class="tsd-signature-symbol">; </span>RSOther<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;RSOther&quot;</span><span class="tsd-signature-symbol">; </span>RSPrimary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;RSPrimary&quot;</span><span class="tsd-signature-symbol">; </span>RSSecondary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;RSSecondary&quot;</span><span class="tsd-signature-symbol">; </span>Standalone<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Standalone&quot;</span><span class="tsd-signature-symbol">; </span>Unknown<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Unknown&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/common.ts#L30">src/sdam/common.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/common.ts#L30">src/sdam/common.ts:30</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1543,7 +1537,7 @@
 					<div class="tsd-signature tsd-kind-icon">Topology<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>ReplicaSetNoPrimary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;ReplicaSetNoPrimary&quot;</span><span class="tsd-signature-symbol">; </span>ReplicaSetWithPrimary<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;ReplicaSetWithPrimary&quot;</span><span class="tsd-signature-symbol">; </span>Sharded<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Sharded&quot;</span><span class="tsd-signature-symbol">; </span>Single<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Single&quot;</span><span class="tsd-signature-symbol">; </span>Unknown<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;Unknown&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/sdam/common.ts#L15">src/sdam/common.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/sdam/common.ts#L15">src/sdam/common.ts:15</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1558,7 +1552,7 @@
 					<div class="tsd-signature tsd-kind-icon">Txn<wbr>State<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>NO_TRANSACTION<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;NO_TRANSACTION&quot;</span><span class="tsd-signature-symbol">; </span>STARTING_TRANSACTION<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;STARTING_TRANSACTION&quot;</span><span class="tsd-signature-symbol">; </span>TRANSACTION_ABORTED<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;TRANSACTION_ABORTED&quot;</span><span class="tsd-signature-symbol">; </span>TRANSACTION_COMMITTED<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED&quot;</span><span class="tsd-signature-symbol">; </span>TRANSACTION_COMMITTED_EMPTY<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;TRANSACTION_COMMITTED_EMPTY&quot;</span><span class="tsd-signature-symbol">; </span>TRANSACTION_IN_PROGRESS<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">&quot;TRANSACTION_IN_PROGRESS&quot;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/transactions.ts#L10">src/transactions.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/transactions.ts#L10">src/transactions.ts:10</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -1567,32 +1561,6 @@
 							<dd></dd>
 						</dl>
 					</div>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function">
-					<a name="instrument" class="tsd-anchor"></a>
-					<h3>instrument</h3>
-					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">instrument<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><a href="modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/instrumentation.html" class="tsd-signature-type" data-tsd-kind="Class">Instrumentation</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/13f857a1/src/index.ts#L19">src/index.ts:19</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>callback: <a href="modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="classes/instrumentation.html" class="tsd-signature-type" data-tsd-kind="Class">Instrumentation</a></h4>
-						</li>
-					</ul>
 				</section>
 			</section>
 		</div>
