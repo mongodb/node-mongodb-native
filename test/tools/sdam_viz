@@ -56,7 +56,7 @@ async function scheduleWorkload(client) {
     const result = await client
       .db('test')
       .collection('test')
-      .find({}, { socketTimeout: 2000 })
+      .find({}, { socketTimeoutMS: 2000 })
       .limit(1)
       .toArray();
 
@@ -89,16 +89,19 @@ async function scheduleWriteWorkload(client) {
 
     completedWriteWorkloads++;
     if (completedWriteWorkloads % writeWorkloadSampleSize === 0) {
-      print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} completed ${completedWriteWorkloads} writes with average time: ${averageWriteMS}`);
+      print(
+        `${chalk.yellow(
+          `workload#${currentWriteWorkload}`
+        )} completed ${completedWriteWorkloads} writes with average time: ${averageWriteMS}`
+      );
     }
-
   } catch (e) {
     print(`${chalk.yellow(`workload#${currentWriteWorkload}`)} write failed: ${e.message}`);
   }
 }
 
 let exitRequestCount = 0;
-process.on('SIGINT', async function() {
+process.on('SIGINT', async function () {
   exitRequestCount++;
   if (exitRequestCount > 3) {
     console.log('force quitting...');

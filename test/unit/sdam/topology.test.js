@@ -162,7 +162,7 @@ describe('Topology (unit)', function () {
         topology.selectServer('primary', (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeout: 250 }, (err, result) => {
+          server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 }, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.match(/timed out/);

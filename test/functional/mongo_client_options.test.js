@@ -67,7 +67,7 @@ describe('MongoClient Options', function () {
           const options = args[2];
           if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
             stub.restore();
-            expect(options).property('socketTimeout').to.equal(0);
+            expect(options).property('socketTimeoutMS').to.equal(0);
             client.close(done);
           }
 
@@ -93,7 +93,7 @@ describe('MongoClient Options', function () {
           const options = args[2];
           if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
             stub.restore();
-            expect(options).property('socketTimeout').to.equal(510);
+            expect(options).property('socketTimeoutMS').to.equal(510);
             client.close(done);
           }
 

@@ -1,6 +1,6 @@
 import { PromiseProvider } from '../promise_provider';
 import { Long, ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
-import { MongoError, MongoWriteConcernError, AnyError } from '../error';
+import { MongoError, MongoWriteConcernError, AnyError, MONGODB_ERROR_CODES } from '../error';
 import {
   applyRetryableWrites,
   executeLegacyOperation,
@@ -19,9 +19,6 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-
-// Error codes
-const WRITE_CONCERN_ERROR = 64;
 
 /** @public */
 export const BatchType = {
@@ -307,7 +304,9 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError(new MongoError({ errmsg: errmsg, code: WRITE_CONCERN_ERROR }));
+      return new WriteConcernError(
+        new MongoError({ errmsg: errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed })
+      );
     }
   }
 

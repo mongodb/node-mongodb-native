@@ -1,7 +1,7 @@
 import Denque = require('denque');
 import { EventEmitter } from 'events';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { ServerDescription } from './server_description';
+import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
 import { Server, ServerOptions } from './server';
 import {
@@ -612,6 +612,11 @@ export class Topology extends EventEmitter {
       return;
     }
 
+    // ignore this server update if its from an outdated topologyVersion
+    if (isStaleServerDescription(this.s.description, serverDescription)) {
+      return;
+    }
+
     // these will be used for monitoring events later
     const previousTopologyDescription = this.s.description;
     const previousServerDescription = this.s.description.servers.get(serverDescription.address);
@@ -963,6 +968,19 @@ function processWaitQueue(topology: Topology) {
       });
     }
   }
+}
+
+function isStaleServerDescription(
+  topologyDescription: TopologyDescription,
+  incomingServerDescription: ServerDescription
+) {
+  const currentServerDescription = topologyDescription.servers.get(
+    incomingServerDescription.address
+  );
+  const currentTopologyVersion = currentServerDescription?.topologyVersion;
+  return (
+    compareTopologyVersion(currentTopologyVersion, incomingServerDescription.topologyVersion) > 0
+  );
 }
 
 /** @public */

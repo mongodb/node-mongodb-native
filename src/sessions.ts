@@ -11,7 +11,13 @@ import {
 } from './transactions';
 import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
-import { MongoError, isRetryableError, MongoNetworkError, MongoWriteConcernError } from './error';
+import {
+  MongoError,
+  isRetryableError,
+  MongoNetworkError,
+  MongoWriteConcernError,
+  MONGODB_ERROR_CODES
+} from './error';
 import {
   now,
   calculateDurationInMs,
@@ -329,9 +335,6 @@ class ClientSession extends EventEmitter {
 }
 
 const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
-const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
-const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
-const MAX_TIME_MS_EXPIRED_CODE = 50;
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'CannotSatisfyWriteConcern',
   'UnknownReplWriteConcern',
@@ -349,8 +352,8 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   return (
     isMaxTimeMSExpiredError(err) ||
     (!isNonDeterministicWriteConcernError &&
-      err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &&
-      err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE)
+      err.code !== MONGODB_ERROR_CODES.UnsatisfiableWriteConcern &&
+      err.code !== MONGODB_ERROR_CODES.UnknownReplWriteConcern)
   );
 }
 
@@ -360,8 +363,8 @@ function isMaxTimeMSExpiredError(err: MongoError) {
   }
 
   return (
-    err.code === MAX_TIME_MS_EXPIRED_CODE ||
-    (err.writeConcernError && err.writeConcernError.code === MAX_TIME_MS_EXPIRED_CODE)
+    err.code === MONGODB_ERROR_CODES.MaxTimeMSExpired ||
+    (err.writeConcernError && err.writeConcernError.code === MONGODB_ERROR_CODES.MaxTimeMSExpired)
   );
 }
 

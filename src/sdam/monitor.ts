@@ -222,10 +222,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
     const options = isAwaitable
       ? {
-          socketTimeout: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
+          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
           exhaustAllowed: true
         }
-      : { socketTimeout: connectTimeoutMS };
+      : { socketTimeoutMS: connectTimeoutMS };
 
     if (isAwaitable && monitor[kRTTPinger] == null) {
       monitor[kRTTPinger] = new RTTPinger(
@@ -343,10 +343,8 @@ function monitorServer(monitor: Monitor) {
 function makeTopologyVersion(tv: TopologyVersion) {
   return {
     processId: tv.processId,
-
-    // NOTE: The casting here is a bug, `counter` should always be a `Long`
-    //       but it was not at the time of typing. Further investigation needed
-    counter: Long.fromNumber((tv.counter as unknown) as number)
+    // tests mock counter as just number, but in a real situation counter should always be a Long
+    counter: Long.isLong(tv.counter) ? tv.counter : Long.fromNumber(tv.counter)
   };
 }
 

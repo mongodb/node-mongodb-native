@@ -30,7 +30,7 @@ export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
 
 /** @internal */
 export interface OpQueryOptions extends CommandOptions {
-  socketTimeout?: number;
+  socketTimeoutMS?: number;
   session?: ClientSession;
   documentsReturnedIn?: string;
   numberToSkip?: number;

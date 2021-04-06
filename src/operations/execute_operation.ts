@@ -1,5 +1,5 @@
 import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError } from '../error';
+import { MongoError, isRetryableError, MONGODB_ERROR_CODES } from '../error';
 import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
@@ -8,7 +8,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
 
-const MMAPv1_RETRY_WRITES_ERROR_CODE = 20;
+const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 

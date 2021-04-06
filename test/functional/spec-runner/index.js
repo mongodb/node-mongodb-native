@@ -95,7 +95,7 @@ function parseRunOn(runOn) {
     }
 
     const mongodb = version.join(' ');
-    return { topology, mongodb };
+    return { topology, mongodb, authEnabled: !!config.authEnabled };
   });
 }
 
@@ -121,6 +121,21 @@ function generateTopologyTests(testSuites, testContext, filter) {
           afterEach(() => testContext.cleanupAfterSuite());
           testSuite.tests.forEach(spec => {
             it(spec.description, function () {
+              if (requires.authEnabled && process.env.AUTH !== 'auth') {
+                // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
+                // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
+                this.skip();
+              }
+
+              if (
+                spec.operations.some(
+                  op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
+                )
+              ) {
+                // TODO(NODE-2994): Connection storms work will add new events to connection pool
+                this.skip();
+              }
+
               if (
                 spec.skipReason ||
                 (filter && typeof filter === 'function' && !filter(spec, this.configuration))

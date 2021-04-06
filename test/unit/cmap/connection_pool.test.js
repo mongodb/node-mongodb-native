@@ -95,7 +95,7 @@ describe('Connection Pool', function () {
 
     const pool = new ConnectionPool({
       maxPoolSize: 1,
-      socketTimeout: 200,
+      socketTimeoutMS: 200,
       hostAddress: server.hostAddress()
     });
 

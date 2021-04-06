@@ -80,7 +80,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   raw?: boolean;
   monitoring?: boolean;
   fullResult?: boolean;
-  socketTimeout?: number;
+  socketTimeoutMS?: number;
   /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
@@ -120,7 +120,7 @@ export interface ConnectionOptions
   keepAlive?: boolean;
   keepAliveInitialDelay?: number;
   noDelay?: boolean;
-  socketTimeout?: number;
+  socketTimeoutMS?: number;
   cancellationToken?: EventEmitter;
 
   metadata: ClientMetadata;
@@ -136,7 +136,7 @@ export interface DestroyOptions {
 export class Connection extends EventEmitter {
   id: number | '<monitor>';
   address: string;
-  socketTimeout: number;
+  socketTimeoutMS: number;
   monitorCommands: boolean;
   closed: boolean;
   destroyed: boolean;
@@ -172,7 +172,7 @@ export class Connection extends EventEmitter {
     super();
     this.id = options.id;
     this.address = streamIdentifier(stream);
-    this.socketTimeout = options.socketTimeout ?? 0;
+    this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
     this.closed = false;
@@ -674,7 +674,7 @@ function messageHandler(conn: Connection) {
       // requeue the callback for next synthetic request
       conn[kQueue].set(message.requestId, operationDescription);
     } else if (operationDescription.socketTimeoutOverride) {
-      conn[kStream].setTimeout(conn.socketTimeout);
+      conn[kStream].setTimeout(conn.socketTimeoutMS);
     }
 
     try {
@@ -764,9 +764,9 @@ function write(
     }
   }
 
-  if (typeof options.socketTimeout === 'number') {
+  if (typeof options.socketTimeoutMS === 'number') {
     operationDescription.socketTimeoutOverride = true;
-    conn[kStream].setTimeout(options.socketTimeout);
+    conn[kStream].setTimeout(options.socketTimeoutMS);
   }
 
   // if command monitoring is enabled we need to modify the callback here

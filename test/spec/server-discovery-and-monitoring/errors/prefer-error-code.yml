@@ -1,0 +1,53 @@
+description: Do not check errmsg when code exists
+uri: mongodb://a/?replicaSet=rs
+phases:
+- description: Primary A is discovered
+  responses:
+  - - a:27017
+    - ok: 1
+      ismaster: true
+      hosts:
+      - a:27017
+      setName: rs
+      minWireVersion: 0
+      maxWireVersion: 9
+      topologyVersion: &topologyVersion_1_1
+        processId:
+          "$oid": '000000000000000000000001'
+        counter:
+          "$numberLong": '1'
+  outcome: &outcome
+    servers:
+      a:27017:
+        type: RSPrimary
+        setName: rs
+        topologyVersion: *topologyVersion_1_1
+        pool:
+          generation: 0
+    topologyType: ReplicaSetWithPrimary
+    logicalSessionTimeoutMinutes: null
+    setName: rs
+
+- description: errmsg "not master" gets ignored when error code exists
+  applicationErrors:
+  - address: a:27017
+    when: afterHandshakeCompletes
+    maxWireVersion: 9
+    type: command
+    response:
+      ok: 0
+      errmsg: "not master"
+      code: 1  # Not a "not master" error code.
+  outcome: *outcome
+
+- description: errmsg "node is recovering" gets ignored when error code exists
+  applicationErrors:
+  - address: a:27017
+    when: afterHandshakeCompletes
+    maxWireVersion: 9
+    type: command
+    response:
+      ok: 0
+      errmsg: "node is recovering"
+      code: 1  # Not a "node is recovering" error code.
+  outcome: *outcome
