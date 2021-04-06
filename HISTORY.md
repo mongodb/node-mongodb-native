@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.3](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-04-06)
+
+
+### Features
+
+* add fermium to evergreen test runs ([#2762](https://github.com/mongodb/node-mongodb-native/issues/2762)) ([2303b41](https://github.com/mongodb/node-mongodb-native/commit/2303b418b461b3c965f0c48f160d812153eba11e))
+* versioned api ([#2736](https://github.com/mongodb/node-mongodb-native/issues/2736)) ([93f3ea5](https://github.com/mongodb/node-mongodb-native/commit/93f3ea5815bbd85b90745716f35849a59e8f8746))
+
+
+### Bug Fixes
+
+* always close gridfs upload stream on finish ([#2759](https://github.com/mongodb/node-mongodb-native/issues/2759)) ([1c6f544](https://github.com/mongodb/node-mongodb-native/commit/1c6f54499402cff5ac0108d3fd3f3f18297c74bd))
+* don't auto destroy read stream for Node 14 ([d4e297e](https://github.com/mongodb/node-mongodb-native/commit/d4e297e183213a1d1d533c266a537ab2a62aa477))
+* move session support check to operation layer ([#2750](https://github.com/mongodb/node-mongodb-native/issues/2750)) ([c19f296](https://github.com/mongodb/node-mongodb-native/commit/c19f29617e243426268c9d62fc1380c6ea49e56a))
+* remove existing session from cloned cursors ([30ccd86](https://github.com/mongodb/node-mongodb-native/commit/30ccd86f41e65991b04a4ce1000762ae9de8d6d1))
+* **NODE-3071:** Ignore error message if error code is defined ([#2770](https://github.com/mongodb/node-mongodb-native/issues/2770)) ([d4cc936](https://github.com/mongodb/node-mongodb-native/commit/d4cc9367f411fd803ad82975b52f9444862ff715))
+* **NODE-3152:** ensure AWS environment variables are applied properly ([#2756](https://github.com/mongodb/node-mongodb-native/issues/2756)) ([341a602](https://github.com/mongodb/node-mongodb-native/commit/341a60260a4b47271580a6b37d67075f5074cc8d))
+
 ## [4.0.0-beta.2](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2021-03-16)
 
 
