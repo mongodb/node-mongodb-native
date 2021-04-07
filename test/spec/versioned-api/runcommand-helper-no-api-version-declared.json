@@ -3,7 +3,7 @@
   "schemaVersion": "1.1",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.7",
+      "minServerVersion": "4.9",
       "serverParameters": {
         "requireApiVersion": false
       }

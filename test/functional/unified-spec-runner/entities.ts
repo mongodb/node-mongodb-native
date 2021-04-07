@@ -27,6 +27,17 @@ interface UnifiedChangeStream extends ChangeStream {
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
+function serverApiConfig() {
+  if (process.env.MONGODB_API_VERSION) {
+    return { version: process.env.MONGODB_API_VERSION };
+  }
+}
+
+function getClient(address) {
+  const serverApi = serverApiConfig();
+  return new MongoClient(`mongodb://${address}`, serverApi ? { serverApi } : {});
+}
+
 export class UnifiedMongoClient extends MongoClient {
   events: CommandEvent[];
   failPoints: Document[];
@@ -43,11 +54,7 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      serverApi: description.serverApi
-        ? description.serverApi
-        : process.env.MONGODB_API_VERSION
-        ? { version: process.env.MONGODB_API_VERSION }
-        : null
+      serverApi: description.serverApi ? description.serverApi : serverApiConfig()
     });
     this.events = [];
     this.failPoints = [];
@@ -93,7 +100,7 @@ export class FailPointMap extends Map<string, Document> {
     } else {
       // create a new client
       address = addressOrClient.toString();
-      client = new MongoClient(`mongodb://${address}`);
+      client = getClient(address);
       await client.connect();
     }
 
@@ -114,7 +121,7 @@ export class FailPointMap extends Map<string, Document> {
     const entries = Array.from(this.entries());
     await Promise.all(
       entries.map(async ([hostAddress, configureFailPoint]) => {
-        const client = new MongoClient(`mongodb://${hostAddress}`);
+        const client = getClient(hostAddress);
         await client.connect();
         const admin = client.db('admin');
         const result = await admin.command({ configureFailPoint, mode: 'off' });

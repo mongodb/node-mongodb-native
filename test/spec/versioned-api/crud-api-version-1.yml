@@ -3,7 +3,7 @@ description: "CRUD Api Version 1"
 schemaVersion: "1.1"
 
 runOnRequirements:
-  - minServerVersion: "4.7"
+  - minServerVersion: "4.9"
 
 createEntities:
   - client:
@@ -209,7 +209,7 @@ tests:
                 key: x
                 <<: *expectedApiVersion
 
-  - description: "estimatedDocumentCount appends declared API version"
+  - description: "estimatedDocumentCount appends declared API version on 4.9.0 or greater"
     operations:
       - name: estimatedDocumentCount
         object: *collection
@@ -219,7 +219,10 @@ tests:
         events:
           - commandStartedEvent:
               command:
-                count: *collectionName
+                aggregate: *collectionName
+                pipeline: &pipeline
+                  - $collStats: { count: {} }
+                  - $group: { _id: 1, n: { $sum: $count }}
                 <<: *expectedApiVersion
 
   - description: "find command with declared API version appends to the command, but getMore does not"

@@ -1,17 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.0",
-      "topology": [
-        "single",
-        "replicaset"
-      ]
-    },
-    {
-      "minServerVersion": "4.1.7",
-      "topology": [
-        "sharded"
-      ]
+      "minServerVersion": "4.9.0"
     }
   ],
   "database_name": "retryable-reads-tests",
@@ -36,7 +26,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 11600
         }
@@ -52,7 +42,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -60,7 +65,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -76,7 +96,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 11602
         }
@@ -92,7 +112,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -100,7 +135,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -116,7 +166,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 10107
         }
@@ -132,7 +182,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -140,7 +205,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -156,7 +236,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 13435
         }
@@ -172,7 +252,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -180,7 +275,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -196,7 +306,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 13436
         }
@@ -212,7 +322,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -220,7 +345,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -236,7 +376,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 189
         }
@@ -252,7 +392,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -260,7 +415,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -276,7 +446,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 91
         }
@@ -292,7 +462,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -300,7 +485,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -316,7 +516,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 7
         }
@@ -332,7 +532,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -340,7 +555,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -356,7 +586,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 6
         }
@@ -372,7 +602,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -380,7 +625,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -396,7 +656,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 89
         }
@@ -412,7 +672,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -420,7 +695,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -436,7 +726,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 9001
         }
@@ -452,7 +742,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -460,7 +765,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -476,7 +796,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 10107
         }
@@ -492,7 +812,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -500,7 +835,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }
@@ -519,7 +869,7 @@
         },
         "data": {
           "failCommands": [
-            "count"
+            "aggregate"
           ],
           "errorCode": 10107
         }
@@ -535,7 +885,22 @@
         {
           "command_started_event": {
             "command": {
-              "count": "coll"
+              "aggregate": "coll",
+              "pipeline": [
+                {
+                  "$collStats": {
+                    "count": {}
+                  }
+                },
+                {
+                  "$group": {
+                    "_id": 1,
+                    "n": {
+                      "$sum": "$count"
+                    }
+                  }
+                }
+              ]
             },
             "database_name": "retryable-reads-tests"
           }

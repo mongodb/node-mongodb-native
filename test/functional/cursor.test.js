@@ -3594,7 +3594,7 @@ describe('Cursor', function () {
     }
   });
 
-  it('Correctly decorate the collection cursor count command with skip, limit, hint, readConcern', {
+  it.skip('Correctly decorate the collection count command with skip, limit, hint, readConcern', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {

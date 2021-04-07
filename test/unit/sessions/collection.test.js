@@ -63,7 +63,7 @@ describe('Sessions - unit/sessions', function () {
           const doc = request.document;
           if (doc.ismaster) {
             request.reply(mock.DEFAULT_ISMASTER_36);
-          } else if (doc.count || doc.endSessions) {
+          } else if (doc.count || doc.aggregate || doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -72,7 +72,7 @@ describe('Sessions - unit/sessions', function () {
         return client.connect().then(client => {
           const coll = client.db('foo').collection('bar');
 
-          return coll.count({}, options).then(() => {
+          return coll.countDocuments({}, options).then(() => {
             expect(options).to.deep.equal({});
             return client.close();
           });

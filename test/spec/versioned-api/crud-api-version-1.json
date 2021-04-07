@@ -3,7 +3,7 @@
   "schemaVersion": "1.1",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.7"
+      "minServerVersion": "4.9"
     }
   ],
   "createEntities": [
@@ -587,7 +587,7 @@
       ]
     },
     {
-      "description": "estimatedDocumentCount appends declared API version",
+      "description": "estimatedDocumentCount appends declared API version on 4.9.0 or greater",
       "operations": [
         {
           "name": "estimatedDocumentCount",
@@ -602,7 +602,22 @@
             {
               "commandStartedEvent": {
                 "command": {
-                  "count": "test",
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ],
                   "apiVersion": "1",
                   "apiStrict": {
                     "$$unsetOrMatches": false

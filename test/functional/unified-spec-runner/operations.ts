@@ -6,7 +6,7 @@ import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
 import { Document, InsertOneOptions } from '../../../src';
 import { EventCollector } from '../../tools/utils';
-import { EntitiesMap, UnifiedMongoClient } from './entities';
+import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
@@ -384,7 +384,7 @@ operations.set('distinct', async ({ entities, operation }) => {
 
 operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.estimatedDocumentCount();
+  return collection.estimatedDocumentCount(operation.arguments);
 });
 
 operations.set('findOneAndDelete', async ({ entities, operation }) => {
