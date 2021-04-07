@@ -24,6 +24,8 @@ ARG HOSTNAME
 
 RUN npm install -g m
 
+VOLUME ["/usr/local/m"]
+
 RUN mkdir /data
 
 # preload mongo binaries
@@ -47,7 +49,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 # 1. Build the docker image and tag it as e.g. `docker-mongodb`
 #    Then in the same folder as this Dockerfile, run
 #
-# > docker build -t [--no-cache] docker-mongodb .
+# > docker build [--no-cache] -t docker-mongodb .
 # Note: passing --no-cache will force a full rebuild i.e. if a new version of the server is released; otherwise it should be omitted to reduce build time
 
 # 2. Run the appropriate topology

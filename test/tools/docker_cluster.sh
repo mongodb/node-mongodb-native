@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-DOCKER_IMAGE=node-mongodb-native/docker-mongodb
+DOCKER_IMAGE="node-mongodb-native/docker-mongodb"
+SHARED_VOLUME="type=volume,source=mongodb_binaries,target=/usr/local/m"
 
 function die_with_usage {
     printf "usage:\tdocker_cluster <server|replica_set|sharded_cluster|all> <mongo version>\n\tdocker_cluster killall\n"
@@ -10,13 +11,13 @@ function die_with_usage {
 
 function docker_mongodb {
     if [[ $1 == "replica_set" ]]; then
-        docker run --name "mongo_${1}_${2}" --rm -d -p 31000-31003:31000-31003 -e MONGO_VERSION=$2 ${DOCKER_IMAGE} replica
+        docker run --name "mongo_${1}_${2}" --rm --mount $SHARED_VOLUME -d -p 31000-31003:31000-31003 -e MONGO_VERSION=$2 ${DOCKER_IMAGE} replica
         echo "mongodb://localhost:31000/?replicaSet=rs"
     elif [[ $1 == "sharded_cluster" ]]; then
-        docker run --name "mongo_${1}_${2}" --rm -d -p 51000-51006:51000-51006 -e MONGO_VERSION=$2 ${DOCKER_IMAGE} sharded
+        docker run --name "mongo_${1}_${2}" --rm --mount $SHARED_VOLUME -d -p 51000-51006:51000-51006 -e MONGO_VERSION=$2 ${DOCKER_IMAGE} sharded
         echo "mongodb://localhost:51000,localhost:51001/"
     elif [[ $1 == "server" ]]; then
-        docker run --name "mongo_${1}_${2}" --rm -d -p 27017:27017 -e MONGO_VERSION=$2 -e HOSTNAME=$(hostname) ${DOCKER_IMAGE} single
+        docker run --name "mongo_${1}_${2}" --rm --mount $SHARED_VOLUME -d -p 27017:27017 -e MONGO_VERSION=$2 -e HOSTNAME=$(hostname) ${DOCKER_IMAGE} single
         echo "mongodb://localhost:27017"
     elif [[ $1 == "all" ]]; then
         docker_mongodb server $2 &
