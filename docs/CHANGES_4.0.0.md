@@ -12,7 +12,7 @@ Versioned API is a new feature in MongoDB 5.0 that allows user-selectable API ve
 // Declare API version "1" for the client
 client = new MongoClient(uri, { serverApi: { version: '1' } });
 
-cursor = client.database.collection.find(...);
+cursor = client.db('database').collection('coll').find(...);
 ```
 
 ### Strict mode
@@ -24,7 +24,7 @@ Declaring a `strict` API version will cause the MongoDB server to reject all com
 client = new MongoClient(uri, { serverApi: { version: '1', strict: true } });
 
 // Fails with an error
-cursor = client.database.collection.find(..., tailable: true);
+cursor = client.db('database').collection('coll').find({ ... }, { tailable: true });
 ```
 
 ### Deprecation Errors
