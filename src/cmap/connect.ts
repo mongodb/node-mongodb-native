@@ -248,7 +248,7 @@ function parseSslOptions(options: ConnectionOptions): TLSConnectionOpts {
   }
 
   // Set default sni servername to be the same as host
-  if (result.servername == null) {
+  if (result.servername == null && result.host && !net.isIP(result.host)) {
     result.servername = result.host;
   }
 
