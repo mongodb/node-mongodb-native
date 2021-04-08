@@ -324,3 +324,4 @@ export type {
 } from './bulk/common';
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
+export type { Encrypter, EncrypterOptions } from './encrypter';

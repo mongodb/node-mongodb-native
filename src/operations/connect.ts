@@ -3,11 +3,9 @@ import { Topology } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
 import { CMAP_EVENT_NAMES } from '../cmap/connection_pool';
-import * as BSON from '../bson';
 import type { MongoClient, MongoOptions } from '../mongo_client';
 import { Connection } from '../cmap/connection';
 import { Server } from '../sdam/server';
-import type { AutoEncrypter } from '../deps';
 
 export function connect(
   mongoClient: MongoClient,
@@ -68,44 +66,6 @@ function createListener<V1, V2>(mongoClient: MongoClient, event: string): Listen
   };
 }
 
-/**
- * If AutoEncryption is requested, handles the optional dependency logic and passing through options
- * returns undefined if CSFLE is not enabled.
- * @throws if optional 'mongodb-client-encryption' dependency missing
- */
-export function createAutoEncrypter(
-  client: MongoClient,
-  options: MongoOptions
-): AutoEncrypter | undefined {
-  if (!options.autoEncryption) {
-    return;
-  }
-  try {
-    require.resolve('mongodb-client-encryption');
-  } catch (err) {
-    throw new MongoError(
-      'Auto-encryption requested, but the module is not installed. ' +
-        'Please add `mongodb-client-encryption` as a dependency of your project'
-    );
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mongodbClientEncryption = require('mongodb-client-encryption');
-  if (typeof mongodbClientEncryption.extension !== 'function') {
-    throw new MongoError(
-      'loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
-        'Please make sure you are loading the correct version of `mongodb-client-encryption`'
-    );
-  }
-  const { AutoEncrypter: AutoEncrypterClass } = mongodbClientEncryption.extension(
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../lib/index')
-  );
-
-  const mongoCryptOptions = Object.assign({ bson: BSON }, options.autoEncryption);
-  return new AutoEncrypterClass(client, mongoCryptOptions);
-}
-
 function createTopology(
   mongoClient: MongoClient,
   options: MongoOptions,
@@ -130,18 +90,20 @@ function createTopology(
   if (mongoClient.autoEncrypter) {
     mongoClient.autoEncrypter.init(err => {
       if (err) {
-        callback(err);
-        return;
+        return callback(err);
       }
 
       topology.connect(options, err => {
         if (err) {
           topology.close({ force: true });
-          callback(err);
-          return;
+          return callback(err);
         }
 
-        callback(undefined, topology);
+        options.encrypter.connectInternalClient(error => {
+          if (error) return callback(error);
+
+          callback(undefined, topology);
+        });
       });
     });
 

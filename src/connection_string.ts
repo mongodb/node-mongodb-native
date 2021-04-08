@@ -29,7 +29,7 @@ import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevelId } from './logger';
 import { PromiseProvider } from './promise_provider';
-import { createAutoEncrypter } from './operations/connect';
+import { Encrypter } from './encrypter';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order
@@ -424,9 +424,7 @@ export function parseOptions(
   }
 
   checkTLSOptions(mongoOptions);
-  if (mongoClient && options.autoEncryption) {
-    mongoOptions.autoEncrypter = createAutoEncrypter(mongoClient, mongoOptions);
-  }
+
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
   if (mongoOptions.directConnection && typeof mongoOptions.srvHost === 'string') {
@@ -438,6 +436,12 @@ export function parseOptions(
     objectOptions.has('authSource') || urlOptions.has('authSource');
   mongoOptions.userSpecifiedReplicaSet =
     objectOptions.has('replicaSet') || urlOptions.has('replicaSet');
+
+  if (mongoClient && mongoOptions.autoEncryption) {
+    Encrypter.checkForMongoCrypt();
+    mongoOptions.encrypter = new Encrypter(mongoClient, uri, options);
+    mongoOptions.autoEncrypter = mongoOptions.encrypter.autoEncrypter;
+  }
 
   return mongoOptions;
 }

@@ -6,26 +6,7 @@
   ],
   "database_name": "default",
   "collection_name": "default",
-  "data": [
-    {
-      "_id": 1,
-      "encrypted_string": {
-        "$binary": {
-          "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
-          "subType": "06"
-        }
-      }
-    },
-    {
-      "_id": 2,
-      "encrypted_string": {
-        "$binary": {
-          "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
-          "subType": "06"
-        }
-      }
-    }
-  ],
+  "data": [],
   "json_schema": {
     "properties": {
       "encrypted_w_altname": {
@@ -118,24 +99,23 @@
   ],
   "tests": [
     {
-      "description": "countDocuments with deterministic encryption",
-      "skipReason": "waiting on SERVER-39395",
+      "description": "Insert a document with auto encryption using the AWS provider with temporary credentials",
       "clientOptions": {
         "autoEncryptOpts": {
           "kmsProviders": {
-            "aws": {}
+            "awsTemporary": {}
           }
         }
       },
       "operations": [
         {
-          "name": "countDocuments",
+          "name": "insertOne",
           "arguments": {
-            "filter": {
+            "document": {
+              "_id": 1,
               "encrypted_string": "string0"
             }
-          },
-          "result": 1
+          }
         }
       ],
       "expectations": [
@@ -175,10 +155,7 @@
                   }
                 ]
               },
-              "$db": "keyvault",
-              "readConcern": {
-                "level": "majority"
-              }
+              "$db": "keyvault"
             },
             "command_name": "find"
           }
@@ -186,29 +163,21 @@
         {
           "command_started_event": {
             "command": {
-              "aggregate": "default",
-              "pipeline": [
+              "insert": "default",
+              "documents": [
                 {
-                  "$match": {
-                    "encrypted_string": {
-                      "$binary": {
-                        "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
-                        "subType": "06"
-                      }
-                    }
-                  }
-                },
-                {
-                  "$group": {
-                    "_id": 1,
-                    "n": {
-                      "$sum": 1
+                  "_id": 1,
+                  "encrypted_string": {
+                    "$binary": {
+                      "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
+                      "subType": "06"
                     }
                   }
                 }
-              ]
+              ],
+              "ordered": true
             },
-            "command_name": "aggregate"
+            "command_name": "insert"
           }
         }
       ],
@@ -223,19 +192,34 @@
                   "subType": "06"
                 }
               }
-            },
-            {
-              "_id": 2,
-              "encrypted_string": {
-                "$binary": {
-                  "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
-                  "subType": "06"
-                }
-              }
             }
           ]
         }
       }
+    },
+    {
+      "description": "Insert with invalid temporary credentials",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "awsTemporaryNoSessionToken": {}
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          },
+          "result": {
+            "errorContains": "security token"
+          }
+        }
+      ]
     }
   ]
 }

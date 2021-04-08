@@ -25,13 +25,6 @@ tests:
             filter:
               name: *collection_name
           command_name: listCollections
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
-          command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
           command:
@@ -70,13 +63,6 @@ tests:
             listCollections: 1
             filter:
               name: *collection_name
-          command_name: listCollections
-      - command_started_event:
-          command:
-            listCollections: 1
-            filter:
-              name: "datakeys"
-            $db: keyvault
           command_name: listCollections
       # Then key is fetched from the key vault.
       - command_started_event:
