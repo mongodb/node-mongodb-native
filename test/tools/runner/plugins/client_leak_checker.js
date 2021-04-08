@@ -30,7 +30,7 @@ function unifiedTopologyIsConnected(client) {
 }
 
 after(function() {
-  const isUnifiedTopology = this.configuration.usingUnifiedTopology;
+  const isUnifiedTopology = !!(this.configuration && this.configuration.usingUnifiedTopology);
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
     const isConnected = isUnifiedTopology
