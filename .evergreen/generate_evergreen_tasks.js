@@ -400,10 +400,18 @@ OCSP_VERSIONS.forEach(VERSION => {
 const AWS_AUTH_TASKS = [];
 
 AWS_AUTH_VERSIONS.forEach(VERSION => {
-  const name = `aws-${VERSION}-auth-test`;
-  AWS_AUTH_TASKS.push(name);
-  TASKS.push({
-    name: name,
+  const name = (ex) => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
+  const aws_funcs = [
+    { func: 'run aws auth test with regular aws credentials' },
+    { func: 'run aws auth test with assume role credentials' },
+    { func: 'run aws auth test with aws EC2 credentials' },
+    { func: 'run aws auth test with aws credentials as environment variables' },
+    { func: 'run aws auth test with aws credentials and session token as environment variables' },
+    { func: 'run aws ECS auth test' }
+  ];
+
+  const aws_tasks = aws_funcs.map(fn => ({
+    name: name(fn.func),
     commands: [
       { func: 'install dependencies' },
       {
@@ -416,16 +424,15 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
         }
       },
       { func: 'add aws auth variables to file' },
-      { func: 'run aws auth test with regular aws credentials' },
-      { func: 'run aws auth test with assume role credentials' },
-      { func: 'run aws auth test with aws EC2 credentials' },
-      // FIXME: NODE-3113
-      // { func: 'run aws auth test with aws credentials as environment variables' },
-      // { func: 'run aws auth test with aws credentials and session token as environment variables' },
-      // { func: 'run aws ECS auth test' }
+      { func: 'setup aws env' },
+      fn
     ]
-  });
+  }))
+
+  TASKS.push(...aws_tasks);
+  AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name))
 });
+
 
 const BUILD_VARIANTS = [];
 

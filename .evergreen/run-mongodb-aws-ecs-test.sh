@@ -2,7 +2,7 @@
 set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
-MONGODB_URI="$1"
+export MONGODB_URI="$1"
 PROJECT_DIRECTORY="$(pwd)/src"
 
 # untar packed archive
@@ -16,5 +16,6 @@ export NVM_DIR="${PROJECT_DIRECTORY}/node-artifacts/nvm"
 set -x
 
 # run the tests
-npm install aws4 
-MONGODB_URI=$MONGODB_URI MONGODB_UNIFIED_TOPOLOGY=1 npx mocha test/functional/mongodb_aws.test.js
+npm install aws4
+
+npx mocha test/functional/mongodb_aws.test.js

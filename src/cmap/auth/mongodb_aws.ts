@@ -43,7 +43,7 @@ export class MongoDBAWS extends AuthProvider {
       return;
     }
 
-    if (credentials.username == null) {
+    if (!credentials.username) {
       makeTempCredentials(credentials, (err, tempCredentials) => {
         if (err || !tempCredentials) return callback(err);
 
@@ -144,7 +144,7 @@ interface AWSCredentials {
 
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
   function done(creds: AWSCredentials) {
-    if (creds.AccessKeyId == null || creds.SecretAccessKey == null || creds.Token == null) {
+    if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
       callback(new MongoError('Could not obtain temporary MONGODB-AWS credentials'));
       return;
     }
