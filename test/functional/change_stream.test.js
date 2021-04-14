@@ -1,6 +1,7 @@
 'use strict';
 const assert = require('assert');
 const Transform = require('stream').Transform;
+const EventCollector = require('../tools/utils').EventCollector;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
@@ -220,56 +221,6 @@ describe('Change Streams', function() {
       });
     }
   });
-
-  class EventCollector {
-    constructor(obj, events, options) {
-      this._events = [];
-      this._timeout = options ? options.timeout : 5000;
-
-      events.forEach(eventName => {
-        this._events[eventName] = [];
-        obj.on(eventName, event => this._events[eventName].push(event));
-      });
-    }
-
-    waitForEvent(eventName, count, callback) {
-      if (typeof count === 'function') {
-        callback = count;
-        count = 1;
-      }
-
-      waitForEventImpl(this, Date.now(), eventName, count, callback);
-    }
-
-    reset(eventName) {
-      if (eventName == null) {
-        Object.keys(this._events).forEach(eventName => {
-          this._events[eventName] = [];
-        });
-
-        return;
-      }
-
-      if (this._events[eventName] == null) {
-        throw new TypeError(`invalid event name "${eventName}" specified for reset`);
-      }
-
-      this._events[eventName] = [];
-    }
-  }
-
-  function waitForEventImpl(collector, start, eventName, count, callback) {
-    const events = collector._events[eventName];
-    if (events.length >= count) {
-      return callback(undefined, events);
-    }
-
-    if (Date.now() - start >= collector._timeout) {
-      return callback(new Error(`timed out waiting for event "${eventName}"`));
-    }
-
-    setTimeout(() => waitForEventImpl(collector, start, eventName, count, callback), 10);
-  }
 
   it('should create a ChangeStream on a collection and emit `change` events', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },

@@ -2,6 +2,7 @@
 const url = require('url');
 const qs = require('querystring');
 const util = require('util');
+const expect = require('chai').expect;
 
 const MongoClient = require('../../../lib/mongo_client');
 const TopologyType = require('../../../lib/core/sdam/common').TopologyType;
@@ -21,6 +22,7 @@ class NativeConfiguration {
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.parameters = undefined;
     this.options = Object.assign(
       {
         auth: parsedURI.auth,
@@ -226,6 +228,57 @@ class NativeConfiguration {
     }
 
     return url.format(urlObject);
+  }
+
+  unifiedUrlBuilder(options) {
+    options = Object.assign({ db: this.options.db, replicaSet: this.options.replicaSet }, options);
+
+    const FILLER_HOST = 'fillerHost';
+
+    const uri = url.parse(`mongodb://${FILLER_HOST}`);
+    uri.query = {};
+
+    if (options.replicaSet) {
+      uri.query['replicaSet'] = options.replicaSet;
+    }
+
+    uri.pathname = `/${options.db}`;
+
+    if (options.username) uri.auth = options.username;
+    if (options.password) uri.auth += `:${options.password}`;
+
+    if (options.username || options.password) {
+      if (options.authMechanism) {
+        uri.query['authMechanism'] = options.authMechanism;
+      }
+
+      if (options.authMechanismProperties) {
+        uri.query['authMechanismProperties'] = convertToConnStringMap(
+          options.authMechanismProperties
+        );
+      }
+
+      if (options.authSource) {
+        uri.query['authSource'] = options.authSource;
+      }
+    }
+
+    let actualHostsString;
+    if (options.useMultipleMongoses) {
+      expect(this.options.hosts).to.have.length.greaterThan(1);
+      actualHostsString = this.options.hosts.map(h => `${h.host}:${h.port}`).join(',');
+    } else {
+      const host = this.options.hosts[0];
+      actualHostsString = `${host.host}:${host.port}`;
+    }
+
+    console.log(uri);
+    const connectionString = url
+      .format(uri)
+      .replace(new RegExp(FILLER_HOST, 'ig'), actualHostsString);
+    console.log(connectionString);
+
+    return connectionString;
   }
 
   writeConcernMax() {
