@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-minServerVersion-pattern",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "1.2.3.4"
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

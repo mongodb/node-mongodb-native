@@ -1,0 +1,66 @@
+{
+  "description": "returnDocument-enum-invalid",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndReplace returnDocument invalid enum value",
+      "operations": [
+        {
+          "name": "findOneAndReplace",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "_id": 1,
+              "x": 111
+            },
+            "returnDocument": "invalid"
+          }
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate returnDocument invalid enum value",
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "invalid"
+          }
+        }
+      ]
+    }
+  ]
+}

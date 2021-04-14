@@ -1,0 +1,26 @@
+{
+  "description": "operation-expectError-conflicts_with_expectResult",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "client0",
+          "expectError": {
+            "isError": true
+          },
+          "expectResult": {}
+        }
+      ]
+    }
+  ]
+}

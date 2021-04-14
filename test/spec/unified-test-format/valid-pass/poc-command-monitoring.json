@@ -1,0 +1,222 @@
+{
+  "description": "poc-command-monitoring",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        },
+        {
+          "_id": 5,
+          "x": 55
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful find event with a getmore and the server kills the cursor",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.1",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            },
+            "sort": {
+              "_id": 1
+            },
+            "batchSize": 3,
+            "limit": 4
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": {
+                      "$gte": 1
+                    }
+                  },
+                  "sort": {
+                    "_id": 1
+                  },
+                  "batchSize": 3,
+                  "limit": 4
+                },
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "cursor": {
+                    "id": {
+                      "$$type": [
+                        "int",
+                        "long"
+                      ]
+                    },
+                    "ns": "command-monitoring-tests.test",
+                    "firstBatch": [
+                      {
+                        "_id": 1,
+                        "x": 11
+                      },
+                      {
+                        "_id": 2,
+                        "x": 22
+                      },
+                      {
+                        "_id": 3,
+                        "x": 33
+                      }
+                    ]
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "test",
+                  "batchSize": 1
+                },
+                "commandName": "getMore",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "cursor": {
+                    "id": 0,
+                    "ns": "command-monitoring-tests.test",
+                    "nextBatch": [
+                      {
+                        "_id": 4,
+                        "x": 44
+                      }
+                    ]
+                  }
+                },
+                "commandName": "getMore"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A failed find event",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "$or": true
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "$or": true
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

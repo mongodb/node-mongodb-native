@@ -1,0 +1,10 @@
+{
+  "description": "schemaVersion-unsupported",
+  "schemaVersion": "0.1",
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

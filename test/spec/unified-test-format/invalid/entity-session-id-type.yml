@@ -1,0 +1,14 @@
+description: "entity-session-id-type"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+  - session:
+      id: 0
+      client: *client0
+
+tests:
+  - description: "foo"
+    operations: []

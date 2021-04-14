@@ -1,0 +1,10 @@
+description: "entity-minProperties"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - {}
+
+tests:
+  - description: "foo"
+    operations: []

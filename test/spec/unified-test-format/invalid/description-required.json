@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

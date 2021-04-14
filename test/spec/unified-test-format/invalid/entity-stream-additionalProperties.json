@@ -1,0 +1,19 @@
+{
+  "description": "entity-stream-additionalProperties",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "stream": {
+        "id": "stream0",
+        "hexBytes": "FF",
+        "foo": 0
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}
