@@ -286,5 +286,33 @@ describe('Topology (unit)', function () {
         });
       });
     });
+
+    it('should encounter a server selection timeout on garbled server responses', function () {
+      const net = require('net');
+      const server = net.createServer();
+      const p = Promise.resolve();
+      server.listen(0, 'localhost', 2, () => {
+        server.on('connection', c => c.on('data', () => c.write('garbage_data')));
+        const { address, port } = server.address();
+        const client = this.configuration.newClient(`mongodb://${address}:${port}`, {
+          serverSelectionTimeoutMS: 1000
+        });
+        p.then(() =>
+          client
+            .connect()
+            .then(() => {
+              expect.fail('Should throw a server selection error!');
+            })
+            .catch(error => {
+              expect(error).to.exist;
+            })
+            .finally(() => {
+              server.close();
+              return client.close();
+            })
+        );
+      });
+      return p;
+    });
   });
 });

@@ -194,38 +194,9 @@ export class Connection extends EventEmitter {
       /* ignore errors, listen to `close` instead */
     });
 
-    stream.on('close', () => {
-      if (this.closed) {
-        return;
-      }
-
-      this.closed = true;
-      this[kQueue].forEach(op =>
-        op.cb(new MongoNetworkError(`connection ${this.id} to ${this.address} closed`))
-      );
-      this[kQueue].clear();
-
-      this.emit('close');
-    });
-
-    stream.on('timeout', () => {
-      if (this.closed) {
-        return;
-      }
-
-      stream.destroy();
-      this.closed = true;
-      this[kQueue].forEach(op =>
-        op.cb(
-          new MongoNetworkTimeoutError(`connection ${this.id} to ${this.address} timed out`, {
-            beforeHandshake: this[kIsMaster] == null
-          })
-        )
-      );
-
-      this[kQueue].clear();
-      this.emit('close');
-    });
+    this[kMessageStream].on('error', error => this.handleIssue({ destroy: error }));
+    stream.on('close', () => this.handleIssue({ isClose: true }));
+    stream.on('timeout', () => this.handleIssue({ isTimeout: true, destroy: true }));
 
     // hook the message stream up to the passed in stream
     stream.pipe(this[kMessageStream]);
@@ -267,6 +238,35 @@ export class Connection extends EventEmitter {
 
   markAvailable(): void {
     this[kLastUseTime] = now();
+  }
+
+  handleIssue(issue: { isTimeout?: boolean; isClose?: boolean; destroy?: boolean | Error }): void {
+    if (this.closed) {
+      return;
+    }
+
+    if (issue.destroy) {
+      this[kStream].destroy(typeof issue.destroy === 'boolean' ? undefined : issue.destroy);
+    }
+
+    this.closed = true;
+
+    for (const [, op] of this[kQueue]) {
+      if (issue.isTimeout) {
+        op.cb(
+          new MongoNetworkTimeoutError(`connection ${this.id} to ${this.address} timed out`, {
+            beforeHandshake: !!this[kIsMaster]
+          })
+        );
+      } else if (issue.isClose) {
+        op.cb(new MongoNetworkError(`connection ${this.id} to ${this.address} closed`));
+      } else {
+        op.cb(typeof issue.destroy === 'boolean' ? undefined : issue.destroy);
+      }
+    }
+
+    this[kQueue].clear();
+    this.emit('close');
   }
 
   destroy(): void;
