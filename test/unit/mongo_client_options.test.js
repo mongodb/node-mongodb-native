@@ -296,4 +296,23 @@ describe('MongoOptions', function () {
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
   });
+
+  it('transforms tlsAllowInvalidCertificates and tlsAllowInvalidHostnames correctly', function () {
+    const options = parseOptions('mongodb://localhost/', {
+      tlsAllowInvalidCertificates: true,
+      tlsAllowInvalidHostnames: true
+    });
+    expect(options.rejectUnauthorized).to.equal(false);
+    expect(options.checkServerIdentity).to.be.a('function');
+    expect(options.checkServerIdentity()).to.equal(undefined);
+  });
+
+  it('transforms tlsInsecure correctly', function () {
+    const options = parseOptions('mongodb://localhost/', {
+      tlsInsecure: true
+    });
+    expect(options.rejectUnauthorized).to.equal(false);
+    expect(options.checkServerIdentity).to.be.a('function');
+    expect(options.checkServerIdentity()).to.equal(undefined);
+  });
 });
