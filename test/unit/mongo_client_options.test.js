@@ -311,11 +311,11 @@ describe('MongoOptions', function () {
       tlsAllowInvalidHostnames: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
-    expect(optionsFalse.checkServerIdentity).not.exist;
+    expect(optionsFalse.checkServerIdentity).to.equal(undefined);
 
     const optionsUndefined = parseOptions('mongodb://localhost/');
-    expect(optionsUndefined.rejectUnauthorized).not.exist;
-    expect(optionsUndefined.checkServerIdentity).not.exist;
+    expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
+    expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
 
   it('transforms tlsInsecure correctly', function () {
@@ -330,10 +330,10 @@ describe('MongoOptions', function () {
       tlsInsecure: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
-    expect(optionsFalse.checkServerIdentity).to.not.exist;
+    expect(optionsFalse.checkServerIdentity).to.equal(undefined);
 
     const optionsUndefined = parseOptions('mongodb://localhost/');
-    expect(optionsUndefined.rejectUnauthorized).to.not.exist;
-    expect(optionsUndefined.checkServerIdentity).to.not.exist;
+    expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
+    expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
 });
