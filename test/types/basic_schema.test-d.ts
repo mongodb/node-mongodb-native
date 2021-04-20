@@ -1,26 +1,43 @@
-import { expectType } from 'tsd';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
 
 import { Collection } from '../../src/collection';
-import type { ObjectId } from '../../src/bson';
+import { ObjectId } from '../../src/bson';
 import { Db } from '../../src/db';
 import { MongoClient } from '../../src/mongo_client';
 import type { InferIdType } from '../../src/mongo_types';
 
 const db = new Db(new MongoClient(''), '');
 
-type InsertRes<TId = ObjectId> = Promise<{ acknowledged: boolean; insertedId: TId }>;
+type ACounter = { a: number };
+type ACounterWithId = { a: number; _id: ObjectId };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Can defined Schema without _id
-expectType<Collection<{ a: number }>>(new Collection<{ a: number }>(db, ''));
+expectType<Collection<ACounter>>(new Collection<ACounter>(db, ''));
+// Or with one
+expectType<Collection<ACounterWithId>>(new Collection<ACounterWithId>(db, ''));
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Simple Schema
-const simpleC = new Collection<{ a: number; _id: ObjectId }>(db, '');
-expectType<InsertRes>(simpleC.insertOne({ a: 2 }));
+// Simple Schema that does not define an _id
+// With _id
+type InsertOneArgOf<S> = Parameters<Collection<S>['insertOne']>[0];
+expectAssignable<InsertOneArgOf<ACounter>>({ _id: new ObjectId(), a: 3 });
+// Without _id
+expectAssignable<InsertOneArgOf<ACounter>>({ a: 3 });
+// Does not permit extra keys
+expectNotType<InsertOneArgOf<ACounter>>({ a: 2, b: 34 });
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Simple Schema that does define an _id
+// With _id
+expectAssignable<InsertOneArgOf<ACounterWithId>>({ _id: new ObjectId(), a: 3 });
+// Without _id
+expectAssignable<InsertOneArgOf<ACounterWithId>>({ a: 3 });
+// Does not permit extra keys
+expectNotType<InsertOneArgOf<ACounterWithId>>({ a: 2, b: 34 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// CustomType _id Schema
+// CustomType _id Schema (behavior change)
+// _id that is a custom type must be generated client side, so it is required
 class MyId {
   uuid!: number;
 }
@@ -28,7 +45,23 @@ interface CustomIdType {
   a: number;
   _id: MyId;
 }
-const customIdTypeC = new Collection<CustomIdType>(db, '');
+type customIdCollection = Collection<CustomIdType>;
+type insertOneArg = Parameters<customIdCollection['insertOne']>[0];
+
+// inferring the _id type is straight forward for a schema like this
 type IdType = InferIdType<CustomIdType>;
 expectType<IdType>(new MyId());
-expectType<InsertRes<MyId>>(customIdTypeC.insertOne({ a: 2, _id: new MyId() }));
+
+// _id is a required field since it isn't an ObjectId
+expectAssignable<insertOneArg>({ a: 2, _id: new MyId() });
+expectNotType<insertOneArg>({ a: 2 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// InferIdType -
+// eslint-disable-next-line @typescript-eslint/ban-types
+type Empty = {};
+const a: never = 0 as never;
+const oid = new ObjectId();
+expectType<InferIdType<Empty>>(oid); // Empty schema gets the implicit _id
+expectType<InferIdType<{ _id: Empty }>>(a); // Empty object as an oid resolves to never, while this is a valid _id, it is likely undesirable
+expectType<InferIdType<{ _id: { a: number } }>>({ a: 3 }); // embedded documents are permitted as _id fields

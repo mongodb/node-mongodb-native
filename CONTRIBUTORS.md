@@ -56,7 +56,7 @@
 
 - Neal Beeken <<neal.beeken@mongodb.com>>
 - Eric Adum <<eric.adum@mongodb.com>>
-- Durran Jordan <<durran.jordan@mongodb.com>>
+- Durran Jordan <<durran@gmail.com>>
 
 ## Community Types
 

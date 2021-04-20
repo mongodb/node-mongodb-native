@@ -2,8 +2,8 @@ import { expectType, expectError, expectNotType, expectNotAssignable } from 'tsd
 
 import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
-import { Db } from '../../src//db';
-import { MongoClient } from '../../src//mongo_client';
+import { Db } from '../../src/db';
+import { MongoClient } from '../../src/mongo_client';
 
 type InsertRes<TId = ObjectId> = Promise<{ acknowledged: boolean; insertedId: TId }>;
 
