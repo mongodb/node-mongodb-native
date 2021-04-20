@@ -298,21 +298,42 @@ describe('MongoOptions', function () {
   });
 
   it('transforms tlsAllowInvalidCertificates and tlsAllowInvalidHostnames correctly', function () {
-    const options = parseOptions('mongodb://localhost/', {
+    const optionsTrue = parseOptions('mongodb://localhost/', {
       tlsAllowInvalidCertificates: true,
       tlsAllowInvalidHostnames: true
     });
-    expect(options.rejectUnauthorized).to.equal(false);
-    expect(options.checkServerIdentity).to.be.a('function');
-    expect(options.checkServerIdentity()).to.equal(undefined);
+    expect(optionsTrue.rejectUnauthorized).to.equal(false);
+    expect(optionsTrue.checkServerIdentity).to.be.a('function');
+    expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
+
+    const optionsFalse = parseOptions('mongodb://localhost/', {
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false
+    });
+    expect(optionsFalse.rejectUnauthorized).to.equal(true);
+    expect(optionsFalse.checkServerIdentity).not.exist;
+
+    const optionsUndefined = parseOptions('mongodb://localhost/');
+    expect(optionsUndefined.rejectUnauthorized).not.exist;
+    expect(optionsUndefined.checkServerIdentity).not.exist;
   });
 
   it('transforms tlsInsecure correctly', function () {
-    const options = parseOptions('mongodb://localhost/', {
+    const optionsTrue = parseOptions('mongodb://localhost/', {
       tlsInsecure: true
     });
-    expect(options.rejectUnauthorized).to.equal(false);
-    expect(options.checkServerIdentity).to.be.a('function');
-    expect(options.checkServerIdentity()).to.equal(undefined);
+    expect(optionsTrue.rejectUnauthorized).to.equal(false);
+    expect(optionsTrue.checkServerIdentity).to.be.a('function');
+    expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
+
+    const optionsFalse = parseOptions('mongodb://localhost/', {
+      tlsInsecure: false
+    });
+    expect(optionsFalse.rejectUnauthorized).to.equal(true);
+    expect(optionsFalse.checkServerIdentity).to.not.exist;
+
+    const optionsUndefined = parseOptions('mongodb://localhost/');
+    expect(optionsUndefined.rejectUnauthorized).to.not.exist;
+    expect(optionsUndefined.checkServerIdentity).to.not.exist;
   });
 });
