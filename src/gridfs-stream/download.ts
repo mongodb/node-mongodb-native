@@ -102,7 +102,7 @@ export class GridFSBucketReadStream extends Readable {
    * @param chunks - Handle for chunks collection
    * @param files - Handle for files collection
    * @param readPreference - The read preference to use
-   * @param filter - The query to use to find the file document
+   * @param filter - The filter to use to find the file document
    */
   constructor(
     chunks: Collection,

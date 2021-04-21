@@ -40,7 +40,7 @@ export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecor
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
-export type Query<TSchema> = Partial<TSchema> & Document;
+export type Filter<TSchema> = Partial<TSchema> & Document;
 
 /** A MongoDB UpdateQuery is set of operators @public */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

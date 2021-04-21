@@ -133,7 +133,7 @@ export type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
-  Query as __InternalQuery,
+  Query,
   GetMore,
   Msg,
   KillCursor,
@@ -337,7 +337,7 @@ export type {
   OptionalId,
   WithoutId,
   UpdateQuery,
-  Query,
+  Filter,
   Projection,
   InferIdType,
   ProjectionOperators,

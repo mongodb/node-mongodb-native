@@ -19,7 +19,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Query } from '../mongo_types';
+import type { Filter } from '../mongo_types';
 
 /** @public */
 export const BatchType = {
@@ -40,7 +40,7 @@ export interface InsertOneModel<TSchema> {
 /** @public */
 export interface DeleteOneModel<TSchema> {
   /** The filter to limit the deleted documents. */
-  filter: Query<TSchema>;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -50,7 +50,7 @@ export interface DeleteOneModel<TSchema> {
 /** @public */
 export interface DeleteManyModel<TSchema> {
   /** The filter to limit the deleted documents. */
-  filter: Query<TSchema>;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -60,7 +60,7 @@ export interface DeleteManyModel<TSchema> {
 /** @public */
 export interface ReplaceOneModel<TSchema> {
   /** The filter to limit the replaced document. */
-  filter: Query<TSchema>;
+  filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
   replacement: TSchema;
   /** Specifies a collation. */

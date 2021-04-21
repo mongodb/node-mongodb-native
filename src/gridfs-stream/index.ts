@@ -17,7 +17,7 @@ import type { FindOptions } from './../operations/find';
 import type { Sort } from '../sort';
 import type { Logger } from '../logger';
 import type { FindCursor } from '../cursor/find_cursor';
-import type { Query } from '../mongo_types';
+import type { Filter } from '../mongo_types';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;
@@ -145,10 +145,10 @@ export class GridFSBucket extends EventEmitter {
   }
 
   /** Convenience wrapper around find on the files collection */
-  find(query?: Query<GridFSFile>, options?: FindOptions): FindCursor<GridFSFile> {
-    query = query ?? {};
+  find(filter?: Filter<GridFSFile>, options?: FindOptions): FindCursor<GridFSFile> {
+    filter ??= {};
     options = options ?? {};
-    return this.s._filesCollection.find(query, options);
+    return this.s._filesCollection.find(filter, options);
   }
 
   /**

@@ -89,7 +89,7 @@ import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
 import { FindCursor } from './cursor/find_cursor';
 import type { CountOptions } from './operations/count';
-import type { Query, TODO_NODE_2648, UpdateQuery, WithId, OptionalId } from './mongo_types';
+import type { Filter, TODO_NODE_2648, UpdateQuery, WithId, OptionalId } from './mongo_types';
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
@@ -387,33 +387,33 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Update a single document in a collection
    *
-   * @param query - The query used to select the document to update
+   * @param filter - The filter used to select the document to update
    * @param update - The update operations to be applied to the document
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   updateOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema> | Partial<TSchema>
   ): Promise<UpdateResult | Document>;
   updateOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema> | Partial<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema> | Partial<TSchema>,
     options: UpdateOptions
   ): Promise<UpdateResult | Document>;
   updateOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema> | Partial<TSchema>,
     options: UpdateOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema> | Partial<TSchema>,
     options?: UpdateOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
@@ -422,7 +422,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new UpdateOneOperation(this, query, update, resolveOptions(this, options)),
+      new UpdateOneOperation(this, filter, update, resolveOptions(this, options)),
       callback
     );
   }
@@ -430,30 +430,30 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Replace a document in a collection with another document
    *
-   * @param query - The query used to select the document to replace
+   * @param filter - The filter used to select the document to replace
    * @param replacement - The Document that replaces the matching document
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  replaceOne(query: Query<TSchema>, replacement: TSchema): Promise<UpdateResult | Document>;
+  replaceOne(filter: Filter<TSchema>, replacement: TSchema): Promise<UpdateResult | Document>;
   replaceOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: TSchema,
     callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: TSchema,
     options: ReplaceOptions
   ): Promise<UpdateResult | Document>;
   replaceOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: TSchema,
     options: ReplaceOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: TSchema,
     options?: ReplaceOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
@@ -462,7 +462,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new ReplaceOneOperation(this, query, replacement, resolveOptions(this, options)),
+      new ReplaceOneOperation(this, filter, replacement, resolveOptions(this, options)),
       callback
     );
   }
@@ -470,30 +470,33 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Update multiple documents in a collection
    *
-   * @param query - The query used to select the documents to update
+   * @param filter - The filter used to select the documents to update
    * @param update - The update operations to be applied to the documents
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  updateMany(query: Query<TSchema>, update: UpdateQuery<TSchema>): Promise<UpdateResult | Document>;
   updateMany(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
+    update: UpdateQuery<TSchema>
+  ): Promise<UpdateResult | Document>;
+  updateMany(
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options: UpdateOptions
   ): Promise<UpdateResult | Document>;
   updateMany(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options: UpdateOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options?: UpdateOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
@@ -502,7 +505,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new UpdateManyOperation(this, query, update, resolveOptions(this, options)),
+      new UpdateManyOperation(this, filter, update, resolveOptions(this, options)),
       callback
     );
   }
@@ -510,16 +513,20 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Delete a document from a collection
    *
-   * @param query - The query used to select the document to remove
+   * @param filter - The filter used to select the document to remove
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  deleteOne(query: Query<TSchema>): Promise<DeleteResult>;
-  deleteOne(query: Query<TSchema>, callback: Callback<DeleteResult>): void;
-  deleteOne(query: Query<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
-  deleteOne(query: Query<TSchema>, options: DeleteOptions, callback?: Callback<DeleteResult>): void;
+  deleteOne(filter: Filter<TSchema>): Promise<DeleteResult>;
+  deleteOne(filter: Filter<TSchema>, callback: Callback<DeleteResult>): void;
+  deleteOne(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   deleteOne(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
+    options: DeleteOptions,
+    callback?: Callback<DeleteResult>
+  ): void;
+  deleteOne(
+    filter: Filter<TSchema>,
     options?: DeleteOptions | Callback<DeleteResult>,
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
@@ -527,7 +534,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new DeleteOneOperation(this, query, resolveOptions(this, options)),
+      new DeleteOneOperation(this, filter, resolveOptions(this, options)),
       callback
     );
   }
@@ -535,26 +542,30 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Delete multiple documents from a collection
    *
-   * @param query - The query used to select the documents to remove
+   * @param filter - The filter used to select the documents to remove
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  deleteMany(query: Query<TSchema>): Promise<DeleteResult>;
-  deleteMany(query: Query<TSchema>, callback: Callback<DeleteResult>): void;
-  deleteMany(query: Query<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
-  deleteMany(query: Query<TSchema>, options: DeleteOptions, callback: Callback<DeleteResult>): void;
+  deleteMany(filter: Filter<TSchema>): Promise<DeleteResult>;
+  deleteMany(filter: Filter<TSchema>, callback: Callback<DeleteResult>): void;
+  deleteMany(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   deleteMany(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
+    options: DeleteOptions,
+    callback: Callback<DeleteResult>
+  ): void;
+  deleteMany(
+    filter: Filter<TSchema>,
     options?: DeleteOptions | Callback<DeleteResult>,
     callback?: Callback<DeleteResult>
   ): Promise<DeleteResult> | void {
-    if (query == null) {
-      query = {};
+    if (filter == null) {
+      filter = {};
       options = {};
       callback = undefined;
-    } else if (typeof query === 'function') {
-      callback = query as Callback<DeleteResult>;
-      query = {};
+    } else if (typeof filter === 'function') {
+      callback = filter as Callback<DeleteResult>;
+      filter = {};
       options = {};
     } else if (typeof options === 'function') {
       callback = options;
@@ -563,7 +574,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new DeleteManyOperation(this, query, resolveOptions(this, options)),
+      new DeleteManyOperation(this, filter, resolveOptions(this, options)),
       callback
     );
   }
@@ -622,20 +633,20 @@ export class Collection<TSchema extends Document = any> {
   }
 
   /**
-   * Fetches the first document that matches the query
+   * Fetches the first document that matches the filter
    *
-   * @param query - Query for find Operation
+   * @param filter - Query for find Operation
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findOne(): Promise<TSchema>;
   findOne(callback: Callback<TSchema>): void;
-  findOne(query: Query<TSchema>): Promise<TSchema>;
-  findOne(query: Query<TSchema>, callback?: Callback<TSchema>): void;
-  findOne(query: Query<TSchema>, options: FindOptions): Promise<TSchema>;
-  findOne(query: Query<TSchema>, options: FindOptions, callback: Callback<TSchema>): void;
+  findOne(filter: Filter<TSchema>): Promise<TSchema>;
+  findOne(filter: Filter<TSchema>, callback?: Callback<TSchema>): void;
+  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema>;
+  findOne(filter: Filter<TSchema>, options: FindOptions, callback: Callback<TSchema>): void;
   findOne(
-    query?: Query<TSchema> | Callback<TSchema>,
+    filter?: Filter<TSchema> | Callback<TSchema>,
     options?: FindOptions | Callback<TSchema>,
     callback?: Callback<TSchema>
   ): Promise<TSchema> | void {
@@ -643,27 +654,27 @@ export class Collection<TSchema extends Document = any> {
       throw new TypeError('Third parameter to `findOne()` must be a callback or undefined');
     }
 
-    if (typeof query === 'function')
-      (callback = query as Callback<Document>), (query = {}), (options = {});
+    if (typeof filter === 'function')
+      (callback = filter as Callback<Document>), (filter = {}), (options = {});
     if (typeof options === 'function') (callback = options), (options = {});
-    query = query || {};
+    filter = filter || {};
 
     return executeOperation(
       getTopology(this),
-      new FindOneOperation(this, query, resolveOptions(this, options)) as TODO_NODE_2648,
+      new FindOneOperation(this, filter, resolveOptions(this, options)) as TODO_NODE_2648,
       callback
     );
   }
 
   /**
-   * Creates a cursor for a query that can be used to iterate over results from MongoDB
+   * Creates a cursor for a filter that can be used to iterate over results from MongoDB
    *
-   * @param query - The query predicate. If unspecified, then all documents in the collection will match the predicate
+   * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<TSchema>;
-  find(query: Query<TSchema>): FindCursor<TSchema>;
-  find(query: Query<TSchema>, options: FindOptions<TSchema>): FindCursor<TSchema>;
-  find(query?: Query<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
+  find(filter: Filter<TSchema>): FindCursor<TSchema>;
+  find(filter: Filter<TSchema>, options: FindOptions<TSchema>): FindCursor<TSchema>;
+  find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new TypeError('Third parameter to `collection.find()` must be undefined');
     }
@@ -674,7 +685,7 @@ export class Collection<TSchema extends Document = any> {
     return new FindCursor<TSchema>(
       getTopology(this),
       this.s.namespace,
-      query,
+      filter,
       resolveOptions(this, options)
     );
   }
@@ -989,7 +1000,7 @@ export class Collection<TSchema extends Document = any> {
    * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    *
-   * @param query - The query for the count
+   * @param filter - The filter for the count
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
@@ -1000,35 +1011,35 @@ export class Collection<TSchema extends Document = any> {
    */
   countDocuments(): Promise<number>;
   countDocuments(callback: Callback<number>): void;
-  countDocuments(query: Query<TSchema>): Promise<number>;
+  countDocuments(filter: Filter<TSchema>): Promise<number>;
   countDocuments(callback: Callback<number>): void;
-  countDocuments(query: Query<TSchema>, options: CountDocumentsOptions): Promise<number>;
+  countDocuments(filter: Filter<TSchema>, options: CountDocumentsOptions): Promise<number>;
   countDocuments(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: CountDocumentsOptions,
     callback: Callback<number>
   ): void;
   countDocuments(
-    query?: Document | CountDocumentsOptions | Callback<number>,
+    filter?: Document | CountDocumentsOptions | Callback<number>,
     options?: CountDocumentsOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
-    if (typeof query === 'undefined') {
-      (query = {}), (options = {}), (callback = undefined);
-    } else if (typeof query === 'function') {
-      (callback = query as Callback<number>), (query = {}), (options = {});
+    if (typeof filter === 'undefined') {
+      (filter = {}), (options = {}), (callback = undefined);
+    } else if (typeof filter === 'function') {
+      (callback = filter as Callback<number>), (filter = {}), (options = {});
     } else {
       if (arguments.length === 2) {
         if (typeof options === 'function') (callback = options), (options = {});
       }
     }
 
-    query ??= {};
+    filter ??= {};
     return executeOperation(
       getTopology(this),
       new CountDocumentsOperation(
         this,
-        query as Document,
+        filter as Document,
         resolveOptions(this, options as CountDocumentsOptions)
       ),
       callback
@@ -1039,50 +1050,50 @@ export class Collection<TSchema extends Document = any> {
    * The distinct command returns a list of distinct values for the given key across a collection.
    *
    * @param key - Field of the document to find distinct values for
-   * @param query - The query for filtering the set of documents to which we apply the distinct filter.
+   * @param filter - The filter for filtering the set of documents to which we apply the distinct filter.
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   distinct<Key extends keyof WithId<TSchema>>(key: Key): Promise<any[]>;
   distinct<Key extends keyof WithId<TSchema>>(key: Key, callback: Callback<any[]>): void;
-  distinct<Key extends keyof WithId<TSchema>>(key: Key, query: Query<TSchema>): Promise<any[]>;
+  distinct<Key extends keyof WithId<TSchema>>(key: Key, query: Filter<TSchema>): Promise<any[]>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    query: Query<TSchema>,
+    query: Filter<TSchema>,
     callback: Callback<any[]>
   ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: DistinctOptions
   ): Promise<any[]>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: DistinctOptions,
     callback: Callback<any[]>
   ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    query?: Query<TSchema> | DistinctOptions | Callback<any[]>,
+    filter?: Filter<TSchema> | DistinctOptions | Callback<any[]>,
     options?: DistinctOptions | Callback<any[]>,
     callback?: Callback<any[]>
   ): Promise<any[]> | void {
-    if (typeof query === 'function') {
-      (callback = query as Callback<any[]>), (query = {}), (options = {});
+    if (typeof filter === 'function') {
+      (callback = filter as Callback<any[]>), (filter = {}), (options = {});
     } else {
       if (arguments.length === 3 && typeof options === 'function') {
         (callback = options), (options = {});
       }
     }
 
-    query ??= {};
+    filter ??= {};
     return executeOperation(
       getTopology(this),
       new DistinctOperation(
         this,
         key as TODO_NODE_2648,
-        query,
+        filter,
         resolveOptions(this, options as DistinctOptions)
       ),
       callback
@@ -1135,23 +1146,23 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Find a document and delete it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param query - The query used to select the document to remove
+   * @param filter - The filter used to select the document to remove
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOneAndDelete(query: Query<TSchema>): Promise<ModifyResult<TSchema>>;
-  findOneAndDelete(query: Query<TSchema>, callback: Callback<ModifyResult<TSchema>>): void;
+  findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
+  findOneAndDelete(filter: Filter<TSchema>, callback: Callback<ModifyResult<TSchema>>): void;
   findOneAndDelete(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: FindOneAndDeleteOptions
   ): Promise<ModifyResult<TSchema>>;
   findOneAndDelete(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: FindOneAndDeleteOptions,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndDelete(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions | Callback<ModifyResult<TSchema>>,
     callback?: Callback<ModifyResult<TSchema>>
   ): Promise<Document> | void {
@@ -1159,7 +1170,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new FindOneAndDeleteOperation(this, query, resolveOptions(this, options)) as TODO_NODE_2648,
+      new FindOneAndDeleteOperation(this, filter, resolveOptions(this, options)) as TODO_NODE_2648,
       callback
     );
   }
@@ -1167,30 +1178,30 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Find a document and replace it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param query - The query used to select the document to replace
+   * @param filter - The filter used to select the document to replace
    * @param replacement - The Document that replaces the matching document
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOneAndReplace(query: Query<TSchema>, replacement: Document): Promise<ModifyResult<TSchema>>;
+  findOneAndReplace(filter: Filter<TSchema>, replacement: Document): Promise<ModifyResult<TSchema>>;
   findOneAndReplace(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: Document,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndReplace(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: Document,
     options: FindOneAndReplaceOptions
   ): Promise<ModifyResult<TSchema>>;
   findOneAndReplace(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: Document,
     options: FindOneAndReplaceOptions,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndReplace(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     replacement: Document,
     options?: FindOneAndReplaceOptions | Callback<ModifyResult<TSchema>>,
     callback?: Callback<ModifyResult<TSchema>>
@@ -1201,7 +1212,7 @@ export class Collection<TSchema extends Document = any> {
       getTopology(this),
       new FindOneAndReplaceOperation(
         this,
-        query,
+        filter,
         replacement,
         resolveOptions(this, options)
       ) as TODO_NODE_2648,
@@ -1212,33 +1223,33 @@ export class Collection<TSchema extends Document = any> {
   /**
    * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
    *
-   * @param query - The query used to select the document to update
+   * @param filter - The filter used to select the document to update
    * @param update - Update operations to be performed on the document
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findOneAndUpdate(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>
   ): Promise<ModifyResult<TSchema>>;
   findOneAndUpdate(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndUpdate(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options: FindOneAndUpdateOptions
   ): Promise<ModifyResult<TSchema>>;
   findOneAndUpdate(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options: FindOneAndUpdateOptions,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndUpdate(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options?: FindOneAndUpdateOptions | Callback<ModifyResult<TSchema>>,
     callback?: Callback<ModifyResult<TSchema>>
@@ -1249,7 +1260,7 @@ export class Collection<TSchema extends Document = any> {
       getTopology(this),
       new FindOneAndUpdateOperation(
         this,
-        query,
+        filter,
         update,
         resolveOptions(this, options)
       ) as TODO_NODE_2648,
@@ -1428,7 +1439,7 @@ export class Collection<TSchema extends Document = any> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   update(
-    selector: Query<TSchema>,
+    selector: Filter<TSchema>,
     update: UpdateQuery<TSchema>,
     options: UpdateOptions,
     callback: Callback<Document>
@@ -1451,7 +1462,7 @@ export class Collection<TSchema extends Document = any> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   remove(
-    selector: Query<TSchema>,
+    selector: Filter<TSchema>,
     options: DeleteOptions,
     callback: Callback
   ): Promise<DeleteResult> | void {
@@ -1465,7 +1476,7 @@ export class Collection<TSchema extends Document = any> {
   }
 
   /**
-   * An estimated count of matching documents in the db to a query.
+   * An estimated count of matching documents in the db to a filter.
    *
    * **NOTE:** This method has been deprecated, since it does not provide an accurate count of the documents
    * in a collection. To obtain an accurate count of documents in the collection, use {@link Collection#countDocuments| countDocuments}.
@@ -1473,35 +1484,35 @@ export class Collection<TSchema extends Document = any> {
    *
    * @deprecated use {@link Collection#countDocuments| countDocuments} or {@link Collection#estimatedDocumentCount| estimatedDocumentCount} instead
    *
-   * @param query - The query for the count.
+   * @param filter - The filter for the count.
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   count(): Promise<number>;
   count(callback: Callback<number>): void;
-  count(query: Query<TSchema>): Promise<number>;
-  count(query: Query<TSchema>, callback: Callback<number>): void;
-  count(query: Query<TSchema>, options: CountOptions): Promise<number>;
+  count(filter: Filter<TSchema>): Promise<number>;
+  count(filter: Filter<TSchema>, callback: Callback<number>): void;
+  count(filter: Filter<TSchema>, options: CountOptions): Promise<number>;
   count(
-    query: Query<TSchema>,
+    filter: Filter<TSchema>,
     options: CountOptions,
     callback: Callback<number>
   ): Promise<number> | void;
   count(
-    query?: Query<TSchema> | CountOptions | Callback<number>,
+    filter?: Filter<TSchema> | CountOptions | Callback<number>,
     options?: CountOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
-    if (typeof query === 'function') {
-      (callback = query as Callback<number>), (query = {}), (options = {});
+    if (typeof filter === 'function') {
+      (callback = filter as Callback<number>), (filter = {}), (options = {});
     } else {
       if (typeof options === 'function') (callback = options), (options = {});
     }
 
-    query = query || {};
+    filter ??= {};
     return executeOperation(
       getTopology(this),
-      new CountDocumentsOperation(this, query, resolveOptions(this, options)),
+      new CountDocumentsOperation(this, filter, resolveOptions(this, options)),
       callback
     );
   }
