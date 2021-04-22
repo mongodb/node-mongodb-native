@@ -58,7 +58,7 @@ EOF_HAPROXY_CONFIG
   echo "Single Mongos LB: $SINGLE_MONGOS_LB_URI"
   echo "Multiple Mongos LB: $MULTI_MONGOS_LB_URI"
 
-  /usr/sbin/haproxy -D -f $DRIVERS_TOOLS/haproxy.conf -p ./haproxy.pid
+  /usr/sbin/haproxy -D -f $DRIVERS_TOOLS/haproxy.conf -p $DRIVERS_TOOLS/haproxy.pid
 
   export SINGLE_MONGOS_LB_URI="$SINGLE_MONGOS_LB_URI"
   export MULTI_MONGOS_LB_URI="$MULTI_MONGOS_LB_URI"
