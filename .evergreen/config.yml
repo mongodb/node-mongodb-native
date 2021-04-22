@@ -131,7 +131,20 @@ functions:
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-  run lb tests single:
+  start-load-balancer:
+    - command: shell.exec
+      params:
+        script: |
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} bash ${DRIVERS_TOOLS}/.evergreen/load-balancer.sh start
+    - command: expansions.update
+      params:
+        file: lb-expansion.yml
+  stop-load-balancer:
+    - command: shell.exec
+      params:
+        script: |
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} bash ${DRIVERS_TOOLS}/.evergreen/load-balancer.sh stop
+  run-lb-tests:
     - command: shell.exec
       type: test
       params:
@@ -139,34 +152,8 @@ functions:
         timeout_secs: 60
         script: |
           ${PREPARE_SHELL}
-
-          ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
-
-          MONGODB_URI="${SINGLE_MONGOS_LB_URI}" \
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
-  run lb tests multi:
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        timeout_secs: 60
-        script: |
-          ${PREPARE_SHELL}
-
-          ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
-
-          MONGODB_URI="${MULTI_MONGOS_LB_URI}" \
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
+          echo "SINGLE_MONGOS_LB_URI: ${SINGLE_MONGOS_LB_URI}"
+          echo "MULTI_MONGOS_LB_URI: ${MULTI_MONGOS_LB_URI}"
   run checks:
     - command: shell.exec
       type: test
@@ -568,28 +555,19 @@ post:
 ignore:
   - '*.md'
 tasks:
-  - name: test-latest-load-balancer-single
+  - name: test-latest-load-balancer
     tags:
       - latest
       - server
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
+      - func: start-load-balancer
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
-      - func: run lb tests single
-  - name: test-latest-load-balancer-multi
-    tags:
-      - latest
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: sharded_cluster
-      - func: run lb tests multi
+      - func: run-lb-tests
+      - func: stop-load-balancer
   - name: test-latest-server
     tags:
       - latest
