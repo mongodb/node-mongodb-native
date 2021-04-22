@@ -131,7 +131,7 @@ functions:
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-  run tests:
+  run lb tests:
     - command: shell.exec
       type: test
       params:
@@ -1462,6 +1462,7 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
+      - test-latest-load-balancer
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
