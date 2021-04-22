@@ -30,10 +30,10 @@ start() {
       server mongos_two 127.0.0.1:27018 check
 EOF_HAPROXY_CONFIG
 
-  PREFIX=$(echo $MONGODB_URI | grep -Eo "(.*?)@") || true
-  SUFFIX=$(echo $MONGODB_URI | grep -Eo "\?(.*)") || true
+  PREFIX=$(echo $MONGODB_URI | grep -Eo "(.*?)@" | cat)
+  SUFFIX=$(echo $MONGODB_URI | grep -Eo "\?(.*)" | cat)
 
-  if [ PREFIX = "" ]
+  if [[ $PREFIX = "" ]]
   then
     # No auth then just set the URI
     SINGLE_MONGOS_LB_URI="mongodb://127.0.0.1:8000"
@@ -44,7 +44,7 @@ EOF_HAPROXY_CONFIG
     MULTI_MONGOS_LB_URI="${PREFIX}127.0.0.1:8001"
   fi
 
-  if [ SUFFIX = "" ]
+  if [[ $SUFFIX = "" ]]
   then
     # If there are no query params then add only the load balanced option.
     SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}?loadBalanced=true"
