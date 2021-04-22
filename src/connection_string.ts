@@ -938,10 +938,18 @@ export const OPTIONS = {
     type: 'boolean'
   },
   tlsAllowInvalidCertificates: {
-    type: 'boolean'
+    target: 'rejectUnauthorized',
+    transform({ name, values: [value] }) {
+      // allowInvalidCertificates is the inverse of rejectUnauthorized
+      return !getBoolean(name, value);
+    }
   },
   tlsAllowInvalidHostnames: {
-    type: 'boolean'
+    target: 'checkServerIdentity',
+    transform({ name, values: [value] }) {
+      // tlsAllowInvalidHostnames means setting the checkServerIdentity function to a noop
+      return getBoolean(name, value) ? () => undefined : undefined;
+    }
   },
   tlsCAFile: {
     target: 'ca',
@@ -969,10 +977,12 @@ export const OPTIONS = {
     transform({ name, options, values: [value] }) {
       const tlsInsecure = getBoolean(name, value);
       if (tlsInsecure) {
-        options.checkServerIdentity = undefined;
+        options.checkServerIdentity = () => undefined;
         options.rejectUnauthorized = false;
       } else {
-        options.checkServerIdentity = options.tlsAllowInvalidHostnames ? undefined : (true as any);
+        options.checkServerIdentity = options.tlsAllowInvalidHostnames
+          ? () => undefined
+          : undefined;
         options.rejectUnauthorized = options.tlsAllowInvalidCertificates ? false : true;
       }
       return tlsInsecure;

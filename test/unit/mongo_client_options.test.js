@@ -296,4 +296,44 @@ describe('MongoOptions', function () {
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
   });
+
+  it('transforms tlsAllowInvalidCertificates and tlsAllowInvalidHostnames correctly', function () {
+    const optionsTrue = parseOptions('mongodb://localhost/', {
+      tlsAllowInvalidCertificates: true,
+      tlsAllowInvalidHostnames: true
+    });
+    expect(optionsTrue.rejectUnauthorized).to.equal(false);
+    expect(optionsTrue.checkServerIdentity).to.be.a('function');
+    expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
+
+    const optionsFalse = parseOptions('mongodb://localhost/', {
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false
+    });
+    expect(optionsFalse.rejectUnauthorized).to.equal(true);
+    expect(optionsFalse.checkServerIdentity).to.equal(undefined);
+
+    const optionsUndefined = parseOptions('mongodb://localhost/');
+    expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
+    expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
+  });
+
+  it('transforms tlsInsecure correctly', function () {
+    const optionsTrue = parseOptions('mongodb://localhost/', {
+      tlsInsecure: true
+    });
+    expect(optionsTrue.rejectUnauthorized).to.equal(false);
+    expect(optionsTrue.checkServerIdentity).to.be.a('function');
+    expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
+
+    const optionsFalse = parseOptions('mongodb://localhost/', {
+      tlsInsecure: false
+    });
+    expect(optionsFalse.rejectUnauthorized).to.equal(true);
+    expect(optionsFalse.checkServerIdentity).to.equal(undefined);
+
+    const optionsUndefined = parseOptions('mongodb://localhost/');
+    expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
+    expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
+  });
 });
