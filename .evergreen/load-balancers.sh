@@ -30,8 +30,8 @@ start() {
       server mongos_two 127.0.0.1:27018 check
 EOF_HAPROXY_CONFIG
 
-  PREFIX=$(echo $MONGODB_URI | grep -Eo "(.*?)@")
-  SUFFIX=$(echo $MONGODB_URI | grep -Eo "\?(.*)")
+  PREFIX=$(echo $MONGODB_URI | grep -Eo "(.*?)@") || true
+  SUFFIX=$(echo $MONGODB_URI | grep -Eo "\?(.*)") || true
 
   if [ PREFIX = "" ]
   then

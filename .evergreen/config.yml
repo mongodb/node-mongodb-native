@@ -148,7 +148,7 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
+          bash DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
   run lb tests multi:
     - command: shell.exec
       type: test
@@ -166,7 +166,7 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
+          bash DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
   run checks:
     - command: shell.exec
       type: test
