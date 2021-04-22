@@ -1491,8 +1491,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-latest-load-balancer-single
-      - test-latest-load-balancer-multi
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
@@ -1607,6 +1605,8 @@ buildvariants:
       NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
     tasks: &ref_3
+      - test-latest-load-balancer-single
+      - test-latest-load-balancer-multi
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
