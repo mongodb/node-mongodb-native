@@ -131,7 +131,7 @@ functions:
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-  run lb tests:
+  run lb tests single:
     - command: shell.exec
       type: test
       params:
@@ -142,7 +142,25 @@ functions:
 
           bash ${PROJECT_DIRECTORY}/.evergreen/load-balancer.sh start
 
-          MONGODB_URI="${MONGODB_URI}" \
+          MONGODB_URI="${SINGLE_MONGOS_LB_URI}" \
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancer.sh stop
+  run lb tests multi:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancer.sh start
+
+          MONGODB_URI="${MULTI_MONGOS_LB_URI}" \
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
@@ -550,7 +568,7 @@ post:
 ignore:
   - '*.md'
 tasks:
-  - name: test-latest-load-balancer
+  - name: test-latest-load-balancer-single
     tags:
       - latest
       - server
@@ -560,7 +578,18 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
-      - func: run lb tests
+      - func: run lb tests single
+  - name: test-latest-load-balancer-multi
+    tags:
+      - latest
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+      - func: run lb tests multi
   - name: test-latest-server
     tags:
       - latest
@@ -1462,7 +1491,8 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: dubnium
     tasks: &ref_1
-      - test-latest-load-balancer
+      - test-latest-load-balancer-single
+      - test-latest-load-balancer-multi
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
