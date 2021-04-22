@@ -131,6 +131,24 @@ functions:
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancer.sh start
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancer.sh stop
   run checks:
     - command: shell.exec
       type: test
@@ -532,6 +550,17 @@ post:
 ignore:
   - '*.md'
 tasks:
+  - name: test-latest-load-balancer
+    tags:
+      - latest
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+      - func: run lb tests
   - name: test-latest-server
     tags:
       - latest
