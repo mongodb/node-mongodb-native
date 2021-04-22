@@ -1,11 +1,19 @@
 import { MongoError } from '../error';
-import { Topology } from '../sdam/topology';
+import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
-import { CMAP_EVENT_NAMES } from '../cmap/connection_pool';
 import type { MongoClient, MongoOptions } from '../mongo_client';
-import { Connection } from '../cmap/connection';
-import { Server } from '../sdam/server';
+import { CMAP_EVENTS } from '../cmap/connection_pool';
+import { APM_EVENTS } from '../cmap/connection';
+import { HEARTBEAT_EVENTS } from '../sdam/server';
+
+/** @public */
+export const MONGO_CLIENT_EVENTS = [
+  ...CMAP_EVENTS,
+  ...APM_EVENTS,
+  ...TOPOLOGY_EVENTS,
+  ...HEARTBEAT_EVENTS
+] as const;
 
 export function connect(
   mongoClient: MongoClient,
@@ -53,19 +61,6 @@ export function connect(
   return createTopology(mongoClient, options, connectCallback);
 }
 
-export type ListenerFunction<V1 = unknown, V2 = unknown> = (v1: V1, v2: V2) => boolean;
-
-function createListener<V1, V2>(mongoClient: MongoClient, event: string): ListenerFunction<V1, V2> {
-  const eventSet = new Set(['all', 'fullsetup', 'open', 'reconnect']);
-  return (v1, v2) => {
-    if (eventSet.has(event)) {
-      return mongoClient.emit(event, mongoClient);
-    }
-
-    return mongoClient.emit(event, v1, v2);
-  };
-}
-
 function createTopology(
   mongoClient: MongoClient,
   options: MongoOptions,
@@ -78,13 +73,11 @@ function createTopology(
   mongoClient.topology = topology;
 
   // Add listeners
-  topology.on('error', createListener(mongoClient, 'error'));
-  topology.on('timeout', createListener(mongoClient, 'timeout'));
-  topology.on('close', createListener(mongoClient, 'close'));
-  topology.once('open', createListener(mongoClient, 'open'));
+  topology.once(Topology.OPEN, topology => mongoClient.emit(Topology.OPEN, topology));
 
-  // Propagate the events to the client
-  relayEvents(mongoClient, topology);
+  for (const event of MONGO_CLIENT_EVENTS) {
+    topology.on(event, (...args: any[]) => mongoClient.emit(event, ...(args as any)));
+  }
 
   // initialize CSFLE if requested
   if (mongoClient.autoEncrypter) {
@@ -120,31 +113,4 @@ function createTopology(
     callback(undefined, topology);
     return;
   });
-}
-
-function relayEvents(mongoClient: MongoClient, topology: Topology) {
-  const serverOrCommandEvents = [
-    // APM
-    Connection.COMMAND_STARTED,
-    Connection.COMMAND_SUCCEEDED,
-    Connection.COMMAND_FAILED,
-
-    // SDAM
-    Topology.SERVER_OPENING,
-    Topology.SERVER_CLOSED,
-    Topology.SERVER_DESCRIPTION_CHANGED,
-    Server.SERVER_HEARTBEAT_STARTED,
-    Server.SERVER_HEARTBEAT_SUCCEEDED,
-    Server.SERVER_HEARTBEAT_FAILED,
-    Topology.TOPOLOGY_OPENING,
-    Topology.TOPOLOGY_CLOSED,
-    Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-    ...CMAP_EVENT_NAMES
-  ];
-
-  for (const event of serverOrCommandEvents) {
-    topology.on(event, (object1, object2) => {
-      mongoClient.emit(event, object1, object2);
-    });
-  }
 }

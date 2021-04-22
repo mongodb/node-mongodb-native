@@ -4,10 +4,7 @@ import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import { MongoError } from './error';
 import { deserialize, serialize } from './bson';
 import type { Callback } from './utils';
-import { Connection } from './cmap/connection';
-import { Topology } from './sdam/topology';
-import { Server } from './sdam/server';
-import { CMAP_EVENT_NAMES } from './cmap/connection_pool';
+import { MONGO_CLIENT_EVENTS } from './operations/connect';
 
 let AutoEncrypterClass: AutoEncrypter;
 
@@ -69,32 +66,11 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
-      const allEvents = [
-        // APM
-        Connection.COMMAND_STARTED,
-        Connection.COMMAND_SUCCEEDED,
-        Connection.COMMAND_FAILED,
-
-        // SDAM
-        Topology.SERVER_OPENING,
-        Topology.SERVER_CLOSED,
-        Topology.SERVER_DESCRIPTION_CHANGED,
-        Topology.TOPOLOGY_OPENING,
-        Topology.TOPOLOGY_CLOSED,
-        Topology.SERVER_DESCRIPTION_CHANGED,
-        Server.SERVER_HEARTBEAT_STARTED,
-        Server.SERVER_HEARTBEAT_FAILED,
-        Server.SERVER_HEARTBEAT_SUCCEEDED,
-
-        // CMAP
-        ...CMAP_EVENT_NAMES
-      ];
-
       this[kInternalClient] = new MongoClient(uri, clonedOptions);
 
-      for (const eventName of allEvents) {
+      for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
-          this[kInternalClient].on(eventName, listener as (...args: any[]) => void);
+          this[kInternalClient].on(eventName, listener);
         }
       }
 
