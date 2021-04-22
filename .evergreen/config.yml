@@ -140,7 +140,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
-          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
+          ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
 
           MONGODB_URI="${SINGLE_MONGOS_LB_URI}" \
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
@@ -148,7 +148,7 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-          bash DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
   run lb tests multi:
     - command: shell.exec
       type: test
@@ -158,7 +158,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
-          bash ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
+          ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh start
 
           MONGODB_URI="${MULTI_MONGOS_LB_URI}" \
           AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
@@ -166,7 +166,7 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-          bash DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} ${PROJECT_DIRECTORY}/.evergreen/load-balancers.sh stop
   run checks:
     - command: shell.exec
       type: test
