@@ -36,12 +36,12 @@ EOF_HAPROXY_CONFIG
   if [[ $PREFIX = "" ]]
   then
     # No auth then just set the URI
-    SINGLE_MONGOS_LB_URI="mongodb://127.0.0.1:8000"
-    MULTI_MONGOS_LB_URI="mongodb://127.0.0.1:8001"
+    SINGLE_MONGOS_LB_URI="mongodb://127.0.0.1:8000/"
+    MULTI_MONGOS_LB_URI="mongodb://127.0.0.1:8001/"
   else
     # We have auth so append the lb host:port
-    SINGLE_MONGOS_LB_URI="${PREFIX}127.0.0.1:8000"
-    MULTI_MONGOS_LB_URI="${PREFIX}127.0.0.1:8001"
+    SINGLE_MONGOS_LB_URI="${PREFIX}127.0.0.1:8000/"
+    MULTI_MONGOS_LB_URI="${PREFIX}127.0.0.1:8001/"
   fi
 
   if [[ $SUFFIX = "" ]]
