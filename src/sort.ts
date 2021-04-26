@@ -13,6 +13,7 @@ export type Sort =
   | string
   | string[]
   | { [key: string]: SortDirection }
+  | Map<string, SortDirection>
   | [string, SortDirection][]
   | [string, SortDirection];
 
@@ -22,7 +23,10 @@ export type Sort =
 type SortDirectionForCmd = 1 | -1 | { $meta: string };
 
 /** @internal */
-type SortForCmd = { [key: string]: SortDirectionForCmd };
+type SortForCmd = Map<string, SortDirectionForCmd>;
+
+/** @internal */
+type SortPairForCmd = [string, SortDirectionForCmd];
 
 /** @internal */
 function prepareDirection(direction: any = 1): SortDirectionForCmd {
@@ -60,41 +64,47 @@ function isPair(t: Sort): t is [string, SortDirection] {
   return false;
 }
 
-/** @internal */
-function pairToObject(v: [string, SortDirection]): SortForCmd {
-  return { [v[0]]: prepareDirection(v[1]) };
-}
-
-/** @internal */
 function isDeep(t: Sort): t is [string, SortDirection][] {
   return Array.isArray(t) && Array.isArray(t[0]);
 }
 
-/** @internal */
-function deepToObject(t: [string, SortDirection][]): SortForCmd {
-  const sortObject: SortForCmd = {};
-  for (const [name, value] of t) {
-    sortObject[name] = prepareDirection(value);
-  }
-  return sortObject;
+function isMap(t: Sort): t is Map<string, SortDirection> {
+  return t instanceof Map && t.size > 0;
 }
 
 /** @internal */
-function stringsToObject(t: string[]): SortForCmd {
-  const sortObject: SortForCmd = {};
-  for (const key of t) {
-    sortObject[key] = 1;
-  }
-  return sortObject;
+function pairToMap(v: [string, SortDirection]): SortForCmd {
+  return new Map([[`${v[0]}`, prepareDirection([v[1]])]]);
 }
 
 /** @internal */
-function objectToObject(t: { [key: string]: SortDirection }): SortForCmd {
-  const sortObject: SortForCmd = {};
-  for (const key in t) {
-    sortObject[key] = prepareDirection(t[key]);
-  }
-  return sortObject;
+function deepToMap(t: [string, SortDirection][]): SortForCmd {
+  const sortEntries: SortPairForCmd[] = t.map(([k, v]) => [`${k}`, prepareDirection(v)]);
+  return new Map(sortEntries);
+}
+
+/** @internal */
+function stringsToMap(t: string[]): SortForCmd {
+  const sortEntries: SortPairForCmd[] = t.map(key => [`${key}`, 1]);
+  return new Map(sortEntries);
+}
+
+/** @internal */
+function objectToMap(t: { [key: string]: SortDirection }): SortForCmd {
+  const sortEntries: SortPairForCmd[] = Object.entries(t).map(([k, v]) => [
+    `${k}`,
+    prepareDirection(v)
+  ]);
+  return new Map(sortEntries);
+}
+
+/** @internal */
+function mapToMap(t: Map<string, SortDirection>): SortForCmd {
+  const sortEntries: SortPairForCmd[] = Array.from(t).map(([k, v]) => [
+    `${k}`,
+    prepareDirection(v)
+  ]);
+  return new Map(sortEntries);
 }
 
 /** converts a Sort type into a type that is valid for the server (SortForCmd) */
@@ -103,12 +113,15 @@ export function formatSort(
   direction?: SortDirection
 ): SortForCmd | undefined {
   if (sort == null) return undefined;
-  if (Array.isArray(sort) && !sort.length) return undefined;
-  if (typeof sort === 'object' && !Object.keys(sort).length) return undefined;
-  if (typeof sort === 'string') return { [sort]: prepareDirection(direction) };
-  if (isPair(sort)) return pairToObject(sort);
-  if (isDeep(sort)) return deepToObject(sort);
-  if (Array.isArray(sort)) return stringsToObject(sort);
-  if (typeof sort === 'object') return objectToObject(sort);
-  throw new Error(`Invalid sort format: ${JSON.stringify(sort)}`);
+  if (typeof sort === 'string') return new Map([[sort, prepareDirection(direction)]]);
+  if (typeof sort !== 'object') {
+    throw new Error(`Invalid sort format: ${JSON.stringify(sort)}`);
+  }
+  if (!Array.isArray(sort)) {
+    return isMap(sort) ? mapToMap(sort) : Object.keys(sort).length ? objectToMap(sort) : undefined;
+  }
+  if (!sort.length) return undefined;
+  if (isDeep(sort)) return deepToMap(sort);
+  if (isPair(sort)) return pairToMap(sort);
+  return stringsToMap(sort);
 }
