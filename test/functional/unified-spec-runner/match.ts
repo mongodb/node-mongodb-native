@@ -142,7 +142,7 @@ export function resultCheck(
           // TODO: This is a workaround that works because all sorts in the specs
           // are objects with one key; ideally we'd want to adjust the spec definitions
           // to indicate whether order matters for any given key and set general
-          // expectations accordingly
+          // expectations accordingly (see NODE-3235)
           expect(Object.keys(value)).to.have.lengthOf(1);
           expect(actual[key]).to.be.instanceOf(Map);
           expect(actual[key].size).to.equal(1);

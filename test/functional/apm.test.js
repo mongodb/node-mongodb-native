@@ -676,7 +676,7 @@ describe('APM', function () {
         // TODO: This is a workaround that works because all sorts in the specs
         // are objects with one key; ideally we'd want to adjust the spec definitions
         // to indicate whether order matters for any given key and set general
-        // expectations accordingly
+        // expectations accordingly (see NODE-3235)
         if (key === 'sort') {
           expect(actual[key]).to.be.instanceOf(Map);
           expect(Object.keys(expected[key])).to.have.lengthOf(1);

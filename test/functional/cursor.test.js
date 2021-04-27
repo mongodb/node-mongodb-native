@@ -4208,7 +4208,7 @@ describe('Cursor', function () {
     it('should use cursor.sort deep array', cursorSort([['alpha', 1]], new Map([['alpha', 1]])));
 
     it('formatSort - one key', () => {
-      // TODO: rewrite these tests
+      // TODO (NODE-3236): These are unit tests for a standalone function and should be moved out of the cursor context file
       expect(formatSort('alpha')).to.deep.equal(new Map([['alpha', 1]]));
       expect(formatSort(['alpha'])).to.deep.equal(new Map([['alpha', 1]]));
       expect(formatSort('alpha', 1)).to.deep.equal(new Map([['alpha', 1]]));
