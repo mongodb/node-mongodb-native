@@ -1,4 +1,4 @@
-uri: "mongodb+srv://test1.test.build.10gen.cc/some,db?replicaSet=repl0"
+uri: "mongodb+srv://test1.test.build.10gen.cc/some,db/?replicaSet=repl0"
 seeds:
   - test1.test.build.10gen.cc:27017
   - test1.test.build.10gen.cc:27018
