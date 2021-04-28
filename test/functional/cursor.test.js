@@ -4175,7 +4175,8 @@ describe('Cursor', function () {
           const cursor = collection.find({}, { sort: input });
           cursor.next(err => {
             expect(err).to.not.exist;
-            expect(events[0].command.sort).to.deep.equal(output);
+            expect(events[0].command.sort).to.be.instanceOf(Map);
+            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
             cursor.close(done);
           });
         });
@@ -4189,54 +4190,97 @@ describe('Cursor', function () {
           const cursor = collection.find({}).sort(input);
           cursor.next(err => {
             expect(err).to.not.exist;
-            expect(events[0].command.sort).to.deep.equal(output);
+            expect(events[0].command.sort).to.be.instanceOf(Map);
+            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
             cursor.close(done);
           });
         });
       });
 
-    it('should use find options object', findSort({ alpha: 1 }, { alpha: 1 }));
-    it('should use find options string', findSort('alpha', { alpha: 1 }));
-    it('should use find options shallow array', findSort(['alpha', 1], { alpha: 1 }));
-    it('should use find options deep array', findSort([['alpha', 1]], { alpha: 1 }));
+    it('should use find options object', findSort({ alpha: 1 }, new Map([['alpha', 1]])));
+    it('should use find options string', findSort('alpha', new Map([['alpha', 1]])));
+    it('should use find options shallow array', findSort(['alpha', 1], new Map([['alpha', 1]])));
+    it('should use find options deep array', findSort([['alpha', 1]], new Map([['alpha', 1]])));
 
-    it('should use cursor.sort object', cursorSort({ alpha: 1 }, { alpha: 1 }));
-    it('should use cursor.sort string', cursorSort('alpha', { alpha: 1 }));
-    it('should use cursor.sort shallow array', cursorSort(['alpha', 1], { alpha: 1 }));
-    it('should use cursor.sort deep array', cursorSort([['alpha', 1]], { alpha: 1 }));
+    it('should use cursor.sort object', cursorSort({ alpha: 1 }, new Map([['alpha', 1]])));
+    it('should use cursor.sort string', cursorSort('alpha', new Map([['alpha', 1]])));
+    it('should use cursor.sort shallow array', cursorSort(['alpha', 1], new Map([['alpha', 1]])));
+    it('should use cursor.sort deep array', cursorSort([['alpha', 1]], new Map([['alpha', 1]])));
 
     it('formatSort - one key', () => {
-      expect(formatSort('alpha')).to.deep.equal({ alpha: 1 });
-      expect(formatSort(['alpha'])).to.deep.equal({ alpha: 1 });
-      expect(formatSort('alpha', 1)).to.deep.equal({ alpha: 1 });
-      expect(formatSort('alpha', 'asc')).to.deep.equal({ alpha: 1 });
-      expect(formatSort([['alpha', 'asc']])).to.deep.equal({ alpha: 1 });
-      expect(formatSort('alpha', 'ascending')).to.deep.equal({ alpha: 1 });
-      expect(formatSort({ alpha: 1 })).to.deep.equal({ alpha: 1 });
-      expect(formatSort('beta')).to.deep.equal({ beta: 1 });
-      expect(formatSort(['beta'])).to.deep.equal({ beta: 1 });
-      expect(formatSort('beta', -1)).to.deep.equal({ beta: -1 });
-      expect(formatSort('beta', 'desc')).to.deep.equal({ beta: -1 });
-      expect(formatSort('beta', 'descending')).to.deep.equal({ beta: -1 });
-      expect(formatSort({ beta: -1 })).to.deep.equal({ beta: -1 });
-      expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal({
-        alpha: { $meta: 'hi' }
-      });
+      // TODO (NODE-3236): These are unit tests for a standalone function and should be moved out of the cursor context file
+      expect(formatSort('alpha')).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort(['alpha'])).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort('alpha', 1)).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort('alpha', 'asc')).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort([['alpha', 'asc']])).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort('alpha', 'ascending')).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort({ alpha: 1 })).to.deep.equal(new Map([['alpha', 1]]));
+      expect(formatSort('beta')).to.deep.equal(new Map([['beta', 1]]));
+      expect(formatSort(['beta'])).to.deep.equal(new Map([['beta', 1]]));
+      expect(formatSort('beta', -1)).to.deep.equal(new Map([['beta', -1]]));
+      expect(formatSort('beta', 'desc')).to.deep.equal(new Map([['beta', -1]]));
+      expect(formatSort('beta', 'descending')).to.deep.equal(new Map([['beta', -1]]));
+      expect(formatSort({ beta: -1 })).to.deep.equal(new Map([['beta', -1]]));
+      expect(formatSort({ alpha: { $meta: 'hi' } })).to.deep.equal(
+        new Map([['alpha', { $meta: 'hi' }]])
+      );
     });
 
     it('formatSort - multi key', () => {
-      expect(formatSort(['alpha', 'beta'])).to.deep.equal({ alpha: 1, beta: 1 });
-      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal({ alpha: 1, beta: 1 });
+      expect(formatSort(['alpha', 'beta'])).to.deep.equal(
+        new Map([
+          ['alpha', 1],
+          ['beta', 1]
+        ])
+      );
+      expect(formatSort({ alpha: 1, beta: 1 })).to.deep.equal(
+        new Map([
+          ['alpha', 1],
+          ['beta', 1]
+        ])
+      );
       expect(
         formatSort([
           ['alpha', 'asc'],
           ['beta', 'ascending']
         ])
-      ).to.deep.equal({ alpha: 1, beta: 1 });
-      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal({
-        alpha: { $meta: 'hi' },
-        beta: 1
-      });
+      ).to.deep.equal(
+        new Map([
+          ['alpha', 1],
+          ['beta', 1]
+        ])
+      );
+      expect(
+        formatSort(
+          new Map([
+            ['alpha', 'asc'],
+            ['beta', 'ascending']
+          ])
+        )
+      ).to.deep.equal(
+        new Map([
+          ['alpha', 1],
+          ['beta', 1]
+        ])
+      );
+      expect(
+        formatSort([
+          ['3', 'asc'],
+          ['1', 'ascending']
+        ])
+      ).to.deep.equal(
+        new Map([
+          ['3', 1],
+          ['1', 1]
+        ])
+      );
+      expect(formatSort({ alpha: { $meta: 'hi' }, beta: 'ascending' })).to.deep.equal(
+        new Map([
+          ['alpha', { $meta: 'hi' }],
+          ['beta', 1]
+        ])
+      );
     });
 
     it('should use allowDiskUse option on sort', {
@@ -4249,7 +4293,7 @@ describe('Cursor', function () {
           cursor.next(err => {
             expect(err).to.not.exist;
             const { command } = events.shift();
-            expect(command.sort).to.deep.equal({ alpha: 1 });
+            expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
             expect(command.allowDiskUse).to.be.true;
             cursor.close(done);
           });

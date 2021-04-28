@@ -673,6 +673,20 @@ describe('APM', function () {
       Object.keys(expected).forEach(key => {
         expect(actual).to.include.key(key);
 
+        // TODO: This is a workaround that works because all sorts in the specs
+        // are objects with one key; ideally we'd want to adjust the spec definitions
+        // to indicate whether order matters for any given key and set general
+        // expectations accordingly (see NODE-3235)
+        if (key === 'sort') {
+          expect(actual[key]).to.be.instanceOf(Map);
+          expect(Object.keys(expected[key])).to.have.lengthOf(1);
+          expect(actual[key].size).to.equal(1);
+          expect(actual[key].get(Object.keys(expected[key])[0])).to.equal(
+            Object.values(expected[key])[0]
+          );
+          return;
+        }
+
         if (Array.isArray(expected[key])) {
           expect(actual[key]).to.be.instanceOf(Array);
           expect(actual[key]).to.have.lengthOf(expected[key].length);

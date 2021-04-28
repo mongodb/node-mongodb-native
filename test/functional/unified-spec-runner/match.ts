@@ -138,7 +138,21 @@ export function resultCheck(
       for (const [key, value] of expectedEntries) {
         path.push(Array.isArray(expected) ? `[${key}]` : `.${key}`); // record what key we're at
         depth += 1;
-        resultCheck(actual[key], value, entities, path, depth);
+        if (key === 'sort') {
+          // TODO: This is a workaround that works because all sorts in the specs
+          // are objects with one key; ideally we'd want to adjust the spec definitions
+          // to indicate whether order matters for any given key and set general
+          // expectations accordingly (see NODE-3235)
+          expect(Object.keys(value)).to.have.lengthOf(1);
+          expect(actual[key]).to.be.instanceOf(Map);
+          expect(actual[key].size).to.equal(1);
+          const expectedSortKey = Object.keys(value)[0];
+          expect(actual[key]).to.have.all.keys(expectedSortKey);
+          const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
+          resultCheck(objFromActual, value, entities, path, depth);
+        } else {
+          resultCheck(actual[key], value, entities, path, depth);
+        }
         depth -= 1;
         path.pop(); // if the recursion was successful we can drop the tested key
       }
