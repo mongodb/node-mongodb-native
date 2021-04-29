@@ -4241,7 +4241,7 @@ describe('Operation (Promises)', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         return batch.execute().then(function (result) {
@@ -4308,7 +4308,7 @@ describe('Operation (Promises)', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         return batch.execute().then(function (result) {

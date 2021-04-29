@@ -3861,7 +3861,7 @@ describe('Operation (Generators)', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         var result = yield batch.execute();
@@ -3932,7 +3932,7 @@ describe('Operation (Generators)', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         var result = yield batch.execute();
