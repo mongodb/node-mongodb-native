@@ -3688,10 +3688,9 @@ describe('Operation Examples', function() {
         // REMOVE-LINE done();
         // REMOVE-LINE var db = client.db(configuration.db);
         // BEGIN
-        var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.on('close', function() {
+        client.on('close', function() {
           done();
         });
 
