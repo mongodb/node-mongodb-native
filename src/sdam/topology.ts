@@ -448,7 +448,6 @@ export class Topology extends EventEmitter {
           this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
 
           stateTransition(this, STATE_CLOSED);
-          this.emit('close');
 
           if (typeof callback === 'function') {
             callback(err);
