@@ -384,6 +384,18 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
 
     const actualCommand = actual.command;
     const expectedCommand = expected.command;
+    if (expectedCommand.sort) {
+      // TODO: This is a workaround that works because all sorts in the specs
+      // are objects with one key; ideally we'd want to adjust the spec definitions
+      // to indicate whether order matters for any given key and set general
+      // expectations accordingly (see NODE-3235)
+      expect(Object.keys(expectedCommand.sort)).to.have.lengthOf(1);
+      expect(actualCommand.sort).to.be.instanceOf(Map);
+      expect(actualCommand.sort.size).to.equal(1);
+      const expectedKey = Object.keys(expectedCommand.sort)[0];
+      expect(actualCommand.sort).to.have.all.keys(expectedKey);
+      actualCommand.sort = { [expectedKey]: actualCommand.sort.get(expectedKey) };
+    }
 
     expect(actualCommand)
       .withSessionData(savedSessionData)
@@ -392,18 +404,23 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
 }
 
 function normalizeCommandShapes(commands) {
-  return commands.map(command =>
-    JSON.parse(
+  return commands.map(def => {
+    const output = JSON.parse(
       EJSON.stringify(
         {
-          command: command.command,
-          commandName: command.command_name ? command.command_name : command.commandName,
-          databaseName: command.database_name ? command.database_name : command.databaseName
+          command: def.command,
+          commandName: def.command_name ? def.command_name : def.commandName,
+          databaseName: def.database_name ? def.database_name : def.databaseName
         },
         { relaxed: true }
       )
-    )
-  );
+    );
+    // TODO: this is a workaround to preserve sort Map type until NODE-3235 is completed
+    if (def.command.sort) {
+      output.command.sort = def.command.sort;
+    }
+    return output;
+  });
 }
 
 function extractCrudResult(result, operation) {
