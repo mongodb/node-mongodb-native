@@ -22,25 +22,7 @@ The following code example hooks into all the available features
 of the APM API.
 
 ```js
-const listener = require('mongodb').instrument({
-  operationIdGenerator: {
-    operationId: 1,
-
-    next: function() {
-      return this.operationId++;
-    }
-  },
-
-  timestampGenerator: {
-    current: function() {
-      return new Date().getTime();
-    },
-
-    duration: function(start, end) {
-      return end - start;
-    }
-  }  
-}, function(err, instrumentations) {
+const listener = require('mongodb').instrument(function(err, instrumentations) {
   // Instrument the driver  
 });
 
