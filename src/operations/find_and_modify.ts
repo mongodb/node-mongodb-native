@@ -1,11 +1,5 @@
 import { ReadPreference } from '../read_preference';
-import {
-  maxWireVersion,
-  applyRetryableWrites,
-  decorateWithCollation,
-  hasAtomicOperators,
-  Callback
-} from '../utils';
+import { maxWireVersion, decorateWithCollation, hasAtomicOperators, Callback } from '../utils';
 import { MongoError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
@@ -79,7 +73,6 @@ interface FindAndModifyOptions extends CommandOperationOptions {
   hint?: Document;
 
   // NOTE: These types are a misuse of options, can we think of a way to remove them?
-  update?: boolean;
   remove?: boolean;
   new?: boolean;
 }
@@ -116,7 +109,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     const query = this.query;
     const sort = formatSort(this.sort);
     const doc = this.doc;
-    let options = { ...this.options, ...this.bsonOptions };
+    const options = { ...this.options, ...this.bsonOptions };
 
     // Create findAndModify command object
     const cmd: Document = {
@@ -147,12 +140,6 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     if (options.maxTimeMS) {
       cmd.maxTimeMS = options.maxTimeMS;
     }
-
-    // No check on the documents
-    options.checkKeys = false;
-
-    // Final options for retryable writes
-    options = applyRetryableWrites(options, coll.s.db);
 
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {
@@ -225,7 +212,6 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.update = true;
     finalOptions.new = options.returnOriginal !== void 0 ? !options.returnOriginal : false;
     finalOptions.upsert = options.upsert !== void 0 ? !!options.upsert : false;
 
@@ -255,7 +241,6 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.update = true;
     finalOptions.new =
       typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
     finalOptions.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
