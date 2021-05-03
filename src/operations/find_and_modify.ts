@@ -74,7 +74,6 @@ interface FindAndModifyOptions extends CommandOperationOptions {
 
   // NOTE: These types are a misuse of options, can we think of a way to remove them?
   remove?: boolean;
-  new?: boolean;
 }
 
 /** @internal */
@@ -121,9 +120,15 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
       cmd.sort = sort;
     }
 
-    cmd.new = options.new ? true : false;
+    if (!options.remove) {
+      cmd.new = typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
+      cmd.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
+      if (doc) {
+        cmd.update = doc;
+      }
+    }
+
     cmd.remove = options.remove ? true : false;
-    cmd.upsert = options.upsert ? true : false;
 
     if (options.projection) {
       cmd.fields = options.projection;
@@ -131,10 +136,6 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 
     if (options.arrayFilters) {
       cmd.arrayFilters = options.arrayFilters;
-    }
-
-    if (doc && !options.remove) {
-      cmd.update = doc;
     }
 
     if (options.maxTimeMS) {
@@ -212,8 +213,6 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.new = options.returnOriginal !== void 0 ? !options.returnOriginal : false;
-    finalOptions.upsert = options.upsert !== void 0 ? !!options.upsert : false;
 
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
@@ -241,9 +240,6 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.new =
-      typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
-    finalOptions.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
 
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
