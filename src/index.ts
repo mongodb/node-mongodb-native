@@ -225,7 +225,11 @@ export type { EstimatedDocumentCountOptions } from './operations/estimated_docum
 export type { EvalOptions } from './operations/eval';
 export type { FindOptions } from './operations/find';
 export type { Sort, SortDirection } from './sort';
-export type { FindAndModifyOptions } from './operations/find_and_modify';
+export type {
+  FindOneAndDeleteOptions,
+  FindOneAndReplaceOptions,
+  FindOneAndUpdateOptions
+} from './operations/find_and_modify';
 export type {
   IndexSpecification,
   CreateIndexesOptions,

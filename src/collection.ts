@@ -45,7 +45,9 @@ import {
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
   FindOneAndUpdateOperation,
-  FindAndModifyOptions
+  FindOneAndDeleteOptions,
+  FindOneAndReplaceOptions,
+  FindOneAndUpdateOptions
 } from './operations/find_and_modify';
 import {
   InsertOneOperation,
@@ -1098,15 +1100,15 @@ export class Collection {
    */
   findOneAndDelete(filter: Document): Promise<Document>;
   findOneAndDelete(filter: Document, callback: Callback<Document>): void;
-  findOneAndDelete(filter: Document, options: FindAndModifyOptions): Promise<Document>;
+  findOneAndDelete(filter: Document, options: FindOneAndDeleteOptions): Promise<Document>;
   findOneAndDelete(
     filter: Document,
-    options: FindAndModifyOptions,
+    options: FindOneAndDeleteOptions,
     callback: Callback<Document>
   ): void;
   findOneAndDelete(
     filter: Document,
-    options?: FindAndModifyOptions | Callback<Document>,
+    options?: FindOneAndDeleteOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1131,18 +1133,18 @@ export class Collection {
   findOneAndReplace(
     filter: Document,
     replacement: Document,
-    options: FindAndModifyOptions
+    options: FindOneAndReplaceOptions
   ): Promise<Document>;
   findOneAndReplace(
     filter: Document,
     replacement: Document,
-    options: FindAndModifyOptions,
+    options: FindOneAndReplaceOptions,
     callback: Callback<Document>
   ): void;
   findOneAndReplace(
     filter: Document,
     replacement: Document,
-    options?: FindAndModifyOptions | Callback<Document>,
+    options?: FindOneAndReplaceOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -1167,18 +1169,18 @@ export class Collection {
   findOneAndUpdate(
     filter: Document,
     update: Document,
-    options: FindAndModifyOptions
+    options: FindOneAndUpdateOptions
   ): Promise<Document>;
   findOneAndUpdate(
     filter: Document,
     update: Document,
-    options: FindAndModifyOptions,
+    options: FindOneAndUpdateOptions,
     callback: Callback<Document>
   ): void;
   findOneAndUpdate(
     filter: Document,
     update: Document,
-    options?: FindAndModifyOptions | Callback<Document>,
+    options?: FindOneAndUpdateOptions | Callback<Document>,
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});

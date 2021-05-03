@@ -16,7 +16,53 @@ import { Sort, formatSort } from '../sort';
 import type { ClientSession } from '../sessions';
 
 /** @public */
-export interface FindAndModifyOptions extends CommandOperationOptions {
+export interface FindOneAndDeleteOptions extends CommandOperationOptions {
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  hint?: Document;
+  /** Limits the fields to return for all matching documents. */
+  projection?: Document;
+  /** Determines which document the operation modifies if the query selects multiple documents. */
+  sort?: Sort;
+}
+
+/** @public */
+export interface FindOneAndReplaceOptions extends CommandOperationOptions {
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  hint?: Document;
+  /** Limits the fields to return for all matching documents. */
+  projection?: Document;
+  /** When false, returns the updated document rather than the original. The default is true. */
+  returnOriginal?: boolean;
+  /** Determines which document the operation modifies if the query selects multiple documents. */
+  sort?: Sort;
+  /** Upsert the document if it does not exist. */
+  upsert?: boolean;
+}
+
+/** @public */
+export interface FindOneAndUpdateOptions extends CommandOperationOptions {
+  /** Optional list of array filters referenced in filtered positional operators */
+  arrayFilters?: Document[];
+  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  bypassDocumentValidation?: boolean;
+  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  hint?: Document;
+  /** Limits the fields to return for all matching documents. */
+  projection?: Document;
+  /** When false, returns the updated document rather than the original. The default is true. */
+  returnOriginal?: boolean;
+  /** Determines which document the operation modifies if the query selects multiple documents. */
+  sort?: Sort;
+  /** Upsert the document if it does not exist. */
+  upsert?: boolean;
+}
+
+// TODO: NODE-1812 to deprecate returnOriginal for returnDocument
+
+/** @internal */
+interface FindAndModifyOptions extends CommandOperationOptions {
   /** When false, returns the updated document rather than the original. The default is true. */
   returnOriginal?: boolean;
   /** Upsert the document if it does not exist. */
