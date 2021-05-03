@@ -23,8 +23,6 @@ export interface FindAndModifyOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
-  /** @deprecated use `projection` instead */
-  fields?: Document;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
   /** Optional list of array filters referenced in filtered positional operators */
@@ -88,10 +86,8 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     cmd.remove = options.remove ? true : false;
     cmd.upsert = options.upsert ? true : false;
 
-    const projection = options.projection || options.fields;
-
-    if (projection) {
-      cmd.fields = projection;
+    if (options.projection) {
+      cmd.fields = options.projection;
     }
 
     if (options.arrayFilters) {
@@ -162,7 +158,6 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.fields = options.projection;
     finalOptions.remove = true;
 
     // Basic validation
@@ -184,7 +179,6 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.fields = options.projection;
     finalOptions.update = true;
     finalOptions.new = options.returnOriginal !== void 0 ? !options.returnOriginal : false;
     finalOptions.upsert = options.upsert !== void 0 ? !!options.upsert : false;
@@ -215,7 +209,6 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
   ) {
     // Final options
     const finalOptions = Object.assign({}, options);
-    finalOptions.fields = options.projection;
     finalOptions.update = true;
     finalOptions.new =
       typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
