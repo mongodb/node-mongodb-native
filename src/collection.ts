@@ -314,8 +314,6 @@ export class Collection {
    * ```js
    *  { insertOne: { document: { a: 1 } } }
    *
-   *  { insertMany: [{ g: 1 }, { g: 2 }]}
-   *
    *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
    *
    *  { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -326,7 +324,7 @@ export class Collection {
    *
    *  { deleteMany: { filter: {c:1} } }
    *
-   *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
+   *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true} }
    *```
    * Please note that raw operations are no longer accepted as of driver version 4.0.
    *
