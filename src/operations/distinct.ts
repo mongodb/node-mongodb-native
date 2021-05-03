@@ -14,7 +14,7 @@ export type DistinctOptions = CommandOperationOptions;
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandOperation<Document[]> {
+export class DistinctOperation extends CommandOperation<any[]> {
   options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
@@ -39,7 +39,7 @@ export class DistinctOperation extends CommandOperation<Document[]> {
     this.query = query;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document[]>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<any[]>): void {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;

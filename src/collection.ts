@@ -1013,25 +1013,20 @@ export class Collection {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  distinct(key: string): Promise<Document[]>;
-  distinct(key: string, callback: Callback<Document[]>): void;
-  distinct(key: string, query: Document): Promise<Document[]>;
-  distinct(key: string, query: Document, callback: Callback<Document[]>): void;
-  distinct(key: string, query: Document, options: DistinctOptions): Promise<Document[]>;
+  distinct(key: string): Promise<any[]>;
+  distinct(key: string, callback: Callback<any[]>): void;
+  distinct(key: string, query: Document): Promise<any[]>;
+  distinct(key: string, query: Document, callback: Callback<any[]>): void;
+  distinct(key: string, query: Document, options: DistinctOptions): Promise<any[]>;
+  distinct(key: string, query: Document, options: DistinctOptions, callback: Callback<any[]>): void;
   distinct(
     key: string,
-    query: Document,
-    options: DistinctOptions,
-    callback: Callback<Document[]>
-  ): void;
-  distinct(
-    key: string,
-    query?: Document | DistinctOptions | Callback<Document[]>,
-    options?: DistinctOptions | Callback<Document[]>,
-    callback?: Callback<Document[]>
-  ): Promise<Document[]> | void {
+    query?: Document | DistinctOptions | Callback<any[]>,
+    options?: DistinctOptions | Callback<any[]>,
+    callback?: Callback<any[]>
+  ): Promise<any[]> | void {
     if (typeof query === 'function') {
-      (callback = query as Callback<Document[]>), (query = {}), (options = {});
+      (callback = query as Callback<any[]>), (query = {}), (options = {});
     } else {
       if (arguments.length === 3 && typeof options === 'function') {
         (callback = options), (options = {});
