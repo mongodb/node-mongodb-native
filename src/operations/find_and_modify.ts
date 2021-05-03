@@ -71,10 +71,17 @@ interface FindAndModifyOptions extends CommandOperationOptions {
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
-
-  // NOTE: These types are a misuse of options, can we think of a way to remove them?
-  remove?: boolean;
 }
+
+/** @internal */
+const OperationTypes = Object.freeze({
+  deleteOne: 'deleteOne',
+  replaceOne: 'replaceOne',
+  updateOne: 'updateOne'
+} as const);
+
+/** @internal */
+type OperationType = typeof OperationTypes[keyof typeof OperationTypes];
 
 /** @internal */
 export class FindAndModifyOperation extends CommandOperation<Document> {
@@ -83,6 +90,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
   query: Document;
   sort?: Sort;
   doc?: Document;
+  operationType?: OperationType;
 
   constructor(
     collection: Collection,
@@ -116,26 +124,36 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
       query: query
     };
 
-    if (sort) {
-      cmd.sort = sort;
-    }
-
-    if (!options.remove) {
+    if (this.operationType === OperationTypes.deleteOne) {
+      cmd.remove = true;
+    } else {
+      cmd.remove = false;
+      // TODO: cmd.new and cmd.upsert were set in two nonequivalent ways, do we want the truthy or the boolean approach?
       cmd.new = typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
+      // TODO: technically, cmd.upsert would previously be set "as is" if it were passed in for delete, do we want to preserve
+      // that behavior?
       cmd.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
       if (doc) {
         cmd.update = doc;
       }
     }
 
-    cmd.remove = options.remove ? true : false;
+    // TODO: arrayFilters is specific to update - do we want to add it to a type-specific block?
+    if (options.arrayFilters) {
+      cmd.arrayFilters = options.arrayFilters;
+    }
+
+    // TODO: bypassDocumentValidation is not applicable to delete - do we want to add it to the else block?
+    if (options.bypassDocumentValidation === true) {
+      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
+    }
+
+    if (sort) {
+      cmd.sort = sort;
+    }
 
     if (options.projection) {
       cmd.fields = options.projection;
-    }
-
-    if (options.arrayFilters) {
-      cmd.arrayFilters = options.arrayFilters;
     }
 
     if (options.maxTimeMS) {
@@ -145,11 +163,6 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {
       cmd.writeConcern = options.writeConcern;
-    }
-
-    // Have we specified bypassDocumentValidation
-    if (options.bypassDocumentValidation === true) {
-      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
     // Have we specified collation
@@ -190,16 +203,13 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 /** @internal */
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
-    // Final options
-    const finalOptions = Object.assign({}, options);
-    finalOptions.remove = true;
-
     // Basic validation
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
     }
 
-    super(collection, filter, finalOptions.sort, undefined, finalOptions);
+    super(collection, filter, options.sort, undefined, options);
+    this.operationType = OperationTypes.deleteOne;
   }
 }
 
@@ -211,9 +221,6 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     replacement: Document,
     options: FindAndModifyOptions
   ) {
-    // Final options
-    const finalOptions = Object.assign({}, options);
-
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
     }
@@ -226,7 +233,8 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
       throw new TypeError('Replacement document must not contain atomic operators');
     }
 
-    super(collection, filter, finalOptions.sort, replacement, finalOptions);
+    super(collection, filter, options.sort, replacement, options);
+    this.operationType = OperationTypes.replaceOne;
   }
 }
 
@@ -238,9 +246,6 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     update: Document,
     options: FindAndModifyOptions
   ) {
-    // Final options
-    const finalOptions = Object.assign({}, options);
-
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
     }
@@ -253,7 +258,8 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    super(collection, filter, finalOptions.sort, update, finalOptions);
+    super(collection, filter, options.sort, update, options);
+    this.operationType = OperationTypes.updateOne;
   }
 }
 
