@@ -84,7 +84,7 @@ const OperationTypes = Object.freeze({
 type OperationType = typeof OperationTypes[keyof typeof OperationTypes];
 
 /** @internal */
-export class FindAndModifyOperation extends CommandOperation<Document> {
+class FindAndModifyOperation extends CommandOperation<Document> {
   options: FindAndModifyOptions;
   collection: Collection;
   query: Document;
@@ -95,9 +95,8 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
   constructor(
     collection: Collection,
     query: Document,
-    sort: Sort | undefined,
     doc: Document | undefined,
-    options?: FindAndModifyOptions
+    options: FindAndModifyOptions
   ) {
     super(collection, options);
     this.options = options ?? {};
@@ -107,7 +106,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 
     this.collection = collection;
     this.query = query;
-    this.sort = sort;
+    this.sort = options.sort;
     this.doc = doc;
   }
 
@@ -202,13 +201,13 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 
 /** @internal */
 export class FindOneAndDeleteOperation extends FindAndModifyOperation {
-  constructor(collection: Collection, filter: Document, options: FindAndModifyOptions) {
+  constructor(collection: Collection, filter: Document, options: FindOneAndDeleteOptions) {
     // Basic validation
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
     }
 
-    super(collection, filter, options.sort, undefined, options);
+    super(collection, filter, undefined, options);
     this.operationType = OperationTypes.deleteOne;
   }
 }
@@ -219,7 +218,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     collection: Collection,
     filter: Document,
     replacement: Document,
-    options: FindAndModifyOptions
+    options: FindOneAndReplaceOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
@@ -233,7 +232,7 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
       throw new TypeError('Replacement document must not contain atomic operators');
     }
 
-    super(collection, filter, options.sort, replacement, options);
+    super(collection, filter, replacement, options);
     this.operationType = OperationTypes.replaceOne;
   }
 }
@@ -244,7 +243,7 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     collection: Collection,
     filter: Document,
     update: Document,
-    options: FindAndModifyOptions
+    options: FindOneAndUpdateOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
       throw new TypeError('Filter parameter must be an object');
@@ -258,7 +257,7 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    super(collection, filter, options.sort, update, options);
+    super(collection, filter, update, options);
     this.operationType = OperationTypes.updateOne;
   }
 }
