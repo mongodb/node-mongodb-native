@@ -363,7 +363,8 @@ describe('CRUD API', function() {
             db.collection('t2_5').bulkWrite(
               [
                 { insertOne: { a: 1 } },
-                { insertMany: [{ g: 1 }, { g: 2 }] },
+                { insertOne: { document: { g: 1 } } },
+                { insertOne: { document: { g: 2 } } },
                 { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
                 { updateMany: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
                 { deleteOne: { q: { c: 1 } } },
@@ -444,7 +445,8 @@ describe('CRUD API', function() {
             db.collection('t2_7').bulkWrite(
               [
                 { insertOne: { a: 1 } },
-                { insertMany: [{ g: 1 }, { g: 2 }] },
+                { insertOne: { document: { g: 1 } } },
+                { insertOne: { document: { g: 2 } } },
                 { updateOne: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
                 { updateMany: { q: { a: 2 }, u: { $set: { a: 2 } }, upsert: true } },
                 { deleteOne: { q: { c: 1 } } },
