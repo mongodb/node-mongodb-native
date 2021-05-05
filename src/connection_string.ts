@@ -340,7 +340,9 @@ export function parseOptions(
     }
   }
 
-  const objectOptions = new CaseInsensitiveMap(Object.entries(options));
+  const objectOptions = new CaseInsensitiveMap(
+    Object.entries(options).filter(([, v]) => (v ?? null) !== null)
+  );
 
   const allOptions = new CaseInsensitiveMap();
 
