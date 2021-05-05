@@ -629,7 +629,7 @@ describe('Bulk', function () {
         }
 
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
-        bulk.find({ c: 1 }).remove();
+        bulk.find({ c: 1 }).delete();
 
         bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
@@ -1135,7 +1135,7 @@ describe('Bulk', function () {
         }
 
         bulk.find({ b: 1 }).upsert().update({ b: 1 });
-        bulk.find({ c: 1 }).remove();
+        bulk.find({ c: 1 }).delete();
 
         bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
@@ -1917,8 +1917,8 @@ describe('Bulk', function () {
       bulk.find({ b: 3 }).collation({ locale: locales[2] }).replaceOne({ b: 2 });
 
       // deletes
-      bulk.find({ b: 2 }).collation({ locale: locales[0] }).removeOne();
-      bulk.find({ b: 1 }).collation({ locale: locales[1] }).remove();
+      bulk.find({ b: 2 }).collation({ locale: locales[0] }).deleteOne();
+      bulk.find({ b: 1 }).collation({ locale: locales[1] }).delete();
 
       bulk.execute(err => {
         expect(err).to.not.exist;

@@ -5903,7 +5903,7 @@ describe('Operation Examples', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         batch.execute(function (err, result) {
@@ -5969,7 +5969,7 @@ describe('Operation Examples', function () {
           .upsert()
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
-        batch.find({ a: 3 }).remove({ a: 3 });
+        batch.find({ a: 3 }).delete({ a: 3 });
 
         // Execute the operations
         batch.execute(function (err, result) {

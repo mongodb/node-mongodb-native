@@ -105,12 +105,9 @@ export interface UpdateManyModel {
 /** @public */
 export type AnyBulkWriteOperation =
   | { insertOne: InsertOneModel }
-  | { insertMany: Document[] }
   | { replaceOne: ReplaceOneModel }
   | { updateOne: UpdateOneModel }
   | { updateMany: UpdateManyModel }
-  | { removeOne: DeleteOneModel }
-  | { removeMany: DeleteManyModel }
   | { deleteOne: DeleteOneModel }
   | { deleteMany: DeleteManyModel };
 
@@ -786,14 +783,6 @@ export class FindOperators {
     );
   }
 
-  removeOne(): BulkOperationBase {
-    return this.deleteOne();
-  }
-
-  remove(): BulkOperationBase {
-    return this.delete();
-  }
-
   /** Upsert modifier for update bulk operation, noting that this operation is an upsert. */
   upsert(): this {
     if (!this.bulkOperation.s.currentOp) {
@@ -1070,12 +1059,6 @@ export abstract class BulkOperationBase {
       return this.addToOperationsList(BatchType.INSERT, op.insertOne.document);
     }
 
-    // NOTE: incompatible with CRUD specification, consider removing
-    if ('insertMany' in op) {
-      op.insertMany.forEach(insertOp => this.raw({ insertOne: { document: insertOp } }));
-      return this;
-    }
-
     if ('replaceOne' in op || 'updateOne' in op || 'updateMany' in op) {
       if ('replaceOne' in op) {
         if ('q' in op.replaceOne) {
@@ -1121,20 +1104,6 @@ export abstract class BulkOperationBase {
       }
     }
 
-    if ('removeOne' in op) {
-      return this.addToOperationsList(
-        BatchType.DELETE,
-        makeDeleteStatement(op.removeOne.filter, { ...op.removeOne, limit: 1 })
-      );
-    }
-
-    if ('removeMany' in op) {
-      return this.addToOperationsList(
-        BatchType.DELETE,
-        makeDeleteStatement(op.removeMany.filter, { ...op.removeMany, limit: 0 })
-      );
-    }
-
     if ('deleteOne' in op) {
       if ('q' in op.deleteOne) {
         throw new TypeError('Raw operations are not allowed');
@@ -1157,7 +1126,7 @@ export abstract class BulkOperationBase {
 
     // otherwise an unknown operation was provided
     throw TypeError(
-      'bulkWrite only supports insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, deleteOne, deleteMany'
+      'bulkWrite only supports insertOne, updateOne, updateMany, deleteOne, deleteMany'
     );
   }
 
