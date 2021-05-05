@@ -20,10 +20,10 @@ export type Sort =
 /** Below stricter types were created for sort that correspond with type that the cmd takes  */
 
 /** @internal */
-type SortDirectionForCmd = 1 | -1 | { $meta: string };
+export type SortDirectionForCmd = 1 | -1 | { $meta: string };
 
 /** @internal */
-type SortForCmd = Map<string, SortDirectionForCmd>;
+export type SortForCmd = Map<string, SortDirectionForCmd>;
 
 /** @internal */
 type SortPairForCmd = [string, SortDirectionForCmd];

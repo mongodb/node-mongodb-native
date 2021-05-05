@@ -6,8 +6,9 @@ import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { Sort, formatSort } from '../sort';
+import { Sort, SortForCmd, formatSort } from '../sort';
 import type { ClientSession } from '../sessions';
+import type { WriteConcern, WriteConcernSettings } from '../write_concern';
 
 /** @public */
 export interface FindOneAndDeleteOptions extends CommandOperationOptions {
@@ -56,113 +57,89 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
 // TODO: NODE-1812 to deprecate returnOriginal for returnDocument
 
 /** @internal */
-interface FindAndModifyOptions extends CommandOperationOptions {
-  /** When false, returns the updated document rather than the original. The default is true. */
-  returnOriginal?: boolean;
-  /** Upsert the document if it does not exist. */
-  upsert?: boolean;
-  /** Limits the fields to return for all matching documents. */
-  projection?: Document;
-  /** Determines which document the operation modifies if the query selects multiple documents. */
-  sort?: Sort;
-  /** Optional list of array filters referenced in filtered positional operators */
-  arrayFilters?: Document[];
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+interface FindAndModifyCmdBase {
+  remove: boolean;
+  new: boolean;
+  upsert: boolean;
+  update?: Document;
+  sort?: SortForCmd;
+  fields?: Document;
   bypassDocumentValidation?: boolean;
-  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
-  hint?: Document;
+  arrayFilters?: Document[];
+  maxTimeMS?: number;
+  writeConcern?: WriteConcern | WriteConcernSettings;
+}
+
+function configureFindAndModifyCmdBaseUpdateOpts(
+  cmdBase: FindAndModifyCmdBase,
+  options: FindOneAndReplaceOptions | FindOneAndUpdateOptions
+): FindAndModifyCmdBase {
+  cmdBase.new = options.returnOriginal === false;
+  cmdBase.upsert = options.upsert === true;
+
+  if (options.bypassDocumentValidation === true) {
+    cmdBase.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+  return cmdBase;
 }
 
 /** @internal */
-const OperationTypes = Object.freeze({
-  deleteOne: 'deleteOne',
-  replaceOne: 'replaceOne',
-  updateOne: 'updateOne'
-} as const);
-
-/** @internal */
-type OperationType = typeof OperationTypes[keyof typeof OperationTypes];
-
-/** @internal */
 class FindAndModifyOperation extends CommandOperation<Document> {
-  options: FindAndModifyOptions;
+  options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
+  cmdBase: FindAndModifyCmdBase;
   collection: Collection;
   query: Document;
-  sort?: Sort;
   doc?: Document;
-  operationType?: OperationType;
 
   constructor(
     collection: Collection,
     query: Document,
-    doc: Document | undefined,
-    options: FindAndModifyOptions
+    options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions
   ) {
     super(collection, options);
     this.options = options ?? {};
+    this.cmdBase = {
+      remove: false,
+      new: false,
+      upsert: false
+    };
+
+    const sort = formatSort(options.sort);
+    if (sort) {
+      this.cmdBase.sort = sort;
+    }
+
+    if (options.projection) {
+      this.cmdBase.fields = options.projection;
+    }
+
+    if (options.maxTimeMS) {
+      this.cmdBase.maxTimeMS = options.maxTimeMS;
+    }
+
+    // Decorate the findAndModify command with the write Concern
+    if (options.writeConcern) {
+      this.cmdBase.writeConcern = options.writeConcern;
+    }
 
     // force primary read preference
     this.readPreference = ReadPreference.primary;
 
     this.collection = collection;
     this.query = query;
-    this.sort = options.sort;
-    this.doc = doc;
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
-    const sort = formatSort(this.sort);
-    const doc = this.doc;
     const options = { ...this.options, ...this.bsonOptions };
 
     // Create findAndModify command object
     const cmd: Document = {
       findAndModify: coll.collectionName,
-      query: query
+      query: query,
+      ...this.cmdBase
     };
-
-    if (this.operationType === OperationTypes.deleteOne) {
-      cmd.remove = true;
-    } else {
-      cmd.remove = false;
-      // TODO: cmd.new and cmd.upsert were set in two nonequivalent ways, do we want the truthy or the boolean approach?
-      cmd.new = typeof options.returnOriginal === 'boolean' ? !options.returnOriginal : false;
-      // TODO: technically, cmd.upsert would previously be set "as is" if it were passed in for delete, do we want to preserve
-      // that behavior?
-      cmd.upsert = typeof options.upsert === 'boolean' ? options.upsert : false;
-      if (doc) {
-        cmd.update = doc;
-      }
-    }
-
-    // TODO: arrayFilters is specific to update - do we want to add it to a type-specific block?
-    if (options.arrayFilters) {
-      cmd.arrayFilters = options.arrayFilters;
-    }
-
-    // TODO: bypassDocumentValidation is not applicable to delete - do we want to add it to the else block?
-    if (options.bypassDocumentValidation === true) {
-      cmd.bypassDocumentValidation = options.bypassDocumentValidation;
-    }
-
-    if (sort) {
-      cmd.sort = sort;
-    }
-
-    if (options.projection) {
-      cmd.fields = options.projection;
-    }
-
-    if (options.maxTimeMS) {
-      cmd.maxTimeMS = options.maxTimeMS;
-    }
-
-    // Decorate the findAndModify command with the write Concern
-    if (options.writeConcern) {
-      cmd.writeConcern = options.writeConcern;
-    }
 
     // Have we specified collation
     try {
@@ -207,8 +184,8 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
       throw new TypeError('Filter parameter must be an object');
     }
 
-    super(collection, filter, undefined, options);
-    this.operationType = OperationTypes.deleteOne;
+    super(collection, filter, options);
+    this.cmdBase.remove = true;
   }
 }
 
@@ -232,8 +209,9 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
       throw new TypeError('Replacement document must not contain atomic operators');
     }
 
-    super(collection, filter, replacement, options);
-    this.operationType = OperationTypes.replaceOne;
+    super(collection, filter, options);
+    this.cmdBase.update = replacement;
+    configureFindAndModifyCmdBaseUpdateOpts(this.cmdBase, options);
   }
 }
 
@@ -257,8 +235,13 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
       throw new TypeError('Update document requires atomic operators');
     }
 
-    super(collection, filter, update, options);
-    this.operationType = OperationTypes.updateOne;
+    super(collection, filter, options);
+    this.cmdBase.update = update;
+    configureFindAndModifyCmdBaseUpdateOpts(this.cmdBase, options);
+
+    if (options.arrayFilters) {
+      this.cmdBase.arrayFilters = options.arrayFilters;
+    }
   }
 }
 
