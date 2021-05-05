@@ -520,7 +520,7 @@ describe('Bulk', function() {
           .find({ b: 1 })
           .upsert()
           .update({ b: 1 });
-        bulk.find({ c: 1 }).remove();
+        bulk.find({ c: 1 }).delete();
 
         bulk.execute({ w: 0 }, function(err, result) {
           test.equal(null, err);
@@ -1027,7 +1027,7 @@ describe('Bulk', function() {
           .find({ b: 1 })
           .upsert()
           .update({ b: 1 });
-        bulk.find({ c: 1 }).remove();
+        bulk.find({ c: 1 }).delete();
 
         bulk.execute({ w: 0 }, function(err, result) {
           test.equal(null, err);
