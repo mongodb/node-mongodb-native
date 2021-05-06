@@ -370,9 +370,9 @@ export function parseOptions(
     allKeys,
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
   );
-  const optionWord = unsupportedOptions.size > 1 ? 'options' : 'option';
-  const isOrAre = unsupportedOptions.size > 1 ? 'are' : 'is';
   if (unsupportedOptions.size !== 0) {
+    const optionWord = unsupportedOptions.size > 1 ? 'options' : 'option';
+    const isOrAre = unsupportedOptions.size > 1 ? 'are' : 'is';
     throw new MongoParseError(
       `${optionWord} ${Array.from(unsupportedOptions).join(', ')} ${isOrAre} not supported`
     );
