@@ -3,6 +3,7 @@ const { withClient, setupDatabase } = require('./shared');
 const test = require('./shared').assert;
 const { expect } = require('chai');
 const { ServerHeartbeatStartedEvent } = require('../../src');
+const { Topology } = require('../../src/sdam/topology');
 
 describe('Connection - functional', function () {
   before(function () {
@@ -70,21 +71,16 @@ describe('Connection - functional', function () {
     }
   });
 
-  it('should correctly connect to server using just events', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('should correctly connect to server using just events', function (done) {
+    var configuration = this.configuration;
+    var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    client.on('open', topology => {
+      expect(topology).to.be.instanceOf(Topology);
+      client.close(done);
+    });
 
-      client.on('open', function () {
-        client.close(done);
-      });
-
-      client.connect();
-    }
+    client.connect();
   });
 
   it('should correctly connect to server using big connection pool', {

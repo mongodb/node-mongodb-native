@@ -425,4 +425,35 @@ describe('Mongos SRV Polling', function () {
       });
     });
   });
+
+  it('should emit a topologyDescriptionChanged event upon receiving an SRV update', function () {
+    const topology = new Topology(['localhost:27017'], { srvHost: SRV_HOST });
+
+    return new Promise(resolve => {
+      topology.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
+        if (ev.topologyId === 'fake') {
+          // the fake description change emitted within this test
+          expect(topology.s.handleSrvPolling).to.be.a('function');
+          expect(ev.newDescription.servers.size).to.equal(0);
+          topology.s.handleSrvPolling(
+            new SrvPollingEvent([srvRecord('localhost', 27017), srvRecord('localhost', 27018)])
+          );
+        } else {
+          // topologyDescriptionChanged event emitted from the handleSrvPolling function
+          expect(ev.topologyId).to.equal(1);
+          expect(ev.newDescription.servers.size).to.equal(2);
+          resolve();
+        }
+      });
+
+      topology.emit(
+        Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+        new sdamEvents.TopologyDescriptionChangedEvent(
+          'fake',
+          new TopologyDescription(TopologyType.Unknown),
+          new TopologyDescription(TopologyType.Sharded)
+        )
+      );
+    });
+  });
 });
