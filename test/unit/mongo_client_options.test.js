@@ -215,7 +215,14 @@ describe('MongoOptions', function () {
       parseOptions('mongodb://localhost:27017/', {
         randomopt: 'test'
       })
-    ).to.throw(MongoParseError, /randomopt.+not supported$/);
+    ).to.throw(MongoParseError, 'option randomopt is not supported');
+
+    expect(() =>
+      parseOptions('mongodb://localhost:27017/', {
+        randomopt: 'test',
+        randomopt2: 'test'
+      })
+    ).to.throw(MongoParseError, 'options randomopt, randomopt2 are not supported');
   });
 
   it('srvHost saved to options for later resolution', function () {
