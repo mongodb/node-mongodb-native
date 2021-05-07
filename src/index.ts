@@ -224,8 +224,12 @@ export type { DropCollectionOptions, DropDatabaseOptions } from './operations/dr
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
 export type { EvalOptions } from './operations/eval';
 export type { FindOptions } from './operations/find';
-export type { Sort, SortDirection } from './sort';
-export type { FindAndModifyOptions } from './operations/find_and_modify';
+export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
+export type {
+  FindOneAndDeleteOptions,
+  FindOneAndReplaceOptions,
+  FindOneAndUpdateOptions
+} from './operations/find_and_modify';
 export type {
   IndexSpecification,
   CreateIndexesOptions,
