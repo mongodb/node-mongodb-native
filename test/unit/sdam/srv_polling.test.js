@@ -444,22 +444,23 @@ describe('Mongos SRV Polling', function () {
       expect(topology.s.handleSrvPolling).to.be.a('function');
     });
 
-    it('two topologyDescriptionChanged events are emitted when receiving an SRV update with one server', function (done) {
+    it('topologyDescriptionChanged events are emitted when receiving an SRV update', function (done) {
+      // 0th event is triggered by the SRV resolution
+      // 1st event is triggered by the single server contained in the record
+      // more events would be triggered by more servers
+
       let eventCount = 0;
       topology.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
-        if (eventCount === 0) {
-          // topologyDescriptionChanged event emitted from the handleSrvPolling function
-          expect(ev.topologyId).to.equal(1);
-          expect(ev.previousDescription.servers.size, 'previous should have 0 servers').to.equal(0);
-          expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
-        }
+        expect(ev.topologyId).to.equal(1);
+        expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
+        expect(
+          ev.previousDescription.servers.size,
+          `previous should have ${eventCount} servers`
+        ).to.equal(eventCount);
 
         if (eventCount >= 1) {
-          // Testing >= 1 to allow done to be called potentially more than once here catching erroneous events
-          // topologyDescriptionChanged event emitted from updating "each" server (just one for this test)
-          expect(ev.topologyId).to.equal(1);
-          expect(ev.previousDescription.servers.size, 'previous should have 1 server').to.equal(1);
-          expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
+          // Testing >= 1 to allow done to be called
+          // potentially more than once here catching erroneous events
           done();
         }
         eventCount += 1;
