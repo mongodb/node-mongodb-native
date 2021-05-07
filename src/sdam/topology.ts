@@ -332,7 +332,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
           this.s.handleSrvPolling = srvPollingHandler(this);
           if (this.s.srvPoller) {
-            // TODO: it looks like there is a bug here, what if this happens twice?
+            // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
             this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
             this.s.srvPoller.start();
           }
