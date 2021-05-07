@@ -426,26 +426,11 @@ describe('Mongos SRV Polling', function () {
     });
   });
 
-  it('should emit a topologyDescriptionChanged event upon receiving an SRV update', function () {
-    const topology = new Topology(['localhost:27017'], { srvHost: SRV_HOST });
-
-    return new Promise(resolve => {
-      topology.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
-        if (ev.topologyId === 'fake') {
-          // the fake description change emitted within this test
-          expect(topology.s.handleSrvPolling).to.be.a('function');
-          expect(ev.newDescription.servers.size).to.equal(0);
-          topology.s.handleSrvPolling(
-            new SrvPollingEvent([srvRecord('localhost', 27017), srvRecord('localhost', 27018)])
-          );
-        } else {
-          // topologyDescriptionChanged event emitted from the handleSrvPolling function
-          expect(ev.topologyId).to.equal(1);
-          expect(ev.newDescription.servers.size).to.equal(2);
-          resolve();
-        }
-      });
-
+  describe('Topology#handleSrvPolling', function () {
+    let topology;
+    before(function () {
+      topology = new Topology([], { srvHost: SRV_HOST });
+      // This is attempting to fake the initial transition from unknown to sharded cluster
       topology.emit(
         Topology.TOPOLOGY_DESCRIPTION_CHANGED,
         new sdamEvents.TopologyDescriptionChangedEvent(
@@ -454,6 +439,33 @@ describe('Mongos SRV Polling', function () {
           new TopologyDescription(TopologyType.Sharded)
         )
       );
+      // This changes the topology to a sharded cluster
+      // We now have topology.s.handleSrvPolling assigned
+      expect(topology.s.handleSrvPolling).to.be.a('function');
+    });
+
+    it('two topologyDescriptionChanged events are emitted when receiving an SRV update with one server', function (done) {
+      let eventCount = 0;
+      topology.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
+        if (eventCount === 0) {
+          // topologyDescriptionChanged event emitted from the handleSrvPolling function
+          expect(ev.topologyId).to.equal(1);
+          expect(ev.previousDescription.servers.size, 'previous should have 0 servers').to.equal(0);
+          expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
+        }
+
+        if (eventCount >= 1) {
+          // Testing >= 1 to allow done to be called potentially more than once here catching erroneous events
+          // topologyDescriptionChanged event emitted from updating "each" server (just one for this test)
+          expect(ev.topologyId).to.equal(1);
+          expect(ev.previousDescription.servers.size, 'previous should have 1 server').to.equal(1);
+          expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
+          done();
+        }
+        eventCount += 1;
+      });
+
+      topology.s.handleSrvPolling(new SrvPollingEvent([srvRecord('localhost', 27017)]));
     });
   });
 });
