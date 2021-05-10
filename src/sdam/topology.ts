@@ -126,8 +126,8 @@ export interface TopologyPrivate {
 
   /** related to srv polling */
   srvPoller?: SrvPoller;
-  detectTopologyDescriptionChange?: (event: TopologyDescriptionChangedEvent) => void;
-  handleSrvPolling?: (event: SrvPollingEvent) => void;
+  detectTopologyDescriptionChange: (event: TopologyDescriptionChangedEvent) => void;
+  handleSrvPolling: (event: SrvPollingEvent) => void;
 }
 
 /** @public */
@@ -314,7 +314,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       clusterTime: undefined,
 
       // timer management
-      connectionTimers: new Set<NodeJS.Timeout>()
+      connectionTimers: new Set<NodeJS.Timeout>(),
+      // event handlers that can optionally be used
+      detectTopologyDescriptionChange: ev => this.detectTopologyDescriptionChange(ev),
+      handleSrvPolling: ev => this.handleSrvPolling(ev)
     };
 
     if (options.srvHost) {
@@ -325,25 +328,44 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           srvHost: options.srvHost
         });
 
-      this.s.detectTopologyDescriptionChange = (ev: TopologyDescriptionChangedEvent) => {
-        const previousType = ev.previousDescription.type;
-        const newType = ev.newDescription.type;
-
-        if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
-          this.s.handleSrvPolling = srvPollingHandler(this);
-          if (this.s.srvPoller) {
-            // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
-            this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
-            this.s.srvPoller.start();
-          }
-        }
-      };
-
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectTopologyDescriptionChange);
     }
 
     // NOTE: remove this when NODE-1709 is resolved
     this.setMaxListeners(Infinity);
+  }
+
+  private detectTopologyDescriptionChange(ev: TopologyDescriptionChangedEvent): void {
+    const previousType = ev.previousDescription.type;
+    const newType = ev.newDescription.type;
+
+    if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
+      if (this.s.srvPoller) {
+        // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
+        this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
+        this.s.srvPoller.start();
+      }
+    }
+  }
+
+  private handleSrvPolling(ev: SrvPollingEvent) {
+    const previousTopologyDescription = this.s.description;
+    this.s.description = this.s.description.updateFromSrvPollingEvent(ev);
+    if (this.s.description === previousTopologyDescription) {
+      // Nothing changed, so return
+      return;
+    }
+
+    updateServers(this);
+
+    this.emit(
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+      new TopologyDescriptionChangedEvent(
+        this.s.id,
+        previousTopologyDescription,
+        this.s.description
+      )
+    );
   }
 
   /**
@@ -449,19 +471,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     if (this.s.srvPoller) {
       this.s.srvPoller.stop();
-      if (this.s.handleSrvPolling) {
-        this.s.srvPoller.removeListener('srvRecordDiscovery', this.s.handleSrvPolling);
-        delete this.s.handleSrvPolling;
-      }
+      this.s.srvPoller.removeListener('srvRecordDiscovery', this.s.handleSrvPolling);
     }
 
-    if (this.s.detectTopologyDescriptionChange) {
-      this.removeListener(
-        Topology.SERVER_DESCRIPTION_CHANGED,
-        this.s.detectTopologyDescriptionChange
-      );
-      delete this.s.detectTopologyDescriptionChange;
-    }
+    this.removeListener(
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+      this.s.detectTopologyDescriptionChange
+    );
 
     this.s.sessions.forEach((session: ClientSession) => session.endSession());
     this.s.sessionPool.endAllPooledSessions(() => {
@@ -911,28 +927,6 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
       destroyServer(server, topology);
     }
   }
-}
-
-function srvPollingHandler(topology: Topology) {
-  return function handleSrvPolling(ev: SrvPollingEvent) {
-    const previousTopologyDescription = topology.s.description;
-    topology.s.description = topology.s.description.updateFromSrvPollingEvent(ev);
-    if (topology.s.description === previousTopologyDescription) {
-      // Nothing changed, so return
-      return;
-    }
-
-    updateServers(topology);
-
-    topology.emit(
-      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-      new TopologyDescriptionChangedEvent(
-        topology.s.id,
-        previousTopologyDescription,
-        topology.s.description
-      )
-    );
-  };
 }
 
 function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
