@@ -18,34 +18,32 @@ function srvRecord(host, port) {
 describe('SDAM Events', function () {
   it('topologyDescriptionChanged events are emitted when receiving an SRV update', {
     // no sessions are created in the running of this test, yet the leak checker throws
-    metadata: { sessions: { skipLeakTests: true } },
+    metadata: { sessions: { skipLeakTests: false } },
 
     test(done) {
-      // 0th event is triggered by the SRV resolution
-      // 1st event is triggered by the single server contained in the record
-      // more events would be triggered by more servers
-      const topology = new Topology([], { srvHost: 'darmok.tanagra.com' });
+      const topology = new Topology([], { srvHost: 'some.random.host' });
       expect(topology.s.handleSrvPolling).to.be.a('function');
 
-      let eventCount = 0;
-      topology.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
+      topology.once(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
         expect(ev.topologyId).to.equal(1);
         expect(ev.newDescription.servers.size, 'next should have 1 server').to.equal(1);
-        expect(
-          ev.previousDescription.servers.size,
-          `previous should have ${eventCount} servers`
-        ).to.equal(eventCount);
+        expect(ev.previousDescription.servers.size, `previous should have 0 servers`).to.equal(0);
 
-        if (eventCount >= 1) {
-          topology.close(() => done());
-          // Testing >= 1 to allow done to be called
-          // potentially more than once here catching erroneous events
-          // done();
-        }
-        eventCount += 1;
+        // if done is called more than once it will catch erroneous events
+        topology.close({ force: true }, () => {
+          // Since this topology was never connected (b/c unit test)
+          // We need to do some extra manual clean up
+          if (topology.s.srvPoller) {
+            topology.s.srvPoller.stop();
+          }
+
+          expect(topology.s.servers.size).to.equal(1);
+          const server = Array.from(topology.s.servers.values())[0];
+          server.destroy({ force: true }, done);
+        });
       });
 
-      topology.s.handleSrvPolling(new SrvPollingEvent([srvRecord('localhost', 27017)]));
+      topology.s.handleSrvPolling(new SrvPollingEvent([srvRecord('nonexistentHost', 1)]));
     }
   });
 });
