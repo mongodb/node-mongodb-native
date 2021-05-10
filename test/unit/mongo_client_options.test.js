@@ -8,7 +8,7 @@ const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
-const { MongoClient } = require('../../src');
+const { MongoClient, MongoParseError } = require('../../src');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -138,9 +138,8 @@ describe('MongoOptions', function () {
     zlibCompressionLevel: 2
   };
 
-  it('All options', function () {
+  it('should parse all options from the options object', function () {
     const options = parseOptions('mongodb://localhost:27017/', ALL_OPTIONS);
-
     // Check consolidated options
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 2);
@@ -183,13 +182,47 @@ describe('MongoOptions', function () {
       'zlibCompressionLevel=2'
     ].join('&');
 
-  it('All URI options', function () {
+  it('should parse all options from the URI string', function () {
     const options = parseOptions(allURIOptions);
     expect(options).has.property('zlibCompressionLevel', 2);
 
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 'majority');
     expect(options.writeConcern).has.property('wtimeout', 2);
+  });
+
+  it('should ignore undefined and null values in the options object', function () {
+    const options = parseOptions('mongodb://localhost:27017/', {
+      maxPoolSize: null,
+      servername: undefined,
+      randomopt: null,
+      otherrandomopt: undefined
+    });
+
+    // test valid option key with default value
+    expect(options).to.have.property('maxPoolSize', 100);
+
+    // test valid option key without default value
+    expect(options).not.to.have.property('servername');
+
+    // test invalid option keys that are null/undefined
+    expect(options).not.to.have.property('randomopt');
+    expect(options).not.to.have.property('otherrandomopt');
+  });
+
+  it('should throw an error on unrecognized keys in the options object if they are defined', function () {
+    expect(() =>
+      parseOptions('mongodb://localhost:27017/', {
+        randomopt: 'test'
+      })
+    ).to.throw(MongoParseError, 'option randomopt is not supported');
+
+    expect(() =>
+      parseOptions('mongodb://localhost:27017/', {
+        randomopt: 'test',
+        randomopt2: 'test'
+      })
+    ).to.throw(MongoParseError, 'options randomopt, randomopt2 are not supported');
   });
 
   it('srvHost saved to options for later resolution', function () {

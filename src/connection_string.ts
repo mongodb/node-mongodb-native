@@ -340,7 +340,9 @@ export function parseOptions(
     }
   }
 
-  const objectOptions = new CaseInsensitiveMap(Object.entries(options));
+  const objectOptions = new CaseInsensitiveMap(
+    Object.entries(options).filter(([, v]) => (v ?? null) !== null)
+  );
 
   const allOptions = new CaseInsensitiveMap();
 
@@ -369,8 +371,10 @@ export function parseOptions(
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
   );
   if (unsupportedOptions.size !== 0) {
+    const optionWord = unsupportedOptions.size > 1 ? 'options' : 'option';
+    const isOrAre = unsupportedOptions.size > 1 ? 'are' : 'is';
     throw new MongoParseError(
-      `options ${Array.from(unsupportedOptions).join(', ')} are not supported`
+      `${optionWord} ${Array.from(unsupportedOptions).join(', ')} ${isOrAre} not supported`
     );
   }
 
