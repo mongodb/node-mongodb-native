@@ -1,6 +1,7 @@
 'use strict';
 const test = require('./shared').assert;
 const { expect } = require('chai');
+const { ReturnDocument } = require('../../src');
 const setupDatabase = require('./shared').setupDatabase;
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
@@ -784,7 +785,7 @@ describe('CRUD API', function () {
               {
                 projection: { b: 1, c: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: ReturnDocument.AFTER,
                 upsert: true
               },
               function (err, r) {
@@ -816,7 +817,7 @@ describe('CRUD API', function () {
               {
                 projection: { b: 1, d: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: ReturnDocument.AFTER,
                 upsert: true
               },
               function (err, r) {

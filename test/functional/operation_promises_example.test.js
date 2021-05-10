@@ -2,7 +2,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { Code } = require('../../src');
+const { Code, ReturnDocument } = require('../../src');
 const { expect } = require('chai');
 
 var delay = function (ms) {
@@ -918,7 +918,7 @@ describe('Operation (Promises)', function () {
             return collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b1: 1 } },
-              { returnOriginal: false }
+              { returnDocument: ReturnDocument.AFTER }
             );
           })
           .then(function (doc) {
@@ -943,7 +943,7 @@ describe('Operation (Promises)', function () {
             return collection.findOneAndUpdate(
               { d: 1 },
               { $set: { d: 1, f: 1 } },
-              { returnOriginal: false, upsert: true, writeConcern: { w: 1 } }
+              { returnDocument: ReturnDocument.AFTER, upsert: true, writeConcern: { w: 1 } }
             );
           })
           .then(function (doc) {
@@ -4766,7 +4766,7 @@ describe('Operation (Promises)', function () {
               {
                 projection: { b: 1, c: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: ReturnDocument.AFTER,
                 upsert: true
               }
             )
@@ -4821,7 +4821,7 @@ describe('Operation (Promises)', function () {
               {
                 projection: { b: 1, d: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: ReturnDocument.AFTER,
                 upsert: true
               }
             );

@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { Code } = require('../../src');
+const { Code, ReturnDocument } = require('../../src');
 const { expect } = require('chai');
 
 /**************************************************************************
@@ -906,7 +906,7 @@ describe('Operation (Generators)', function () {
         var doc = yield collection.findOneAndUpdate(
           { a: 1 },
           { $set: { b1: 1 } },
-          { returnOriginal: false }
+          { returnDocument: ReturnDocument.AFTER }
         );
         test.equal(1, doc.value.a);
         test.equal(1, doc.value.b1);
@@ -924,7 +924,7 @@ describe('Operation (Generators)', function () {
         doc = yield collection.findOneAndUpdate(
           { d: 1 },
           { $set: { d: 1, f: 1 } },
-          { returnOriginal: false, upsert: true, writeConcern: { w: 1 } }
+          { returnDocument: ReturnDocument.AFTER, upsert: true, writeConcern: { w: 1 } }
         );
         test.equal(1, doc.value.d);
         test.equal(1, doc.value.f);
@@ -4375,7 +4375,7 @@ describe('Operation (Generators)', function () {
           {
             projection: { b: 1, c: 1 },
             sort: { a: 1 },
-            returnOriginal: false,
+            returnDocument: ReturnDocument.AFTER,
             upsert: true
           }
         );
@@ -4430,7 +4430,7 @@ describe('Operation (Generators)', function () {
           {
             projection: { b: 1, d: 1 },
             sort: { a: 1 },
-            returnOriginal: false,
+            returnDocument: ReturnDocument.AFTER,
             upsert: true
           }
         );

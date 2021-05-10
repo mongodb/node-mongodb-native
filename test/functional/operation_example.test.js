@@ -3,7 +3,7 @@ const { assert: test } = require('./shared');
 const { setupDatabase } = require('./shared');
 const { format: f } = require('util');
 const { Topology } = require('../../src/sdam/topology');
-const { Code, ObjectId } = require('../../src');
+const { Code, ObjectId, ReturnDocument } = require('../../src');
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -1532,7 +1532,7 @@ describe('Operation Examples', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b1: 1 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, doc) {
                 expect(err).to.not.exist;
                 test.equal(1, doc.value.a);
@@ -1558,7 +1558,11 @@ describe('Operation Examples', function () {
                       collection.findOneAndUpdate(
                         { d: 1 },
                         { $set: { d: 1, f: 1 } },
-                        { returnOriginal: false, upsert: true, writeConcern: { w: 1 } },
+                        {
+                          returnDocument: ReturnDocument.AFTER,
+                          upsert: true,
+                          writeConcern: { w: 1 }
+                        },
                         function (err, doc) {
                           expect(err).to.not.exist;
                           test.equal(1, doc.value.d);
@@ -6406,7 +6410,7 @@ describe('Operation Examples', function () {
             {
               projection: { b: 1, c: 1 },
               sort: { a: 1 },
-              returnOriginal: false,
+              returnDocument: ReturnDocument.AFTER,
               upsert: true
             },
             function (err, r) {
@@ -6462,7 +6466,7 @@ describe('Operation Examples', function () {
             {
               projection: { b: 1, d: 1 },
               sort: { a: 1 },
-              returnOriginal: false,
+              returnDocument: ReturnDocument.AFTER,
               upsert: true
             },
             function (err, r) {

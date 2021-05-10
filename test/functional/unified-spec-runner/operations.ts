@@ -234,17 +234,14 @@ operations.set('find', async ({ entities, operation }) => {
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.findOneAndReplace(operation.arguments.filter, operation.arguments.replacement);
+  const { filter, replacement, ...opts } = operation.arguments;
+  return collection.findOneAndReplace(filter, replacement, { ...opts });
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const returnOriginal = operation.arguments.returnDocument === 'Before';
-  return (
-    await collection.findOneAndUpdate(operation.arguments.filter, operation.arguments.update, {
-      returnOriginal
-    })
-  ).value;
+  const { filter, update, ...opts } = operation.arguments;
+  return (await collection.findOneAndUpdate(update, { ...opts })).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {

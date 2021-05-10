@@ -16,7 +16,8 @@ const {
   MinKey,
   MaxKey,
   Code,
-  MongoBulkWriteError
+  MongoBulkWriteError,
+  ReturnDocument
 } = require('../../src');
 
 /**
@@ -967,7 +968,11 @@ describe('Insert', function () {
                 collection.findOneAndUpdate(
                   { str: 'String' },
                   { $set: { f: function () {} } },
-                  { returnOriginal: false, safe: true, serializeFunctions: true },
+                  {
+                    returnDocument: ReturnDocument.AFTER,
+                    safe: true,
+                    serializeFunctions: true
+                  },
                   function (err, result) {
                     test.ok(result.value.f._bsontype === 'Code');
                     client.close(done);
