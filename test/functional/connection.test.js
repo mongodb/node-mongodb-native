@@ -75,7 +75,9 @@ describe('Connection - functional', function () {
     var configuration = this.configuration;
     var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.on('open', topology => {
+    client.on('open', (error, topology) => {
+      // TODO(NODE-3273) - remove error
+      expect(error).to.equal(undefined);
       expect(topology).to.be.instanceOf(Topology);
       client.close(done);
     });

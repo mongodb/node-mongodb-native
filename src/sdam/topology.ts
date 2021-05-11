@@ -126,8 +126,8 @@ export interface TopologyPrivate {
 
   /** related to srv polling */
   srvPoller?: SrvPoller;
-  detectTopologyDescriptionChange: (event: TopologyDescriptionChangedEvent) => void;
-  handleSrvPolling: (event: SrvPollingEvent) => void;
+  detectTopologyDescriptionChange?: (event: TopologyDescriptionChangedEvent) => void;
+  handleSrvPolling?: (event: SrvPollingEvent) => void;
 }
 
 /** @public */
@@ -171,14 +171,14 @@ export type TopologyEvents = {
   [Topology.TOPOLOGY_CLOSED](event: TopologyClosedEvent): void;
   [Topology.TOPOLOGY_DESCRIPTION_CHANGED](event: TopologyDescriptionChangedEvent): void;
   [Topology.ERROR](error: Error): void;
-  [Topology.OPEN](topology: Topology): void;
+  // TODO(NODE-3273) - remove error
+  [Topology.OPEN](error: undefined, topology: Topology): void;
   [Topology.CLOSE](): void;
   [Topology.TIMEOUT](): void;
 } & Omit<ServerEvents, 'connect'> &
   ConnectionPoolEvents &
   ConnectionEvents &
   EventEmitterWithState;
-
 /**
  * A container of server instances representing a connection to a MongoDB topology.
  * @public
@@ -215,6 +215,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   static readonly CLOSE = 'close' as const;
   /** @event */
   static readonly TIMEOUT = 'timeout' as const;
+
   /**
    * @internal
    *
@@ -314,10 +315,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       clusterTime: undefined,
 
       // timer management
-      connectionTimers: new Set<NodeJS.Timeout>(),
-      // event handlers that can optionally be used
-      detectTopologyDescriptionChange: ev => this.detectTopologyDescriptionChange(ev),
-      handleSrvPolling: ev => this.handleSrvPolling(ev)
+      connectionTimers: new Set<NodeJS.Timeout>()
     };
 
     if (options.srvHost) {
@@ -328,44 +326,25 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           srvHost: options.srvHost
         });
 
+      this.s.detectTopologyDescriptionChange = (ev: TopologyDescriptionChangedEvent) => {
+        const previousType = ev.previousDescription.type;
+        const newType = ev.newDescription.type;
+
+        if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
+          this.s.handleSrvPolling = srvPollingHandler(this);
+          if (this.s.srvPoller) {
+            // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
+            this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
+            this.s.srvPoller.start();
+          }
+        }
+      };
+
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectTopologyDescriptionChange);
     }
 
     // NOTE: remove this when NODE-1709 is resolved
     this.setMaxListeners(Infinity);
-  }
-
-  private detectTopologyDescriptionChange(ev: TopologyDescriptionChangedEvent): void {
-    const previousType = ev.previousDescription.type;
-    const newType = ev.newDescription.type;
-
-    if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
-      if (this.s.srvPoller) {
-        // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
-        this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
-        this.s.srvPoller.start();
-      }
-    }
-  }
-
-  private handleSrvPolling(ev: SrvPollingEvent) {
-    const previousTopologyDescription = this.s.description;
-    this.s.description = this.s.description.updateFromSrvPollingEvent(ev);
-    if (this.s.description === previousTopologyDescription) {
-      // Nothing changed, so return
-      return;
-    }
-
-    updateServers(this);
-
-    this.emit(
-      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-      new TopologyDescriptionChangedEvent(
-        this.s.id,
-        previousTopologyDescription,
-        this.s.description
-      )
-    );
   }
 
   /**
@@ -427,7 +406,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           }
 
           stateTransition(this, STATE_CONNECTED);
-          this.emit(Topology.OPEN, this);
+          // TODO(NODE-3273) - remove err
+          this.emit(Topology.OPEN, err, this);
           this.emit(Topology.CONNECT, this);
 
           if (typeof callback === 'function') callback(undefined, this);
@@ -437,7 +417,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
 
       stateTransition(this, STATE_CONNECTED);
-      this.emit(Topology.OPEN, this);
+      // TODO(NODE-3273) - remove err
+      this.emit(Topology.OPEN, err, this);
       this.emit(Topology.CONNECT, this);
 
       if (typeof callback === 'function') callback(undefined, this);
@@ -471,15 +452,25 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     if (this.s.srvPoller) {
       this.s.srvPoller.stop();
-      this.s.srvPoller.removeListener('srvRecordDiscovery', this.s.handleSrvPolling);
+      if (this.s.handleSrvPolling) {
+        this.s.srvPoller.removeListener('srvRecordDiscovery', this.s.handleSrvPolling);
+        delete this.s.handleSrvPolling;
+      }
     }
 
-    this.removeListener(
-      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-      this.s.detectTopologyDescriptionChange
-    );
+    if (this.s.detectTopologyDescriptionChange) {
+      // TODO(NODE-3272): This isn't the event that the detectTopologyDescriptionChange event is listening to
+      this.removeListener(
+        Topology.SERVER_DESCRIPTION_CHANGED,
+        this.s.detectTopologyDescriptionChange
+      );
+      delete this.s.detectTopologyDescriptionChange;
+    }
 
-    this.s.sessions.forEach((session: ClientSession) => session.endSession());
+    for (const session of this.s.sessions) {
+      session.endSession();
+    }
+
     this.s.sessionPool.endAllPooledSessions(() => {
       eachAsync(
         Array.from(this.s.servers.values()),
@@ -853,7 +844,7 @@ function createAndConnectServer(
     server.on(event, (e: any) => topology.emit(event, e));
   }
 
-  server.on(Server.DESCRIPTION_RECEIVED, topology.serverUpdateHandler.bind(topology));
+  server.on(Server.DESCRIPTION_RECEIVED, description => topology.serverUpdateHandler(description));
 
   if (connectDelay) {
     const connectTimer = setTimeout(() => {
@@ -927,6 +918,31 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
       destroyServer(server, topology);
     }
   }
+}
+
+function srvPollingHandler(topology: Topology) {
+  return function handleSrvPolling(ev: SrvPollingEvent) {
+    const previousTopologyDescription = topology.s.description;
+    topology.s.description = topology.s.description.updateFromSrvPollingEvent(ev);
+    if (topology.s.description === previousTopologyDescription) {
+      // Nothing changed, so return
+      return;
+    }
+
+    updateServers(topology);
+
+    topology.emit(
+      Topology.SERVER_DESCRIPTION_CHANGED,
+      // TODO(NODE-3272): This server description changed event is emitting a TopologyDescriptionChangeEvent
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      new TopologyDescriptionChangedEvent(
+        topology.s.id,
+        previousTopologyDescription,
+        topology.s.description
+      )
+    );
+  };
 }
 
 function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
