@@ -235,13 +235,19 @@ operations.set('find', async ({ entities, operation }) => {
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments;
+  if (opts.returnDocument) {
+    opts.returnDocument = opts.returnDocument.toLowerCase();
+  }
   return collection.findOneAndReplace(filter, replacement, { ...opts });
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...opts } = operation.arguments;
-  return (await collection.findOneAndUpdate(update, { ...opts })).value;
+  if (opts.returnDocument) {
+    opts.returnDocument = opts.returnDocument.toLowerCase();
+  }
+  return (await collection.findOneAndUpdate(filter, update, { ...opts })).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {

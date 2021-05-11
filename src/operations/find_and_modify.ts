@@ -12,8 +12,8 @@ import type { WriteConcern, WriteConcernSettings } from '../write_concern';
 
 /** @public */
 export const ReturnDocument = Object.freeze({
-  BEFORE: 'Before',
-  AFTER: 'After'
+  BEFORE: 'before',
+  AFTER: 'after'
 } as const);
 
 /** @public */
@@ -37,7 +37,7 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
-  /** When set to 'After', returns the updated document rather than the original. The default is 'Before'.  */
+  /** When set to 'after', returns the updated document rather than the original. The default is 'before'.  */
   returnDocument?: ReturnDocument;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
@@ -55,7 +55,7 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
-  /** When set to 'After', returns the updated document rather than the original. The default is 'Before'.  */
+  /** When set to 'after', returns the updated document rather than the original. The default is 'before'.  */
   returnDocument?: ReturnDocument;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
