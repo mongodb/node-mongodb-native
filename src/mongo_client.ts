@@ -1,5 +1,4 @@
 import { Db, DbOptions } from './db';
-import { EventEmitter } from 'events';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceModeId } from './read_preference';
 import { MongoError, AnyError } from './error';
@@ -13,14 +12,14 @@ import {
   ns,
   HostAddress
 } from './utils';
-import { connect } from './operations/connect';
+import { connect, MONGO_CLIENT_EVENTS } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { Logger, LoggerLevelId } from './logger';
 import type { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
-import type { Topology } from './sdam/topology';
+import type { Topology, TopologyEvents } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { TagSet } from './sdam/server_description';
 import type { MongoCredentials } from './cmap/auth/mongo_credentials';
@@ -32,6 +31,7 @@ import type { SrvPoller } from './sdam/srv_polling';
 import type { Connection } from './cmap/connection';
 import type { LEGAL_TLS_SOCKET_OPTIONS, LEGAL_TCP_SOCKET_OPTIONS } from './cmap/connect';
 import type { Encrypter } from './encrypter';
+import { TypedEventEmitter } from './mongo_types';
 
 /** @public */
 export const ServerApiVersion = {
@@ -255,6 +255,9 @@ export interface MongoClientPrivate {
   readonly logger: Logger;
 }
 
+/** @public */
+export type MongoClientEvents = Pick<TopologyEvents, typeof MONGO_CLIENT_EVENTS[number] | 'open'>;
+
 const kOptions = Symbol('options');
 
 /**
@@ -297,7 +300,7 @@ const kOptions = Symbol('options');
  * });
  * ```
  */
-export class MongoClient extends EventEmitter {
+export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   s: MongoClientPrivate;
   topology?: Topology;

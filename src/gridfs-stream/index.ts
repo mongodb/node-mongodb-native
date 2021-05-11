@@ -1,5 +1,4 @@
 import { MongoError } from '../error';
-import { EventEmitter } from 'events';
 import {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
@@ -16,6 +15,7 @@ import type { FindOptions } from './../operations/find';
 import type { Sort } from '../sort';
 import type { Logger } from '../logger';
 import type { FindCursor } from '../cursor/find_cursor';
+import { TypedEventEmitter } from '../mongo_types';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;
@@ -50,11 +50,16 @@ export interface GridFSBucketPrivate {
   calledOpenUploadStream: boolean;
 }
 
+/** @public */
+export type GridFSBucketEvents = {
+  [GridFSBucket.INDEX](): void;
+};
+
 /**
  * Constructor for a streaming GridFS interface
  * @public
  */
-export class GridFSBucket extends EventEmitter {
+export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   /** @internal */
   s: GridFSBucketPrivate;
 

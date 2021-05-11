@@ -6,9 +6,9 @@ import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
-import { EventEmitter } from 'events';
 import type { ExecutionResult } from '../operations/execute_operation';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
+import { TypedEventEmitter } from '../mongo_types';
 
 const kId = Symbol('id');
 const kDocuments = Symbol('documents');
@@ -73,7 +73,14 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
 };
 
 /** @public */
-export abstract class AbstractCursor extends EventEmitter {
+export type AbstractCursorEvents = {
+  [AbstractCursor.CLOSE](): void;
+};
+
+/** @public */
+export abstract class AbstractCursor<
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+> extends TypedEventEmitter<CursorEvents> {
   /** @internal */
   [kId]?: Long;
   /** @internal */
@@ -342,6 +349,8 @@ export abstract class AbstractCursor extends EventEmitter {
       if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
         if (needsToEmitClosed) {
           this[kId] = Long.ZERO;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
           this.emit(AbstractCursor.CLOSE);
         }
 
@@ -360,11 +369,15 @@ export abstract class AbstractCursor extends EventEmitter {
         () => {
           if (session && session.owner === this) {
             return session.endSession(() => {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
               this.emit(AbstractCursor.CLOSE);
               done();
             });
           }
 
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
           this.emit(AbstractCursor.CLOSE);
           done();
         }

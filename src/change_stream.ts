@@ -1,9 +1,7 @@
 import Denque = require('denque');
-import { EventEmitter } from 'events';
 import { MongoError, AnyError, isResumableError } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
-  relayEvents,
   maxWireVersion,
   calculateDurationInMs,
   now,
@@ -22,11 +20,13 @@ import { Collection } from './collection';
 import type { Readable } from 'stream';
 import {
   AbstractCursor,
+  AbstractCursorEvents,
   AbstractCursorOptions,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
 import type { ClientSession } from './sessions';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import { TypedEventEmitter } from './mongo_types';
 
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
@@ -96,7 +96,8 @@ export interface ChangeStreamOptions extends AggregateOptions {
   batchSize?: number;
 }
 
-interface ChangeStreamDocument {
+/** @public */
+export interface ChangeStreamDocument {
   /**
    * The id functions as an opaque token for use when resuming an interrupted
    * change stream.
@@ -157,7 +158,8 @@ interface ChangeStreamDocument {
   fullDocument?: Document;
 }
 
-interface UpdateDescription {
+/** @public */
+export interface UpdateDescription {
   /**
    * A document containing key:value pairs of names of the fields that were
    * changed, and the new value for those fields.
@@ -170,11 +172,22 @@ interface UpdateDescription {
   removedFields: string[];
 }
 
+/** @public */
+export type ChangeStreamEvents = {
+  resumeTokenChanged(token: ResumeToken): void;
+  init(response: Document): void;
+  more(response?: Document | undefined): void;
+  response(): void;
+  end(): void;
+  error(error: Error): void;
+  change(change: ChangeStreamDocument): void;
+} & AbstractCursorEvents;
+
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream extends EventEmitter {
+export class ChangeStream extends TypedEventEmitter<ChangeStreamEvents> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
@@ -190,6 +203,12 @@ export class ChangeStream extends EventEmitter {
   /** @internal */
   [kClosed]: boolean;
 
+  /** @event */
+  static readonly RESPONSE = 'response' as const;
+  /** @event */
+  static readonly MORE = 'more' as const;
+  /** @event */
+  static readonly INIT = 'init' as const;
   /** @event */
   static readonly CLOSE = 'close' as const;
   /**
@@ -357,7 +376,7 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
 }
 
 /** @internal */
-export class ChangeStreamCursor extends AbstractCursor {
+export class ChangeStreamCursor extends AbstractCursor<ChangeStreamEvents> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
@@ -476,8 +495,8 @@ export class ChangeStreamCursor extends AbstractCursor {
 
       this._processBatch('firstBatch', response);
 
-      this.emit('init', response);
-      this.emit('response');
+      this.emit(ChangeStream.INIT, response);
+      this.emit(ChangeStream.RESPONSE);
 
       // TODO: NODE-2882
       callback(undefined, { server, session, response });
@@ -492,12 +511,18 @@ export class ChangeStreamCursor extends AbstractCursor {
 
       this._processBatch('nextBatch', response);
 
-      this.emit('more', response);
-      this.emit('response');
+      this.emit(ChangeStream.MORE, response);
+      this.emit(ChangeStream.RESPONSE);
       callback(err, response);
     });
   }
 }
+
+const CHANGE_STREAM_EVENTS = [
+  ChangeStream.RESUME_TOKEN_CHANGED,
+  ChangeStream.END,
+  ChangeStream.CLOSE
+];
 
 /**
  * Create a new change stream cursor based on self's configuration
@@ -525,7 +550,10 @@ function createChangeStreamCursor(
     cursorOptions
   );
 
-  relayEvents(changeStreamCursor, changeStream, ['resumeTokenChanged', 'end', 'close']);
+  for (const event of CHANGE_STREAM_EVENTS) {
+    changeStreamCursor.on(event, e => changeStream.emit(event, e));
+  }
+
   if (changeStream.listenerCount(ChangeStream.CHANGE) > 0) {
     streamEvents(changeStream, changeStreamCursor);
   }

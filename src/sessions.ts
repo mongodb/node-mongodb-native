@@ -1,5 +1,4 @@
 import { PromiseProvider } from './promise_provider';
-import { EventEmitter } from 'events';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import {
@@ -34,6 +33,7 @@ import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { CommandOptions } from './cmap/connection';
 import type { WriteConcern } from './write_concern';
+import { TypedEventEmitter } from './mongo_types';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -69,6 +69,11 @@ export interface ClientSessionOptions {
 /** @public */
 export type WithTransactionCallback = (session: ClientSession) => Promise<any> | void;
 
+/** @public */
+export type ClientSessionEvents = {
+  ended(session: ClientSession): void;
+};
+
 const kServerSession = Symbol('serverSession');
 
 /**
@@ -77,7 +82,7 @@ const kServerSession = Symbol('serverSession');
  * NOTE: not meant to be instantiated directly.
  * @public
  */
-class ClientSession extends EventEmitter {
+class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   topology: Topology;
   /** @internal */
   sessionPool: ServerSessionPool;
