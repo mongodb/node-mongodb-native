@@ -44,7 +44,7 @@ export type Filter<TSchema> = Partial<TSchema> & Document;
 
 /** A MongoDB UpdateQuery is set of operators @public */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type UpdateQuery<TSchema> = Document; // TODO
+export type UpdateQuery<TSchema> = Document; // TODO(NODE-3274)
 
 /** @see https://docs.mongodb.com/manual/reference/operator/aggregation/meta/#proj._S_meta @public */
 export type MetaSortOperators = 'textScore' | 'indexKey';
