@@ -20,6 +20,7 @@ import {
 } from './connection_pool_events';
 
 const kLogger = Symbol('logger');
+const kAvailableConnections = Symbol('availableConnections');
 const kConnections = Symbol('connections');
 const kPermits = Symbol('permits');
 const kMinPoolSizeTimer = Symbol('minPoolSizeTimer');
@@ -62,8 +63,19 @@ export class ConnectionPool extends EventEmitter {
   options: Readonly<ConnectionPoolOptions>;
   /** @internal */
   [kLogger]: Logger;
-  /** @internal */
-  [kConnections]: Denque<Connection>;
+  /**
+   * This represents the queue of all currently idle connections, i.e. connections
+   * that we can hand out and use for operations.
+   * @internal
+   */
+  [kAvailableConnections]: Denque<Connection>;
+  /**
+   * This represents a set of all known connections that were created for the pool.
+   * We keep track of all connections (not just the idle ones) so we can
+   * close all connections when we are instructed to do so.
+   * @internal
+   */
+  [kConnections]: Set<Connection>;
   /**
    * An integer expressing how many total connections are permitted
    * @internal
@@ -156,7 +168,8 @@ export class ConnectionPool extends EventEmitter {
     }
 
     this[kLogger] = new Logger('ConnectionPool');
-    this[kConnections] = new Denque();
+    this[kAvailableConnections] = new Denque();
+    this[kConnections] = new Set<Connection>();
     this[kPermits] = this.options.maxPoolSize;
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
@@ -183,12 +196,12 @@ export class ConnectionPool extends EventEmitter {
 
   /** An integer expressing how many total connections (active + in use) the pool currently has */
   get totalConnectionCount(): number {
-    return this[kConnections].length + (this.options.maxPoolSize - this[kPermits]);
+    return this[kAvailableConnections].length + (this.options.maxPoolSize - this[kPermits]);
   }
 
   /** An integer expressing how many connections are currently available in the pool. */
   get availableConnectionCount(): number {
-    return this[kConnections].length;
+    return this[kAvailableConnections].length;
   }
 
   get waitQueueSize(): number {
@@ -199,6 +212,9 @@ export class ConnectionPool extends EventEmitter {
    * Check a connection out of this pool. The connection will continue to be tracked, but no reference to it
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
+   *
+   * If the pool is force-closed while the connection is checked out, the connection will nevertheless be
+   * destroyed forcefully immediately, too.
    */
   checkOut(callback: Callback<Connection>): void {
     this.emit(
@@ -246,7 +262,7 @@ export class ConnectionPool extends EventEmitter {
 
     if (!willDestroy) {
       connection.markAvailable();
-      this[kConnections].push(connection);
+      this[kAvailableConnections].push(connection);
     }
 
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
@@ -315,8 +331,15 @@ export class ConnectionPool extends EventEmitter {
     // mark the pool as closed immediately
     this.closed = true;
 
+    // when we are force closed we ensure to really force close
+    // all existing connections - otherwise connections will be
+    // closed automatically upon check in
+    const connections = options.force
+      ? [...this[kConnections]]
+      : this[kAvailableConnections].toArray();
+
     eachAsync<Connection>(
-      this[kConnections].toArray(),
+      connections,
       (conn, cb) => {
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
@@ -325,6 +348,7 @@ export class ConnectionPool extends EventEmitter {
         conn.destroy(options, cb);
       },
       err => {
+        this[kAvailableConnections].clear();
         this[kConnections].clear();
         this.emit(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
         callback(err);
@@ -407,6 +431,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
       connection.destroy({ force: true });
       return;
     }
+    // Immediately register the connection with the pool
+    pool[kConnections].add(connection);
 
     // forward all events from the connection to the pool
     relayEvents(connection, pool, [
@@ -428,7 +454,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     }
 
     // otherwise add it to the pool for later acquisition, and try to process the wait queue
-    pool[kConnections].push(connection);
+    pool[kAvailableConnections].push(connection);
     setImmediate(() => processWaitQueue(pool));
   });
 }
@@ -440,7 +466,13 @@ function destroyConnection(pool: ConnectionPool, connection: Connection, reason:
   pool[kPermits]++;
 
   // destroy the connection
-  process.nextTick(() => connection.destroy());
+  process.nextTick(() => {
+    connection.destroy(() => {
+      // when it has been successfully destroyed we remove it from tracking in the pool
+      // - but only then since we might have to force destroy it in the mean time
+      pool[kConnections].delete(connection);
+    });
+  });
 }
 
 function processWaitQueue(pool: ConnectionPool) {
@@ -464,7 +496,7 @@ function processWaitQueue(pool: ConnectionPool) {
       break;
     }
 
-    const connection = pool[kConnections].shift();
+    const connection = pool[kAvailableConnections].shift();
     if (!connection) {
       break;
     }
@@ -494,7 +526,7 @@ function processWaitQueue(pool: ConnectionPool) {
       const waitQueueMember = pool[kWaitQueue].shift();
       if (!waitQueueMember || waitQueueMember[kCancelled]) {
         if (!err && connection) {
-          pool[kConnections].push(connection);
+          pool[kAvailableConnections].push(connection);
         }
 
         return;
