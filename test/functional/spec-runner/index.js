@@ -680,6 +680,11 @@ function testOperation(operation, obj, context, options) {
             return;
           }
 
+          if (key === 'returnDocument') {
+            opOptions.returnDocument = operation.arguments[key].toLowerCase();
+            return;
+          }
+
           if (key === 'options') {
             Object.assign(opOptions, operation.arguments[key]);
             if (opOptions.readPreference) {

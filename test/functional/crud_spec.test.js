@@ -320,6 +320,9 @@ describe('CRUD spec', function () {
     const filter = args.filter;
     const second = args.update || args.replacement;
     const options = Object.assign({}, args);
+    if (options.returnDocument) {
+      options.returnDocument = options.returnDocument.toLowerCase();
+    }
 
     delete options.filter;
     delete options.update;

@@ -136,8 +136,10 @@ function generateArguments(test) {
     Object.keys(test.operation.arguments).forEach(arg => {
       if (arg === 'requests') {
         args.push(test.operation.arguments[arg].map(convertBulkWriteOperation));
-      } else if (arg === 'upsert' || arg === 'returnDocument') {
-        options[arg] = test.operation.arguments[arg];
+      } else if (arg === 'upsert') {
+        options.upsert = test.operation.arguments[arg];
+      } else if (arg === 'returnDocument') {
+        options.returnDocument = test.operation.arguments[arg].toLowerCase();
       } else {
         args.push(test.operation.arguments[arg]);
       }
