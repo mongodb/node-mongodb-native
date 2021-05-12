@@ -1,9 +1,8 @@
 import Denque = require('denque');
-import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { Connection, ConnectionOptions } from './connection';
+import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
-import { eachAsync, relayEvents, makeCounter, Callback } from '../utils';
+import { eachAsync, makeCounter, Callback } from '../utils';
 import { MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
@@ -18,6 +17,7 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './connection_pool_events';
+import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
 const kLogger = Symbol('logger');
 const kConnections = Symbol('connections');
@@ -53,11 +53,25 @@ export interface CloseOptions {
   force?: boolean;
 }
 
+/** @public */
+export type ConnectionPoolEvents = {
+  [ConnectionPool.CONNECTION_POOL_CREATED](event: ConnectionPoolCreatedEvent): void;
+  [ConnectionPool.CONNECTION_POOL_CLOSED](event: ConnectionPoolClosedEvent): void;
+  [ConnectionPool.CONNECTION_POOL_CLEARED](event: ConnectionPoolClearedEvent): void;
+  [ConnectionPool.CONNECTION_CREATED](event: ConnectionCreatedEvent): void;
+  [ConnectionPool.CONNECTION_READY](event: ConnectionReadyEvent): void;
+  [ConnectionPool.CONNECTION_CLOSED](event: ConnectionClosedEvent): void;
+  [ConnectionPool.CONNECTION_CHECK_OUT_STARTED](event: ConnectionCheckOutStartedEvent): void;
+  [ConnectionPool.CONNECTION_CHECK_OUT_FAILED](event: ConnectionCheckOutFailedEvent): void;
+  [ConnectionPool.CONNECTION_CHECKED_OUT](event: ConnectionCheckedOutEvent): void;
+  [ConnectionPool.CONNECTION_CHECKED_IN](event: ConnectionCheckedInEvent): void;
+} & Omit<ConnectionEvents, 'close' | 'message'>;
+
 /**
  * A pool of connections which dynamically resizes, and emit events related to pool activity
  * @public
  */
-export class ConnectionPool extends EventEmitter {
+export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   /** @internal */
@@ -79,7 +93,7 @@ export class ConnectionPool extends EventEmitter {
   /** @internal */
   [kConnectionCounter]: Generator<number>;
   /** @internal */
-  [kCancellationToken]: EventEmitter;
+  [kCancellationToken]: CancellationToken;
   /** @internal */
   [kWaitQueue]: Denque<WaitQueueMember>;
 
@@ -93,6 +107,11 @@ export class ConnectionPool extends EventEmitter {
    * @event
    */
   static readonly CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
+  /**
+   * Emitted each time the connection pool is cleared and it's generation incremented
+   * @event
+   */
+  static readonly CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
   /**
    * Emitted when a connection is created.
    * @event
@@ -128,11 +147,6 @@ export class ConnectionPool extends EventEmitter {
    * @event
    */
   static readonly CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
-  /**
-   * Emitted each time the connection pool is cleared and it's generation incremented
-   * @event
-   */
-  static readonly CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
 
   constructor(options: ConnectionPoolOptions) {
     super();
@@ -161,7 +175,7 @@ export class ConnectionPool extends EventEmitter {
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
     this[kConnectionCounter] = makeCounter(1);
-    this[kCancellationToken] = new EventEmitter();
+    this[kCancellationToken] = new CancellationToken();
     this[kCancellationToken].setMaxListeners(Infinity);
     this[kWaitQueue] = new Denque();
 
@@ -409,12 +423,9 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     }
 
     // forward all events from the connection to the pool
-    relayEvents(connection, pool, [
-      Connection.COMMAND_STARTED,
-      Connection.COMMAND_FAILED,
-      Connection.COMMAND_SUCCEEDED,
-      Connection.CLUSTER_TIME_RECEIVED
-    ]);
+    for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
+      connection.on(event, (e: any) => pool.emit(event, e));
+    }
 
     pool.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionCreatedEvent(pool, connection));
 
@@ -522,7 +533,7 @@ function processWaitQueue(pool: ConnectionPool) {
   }
 }
 
-export const CMAP_EVENT_NAMES = [
+export const CMAP_EVENTS = [
   ConnectionPool.CONNECTION_POOL_CREATED,
   ConnectionPool.CONNECTION_POOL_CLOSED,
   ConnectionPool.CONNECTION_CREATED,

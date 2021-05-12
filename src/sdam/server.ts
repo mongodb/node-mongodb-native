@@ -1,18 +1,22 @@
-import { EventEmitter } from 'events';
 import { Logger } from '../logger';
-import { ConnectionPool, ConnectionPoolOptions, CMAP_EVENT_NAMES } from '../cmap/connection_pool';
+import {
+  ConnectionPool,
+  ConnectionPoolOptions,
+  CMAP_EVENTS,
+  ConnectionPoolEvents
+} from '../cmap/connection_pool';
 import { ServerDescription, compareTopologyVersion } from './server_description';
 import { Monitor, MonitorOptions } from './monitor';
 import { isTransactionCommand } from '../transactions';
 import {
-  relayEvents,
   collationNotSupported,
   debugOptions,
   makeStateMachine,
   maxWireVersion,
   Callback,
   CallbackWithType,
-  MongoDBNamespace
+  MongoDBNamespace,
+  EventEmitterWithState
 } from '../utils';
 import {
   ServerType,
@@ -36,14 +40,20 @@ import {
   DestroyOptions,
   QueryOptions,
   GetMoreOptions,
-  CommandOptions
+  CommandOptions,
+  APM_EVENTS
 } from '../cmap/connection';
 import type { Topology } from './topology';
-import type { ServerHeartbeatSucceededEvent } from './events';
+import type {
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent
+} from './events';
 import type { ClientSession } from '../sessions';
 import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
+import { TypedEventEmitter } from '../mongo_types';
 
 // Used for filtering out fields for logging
 const DEBUG_FIELDS = [
@@ -105,7 +115,19 @@ export interface ServerPrivate {
 }
 
 /** @public */
-export class Server extends EventEmitter {
+export type ServerEvents = {
+  [Server.SERVER_HEARTBEAT_STARTED](event: ServerHeartbeatStartedEvent): void;
+  [Server.SERVER_HEARTBEAT_SUCCEEDED](event: ServerHeartbeatSucceededEvent): void;
+  [Server.SERVER_HEARTBEAT_FAILED](event: ServerHeartbeatFailedEvent): void;
+  [Server.CONNECT](server: Server): void;
+  [Server.DESCRIPTION_RECEIVED](description: ServerDescription): void;
+  [Server.CLOSED](): void;
+  [Server.ENDED](): void;
+} & ConnectionPoolEvents &
+  EventEmitterWithState;
+
+/** @public */
+export class Server extends TypedEventEmitter<ServerEvents> {
   /** @internal */
   s: ServerPrivate;
   serverApi?: ServerApi;
@@ -147,11 +169,9 @@ export class Server extends EventEmitter {
       pool: new ConnectionPool(poolOptions)
     };
 
-    relayEvents(
-      this.s.pool,
-      this,
-      ['commandStarted', 'commandSucceeded', 'commandFailed'].concat(CMAP_EVENT_NAMES)
-    );
+    for (const event of [...CMAP_EVENTS, ...APM_EVENTS]) {
+      this.s.pool.on(event, (e: any) => this.emit(event, e));
+    }
 
     this.s.pool.on(Connection.CLUSTER_TIME_RECEIVED, (clusterTime: ClusterTime) => {
       this.clusterTime = clusterTime;
@@ -159,11 +179,10 @@ export class Server extends EventEmitter {
 
     // create the monitor
     this[kMonitor] = new Monitor(this, this.s.options);
-    relayEvents(this[kMonitor], this, [
-      Server.SERVER_HEARTBEAT_STARTED,
-      Server.SERVER_HEARTBEAT_SUCCEEDED,
-      Server.SERVER_HEARTBEAT_FAILED
-    ]);
+
+    for (const event of HEARTBEAT_EVENTS) {
+      this[kMonitor].on(event, (e: any) => this.emit(event, e));
+    }
 
     this[kMonitor].on('resetConnectionPool', () => {
       this.s.pool.clear();
@@ -397,6 +416,12 @@ export class Server extends EventEmitter {
     }, callback);
   }
 }
+
+export const HEARTBEAT_EVENTS = [
+  Server.SERVER_HEARTBEAT_STARTED,
+  Server.SERVER_HEARTBEAT_SUCCEEDED,
+  Server.SERVER_HEARTBEAT_FAILED
+];
 
 Object.defineProperty(Server.prototype, 'clusterTime', {
   get() {

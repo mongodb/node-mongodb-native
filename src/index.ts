@@ -11,6 +11,7 @@ import { Collection } from './collection';
 import { ReadPreference } from './read_preference';
 import { Logger } from './logger';
 import { GridFSBucket } from './gridfs-stream';
+import { CancellationToken } from './mongo_types';
 
 export {
   Binary,
@@ -53,7 +54,8 @@ export {
   FindCursor,
   ListIndexesCursor,
   ListCollectionsCursor,
-  GridFSBucket
+  GridFSBucket,
+  CancellationToken
 };
 
 // enums
@@ -121,6 +123,7 @@ export type {
   ChangeStream,
   ChangeStreamDocument,
   UpdateDescription,
+  ChangeStreamEvents,
   ChangeStreamOptions,
   ChangeStreamCursor,
   ResumeToken,
@@ -147,14 +150,16 @@ export type {
   DestroyOptions,
   CommandOptions,
   QueryOptions,
-  GetMoreOptions
+  GetMoreOptions,
+  ConnectionEvents
 } from './cmap/connection';
 export type {
   CloseOptions,
   ConnectionPoolOptions,
   WaitQueueMember,
   WithConnectionCallback,
-  ConnectionPool
+  ConnectionPool,
+  ConnectionPoolEvents
 } from './cmap/connection_pool';
 export type {
   OperationDescription,
@@ -169,6 +174,7 @@ export type {
   CursorCloseOptions,
   CursorStreamOptions,
   AbstractCursorOptions,
+  AbstractCursorEvents,
   CursorFlag
 } from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
@@ -182,7 +188,11 @@ export type {
   GridFSBucketReadStreamPrivate,
   GridFSFile
 } from './gridfs-stream/download';
-export type { GridFSBucketOptions, GridFSBucketPrivate } from './gridfs-stream/index';
+export type {
+  GridFSBucketOptions,
+  GridFSBucketPrivate,
+  GridFSBucketEvents
+} from './gridfs-stream/index';
 export type {
   GridFSBucketWriteStreamOptions,
   GridFSBucketWriteStream,
@@ -190,6 +200,7 @@ export type {
 } from './gridfs-stream/upload';
 export type { LoggerOptions, LoggerFunction, LoggerLevelId } from './logger';
 export type {
+  MongoClientEvents,
   MongoClientPrivate,
   MongoClientOptions,
   WithSessionCallback,
@@ -204,12 +215,19 @@ export type {
   SupportedTLSSocketOptions,
   SupportedSocketOptions
 } from './mongo_client';
+export type {
+  TypedEventEmitter,
+  EventsDescription,
+  CommonEvents,
+  GenericListener
+} from './mongo_types';
 export type { AddUserOptions, RoleSpecification } from './operations/add_user';
 export type {
   AggregateOptions,
   AggregateOperation,
   DB_AGGREGATE_COLLECTION
 } from './operations/aggregate';
+export type { MONGO_CLIENT_EVENTS } from './operations/connect';
 export type {
   CommandOperationOptions,
   OperationParent,
@@ -275,12 +293,13 @@ export type {
 export type { ClusterTime, ServerTypeId, TimerQueue, TopologyTypeId } from './sdam/common';
 export type {
   Monitor,
+  MonitorEvents,
   MonitorPrivate,
   MonitorOptions,
   RTTPinger,
   RTTPingerOptions
 } from './sdam/monitor';
-export type { Server, ServerPrivate, ServerOptions } from './sdam/server';
+export type { Server, ServerEvents, ServerPrivate, ServerOptions } from './sdam/server';
 export type {
   TopologyVersion,
   TagSet,
@@ -288,9 +307,10 @@ export type {
   ServerDescriptionOptions
 } from './sdam/server_description';
 export type { ServerSelector } from './sdam/server_selection';
-export type { SrvPoller, SrvPollerOptions } from './sdam/srv_polling';
+export type { SrvPoller, SrvPollerEvents, SrvPollerOptions } from './sdam/srv_polling';
 export type {
   Topology,
+  TopologyEvents,
   TopologyPrivate,
   ServerSelectionRequest,
   TopologyOptions,
@@ -302,6 +322,7 @@ export type {
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {
   ClientSession,
+  ClientSessionEvents,
   ClientSessionOptions,
   ServerSessionPool,
   ServerSession,
@@ -316,7 +337,8 @@ export type {
   MongoDBNamespace,
   InterruptibleAsyncInterval,
   BufferPool,
-  HostAddress
+  HostAddress,
+  EventEmitterWithState
 } from './utils';
 export type { WriteConcern, W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';

@@ -4,9 +4,9 @@ import {
   makeStateMachine,
   calculateDurationInMs,
   makeInterruptibleAsyncInterval,
-  ns
+  ns,
+  EventEmitterWithState
 } from '../utils';
-import { EventEmitter } from 'events';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { MongoNetworkError, AnyError } from '../error';
@@ -20,6 +20,7 @@ import {
 import { Server } from './server';
 import type { InterruptibleAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
+import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
 const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
@@ -56,7 +57,17 @@ export interface MonitorOptions
 }
 
 /** @public */
-export class Monitor extends EventEmitter {
+export type MonitorEvents = {
+  [Server.SERVER_HEARTBEAT_STARTED](event: ServerHeartbeatStartedEvent): void;
+  [Server.SERVER_HEARTBEAT_SUCCEEDED](event: ServerHeartbeatSucceededEvent): void;
+  [Server.SERVER_HEARTBEAT_FAILED](event: ServerHeartbeatFailedEvent): void;
+  resetServer(error?: Error): void;
+  resetConnectionPool(): void;
+  close(): void;
+} & EventEmitterWithState;
+
+/** @public */
+export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   s: MonitorPrivate;
   address: string;
@@ -66,7 +77,7 @@ export class Monitor extends EventEmitter {
   connectOptions: ConnectionOptions;
   [kServer]: Server;
   [kConnection]?: Connection;
-  [kCancellationToken]: EventEmitter;
+  [kCancellationToken]: CancellationToken;
   /** @internal */
   [kMonitorId]?: InterruptibleAsyncInterval;
   [kRTTPinger]?: RTTPinger;
@@ -76,7 +87,7 @@ export class Monitor extends EventEmitter {
 
     this[kServer] = server;
     this[kConnection] = undefined;
-    this[kCancellationToken] = new EventEmitter();
+    this[kCancellationToken] = new CancellationToken();
     this[kCancellationToken].setMaxListeners(Infinity);
     this[kMonitorId] = undefined;
     this.s = {
@@ -358,14 +369,14 @@ export class RTTPinger {
   /** @internal */
   [kConnection]?: Connection;
   /** @internal */
-  [kCancellationToken]: EventEmitter;
+  [kCancellationToken]: CancellationToken;
   /** @internal */
   [kRoundTripTime]: number;
   /** @internal */
   [kMonitorId]: NodeJS.Timeout;
   closed: boolean;
 
-  constructor(cancellationToken: EventEmitter, options: RTTPingerOptions) {
+  constructor(cancellationToken: CancellationToken, options: RTTPingerOptions) {
     this[kConnection] = undefined;
     this[kCancellationToken] = cancellationToken;
     this[kRoundTripTime] = 0;

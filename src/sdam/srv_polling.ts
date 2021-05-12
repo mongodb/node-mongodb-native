@@ -1,7 +1,7 @@
 import * as dns from 'dns';
 import { Logger, LoggerOptions } from '../logger';
-import { EventEmitter } from 'events';
 import { HostAddress } from '../utils';
+import { TypedEventEmitter } from '../mongo_types';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order
@@ -45,7 +45,12 @@ export interface SrvPollerOptions extends LoggerOptions {
 }
 
 /** @public */
-export class SrvPoller extends EventEmitter {
+export type SrvPollerEvents = {
+  srvRecordDiscovery(event: SrvPollingEvent): void;
+};
+
+/** @public */
+export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;

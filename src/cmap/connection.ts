@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import {
@@ -43,6 +42,7 @@ import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { isTransactionCommand } from '../transactions';
 import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
 const kStream = Symbol('stream');
 const kQueue = Symbol('queue');
@@ -121,7 +121,7 @@ export interface ConnectionOptions
   keepAliveInitialDelay?: number;
   noDelay?: boolean;
   socketTimeoutMS?: number;
-  cancellationToken?: EventEmitter;
+  cancellationToken?: CancellationToken;
 
   metadata: ClientMetadata;
 }
@@ -133,7 +133,17 @@ export interface DestroyOptions {
 }
 
 /** @public */
-export class Connection extends EventEmitter {
+export type ConnectionEvents = {
+  [Connection.COMMAND_STARTED](event: CommandStartedEvent): void;
+  [Connection.COMMAND_SUCCEEDED](event: CommandSucceededEvent): void;
+  [Connection.COMMAND_FAILED](event: CommandFailedEvent): void;
+  [Connection.CLUSTER_TIME_RECEIVED](clusterTime: Document): void;
+  [Connection.CLOSE](): void;
+  [Connection.MESSAGE](message: any): void;
+};
+
+/** @public */
+export class Connection extends TypedEventEmitter<ConnectionEvents> {
   id: number | '<monitor>';
   address: string;
   socketTimeoutMS: number;
@@ -167,6 +177,10 @@ export class Connection extends EventEmitter {
   static readonly COMMAND_FAILED = 'commandFailed' as const;
   /** @event */
   static readonly CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
+  /** @event */
+  static readonly CLOSE = 'close' as const;
+  /** @event */
+  static readonly MESSAGE = 'message' as const;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -266,7 +280,7 @@ export class Connection extends EventEmitter {
     }
 
     this[kQueue].clear();
-    this.emit('close');
+    this.emit(Connection.CLOSE);
   }
 
   destroy(): void;
@@ -585,6 +599,13 @@ export class Connection extends EventEmitter {
     );
   }
 }
+
+/** @public */
+export const APM_EVENTS = [
+  Connection.COMMAND_STARTED,
+  Connection.COMMAND_SUCCEEDED,
+  Connection.COMMAND_FAILED
+];
 
 /** @internal */
 export class CryptoConnection extends Connection {

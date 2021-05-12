@@ -5,7 +5,6 @@ import { MongoError, AnyError, MongoParseError } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
-import type { EventEmitter } from 'events';
 import type { Db } from './db';
 import type { Collection } from './collection';
 import type { OperationOptions, Hint } from './operations/operation';
@@ -670,18 +669,6 @@ export function uuidV4(): Buffer {
 }
 
 /**
- * Relays events for a given listener and emitter
- * @internal
- *
- * @param listener - the EventEmitter to listen to the events from
- * @param emitter - the EventEmitter to relay the events to
- * @param events - list of events to relay
- */
-export function relayEvents(listener: EventEmitter, emitter: EventEmitter, events: string[]): void {
-  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
-}
-
-/**
  * A helper function for determining `maxWireVersion` between legacy and new topology instances
  * @internal
  */
@@ -839,6 +826,11 @@ interface ObjectWithState {
 interface StateTransitionFunction {
   (target: ObjectWithState, newState: string): void;
 }
+
+/** @public */
+export type EventEmitterWithState = {
+  stateChanged(previous: string, current: string): void;
+};
 
 /** @internal */
 export function makeStateMachine(stateTable: StateTable): StateTransitionFunction {

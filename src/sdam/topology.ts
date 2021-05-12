@@ -1,9 +1,8 @@
 import Denque = require('denque');
-import { EventEmitter } from 'events';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
-import { Server, ServerOptions } from './server';
+import { Server, ServerEvents, ServerOptions } from './server';
 import {
   ClientSession,
   ServerSessionPool,
@@ -11,18 +10,18 @@ import {
   ClientSessionOptions
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
-import { CMAP_EVENT_NAMES } from '../cmap/connection_pool';
+import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
 import { MongoError, MongoServerSelectionError, AnyError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
-  relayEvents,
   makeStateMachine,
   eachAsync,
   ClientMetadata,
   Callback,
   HostAddress,
   ns,
-  emitWarning
+  emitWarning,
+  EventEmitterWithState
 } from '../utils';
 import {
   TopologyType,
@@ -49,10 +48,11 @@ import type { Document, BSONSerializeOptions } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
-import { DestroyOptions, Connection } from '../cmap/connection';
+import { DestroyOptions, Connection, ConnectionEvents } from '../cmap/connection';
 import type { MongoOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
+import { TypedEventEmitter } from '../mongo_types';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -65,11 +65,16 @@ const SERVER_RELAY_EVENTS = [
   Connection.COMMAND_STARTED,
   Connection.COMMAND_SUCCEEDED,
   Connection.COMMAND_FAILED,
-  ...CMAP_EVENT_NAMES
+  ...CMAP_EVENTS
 ];
 
 // all events we listen to from `Server` instances
-const LOCAL_SERVER_EVENTS = ['connect', 'descriptionReceived', 'closed', 'ended'];
+const LOCAL_SERVER_EVENTS = [
+  Server.CONNECT,
+  Server.DESCRIPTION_RECEIVED,
+  Server.CLOSED,
+  Server.ENDED
+];
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -156,11 +161,29 @@ export interface SelectServerOptions {
   session?: ClientSession;
 }
 
+/** @public */
+export type TopologyEvents = {
+  [Topology.CONNECT](topology: Topology): void;
+  [Topology.SERVER_OPENING](event: ServerOpeningEvent): void;
+  [Topology.SERVER_CLOSED](event: ServerClosedEvent): void;
+  [Topology.SERVER_DESCRIPTION_CHANGED](event: ServerDescriptionChangedEvent): void;
+  [Topology.TOPOLOGY_OPENING](event: TopologyOpeningEvent): void;
+  [Topology.TOPOLOGY_CLOSED](event: TopologyClosedEvent): void;
+  [Topology.TOPOLOGY_DESCRIPTION_CHANGED](event: TopologyDescriptionChangedEvent): void;
+  [Topology.ERROR](error: Error): void;
+  // TODO(NODE-3273) - remove error
+  [Topology.OPEN](error: undefined, topology: Topology): void;
+  [Topology.CLOSE](): void;
+  [Topology.TIMEOUT](): void;
+} & Omit<ServerEvents, 'connect'> &
+  ConnectionPoolEvents &
+  ConnectionEvents &
+  EventEmitterWithState;
 /**
  * A container of server instances representing a connection to a MongoDB topology.
  * @public
  */
-export class Topology extends EventEmitter {
+export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   s: TopologyPrivate;
   /** @internal */
@@ -188,6 +211,11 @@ export class Topology extends EventEmitter {
   static readonly OPEN = 'open' as const;
   /** @event */
   static readonly CONNECT = 'connect' as const;
+  /** @event */
+  static readonly CLOSE = 'close' as const;
+  /** @event */
+  static readonly TIMEOUT = 'timeout' as const;
+
   /**
    * @internal
    *
@@ -305,7 +333,7 @@ export class Topology extends EventEmitter {
         if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
           this.s.handleSrvPolling = srvPollingHandler(this);
           if (this.s.srvPoller) {
-            // TODO: it looks like there is a bug here, what if this happens twice?
+            // TODO(NODE-3269): it looks like there is a bug here, what if this happens twice?
             this.s.srvPoller.on('srvRecordDiscovery', this.s.handleSrvPolling);
             this.s.srvPoller.start();
           }
@@ -378,6 +406,7 @@ export class Topology extends EventEmitter {
           }
 
           stateTransition(this, STATE_CONNECTED);
+          // TODO(NODE-3273) - remove err
           this.emit(Topology.OPEN, err, this);
           this.emit(Topology.CONNECT, this);
 
@@ -388,6 +417,7 @@ export class Topology extends EventEmitter {
       }
 
       stateTransition(this, STATE_CONNECTED);
+      // TODO(NODE-3273) - remove err
       this.emit(Topology.OPEN, err, this);
       this.emit(Topology.CONNECT, this);
 
@@ -429,6 +459,7 @@ export class Topology extends EventEmitter {
     }
 
     if (this.s.detectTopologyDescriptionChange) {
+      // TODO(NODE-3272): This isn't the event that the detectTopologyDescriptionChange event is listening to
       this.removeListener(
         Topology.SERVER_DESCRIPTION_CHANGED,
         this.s.detectTopologyDescriptionChange
@@ -436,7 +467,10 @@ export class Topology extends EventEmitter {
       delete this.s.detectTopologyDescriptionChange;
     }
 
-    this.s.sessions.forEach((session: ClientSession) => session.endSession());
+    for (const session of this.s.sessions) {
+      session.endSession();
+    }
+
     this.s.sessionPool.endAllPooledSessions(() => {
       eachAsync(
         Array.from(this.s.servers.values()),
@@ -731,6 +765,19 @@ export class Topology extends EventEmitter {
   }
 }
 
+/** @public */
+export const TOPOLOGY_EVENTS = [
+  Topology.SERVER_OPENING,
+  Topology.SERVER_CLOSED,
+  Topology.SERVER_DESCRIPTION_CHANGED,
+  Topology.TOPOLOGY_OPENING,
+  Topology.TOPOLOGY_CLOSED,
+  Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+  Topology.ERROR,
+  Topology.TIMEOUT,
+  Topology.CLOSE
+];
+
 /** Destroys a server, and removes all event listeners from the instance */
 function destroyServer(
   server: Server,
@@ -739,7 +786,9 @@ function destroyServer(
   callback?: Callback
 ) {
   options = options ?? {};
-  LOCAL_SERVER_EVENTS.forEach((event: string) => server.removeAllListeners(event));
+  for (const event of LOCAL_SERVER_EVENTS) {
+    server.removeAllListeners(event);
+  }
 
   server.destroy(options, () => {
     topology.emit(
@@ -747,7 +796,9 @@ function destroyServer(
       new ServerClosedEvent(topology.s.id, server.description.address)
     );
 
-    SERVER_RELAY_EVENTS.forEach((event: string) => server.removeAllListeners(event));
+    for (const event of SERVER_RELAY_EVENTS) {
+      server.removeAllListeners(event);
+    }
     if (typeof callback === 'function') {
       callback();
     }
@@ -789,9 +840,11 @@ function createAndConnectServer(
   );
 
   const server = new Server(topology, serverDescription, topology.s.options);
-  relayEvents(server, topology, SERVER_RELAY_EVENTS);
+  for (const event of SERVER_RELAY_EVENTS) {
+    server.on(event, (e: any) => topology.emit(event, e));
+  }
 
-  server.on(Server.DESCRIPTION_RECEIVED, topology.serverUpdateHandler.bind(topology));
+  server.on(Server.DESCRIPTION_RECEIVED, description => topology.serverUpdateHandler(description));
 
   if (connectDelay) {
     const connectTimer = setTimeout(() => {
@@ -880,6 +933,9 @@ function srvPollingHandler(topology: Topology) {
 
     topology.emit(
       Topology.SERVER_DESCRIPTION_CHANGED,
+      // TODO(NODE-3272): This server description changed event is emitting a TopologyDescriptionChangeEvent
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       new TopologyDescriptionChangedEvent(
         topology.s.id,
         previousTopologyDescription,
