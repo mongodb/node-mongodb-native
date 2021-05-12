@@ -83,6 +83,53 @@ describe('Connection Pool', function () {
     );
   });
 
+  it('should destroy all connections immediately when force-closed', function (done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      } else {
+        // destroy on any other command
+        request.connection.destroy();
+      }
+    });
+
+    const pool = new ConnectionPool({ maxPoolSize: 2, hostAddress: server.hostAddress() });
+
+    const events = [];
+    pool.on('connectionClosed', event => events.push(event));
+
+    pool.checkOut((err, checkedOutConn) => {
+      expect(err).to.not.exist;
+
+      // create a second connection
+      let regularConn;
+      pool.withConnection(
+        (err, conn, cb) => {
+          expect(err).to.not.exist;
+          regularConn = conn;
+          cb();
+        },
+        () => {
+          // The connection is only really checked in after this callback returns, so we setImmediate
+          setImmediate(() => {
+            // force close now with 1 checked out connection and 1 regular, available connection
+            pool.close({ force: true }, () => {
+              expect(events).to.have.length(2);
+              expect(events[0]).to.have.property('reason').equal('poolClosed');
+              expect(events[1]).to.have.property('reason').equal('poolClosed');
+
+              expect(checkedOutConn.destroyed).to.be.true;
+              expect(regularConn.destroyed).to.be.true;
+
+              done();
+            });
+          });
+        }
+      );
+    });
+  });
+
   it('should propagate socket timeouts to connections', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
