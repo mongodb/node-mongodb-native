@@ -354,7 +354,7 @@ methods, the operation takes a write lock for the duration of the operation in o
 
     // Modify and return the modified document
     col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-        returnOriginal: false
+        returnDocument: 'after'
       , sort: [[a,1]]
       , upsert: true
     }, function(err, r) {
@@ -382,7 +382,7 @@ methods, the operation takes a write lock for the duration of the operation in o
 
     // Modify and return the modified document
     r = await col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-        returnOriginal: false
+        returnDocument: 'after'
       , sort: [[a,1]]
       , upsert: true
     });
@@ -410,7 +410,7 @@ The ``findOneAndUpdate`` method also accepts a third argument which can be an op
 | `upsert` | (Boolean, default:false) | Perform an upsert operation. |
 | `sort` | (Object, default:null) | Sort for find operation. |
 | `projection` | (Object, default:null) | Projection for returned result |
-| `returnOriginal` | (Boolean, default:true) | Set to false if you want to return the modified object rather than the original. Ignored for remove. |
+| `returnDocument` | (String, 'before' \|\| 'after', default:'before') | Set to 'after' if you want to return the modified document rather than the original. Ignored for remove. |
 
 The ``findOneAndDelete`` function is designed to help remove a document.
 
