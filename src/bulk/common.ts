@@ -19,7 +19,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter } from '../mongo_types';
+import type { Filter, OptionalId, UpdateQuery } from '../mongo_types';
 
 /** @public */
 export const BatchType = {
@@ -32,13 +32,13 @@ export const BatchType = {
 export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
-export interface InsertOneModel<TSchema> {
+export interface InsertOneModel<TSchema extends Document = Document> {
   /** The document to insert. */
-  document: TSchema;
+  document: OptionalId<TSchema>;
 }
 
 /** @public */
-export interface DeleteOneModel<TSchema> {
+export interface DeleteOneModel<TSchema extends Document = Document> {
   /** The filter to limit the deleted documents. */
   filter: Filter<TSchema>;
   /** Specifies a collation. */
@@ -48,7 +48,7 @@ export interface DeleteOneModel<TSchema> {
 }
 
 /** @public */
-export interface DeleteManyModel<TSchema> {
+export interface DeleteManyModel<TSchema extends Document = Document> {
   /** The filter to limit the deleted documents. */
   filter: Filter<TSchema>;
   /** Specifies a collation. */
@@ -58,7 +58,7 @@ export interface DeleteManyModel<TSchema> {
 }
 
 /** @public */
-export interface ReplaceOneModel<TSchema> {
+export interface ReplaceOneModel<TSchema extends Document = Document> {
   /** The filter to limit the replaced document. */
   filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
@@ -72,11 +72,11 @@ export interface ReplaceOneModel<TSchema> {
 }
 
 /** @public */
-export interface UpdateOneModel {
+export interface UpdateOneModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: Document | Document[];
+  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -88,11 +88,11 @@ export interface UpdateOneModel {
 }
 
 /** @public */
-export interface UpdateManyModel {
+export interface UpdateManyModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: Document | Document[];
+  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -104,11 +104,11 @@ export interface UpdateManyModel {
 }
 
 /** @public */
-export type AnyBulkWriteOperation<TSchema = Document> =
+export type AnyBulkWriteOperation<TSchema extends Document = Document> =
   | { insertOne: InsertOneModel<TSchema> }
   | { replaceOne: ReplaceOneModel<TSchema> }
-  | { updateOne: UpdateOneModel }
-  | { updateMany: UpdateManyModel }
+  | { updateOne: UpdateOneModel<TSchema> }
+  | { updateMany: UpdateManyModel<TSchema> }
   | { deleteOne: DeleteOneModel<TSchema> }
   | { deleteMany: DeleteManyModel<TSchema> };
 

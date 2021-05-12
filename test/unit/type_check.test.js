@@ -3,8 +3,8 @@
 const tsd = require('tsd').default;
 const { expect } = require('chai');
 
-describe('Exported Types', () => {
-  it('should be as expected', async () => {
+describe('Typescript definitions', () => {
+  it('should pass assertions defined in test/types', async () => {
     const diagnostics = await tsd();
     if (diagnostics.length !== 0) {
       const messages = diagnostics

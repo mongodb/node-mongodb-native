@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import type { Document, ObjectId } from './bson';
 
 /** @internal */
@@ -6,8 +5,10 @@ export type TODO_NODE_2648 = any;
 
 /** Given an object shaped type, return the type of the _id field or default to ObjectId @public */
 export type InferIdType<TSchema> = TSchema extends { _id: infer IdType } // user has defined a type for _id
-  ? {} extends IdType
-    ? Exclude<IdType, {}>
+  ? // eslint-disable-next-line @typescript-eslint/ban-types
+    {} extends IdType
+    ? // eslint-disable-next-line @typescript-eslint/ban-types
+      Exclude<IdType, {}>
     : unknown extends IdType
     ? ObjectId
     : IdType

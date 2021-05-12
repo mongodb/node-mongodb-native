@@ -379,7 +379,7 @@ export class Collection<TSchema extends Document = any> {
 
     return executeOperation(
       getTopology(this),
-      new BulkWriteOperation(this, operations, resolveOptions(this, options)),
+      new BulkWriteOperation(this, operations as TODO_NODE_2648, resolveOptions(this, options)),
       callback
     );
   }

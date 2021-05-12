@@ -1,13 +1,9 @@
-import { expectType, expectError, expectNotType, expectNotAssignable } from 'tsd';
+import { expectType, expectError, expectNotType, expectNotAssignable, expectAssignable } from 'tsd';
 
-import { Collection } from '../../src/collection';
+import type { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
-import { Db } from '../../src/db';
-import { MongoClient } from '../../src/mongo_client';
 
-type InsertRes<TId = ObjectId> = Promise<{ acknowledged: boolean; insertedId: TId }>;
-
-const db = new Db(new MongoClient(''), '');
+type InsertOneFirstParam<C extends Collection> = Parameters<C['insertOne']>[0];
 
 interface Circle {
   _id: ObjectId;
@@ -20,18 +16,23 @@ interface Rectangle {
 }
 type Shape = Circle | Rectangle;
 
-type c = Collection<Shape>;
-// should not insert a portion of a type
-expectNotAssignable<Parameters<c['insertOne']>[0]>({ height: 2 });
+type ShapeInsert = InsertOneFirstParam<Collection<Shape>>;
+expectAssignable<ShapeInsert>({ height: 2, width: 2, radius: 2 }); // This is permitted...
+// error cases, should not insert a portion of a type
+expectNotAssignable<ShapeInsert>({ height: 2 });
+expectError<ShapeInsert>({
+  radius: 4,
+  extraKey: 'I should not be allowed',
+  _id: new ObjectId()
+});
+// valid cases
+expectAssignable<ShapeInsert>({ height: 4, width: 4 });
+expectAssignable<ShapeInsert>({ radius: 4 });
 
-const shapesC = new Collection<Shape>(db, '');
-expectType<InsertRes>(shapesC.insertOne({ radius: 4 }));
-expectError(
-  shapesC.insertOne({ radius: 4, extraKey: 'I should not be allowed', _id: new ObjectId() })
-);
-expectType<InsertRes>(shapesC.insertOne({ height: 4, width: 4 }));
-expectType<Promise<Shape>>(shapesC.findOne({ height: 4, width: 4 }));
-expectNotType<Promise<Rectangle>>(shapesC.findOne({ height: 4, width: 4 })); // collection API can only respect TSchema given
+const c: Collection<Shape> = null as never;
+expectType<Promise<Shape>>(c.findOne({ height: 4, width: 4 }));
+// collection API can only respect TSchema given, cannot pick a type inside a union
+expectNotType<Promise<Rectangle>>(c.findOne({ height: 4, width: 4 }));
 
 interface A {
   _id: number;
@@ -40,6 +41,5 @@ interface B {
   _id: string;
 }
 type Data = A | B;
-const dataC = db.collection<Data>('');
-expectType<InsertRes<number | string>>(dataC.insertOne({ _id: 2 }));
-expectType<InsertRes<number | string>>(dataC.insertOne({ _id: 'hi' }));
+expectAssignable<InsertOneFirstParam<Collection<Data>>>({ _id: 2 });
+expectAssignable<InsertOneFirstParam<Collection<Data>>>({ _id: 'hi' });

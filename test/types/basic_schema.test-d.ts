@@ -12,7 +12,7 @@ type ACounter = { a: number };
 type ACounterWithId = { a: number; _id: ObjectId };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Can defined Schema without _id
+// Can define Schema without _id
 expectType<Collection<ACounter>>(new Collection<ACounter>(db, ''));
 // Or with one
 expectType<Collection<ACounterWithId>>(new Collection<ACounterWithId>(db, ''));
