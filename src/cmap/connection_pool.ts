@@ -245,7 +245,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kWaitQueue].push(waitQueueMember);
-    setImmediate(() => processWaitQueue(this));
+    process.nextTick(processWaitQueue, this);
   }
 
   /**
@@ -270,7 +270,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       destroyConnection(this, connection, reason);
     }
 
-    setImmediate(() => processWaitQueue(this));
+    process.nextTick(processWaitQueue, this);
   }
 
   /**
@@ -440,7 +440,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
     // otherwise add it to the pool for later acquisition, and try to process the wait queue
     pool[kConnections].push(connection);
-    setImmediate(() => processWaitQueue(pool));
+    process.nextTick(processWaitQueue, pool);
   });
 }
 
