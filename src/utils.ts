@@ -1010,6 +1010,7 @@ export function makeInterruptibleAsyncInterval(
     // to reschedule.
     if (timeUntilNextCall < 0) {
       executeAndReschedule();
+      return;
     }
 
     // debounce multiple calls to wake within the `minInterval`
