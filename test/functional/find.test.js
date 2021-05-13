@@ -3,7 +3,7 @@ const test = require('./shared').assert;
 const { setupDatabase, withMonitoredClient } = require('./shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Code, ObjectId, Long, Binary } = require('../../src');
+const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../src');
 
 describe('Find', function () {
   before(function () {
@@ -810,7 +810,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);
@@ -846,7 +846,7 @@ describe('Find', function () {
                             collection.findOneAndUpdate(
                               { a: 4 },
                               { $set: { b: 3 } },
-                              { returnOriginal: false, upsert: true },
+                              { returnDocument: ReturnDocument.AFTER, upsert: true },
                               function (err, updated_doc) {
                                 test.equal(4, updated_doc.value.a);
                                 test.equal(3, updated_doc.value.b);
@@ -861,7 +861,10 @@ describe('Find', function () {
                                     collection.findOneAndUpdate(
                                       { a: 100 },
                                       { $set: { b: 5 } },
-                                      { returnOriginal: false, projection: { b: 1 } },
+                                      {
+                                        returnDocument: ReturnDocument.AFTER,
+                                        projection: { b: 1 }
+                                      },
                                       function (err, updated_doc) {
                                         test.equal(2, Object.keys(updated_doc.value).length);
                                         test.equal(
@@ -913,7 +916,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnOriginal: false, projection: { a: 1 } },
+              { returnDocument: ReturnDocument.AFTER, projection: { a: 1 } },
               function (err, updated_doc) {
                 test.equal(2, Object.keys(updated_doc.value).length);
                 test.equal(1, updated_doc.value.a);
@@ -1160,7 +1163,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 2 },
               { $set: { b: 3 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, result) {
                 test.equal(2, result.value.a);
                 test.equal(3, result.value.b);
@@ -1252,7 +1255,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { _id: id },
               { $set: { 'c.c': 100 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, item) {
                 test.equal(doc._id.toString(), item.value._id.toString());
                 test.equal(doc.a, item.value.a);
@@ -1289,7 +1292,11 @@ describe('Find', function () {
           collection.findOneAndUpdate(
             { _id: self._id, 'plays.uuid': _uuid },
             { $set: { 'plays.$.active': true } },
-            { returnOriginal: false, projection: { plays: 0, results: 0 }, safe: true },
+            {
+              returnDocument: ReturnDocument.AFTER,
+              projection: { plays: 0, results: 0 },
+              safe: true
+            },
             function (err) {
               expect(err).to.not.exist;
               client.close(done);
@@ -1437,7 +1444,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
                 expect(err).to.not.exist;
                 expect(updated_doc.value).to.not.exist;
@@ -1500,7 +1507,7 @@ describe('Find', function () {
                     'transactions.id': { $ne: transaction.transactionId }
                   },
                   { $push: { transactions: transaction } },
-                  { returnOriginal: false, safe: true },
+                  { returnDocument: ReturnDocument.AFTER, safe: true },
                   function (err) {
                     expect(err).to.not.exist;
                     client.close(done);
@@ -1587,7 +1594,7 @@ describe('Find', function () {
           function (err, collection) {
             var q = { x: 1 };
             var set = { y: 2, _id: new ObjectId() };
-            var opts = { returnOriginal: false, upsert: true };
+            var opts = { returnDocument: ReturnDocument.AFTER, upsert: true };
             // Original doc
             var doc = { _id: new ObjectId(), x: 1 };
 
@@ -2316,7 +2323,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnOriginal: false },
+              { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
                 test.equal(1, updated_doc.value.a);
                 test.equal(3, updated_doc.value.b);

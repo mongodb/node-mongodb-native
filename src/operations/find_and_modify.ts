@@ -11,6 +11,15 @@ import type { ClientSession } from '../sessions';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
 
 /** @public */
+export const ReturnDocument = Object.freeze({
+  BEFORE: 'before',
+  AFTER: 'after'
+} as const);
+
+/** @public */
+export type ReturnDocument = typeof ReturnDocument[keyof typeof ReturnDocument];
+
+/** @public */
 export interface FindOneAndDeleteOptions extends CommandOperationOptions {
   /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
@@ -28,8 +37,8 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
-  /** When false, returns the updated document rather than the original. The default is true. */
-  returnOriginal?: boolean;
+  /** When set to 'after', returns the updated document rather than the original. The default is 'before'.  */
+  returnDocument?: ReturnDocument;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
   /** Upsert the document if it does not exist. */
@@ -46,15 +55,13 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
-  /** When false, returns the updated document rather than the original. The default is true. */
-  returnOriginal?: boolean;
+  /** When set to 'after', returns the updated document rather than the original. The default is 'before'.  */
+  returnDocument?: ReturnDocument;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
   /** Upsert the document if it does not exist. */
   upsert?: boolean;
 }
-
-// TODO: NODE-1812 to deprecate returnOriginal for returnDocument
 
 /** @internal */
 interface FindAndModifyCmdBase {
@@ -74,7 +81,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
   cmdBase: FindAndModifyCmdBase,
   options: FindOneAndReplaceOptions | FindOneAndUpdateOptions
 ): FindAndModifyCmdBase {
-  cmdBase.new = options.returnOriginal === false;
+  cmdBase.new = options.returnDocument === ReturnDocument.AFTER;
   cmdBase.upsert = options.upsert === true;
 
   if (options.bypassDocumentValidation === true) {

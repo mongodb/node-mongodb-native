@@ -139,8 +139,7 @@ function generateArguments(test) {
       } else if (arg === 'upsert') {
         options.upsert = test.operation.arguments[arg];
       } else if (arg === 'returnDocument') {
-        const returnDocument = test.operation.arguments[arg];
-        options.returnOriginal = returnDocument === 'Before';
+        options.returnDocument = test.operation.arguments[arg].toLowerCase();
       } else {
         args.push(test.operation.arguments[arg]);
       }

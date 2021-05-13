@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { ReturnDocument } = require('../../src');
 const { expect } = require('chai');
 
 describe('Multiple Databases', function () {
@@ -78,12 +79,15 @@ describe('Multiple Databases', function () {
 
         db_instance.collection('counters', function (err, collection) {
           expect(err).to.not.exist;
-          collection.findOneAndUpdate({}, { $inc: { db: 1 } }, { returnOriginal: false }, function (
-            err
-          ) {
-            expect(err).to.not.exist;
-            client.close(done);
-          });
+          collection.findOneAndUpdate(
+            {},
+            { $inc: { db: 1 } },
+            { returnDocument: ReturnDocument.AFTER },
+            function (err) {
+              expect(err).to.not.exist;
+              client.close(done);
+            }
+          );
         });
       });
     }

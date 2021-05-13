@@ -67,6 +67,7 @@ export { BatchType } from './bulk/common';
 export { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
 export { Compressor } from './cmap/wire_protocol/compression';
+export { ReturnDocument } from './operations/find_and_modify';
 export { ExplainVerbosity } from './explain';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';

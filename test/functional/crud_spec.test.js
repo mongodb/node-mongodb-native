@@ -321,13 +321,12 @@ describe('CRUD spec', function () {
     const second = args.update || args.replacement;
     const options = Object.assign({}, args);
     if (options.returnDocument) {
-      options.returnOriginal = options.returnDocument === 'After' ? false : true;
+      options.returnDocument = options.returnDocument.toLowerCase();
     }
 
     delete options.filter;
     delete options.update;
     delete options.replacement;
-    delete options.returnDocument;
 
     const opName = scenarioTest.operation.name;
     const findPromise =

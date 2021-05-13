@@ -681,7 +681,7 @@ function testOperation(operation, obj, context, options) {
           }
 
           if (key === 'returnDocument') {
-            opOptions.returnOriginal = operation.arguments[key] === 'Before' ? true : false;
+            opOptions.returnDocument = operation.arguments[key].toLowerCase();
             return;
           }
 
