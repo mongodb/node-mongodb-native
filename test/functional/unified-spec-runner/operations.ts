@@ -10,6 +10,7 @@ import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -235,19 +236,13 @@ operations.set('find', async ({ entities, operation }) => {
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments;
-  if (opts.returnDocument) {
-    opts.returnDocument = opts.returnDocument.toLowerCase();
-  }
-  return collection.findOneAndReplace(filter, replacement, { ...opts });
+  return collection.findOneAndReplace(filter, replacement, translateOptions(opts));
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...opts } = operation.arguments;
-  if (opts.returnDocument) {
-    opts.returnDocument = opts.returnDocument.toLowerCase();
-  }
-  return (await collection.findOneAndUpdate(filter, update, { ...opts })).value;
+  return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import type { Document } from '../../../src';
 import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
@@ -81,4 +82,12 @@ export function patchDbOptions(options: CollectionOrDatabaseOptions): DbOptions 
 export function patchCollectionOptions(options: CollectionOrDatabaseOptions): CollectionOptions {
   // TODO
   return { ...options } as CollectionOptions;
+}
+
+export function translateOptions(options: Document): Document {
+  const translatedOptions = { ...options };
+  if (options.returnDocument) {
+    translatedOptions.returnDocument = options.returnDocument.toLowerCase();
+  }
+  return translatedOptions as Document;
 }
