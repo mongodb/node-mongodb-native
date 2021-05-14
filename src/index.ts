@@ -209,7 +209,6 @@ export type {
   DriverInfo,
   MongoOptions,
   ServerApi,
-  ServerApiVersionId,
   SupportedNodeConnectionOptions,
   SupportedTLSConnectionOptions,
   SupportedTLSSocketOptions,
@@ -281,10 +280,9 @@ export type {
   UpdateStatement
 } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type { ReadConcern, ReadConcernLike, ReadConcernLevelId } from './read_concern';
+export type { ReadConcern, ReadConcernLike } from './read_concern';
 export type {
   ReadPreferenceLike,
-  ReadPreferenceModeId,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
   ReadPreferenceFromOptions,

@@ -2,8 +2,8 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import { URL, URLSearchParams } from 'url';
 import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
-import { ReadPreference, ReadPreferenceModeId } from './read_preference';
-import { ReadConcern, ReadConcernLevelId } from './read_concern';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
 import { MongoParseError } from './error';
 import {
@@ -818,7 +818,7 @@ export const OPTIONS = {
     transform({ values: [level], options }) {
       return ReadConcern.fromOptions({
         ...options.readConcern,
-        level: level as ReadConcernLevelId
+        level: level as ReadConcernLevel
       });
     }
   },
@@ -845,7 +845,7 @@ export const OPTIONS = {
           maxStalenessSeconds: options.readPreference?.maxStalenessSeconds
         };
         return new ReadPreference(
-          value as ReadPreferenceModeId,
+          value as ReadPreferenceMode,
           options.readPreference?.tags,
           rpOpts
         );

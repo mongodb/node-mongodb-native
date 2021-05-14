@@ -21,11 +21,11 @@ import type { CommandOperationOptions, CollationOptions } from '../operations/co
 import type { Hint } from '../operations/operation';
 
 /** @public */
-export const BatchType = {
+export const BatchType = Object.freeze({
   INSERT: 1,
   UPDATE: 2,
   DELETE: 3
-} as const;
+} as const);
 
 /** @public */
 export type BatchType = typeof BatchType[keyof typeof BatchType];

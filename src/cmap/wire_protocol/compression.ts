@@ -11,7 +11,8 @@ export const Compressor = Object.freeze({
   zlib: 2
 } as const);
 
-export type Compressor = typeof Compressor[keyof typeof Compressor];
+/** @public */
+export type Compressor = typeof Compressor[CompressorName];
 
 /** @public */
 export type CompressorName = keyof typeof Compressor;

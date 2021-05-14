@@ -1,6 +1,6 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import type { ReadPreference, ReadPreferenceModeId } from './read_preference';
+import type { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError, AnyError } from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
@@ -15,7 +15,7 @@ import {
 import { connect, MONGO_CLIENT_EVENTS } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { Logger, LoggerLevel } from './logger';
-import type { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
+import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
@@ -34,16 +34,16 @@ import type { Encrypter } from './encrypter';
 import { TypedEventEmitter } from './mongo_types';
 
 /** @public */
-export const ServerApiVersion = {
+export const ServerApiVersion = Object.freeze({
   v1: '1'
-};
+} as const);
 
 /** @public */
-export type ServerApiVersionId = typeof ServerApiVersion[keyof typeof ServerApiVersion];
+export type ServerApiVersion = typeof ServerApiVersion[keyof typeof ServerApiVersion];
 
 /** @public */
 export interface ServerApi {
-  version: string | ServerApiVersionId;
+  version: string | ServerApiVersion;
   strict?: boolean;
   deprecationErrors?: boolean;
 }
@@ -138,9 +138,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevelId;
+  readConcernLevel?: ReadConcernLevel;
   /** Specifies the read preferences for this connection */
-  readPreference?: ReadPreferenceModeId | ReadPreference;
+  readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
   maxStalenessSeconds?: number;
   /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
@@ -215,7 +215,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Enable command monitoring for this client */
   monitorCommands?: boolean;
   /** Server API version */
-  serverApi?: ServerApi | ServerApiVersionId;
+  serverApi?: ServerApi | ServerApiVersion;
   /**
    * Optionally enable client side auto encryption
    *
