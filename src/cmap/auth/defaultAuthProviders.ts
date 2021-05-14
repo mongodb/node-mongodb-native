@@ -19,9 +19,9 @@ export const AuthMechanism = {
 } as const;
 
 /** @public */
-export type AuthMechanismId = typeof AuthMechanism[keyof typeof AuthMechanism];
+export type AuthMechanism = typeof AuthMechanism[keyof typeof AuthMechanism];
 
-export const AUTH_PROVIDERS = new Map<AuthMechanismId | string, AuthProvider>([
+export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],

@@ -11,7 +11,7 @@ export const Compressor = Object.freeze({
   zlib: 2
 } as const);
 
-export type CompressorId = typeof Compressor[keyof typeof Compressor];
+export type Compressor = typeof Compressor[keyof typeof Compressor];
 
 /** @public */
 export type CompressorName = keyof typeof Compressor;
@@ -61,7 +61,7 @@ export function compress(
 
 // Decompress a message using the given compressor
 export function decompress(
-  compressorID: CompressorId,
+  compressorID: Compressor,
   compressedData: Buffer,
   callback: Callback<Buffer>
 ): void {

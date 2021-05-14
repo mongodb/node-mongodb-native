@@ -77,7 +77,7 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type AutoEncryptionLoggerLevelId = typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
+export type AutoEncryptionLoggerLevel = typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -153,7 +153,7 @@ export interface AutoEncryptionOptions {
   bypassAutoEncryption?: boolean;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
-    logger?: (level: AutoEncryptionLoggerLevelId, message: string) => void;
+    logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
   };
   extraOptions?: {
     /**

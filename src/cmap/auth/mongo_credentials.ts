@@ -1,10 +1,10 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
-import { AuthMechanismId, AuthMechanism } from './defaultAuthProviders';
+import { AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster?: Document): AuthMechanismId {
+function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
   if (ismaster) {
     // If ismaster contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
@@ -30,7 +30,7 @@ export interface MongoCredentialsOptions {
   password: string;
   source: string;
   db?: string;
-  mechanism?: AuthMechanismId;
+  mechanism?: AuthMechanism;
   mechanismProperties: Document;
 }
 
@@ -46,7 +46,7 @@ export class MongoCredentials {
   /** The database that the user should authenticate against */
   readonly source: string;
   /** The method used to authenticate */
-  readonly mechanism: AuthMechanismId;
+  readonly mechanism: AuthMechanism;
   /** Special properties used by some types of auth mechanisms */
   readonly mechanismProperties: Document;
 

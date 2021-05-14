@@ -28,7 +28,7 @@ export const BatchType = {
 } as const;
 
 /** @public */
-export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
+export type BatchType = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
 export interface InsertOneModel {
@@ -136,12 +136,12 @@ export class Batch<T = Document> {
   originalZeroIndex: number;
   currentIndex: number;
   originalIndexes: number[];
-  batchType: BatchTypeId;
+  batchType: BatchType;
   operations: T[];
   size: number;
   sizeBytes: number;
 
-  constructor(batchType: BatchTypeId, originalZeroIndex: number) {
+  constructor(batchType: BatchType, originalZeroIndex: number) {
     this.originalZeroIndex = originalZeroIndex;
     this.currentIndex = 0;
     this.originalIndexes = [];
@@ -1220,7 +1220,7 @@ export abstract class BulkOperationBase {
   }
 
   abstract addToOperationsList(
-    batchType: BatchTypeId,
+    batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this;
 }

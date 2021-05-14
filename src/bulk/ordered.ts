@@ -1,5 +1,5 @@
 import * as BSON from '../bson';
-import { BulkOperationBase, Batch, BatchType, BulkWriteOptions, BatchTypeId } from './common';
+import { BulkOperationBase, Batch, BatchType, BulkWriteOptions } from './common';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { UpdateStatement } from '../operations/update';
@@ -12,7 +12,7 @@ export class OrderedBulkOperation extends BulkOperationBase {
   }
 
   addToOperationsList(
-    batchType: BatchTypeId,
+    batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this {
     // Get the bsonSize
