@@ -2,7 +2,7 @@ import { expectType, expectError, expectNotType, expectNotAssignable, expectAssi
 
 import type { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
-import { Filter } from '../../src/mongo_types';
+import type { Filter } from '../../src/mongo_types';
 
 type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
 
@@ -57,10 +57,10 @@ interface Cat {
   meow: string;
 }
 type Pet = XOR<Dog, Cat>;
-expectNotType<InsertOneFirstParam<Pet>>({ meow: '', bark: '' });
-expectType<InsertOneFirstParam<Pet>>({ meow: '' });
-expectType<InsertOneFirstParam<Pet>>({ bark: '' });
-expectType<InsertOneFirstParam<Pet>>({ bark: '', _id: new ObjectId() });
-expectNotType<Filter<Pet>>({ meow: '', bark: '' }); // find
-expectType<Filter<Pet>>({ bark: '' });
-expectType<Filter<Pet>>({ meow: '' });
+expectNotAssignable<InsertOneFirstParam<Pet>>({ meow: '', bark: '' });
+expectAssignable<InsertOneFirstParam<Pet>>({ meow: '' });
+expectAssignable<InsertOneFirstParam<Pet>>({ bark: '' });
+expectAssignable<InsertOneFirstParam<Pet>>({ bark: '', _id: new ObjectId() });
+expectNotAssignable<Filter<Pet>>({ meow: '', bark: '' }); // find
+expectAssignable<Filter<Pet>>({ bark: '' });
+expectAssignable<Filter<Pet>>({ meow: '' });

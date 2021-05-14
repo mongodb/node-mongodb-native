@@ -622,14 +622,17 @@ function closeWithError<T>(
   changeStream.close(() => callback && callback(error));
 }
 
-function streamEvents<T>(changeStream: ChangeStream<T>, cursor: ChangeStreamCursor<T>): void {
+function streamEvents<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  cursor: ChangeStreamCursor<TSchema>
+): void {
   const stream = changeStream[kCursorStream] || cursor.stream();
   changeStream[kCursorStream] = stream;
   stream.on('data', change => processNewChange(changeStream, change));
   stream.on('error', error => processError(changeStream, error));
 }
 
-function endStream(changeStream: ChangeStream<any>): void {
+function endStream<TSchema>(changeStream: ChangeStream<TSchema>): void {
   const cursorStream = changeStream[kCursorStream];
   if (cursorStream) {
     ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
@@ -670,7 +673,11 @@ function processNewChange<TSchema>(
   return callback(undefined, change);
 }
 
-function processError(changeStream: ChangeStream<any>, error: AnyError, callback?: Callback) {
+function processError<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  error: AnyError,
+  callback?: Callback
+) {
   const cursor = changeStream.cursor;
 
   // If the change stream has been closed explicitly, do not process error.
@@ -680,7 +687,7 @@ function processError(changeStream: ChangeStream<any>, error: AnyError, callback
   }
 
   // if the resume succeeds, continue with the new cursor
-  function resumeWithCursor(newCursor: ChangeStreamCursor) {
+  function resumeWithCursor(newCursor: ChangeStreamCursor<TSchema>) {
     changeStream.cursor = newCursor;
     processResumeQueue(changeStream);
   }
