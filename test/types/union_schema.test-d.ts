@@ -16,8 +16,6 @@ interface Rectangle {
 }
 type Shape = Circle | Rectangle;
 
-type x = Shape extends Document ? true : false;
-
 type ShapeInsert = InsertOneFirstParam<Shape>;
 expectAssignable<ShapeInsert>({ height: 2, width: 2, radius: 2 }); // This is permitted...
 // error cases, should not insert a portion of a type
