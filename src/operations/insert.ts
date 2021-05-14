@@ -5,11 +5,12 @@ import { prepareDocs } from './common_functions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
+import type { Document, BSONSerializeOptions } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ClientSession } from '../sessions';
 import { BulkWriteOperation } from './bulk_write';
+import type { InferIdType } from '../mongo_types';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {
@@ -53,11 +54,11 @@ export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOpti
 }
 
 /** @public */
-export interface InsertOneResult {
+export interface InsertOneResult<TSchema = Document> {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
   acknowledged: boolean;
   /** The identifier that was inserted. If the server generated the identifier, this value will be null as the driver does not have access to that data */
-  insertedId: ObjectId;
+  insertedId: InferIdType<TSchema>;
 }
 
 export class InsertOneOperation extends InsertOperation {
@@ -80,13 +81,13 @@ export class InsertOneOperation extends InsertOperation {
 }
 
 /** @public */
-export interface InsertManyResult {
+export interface InsertManyResult<TSchema = Document> {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
   acknowledged: boolean;
   /** The number of inserted documents for this operations */
   insertedCount: number;
   /** Map of the index of the inserted document to the id of the inserted document */
-  insertedIds: { [key: number]: ObjectId };
+  insertedIds: { [key: number]: InferIdType<TSchema> };
 }
 
 /** @internal */

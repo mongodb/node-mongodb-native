@@ -460,7 +460,7 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
  * if the topology cannot be found.
  * @internal
  */
-export function getTopology(provider: MongoClient | Db | Collection): Topology {
+export function getTopology<T>(provider: MongoClient | Db | Collection<T>): Topology {
   if (`topology` in provider && provider.topology) {
     return provider.topology;
   } else if ('client' in provider.s && provider.s.client.topology) {

@@ -169,7 +169,7 @@ export type {
 } from './cmap/message_stream';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
-export type { CollectionPrivate, CollectionOptions } from './collection';
+export type { CollectionPrivate, CollectionOptions, ModifyResult } from './collection';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type {
   CursorCloseOptions,
@@ -196,8 +196,8 @@ export type {
 } from './gridfs-stream/index';
 export type {
   GridFSBucketWriteStreamOptions,
-  TFileId,
-  GridFSBucketWriteStream
+  GridFSBucketWriteStream,
+  GridFSChunk
 } from './gridfs-stream/upload';
 export type { LoggerOptions, LoggerFunction, LoggerLevelId } from './logger';
 export type {
@@ -354,3 +354,16 @@ export type {
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type { Encrypter, EncrypterOptions } from './encrypter';
+export type {
+  EnhancedOmit,
+  WithId,
+  OptionalId,
+  WithoutId,
+  UpdateQuery,
+  Filter,
+  Projection,
+  InferIdType,
+  ProjectionOperators,
+  MetaProjectionOperators,
+  MetaSortOperators
+} from './mongo_types';

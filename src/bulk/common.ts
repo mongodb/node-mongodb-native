@@ -19,6 +19,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
+import type { Filter, OptionalId, UpdateQuery } from '../mongo_types';
 
 /** @public */
 export const BatchType = {
@@ -31,15 +32,15 @@ export const BatchType = {
 export type BatchTypeId = typeof BatchType[keyof typeof BatchType];
 
 /** @public */
-export interface InsertOneModel {
+export interface InsertOneModel<TSchema extends Document = Document> {
   /** The document to insert. */
-  document: Document;
+  document: OptionalId<TSchema>;
 }
 
 /** @public */
-export interface DeleteOneModel {
+export interface DeleteOneModel<TSchema extends Document = Document> {
   /** The filter to limit the deleted documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -47,9 +48,9 @@ export interface DeleteOneModel {
 }
 
 /** @public */
-export interface DeleteManyModel {
+export interface DeleteManyModel<TSchema extends Document = Document> {
   /** The filter to limit the deleted documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -57,11 +58,11 @@ export interface DeleteManyModel {
 }
 
 /** @public */
-export interface ReplaceOneModel {
+export interface ReplaceOneModel<TSchema extends Document = Document> {
   /** The filter to limit the replaced document. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
-  replacement: Document;
+  replacement: TSchema;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -71,11 +72,11 @@ export interface ReplaceOneModel {
 }
 
 /** @public */
-export interface UpdateOneModel {
+export interface UpdateOneModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: Document | Document[];
+  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -87,11 +88,11 @@ export interface UpdateOneModel {
 }
 
 /** @public */
-export interface UpdateManyModel {
+export interface UpdateManyModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
-  filter: Document;
+  filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: Document | Document[];
+  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -103,13 +104,13 @@ export interface UpdateManyModel {
 }
 
 /** @public */
-export type AnyBulkWriteOperation =
-  | { insertOne: InsertOneModel }
-  | { replaceOne: ReplaceOneModel }
-  | { updateOne: UpdateOneModel }
-  | { updateMany: UpdateManyModel }
-  | { deleteOne: DeleteOneModel }
-  | { deleteMany: DeleteManyModel };
+export type AnyBulkWriteOperation<TSchema extends Document = Document> =
+  | { insertOne: InsertOneModel<TSchema> }
+  | { replaceOne: ReplaceOneModel<TSchema> }
+  | { updateOne: UpdateOneModel<TSchema> }
+  | { updateMany: UpdateManyModel<TSchema> }
+  | { deleteOne: DeleteOneModel<TSchema> }
+  | { deleteMany: DeleteManyModel<TSchema> };
 
 /** @public */
 export interface BulkResult {

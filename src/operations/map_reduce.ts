@@ -1,5 +1,4 @@
 import { Code, Document } from '../bson';
-import { loadDb } from '../dynamic_loaders';
 import {
   applyWriteConcern,
   decorateWithCollation,
@@ -17,6 +16,7 @@ import { MongoError } from '../error';
 import type { ObjectId } from '../bson';
 import { Aspect, defineAspects } from './operation';
 import type { ClientSession } from '../sessions';
+import { Db } from '../db';
 
 const exclusionList = [
   'explain',
@@ -36,14 +36,21 @@ const exclusionList = [
 ];
 
 /** @public */
-export type MapFunction = () => void;
+export type MapFunction<TSchema = Document> = (this: TSchema) => void;
 /** @public */
-export type ReduceFunction = (key: string, values: Document[]) => Document;
+export type ReduceFunction<TKey = ObjectId, TValue = Document> = (
+  key: TKey,
+  values: TValue[]
+) => TValue;
 /** @public */
-export type FinalizeFunction = (key: string, reducedValue: Document) => Document;
+export type FinalizeFunction<TKey = ObjectId, TValue = Document> = (
+  key: TKey,
+  reducedValue: TValue
+) => TValue;
 
 /** @public */
-export interface MapReduceOptions extends CommandOperationOptions {
+export interface MapReduceOptions<TKey = ObjectId, TValue = Document>
+  extends CommandOperationOptions {
   /** Sets the output target for the map reduce job. */
   out?: 'inline' | { inline: 1 } | { replace: string } | { merge: string } | { reduce: string };
   /** Query filter object. */
@@ -55,7 +62,7 @@ export interface MapReduceOptions extends CommandOperationOptions {
   /** Keep temporary data. */
   keeptemp?: boolean;
   /** Finalize function. */
-  finalize?: FinalizeFunction | string;
+  finalize?: FinalizeFunction<TKey, TValue> | string;
   /** Can pass in variables that can be access from map/reduce/finalize. */
   scope?: Document;
   /** It is possible to make the execution stay in JS. Provided in MongoDB \> 2.0.X. */
@@ -198,7 +205,6 @@ export class MapReduceOperation extends CommandOperation<Document | Document[]> 
       if (result.result != null && typeof result.result === 'object') {
         const doc = result.result;
         // Return a collection from another db
-        const Db = loadDb();
         collection = new Db(coll.s.db.s.client, doc.db, coll.s.db.s.options).collection(
           doc.collection
         );

@@ -26,7 +26,7 @@ import {
 } from './cursor/abstract_cursor';
 import type { ClientSession } from './sessions';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
-import { TypedEventEmitter } from './mongo_types';
+import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
 
 const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
@@ -97,12 +97,12 @@ export interface ChangeStreamOptions extends AggregateOptions {
 }
 
 /** @public */
-export interface ChangeStreamDocument {
+export interface ChangeStreamDocument<TSchema extends Document = Document> {
   /**
    * The id functions as an opaque token for use when resuming an interrupted
    * change stream.
    */
-  _id: Document;
+  _id: InferIdType<TSchema>;
 
   /**
    * Describes the type of operation represented in this change notification.
@@ -121,7 +121,7 @@ export interface ChangeStreamDocument {
    * Contains two fields: “db” and “coll” containing the database and
    * collection name in which the change happened.
    */
-  ns: Document;
+  ns: { db: string; coll: string };
 
   /**
    * Only present for ops of type ‘insert’, ‘update’, ‘replace’, and
@@ -132,7 +132,7 @@ export interface ChangeStreamDocument {
    * this will contain all the components of the shard key in order,
    * followed by the _id if the _id isn’t part of the shard key.
    */
-  documentKey?: Document;
+  documentKey?: InferIdType<TSchema>;
 
   /**
    * Only present for ops of type ‘update’.
@@ -140,7 +140,7 @@ export interface ChangeStreamDocument {
    * Contains a description of updated and removed fields in this
    * operation.
    */
-  updateDescription?: UpdateDescription;
+  updateDescription?: UpdateDescription<TSchema>;
 
   /**
    * Always present for operations of type ‘insert’ and ‘replace’. Also
@@ -155,16 +155,16 @@ export interface ChangeStreamDocument {
    * version of the document from some point after the update occurred. If the
    * document was deleted since the updated happened, it will be null.
    */
-  fullDocument?: Document;
+  fullDocument?: TSchema;
 }
 
 /** @public */
-export interface UpdateDescription {
+export interface UpdateDescription<TSchema extends Document = Document> {
   /**
    * A document containing key:value pairs of names of the fields that were
    * changed, and the new value for those fields.
    */
-  updatedFields: Document;
+  updatedFields: Partial<TSchema>;
 
   /**
    * An array of field names that were removed from the document.
@@ -187,14 +187,14 @@ export type ChangeStreamEvents = {
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream extends TypedEventEmitter<ChangeStreamEvents> {
+export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<ChangeStreamEvents> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
   /** @internal */
-  cursor?: ChangeStreamCursor;
+  cursor?: ChangeStreamCursor<TSchema>;
   streamOptions?: CursorStreamOptions;
   /** @internal */
   [kResumeQueue]: Denque;
@@ -304,7 +304,11 @@ export class ChangeStream extends TypedEventEmitter<ChangeStreamEvents> {
   }
 
   /** Get the next available document from the Change Stream. */
-  next(callback?: Callback): Promise<void> | void {
+  next(): Promise<ChangeStreamDocument<TSchema>>;
+  next(callback: Callback<ChangeStreamDocument<TSchema>>): void;
+  next(
+    callback?: Callback<ChangeStreamDocument<TSchema>>
+  ): Promise<ChangeStreamDocument<TSchema>> | void {
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -314,7 +318,7 @@ export class ChangeStream extends TypedEventEmitter<ChangeStreamEvents> {
             processError(this, error, cb);
             return;
           }
-          processNewChange(this, change as ChangeStreamDocument, cb);
+          processNewChange<TSchema>(this, change, cb);
         });
       });
     });
@@ -376,7 +380,10 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
 }
 
 /** @internal */
-export class ChangeStreamCursor extends AbstractCursor<ChangeStreamEvents> {
+export class ChangeStreamCursor<TSchema extends Document = Document> extends AbstractCursor<
+  ChangeStreamDocument<TSchema>,
+  ChangeStreamEvents
+> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
@@ -461,7 +468,7 @@ export class ChangeStreamCursor extends AbstractCursor<ChangeStreamEvents> {
     }
   }
 
-  clone(): ChangeStreamCursor {
+  clone(): AbstractCursor<ChangeStreamDocument<TSchema>> {
     return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
       ...this.cursorOptions
     });
@@ -528,10 +535,10 @@ const CHANGE_STREAM_EVENTS = [
  * Create a new change stream cursor based on self's configuration
  * @internal
  */
-function createChangeStreamCursor(
-  changeStream: ChangeStream,
+function createChangeStreamCursor<TSchema>(
+  changeStream: ChangeStream<TSchema>,
   options: ChangeStreamOptions
-): ChangeStreamCursor {
+): ChangeStreamCursor<TSchema> {
   const changeStreamStageOptions: Document = { fullDocument: options.fullDocument || 'default' };
   applyKnownOptions(changeStreamStageOptions, options, CHANGE_STREAM_OPTIONS);
   if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
@@ -543,7 +550,7 @@ function createChangeStreamCursor(
   );
 
   const cursorOptions = applyKnownOptions({}, options, CURSOR_OPTIONS);
-  const changeStreamCursor = new ChangeStreamCursor(
+  const changeStreamCursor = new ChangeStreamCursor<TSchema>(
     getTopology(changeStream.parent),
     changeStream.namespace,
     pipeline,
@@ -603,7 +610,11 @@ function waitForTopologyConnected(
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
-function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: Callback): void {
+function closeWithError<T>(
+  changeStream: ChangeStream<T>,
+  error: AnyError,
+  callback?: Callback
+): void {
   if (!callback) {
     changeStream.emit(ChangeStream.ERROR, error);
   }
@@ -611,14 +622,17 @@ function closeWithError(changeStream: ChangeStream, error: AnyError, callback?: 
   changeStream.close(() => callback && callback(error));
 }
 
-function streamEvents(changeStream: ChangeStream, cursor: ChangeStreamCursor): void {
+function streamEvents<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  cursor: ChangeStreamCursor<TSchema>
+): void {
   const stream = changeStream[kCursorStream] || cursor.stream();
   changeStream[kCursorStream] = stream;
   stream.on('data', change => processNewChange(changeStream, change));
   stream.on('error', error => processError(changeStream, error));
 }
 
-function endStream(changeStream: ChangeStream): void {
+function endStream<TSchema>(changeStream: ChangeStream<TSchema>): void {
   const cursorStream = changeStream[kCursorStream];
   if (cursorStream) {
     ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
@@ -628,10 +642,10 @@ function endStream(changeStream: ChangeStream): void {
   changeStream[kCursorStream] = undefined;
 }
 
-function processNewChange(
-  changeStream: ChangeStream,
-  change: ChangeStreamDocument,
-  callback?: Callback
+function processNewChange<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  change: Nullable<ChangeStreamDocument<TSchema>>,
+  callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
     if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
@@ -659,7 +673,11 @@ function processNewChange(
   return callback(undefined, change);
 }
 
-function processError(changeStream: ChangeStream, error: AnyError, callback?: Callback) {
+function processError<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  error: AnyError,
+  callback?: Callback
+) {
   const cursor = changeStream.cursor;
 
   // If the change stream has been closed explicitly, do not process error.
@@ -669,7 +687,7 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
   }
 
   // if the resume succeeds, continue with the new cursor
-  function resumeWithCursor(newCursor: ChangeStreamCursor) {
+  function resumeWithCursor(newCursor: ChangeStreamCursor<TSchema>) {
     changeStream.cursor = newCursor;
     processResumeQueue(changeStream);
   }
@@ -722,7 +740,7 @@ function processError(changeStream: ChangeStream, error: AnyError, callback?: Ca
  *
  * @param changeStream - the parent ChangeStream
  */
-function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCursor>) {
+function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
     callback(CHANGESTREAM_CLOSED_ERROR);
     return;
@@ -744,7 +762,7 @@ function getCursor(changeStream: ChangeStream, callback: Callback<ChangeStreamCu
  * @param changeStream - the parent ChangeStream
  * @param err - error getting a new cursor
  */
-function processResumeQueue(changeStream: ChangeStream, err?: Error) {
+function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: Error) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
     if (!err) {

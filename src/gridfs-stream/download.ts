@@ -6,7 +6,7 @@ import type { Sort } from '../sort';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { ReadPreference } from '../read_preference';
-import type { GridFSBucketWriteStream } from './upload';
+import type { GridFSBucketWriteStream, GridFSChunk } from './upload';
 import type { FindCursor } from '../cursor/find_cursor';
 
 /** @public */
@@ -32,7 +32,7 @@ export interface GridFSFile {
   _id: GridFSBucketWriteStream['id'];
   length: GridFSBucketWriteStream['length'];
   chunkSize: GridFSBucketWriteStream['chunkSizeBytes'];
-  md5?: boolean | string;
+  md5?: string;
   filename: GridFSBucketWriteStream['filename'];
   contentType?: GridFSBucketWriteStream['options']['contentType'];
   aliases?: GridFSBucketWriteStream['options']['aliases'];
@@ -45,10 +45,10 @@ export interface GridFSBucketReadStreamPrivate {
   bytesRead: number;
   bytesToTrim: number;
   bytesToSkip: number;
-  chunks: Collection;
-  cursor?: FindCursor;
+  chunks: Collection<GridFSChunk>;
+  cursor?: FindCursor<GridFSChunk>;
   expected: number;
-  files: Collection;
+  files: Collection<GridFSFile>;
   filter: Document;
   init: boolean;
   expectedEnd: number;
@@ -102,11 +102,11 @@ export class GridFSBucketReadStream extends Readable {
    * @param chunks - Handle for chunks collection
    * @param files - Handle for files collection
    * @param readPreference - The read preference to use
-   * @param filter - The query to use to find the file document
+   * @param filter - The filter to use to find the file document
    */
   constructor(
-    chunks: Collection,
-    files: Collection,
+    chunks: Collection<GridFSChunk>,
+    files: Collection<GridFSFile>,
     readPreference: ReadPreference | undefined,
     filter: Document,
     options?: GridFSBucketReadStreamOptions
@@ -246,20 +246,23 @@ function doRead(stream: GridFSBucketReadStream): void {
 
     let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
 
-    if (buf.length !== expectedLength) {
+    if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {
         errmsg = 'ExtraChunk: Got unexpected n: ' + doc.n;
         return __handleError(stream, new Error(errmsg));
       }
 
       errmsg =
-        'ChunkIsWrongSize: Got unexpected length: ' + buf.length + ', expected: ' + expectedLength;
+        'ChunkIsWrongSize: Got unexpected length: ' +
+        buf.byteLength +
+        ', expected: ' +
+        expectedLength;
       return __handleError(stream, new Error(errmsg));
     }
 
-    stream.s.bytesRead += buf.length;
+    stream.s.bytesRead += buf.byteLength;
 
-    if (buf.length === 0) {
+    if (buf.byteLength === 0) {
       return stream.push(null);
     }
 
@@ -275,12 +278,12 @@ function doRead(stream: GridFSBucketReadStream): void {
     const bytesLeftToRead = stream.s.options.end - stream.s.bytesToSkip;
     if (atEndOfStream && stream.s.bytesToTrim != null) {
       sliceEnd = stream.s.file.chunkSize - stream.s.bytesToTrim;
-    } else if (stream.s.options.end && bytesLeftToRead < doc.data.length()) {
+    } else if (stream.s.options.end && bytesLeftToRead < doc.data.byteLength) {
       sliceEnd = bytesLeftToRead;
     }
 
     if (sliceStart != null || sliceEnd != null) {
-      buf = buf.slice(sliceStart || 0, sliceEnd || buf.length);
+      buf = buf.slice(sliceStart || 0, sliceEnd || buf.byteLength);
     }
 
     stream.push(buf);
@@ -421,7 +424,7 @@ function handleStartOption(
 function handleEndOption(
   stream: GridFSBucketReadStream,
   doc: Document,
-  cursor: FindCursor,
+  cursor: FindCursor<GridFSChunk>,
   options: GridFSBucketReadStreamOptions
 ) {
   if (options && options.end != null) {

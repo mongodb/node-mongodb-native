@@ -26,7 +26,7 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
-    "bson": "^4.2.2",
+    "bson": "^4.2.3",
     "denque": "^1.4.1"
   },
   "devDependencies": {
@@ -42,8 +42,8 @@
     "@types/node": "^14.14.41",
     "@types/saslprep": "^1.0.0",
     "@types/semver": "^7.3.4",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
-    "@typescript-eslint/parser": "^4.15.1",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
     "chalk": "^4.1.0",
@@ -57,7 +57,7 @@
     "js-yaml": "^3.14.0",
     "jsdoc": "^3.6.4",
     "lodash.camelcase": "^4.3.0",
-    "madge": "^3.9.0",
+    "madge": "^4.0.2",
     "mocha": "^7.1.1",
     "mocha-sinon": "^2.1.0",
     "mongodb-mock-server": "^2.0.1",
@@ -69,9 +69,10 @@
     "sinon-chai": "^3.2.0",
     "snappy": "^6.3.0",
     "source-map-support": "^0.5.19",
-    "standard-version": "^8.0.2",
+    "standard-version": "^9.1.1",
     "through2": "^3.0.1",
     "ts-node": "^9.1.1",
+    "tsd": "^0.14.0",
     "typedoc": "^0.20.35",
     "typescript": "^4.2.4",
     "typescript-cached-transpile": "^0.0.6",
@@ -86,6 +87,10 @@
   },
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
+  },
+  "homepage": "https://github.com/mongodb/node-mongodb-native",
+  "optionalDependencies": {
+    "saslprep": "^1.0.0"
   },
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
@@ -109,8 +114,7 @@
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run check:test"
   },
-  "homepage": "https://github.com/mongodb/node-mongodb-native",
-  "optionalDependencies": {
-    "saslprep": "^1.0.0"
+  "tsd": {
+    "directory": "test/types"
   }
 }

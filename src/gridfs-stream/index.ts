@@ -2,12 +2,13 @@ import { MongoError } from '../error';
 import {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
-  GridFSBucketReadStreamOptionsWithRevision
+  GridFSBucketReadStreamOptionsWithRevision,
+  GridFSFile
 } from './download';
-import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, TFileId } from './upload';
+import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, GridFSChunk } from './upload';
 import { executeLegacyOperation, Callback, getTopology } from '../utils';
 import { WriteConcernOptions, WriteConcern } from '../write_concern';
-import type { Document } from '../bson';
+import type { ObjectId } from '../bson';
 import type { Db } from '../db';
 import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
@@ -15,7 +16,7 @@ import type { FindOptions } from './../operations/find';
 import type { Sort } from '../sort';
 import type { Logger } from '../logger';
 import type { FindCursor } from '../cursor/find_cursor';
-import { TypedEventEmitter } from '../mongo_types';
+import { Filter, TypedEventEmitter } from '../mongo_types';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;
@@ -44,8 +45,8 @@ export interface GridFSBucketPrivate {
     readPreference?: ReadPreference;
     writeConcern: WriteConcern | undefined;
   };
-  _chunksCollection: Collection;
-  _filesCollection: Collection;
+  _chunksCollection: Collection<GridFSChunk>;
+  _filesCollection: Collection<GridFSFile>;
   checkedIndexes: boolean;
   calledOpenUploadStream: boolean;
 }
@@ -84,8 +85,8 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     this.s = {
       db,
       options: privateOptions,
-      _chunksCollection: db.collection(privateOptions.bucketName + '.chunks'),
-      _filesCollection: db.collection(privateOptions.bucketName + '.files'),
+      _chunksCollection: db.collection<GridFSChunk>(privateOptions.bucketName + '.chunks'),
+      _filesCollection: db.collection<GridFSFile>(privateOptions.bucketName + '.files'),
       checkedIndexes: false,
       calledOpenUploadStream: false
     };
@@ -113,7 +114,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * file's id.
    */
   openUploadStreamWithId(
-    id: TFileId,
+    id: ObjectId,
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
@@ -121,7 +122,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   }
 
   /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
-  openDownloadStream(id: TFileId, options?: GridFSBucketReadStreamOptions): GridFSBucketReadStream {
+  openDownloadStream(
+    id: ObjectId,
+    options?: GridFSBucketReadStreamOptions
+  ): GridFSBucketReadStream {
     return new GridFSBucketReadStream(
       this.s._chunksCollection,
       this.s._filesCollection,
@@ -136,17 +140,17 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  delete(id: TFileId): Promise<undefined>;
-  delete(id: TFileId, callback: Callback<void>): void;
-  delete(id: TFileId, callback?: Callback<void>): Promise<undefined> | void {
+  delete(id: ObjectId): Promise<undefined>;
+  delete(id: ObjectId, callback: Callback<void>): void;
+  delete(id: ObjectId, callback?: Callback<void>): Promise<undefined> | void {
     return executeLegacyOperation(getTopology(this.s.db), _delete, [this, id, callback], {
       skipSessions: true
     });
   }
 
   /** Convenience wrapper around find on the files collection */
-  find(filter: Document, options?: FindOptions): FindCursor {
-    filter = filter || {};
+  find(filter?: Filter<GridFSFile>, options?: FindOptions): FindCursor<GridFSFile> {
+    filter ??= {};
     options = options ?? {};
     return this.s._filesCollection.find(filter, options);
   }
@@ -187,9 +191,9 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - the id of the file to rename
    * @param filename - new name for the file
    */
-  rename(id: TFileId, filename: string): Promise<void>;
-  rename(id: TFileId, filename: string, callback: Callback<void>): void;
-  rename(id: TFileId, filename: string, callback?: Callback<void>): Promise<void> | void {
+  rename(id: ObjectId, filename: string): Promise<void>;
+  rename(id: ObjectId, filename: string, callback: Callback<void>): void;
+  rename(id: ObjectId, filename: string, callback?: Callback<void>): Promise<void> | void {
     return executeLegacyOperation(getTopology(this.s.db), _rename, [this, id, filename, callback], {
       skipSessions: true
     });
@@ -210,7 +214,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   }
 }
 
-function _delete(bucket: GridFSBucket, id: TFileId, callback: Callback<void>): void {
+function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): void {
   return bucket.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
     if (error) {
       return callback(error);
@@ -234,7 +238,7 @@ function _delete(bucket: GridFSBucket, id: TFileId, callback: Callback<void>): v
 
 function _rename(
   bucket: GridFSBucket,
-  id: TFileId,
+  id: ObjectId,
   filename: string,
   callback: Callback<void>
 ): void {

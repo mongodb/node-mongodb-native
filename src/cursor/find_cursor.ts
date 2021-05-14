@@ -28,7 +28,7 @@ export const FLAGS = [
 ] as const;
 
 /** @public */
-export class FindCursor extends AbstractCursor {
+export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   /** @internal */
   [kFilter]: Document;
   /** @internal */
@@ -52,7 +52,7 @@ export class FindCursor extends AbstractCursor {
     }
   }
 
-  clone(): FindCursor {
+  clone(): FindCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
     delete clonedOptions.session;
     return new FindCursor(this.topology, this.namespace, this[kFilter], {

@@ -25,7 +25,7 @@ const kOptions = Symbol('options');
  * or higher stream
  * @public
  */
-export class AggregationCursor extends AbstractCursor {
+export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   /** @internal */
   [kParent]: OperationParent; // TODO: NODE-2883
   /** @internal */
@@ -52,7 +52,7 @@ export class AggregationCursor extends AbstractCursor {
     return this[kPipeline];
   }
 
-  clone(): AggregationCursor {
+  clone(): AggregationCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kOptions]);
     delete clonedOptions.session;
     return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {

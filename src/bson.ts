@@ -1,4 +1,3 @@
-import type { OperationParent } from './operations/command';
 // import type * as _BSON from 'bson';
 // let BSON: typeof _BSON = require('bson');
 // try {
@@ -86,7 +85,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
  */
 export function resolveBSONOptions(
   options?: BSONSerializeOptions,
-  parent?: OperationParent
+  parent?: { bsonOptions?: BSONSerializeOptions }
 ): BSONSerializeOptions {
   const parentOptions = parent?.bsonOptions;
   return {
