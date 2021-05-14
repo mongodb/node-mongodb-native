@@ -1,9 +1,9 @@
 import { expectType, expectError, expectNotType, expectNotAssignable, expectAssignable } from 'tsd';
 
 import type { Collection } from '../../src/collection';
-import { ObjectId } from '../../src/bson';
+import { ObjectId, Document } from '../../src/bson';
 
-type InsertOneFirstParam<C extends Collection> = Parameters<C['insertOne']>[0];
+type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
 
 interface Circle {
   _id: ObjectId;
@@ -16,7 +16,9 @@ interface Rectangle {
 }
 type Shape = Circle | Rectangle;
 
-type ShapeInsert = InsertOneFirstParam<Collection<Shape>>;
+type x = Shape extends Document ? true : false;
+
+type ShapeInsert = InsertOneFirstParam<Shape>;
 expectAssignable<ShapeInsert>({ height: 2, width: 2, radius: 2 }); // This is permitted...
 // error cases, should not insert a portion of a type
 expectNotAssignable<ShapeInsert>({ height: 2 });
@@ -41,5 +43,5 @@ interface B {
   _id: string;
 }
 type Data = A | B;
-expectAssignable<InsertOneFirstParam<Collection<Data>>>({ _id: 2 });
-expectAssignable<InsertOneFirstParam<Collection<Data>>>({ _id: 'hi' });
+expectAssignable<InsertOneFirstParam<Data>>({ _id: 2 });
+expectAssignable<InsertOneFirstParam<Data>>({ _id: 'hi' });

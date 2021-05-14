@@ -154,7 +154,7 @@ export interface CollectionPrivate {
  * });
  * ```
  */
-export class Collection<TSchema extends Document = any> {
+export class Collection<TSchema extends Document = Document> {
   /** @internal */
   s: CollectionPrivate;
 
