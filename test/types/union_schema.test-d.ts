@@ -1,7 +1,7 @@
 import { expectType, expectError, expectNotType, expectNotAssignable, expectAssignable } from 'tsd';
 
 import type { Collection } from '../../src/collection';
-import { ObjectId, Document } from '../../src/bson';
+import { ObjectId } from '../../src/bson';
 
 type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
 

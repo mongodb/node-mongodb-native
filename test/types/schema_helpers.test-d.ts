@@ -1,9 +1,9 @@
 import type {
   InferIdType,
   WithId,
-  WithoutId,
-  OptionalId,
-  EnhancedOmit
+  // WithoutId,
+  OptionalId
+  // EnhancedOmit
 } from '../../src/mongo_types';
 
 import { expectType, expectNotType, expectAssignable } from 'tsd';
