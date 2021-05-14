@@ -2,12 +2,12 @@ import type { Document, ObjectId } from './bson';
 import { EventEmitter } from 'events';
 
 /** @internal */
-export type TODO_NODE_2648 = any;
+export type TODO_NODE_3286 = any;
 
 /** Given an object shaped type, return the type of the _id field or default to ObjectId @public */
 export type InferIdType<TSchema> = TSchema extends { _id: infer IdType } // user has defined a type for _id
   ? // eslint-disable-next-line @typescript-eslint/ban-types
-    {} extends IdType
+    {} extends IdType // TODO(NODE-3285): Improve type readability
     ? // eslint-disable-next-line @typescript-eslint/ban-types
       Exclude<IdType, {}>
     : unknown extends IdType
@@ -29,7 +29,7 @@ export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<
  */
 export type OptionalId<TSchema extends { _id?: any }> = ObjectId extends TSchema['_id'] // a Schema with ObjectId _id type or "any" or "indexed type" provided
   ? EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> } // a Schema provided but _id type is not ObjectId
-  : WithId<TSchema>;
+  : WithId<TSchema>; // TODO(NODE-3285): Improve type readability
 
 /** TypeScript Omit (Exclude to be specific) does not work for objects with an "any" indexed type, and breaks discriminated unions @public */
 export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecordOrUnion

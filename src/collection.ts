@@ -89,7 +89,7 @@ import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
 import { FindCursor } from './cursor/find_cursor';
 import type { CountOptions } from './operations/count';
-import type { Filter, TODO_NODE_2648, UpdateQuery, WithId, OptionalId } from './mongo_types';
+import type { Filter, TODO_NODE_3286, UpdateQuery, WithId, OptionalId } from './mongo_types';
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
@@ -284,10 +284,10 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new InsertOneOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         doc,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -323,10 +323,10 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new InsertManyOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         docs,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -391,8 +391,8 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new BulkWriteOperation(
-        this as TODO_NODE_2648,
-        operations as TODO_NODE_2648,
+        this as TODO_NODE_3286,
+        operations as TODO_NODE_3286,
         resolveOptions(this, options)
       ),
       callback
@@ -437,7 +437,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new UpdateOneOperation(this as TODO_NODE_2648, filter, update, resolveOptions(this, options)),
+      new UpdateOneOperation(this as TODO_NODE_3286, filter, update, resolveOptions(this, options)),
       callback
     );
   }
@@ -478,7 +478,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new ReplaceOneOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         replacement,
         resolveOptions(this, options)
@@ -526,7 +526,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new UpdateManyOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         update,
         resolveOptions(this, options)
@@ -559,7 +559,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new DeleteOneOperation(this as TODO_NODE_2648, filter, resolveOptions(this, options)),
+      new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
   }
@@ -599,7 +599,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new DeleteManyOperation(this as TODO_NODE_2648, filter, resolveOptions(this, options)),
+      new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
   }
@@ -628,7 +628,7 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
       getTopology(this),
-      new RenameOperation(this as TODO_NODE_2648, newName, {
+      new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
         readPreference: ReadPreference.PRIMARY
       }),
@@ -690,10 +690,10 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new FindOneOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -718,7 +718,7 @@ export class Collection<TSchema extends Document = Document> {
       getTopology(this),
       this.s.namespace,
       filter,
-      resolveOptions(this as TODO_NODE_2648, options)
+      resolveOptions(this as TODO_NODE_3286, options)
     );
   }
 
@@ -740,7 +740,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new OptionsOperation(this as TODO_NODE_2648, resolveOptions(this, options)),
+      new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
   }
@@ -763,7 +763,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new IsCappedOperation(this as TODO_NODE_2648, resolveOptions(this, options)),
+      new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
   }
@@ -815,7 +815,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new CreateIndexOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         this.collectionName,
         indexSpec,
         resolveOptions(this, options)
@@ -876,7 +876,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new CreateIndexesOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         this.collectionName,
         indexSpecs,
         resolveOptions(this, options)
@@ -909,7 +909,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new DropIndexOperation(this as TODO_NODE_2648, indexName, options),
+      new DropIndexOperation(this as TODO_NODE_3286, indexName, options),
       callback
     );
   }
@@ -932,7 +932,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new DropIndexesOperation(this as TODO_NODE_2648, resolveOptions(this, options)),
+      new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
   }
@@ -943,7 +943,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   listIndexes(options?: ListIndexesOptions): ListIndexesCursor {
-    return new ListIndexesCursor(this as TODO_NODE_2648, resolveOptions(this, options));
+    return new ListIndexesCursor(this as TODO_NODE_3286, resolveOptions(this, options));
   }
 
   /**
@@ -970,7 +970,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new IndexExistsOperation(this as TODO_NODE_2648, indexes, resolveOptions(this, options)),
+      new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options)),
       callback
     );
   }
@@ -1015,7 +1015,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
     return executeOperation(
       getTopology(this),
-      new EstimatedDocumentCountOperation(this as TODO_NODE_2648, resolveOptions(this, options)),
+      new EstimatedDocumentCountOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
   }
@@ -1075,7 +1075,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new CountDocumentsOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter as Document,
         resolveOptions(this, options as CountDocumentsOptions)
       ),
@@ -1128,8 +1128,8 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new DistinctOperation(
-        this as TODO_NODE_2648,
-        key as TODO_NODE_2648,
+        this as TODO_NODE_3286,
+        key as TODO_NODE_3286,
         filter,
         resolveOptions(this, options as DistinctOptions)
       ),
@@ -1155,7 +1155,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new IndexesOperation(this as TODO_NODE_2648, resolveOptions(this, options)),
+      new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
   }
@@ -1179,7 +1179,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       getTopology(this),
-      new CollStatsOperation(this as TODO_NODE_2648, options),
+      new CollStatsOperation(this as TODO_NODE_3286, options),
       callback
     );
   }
@@ -1212,10 +1212,10 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new FindOneAndDeleteOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -1256,11 +1256,11 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new FindOneAndReplaceOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         replacement,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -1304,11 +1304,11 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new FindOneAndUpdateOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         filter,
         update,
         resolveOptions(this, options)
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }
@@ -1334,7 +1334,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new AggregationCursor(
-      this as TODO_NODE_2648,
+      this as TODO_NODE_3286,
       getTopology(this),
       this.s.namespace,
       pipeline,
@@ -1422,10 +1422,10 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       getTopology(this),
       new MapReduceOperation(
-        this as TODO_NODE_2648,
+        this as TODO_NODE_3286,
         map,
         reduce,
-        resolveOptions(this, options) as TODO_NODE_2648
+        resolveOptions(this, options) as TODO_NODE_3286
       ),
       callback
     );
@@ -1433,12 +1433,12 @@ export class Collection<TSchema extends Document = Document> {
 
   /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
   initializeUnorderedBulkOp(options?: BulkWriteOptions): UnorderedBulkOperation {
-    return new UnorderedBulkOperation(this as TODO_NODE_2648, resolveOptions(this, options));
+    return new UnorderedBulkOperation(this as TODO_NODE_3286, resolveOptions(this, options));
   }
 
   /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
   initializeOrderedBulkOp(options?: BulkWriteOptions): OrderedBulkOperation {
-    return new OrderedBulkOperation(this as TODO_NODE_2648, resolveOptions(this, options));
+    return new OrderedBulkOperation(this as TODO_NODE_3286, resolveOptions(this, options));
   }
 
   /** Get the db scoped logger */
@@ -1562,7 +1562,7 @@ export class Collection<TSchema extends Document = Document> {
     filter ??= {};
     return executeOperation(
       getTopology(this),
-      new CountDocumentsOperation(this as TODO_NODE_2648, filter, resolveOptions(this, options)),
+      new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
   }

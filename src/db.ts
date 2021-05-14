@@ -47,7 +47,7 @@ import { executeOperation } from './operations/execute_operation';
 import type { IndexInformationOptions } from './operations/common_functions';
 import type { MongoClient, PkFactory } from './mongo_client';
 import { Admin } from './admin';
-import type { TODO_NODE_2648 } from './mongo_types';
+import type { TODO_NODE_3286 } from './mongo_types';
 
 // Allowed parameters
 const DB_OPTIONS_ALLOW_LIST = [
@@ -245,9 +245,9 @@ export class Db {
 
     return executeOperation(
       getTopology(this),
-      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_2648,
+      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286,
       callback
-    ) as TODO_NODE_2648;
+    ) as TODO_NODE_3286;
   }
 
   /**
@@ -464,10 +464,10 @@ export class Db {
     return executeOperation(
       getTopology(this),
       new RenameOperation(
-        this.collection<TSchema>(fromCollection) as TODO_NODE_2648,
+        this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
         options
-      ) as TODO_NODE_2648,
+      ) as TODO_NODE_3286,
       callback
     );
   }

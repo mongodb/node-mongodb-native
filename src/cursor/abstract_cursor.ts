@@ -8,7 +8,7 @@ import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
 import type { ExecutionResult } from '../operations/execute_operation';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
-import { TODO_NODE_2648, TypedEventEmitter } from '../mongo_types';
+import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 
 const kId = Symbol('id');
 const kDocuments = Symbol('documents');
@@ -669,8 +669,8 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
         // for example
         if (cursor[kId] == null) {
           cursor[kId] = Long.ZERO;
-          // TODO(NODE-2648): ExecutionResult needs to accept a generic parameter
-          cursor[kDocuments] = [state.response as TODO_NODE_2648];
+          // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
+          cursor[kDocuments] = [state.response as TODO_NODE_3286];
         }
       }
 

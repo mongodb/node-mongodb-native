@@ -2,6 +2,7 @@ import { expectType, expectError, expectNotType, expectNotAssignable, expectAssi
 
 import type { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
+import { Filter } from '../../src/mongo_types';
 
 type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
 
@@ -43,3 +44,23 @@ interface B {
 type Data = A | B;
 expectAssignable<InsertOneFirstParam<Data>>({ _id: 2 });
 expectAssignable<InsertOneFirstParam<Data>>({ _id: 'hi' });
+
+// Ensure Exclusive Union Type doesn't break inside our collection methods
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+// eslint-disable-next-line @typescript-eslint/ban-types
+type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+
+interface Dog {
+  bark: string;
+}
+interface Cat {
+  meow: string;
+}
+type Pet = XOR<Dog, Cat>;
+expectNotType<InsertOneFirstParam<Pet>>({ meow: '', bark: '' });
+expectType<InsertOneFirstParam<Pet>>({ meow: '' });
+expectType<InsertOneFirstParam<Pet>>({ bark: '' });
+expectType<InsertOneFirstParam<Pet>>({ bark: '', _id: new ObjectId() });
+expectNotType<Filter<Pet>>({ meow: '', bark: '' }); // find
+expectType<Filter<Pet>>({ bark: '' });
+expectType<Filter<Pet>>({ meow: '' });
