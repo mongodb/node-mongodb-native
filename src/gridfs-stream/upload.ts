@@ -16,7 +16,7 @@ export interface GridFSChunk {
   _id: ObjectId;
   files_id: ObjectId;
   n: number;
-  data: Buffer;
+  data: Buffer | Uint8Array;
 }
 
 /** @public */

@@ -464,7 +464,7 @@ export class Db {
     return executeOperation(
       getTopology(this),
       new RenameOperation(
-        this.collection<TSchema>(fromCollection),
+        this.collection<TSchema>(fromCollection) as TODO_NODE_2648,
         toCollection,
         options
       ) as TODO_NODE_2648,

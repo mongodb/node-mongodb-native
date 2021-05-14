@@ -204,7 +204,7 @@ export abstract class AbstractCursor<
 
   [Symbol.asyncIterator](): AsyncIterator<TSchema | null> {
     return {
-      next: () => this.next().then(value => ({ value, done: value === null }))
+      next: () => this.next<TSchema>().then(value => ({ value, done: value === null }))
     };
   }
 
@@ -244,7 +244,8 @@ export abstract class AbstractCursor<
         return done(undefined, true);
       }
 
-      next(this, true, (err, doc) => {
+      next<any>(this, true, (err, doc) => {
+        // FIXME(NODE):
         if (err) return done(err);
 
         if (doc) {
@@ -259,9 +260,9 @@ export abstract class AbstractCursor<
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
-  next(): Promise<TSchema | null>;
-  next(callback: Callback<TSchema | null>): void;
-  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
+  next<T = TSchema>(): Promise<T | null>;
+  next<T = TSchema>(callback: Callback<T | null>): void;
+  next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoError('Cursor is exhausted'));
@@ -274,9 +275,9 @@ export abstract class AbstractCursor<
   /**
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
-  tryNext(): Promise<TSchema | null>;
-  tryNext(callback: Callback<TSchema | null>): void;
-  tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
+  tryNext<T = TSchema>(): Promise<T | null>;
+  tryNext<T = TSchema>(callback: Callback<T | null>): void;
+  tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoError('Cursor is exhausted'));
@@ -292,25 +293,24 @@ export abstract class AbstractCursor<
    * @param iterator - The iteration callback.
    * @param callback - The end callback.
    */
-  forEach(iterator: (doc: TSchema) => boolean | void): Promise<void>;
-  forEach(iterator: (doc: TSchema) => boolean | void, callback: Callback<void>): void;
-  forEach(
-    iterator: (doc: TSchema) => boolean | void,
+  forEach<T = TSchema>(iterator: (doc: T) => boolean | void): Promise<void>;
+  forEach<T = TSchema>(iterator: (doc: T) => boolean | void, callback: Callback<void>): void;
+  forEach<T = TSchema>(
+    iterator: (doc: T) => boolean | void,
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
       throw new TypeError('Missing required parameter `iterator`');
     }
-
     return maybePromise(callback, done => {
       const transform = this[kTransform];
       const fetchDocs = () => {
-        next(this, true, (err, doc) => {
+        next<T>(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
           if (doc == null) return done();
 
           // NOTE: no need to transform because `next` will do this automatically
-          let result = iterator(doc as TSchema); // TODO(NODE-2648): We need to work with the transform return type somehow
+          let result = iterator(doc); // TODO(NODE-3283): Improve transform typing
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
@@ -318,7 +318,7 @@ export abstract class AbstractCursor<
           if (internalDocs) {
             for (let i = 0; i < internalDocs.length; ++i) {
               result = iterator(
-                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO(NODE-2648): We need to work with the transform return type somehow
+                (transform ? transform(internalDocs[i]) : internalDocs[i]) as T // TODO(NODE-3283): Improve transform typing
               );
               if (result === false) return done();
             }
@@ -396,25 +396,25 @@ export abstract class AbstractCursor<
    *
    * @param callback - The result callback.
    */
-  toArray(): Promise<TSchema[]>;
-  toArray(callback: Callback<TSchema[]>): void;
-  toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
+  toArray<T = TSchema>(): Promise<T[]>;
+  toArray<T = TSchema>(callback: Callback<T[]>): void;
+  toArray<T = TSchema>(callback?: Callback<T[]>): Promise<T[]> | void {
     return maybePromise(callback, done => {
-      const docs: TSchema[] = [];
+      const docs: T[] = [];
       const transform = this[kTransform];
       const fetchDocs = () => {
         // NOTE: if we add a `nextBatch` then we should use it here
-        next(this, true, (err, doc) => {
+        next<T>(this, true, (err, doc) => {
           if (err) return done(err);
           if (doc == null) return done(undefined, docs);
 
           // NOTE: no need to transform because `next` will do this automatically
-          docs.push(doc as TSchema);
+          docs.push(doc);
 
           // these do need to be transformed since they are copying the rest of the batch
           const internalDocs = (transform
             ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
-            : this[kDocuments].splice(0, this[kDocuments].length)) as TSchema[]; // TODO(NODE-2648): We need to work with the transform return type somehow
+            : this[kDocuments].splice(0, this[kDocuments].length)) as T[]; // TODO(NODE-3283): Improve transform typing
 
           if (internalDocs) {
             docs.push(...internalDocs);
@@ -455,9 +455,9 @@ export abstract class AbstractCursor<
    *
    * @param transform - The mapping transformation method.
    */
-  map<TResult = any>(transform: (doc: TSchema) => TResult): this {
+  map(transform: (doc: TSchema) => any): this {
     assertUninitialized(this);
-    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-2648): We need to work with the transform return type somehow
+    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
       this[kTransform] = doc => {
         return transform(oldTransform(doc));
@@ -603,9 +603,7 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<TSchema extends Document>(
-  cursor: AbstractCursor<TSchema>
-): TSchema | null | undefined {
+function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
   if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
     return null;
   }
@@ -614,7 +612,7 @@ function nextDocument<TSchema extends Document>(
   if (doc) {
     const transform = cursor[kTransform];
     if (transform) {
-      return transform(doc) as TSchema;
+      return transform(doc) as T;
     }
 
     return doc;
@@ -623,11 +621,7 @@ function nextDocument<TSchema extends Document>(
   return null;
 }
 
-function next<TSchema>(
-  cursor: AbstractCursor<TSchema>,
-  blocking: boolean,
-  callback: Callback<TSchema | null>
-): void {
+function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T | null>): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);

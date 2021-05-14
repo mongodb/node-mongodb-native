@@ -102,7 +102,7 @@ export interface ChangeStreamDocument<TSchema extends Document = Document> {
    * The id functions as an opaque token for use when resuming an interrupted
    * change stream.
    */
-  _id: Document;
+  _id: InferIdType<TSchema>;
 
   /**
    * Describes the type of operation represented in this change notification.
@@ -121,7 +121,7 @@ export interface ChangeStreamDocument<TSchema extends Document = Document> {
    * Contains two fields: “db” and “coll” containing the database and
    * collection name in which the change happened.
    */
-  ns: Document;
+  ns: { db: string; coll: string };
 
   /**
    * Only present for ops of type ‘insert’, ‘update’, ‘replace’, and
@@ -140,7 +140,7 @@ export interface ChangeStreamDocument<TSchema extends Document = Document> {
    * Contains a description of updated and removed fields in this
    * operation.
    */
-  updateDescription?: UpdateDescription;
+  updateDescription?: UpdateDescription<TSchema>;
 
   /**
    * Always present for operations of type ‘insert’ and ‘replace’. Also
@@ -159,12 +159,12 @@ export interface ChangeStreamDocument<TSchema extends Document = Document> {
 }
 
 /** @public */
-export interface UpdateDescription {
+export interface UpdateDescription<TSchema extends Document = Document> {
   /**
    * A document containing key:value pairs of names of the fields that were
    * changed, and the new value for those fields.
    */
-  updatedFields: Document;
+  updatedFields: Partial<TSchema>;
 
   /**
    * An array of field names that were removed from the document.
@@ -187,7 +187,7 @@ export type ChangeStreamEvents = {
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream<TSchema> extends TypedEventEmitter<ChangeStreamEvents> {
+export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<ChangeStreamEvents> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
@@ -610,8 +610,8 @@ function waitForTopologyConnected(
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
-function closeWithError(
-  changeStream: ChangeStream<any>,
+function closeWithError<T>(
+  changeStream: ChangeStream<T>,
   error: AnyError,
   callback?: Callback
 ): void {
@@ -622,10 +622,7 @@ function closeWithError(
   changeStream.close(() => callback && callback(error));
 }
 
-function streamEvents<TSchema>(
-  changeStream: ChangeStream<TSchema>,
-  cursor: ChangeStreamCursor<TSchema>
-): void {
+function streamEvents<T>(changeStream: ChangeStream<T>, cursor: ChangeStreamCursor<T>): void {
   const stream = changeStream[kCursorStream] || cursor.stream();
   changeStream[kCursorStream] = stream;
   stream.on('data', change => processNewChange(changeStream, change));
@@ -736,10 +733,7 @@ function processError(changeStream: ChangeStream<any>, error: AnyError, callback
  *
  * @param changeStream - the parent ChangeStream
  */
-function getCursor<TSchema>(
-  changeStream: ChangeStream<TSchema>,
-  callback: Callback<ChangeStreamCursor<TSchema>>
-) {
+function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
     callback(CHANGESTREAM_CLOSED_ERROR);
     return;
