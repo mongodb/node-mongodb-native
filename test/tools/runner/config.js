@@ -272,11 +272,9 @@ class NativeConfiguration {
       actualHostsString = `${host.host}:${host.port}`;
     }
 
-    console.log(uri);
     const connectionString = url
       .format(uri)
       .replace(new RegExp(FILLER_HOST, 'ig'), actualHostsString);
-    console.log(connectionString);
 
     return connectionString;
   }
