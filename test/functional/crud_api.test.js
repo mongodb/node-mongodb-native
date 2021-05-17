@@ -766,7 +766,7 @@ describe('CRUD API', function() {
               {
                 projection: { b: 1, c: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnOriginal: false, // keeping the deprecated option for compatibility testing since returnDocument is covered in spec tests
                 upsert: true
               },
               function(err, r) {
@@ -795,7 +795,7 @@ describe('CRUD API', function() {
               {
                 projection: { b: 1, d: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnOriginal: false, // keeping the deprecated option for compatibility testing since returnDocument is covered in spec tests
                 upsert: true
               },
               function(err, r) {

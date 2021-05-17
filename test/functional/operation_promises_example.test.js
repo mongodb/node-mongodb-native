@@ -6953,7 +6953,7 @@ describe('Operation (Promises)', function() {
               {
                 projection: { b: 1, c: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: 'after',
                 upsert: true
               }
             )
@@ -7011,7 +7011,7 @@ describe('Operation (Promises)', function() {
               {
                 projection: { b: 1, d: 1 },
                 sort: { a: 1 },
-                returnOriginal: false,
+                returnDocument: 'after',
                 upsert: true
               }
             );

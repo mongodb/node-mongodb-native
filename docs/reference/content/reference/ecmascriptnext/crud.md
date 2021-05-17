@@ -213,7 +213,7 @@ const dbName = 'myproject';
 
     // Modify and return the modified document
     r = await col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-      returnOriginal: false,
+      returnDocument: 'after',
       sort: [['a',1]],
       upsert: true
     });
