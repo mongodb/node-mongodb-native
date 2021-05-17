@@ -1,0 +1,22 @@
+{
+  "description": "operation-object-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [
+        {
+          "name": "foo",
+          "object": 0
+        }
+      ]
+    }
+  ]
+}

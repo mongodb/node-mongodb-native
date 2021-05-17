@@ -1,0 +1,414 @@
+{
+  "description": "poc-change-streams",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "getMore",
+          "killCursors"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "change-stream-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client1",
+        "databaseName": "change-stream-tests"
+      }
+    },
+    {
+      "database": {
+        "id": "database2",
+        "client": "client1",
+        "databaseName": "change-stream-tests-2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database1",
+        "collectionName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection2",
+        "database": "database1",
+        "collectionName": "test2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection3",
+        "database": "database2",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "change-stream-tests",
+      "documents": []
+    },
+    {
+      "collectionName": "test2",
+      "databaseName": "change-stream-tests",
+      "documents": []
+    },
+    {
+      "collectionName": "test",
+      "databaseName": "change-stream-tests-2",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Executing a watch helper on a MongoClient results in notifications for changes to all collections in all databases in the cluster.",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.8.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "client0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection2",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection3",
+          "arguments": {
+            "document": {
+              "y": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection1",
+          "arguments": {
+            "document": {
+              "z": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test2"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests-2",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "y": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "z": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "allChangesForCluster": true,
+                        "fullDocument": {
+                          "$$unsetOrMatches": "default"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test consecutive resume",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.1.7",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "batchSize": 1,
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection1",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection1",
+          "arguments": {
+            "document": {
+              "x": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection1",
+          "arguments": {
+            "document": {
+              "x": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "x": 2
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "x": 3
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "cursor": {
+                    "batchSize": 1
+                  },
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": {
+                          "$$unsetOrMatches": "default"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "change-stream-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "cursor": {
+                    "batchSize": 1
+                  },
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": {
+                          "$$unsetOrMatches": "default"
+                        },
+                        "resumeAfter": {
+                          "$$exists": true
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "change-stream-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "cursor": {
+                    "batchSize": 1
+                  },
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": {
+                          "$$unsetOrMatches": "default"
+                        },
+                        "resumeAfter": {
+                          "$$exists": true
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "change-stream-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

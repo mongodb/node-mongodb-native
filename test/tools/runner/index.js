@@ -1,5 +1,9 @@
 'use strict';
 
+// shims
+require('array-includes/auto');
+require('object.entries/auto');
+
 const path = require('path');
 const fs = require('fs');
 const MongoClient = require('../../..').MongoClient;

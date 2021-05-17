@@ -1,0 +1,20 @@
+{
+  "description": "entity-client-serverApi-version-type",
+  "schemaVersion": "1.1",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "serverApi": {
+          "version": 0
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

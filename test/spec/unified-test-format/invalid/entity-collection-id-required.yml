@@ -1,0 +1,18 @@
+description: "entity-collection-id-required"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+  - database:
+      id: &database0 "database0"
+      client: *client0
+      databaseName: "foo"
+  - collection:
+      database: *database0
+      collectionName: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

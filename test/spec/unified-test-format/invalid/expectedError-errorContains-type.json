@@ -1,0 +1,25 @@
+{
+  "description": "expectedError-errorContains-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "client0",
+          "expectError": {
+            "errorContains": 0
+          }
+        }
+      ]
+    }
+  ]
+}

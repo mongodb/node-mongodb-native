@@ -8,14 +8,14 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       UNIFIED                 Set to enable the Unified SDAM topology for the node driver
 #       MONGODB_URI             Set the suggested connection MONGODB_URI (including credentials and topology info)
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
-#       TEST_NPM_SCRIPT         Script to npm run. Defaults to "test-nolint"
+#       TEST_NPM_SCRIPT         Script to npm run. Defaults to "check:test"
 #       SKIP_DEPS               Skip installing dependencies
 #       NO_EXIT                 Don't exit early from tests that leak resources
 
 AUTH=${AUTH:-noauth}
 UNIFIED=${UNIFIED:-0}
 MONGODB_URI=${MONGODB_URI:-}
-TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-test-nolint}
+TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-"check:test"}
 if [[ -z "${NO_EXIT}" ]]; then
   TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
 fi
@@ -54,5 +54,9 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
 else
   npm install mongodb-client-encryption@latest
 fi
+
+nvm use 12
+npm run build:unified
+nvm use "$NODE_VERSION"
 
 MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm run ${TEST_NPM_SCRIPT}

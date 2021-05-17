@@ -179,7 +179,77 @@ function visualizeMonitoringEvents(client) {
   });
 }
 
+class EventCollector {
+  constructor(obj, events, options) {
+    this._events = Object.create(null);
+    this._timeout = options ? options.timeout : 5000;
+
+    events.forEach(eventName => {
+      this._events[eventName] = [];
+      obj.on(eventName, event => this._events[eventName].push(event));
+    });
+  }
+
+  waitForEvent(eventName, count, callback) {
+    if (typeof count === 'function') {
+      callback = count;
+      count = 1;
+    }
+
+    this.waitForEventImpl(this, Date.now(), eventName, count, callback);
+  }
+
+  /**
+   * Will only return one event at a time from the front of the list
+   * Useful for iterating over the events in the order they occurred
+   *
+   * @param {string} eventName
+   * @returns {Promise<Record<string, any>>}
+   */
+  waitAndShiftEvent(eventName) {
+    return new Promise((resolve, reject) => {
+      if (this._events[eventName].length > 0) {
+        return resolve(this._events[eventName].shift());
+      }
+      this.waitForEventImpl(this, Date.now(), eventName, 1, error => {
+        if (error) return reject(error);
+        resolve(this._events[eventName].shift());
+      });
+    });
+  }
+
+  reset(eventName) {
+    if (eventName == null) {
+      Object.keys(this._events).forEach(eventName => {
+        this._events[eventName] = [];
+      });
+
+      return;
+    }
+
+    if (this._events[eventName] == null) {
+      throw new TypeError(`invalid event name "${eventName}" specified for reset`);
+    }
+
+    this._events[eventName] = [];
+  }
+
+  waitForEventImpl(collector, start, eventName, count, callback) {
+    const events = collector._events[eventName];
+    if (events.length >= count) {
+      return callback(undefined, events);
+    }
+
+    if (Date.now() - start >= collector._timeout) {
+      return callback(new Error(`timed out waiting for event "${eventName}"`));
+    }
+
+    setTimeout(() => this.waitForEventImpl(collector, start, eventName, count, callback), 10);
+  }
+}
+
 module.exports = {
+  EventCollector,
   makeTestFunction,
   ensureCalledWith,
   ClassWithLogger,

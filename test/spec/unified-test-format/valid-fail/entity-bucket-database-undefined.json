@@ -1,0 +1,18 @@
+{
+  "description": "entity-bucket-database-undefined",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "foo"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

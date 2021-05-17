@@ -1,0 +1,220 @@
+description: "poc-change-streams"
+
+schemaVersion: "1.0"
+
+createEntities:
+  # Entities for creating changeStreams
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+      # Original tests do not observe getMore commands but only because event
+      # assertions ignore extra events. killCursors is explicitly ignored.
+      ignoreCommandMonitoringEvents: [ getMore, killCursors ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name change-stream-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  # Entities for executing insert operations
+  - client:
+      id: &client1 client1
+      useMultipleMongoses: false
+  - database:
+      id: &database1 database1
+      client: *client1
+      databaseName: &database1Name change-stream-tests
+  - database:
+      id: &database2 database2
+      client: *client1
+      databaseName: &database2Name change-stream-tests-2
+  - collection:
+      id: &collection1 collection1
+      database: *database1
+      collectionName: &collection1Name test
+  - collection:
+      id: &collection2 collection2
+      database: *database1
+      collectionName: &collection2Name test2
+  - collection:
+      id: &collection3 collection3
+      database: *database2
+      collectionName: &collection3Name test
+
+initialData:
+  - collectionName: *collection1Name
+    databaseName: *database1Name
+    documents: []
+  - collectionName: *collection2Name
+    databaseName: *database1Name
+    documents: []
+  - collectionName: *collection3Name
+    databaseName: *database2Name
+    documents: []
+
+tests:
+  - description: "Executing a watch helper on a MongoClient results in notifications for changes to all collections in all databases in the cluster."
+    runOnRequirements:
+      - minServerVersion: "3.8.0"
+        topologies: [ replicaset ]
+    operations:
+      - name: createChangeStream
+        object: *client0
+        arguments:
+          pipeline: []
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection2
+        arguments:
+          document: { x: 1 }
+      - name: insertOne
+        object: *collection3
+        arguments:
+          document: { y: 1 }
+      - name: insertOne
+        object: *collection1
+        arguments:
+          document: { z: 1 }
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database1Name
+            coll: *collection2Name
+          fullDocument:
+            _id: { $$type: objectId }
+            x: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database2Name
+            coll: *collection3Name
+          fullDocument:
+            # Original tests did not include _id, but matching now only permits
+            # extra keys for root-level documents.
+            _id: { $$type: objectId }
+            y: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database1Name
+            coll: *collection1Name
+          fullDocument:
+            _id: { $$type: objectId }
+            z: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                cursor: {}
+                pipeline:
+                  - $changeStream:
+                      allChangesForCluster: true
+                      # Some drivers may send a default value for fullDocument
+                      # or omit it entirely (see: SPEC-1350).
+                      fullDocument: { $$unsetOrMatches: default }
+              commandName: aggregate
+              databaseName: admin
+
+  - description: "Test consecutive resume"
+    runOnRequirements:
+      - minServerVersion: "4.1.7"
+        topologies: [ replicaset ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ getMore ]
+              closeConnection: true
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          batchSize: 1
+          pipeline: []
+        saveResultAsEntity: *changeStream0
+      - name: insertOne
+        object: *collection1
+        arguments:
+          document: { x: 1 }
+      - name: insertOne
+        object: *collection1
+        arguments:
+          document: { x: 2 }
+      - name: insertOne
+        object: *collection1
+        arguments:
+          document: { x: 3 }
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database1Name
+            coll: *collection1Name
+          fullDocument:
+            _id: { $$type: objectId }
+            x: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database1Name
+            coll: *collection1Name
+          fullDocument:
+            _id: { $$type: objectId }
+            x: 2
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database1Name
+            coll: *collection1Name
+          fullDocument:
+            _id: { $$type: objectId }
+            x: 3
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection1Name
+                cursor: { batchSize: 1 }
+                pipeline:
+                  - $changeStream:
+                      fullDocument: { $$unsetOrMatches: default }
+              commandName: aggregate
+              databaseName: *database1Name
+          # The original test only asserted the first command, since expected
+          # events were only an ordered subset. This file does ignore getMore
+          # commands but we must expect the subsequent aggregate commands, since
+          # each failed getMore will resume. While doing so we can also assert
+          # that those commands include a resume token.
+          - &resumingAggregate
+            commandStartedEvent:
+              command:
+                aggregate: *collection1Name
+                cursor: { batchSize: 1 }
+                pipeline:
+                  - $changeStream:
+                      fullDocument: { $$unsetOrMatches: default }
+                      resumeAfter: { $$exists: true }
+              commandName: aggregate
+              databaseName: *database0Name
+          - *resumingAggregate

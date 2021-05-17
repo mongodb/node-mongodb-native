@@ -75,6 +75,7 @@ if [[ "$OS" == "Windows_NT" ]]; then
 root: $NVM_HOME
 path: $NVM_SYMLINK
 EOT
+  nvm install 12
   nvm install $NODE_VERSION
   nvm use $NODE_VERSION
   which node || echo "node not found, PATH=$PATH"
@@ -86,7 +87,9 @@ EOT
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
+  nvm install --no-progress 12
   nvm install --no-progress $NODE_VERSION
+  nvm use $NODE_VERSION
 
   # setup npm cache in a local directory
   cat <<EOT > .npmrc

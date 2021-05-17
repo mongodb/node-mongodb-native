@@ -7,4 +7,4 @@ NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-npm run atlas
+npm run check:atlas

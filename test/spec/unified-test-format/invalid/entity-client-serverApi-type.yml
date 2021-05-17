@@ -1,0 +1,12 @@
+description: "entity-client-serverApi-type"
+
+schemaVersion: "1.1"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+      serverApi: 0
+
+tests:
+  - description: "foo"
+    operations: []
