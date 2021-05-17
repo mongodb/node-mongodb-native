@@ -23,7 +23,8 @@ import {
   MongoClientOptions,
   MongoOptions,
   PkFactory,
-  ServerApi
+  ServerApi,
+  ServerApiVersion
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
@@ -590,10 +591,24 @@ export const OPTIONS = {
   serverApi: {
     target: 'serverApi',
     transform({ values: [version] }): ServerApi {
-      if (typeof version === 'string') {
-        return { version };
+      const serverApiToValidate =
+        typeof version === 'string' ? ({ version } as ServerApi) : (version as ServerApi);
+      const versionToValidate = serverApiToValidate && serverApiToValidate.version;
+      if (!versionToValidate) {
+        throw new MongoParseError(
+          `Invalid \`serverApi\` property; must specify a version as one of the following strings: "${Object.values(
+            ServerApiVersion
+          ).join('", "')}"`
+        );
       }
-      return version as ServerApi;
+      if (!Object.values(ServerApiVersion).some(v => v === versionToValidate)) {
+        throw new MongoParseError(
+          `Invalid server API version=${versionToValidate}; must be one of the following strings: "${Object.values(
+            ServerApiVersion
+          ).join('", "')}"`
+        );
+      }
+      return serverApiToValidate;
     }
   },
   checkKeys: {

@@ -43,7 +43,7 @@ export type ServerApiVersion = typeof ServerApiVersion[keyof typeof ServerApiVer
 
 /** @public */
 export interface ServerApi {
-  version: string | ServerApiVersion;
+  version: ServerApiVersion;
   strict?: boolean;
   deprecationErrors?: boolean;
 }
