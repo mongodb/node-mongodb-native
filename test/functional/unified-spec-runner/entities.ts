@@ -39,7 +39,9 @@ interface UnifiedChangeStream extends ChangeStream {
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
 function getClient(address) {
-  return new MongoClient(`mongodb://${address}`);
+  return new MongoClient(`mongodb://${address}`, {
+    useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY)
+  });
 }
 
 export interface UnifiedMongoClient {

@@ -9,6 +9,7 @@ import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription, Document } from './schema';
 import { CommandStartedEvent } from '../../../lib/core/connection/apm';
+import { translateOptions } from './unified-utils';
 
 export interface WriteConcernSettings {
   /** The write concern */
@@ -292,17 +293,14 @@ operations.set('find', async ({ entities, operation }) => {
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.findOneAndReplace(operation.arguments.filter, operation.arguments.replacement);
+  const { filter, replacement, ...opts } = operation.arguments;
+  return collection.findOneAndReplace(filter, replacement, translateOptions(opts));
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const returnOriginal = operation.arguments.returnDocument === 'Before';
-  return (
-    await collection.findOneAndUpdate(operation.arguments.filter, operation.arguments.update, {
-      returnOriginal
-    })
-  ).value;
+  const { filter, update, ...opts } = operation.arguments;
+  return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {

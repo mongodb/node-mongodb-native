@@ -80,3 +80,11 @@ export function patchCollectionOptions(options: CollectionOrDatabaseOptions): Co
   // TODO
   return options as CollectionOptions;
 }
+
+export function translateOptions(options: Document): Document {
+  const translatedOptions = { ...options };
+  if (options.returnDocument) {
+    translatedOptions.returnDocument = options.returnDocument.toLowerCase();
+  }
+  return translatedOptions as Document;
+}
