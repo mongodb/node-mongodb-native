@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.7](https://github.com/mongodb/node-mongodb-native/compare/v3.6.6...v3.6.7) (2021-05-18)
+
+
+### Bug Fixes
+
+* **docs:** removing incorrect apm docs ([#2793](https://github.com/mongodb/node-mongodb-native/issues/2793)) ([971259a](https://github.com/mongodb/node-mongodb-native/commit/971259a868a8018e90ebc2f28d151eb7af3dd50a))
+* **NODE-3173:** Preserve sort key order for numeric string keys ([#2790](https://github.com/mongodb/node-mongodb-native/issues/2790)) ([730f43a](https://github.com/mongodb/node-mongodb-native/commit/730f43af6d9e53603af998353b720d8161426d8c))
+* **NODE-3176:** handle errors from MessageStream ([#2774](https://github.com/mongodb/node-mongodb-native/issues/2774)) ([f1afcc4](https://github.com/mongodb/node-mongodb-native/commit/f1afcc4efbc41ce436812a6bfa22843e939ab5cf))
+* **NODE-3192:** check clusterTime is defined before access ([#2806](https://github.com/mongodb/node-mongodb-native/issues/2806)) ([6ceace6](https://github.com/mongodb/node-mongodb-native/commit/6ceace6b245c42b8498fb1b13e7c37a97a46946d))
+* **NODE-3252:** state transistion from DISCONNECTED ([#2807](https://github.com/mongodb/node-mongodb-native/issues/2807)) ([5d8f649](https://github.com/mongodb/node-mongodb-native/commit/5d8f6493a0ba4b525434c0868e2ae12315b4c249))
+* **sdam:** topology no longer causes close event ([#2791](https://github.com/mongodb/node-mongodb-native/issues/2791)) ([16e7064](https://github.com/mongodb/node-mongodb-native/commit/16e70642f25954a03b91a2c2991cea96b8356de7))
+* invalid case on writeconcern makes skip check fail ([#2773](https://github.com/mongodb/node-mongodb-native/issues/2773)) ([b1363c2](https://github.com/mongodb/node-mongodb-native/commit/b1363c26db5da5003f9db43be7e8d6e9007d45bd))
+
 ### [3.6.6](https://github.com/mongodb/node-mongodb-native/compare/v3.6.5...v3.6.6) (2021-04-06)
 
 
