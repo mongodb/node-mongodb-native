@@ -2368,7 +2368,7 @@ client.connect(function(err, client) {
 
     // Modify and return the modified document
     col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-        returnOriginal: false
+        returnDocument: 'after'
       , sort: [[a,1]]
       , upsert: true
     }, function(err, r) {
@@ -2410,7 +2410,7 @@ const client = new MongoClient(url);
 
     // Modify and return the modified document
     r = await col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-        returnOriginal: false
+        returnDocument: 'after'
       , sort: [[a,1]]
       , upsert: true
     });
@@ -2477,9 +2477,9 @@ const client = new MongoClient(url);
 </tr>
 
 <tr>
-<td align="left"><code>returnOriginal</code></td>
-<td align="left">(Boolean, default:true)</td>
-<td align="left">Set to false if you want to return the modified object rather than the original. Ignored for remove.</td>
+<td align="left"><code>returnDocument</code></td>
+<td align="left">(String, &lsquo;before&rsquo; || &lsquo;after&rsquo;, default:&lsquo;before&rsquo;)</td>
+<td align="left">Set to &lsquo;after&rsquo; if you want to return the modified document rather than the original. Ignored for remove.</td>
 </tr>
 </tbody>
 </table>

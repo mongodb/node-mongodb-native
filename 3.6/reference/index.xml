@@ -141,7 +141,7 @@ Operations are executed using a work-queue. That means the Pool is responsible f
       <guid>/node-mongodb-native/3.6/reference/management/apm/</guid>
       <description>APM Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.
 API The following code example hooks into all the available features of the APM API.
-const listener = require(&#39;mongodb&#39;).instrument({ operationIdGenerator: { operationId: 1, next: function() { return this.operationId++; } }, timestampGenerator: { current: function() { return new Date().</description>
+const listener = require(&#39;mongodb&#39;).instrument(function(err, instrumentations) { // Instrument the driver }); listener.on(&#39;started&#39;, function(event) { // command start event (see https://github.</description>
     </item>
     
     <item>

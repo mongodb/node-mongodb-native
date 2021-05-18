@@ -124,14 +124,14 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="bsonserializeoptions.html#checkkeys" class="tsd-kind-icon">check<wbr>Keys</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-external"><a href="bsonserializeoptions.html#checkkeys" class="tsd-kind-icon">check<wbr>Keys</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#fieldsasraw" class="tsd-kind-icon">fields<wbr>AsRaw</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#ignoreundefined" class="tsd-kind-icon">ignore<wbr>Undefined</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="bsonserializeoptions.html#ignoreundefined" class="tsd-kind-icon">ignore<wbr>Undefined</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#promotebuffers" class="tsd-kind-icon">promote<wbr>Buffers</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#promotelongs" class="tsd-kind-icon">promote<wbr>Longs</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#promotevalues" class="tsd-kind-icon">promote<wbr>Values</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#raw" class="tsd-kind-icon">raw</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="bsonserializeoptions.html#serializefunctions" class="tsd-kind-icon">serialize<wbr>Functions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="bsonserializeoptions.html#serializefunctions" class="tsd-kind-icon">serialize<wbr>Functions</a></li>
 							</ul>
 						</section>
 					</div>
@@ -139,11 +139,12 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-external">
 					<a name="checkkeys" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> check<wbr>Keys</h3>
-					<div class="tsd-signature tsd-kind-icon">check<wbr>Keys<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">check<wbr>Keys<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from Omit.checkKeys</p>
 						<ul>
 							<li>Defined in node_modules/bson/bson.d.ts:911</li>
 						</ul>
@@ -157,10 +158,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="fieldsasraw" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> fields<wbr>AsRaw</h3>
-					<div class="tsd-signature tsd-kind-icon">fields<wbr>AsRaw<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span></div>
+					<div class="tsd-signature tsd-kind-icon">fields<wbr>AsRaw<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L46">src/bson.ts:46</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L44">src/bson.ts:44</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -168,14 +169,23 @@
 							<p>Return document results as raw BSON buffers</p>
 						</div>
 					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-index-signature">
+								<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">boolean</span></h5>
+							</li>
+						</ul>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 					<a name="ignoreundefined" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> ignore<wbr>Undefined</h3>
-					<div class="tsd-signature tsd-kind-icon">ignore<wbr>Undefined<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">ignore<wbr>Undefined<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
+						<p>Overrides Omit.ignoreUndefined</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L56">src/bson.ts:56</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L54">src/bson.ts:54</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -187,10 +197,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="promotebuffers" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> promote<wbr>Buffers</h3>
-					<div class="tsd-signature tsd-kind-icon">promote<wbr>Buffers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">promote<wbr>Buffers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L50">src/bson.ts:50</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L48">src/bson.ts:48</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -202,10 +212,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="promotelongs" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> promote<wbr>Longs</h3>
-					<div class="tsd-signature tsd-kind-icon">promote<wbr>Longs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">promote<wbr>Longs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L52">src/bson.ts:52</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L50">src/bson.ts:50</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -217,10 +227,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="promotevalues" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> promote<wbr>Values</h3>
-					<div class="tsd-signature tsd-kind-icon">promote<wbr>Values<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">promote<wbr>Values<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L48">src/bson.ts:48</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L46">src/bson.ts:46</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -232,20 +242,21 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="raw" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> raw</h3>
-					<div class="tsd-signature tsd-kind-icon">raw<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">raw<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L58">src/bson.ts:58</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L56">src/bson.ts:56</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 					<a name="serializefunctions" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> serialize<wbr>Functions</h3>
-					<div class="tsd-signature tsd-kind-icon">serialize<wbr>Functions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<div class="tsd-signature tsd-kind-icon">serialize<wbr>Functions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
+						<p>Overrides Omit.serializeFunctions</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/bson.ts#L54">src/bson.ts:54</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/bson.ts#L52">src/bson.ts:52</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -271,13 +282,13 @@
 					<li class="current tsd-kind-interface">
 						<a href="bsonserializeoptions.html" class="tsd-kind-icon">BSONSerialize<wbr>Options</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-external">
 								<a href="bsonserializeoptions.html#checkkeys" class="tsd-kind-icon">check<wbr>Keys</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="bsonserializeoptions.html#fieldsasraw" class="tsd-kind-icon">fields<wbr>AsRaw</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 								<a href="bsonserializeoptions.html#ignoreundefined" class="tsd-kind-icon">ignore<wbr>Undefined</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
@@ -292,7 +303,7 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="bsonserializeoptions.html#raw" class="tsd-kind-icon">raw</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 								<a href="bsonserializeoptions.html#serializefunctions" class="tsd-kind-icon">serialize<wbr>Functions</a>
 							</li>
 						</ul>
@@ -315,13 +326,14 @@
 				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
 			</ul>
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>

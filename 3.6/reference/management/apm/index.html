@@ -2208,25 +2208,7 @@ avoid any performance penalties.</p>
 <p>The following code example hooks into all the available features
 of the APM API.</p>
 
-<pre><code class="language-js">const listener = require('mongodb').instrument({
-  operationIdGenerator: {
-    operationId: 1,
-
-    next: function() {
-      return this.operationId++;
-    }
-  },
-
-  timestampGenerator: {
-    current: function() {
-      return new Date().getTime();
-    },
-
-    duration: function(start, end) {
-      return end - start;
-    }
-  }  
-}, function(err, instrumentations) {
+<pre><code class="language-js">const listener = require('mongodb').instrument(function(err, instrumentations) {
   // Instrument the driver  
 });
 

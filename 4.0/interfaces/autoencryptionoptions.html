@@ -80,11 +80,13 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#bson" class="tsd-kind-icon">bson</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#bypassautoencryption" class="tsd-kind-icon">bypass<wbr>Auto<wbr>Encryption</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#extraoptions" class="tsd-kind-icon">extra<wbr>Options</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#keyvaultclient" class="tsd-kind-icon">key<wbr>Vault<wbr>Client</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#keyvaultnamespace" class="tsd-kind-icon">key<wbr>Vault<wbr>Namespace</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#kmsproviders" class="tsd-kind-icon">kms<wbr>Providers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#metadataclient" class="tsd-kind-icon">metadata<wbr>Client</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#options" class="tsd-kind-icon">options</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="autoencryptionoptions.html#schemamap" class="tsd-kind-icon">schema<wbr>Map</a></li>
 							</ul>
@@ -95,12 +97,99 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="bypassautoencryption" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> bypass<wbr>Auto<wbr>Encryption</h3>
-					<div class="tsd-signature tsd-kind-icon">bypass<wbr>Auto<wbr>Encryption<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+					<a name="bson" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> bson</h3>
+					<div class="tsd-signature tsd-kind-icon">bson<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>deserialize<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>buffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBufferView</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBuffer</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">DeserializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol">; </span>serialize<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>object<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Document</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">SerializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L149">src/deps.ts:149</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L85">src/deps.ts:85</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<dl class="tsd-comment-tags">
+							<dt>internal</dt>
+							<dd></dd>
+						</dl>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>deserialize<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>buffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBufferView</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBuffer</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">DeserializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Document</span></h5>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter-signature">
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-literal">
+											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>buffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBufferView</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBuffer</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">DeserializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Document</span></li>
+										</ul>
+										<ul class="tsd-descriptions">
+											<li class="tsd-description">
+												<div class="tsd-comment tsd-typography">
+													<div class="lead">
+														<p>Deserialize data as BSON.</p>
+													</div>
+												</div>
+												<h4 class="tsd-parameters-title">Parameters</h4>
+												<ul class="tsd-parameters">
+													<li>
+														<h5>buffer: <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBufferView</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ArrayBuffer</span></h5>
+														<div class="tsd-comment tsd-typography">
+															<p>the buffer containing the serialized set of BSON documents.</p>
+														</div>
+													</li>
+													<li>
+														<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">DeserializeOptions</span></h5>
+													</li>
+												</ul>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Document</span></h4>
+												<p>returns the deserialized Javascript Object.</p>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<li class="tsd-parameter">
+								<h5>serialize<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>object<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Document</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">SerializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Buffer</span></h5>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter-signature">
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-literal">
+											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>object<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Document</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">SerializeOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span></li>
+										</ul>
+										<ul class="tsd-descriptions">
+											<li class="tsd-description">
+												<div class="tsd-comment tsd-typography">
+													<div class="lead">
+														<p>Serialize a Javascript object.</p>
+													</div>
+												</div>
+												<h4 class="tsd-parameters-title">Parameters</h4>
+												<ul class="tsd-parameters">
+													<li>
+														<h5>object: <span class="tsd-signature-type">Document</span></h5>
+														<div class="tsd-comment tsd-typography">
+															<p>the Javascript object to serialize.</p>
+														</div>
+													</li>
+													<li>
+														<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">SerializeOptions</span></h5>
+													</li>
+												</ul>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Buffer</span></h4>
+												<p>Buffer object containing the serialized object.</p>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="bypassautoencryption" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> bypass<wbr>Auto<wbr>Encryption</h3>
+					<div class="tsd-signature tsd-kind-icon">bypass<wbr>Auto<wbr>Encryption<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L153">src/deps.ts:153</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -112,20 +201,58 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="extraoptions" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> extra<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">extra<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>mongocryptdBypassSpawn<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>mongocryptdSpawnArgs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>mongocryptdSpawnPath<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>mongocryptdURI<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
+					<div class="tsd-signature tsd-kind-icon">extra<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>mongocryptdBypassSpawn<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>mongocryptdSpawnArgs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>mongocryptdSpawnPath<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>mongocryptdURI<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L154">src/deps.ts:154</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L158">src/deps.ts:158</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> mongocryptd<wbr>Bypass<wbr>Spawn<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>If true, autoEncryption will not attempt to spawn a mongocryptd before connecting</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> mongocryptd<wbr>Spawn<wbr>Args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>Command line arguments to use when auto-spawning a mongocryptd</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> mongocryptd<wbr>Spawn<wbr>Path<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The path to the mongocryptd executable on the system</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> mongocryptdURI<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>A local process the driver communicates with to determine how to encrypt values in a command.
+										Defaults to &quot;mongodb://%2Fvar%2Fmongocryptd.sock&quot; if domain sockets are available or &quot;mongodb://localhost:27020&quot; otherwise</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="keyvaultclient" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> key<wbr>Vault<wbr>Client</h3>
-					<div class="tsd-signature tsd-kind-icon">key<wbr>Vault<wbr>Client<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../classes/mongoclient.html" class="tsd-signature-type" data-tsd-kind="Class">MongoClient</a></div>
+					<div class="tsd-signature tsd-kind-icon">key<wbr>Vault<wbr>Client<span class="tsd-signature-symbol">:</span> <a href="../classes/mongoclient.html" class="tsd-signature-type" data-tsd-kind="Class">MongoClient</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L85">src/deps.ts:85</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L89">src/deps.ts:89</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -137,10 +264,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="keyvaultnamespace" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> key<wbr>Vault<wbr>Namespace</h3>
-					<div class="tsd-signature tsd-kind-icon">key<wbr>Vault<wbr>Namespace<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<div class="tsd-signature tsd-kind-icon">key<wbr>Vault<wbr>Namespace<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L87">src/deps.ts:87</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L91">src/deps.ts:91</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -152,10 +279,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="kmsproviders" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> kms<wbr>Providers</h3>
-					<div class="tsd-signature tsd-kind-icon">kms<wbr>Providers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>aws<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>accessKeyId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>secretAccessKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>sessionToken<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>azure<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>clientId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>clientSecret<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>identityPlatformEndpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>tenantId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>gcp<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>email<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>endpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>privateKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> }</span></div>
+					<div class="tsd-signature tsd-kind-icon">kms<wbr>Providers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>aws<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>accessKeyId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>secretAccessKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>sessionToken<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>azure<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>clientId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>clientSecret<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>identityPlatformEndpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>tenantId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>gcp<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>email<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>endpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>privateKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">; </span>local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L89">src/deps.ts:89</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L93">src/deps.ts:93</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -163,24 +290,214 @@
 							<p>Configuration options that are used by specific KMS providers during key generation, encryption, and decryption.</p>
 						</div>
 					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> aws<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>accessKeyId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>secretAccessKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>sessionToken<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>Configuration options for using &#39;aws&#39; as your KMS provider</p>
+									</div>
+								</div>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter">
+										<h5>access<wbr>Key<wbr>Id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The access key used for the AWS KMS provider</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5>secret<wbr>Access<wbr>Key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The secret access key used for the AWS KMS provider</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> session<wbr>Token<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>An optional AWS session token that will be used as the
+												X-Amz-Security-Token header for AWS requests.</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> azure<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>clientId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>clientSecret<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>identityPlatformEndpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>tenantId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>Configuration options for using &#39;azure&#39; as your KMS provider</p>
+									</div>
+								</div>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter">
+										<h5>client<wbr>Id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The client ID to authenticate a registered application</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5>client<wbr>Secret<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The client secret to authenticate a registered application</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> identity<wbr>Platform<wbr>Endpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>If present, a host with optional port. E.g. &quot;example.com&quot; or &quot;example.com:443&quot;.
+													This is optional, and only needed if customer is using a non-commercial Azure instance
+													(e.g. a government or China account, which use different URLs).
+												Defaults to &quot;login.microsoftonline.com&quot;</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5>tenant<wbr>Id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The tenant ID identifies the organization for the account</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> gcp<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>email<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>endpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>privateKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>Configuration options for using &#39;gcp&#39; as your KMS provider</p>
+									</div>
+								</div>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter">
+										<h5>email<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The service account email to authenticate</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> endpoint<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>If present, a host with optional port. E.g. &quot;example.com&quot; or &quot;example.com:443&quot;.
+												Defaults to &quot;oauth2.googleapis.com&quot;</p>
+											</div>
+										</div>
+									</li>
+									<li class="tsd-parameter">
+										<h5>private<wbr>Key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>A PKCS#8 encrypted key. This can either be a base64 string or a binary representation</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> local<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{ </span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>Configuration options for using &#39;local&#39; as your KMS provider</p>
+									</div>
+								</div>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter">
+										<h5>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span></h5>
+										<div class="tsd-comment tsd-typography">
+											<div class="lead">
+												<p>The master key used to encrypt/decrypt data keys.
+												A 96-byte long Buffer or base64 encoded string.</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="metadataclient" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> metadata<wbr>Client</h3>
+					<div class="tsd-signature tsd-kind-icon">metadata<wbr>Client<span class="tsd-signature-symbol">:</span> <a href="../classes/mongoclient.html" class="tsd-signature-type" data-tsd-kind="Class">MongoClient</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L87">src/deps.ts:87</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<dl class="tsd-comment-tags">
+							<dt>internal</dt>
+							<dd><p>client for metadata lookups</p>
+							</dd>
+						</dl>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="options" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> options</h3>
-					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>logger<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>level<span class="tsd-signature-symbol">: </span><a href="../modules.html#autoencryptionloggerlevelid" class="tsd-signature-type" data-tsd-kind="Type alias">AutoEncryptionLoggerLevelId</a>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> }</span></div>
+					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>logger<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">(</span>level<span class="tsd-signature-symbol">: </span><a href="../modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L150">src/deps.ts:150</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L154">src/deps.ts:154</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> logger<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">(</span>level<span class="tsd-signature-symbol">: </span><a href="../modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>An optional hook to catch logging messages from the underlying encryption engine</p>
+									</div>
+								</div>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter-signature">
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-literal">
+											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>level<span class="tsd-signature-symbol">: </span><a href="../modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+										</ul>
+										<ul class="tsd-descriptions">
+											<li class="tsd-description">
+												<h4 class="tsd-parameters-title">Parameters</h4>
+												<ul class="tsd-parameters">
+													<li>
+														<h5>level: <a href="../modules.html#autoencryptionloggerlevel" class="tsd-signature-type" data-tsd-kind="Variable">AutoEncryptionLoggerLevel</a></h5>
+													</li>
+													<li>
+														<h5>message: <span class="tsd-signature-type">string</span></h5>
+													</li>
+												</ul>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="schemamap" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> schema<wbr>Map</h3>
-					<div class="tsd-signature tsd-kind-icon">schema<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
+					<div class="tsd-signature tsd-kind-icon">schema<wbr>Map<span class="tsd-signature-symbol">:</span> <a href="document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/341a6026/src/deps.ts#L147">src/deps.ts:147</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/661511d1/src/deps.ts#L151">src/deps.ts:151</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -211,6 +528,9 @@
 						<a href="autoencryptionoptions.html" class="tsd-kind-icon">Auto<wbr>Encryption<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="autoencryptionoptions.html#bson" class="tsd-kind-icon">bson</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="autoencryptionoptions.html#bypassautoencryption" class="tsd-kind-icon">bypass<wbr>Auto<wbr>Encryption</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
@@ -224,6 +544,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="autoencryptionoptions.html#kmsproviders" class="tsd-kind-icon">kms<wbr>Providers</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="autoencryptionoptions.html#metadataclient" class="tsd-kind-icon">metadata<wbr>Client</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="autoencryptionoptions.html#options" class="tsd-kind-icon">options</a>
@@ -251,13 +574,14 @@
 				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
 			</ul>
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>

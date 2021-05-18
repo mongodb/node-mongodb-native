@@ -343,7 +343,21 @@
             
             <span class="subtitle">Members</span>
             
+                <li data-name="BulkWriteError#deletedCount"><a href="BulkWriteError.html#deletedCount">deletedCount</a></li>
+            
                 <li data-name="BulkWriteError#errmsg"><a href="BulkWriteError.html#errmsg">errmsg</a></li>
+            
+                <li data-name="BulkWriteError#insertedCount"><a href="BulkWriteError.html#insertedCount">insertedCount</a></li>
+            
+                <li data-name="BulkWriteError#insertedIds"><a href="BulkWriteError.html#insertedIds">insertedIds</a></li>
+            
+                <li data-name="BulkWriteError#matchedCount"><a href="BulkWriteError.html#matchedCount">matchedCount</a></li>
+            
+                <li data-name="BulkWriteError#modifiedCount"><a href="BulkWriteError.html#modifiedCount">modifiedCount</a></li>
+            
+                <li data-name="BulkWriteError#upsertedCount"><a href="BulkWriteError.html#upsertedCount">upsertedCount</a></li>
+            
+                <li data-name="BulkWriteError#upsertedIds"><a href="BulkWriteError.html#upsertedIds">upsertedIds</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -370,6 +384,16 @@
             
             <span class="subtitle">Members</span>
             
+                <li data-name="BulkWriteResult#deletedCount"><a href="BulkWriteResult.html#deletedCount">deletedCount</a></li>
+            
+                <li data-name="BulkWriteResult#insertedCount"><a href="BulkWriteResult.html#insertedCount">insertedCount</a></li>
+            
+                <li data-name="BulkWriteResult#insertedIds"><a href="BulkWriteResult.html#insertedIds">insertedIds</a></li>
+            
+                <li data-name="BulkWriteResult#matchedCount"><a href="BulkWriteResult.html#matchedCount">matchedCount</a></li>
+            
+                <li data-name="BulkWriteResult#modifiedCount"><a href="BulkWriteResult.html#modifiedCount">modifiedCount</a></li>
+            
                 <li data-name="BulkWriteResult#nInserted"><a href="BulkWriteResult.html#nInserted">nInserted</a></li>
             
                 <li data-name="BulkWriteResult#nMatched"><a href="BulkWriteResult.html#nMatched">nMatched</a></li>
@@ -381,6 +405,10 @@
                 <li data-name="BulkWriteResult#nUpserted"><a href="BulkWriteResult.html#nUpserted">nUpserted</a></li>
             
                 <li data-name="BulkWriteResult#ok"><a href="BulkWriteResult.html#ok">ok</a></li>
+            
+                <li data-name="BulkWriteResult#upsertedCount"><a href="BulkWriteResult.html#upsertedCount">upsertedCount</a></li>
+            
+                <li data-name="BulkWriteResult#upsertedIds"><a href="BulkWriteResult.html#upsertedIds">upsertedIds</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1538,6 +1566,8 @@
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="Long.fromBigInt"><a href="Long.html#.fromBigInt">fromBigInt</a></li>
+            
                 <li data-name="Long.fromBits"><a href="Long.html#.fromBits">fromBits</a></li>
             
                 <li data-name="Long.fromInt"><a href="Long.html#.fromInt">fromInt</a></li>
@@ -1597,6 +1627,8 @@
                 <li data-name="Long#shiftRightUnsigned"><a href="Long.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
             
                 <li data-name="Long#subtract"><a href="Long.html#subtract">subtract</a></li>
+            
+                <li data-name="Long#toBigInt"><a href="Long.html#toBigInt">toBigInt</a></li>
             
                 <li data-name="Long#toInt"><a href="Long.html#toInt">toInt</a></li>
             
@@ -2768,7 +2800,7 @@ this collection, will be inherited from the parent DB</p>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1894">line 1894</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1910">line 1910</a>
         </div>
         
     </div>
@@ -11274,7 +11306,7 @@ Promise if no callback passed.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1808">line 1808</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1824">line 1824</a>
         </div>
         
     </div>
@@ -11934,7 +11966,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1853">line 1853</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1869">line 1869</a>
         </div>
         
     </div>
@@ -14036,7 +14068,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1728">line 1728</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1729">line 1729</a>
         </div>
         
     </div>
@@ -14427,6 +14459,45 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>returnDocument</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'before'</span>
+|
+
+<span class="param-type">'after'</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    'before'
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>When set to <code>'after'</code>, returns the updated document rather than the original. The default is <code>'before'</code>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>returnOriginal</code></td>
             
             
@@ -14456,7 +14527,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>When false, returns the updated document rather than the original. The default is true.</p></td>
+                <p><strong>Deprecated</strong> Use <code>options.returnDocument</code> instead.</p></td>
         </tr>
 	
 	
@@ -14747,7 +14818,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1769">line 1769</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1778">line 1778</a>
         </div>
         
     </div>
@@ -15172,6 +15243,45 @@ Promise if no callback passed
 	
         <tr>
             
+                <td class="name"><code>returnDocument</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">'before'</span>
+|
+
+<span class="param-type">'after'</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    'before'
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>When set to <code>'after'</code>, returns the updated document rather than the original. The default is <code>'before'</code>.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>returnOriginal</code></td>
             
             
@@ -15201,7 +15311,7 @@ Promise if no callback passed
                         
                     
                 
-                <p>When false, returns the updated document rather than the original. The default is true.</p></td>
+                <p><strong>Deprecated</strong> Use <code>options.returnDocument</code> instead.</p></td>
         </tr>
 	
 	
@@ -15492,7 +15602,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2034">line 2034</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2050">line 2050</a>
         </div>
         
     </div>
@@ -15911,7 +16021,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2061">line 2061</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2077">line 2077</a>
         </div>
         
     </div>
@@ -17053,12 +17163,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="initializeOrderedBulkOp">
             
-            initializeOrderedBulkOp<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            initializeOrderedBulkOp<span class="signature">(<span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2205">line 2205</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2220">line 2220</a>
         </div>
         
     </div>
@@ -17365,34 +17475,6 @@ Promise if no callback passed
         </tr>
 	
 	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The command result callback</p></td>
-        </tr>
-	
-	
 	</tbody>
 </table>
     
@@ -17452,7 +17534,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2180">line 2180</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2196">line 2196</a>
         </div>
         
     </div>
@@ -19982,7 +20064,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2142">line 2142</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2158">line 2158</a>
         </div>
         
     </div>
@@ -20927,7 +21009,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1993">line 1993</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2009">line 2009</a>
         </div>
         
     </div>
@@ -25674,7 +25756,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1961">line 1961</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1977">line 1977</a>
         </div>
         
     </div>
@@ -27487,7 +27569,7 @@ ChangeStream instance.
             
             
             
-            <td class="description last"><p>Document returned from the <code>findAndModify</code> command. If no documents were found, <code>value</code> will be <code>null</code> by default (<code>returnOriginal: true</code>), even if a document was upserted; if <code>returnOriginal</code> was false, the upserted document will be returned in that case.</p></td>
+            <td class="description last"><p>Document returned from the <code>findAndModify</code> command. If no documents were found, <code>value</code> will be <code>null</code> by default even if a document was upserted unless <code>returnDocument</code> is specified as <code>'after'</code>, in which case the upserted document will be returned.</p></td>
         </tr>
 	
 	
@@ -28416,7 +28498,7 @@ ChangeStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1974">line 1974</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1990">line 1990</a>
         </div>
         
     </div>
@@ -29557,7 +29639,7 @@ ChangeStream instance.
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Tue Apr 06 2021 15:06:07 GMT-0400 (Eastern Daylight Time)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue May 18 2021 17:57:57 GMT-0400 (Eastern Daylight Time)
                     </footer>
                 </div>
             </td>
