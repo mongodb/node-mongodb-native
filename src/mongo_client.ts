@@ -1,6 +1,6 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import type { ReadPreference, ReadPreferenceModeId } from './read_preference';
+import type { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { MongoError, AnyError } from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
@@ -14,11 +14,11 @@ import {
 } from './utils';
 import { connect, MONGO_CLIENT_EVENTS } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
-import type { Logger, LoggerLevelId } from './logger';
-import type { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
+import type { Logger, LoggerLevel } from './logger';
+import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
-import type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
+import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology, TopologyEvents } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { TagSet } from './sdam/server_description';
@@ -34,16 +34,16 @@ import type { Encrypter } from './encrypter';
 import { TypedEventEmitter } from './mongo_types';
 
 /** @public */
-export const ServerApiVersion = {
+export const ServerApiVersion = Object.freeze({
   v1: '1'
-};
+} as const);
 
 /** @public */
-export type ServerApiVersionId = typeof ServerApiVersion[keyof typeof ServerApiVersion];
+export type ServerApiVersion = typeof ServerApiVersion[keyof typeof ServerApiVersion];
 
 /** @public */
 export interface ServerApi {
-  version: string | ServerApiVersionId;
+  version: ServerApiVersion;
   strict?: boolean;
   deprecationErrors?: boolean;
 }
@@ -138,9 +138,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The level of isolation */
-  readConcernLevel?: ReadConcernLevelId;
+  readConcernLevel?: ReadConcernLevel;
   /** Specifies the read preferences for this connection */
-  readPreference?: ReadPreferenceModeId | ReadPreference;
+  readPreference?: ReadPreferenceMode | ReadPreference;
   /** Specifies, in seconds, how stale a secondary can be before the client stops using it for read operations. */
   maxStalenessSeconds?: number;
   /** Specifies the tags document as a comma-separated list of colon-separated key-value pairs.  */
@@ -150,7 +150,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specify the database name associated with the user’s credentials. */
   authSource?: string;
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
-  authMechanism?: AuthMechanismId;
+  authMechanism?: AuthMechanism;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
   authMechanismProperties?: {
     SERVICE_NAME?: string;
@@ -209,13 +209,13 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
   promiseLibrary?: any;
   /** The logging level */
-  loggerLevel?: LoggerLevelId;
+  loggerLevel?: LoggerLevel;
   /** Custom logger object */
   logger?: Logger;
   /** Enable command monitoring for this client */
   monitorCommands?: boolean;
   /** Server API version */
-  serverApi?: ServerApi | ServerApiVersionId;
+  serverApi?: ServerApi | ServerApiVersion;
   /**
    * Optionally enable client side auto encryption
    *

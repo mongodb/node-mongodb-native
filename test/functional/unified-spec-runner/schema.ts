@@ -1,6 +1,6 @@
 import type { Document } from '../../../src/bson';
-import type { ReadConcernLevelId } from '../../../src/read_concern';
-import type { ReadPreferenceModeId } from '../../../src/read_preference';
+import type { ReadConcernLevel } from '../../../src/read_concern';
+import type { ReadPreferenceMode } from '../../../src/read_preference';
 import type { TagSet } from '../../../src/sdam/server_description';
 import type { W } from '../../../src/write_concern';
 
@@ -23,12 +23,12 @@ export interface UnifiedSuite {
   tests: [Test, ...Test[]];
   _yamlAnchors?: Document;
 }
-export const TopologyType = {
+export const TopologyType = Object.freeze({
   single: 'single',
   replicaset: 'replicaset',
   sharded: 'sharded',
   shardedReplicaset: 'sharded-replicaset'
-} as const;
+} as const);
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
   maxServerVersion?: string;
@@ -89,10 +89,10 @@ export interface ServerApi {
 }
 export interface CollectionOrDatabaseOptions {
   readConcern?: {
-    level: ReadConcernLevelId;
+    level: ReadConcernLevel;
   };
   readPreference?: {
-    mode: ReadPreferenceModeId;
+    mode: ReadPreferenceMode;
     maxStalenessSeconds: number;
     tags: TagSet[];
     hedge: { enabled: boolean };

@@ -1,12 +1,15 @@
 import { MongoError } from './error';
 
 /** @public */
-export const ExplainVerbosity = {
+export const ExplainVerbosity = Object.freeze({
   queryPlanner: 'queryPlanner',
   queryPlannerExtended: 'queryPlannerExtended',
   executionStats: 'executionStats',
   allPlansExecution: 'allPlansExecution'
-} as const;
+} as const);
+
+/** @public */
+export type ExplainVerbosity = typeof ExplainVerbosity[keyof typeof ExplainVerbosity];
 
 /**
  * For backwards compatibility, true is interpreted as "allPlansExecution"
@@ -14,7 +17,7 @@ export const ExplainVerbosity = {
  * ignores the verbosity parameter and executes in "queryPlanner".
  * @public
  */
-export type ExplainVerbosityLike = keyof typeof ExplainVerbosity | boolean;
+export type ExplainVerbosityLike = ExplainVerbosity | boolean;
 
 /** @public */
 export interface ExplainOptions {
@@ -24,7 +27,7 @@ export interface ExplainOptions {
 
 /** @internal */
 export class Explain {
-  verbosity: keyof typeof ExplainVerbosity;
+  verbosity: ExplainVerbosity;
 
   constructor(verbosity: ExplainVerbosityLike) {
     if (typeof verbosity === 'boolean') {

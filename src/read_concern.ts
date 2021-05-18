@@ -1,19 +1,19 @@
 import type { Document } from './bson';
 
 /** @public */
-export const ReadConcernLevel = {
+export const ReadConcernLevel = Object.freeze({
   local: 'local',
   majority: 'majority',
   linearizable: 'linearizable',
   available: 'available',
   snapshot: 'snapshot'
-} as const;
+} as const);
 
 /** @public */
-export type ReadConcernLevelId = keyof typeof ReadConcernLevel;
+export type ReadConcernLevel = typeof ReadConcernLevel[keyof typeof ReadConcernLevel];
 
 /** @public */
-export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelId } | ReadConcernLevelId;
+export type ReadConcernLike = ReadConcern | { level: ReadConcernLevel } | ReadConcernLevel;
 
 /**
  * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
@@ -23,10 +23,10 @@ export type ReadConcernLike = ReadConcern | { level: ReadConcernLevelId } | Read
  * @see https://docs.mongodb.com/manual/reference/read-concern/index.html
  */
 export class ReadConcern {
-  level: ReadConcernLevelId | string;
+  level: ReadConcernLevel | string;
 
   /** Constructs a ReadConcern from the read concern level.*/
-  constructor(level: ReadConcernLevelId) {
+  constructor(level: ReadConcernLevel) {
     /**
      * A spec test exists that allows level to be any string.
      * "invalid readConcern with out stage"
@@ -43,7 +43,7 @@ export class ReadConcern {
    */
   static fromOptions(options?: {
     readConcern?: ReadConcernLike;
-    level?: ReadConcernLevelId;
+    level?: ReadConcernLevel;
   }): ReadConcern | undefined {
     if (options == null) {
       return;

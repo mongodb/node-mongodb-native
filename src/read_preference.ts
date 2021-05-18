@@ -3,19 +3,19 @@ import type { Document } from './bson';
 import type { ClientSession } from './sessions';
 
 /** @public */
-export type ReadPreferenceLike = ReadPreference | ReadPreferenceModeId;
+export type ReadPreferenceLike = ReadPreference | ReadPreferenceMode;
 
 /** @public */
-export const ReadPreferenceMode = {
+export const ReadPreferenceMode = Object.freeze({
   primary: 'primary',
   primaryPreferred: 'primaryPreferred',
   secondary: 'secondary',
   secondaryPreferred: 'secondaryPreferred',
   nearest: 'nearest'
-} as const;
+} as const);
 
 /** @public */
-export type ReadPreferenceModeId = keyof typeof ReadPreferenceMode;
+export type ReadPreferenceMode = typeof ReadPreferenceMode[keyof typeof ReadPreferenceMode];
 
 /** @public */
 export interface HedgeOptions {
@@ -36,8 +36,8 @@ export interface ReadPreferenceLikeOptions extends ReadPreferenceOptions {
   readPreference?:
     | ReadPreferenceLike
     | {
-        mode?: ReadPreferenceModeId;
-        preference?: ReadPreferenceModeId;
+        mode?: ReadPreferenceMode;
+        preference?: ReadPreferenceMode;
         tags?: TagSet[];
         maxStalenessSeconds?: number;
       };
@@ -58,7 +58,7 @@ export interface ReadPreferenceFromOptions extends ReadPreferenceLikeOptions {
  * @see https://docs.mongodb.com/manual/core/read-preference/
  */
 export class ReadPreference {
-  mode: ReadPreferenceModeId;
+  mode: ReadPreferenceMode;
   tags?: TagSet[];
   hedge?: HedgeOptions;
   maxStalenessSeconds?: number;
@@ -81,7 +81,7 @@ export class ReadPreference {
    * @param tags - A tag set used to target reads to members with the specified tag(s). tagSet is not available if using read preference mode primary.
    * @param options - Additional read preference options
    */
-  constructor(mode: ReadPreferenceModeId, tags?: TagSet[], options?: ReadPreferenceOptions) {
+  constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
       throw new TypeError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
@@ -127,12 +127,12 @@ export class ReadPreference {
   }
 
   // Support the deprecated `preference` property introduced in the porcelain layer
-  get preference(): ReadPreferenceModeId {
+  get preference(): ReadPreferenceMode {
     return this.mode;
   }
 
   static fromString(mode: string): ReadPreference {
-    return new ReadPreference(mode as ReadPreferenceModeId);
+    return new ReadPreference(mode as ReadPreferenceMode);
   }
 
   /**
@@ -151,12 +151,12 @@ export class ReadPreference {
     }
 
     if (typeof readPreference === 'string') {
-      return new ReadPreference(readPreference as ReadPreferenceModeId, readPreferenceTags);
+      return new ReadPreference(readPreference as ReadPreferenceMode, readPreferenceTags);
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
       const mode = readPreference.mode || readPreference.preference;
       if (mode && typeof mode === 'string') {
         return new ReadPreference(
-          mode as ReadPreferenceModeId,
+          mode as ReadPreferenceMode,
           readPreference.tags ?? readPreferenceTags,
           {
             maxStalenessSeconds: readPreference.maxStalenessSeconds,
@@ -181,11 +181,11 @@ export class ReadPreference {
     const r = options.readPreference;
 
     if (typeof r === 'string') {
-      options.readPreference = new ReadPreference(r as ReadPreferenceModeId);
+      options.readPreference = new ReadPreference(r as ReadPreferenceMode);
     } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
       const mode = r.mode || r.preference;
       if (mode && typeof mode === 'string') {
-        options.readPreference = new ReadPreference(mode as ReadPreferenceModeId, r.tags, {
+        options.readPreference = new ReadPreference(mode as ReadPreferenceMode, r.tags, {
           maxStalenessSeconds: r.maxStalenessSeconds
         });
       }
@@ -211,7 +211,7 @@ export class ReadPreference {
       null
     ]);
 
-    return VALID_MODES.has(mode as ReadPreferenceModeId);
+    return VALID_MODES.has(mode as ReadPreferenceMode);
   }
 
   /**

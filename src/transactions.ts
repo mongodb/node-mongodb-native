@@ -17,9 +17,9 @@ export const TxnState = Object.freeze({
 } as const);
 
 /** @internal */
-export type TxnStateId = typeof TxnState[keyof typeof TxnState];
+export type TxnState = typeof TxnState[keyof typeof TxnState];
 
-const stateMachine: { [state in TxnStateId]: TxnStateId[] } = {
+const stateMachine: { [state in TxnState]: TxnState[] } = {
   [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],
   [TxnState.STARTING_TRANSACTION]: [
     TxnState.TRANSACTION_IN_PROGRESS,
@@ -66,7 +66,7 @@ export interface TransactionOptions extends CommandOperationOptions {
  */
 export class Transaction {
   /** @internal */
-  state: TxnStateId;
+  state: TxnState;
   options: TransactionOptions;
   _pinnedServer?: Server;
   _recoveryToken?: Document;
@@ -125,7 +125,7 @@ export class Transaction {
    * @returns Whether this session is presently in a transaction
    */
   get isActive(): boolean {
-    const activeStates: TxnStateId[] = [
+    const activeStates: TxnState[] = [
       TxnState.STARTING_TRANSACTION,
       TxnState.TRANSACTION_IN_PROGRESS
     ];
@@ -137,7 +137,7 @@ export class Transaction {
    * @internal
    * @param nextState - The new state to transition to
    */
-  transition(nextState: TxnStateId): void {
+  transition(nextState: TxnState): void {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.includes(nextState)) {
       this.state = nextState;

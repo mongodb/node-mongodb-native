@@ -8,7 +8,7 @@ const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
-const { MongoClient, MongoParseError } = require('../../src');
+const { MongoClient, MongoParseError, ServerApiVersion } = require('../../src');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -122,6 +122,7 @@ describe('MongoOptions', function () {
     serializeFunctions: true,
     serverSelectionTimeoutMS: 3,
     servername: 'some tls option',
+    serverApi: { version: '1' },
     socketTimeoutMS: 3,
     ssl: true,
     sslPass: 'pass',
@@ -368,5 +369,72 @@ describe('MongoOptions', function () {
     const optionsUndefined = parseOptions('mongodb://localhost/');
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
+  });
+
+  describe('serverApi', function () {
+    it('is supported as a client option when it is a valid ServerApiVersion string', function () {
+      const validVersions = Object.values(ServerApiVersion);
+      expect(validVersions.length).to.be.at.least(1);
+      for (const version of validVersions) {
+        const result = parseOptions('mongodb://localhost/', {
+          serverApi: version
+        });
+        expect(result).to.have.property('serverApi').deep.equal({ version });
+      }
+    });
+
+    it('is supported as a client option when it is an object with a valid version property', function () {
+      const validVersions = Object.values(ServerApiVersion);
+      expect(validVersions.length).to.be.at.least(1);
+      for (const version of validVersions) {
+        const result = parseOptions('mongodb://localhost/', {
+          serverApi: { version }
+        });
+        expect(result).to.have.property('serverApi').deep.equal({ version });
+      }
+    });
+
+    it('is not supported as a client option when it is an invalid string', function () {
+      expect(() =>
+        parseOptions('mongodb://localhost/', {
+          serverApi: 'bad'
+        })
+      ).to.throw(/^Invalid server API version=bad;/);
+    });
+
+    it('is not supported as a client option when it is a number', function () {
+      expect(() =>
+        parseOptions('mongodb://localhost/', {
+          serverApi: 1
+        })
+      ).to.throw(/^Invalid `serverApi` property;/);
+    });
+
+    it('is not supported as a client option when it is an object without a specified version', function () {
+      expect(() =>
+        parseOptions('mongodb://localhost/', {
+          serverApi: {}
+        })
+      ).to.throw(/^Invalid `serverApi` property;/);
+    });
+
+    it('is not supported as a client option when it is an object with an invalid specified version', function () {
+      expect(() =>
+        parseOptions('mongodb://localhost/', {
+          serverApi: { version: 1 }
+        })
+      ).to.throw(/^Invalid server API version=1;/);
+      expect(() =>
+        parseOptions('mongodb://localhost/', {
+          serverApi: { version: 'bad' }
+        })
+      ).to.throw(/^Invalid server API version=bad;/);
+    });
+
+    it('is not supported as a URI option even when it is a valid ServerApiVersion string', function () {
+      expect(() => parseOptions('mongodb://localhost/?serverApi=1')).to.throw(
+        'URI cannot contain `serverApi`, it can only be passed to the client'
+      );
+    });
   });
 });

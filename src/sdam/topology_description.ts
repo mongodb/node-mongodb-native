@@ -1,6 +1,6 @@
 import { ServerDescription } from './server_description';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { TopologyType, ServerType, TopologyTypeId, ServerTypeId } from './common';
+import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
 
@@ -10,9 +10,9 @@ const MAX_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_SERVER_VERSION
 const MIN_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_WIRE_VERSION;
 const MAX_SUPPORTED_WIRE_VERSION = WIRE_CONSTANTS.MAX_SUPPORTED_WIRE_VERSION;
 
-const MONGOS_OR_UNKNOWN = new Set<ServerTypeId>([ServerType.Mongos, ServerType.Unknown]);
-const MONGOS_OR_STANDALONE = new Set<ServerTypeId>([ServerType.Mongos, ServerType.Standalone]);
-const NON_PRIMARY_RS_MEMBERS = new Set<ServerTypeId>([
+const MONGOS_OR_UNKNOWN = new Set<ServerType>([ServerType.Mongos, ServerType.Unknown]);
+const MONGOS_OR_STANDALONE = new Set<ServerType>([ServerType.Mongos, ServerType.Standalone]);
+const NON_PRIMARY_RS_MEMBERS = new Set<ServerType>([
   ServerType.RSSecondary,
   ServerType.RSArbiter,
   ServerType.RSOther
@@ -29,7 +29,7 @@ export interface TopologyDescriptionOptions {
  * @public
  */
 export class TopologyDescription {
-  type: TopologyTypeId;
+  type: TopologyType;
   setName?: string;
   maxSetVersion?: number;
   maxElectionId?: ObjectId;
@@ -46,7 +46,7 @@ export class TopologyDescription {
    * Create a TopologyDescription
    */
   constructor(
-    topologyType: TopologyTypeId,
+    topologyType: TopologyType,
     serverDescriptions?: Map<string, ServerDescription>,
     setName?: string,
     maxSetVersion?: number,
@@ -314,7 +314,7 @@ export class TopologyDescription {
   }
 }
 
-function topologyTypeForServerType(serverType: ServerTypeId): TopologyTypeId {
+function topologyTypeForServerType(serverType: ServerType): TopologyType {
   switch (serverType) {
     case ServerType.Standalone:
       return TopologyType.Single;
@@ -357,7 +357,7 @@ function updateRsFromPrimary(
   setName?: string,
   maxSetVersion?: number,
   maxElectionId?: ObjectId
-): [TopologyTypeId, string?, number?, ObjectId?] {
+): [TopologyType, string?, number?, ObjectId?] {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
@@ -425,7 +425,7 @@ function updateRsWithPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
   setName?: string
-): TopologyTypeId {
+): TopologyType {
   if (setName == null) {
     throw new TypeError('setName is required');
   }
@@ -444,7 +444,7 @@ function updateRsNoPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
   setName?: string
-): [TopologyTypeId, string?] {
+): [TopologyType, string?] {
   const topologyType = TopologyType.ReplicaSetNoPrimary;
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
@@ -465,7 +465,7 @@ function updateRsNoPrimaryFromMember(
   return [topologyType, setName];
 }
 
-function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): TopologyTypeId {
+function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): TopologyType {
   for (const serverDescription of serverDescriptions.values()) {
     if (serverDescription.type === ServerType.RSPrimary) {
       return TopologyType.ReplicaSetWithPrimary;

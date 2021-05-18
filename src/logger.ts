@@ -4,7 +4,7 @@ import { MongoError } from './error';
 // Filters for classes
 const classFilters: any = {};
 let filteredClasses: any = {};
-let level: LoggerLevelId;
+let level: LoggerLevel;
 
 // Save the process id
 const pid = process.pid;
@@ -26,7 +26,7 @@ export const LoggerLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type LoggerLevelId = typeof LoggerLevel[keyof typeof LoggerLevel];
+export type LoggerLevel = typeof LoggerLevel[keyof typeof LoggerLevel];
 
 /** @public */
 export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
@@ -34,7 +34,7 @@ export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 /** @public */
 export interface LoggerOptions {
   logger?: LoggerFunction;
-  loggerLevel?: LoggerLevelId;
+  loggerLevel?: LoggerLevel;
 }
 
 /**
@@ -246,7 +246,7 @@ export class Logger {
    *
    * @param newLevel - Set current log level (debug, warn, info, error)
    */
-  static setLevel(newLevel: LoggerLevelId): void {
+  static setLevel(newLevel: LoggerLevel): void {
     if (
       newLevel !== LoggerLevel.INFO &&
       newLevel !== LoggerLevel.ERROR &&

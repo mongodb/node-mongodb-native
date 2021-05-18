@@ -133,7 +133,6 @@ export type {
   OperationTime,
   ResumeOptions
 } from './change_stream';
-export type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
@@ -179,7 +178,7 @@ export type {
   CursorFlag
 } from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
-export type { AutoEncryptionOptions, AutoEncryptionLoggerLevelId, AutoEncrypter } from './deps';
+export type { AutoEncryptionOptions, AutoEncrypter } from './deps';
 export type { AnyError, ErrorDescription } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
@@ -199,7 +198,7 @@ export type {
   GridFSBucketWriteStream,
   GridFSChunk
 } from './gridfs-stream/upload';
-export type { LoggerOptions, LoggerFunction, LoggerLevelId } from './logger';
+export type { LoggerOptions, LoggerFunction } from './logger';
 export type {
   MongoClientEvents,
   MongoClientPrivate,
@@ -210,7 +209,6 @@ export type {
   DriverInfo,
   MongoOptions,
   ServerApi,
-  ServerApiVersionId,
   SupportedNodeConnectionOptions,
   SupportedTLSConnectionOptions,
   SupportedTLSSocketOptions,
@@ -273,7 +271,7 @@ export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
-export type { ProfilingLevelId, SetProfilingLevelOptions } from './operations/set_profiling_level';
+export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
 export type {
   UpdateResult,
@@ -282,16 +280,15 @@ export type {
   UpdateStatement
 } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type { ReadConcern, ReadConcernLike, ReadConcernLevelId } from './read_concern';
+export type { ReadConcern, ReadConcernLike } from './read_concern';
 export type {
   ReadPreferenceLike,
-  ReadPreferenceModeId,
   ReadPreferenceOptions,
   ReadPreferenceLikeOptions,
   ReadPreferenceFromOptions,
   HedgeOptions
 } from './read_preference';
-export type { ClusterTime, ServerTypeId, TimerQueue, TopologyTypeId } from './sdam/common';
+export type { ClusterTime, TimerQueue } from './sdam/common';
 export type {
   Monitor,
   MonitorEvents,
@@ -330,7 +327,7 @@ export type {
   ServerSessionId,
   WithTransactionCallback
 } from './sessions';
-export type { TransactionOptions, Transaction, TxnState, TxnStateId } from './transactions';
+export type { TransactionOptions, Transaction, TxnState } from './transactions';
 export type {
   Callback,
   ClientMetadata,
@@ -344,13 +341,7 @@ export type {
 export type { WriteConcern, W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
-export type {
-  BulkOperationBase,
-  BulkOperationPrivate,
-  BatchTypeId,
-  FindOperators,
-  Batch
-} from './bulk/common';
+export type { BulkOperationBase, BulkOperationPrivate, FindOperators, Batch } from './bulk/common';
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type { Encrypter, EncrypterOptions } from './encrypter';

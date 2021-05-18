@@ -41,7 +41,7 @@ import { RenameOperation, RenameOptions } from './operations/rename';
 import {
   SetProfilingLevelOperation,
   SetProfilingLevelOptions,
-  ProfilingLevelId
+  ProfilingLevel
 } from './operations/set_profiling_level';
 import { executeOperation } from './operations/execute_operation';
 import type { IndexInformationOptions } from './operations/common_functions';
@@ -657,22 +657,22 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  setProfilingLevel(level: ProfilingLevelId): Promise<ProfilingLevelId>;
-  setProfilingLevel(level: ProfilingLevelId, callback: Callback<ProfilingLevelId>): void;
+  setProfilingLevel(level: ProfilingLevel): Promise<ProfilingLevel>;
+  setProfilingLevel(level: ProfilingLevel, callback: Callback<ProfilingLevel>): void;
   setProfilingLevel(
-    level: ProfilingLevelId,
+    level: ProfilingLevel,
     options: SetProfilingLevelOptions
-  ): Promise<ProfilingLevelId>;
+  ): Promise<ProfilingLevel>;
   setProfilingLevel(
-    level: ProfilingLevelId,
+    level: ProfilingLevel,
     options: SetProfilingLevelOptions,
-    callback: Callback<ProfilingLevelId>
+    callback: Callback<ProfilingLevel>
   ): void;
   setProfilingLevel(
-    level: ProfilingLevelId,
-    options?: SetProfilingLevelOptions | Callback<ProfilingLevelId>,
-    callback?: Callback<ProfilingLevelId>
-  ): Promise<ProfilingLevelId> | void {
+    level: ProfilingLevel,
+    options?: SetProfilingLevelOptions | Callback<ProfilingLevel>,
+    callback?: Callback<ProfilingLevel>
+  ): Promise<ProfilingLevel> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(

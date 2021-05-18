@@ -7,7 +7,7 @@ import { MongoDBAWS } from './mongodb_aws';
 import type { AuthProvider } from './auth_provider';
 
 /** @public */
-export const AuthMechanism = {
+export const AuthMechanism = Object.freeze({
   MONGODB_AWS: 'MONGODB-AWS',
   MONGODB_CR: 'MONGODB-CR',
   MONGODB_DEFAULT: 'DEFAULT',
@@ -16,12 +16,12 @@ export const AuthMechanism = {
   MONGODB_SCRAM_SHA1: 'SCRAM-SHA-1',
   MONGODB_SCRAM_SHA256: 'SCRAM-SHA-256',
   MONGODB_X509: 'MONGODB-X509'
-} as const;
+} as const);
 
 /** @public */
-export type AuthMechanismId = typeof AuthMechanism[keyof typeof AuthMechanism];
+export type AuthMechanism = typeof AuthMechanism[keyof typeof AuthMechanism];
 
-export const AUTH_PROVIDERS = new Map<AuthMechanismId | string, AuthProvider>([
+export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],

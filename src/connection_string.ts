@@ -2,8 +2,8 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import { URL, URLSearchParams } from 'url';
 import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
-import { ReadPreference, ReadPreferenceModeId } from './read_preference';
-import { ReadConcern, ReadConcernLevelId } from './read_concern';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
 import { MongoParseError } from './error';
 import {
@@ -23,11 +23,12 @@ import {
   MongoClientOptions,
   MongoOptions,
   PkFactory,
-  ServerApi
+  ServerApi,
+  ServerApiVersion
 } from './mongo_client';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
-import { Logger, LoggerLevelId } from './logger';
+import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
 
@@ -590,10 +591,24 @@ export const OPTIONS = {
   serverApi: {
     target: 'serverApi',
     transform({ values: [version] }): ServerApi {
-      if (typeof version === 'string') {
-        return { version };
+      const serverApiToValidate =
+        typeof version === 'string' ? ({ version } as ServerApi) : (version as ServerApi);
+      const versionToValidate = serverApiToValidate && serverApiToValidate.version;
+      if (!versionToValidate) {
+        throw new MongoParseError(
+          `Invalid \`serverApi\` property; must specify a version from the following enum: ["${Object.values(
+            ServerApiVersion
+          ).join('", "')}"]`
+        );
       }
-      return version as ServerApi;
+      if (!Object.values(ServerApiVersion).some(v => v === versionToValidate)) {
+        throw new MongoParseError(
+          `Invalid server API version=${versionToValidate}; must be in the following enum: ["${Object.values(
+            ServerApiVersion
+          ).join('", "')}"]`
+        );
+      }
+      return serverApiToValidate;
     }
   },
   checkKeys: {
@@ -728,7 +743,7 @@ export const OPTIONS = {
   loggerLevel: {
     target: 'logger',
     transform({ values: [value] }) {
-      return new Logger('MongoClient', { loggerLevel: value as LoggerLevelId });
+      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
     }
   },
   maxIdleTimeMS: {
@@ -818,7 +833,7 @@ export const OPTIONS = {
     transform({ values: [level], options }) {
       return ReadConcern.fromOptions({
         ...options.readConcern,
-        level: level as ReadConcernLevelId
+        level: level as ReadConcernLevel
       });
     }
   },
@@ -845,7 +860,7 @@ export const OPTIONS = {
           maxStalenessSeconds: options.readPreference?.maxStalenessSeconds
         };
         return new ReadPreference(
-          value as ReadPreferenceModeId,
+          value as ReadPreferenceMode,
           options.readPreference?.tags,
           rpOpts
         );

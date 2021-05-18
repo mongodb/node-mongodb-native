@@ -13,18 +13,18 @@ export const ProfilingLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type ProfilingLevelId = typeof ProfilingLevel[keyof typeof ProfilingLevel];
+export type ProfilingLevel = typeof ProfilingLevel[keyof typeof ProfilingLevel];
 
 /** @public */
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevelId> {
+export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
   options: SetProfilingLevelOptions;
-  level: ProfilingLevelId;
+  level: ProfilingLevel;
   profile: 0 | 1 | 2;
 
-  constructor(db: Db, level: ProfilingLevelId, options: SetProfilingLevelOptions) {
+  constructor(db: Db, level: ProfilingLevel, options: SetProfilingLevelOptions) {
     super(db, options);
     this.options = options;
     switch (level) {
@@ -45,7 +45,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevelI
     this.level = level;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<ProfilingLevelId>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<ProfilingLevel>): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {
