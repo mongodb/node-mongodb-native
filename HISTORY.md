@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.4](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2021-05-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-1812:** replace returnOriginal with returnDocument option (#2803)
+* **NODE-3157:** update find and modify interfaces for 4.0 (#2799)
+* **NODE-2978:** remove deprecated bulk ops (#2794)
+
+### Features
+
+* **NODE-3115:** Add generic parameterization ([#2767](https://github.com/mongodb/node-mongodb-native/issues/2767)) ([4d12491](https://github.com/mongodb/node-mongodb-native/commit/4d12491a7ef12488bc9b4f0c5b8428d29d687132))
+* **NODE-3132:** Add TypedEventEmitter ([#2785](https://github.com/mongodb/node-mongodb-native/issues/2785)) ([f4d40a4](https://github.com/mongodb/node-mongodb-native/commit/f4d40a4c2bf1ace188e624f5c7d5852d5395e00a))
+
+
+### Bug Fixes
+
+* **NODE-2995:** Add shared metadata MongoClient ([#2772](https://github.com/mongodb/node-mongodb-native/issues/2772)) ([9073d54](https://github.com/mongodb/node-mongodb-native/commit/9073d54b7c924e48aa8c9b96503b4caf5370cdbe))
+* **NODE-3074:** update estimated document count for v1 api ([#2764](https://github.com/mongodb/node-mongodb-native/issues/2764)) ([146791c](https://github.com/mongodb/node-mongodb-native/commit/146791c86ff33e63d87d07076ec55598e8ad59e0))
+* **NODE-3109:** prevent servername from being an IP ([#2771](https://github.com/mongodb/node-mongodb-native/issues/2771)) ([27089be](https://github.com/mongodb/node-mongodb-native/commit/27089be7e1d2878b19f26ae3dbcf5307c690aa09))
+* **NODE-3166:** allowInvalidHostnames and allowInvalidCertificates flags are ignored ([#2784](https://github.com/mongodb/node-mongodb-native/issues/2784)) ([a769cf8](https://github.com/mongodb/node-mongodb-native/commit/a769cf810dab18ce17b4bc58d3a182383c72ee8d))
+* **NODE-3174:** Preserve sort key order for numeric string keys ([#2788](https://github.com/mongodb/node-mongodb-native/issues/2788)) ([440de41](https://github.com/mongodb/node-mongodb-native/commit/440de4112d41776671e0dd36b25169fe88dc0a1f))
+* **NODE-3176:** handle errors from MessageStream ([#2780](https://github.com/mongodb/node-mongodb-native/issues/2780)) ([76b110e](https://github.com/mongodb/node-mongodb-native/commit/76b110ee4613e41183ce849980ba473a388c3e36))
+* **NODE-3194:** Ignore undefined and null options in MongoClient constructor ([#2800](https://github.com/mongodb/node-mongodb-native/issues/2800)) ([8bb92f9](https://github.com/mongodb/node-mongodb-native/commit/8bb92f971f84eae7cedaa380be4bef34896f5c40))
+* **NODE-3197:** revert setImmediate in waitQueue ([#2802](https://github.com/mongodb/node-mongodb-native/issues/2802)) ([6c0dfef](https://github.com/mongodb/node-mongodb-native/commit/6c0dfef8e027feb1b1b263da32dc6f61e13c692d))
+* **NODE-3206:** Make distinct use any[] type instead of Document[] ([#2795](https://github.com/mongodb/node-mongodb-native/issues/2795)) ([b45e3b3](https://github.com/mongodb/node-mongodb-native/commit/b45e3b324acd1acb2e785c091f4a608bf2e561a8))
+* **sdam:** topology no longer causes close event ([#2792](https://github.com/mongodb/node-mongodb-native/issues/2792)) ([6cd982f](https://github.com/mongodb/node-mongodb-native/commit/6cd982f5be9a6e07faf9be426927068342951ab4))
+
+
+* **NODE-1812:** replace returnOriginal with returnDocument option ([#2803](https://github.com/mongodb/node-mongodb-native/issues/2803)) ([1cdc8a8](https://github.com/mongodb/node-mongodb-native/commit/1cdc8a8738d8c2425e0ff76751331636894256b8))
+* **NODE-2978:** remove deprecated bulk ops ([#2794](https://github.com/mongodb/node-mongodb-native/issues/2794)) ([c3a1839](https://github.com/mongodb/node-mongodb-native/commit/c3a183938289c32a067486db0df79259a18d0bb9))
+* **NODE-3157:** update find and modify interfaces for 4.0 ([#2799](https://github.com/mongodb/node-mongodb-native/issues/2799)) ([29512da](https://github.com/mongodb/node-mongodb-native/commit/29512daee9854bb9fa1ff7f220b850ce67ffa36a))
+
 ## [4.0.0-beta.3](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-04-06)
 
 
