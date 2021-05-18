@@ -14,8 +14,11 @@ import type { ExplainVerbosityLike } from '../explain';
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
 
+/** @internal */
 const kParent = Symbol('parent');
+/** @internal */
 const kPipeline = Symbol('pipeline');
+/** @internal */
 const kOptions = Symbol('options');
 
 /**

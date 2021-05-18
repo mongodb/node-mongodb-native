@@ -1,4 +1,5 @@
-import Denque = require('denque');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Denque = require('denque') as DenqueLike;
 import { MongoError, AnyError, isResumableError } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
@@ -26,10 +27,13 @@ import {
 } from './cursor/abstract_cursor';
 import type { ClientSession } from './sessions';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
-import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
+import { DenqueLike, InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
 
+/** @internal */
 const kResumeQueue = Symbol('resumeQueue');
+/** @internal */
 const kCursorStream = Symbol('cursorStream');
+/** @internal */
 const kClosed = Symbol('closed');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
@@ -197,7 +201,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   cursor?: ChangeStreamCursor<TSchema>;
   streamOptions?: CursorStreamOptions;
   /** @internal */
-  [kResumeQueue]: Denque;
+  [kResumeQueue]: DenqueLike;
   /** @internal */
   [kCursorStream]?: Readable;
   /** @internal */

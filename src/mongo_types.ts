@@ -178,3 +178,15 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 
 /** @public */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
+
+/** @internal */
+export type DenqueLike<T = any> = {
+  new (): DenqueLike<T>;
+  shift(): T | undefined;
+  push(item: T): void;
+  pop(): T;
+  peekFront(): T;
+  toArray(): T[];
+  clear(): void;
+  readonly length: number;
+};

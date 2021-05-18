@@ -1,4 +1,5 @@
-import Denque = require('denque');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Denque = require('denque') as DenqueLike;
 import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
@@ -17,16 +18,25 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './connection_pool_events';
-import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { CancellationToken, DenqueLike, TypedEventEmitter } from '../mongo_types';
 
+/** @internal */
 const kLogger = Symbol('logger');
+/** @internal */
 const kConnections = Symbol('connections');
+/** @internal */
 const kPermits = Symbol('permits');
+/** @internal */
 const kMinPoolSizeTimer = Symbol('minPoolSizeTimer');
+/** @internal */
 const kGeneration = Symbol('generation');
+/** @internal */
 const kConnectionCounter = Symbol('connectionCounter');
+/** @internal */
 const kCancellationToken = Symbol('cancellationToken');
+/** @internal */
 const kWaitQueue = Symbol('waitQueue');
+/** @internal */
 const kCancelled = Symbol('cancelled');
 
 /** @public */
@@ -55,21 +65,21 @@ export interface CloseOptions {
 
 /** @public */
 export type ConnectionPoolEvents = {
-  [ConnectionPool.CONNECTION_POOL_CREATED](event: ConnectionPoolCreatedEvent): void;
-  [ConnectionPool.CONNECTION_POOL_CLOSED](event: ConnectionPoolClosedEvent): void;
-  [ConnectionPool.CONNECTION_POOL_CLEARED](event: ConnectionPoolClearedEvent): void;
-  [ConnectionPool.CONNECTION_CREATED](event: ConnectionCreatedEvent): void;
-  [ConnectionPool.CONNECTION_READY](event: ConnectionReadyEvent): void;
-  [ConnectionPool.CONNECTION_CLOSED](event: ConnectionClosedEvent): void;
-  [ConnectionPool.CONNECTION_CHECK_OUT_STARTED](event: ConnectionCheckOutStartedEvent): void;
-  [ConnectionPool.CONNECTION_CHECK_OUT_FAILED](event: ConnectionCheckOutFailedEvent): void;
-  [ConnectionPool.CONNECTION_CHECKED_OUT](event: ConnectionCheckedOutEvent): void;
-  [ConnectionPool.CONNECTION_CHECKED_IN](event: ConnectionCheckedInEvent): void;
+  connectionPoolCreated(event: ConnectionPoolCreatedEvent): void;
+  connectionPoolClosed(event: ConnectionPoolClosedEvent): void;
+  connectionPoolCleared(event: ConnectionPoolClearedEvent): void;
+  connectionCreated(event: ConnectionCreatedEvent): void;
+  connectionReady(event: ConnectionReadyEvent): void;
+  connectionClosed(event: ConnectionClosedEvent): void;
+  connectionCheckOutStarted(event: ConnectionCheckOutStartedEvent): void;
+  connectionCheckOutFailed(event: ConnectionCheckOutFailedEvent): void;
+  connectionCheckedOut(event: ConnectionCheckedOutEvent): void;
+  connectionCheckedIn(event: ConnectionCheckedInEvent): void;
 } & Omit<ConnectionEvents, 'close' | 'message'>;
 
 /**
  * A pool of connections which dynamically resizes, and emit events related to pool activity
- * @public
+ * @internal
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
@@ -77,7 +87,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
-  [kConnections]: Denque<Connection>;
+  [kConnections]: DenqueLike<Connection>;
   /**
    * An integer expressing how many total connections are permitted
    * @internal
@@ -95,7 +105,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kWaitQueue]: Denque<WaitQueueMember>;
+  [kWaitQueue]: DenqueLike<WaitQueueMember>;
 
   /**
    * Emitted when the connection pool is created.
@@ -148,6 +158,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   static readonly CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
 
+  /** @internal */
   constructor(options: ConnectionPoolOptions) {
     super();
 
@@ -548,7 +559,7 @@ export const CMAP_EVENTS = [
 
 /**
  * A callback provided to `withConnection`
- * @public
+ * @internal
  *
  * @param error - An error instance representing the error during the execution.
  * @param connection - The managed connection which was checked out of the pool.

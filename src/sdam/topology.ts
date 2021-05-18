@@ -1,4 +1,5 @@
-import Denque = require('denque');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Denque = require('denque') as DenqueLike;
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
@@ -52,7 +53,7 @@ import { DestroyOptions, Connection, ConnectionEvents } from '../cmap/connection
 import type { MongoOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
-import { TypedEventEmitter } from '../mongo_types';
+import { DenqueLike, TypedEventEmitter } from '../mongo_types';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -83,10 +84,12 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
+/** @internal */
 const kCancelled = Symbol('cancelled');
+/** @internal */
 const kWaitQueue = Symbol('waitQueue');
 
-/** @public */
+/** @internal */
 export type ServerSelectionCallback = Callback<Server>;
 
 /** @internal */
@@ -140,6 +143,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** The name of the replica set to connect to */
   replicaSet?: string;
   srvHost?: string;
+  /** @internal */
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
@@ -163,31 +167,32 @@ export interface SelectServerOptions {
 
 /** @public */
 export type TopologyEvents = {
-  [Topology.CONNECT](topology: Topology): void;
-  [Topology.SERVER_OPENING](event: ServerOpeningEvent): void;
-  [Topology.SERVER_CLOSED](event: ServerClosedEvent): void;
-  [Topology.SERVER_DESCRIPTION_CHANGED](event: ServerDescriptionChangedEvent): void;
-  [Topology.TOPOLOGY_OPENING](event: TopologyOpeningEvent): void;
-  [Topology.TOPOLOGY_CLOSED](event: TopologyClosedEvent): void;
-  [Topology.TOPOLOGY_DESCRIPTION_CHANGED](event: TopologyDescriptionChangedEvent): void;
-  [Topology.ERROR](error: Error): void;
-  // TODO(NODE-3273) - remove error
-  [Topology.OPEN](error: undefined, topology: Topology): void;
-  [Topology.CLOSE](): void;
-  [Topology.TIMEOUT](): void;
+  /** Top level MongoClient doesn't emit this so it is marked: @internal */
+  connect(topology: Topology): void;
+  serverOpening(event: ServerOpeningEvent): void;
+  serverClosed(event: ServerClosedEvent): void;
+  serverDescriptionChanged(event: ServerDescriptionChangedEvent): void;
+  topologyClosed(event: TopologyOpeningEvent): void;
+  topologyOpening(event: TopologyClosedEvent): void;
+  topologyDescriptionChanged(event: TopologyDescriptionChangedEvent): void;
+  error(error: Error): void;
+  /** TODO(NODE-3273) - remove error @internal */
+  open(error: undefined, topology: Topology): void;
+  close(): void;
+  timeout(): void;
 } & Omit<ServerEvents, 'connect'> &
   ConnectionPoolEvents &
   ConnectionEvents &
   EventEmitterWithState;
 /**
  * A container of server instances representing a connection to a MongoDB topology.
- * @public
+ * @internal
  */
 export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   s: TopologyPrivate;
   /** @internal */
-  [kWaitQueue]: Denque<ServerSelectionRequest>;
+  [kWaitQueue]: DenqueLike<ServerSelectionRequest>;
   /** @internal */
   ismaster?: Document;
   /** @internal */
@@ -945,7 +950,7 @@ function srvPollingHandler(topology: Topology) {
   };
 }
 
-function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
+function drainWaitQueue(queue: DenqueLike<ServerSelectionRequest>, err?: AnyError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {

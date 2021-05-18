@@ -68,10 +68,12 @@ export class Transaction {
   /** @internal */
   state: TxnState;
   options: TransactionOptions;
+  /** @internal */
   _pinnedServer?: Server;
+  /** @internal */
   _recoveryToken?: Document;
 
-  /** Create a transaction */
+  /** Create a transaction @internal */
   constructor(options?: TransactionOptions) {
     options = options ?? {};
 
@@ -104,6 +106,7 @@ export class Transaction {
     this._recoveryToken = undefined;
   }
 
+  /** @internal */
   get server(): Server | undefined {
     return this._pinnedServer;
   }
@@ -152,12 +155,14 @@ export class Transaction {
     );
   }
 
+  /** @internal */
   pinServer(server: Server): void {
     if (this.isActive) {
       this._pinnedServer = server;
     }
   }
 
+  /** @internal */
   unpinServer(): void {
     this._pinnedServer = undefined;
   }

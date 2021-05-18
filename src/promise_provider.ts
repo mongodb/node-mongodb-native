@@ -1,3 +1,4 @@
+/** @internal */
 const kPromise = Symbol('promise');
 
 interface PromiseStore {

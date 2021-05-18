@@ -13,8 +13,11 @@ import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
+/** @internal */
 const kFilter = Symbol('filter');
+/** @internal */
 const kNumReturned = Symbol('numReturned');
+/** @internal */
 const kBuiltOptions = Symbol('builtOptions');
 
 /** @public Flags allowed for cursor */
@@ -36,6 +39,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   /** @internal */
   [kBuiltOptions]: FindOptions;
 
+  /** @internal */
   constructor(
     topology: Topology,
     namespace: MongoDBNamespace,

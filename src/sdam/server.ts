@@ -90,6 +90,7 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
+/** @internal */
 const kMonitor = Symbol('monitor');
 
 /** @public */
@@ -116,17 +117,18 @@ export interface ServerPrivate {
 
 /** @public */
 export type ServerEvents = {
-  [Server.SERVER_HEARTBEAT_STARTED](event: ServerHeartbeatStartedEvent): void;
-  [Server.SERVER_HEARTBEAT_SUCCEEDED](event: ServerHeartbeatSucceededEvent): void;
-  [Server.SERVER_HEARTBEAT_FAILED](event: ServerHeartbeatFailedEvent): void;
-  [Server.CONNECT](server: Server): void;
-  [Server.DESCRIPTION_RECEIVED](description: ServerDescription): void;
-  [Server.CLOSED](): void;
-  [Server.ENDED](): void;
+  serverHeartbeatStarted(event: ServerHeartbeatStartedEvent): void;
+  serverHeartbeatSucceeded(event: ServerHeartbeatSucceededEvent): void;
+  serverHeartbeatFailed(event: ServerHeartbeatFailedEvent): void;
+  /** Top level MongoClient doesn't emit this so it is marked: @internal */
+  connect(server: Server): void;
+  descriptionReceived(description: ServerDescription): void;
+  closed(): void;
+  ended(): void;
 } & ConnectionPoolEvents &
   EventEmitterWithState;
 
-/** @public */
+/** @internal */
 export class Server extends TypedEventEmitter<ServerEvents> {
   /** @internal */
   s: ServerPrivate;

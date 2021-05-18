@@ -29,6 +29,7 @@ export interface OperationOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
 }
 
+/** @internal */
 const kSession = Symbol('session');
 
 /**

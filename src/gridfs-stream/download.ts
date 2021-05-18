@@ -134,6 +134,7 @@ export class GridFSBucketReadStream extends Readable {
   /**
    * Reads from the cursor and pushes to the stream.
    * Private Impl, do not call directly
+   * @internal
    */
   _read(): void {
     if (this.destroyed) return;

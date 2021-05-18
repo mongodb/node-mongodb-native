@@ -1196,7 +1196,9 @@ export function deepCopy<T extends any>(value: T): T {
   return value;
 }
 
+/** @internal */
 const kBuffers = Symbol('buffers');
+/** @internal */
 const kLength = Symbol('length');
 
 /**

@@ -5,6 +5,7 @@ import type { TopologyDescription } from './sdam/topology_description';
 /** @public */
 export type AnyError = MongoError | Error;
 
+/** @internal */
 const kErrorLabels = Symbol('errorLabels');
 
 /** @internal MongoDB Error Codes */
@@ -72,6 +73,7 @@ export interface ErrorDescription {
  * @category Error
  */
 export class MongoError extends Error {
+  /** @internal */
   [kErrorLabels]: Set<string>;
   code?: number;
   codeName?: string;
@@ -148,6 +150,7 @@ export class MongoError extends Error {
   }
 }
 
+/** @internal */
 const kBeforeHandshake = Symbol('beforeHandshake');
 export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
   return err[kBeforeHandshake] === true;
@@ -159,6 +162,7 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
  * @category Error
  */
 export class MongoNetworkError extends MongoError {
+  /** @internal */
   [kBeforeHandshake]?: boolean;
 
   constructor(message: string | Error, options?: { beforeHandshake?: boolean }) {

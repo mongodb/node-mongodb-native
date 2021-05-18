@@ -1,0 +1,12 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint",
+        "autofix"
+    ],
+    "rules": {
+        "autofix/no-unused-vars": "error",
+        "autofix/sort-imports": "error",
+        "no-duplicate-imports": "error"
+    }
+}

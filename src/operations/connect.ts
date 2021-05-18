@@ -74,6 +74,8 @@ function createTopology(
 
   // TODO(NODE-3273) - remove error
   topology.once(Topology.OPEN, (error, topology) =>
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     mongoClient.emit(Topology.OPEN, error, topology)
   );
 

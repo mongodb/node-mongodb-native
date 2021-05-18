@@ -53,7 +53,7 @@ export interface GridFSBucketPrivate {
 
 /** @public */
 export type GridFSBucketEvents = {
-  [GridFSBucket.INDEX](): void;
+  index(): void;
 };
 
 /**
