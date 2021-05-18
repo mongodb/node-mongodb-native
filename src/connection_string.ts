@@ -596,16 +596,16 @@ export const OPTIONS = {
       const versionToValidate = serverApiToValidate && serverApiToValidate.version;
       if (!versionToValidate) {
         throw new MongoParseError(
-          `Invalid \`serverApi\` property; must specify a version as one of the following strings: "${Object.values(
+          `Invalid \`serverApi\` property; must specify a version from the following enum: ["${Object.values(
             ServerApiVersion
-          ).join('", "')}"`
+          ).join('", "')}"]`
         );
       }
       if (!Object.values(ServerApiVersion).some(v => v === versionToValidate)) {
         throw new MongoParseError(
-          `Invalid server API version=${versionToValidate}; must be one of the following strings: "${Object.values(
+          `Invalid server API version=${versionToValidate}; must be in the following enum: ["${Object.values(
             ServerApiVersion
-          ).join('", "')}"`
+          ).join('", "')}"]`
         );
       }
       return serverApiToValidate;
