@@ -478,6 +478,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /**
+   * Check if MongoClient is connected
+   */
+  isConnected(): boolean {
+    return !!this.topology?.isConnected();
+  }
+
+  /**
    * Connect to MongoDB using a url
    *
    * @remarks

@@ -135,9 +135,15 @@ describe('Connection - functional', function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
+      expect(client.isConnected()).to.be.false;
+
       client.connect(
         connectionTester(configuration, 'testConnectNoOptions', function (client) {
-          client.close(done);
+          expect(client.isConnected()).to.be.true;
+          client.close(() => {
+            expect(client.isConnected()).to.be.false;
+            done();
+          });
         })
       );
     }
