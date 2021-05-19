@@ -829,6 +829,7 @@ interface StateTransitionFunction {
 
 /** @public */
 export type EventEmitterWithState = {
+  /** @internal */
   stateChanged(previous: string, current: string): void;
 };
 

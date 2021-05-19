@@ -365,12 +365,12 @@ function makeTopologyVersion(tv: TopologyVersion) {
   };
 }
 
-/** @public */
+/** @internal */
 export interface RTTPingerOptions extends ConnectionOptions {
   heartbeatFrequencyMS: number;
 }
 
-/** @public */
+/** @internal */
 export class RTTPinger {
   /** @internal */
   [kConnection]?: Connection;
