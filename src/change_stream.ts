@@ -46,11 +46,10 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-const NO_RESUME_TOKEN_ERROR = new MongoError(
-  'A change stream document has been received that lacks a resume token (_id).'
-);
-const NO_CURSOR_ERROR = new MongoError('ChangeStream has no cursor');
-const CHANGESTREAM_CLOSED_ERROR = new MongoError('ChangeStream is closed');
+const NO_RESUME_TOKEN_ERROR =
+  'A change stream document has been received that lacks a resume token (_id).';
+const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
+const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /** @public */
 export interface ResumeOptions {
@@ -651,17 +650,17 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
-    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    if (callback) callback(new MongoError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
-    return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+    return closeWithError(changeStream, new MongoError(CHANGESTREAM_CLOSED_ERROR), callback);
   }
 
   if (change && !change._id) {
-    return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+    return closeWithError(changeStream, new MongoError(NO_RESUME_TOKEN_ERROR), callback);
   }
 
   // cache the resume token
@@ -685,7 +684,7 @@ function processError<TSchema>(
 
   // If the change stream has been closed explicitly, do not process error.
   if (changeStream[kClosed]) {
-    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    if (callback) callback(new MongoError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -745,7 +744,7 @@ function processError<TSchema>(
  */
 function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
-    callback(CHANGESTREAM_CLOSED_ERROR);
+    callback(new MongoError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
