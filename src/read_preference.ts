@@ -1,6 +1,7 @@
 import type { TagSet } from './sdam/server_description';
 import type { Document } from './bson';
 import type { ClientSession } from './sessions';
+import { MongoDriverError } from './error';
 
 /** @public */
 export type ReadPreferenceLike = ReadPreference | ReadPreferenceMode;
@@ -83,13 +84,13 @@ export class ReadPreference {
    */
   constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
-      throw new TypeError(`Invalid read preference mode ${JSON.stringify(mode)}`);
+      throw new MongoDriverError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
     if (options === undefined && typeof tags === 'object' && !Array.isArray(tags)) {
       options = tags;
       tags = undefined;
     } else if (tags && !Array.isArray(tags)) {
-      throw new TypeError('ReadPreference tags must be an array');
+      throw new MongoDriverError('ReadPreference tags must be an array');
     }
 
     this.mode = mode;
@@ -101,7 +102,7 @@ export class ReadPreference {
     options = options ?? {};
     if (options.maxStalenessSeconds != null) {
       if (options.maxStalenessSeconds <= 0) {
-        throw new TypeError('maxStalenessSeconds must be a positive integer');
+        throw new MongoDriverError('maxStalenessSeconds must be a positive integer');
       }
 
       this.maxStalenessSeconds = options.maxStalenessSeconds;
@@ -113,15 +114,17 @@ export class ReadPreference {
 
     if (this.mode === ReadPreference.PRIMARY) {
       if (this.tags && Array.isArray(this.tags) && this.tags.length > 0) {
-        throw new TypeError('Primary read preference cannot be combined with tags');
+        throw new MongoDriverError('Primary read preference cannot be combined with tags');
       }
 
       if (this.maxStalenessSeconds) {
-        throw new TypeError('Primary read preference cannot be combined with maxStalenessSeconds');
+        throw new MongoDriverError(
+          'Primary read preference cannot be combined with maxStalenessSeconds'
+        );
       }
 
       if (this.hedge) {
-        throw new TypeError('Primary read preference cannot be combined with hedge');
+        throw new MongoDriverError('Primary read preference cannot be combined with hedge');
       }
     }
   }
@@ -190,7 +193,7 @@ export class ReadPreference {
         });
       }
     } else if (!(r instanceof ReadPreference)) {
-      throw new TypeError('Invalid read preference: ' + r);
+      throw new MongoDriverError('Invalid read preference: ' + r);
     }
 
     return options;

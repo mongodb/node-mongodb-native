@@ -1,4 +1,4 @@
-import { MongoError } from '../error';
+import { MongoDriverError, MongoServerError } from '../error';
 import { defineAspects, Aspect, AbstractOperation } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
@@ -69,8 +69,8 @@ export class InsertOneOperation extends InsertOperation {
   execute(server: Server, session: ClientSession, callback: Callback<InsertOneResult>): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoError(res));
-      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (res.code) return callback(new MongoServerError(res));
+      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
       callback(undefined, {
         acknowledged: this.writeConcern?.w !== 0 ?? true,
@@ -100,7 +100,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     super(options);
 
     if (!Array.isArray(docs)) {
-      throw new TypeError('docs parameter must be an array of documents');
+      throw new MongoDriverError('docs parameter must be an array of documents');
     }
 
     this.options = options;

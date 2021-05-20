@@ -6,7 +6,7 @@ import {
   normalizeHintField,
   decorateWithExplain
 } from '../utils';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -84,14 +84,14 @@ export class FindOperation extends CommandOperation<Document> {
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
-      throw new MongoError('Query filter must be a plain object or ObjectId');
+      throw new MongoDriverError('Query filter must be a plain object or ObjectId');
     }
 
     // If the filter is a buffer, validate that is a valid BSON document
     if (Buffer.isBuffer(filter)) {
       const objectSize = filter[0] | (filter[1] << 8) | (filter[2] << 16) | (filter[3] << 24);
       if (objectSize !== filter.length) {
-        throw new TypeError(
+        throw new MongoDriverError(
           `query filter raw message size does not match message header size [${filter.length}] != [${objectSize}]`
         );
       }
@@ -107,13 +107,13 @@ export class FindOperation extends CommandOperation<Document> {
     const serverWireVersion = maxWireVersion(server);
     const options = this.options;
     if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
-      callback(new MongoError('The `allowDiskUse` option is not supported on MongoDB < 3.2'));
+      callback(new MongoDriverError('The `allowDiskUse` option is not supported on MongoDB < 3.2'));
       return;
     }
 
     if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
-        new MongoError(
+        new MongoDriverError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
         )
       );
@@ -124,7 +124,7 @@ export class FindOperation extends CommandOperation<Document> {
     if (serverWireVersion < 4) {
       if (this.readConcern && this.readConcern.level !== 'local') {
         callback(
-          new MongoError(
+          new MongoDriverError(
             `server find command does not support a readConcern level of ${this.readConcern.level}`
           )
         );

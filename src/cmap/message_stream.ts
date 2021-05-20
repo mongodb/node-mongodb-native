@@ -1,6 +1,6 @@
 import { Duplex, DuplexOptions } from 'stream';
 import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
-import { MongoError, MongoParseError } from '../error';
+import { MongoDriverError, MongoParseError } from '../error';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
   compress,
@@ -191,7 +191,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
     if (messageBody.length !== messageHeader.length) {
       callback(
-        new MongoError(
+        new MongoDriverError(
           'Decompressing a compressed message from the server failed. The message is corrupt.'
         )
       );

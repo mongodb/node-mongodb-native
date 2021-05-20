@@ -1,5 +1,5 @@
 import { format } from 'util';
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 
 // Filters for classes
 const classFilters: any = {};
@@ -222,7 +222,7 @@ export class Logger {
    */
   static setCurrentLogger(logger: LoggerFunction): void {
     if (typeof logger !== 'function') {
-      throw new MongoError('current logger must be a function');
+      throw new MongoDriverError('current logger must be a function');
     }
 
     currentLogger = logger;
@@ -253,7 +253,7 @@ export class Logger {
       newLevel !== LoggerLevel.DEBUG &&
       newLevel !== LoggerLevel.WARN
     ) {
-      throw new TypeError(`${newLevel} is an illegal logging level`);
+      throw new MongoDriverError(`${newLevel} is an illegal logging level`);
     }
 
     level = newLevel;

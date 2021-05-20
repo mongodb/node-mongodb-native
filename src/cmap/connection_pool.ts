@@ -3,7 +3,7 @@ import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, makeCounter, Callback } from '../utils';
-import { MongoError } from '../error';
+import { MongoDriverError, MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
   ConnectionPoolCreatedEvent,
@@ -174,7 +174,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     });
 
     if (this.options.minPoolSize > this.options.maxPoolSize) {
-      throw new TypeError(
+      throw new MongoDriverError(
         'Connection pool minimum size must not be greater than maximum pool size'
       );
     }

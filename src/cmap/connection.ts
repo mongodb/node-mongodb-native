@@ -18,9 +18,11 @@ import {
 } from '../utils';
 import {
   AnyError,
+  MongoDriverError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoServerError,
   MongoWriteConcernError
 } from '../error';
 import {
@@ -339,7 +341,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (typeof ns.db === 'undefined' || typeof ns === 'string') {
-      throw new TypeError('ns cannot be a string');
+      throw new MongoDriverError('ns cannot be a string');
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -516,7 +518,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
     const wireVersion = maxWireVersion(this);
     if (!cursorId) {
-      callback(new MongoError('Invalid internal cursor state, no known cursor id'));
+      callback(new MongoDriverError('Invalid internal cursor state, no known cursor id'));
       return;
     }
 
@@ -570,7 +572,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
-      throw new TypeError('Invalid list of cursor ids provided: ' + cursorIds);
+      throw new MongoDriverError('Invalid list of cursor ids provided: ' + cursorIds);
     }
 
     if (maxWireVersion(this) < 4) {
@@ -600,7 +602,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (!Array.isArray(response.documents) || response.documents.length === 0) {
           return callback(
-            new MongoError(`invalid killCursors result returned for cursor id ${cursorIds[0]}`)
+            new MongoDriverError(
+              `invalid killCursors result returned for cursor id ${cursorIds[0]}`
+            )
           );
         }
 
@@ -631,7 +635,7 @@ export class CryptoConnection extends Connection {
   command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions, callback: Callback): void {
     const autoEncrypter = this[kAutoEncrypter];
     if (!autoEncrypter) {
-      return callback(new MongoError('No AutoEncrypter available for encryption'));
+      return callback(new MongoDriverError('No AutoEncrypter available for encryption'));
     }
 
     const serverWireVersion = maxWireVersion(this);
@@ -641,7 +645,7 @@ export class CryptoConnection extends Connection {
     }
 
     if (serverWireVersion < 8) {
-      callback(new MongoError('Auto-encryption requires a minimum MongoDB version of 4.2'));
+      callback(new MongoDriverError('Auto-encryption requires a minimum MongoDB version of 4.2'));
       return;
     }
 
@@ -725,13 +729,13 @@ function messageHandler(conn: Connection) {
         }
 
         if (document.ok === 0 || document.$err || document.errmsg || document.code) {
-          callback(new MongoError(document));
+          callback(new MongoServerError(document));
           return;
         }
       } else {
         // Pre 3.2 support
         if (document.ok === 0 || document.$err || document.errmsg) {
-          callback(new MongoError(document));
+          callback(new MongoServerError(document));
           return;
         }
       }

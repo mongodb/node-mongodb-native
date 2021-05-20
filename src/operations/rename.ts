@@ -4,7 +4,7 @@ import { defineAspects, Aspect } from './operation';
 import type { Server } from '../sdam/server';
 import { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
-import { MongoError } from '../error';
+import { MongoError, MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
 
 /** @public */
@@ -44,7 +44,7 @@ export class RenameOperation extends RunAdminCommandOperation {
       if (err) return callback(err);
       // We have an error
       if (doc.errmsg) {
-        return callback(new MongoError(doc));
+        return callback(new MongoServerError(doc));
       }
 
       try {

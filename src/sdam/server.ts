@@ -33,7 +33,8 @@ import {
   isSDAMUnrecoverableError,
   isRetryableWriteError,
   isNodeShuttingDownError,
-  isNetworkErrorBeforeHandshake
+  isNetworkErrorBeforeHandshake,
+  MongoDriverError
 } from '../error';
 import {
   Connection,
@@ -288,15 +289,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (callback == null) {
-      throw new TypeError('callback must be provided');
+      throw new MongoDriverError('callback must be provided');
     }
 
     if (ns.db == null || typeof ns === 'string') {
-      throw new TypeError('ns must not be a string');
+      throw new MongoDriverError('ns must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
@@ -316,7 +317,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
+      callback(new MongoDriverError(`server ${this.name} does not support collation`));
       return;
     }
 
@@ -341,7 +342,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
@@ -366,7 +367,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     callback: Callback<Document>
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
@@ -397,7 +398,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
-        callback(new MongoError('server is closed'));
+        callback(new MongoDriverError('server is closed'));
       }
 
       return;

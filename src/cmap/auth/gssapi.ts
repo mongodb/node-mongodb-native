@@ -1,5 +1,5 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoError } from '../../error';
+import { MongoDriverError, MongoError } from '../../error';
 import { Kerberos, KerberosClient } from '../../deps';
 import { Callback, ns } from '../../utils';
 import type { Document } from '../../bson';
@@ -13,7 +13,7 @@ import * as dns from 'dns';
 export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
-    if (credentials == null) return callback(new MongoError('credentials required'));
+    if (credentials == null) return callback(new MongoDriverError('credentials required'));
     const { username } = credentials;
     function externalCommand(
       command: Document,
@@ -23,7 +23,7 @@ export class GSSAPI extends AuthProvider {
     }
     makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);
-      if (client == null) return callback(new MongoError('gssapi client missing'));
+      if (client == null) return callback(new MongoDriverError('gssapi client missing'));
       client.step('', (err, payload) => {
         if (err) return callback(err);
 
@@ -63,7 +63,9 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
   const { hostAddress } = authContext.options;
   const { credentials } = authContext;
   if (!hostAddress || typeof hostAddress.host !== 'string' || !credentials) {
-    return callback(new MongoError('Connection must have host and port and credentials defined.'));
+    return callback(
+      new MongoDriverError('Connection must have host and port and credentials defined.')
+    );
   }
 
   if ('kModuleError' in Kerberos) {

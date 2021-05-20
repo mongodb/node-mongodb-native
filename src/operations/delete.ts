@@ -5,7 +5,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
-import { MongoError } from '../error';
+import { MongoDriverError, MongoServerError } from '../error';
 import type { WriteConcernOptions } from '../write_concern';
 
 /** @public */
@@ -82,21 +82,21 @@ export class DeleteOperation extends CommandOperation<Document> {
 
     if (options.explain !== undefined && maxWireVersion(server) < 3) {
       return callback
-        ? callback(new MongoError(`server ${server.name} does not support explain on delete`))
+        ? callback(new MongoDriverError(`server ${server.name} does not support explain on delete`))
         : undefined;
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoError(`servers < 3.4 do not support hint on delete`));
+        callback(new MongoDriverError(`servers < 3.4 do not support hint on delete`));
         return;
       }
     }
 
     const statementWithCollation = this.statements.find(statement => !!statement.collation);
     if (statementWithCollation && collationNotSupported(server, statementWithCollation)) {
-      callback(new MongoError(`server ${server.name} does not support collation`));
+      callback(new MongoDriverError(`server ${server.name} does not support collation`));
       return;
     }
 
@@ -112,8 +112,8 @@ export class DeleteOneOperation extends DeleteOperation {
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoError(res));
-      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (res.code) return callback(new MongoServerError(res));
+      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
       if (this.explain) return callback(undefined, res);
 
       callback(undefined, {
@@ -132,8 +132,8 @@ export class DeleteManyOperation extends DeleteOperation {
   execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoError(res));
-      if (res.writeErrors) return callback(new MongoError(res.writeErrors[0]));
+      if (res.code) return callback(new MongoServerError(res));
+      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
       if (this.explain) return callback(undefined, res);
 
       callback(undefined, {

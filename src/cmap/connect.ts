@@ -1,7 +1,13 @@
 import * as net from 'net';
 import * as tls from 'tls';
 import { Connection, ConnectionOptions, CryptoConnection } from './connection';
-import { MongoError, MongoNetworkError, MongoNetworkTimeoutError, AnyError } from '../error';
+import {
+  MongoNetworkError,
+  MongoNetworkTimeoutError,
+  AnyError,
+  MongoDriverError,
+  MongoServerError
+} from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
 import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType, ns } from '../utils';
@@ -52,13 +58,13 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     const message = `Server at ${options.hostAddress} reports minimum wire version ${JSON.stringify(
       ismaster.minWireVersion
     )}, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
-    return new MongoError(message);
+    return new MongoDriverError(message);
   }
 
   const message = `Server at ${options.hostAddress} reports maximum wire version ${
     JSON.stringify(ismaster.maxWireVersion) ?? 0
   }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
-  return new MongoError(message);
+  return new MongoDriverError(message);
 }
 
 function performInitialHandshake(
@@ -79,7 +85,7 @@ function performInitialHandshake(
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
       !AUTH_PROVIDERS.get(credentials.mechanism)
     ) {
-      callback(new MongoError(`authMechanism '${credentials.mechanism}' not supported`));
+      callback(new MongoDriverError(`authMechanism '${credentials.mechanism}' not supported`));
       return;
     }
   }
@@ -104,7 +110,7 @@ function performInitialHandshake(
       }
 
       if (response?.ok === 0) {
-        callback(new MongoError(response));
+        callback(new MongoServerError(response));
         return;
       }
 
@@ -133,7 +139,7 @@ function performInitialHandshake(
         const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
         if (!provider) {
           return callback(
-            new MongoError(`No AuthProvider for ${resolvedCredentials.mechanism} defined.`)
+            new MongoDriverError(`No AuthProvider for ${resolvedCredentials.mechanism} defined.`)
           );
         }
         provider.auth(authContext, err => {
@@ -177,14 +183,16 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
       if (!provider) {
         // This auth mechanism is always present.
         return callback(
-          new MongoError(`No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`)
+          new MongoDriverError(`No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`)
         );
       }
       return provider.prepare(handshakeDoc, authContext, callback);
     }
     const provider = AUTH_PROVIDERS.get(credentials.mechanism);
     if (!provider) {
-      return callback(new MongoError(`No AuthProvider for ${credentials.mechanism} defined.`));
+      return callback(
+        new MongoDriverError(`No AuthProvider for ${credentials.mechanism} defined.`)
+      );
     }
     return provider.prepare(handshakeDoc, authContext, callback);
   }
@@ -222,7 +230,7 @@ export const LEGAL_TCP_SOCKET_OPTIONS = [
 
 function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   const hostAddress = options.hostAddress;
-  if (!hostAddress) throw new Error('HostAddress required');
+  if (!hostAddress) throw new MongoDriverError('HostAddress required');
 
   const result: Partial<net.TcpNetConnectOpts & net.IpcNetConnectOpts> = {};
   for (const name of LEGAL_TCP_SOCKET_OPTIONS) {
@@ -241,7 +249,7 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   } else {
     // This should never happen since we set up HostAddresses
     // But if we don't throw here the socket could hang until timeout
-    throw new Error(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
+    throw new MongoDriverError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
   }
 }
 
