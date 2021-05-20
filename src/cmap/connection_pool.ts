@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Denque = require('denque') as DenqueLike;
+const Denque = require('denque') as DenqueConstructor;
 import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
@@ -18,7 +18,12 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './connection_pool_events';
-import { CancellationToken, DenqueLike, TypedEventEmitter } from '../mongo_types';
+import {
+  CancellationToken,
+  DenqueConstructor,
+  DenqueLike,
+  TypedEventEmitter
+} from '../mongo_types';
 
 /** @internal */
 const kLogger = Symbol('logger');

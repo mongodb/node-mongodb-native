@@ -357,5 +357,6 @@ export type {
   ProjectionOperators,
   MetaProjectionOperators,
   MetaSortOperators,
-  DenqueLike
+  DenqueLike,
+  DenqueConstructor
 } from './mongo_types';

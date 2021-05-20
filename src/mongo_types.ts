@@ -180,13 +180,29 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 
 /** @internal */
+export type DenqueConstructor = {
+  new <T = any>(): DenqueLike<T>;
+  new <T = any>(array: T[]): DenqueLike<T>;
+  new <T = any>(array: T[], options: { capacity?: number }): DenqueLike<T>;
+};
+
+/** @internal */
 export type DenqueLike<T = any> = {
-  new (): DenqueLike<T>;
+  push(item: T): number;
+  unshift(item: T): number;
+  pop(): T | undefined;
+  removeBack(): T | undefined;
   shift(): T | undefined;
-  push(item: T): void;
-  pop(): T;
-  peekFront(): T;
-  toArray(): T[];
+  peekBack(): T | undefined;
+  peekFront(): T | undefined;
+  peekAt(index: number): T | undefined;
+  get(index: number): T | undefined;
+  remove(index: number, count: number): T[];
+  removeOne(index: number): T | undefined;
+  splice(index: number, count: number, ...item: T[]): T[] | undefined;
+  isEmpty(): boolean;
   clear(): void;
+  toString(): string;
+  toArray(): T[];
   readonly length: number;
 };

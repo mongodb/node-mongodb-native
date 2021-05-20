@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Denque = require('denque') as DenqueLike;
+const Denque = require('denque') as DenqueConstructor;
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
@@ -53,7 +53,7 @@ import { DestroyOptions, Connection, ConnectionEvents } from '../cmap/connection
 import type { MongoOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
-import { DenqueLike, TypedEventEmitter } from '../mongo_types';
+import { DenqueConstructor, DenqueLike, TypedEventEmitter } from '../mongo_types';
 
 // Global state
 let globalTopologyCounter = 0;

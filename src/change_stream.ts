@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Denque = require('denque') as DenqueLike;
+const Denque = require('denque') as DenqueConstructor;
 import { MongoError, AnyError, isResumableError } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
@@ -27,7 +27,13 @@ import {
 } from './cursor/abstract_cursor';
 import type { ClientSession } from './sessions';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
-import { DenqueLike, InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
+import {
+  DenqueConstructor,
+  DenqueLike,
+  InferIdType,
+  Nullable,
+  TypedEventEmitter
+} from './mongo_types';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');
