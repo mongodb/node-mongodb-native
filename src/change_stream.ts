@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import Denque = require('denque');
 import { MongoError, AnyError, isResumableError } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import Denque = require('denque');
 import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';

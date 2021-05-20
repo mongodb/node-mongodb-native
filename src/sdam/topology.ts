@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import Denque = require('denque');
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
