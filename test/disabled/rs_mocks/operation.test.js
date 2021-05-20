@@ -57,7 +57,7 @@ describe('ReplSet Operations (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           } else if (doc.count) {
             request.reply({ ok: 1, n: 1 });
@@ -125,7 +125,7 @@ describe('ReplSet Operations (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[currentIsMasterIndex]);
             } else if (doc.count) {
               request.reply({ ok: 1, n: 1 });

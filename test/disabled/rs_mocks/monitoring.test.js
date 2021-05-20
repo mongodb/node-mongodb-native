@@ -119,7 +119,7 @@ describe('ReplSet Monitoring (mocks)', function () {
             }
 
             function handleMessage(doc) {
-              if (doc.ismaster && currentIsMasterState === 0) {
+              if ((doc.ismaster || doc.hello) && currentIsMasterState === 0) {
                 request.reply(primary[currentIsMasterState]);
               } else if (doc.insert && currentIsMasterState === 0) {
                 request.reply({
@@ -136,7 +136,7 @@ describe('ReplSet Monitoring (mocks)', function () {
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[currentIsMasterState]);
             } else if (doc.insert && currentIsMasterState === 1) {
               request.reply({
@@ -152,7 +152,7 @@ describe('ReplSet Monitoring (mocks)', function () {
 
           secondSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(secondSecondary[currentIsMasterState]);
             } else if (doc.insert && currentIsMasterState === 0) {
               request.reply({ note: 'from execCommand', ok: 0, errmsg: 'not master' });
@@ -303,21 +303,21 @@ describe('ReplSet Monitoring (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster && currentIsMasterState === 0) {
+          if ((doc.ismaster || doc.hello) && currentIsMasterState === 0) {
             request.reply(primary[currentIsMasterState]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterState]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[currentIsMasterState]);
           }
         });

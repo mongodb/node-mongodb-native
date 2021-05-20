@@ -17,7 +17,8 @@
         },
         "data": {
           "failCommands": [
-            "isMaster"
+            "isMaster",
+            "hello"
           ],
           "appName": "SDAMminPoolSizeError",
           "closeConnection": true

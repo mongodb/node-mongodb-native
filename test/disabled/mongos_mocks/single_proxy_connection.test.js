@@ -41,7 +41,7 @@ describe('Mongos Single Proxy Connection (mocks)', function () {
         server.setMessageHandler(request => {
           var doc = request.document;
 
-          if (doc.ismaster && currentStep === 0) {
+          if ((doc.ismaster || doc.hello) && currentStep === 0) {
             request.reply(serverIsMaster[0]);
             currentStep += 1;
           } else if (doc.insert && currentStep === 1) {
@@ -51,7 +51,7 @@ describe('Mongos Single Proxy Connection (mocks)', function () {
               stopRespondingPrimary = false;
               setTimeout(() => request.connection.destroy(), 1500);
             }
-          } else if (doc.ismaster) {
+          } else if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert && currentStep === 2) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -120,7 +120,7 @@ describe('Mongos Single Proxy Connection (mocks)', function () {
         server.setMessageHandler(request => {
           var doc = request.document;
 
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.find) {
             setTimeout(() => {

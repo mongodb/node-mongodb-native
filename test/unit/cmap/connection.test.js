@@ -14,7 +14,7 @@ describe('Connection - unit/cmap', function () {
   it('should support fire-and-forget messages', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
 
@@ -37,7 +37,7 @@ describe('Connection - unit/cmap', function () {
   it('should destroy streams which time out', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
 

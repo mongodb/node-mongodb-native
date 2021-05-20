@@ -89,21 +89,21 @@ class ReplSetFixture {
   configureMessageHandlers() {
     this.primaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(this.primaryStates[0]);
       }
     });
 
     this.firstSecondaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(this.firstSecondaryStates[0]);
       }
     });
 
     this.arbiterServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(this.arbiterStates[0]);
       }
     });

@@ -15,7 +15,7 @@ describe('Client (unit)', function () {
     let handshake;
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         handshake = doc;
         request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.endSessions) {

@@ -11,7 +11,7 @@ describe('db.listCollections', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
 
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
         }
 

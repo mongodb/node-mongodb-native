@@ -84,21 +84,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[0]);
           }
         });
@@ -207,21 +207,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             }
           });
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });
@@ -311,14 +311,14 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           }
         });
@@ -408,7 +408,7 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           }
         });
@@ -488,14 +488,14 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });
@@ -602,21 +602,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             }
           });
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });
@@ -725,21 +725,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[0]);
           }
         });
@@ -820,14 +820,14 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           }
         });
@@ -931,21 +931,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             }
           });
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });
@@ -1038,14 +1038,14 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[0]);
           }
         });
@@ -1144,21 +1144,21 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             }
           });
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });
@@ -1243,14 +1243,14 @@ describe('ReplSet Connection Tests (mocks)', function () {
 
           firstSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           });
 
           arbiterServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           });

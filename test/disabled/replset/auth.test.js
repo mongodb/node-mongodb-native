@@ -36,7 +36,7 @@ describe('Auth (ReplSet)', function () {
 
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         setTimeout(() => request.reply(test.primaryStates[0]));
       } else if (doc.saslStart) {
         finish();
@@ -45,7 +45,7 @@ describe('Auth (ReplSet)', function () {
 
     test.firstSecondaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         timeoutIds.push(setTimeout(() => request.reply(test.firstSecondaryStates[0]), 2000));
       } else if (doc.saslStart) {
         finish();

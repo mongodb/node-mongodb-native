@@ -83,7 +83,7 @@ describe('WriteConcernError', function () {
   it('should expose a user command writeConcern error like a normal WriteConcernError', function (done) {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         setTimeout(() => request.reply(test.primaryStates[0]));
       } else if (doc.createUser) {
         setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR));
@@ -124,7 +124,7 @@ describe('WriteConcernError', function () {
   it('should propagate writeConcernError.errInfo ', function (done) {
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         setTimeout(() => request.reply(test.primaryStates[0]));
       } else if (doc.createUser) {
         setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO));

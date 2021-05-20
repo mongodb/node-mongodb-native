@@ -35,7 +35,7 @@ describe('Retryable Writes (ReplSet)', function () {
       let command = null;
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(test.primaryStates[0]);
         } else if (doc.insert) {
           command = doc;
@@ -85,7 +85,7 @@ describe('Retryable Writes (ReplSet)', function () {
 
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(test.primaryStates[0]);
         } else if (doc.insert) {
           insertCount++;
@@ -141,7 +141,7 @@ describe('Retryable Writes (ReplSet)', function () {
 
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(test.primaryStates[0]);
         } else if (doc.insert) {
           insertCount++;

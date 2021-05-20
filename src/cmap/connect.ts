@@ -13,6 +13,7 @@ import {
 } from './wire_protocol/constants';
 import type { Document } from '../bson';
 
+import type { ServerApi } from '../mongo_client';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 import { Int32 } from '../bson';
@@ -85,7 +86,7 @@ function performInitialHandshake(
   }
 
   const authContext = new AuthContext(conn, credentials, options);
-  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
+  prepareHandshakeDocument(conn.serverApi, authContext, (err, handshakeDoc) => {
     if (err || !handshakeDoc) {
       return callback(err);
     }
@@ -106,6 +107,11 @@ function performInitialHandshake(
       if (response?.ok === 0) {
         callback(new MongoError(response));
         return;
+      }
+
+      if ('isWritablePrimary' in response) {
+        // Provide pre-hello-style response document.
+        response.ismaster = response.isWritablePrimary;
       }
 
       const supportedServerErr = checkSupportedServer(response, options);
@@ -145,18 +151,23 @@ function performInitialHandshake(
 }
 
 export interface HandshakeDocument extends Document {
-  ismaster: boolean;
+  ismaster?: boolean;
+  hello?: boolean;
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
 }
 
-function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
+function prepareHandshakeDocument(
+  serverApi: ServerApi | undefined,
+  authContext: AuthContext,
+  callback: Callback<HandshakeDocument>
+) {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
 
   const handshakeDoc: HandshakeDocument = {
-    ismaster: true,
+    [serverApi?.version ? 'hello' : 'ismaster']: true,
     client: options.metadata || makeClientMetadata(options),
     compression: compressors
   };

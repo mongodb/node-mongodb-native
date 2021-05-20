@@ -16,7 +16,7 @@ tests:
       configureFailPoint: failCommand
       mode: { times: 2 }
       data:
-          failCommands: ["isMaster"]
+          failCommands: ["isMaster", "hello"]
           appName: timeoutMonitorHandshakeTest
           blockConnection: true
           blockTimeMS: 1000
@@ -93,7 +93,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["isMaster"]
+                failCommands: ["isMaster", "hello"]
                 appName: timeoutMonitorCheckTest
                 blockConnection: true
                 # blockTimeMS is evaluated after the waiting for heartbeatFrequencyMS server-side, so this value only

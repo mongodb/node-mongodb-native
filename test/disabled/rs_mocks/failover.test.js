@@ -135,7 +135,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[currentIsMasterIndex]);
             }
           }
@@ -146,7 +146,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
@@ -157,7 +157,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }
@@ -342,7 +342,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[currentIsMasterIndex]);
             }
           }
@@ -353,7 +353,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
@@ -364,7 +364,7 @@ describe('ReplSet Failover (mocks)', function () {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }

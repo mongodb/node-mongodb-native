@@ -31,7 +31,7 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos1.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(serverIsMaster[0]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -42,7 +42,7 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos2.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(serverIsMaster[1]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
