@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Denque = require('denque') as DenqueConstructor;
+import Denque = require('denque');
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
@@ -53,7 +53,7 @@ import { DestroyOptions, Connection, ConnectionEvents } from '../cmap/connection
 import type { MongoOptions, ServerApi } from '../mongo_client';
 import { DEFAULT_OPTIONS } from '../connection_string';
 import { serialize, deserialize } from '../bson';
-import { DenqueConstructor, DenqueLike, TypedEventEmitter } from '../mongo_types';
+import { TypedEventEmitter } from '../mongo_types';
 
 // Global state
 let globalTopologyCounter = 0;
@@ -172,8 +172,8 @@ export type TopologyEvents = {
   serverOpening(event: ServerOpeningEvent): void;
   serverClosed(event: ServerClosedEvent): void;
   serverDescriptionChanged(event: ServerDescriptionChangedEvent): void;
-  topologyClosed(event: TopologyOpeningEvent): void;
-  topologyOpening(event: TopologyClosedEvent): void;
+  topologyClosed(event: TopologyClosedEvent): void;
+  topologyOpening(event: TopologyOpeningEvent): void;
   topologyDescriptionChanged(event: TopologyDescriptionChangedEvent): void;
   error(error: Error): void;
   /** TODO(NODE-3273) - remove error @internal */
@@ -192,7 +192,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   s: TopologyPrivate;
   /** @internal */
-  [kWaitQueue]: DenqueLike<ServerSelectionRequest>;
+  [kWaitQueue]: Denque<ServerSelectionRequest>;
   /** @internal */
   ismaster?: Document;
   /** @internal */
@@ -950,7 +950,7 @@ function srvPollingHandler(topology: Topology) {
   };
 }
 
-function drainWaitQueue(queue: DenqueLike<ServerSelectionRequest>, err?: AnyError) {
+function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {

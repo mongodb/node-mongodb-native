@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Denque = require('denque') as DenqueConstructor;
+import Denque = require('denque');
 import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
@@ -18,12 +18,7 @@ import {
   ConnectionCheckedInEvent,
   ConnectionPoolClearedEvent
 } from './connection_pool_events';
-import {
-  CancellationToken,
-  DenqueConstructor,
-  DenqueLike,
-  TypedEventEmitter
-} from '../mongo_types';
+import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
 /** @internal */
 const kLogger = Symbol('logger');
@@ -92,7 +87,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
-  [kConnections]: DenqueLike<Connection>;
+  [kConnections]: Denque<Connection>;
   /**
    * An integer expressing how many total connections are permitted
    * @internal
@@ -110,7 +105,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kWaitQueue]: DenqueLike<WaitQueueMember>;
+  [kWaitQueue]: Denque<WaitQueueMember>;
 
   /**
    * Emitted when the connection pool is created.

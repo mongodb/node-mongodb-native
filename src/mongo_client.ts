@@ -258,7 +258,11 @@ export interface MongoClientPrivate {
 }
 
 /** @public */
-export type MongoClientEvents = Pick<TopologyEvents, typeof MONGO_CLIENT_EVENTS[number]>;
+export type MongoClientEvents = Pick<TopologyEvents, typeof MONGO_CLIENT_EVENTS[number]> & {
+  // In previous versions the open event emitted a topology, in an effort to no longer
+  // expose internals but continue to expose this useful event API, it now emits a mongoClient
+  open(mongoClient: MongoClient): void;
+};
 
 /** @internal */
 const kOptions = Symbol('options');
