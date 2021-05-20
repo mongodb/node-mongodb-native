@@ -66,4 +66,63 @@ describe('Connection', function() {
       }
     );
   });
+
+  it('streams that timeout after handshake should have error[kBeforeHandshake] be false', function(done) {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(mock.DEFAULT_ISMASTER_36);
+      }
+      // respond to no other requests to trigger timeout event
+    });
+
+    const address = server.address();
+    const options = {
+      bson: new BSON(),
+      connectionType: Connection,
+      host: address.host,
+      port: address.port
+    };
+
+    connect(options, (err, conn) => {
+      expect(err).to.be.a('undefined');
+      expect(conn).to.be.instanceOf(Connection);
+
+      conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, err => {
+        const beforeHandshakeSymbol = Object.getOwnPropertySymbols(err)[0];
+        expect(beforeHandshakeSymbol).to.be.a('symbol');
+        expect(err)
+          .to.have.property(beforeHandshakeSymbol)
+          .equals(false);
+
+        done();
+      });
+    });
+  });
+
+  it('streams that timeout before handshake should have error[kBeforeHandshake] be true', function(done) {
+    // respond to no requests to trigger timeout event
+    server.setMessageHandler(() => {});
+
+    const address = server.address();
+    const options = {
+      bson: new BSON(),
+      connectionType: Connection,
+      host: address.host,
+      port: address.port,
+      socketTimeout: 50
+    };
+
+    connect(options, (err, conn) => {
+      expect(conn).to.be.a('undefined');
+
+      const beforeHandshakeSymbol = Object.getOwnPropertySymbols(err)[0];
+      expect(beforeHandshakeSymbol).to.be.a('symbol');
+      expect(err)
+        .to.have.property(beforeHandshakeSymbol)
+        .equals(true);
+
+      done();
+    });
+  });
 });
