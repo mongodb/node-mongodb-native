@@ -7,11 +7,10 @@
     "target": "ES2018",
     "module": "commonJS",
     "moduleResolution": "node",
-    "esModuleInterop": true,
     "lib": ["ES2018"],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
-    "noEmitHelpers": false,
+    "noEmitHelpers": true,
     // Never emit error filled code
     "noEmitOnError": true,
     "outDir": "lib",
