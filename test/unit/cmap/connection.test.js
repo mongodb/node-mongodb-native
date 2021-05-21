@@ -67,7 +67,7 @@ describe('Connection', function() {
     );
   });
 
-  it('streams that timeout after handshake should have error[kBeforeHandshake] be false', function(done) {
+  it('should throw a network error with kBeforeHandshake set to false on timeout after hand shake', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster) {
@@ -87,20 +87,21 @@ describe('Connection', function() {
     connect(options, (err, conn) => {
       expect(err).to.be.a('undefined');
       expect(conn).to.be.instanceOf(Connection);
+      expect(conn)
+        .to.have.property('ismaster')
+        .that.is.a('object');
 
       conn.command('$admin.cmd', { ping: 1 }, { socketTimeout: 50 }, err => {
         const beforeHandshakeSymbol = Object.getOwnPropertySymbols(err)[0];
         expect(beforeHandshakeSymbol).to.be.a('symbol');
-        expect(err)
-          .to.have.property(beforeHandshakeSymbol)
-          .equals(false);
+        expect(err).to.have.property(beforeHandshakeSymbol, false);
 
         done();
       });
     });
   });
 
-  it('streams that timeout before handshake should have error[kBeforeHandshake] be true', function(done) {
+  it('should throw a network error with kBeforeHandshake set to true on timeout before hand shake', function(done) {
     // respond to no requests to trigger timeout event
     server.setMessageHandler(() => {});
 
@@ -118,9 +119,7 @@ describe('Connection', function() {
 
       const beforeHandshakeSymbol = Object.getOwnPropertySymbols(err)[0];
       expect(beforeHandshakeSymbol).to.be.a('symbol');
-      expect(err)
-        .to.have.property(beforeHandshakeSymbol)
-        .equals(true);
+      expect(err).to.have.property(beforeHandshakeSymbol, true);
 
       done();
     });
