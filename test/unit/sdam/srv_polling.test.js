@@ -12,6 +12,7 @@ const chai = require('chai');
 const sinon = require('sinon');
 const mock = require('../../tools/mock');
 const { HostAddress } = require('../../../src/utils');
+const { MongoDriverError } = require('../../../src/error');
 
 const expect = chai.expect;
 chai.use(require('sinon-chai'));
@@ -112,8 +113,8 @@ describe('Mongos SRV Polling', function () {
 
     describe('poll', function () {
       it('should throw if srvHost is not passed in', function () {
-        expect(() => new SrvPoller()).to.throw(TypeError);
-        expect(() => new SrvPoller({})).to.throw(TypeError);
+        expect(() => new SrvPoller()).to.throw(MongoDriverError);
+        expect(() => new SrvPoller({})).to.throw(MongoDriverError);
       });
 
       it('should poll dns srv records', function () {

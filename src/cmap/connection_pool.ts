@@ -320,7 +320,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           clearTimeout(waitQueueMember.timer);
         }
         if (!waitQueueMember[kCancelled]) {
-          waitQueueMember.callback(new MongoError('connection pool closed'));
+          waitQueueMember.callback(new MongoDriverError('connection pool closed'));
         }
       }
     }

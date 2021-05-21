@@ -518,12 +518,15 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 test.equal(c, 0);
                 uploadStream.write('b', 'utf8', function (error) {
-                  test.equal(error.toString(), 'Error: this stream has been aborted');
+                  test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
                   uploadStream.end('c', 'utf8', function (error) {
-                    test.equal(error.toString(), 'Error: this stream has been aborted');
+                    test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
-                      test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      test.equal(
+                        error.toString(),
+                        'MongoDriverError: Cannot call abort() on a stream twice'
+                      );
                       client.close(done);
                     });
                   });
@@ -575,12 +578,15 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 test.equal(c, 0);
                 uploadStream.write('b', 'utf8', function (error) {
-                  test.equal(error.toString(), 'Error: this stream has been aborted');
+                  test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
                   uploadStream.end('c', 'utf8', function (error) {
-                    test.equal(error.toString(), 'Error: this stream has been aborted');
+                    test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
-                      test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      test.equal(
+                        error.toString(),
+                        'MongoDriverError: Cannot call abort() on a stream twice'
+                      );
                       client.close(done);
                     });
                   });
@@ -1300,10 +1306,10 @@ describe('GridFS Stream', function () {
                 test.equal(c, 0);
 
                 uploadStream.write('b', 'utf8', function (error) {
-                  test.equal(error.toString(), 'Error: this stream has been aborted');
+                  test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
 
                   uploadStream.end(function (error) {
-                    test.equal(error.toString(), 'Error: this stream has been aborted');
+                    test.equal(error.toString(), 'MongoDriverError: this stream has been aborted');
 
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {

@@ -1,6 +1,6 @@
 import { ServerType } from '../../sdam/common';
 import { TopologyDescription } from '../../sdam/topology_description';
-import { MongoError } from '../../error';
+import { MongoDriverError } from '../../error';
 import { ReadPreference } from '../../read_preference';
 import type { Document } from '../../bson';
 import type { OpQueryOptions } from '../commands';
@@ -28,7 +28,7 @@ export function getReadPreference(cmd: Document, options?: ReadPreferenceOption)
   }
 
   if (!(readPreference instanceof ReadPreference)) {
-    throw new MongoError('read preference must be a ReadPreference instance');
+    throw new MongoDriverError('read preference must be a ReadPreference instance');
   }
 
   return readPreference;

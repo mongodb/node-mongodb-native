@@ -159,6 +159,7 @@ export class MongoError extends Error {
 export class MongoServerError extends MongoError {
   constructor(message: string | Error | ErrorDescription) {
     super(message);
+    this.name = 'MongoServerError';
   }
 }
 
@@ -171,6 +172,7 @@ export class MongoServerError extends MongoError {
 export class MongoDriverError extends MongoError {
   constructor(message: string | Error | ErrorDescription) {
     super(message);
+    this.name = 'MongoDriverError';
   }
 }
 
