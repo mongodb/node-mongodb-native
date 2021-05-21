@@ -13,7 +13,6 @@ import {
 } from './wire_protocol/constants';
 import type { Document } from '../bson';
 
-import type { ServerApi } from '../mongo_client';
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
 import { Int32 } from '../bson';
