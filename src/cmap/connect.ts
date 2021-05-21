@@ -86,7 +86,7 @@ function performInitialHandshake(
   }
 
   const authContext = new AuthContext(conn, credentials, options);
-  prepareHandshakeDocument(conn.serverApi, authContext, (err, handshakeDoc) => {
+  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
     if (err || !handshakeDoc) {
       return callback(err);
     }
@@ -158,13 +158,10 @@ export interface HandshakeDocument extends Document {
   saslSupportedMechs?: string;
 }
 
-function prepareHandshakeDocument(
-  serverApi: ServerApi | undefined,
-  authContext: AuthContext,
-  callback: Callback<HandshakeDocument>
-) {
+function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
+  const { serverApi } = authContext.connection;
 
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version ? 'hello' : 'ismaster']: true,
