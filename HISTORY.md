@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.8](https://github.com/mongodb/node-mongodb-native/compare/v3.6.7...v3.6.8) (2021-05-21)
+
+
+### Bug Fixes
+
+* **cmap:** undo flipping of `beforeHandshake` flag for timeout errors ([#2813](https://github.com/mongodb/node-mongodb-native/issues/2813)) ([6e3bab3](https://github.com/mongodb/node-mongodb-native/commit/6e3bab32204ea905ab9b949edccb68556b50d382))
+
 ### [3.6.7](https://github.com/mongodb/node-mongodb-native/compare/v3.6.6...v3.6.7) (2021-05-18)
 
 
