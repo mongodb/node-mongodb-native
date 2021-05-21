@@ -130,6 +130,7 @@ export class TopologyDescription {
 
   /**
    * Returns a new TopologyDescription based on the SrvPollingEvent
+   * @internal
    */
   updateFromSrvPollingEvent(ev: SrvPollingEvent): TopologyDescription {
     const newAddresses = ev.addresses();
@@ -163,6 +164,7 @@ export class TopologyDescription {
 
   /**
    * Returns a copy of this description updated with a given ServerDescription
+   * @internal
    */
   update(serverDescription: ServerDescription): TopologyDescription {
     const address = serverDescription.address;
@@ -308,6 +310,7 @@ export class TopologyDescription {
 
   /**
    * Determines if the topology has a definition for the provided address
+   * @internal
    */
   hasServer(address: string): boolean {
     return this.servers.has(address);

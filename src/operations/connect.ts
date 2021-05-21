@@ -72,10 +72,7 @@ function createTopology(
   // save the reference to the topology on the client ASAP if the event handlers need to access it
   mongoClient.topology = topology;
 
-  // TODO(NODE-3273) - remove error
-  topology.once(Topology.OPEN, (error, topology) =>
-    mongoClient.emit(Topology.OPEN, error, topology)
-  );
+  topology.once(Topology.OPEN, () => mongoClient.emit('open', mongoClient));
 
   for (const event of MONGO_CLIENT_EVENTS) {
     topology.on(event, (...args: any[]) => mongoClient.emit(event, ...(args as any)));

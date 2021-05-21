@@ -2,8 +2,7 @@
 const { withClient, setupDatabase } = require('./shared');
 const test = require('./shared').assert;
 const { expect } = require('chai');
-const { ServerHeartbeatStartedEvent } = require('../../src');
-const { Topology } = require('../../src/sdam/topology');
+const { ServerHeartbeatStartedEvent, MongoClient } = require('../../src');
 
 describe('Connection - functional', function () {
   before(function () {
@@ -75,11 +74,10 @@ describe('Connection - functional', function () {
     var configuration = this.configuration;
     var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.on('open', (error, topology) => {
-      // TODO(NODE-3273) - remove error
-      expect(error).to.equal(undefined);
-      expect(topology).to.be.instanceOf(Topology);
-      client.close(done);
+    client.on('open', clientFromEvent => {
+      expect(clientFromEvent).to.be.instanceOf(MongoClient);
+      expect(clientFromEvent).to.equal(client);
+      clientFromEvent.close(done);
     });
 
     client.connect();

@@ -10,16 +10,27 @@ import type { ExecutionResult } from '../operations/execute_operation';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 
+/** @internal */
 const kId = Symbol('id');
+/** @internal */
 const kDocuments = Symbol('documents');
+/** @internal */
 const kServer = Symbol('server');
+/** @internal */
 const kNamespace = Symbol('namespace');
+/** @internal */
 const kTopology = Symbol('topology');
+/** @internal */
 const kSession = Symbol('session');
+/** @internal */
 const kOptions = Symbol('options');
+/** @internal */
 const kTransform = Symbol('transform');
+/** @internal */
 const kInitialized = Symbol('initialized');
+/** @internal */
 const kClosed = Symbol('closed');
+/** @internal */
 const kKilled = Symbol('killed');
 
 /** @public */
@@ -108,6 +119,7 @@ export abstract class AbstractCursor<
   /** @event */
   static readonly CLOSE = 'close' as const;
 
+  /** @internal */
   constructor(
     topology: Topology,
     namespace: MongoDBNamespace,
@@ -155,10 +167,12 @@ export abstract class AbstractCursor<
     return this[kId];
   }
 
+  /** @internal */
   get topology(): Topology {
     return this[kTopology];
   }
 
+  /** @internal */
   get server(): Server | undefined {
     return this[kServer];
   }

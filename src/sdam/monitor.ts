@@ -22,11 +22,17 @@ import type { InterruptibleAsyncInterval, Callback } from '../utils';
 import type { TopologyVersion } from './server_description';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
+/** @internal */
 const kServer = Symbol('server');
+/** @internal */
 const kMonitorId = Symbol('monitorId');
+/** @internal */
 const kConnection = Symbol('connection');
+/** @internal */
 const kCancellationToken = Symbol('cancellationToken');
+/** @internal */
 const kRTTPinger = Symbol('rttPinger');
+/** @internal */
 const kRoundTripTime = Symbol('roundTripTime');
 
 const STATE_IDLE = 'idle';
@@ -58,15 +64,15 @@ export interface MonitorOptions
 
 /** @public */
 export type MonitorEvents = {
-  [Server.SERVER_HEARTBEAT_STARTED](event: ServerHeartbeatStartedEvent): void;
-  [Server.SERVER_HEARTBEAT_SUCCEEDED](event: ServerHeartbeatSucceededEvent): void;
-  [Server.SERVER_HEARTBEAT_FAILED](event: ServerHeartbeatFailedEvent): void;
+  serverHeartbeatStarted(event: ServerHeartbeatStartedEvent): void;
+  serverHeartbeatSucceeded(event: ServerHeartbeatSucceededEvent): void;
+  serverHeartbeatFailed(event: ServerHeartbeatFailedEvent): void;
   resetServer(error?: Error): void;
   resetConnectionPool(): void;
   close(): void;
 } & EventEmitterWithState;
 
-/** @public */
+/** @internal */
 export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   s: MonitorPrivate;
@@ -359,12 +365,12 @@ function makeTopologyVersion(tv: TopologyVersion) {
   };
 }
 
-/** @public */
+/** @internal */
 export interface RTTPingerOptions extends ConnectionOptions {
   heartbeatFrequencyMS: number;
 }
 
-/** @public */
+/** @internal */
 export class RTTPinger {
   /** @internal */
   [kConnection]?: Connection;

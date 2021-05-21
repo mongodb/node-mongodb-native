@@ -19,7 +19,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
 }
 
 /**
- * @public
+ * @internal
  * @category Event
  */
 export class SrvPollingEvent {
@@ -38,18 +38,18 @@ export class SrvPollingEvent {
   }
 }
 
-/** @public */
+/** @internal */
 export interface SrvPollerOptions extends LoggerOptions {
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
 
-/** @public */
+/** @internal */
 export type SrvPollerEvents = {
   srvRecordDiscovery(event: SrvPollingEvent): void;
 };
 
-/** @public */
+/** @internal */
 export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   srvHost: string;
   rescanSrvIntervalMS: number;

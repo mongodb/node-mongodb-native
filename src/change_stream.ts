@@ -28,8 +28,11 @@ import type { ClientSession } from './sessions';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
 import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
 
+/** @internal */
 const kResumeQueue = Symbol('resumeQueue');
+/** @internal */
 const kCursorStream = Symbol('cursorStream');
+/** @internal */
 const kClosed = Symbol('closed');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];

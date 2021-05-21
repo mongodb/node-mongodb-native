@@ -8,6 +8,7 @@ import { MONGO_CLIENT_EVENTS } from './operations/connect';
 
 let AutoEncrypterClass: AutoEncrypter;
 
+/** @internal */
 const kInternalClient = Symbol('internalClient');
 
 /** @internal */

@@ -44,14 +44,23 @@ import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 
+/** @internal */
 const kStream = Symbol('stream');
+/** @internal */
 const kQueue = Symbol('queue');
+/** @internal */
 const kMessageStream = Symbol('messageStream');
+/** @internal */
 const kGeneration = Symbol('generation');
+/** @internal */
 const kLastUseTime = Symbol('lastUseTime');
+/** @internal */
 const kClusterTime = Symbol('clusterTime');
+/** @internal */
 const kDescription = Symbol('description');
+/** @internal */
 const kIsMaster = Symbol('ismaster');
+/** @internal */
 const kAutoEncrypter = Symbol('autoEncrypter');
 
 /** @internal */
@@ -113,7 +122,8 @@ export interface ConnectionOptions
   autoEncrypter?: AutoEncrypter;
   serverApi?: ServerApi;
   monitorCommands: boolean;
-  connectionType: typeof Connection;
+  /** @internal */
+  connectionType?: typeof Connection;
   credentials?: MongoCredentials;
   connectTimeoutMS?: number;
   tls: boolean;
@@ -134,15 +144,15 @@ export interface DestroyOptions {
 
 /** @public */
 export type ConnectionEvents = {
-  [Connection.COMMAND_STARTED](event: CommandStartedEvent): void;
-  [Connection.COMMAND_SUCCEEDED](event: CommandSucceededEvent): void;
-  [Connection.COMMAND_FAILED](event: CommandFailedEvent): void;
-  [Connection.CLUSTER_TIME_RECEIVED](clusterTime: Document): void;
-  [Connection.CLOSE](): void;
-  [Connection.MESSAGE](message: any): void;
+  commandStarted(event: CommandStartedEvent): void;
+  commandSucceeded(event: CommandSucceededEvent): void;
+  commandFailed(event: CommandFailedEvent): void;
+  clusterTimeReceived(clusterTime: Document): void;
+  close(): void;
+  message(message: any): void;
 };
 
-/** @public */
+/** @internal */
 export class Connection extends TypedEventEmitter<ConnectionEvents> {
   id: number | '<monitor>';
   address: string;
