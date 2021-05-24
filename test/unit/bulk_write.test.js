@@ -64,7 +64,7 @@ describe('Bulk Writes', function() {
     });
   });
 
-  it('should cache insertedIds result', function() {
+  it('should cache the insertedIds and upsertedIds in result', function() {
     const result = new BulkWriteResult({
       upserted: [
         { index: 0, _id: 1 },
