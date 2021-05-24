@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
+const BulkWriteResult = require('../../lib/bulk/common').BulkWriteResult;
 
 describe('Bulk Writes', function() {
   const test = {};
@@ -61,5 +62,46 @@ describe('Bulk Writes', function() {
         }
       });
     });
+  });
+
+  it('should cache insertedIds result', function() {
+    const result = new BulkWriteResult({
+      upserted: [
+        { index: 0, _id: 1 },
+        { index: 1, _id: 2 },
+        { index: 2, _id: 3 }
+      ],
+      insertedIds: [
+        { index: 0, _id: 4 },
+        { index: 1, _id: 5 },
+        { index: 2, _id: 6 }
+      ]
+    });
+
+    const kUpsertedIds = Object.getOwnPropertySymbols(result).filter(
+      s => s.description === 'upsertedIds'
+    )[0];
+    const kInsertedIds = Object.getOwnPropertySymbols(result).filter(
+      s => s.description === 'insertedIds'
+    )[0];
+
+    expect(result[kUpsertedIds]).to.equal(undefined);
+    expect(result[kInsertedIds]).to.equal(undefined);
+
+    const upsertedIds = result.upsertedIds; // calls getter
+    const insertedIds = result.insertedIds; // calls getter
+
+    expect(upsertedIds).to.be.a('object');
+    expect(insertedIds).to.be.a('object');
+
+    expect(result[kUpsertedIds]).to.equal(upsertedIds);
+    expect(result[kInsertedIds]).to.equal(insertedIds);
+
+    Object.freeze(result); // If the getters try to write to `this`
+    Object.freeze(result[kUpsertedIds]); // or either cached object
+    Object.freeze(result[kInsertedIds]); // then they will throw in these expects:
+
+    expect(() => result.upsertedIds).to.not.throw();
+    expect(() => result.insertedIds).to.not.throw();
   });
 });
