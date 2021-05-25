@@ -52,6 +52,9 @@ describe('mongodb+srv (spec)', function() {
               expect(object.auth.user).to.equal(test[1].parsed_options.user);
               expect(object.auth.password).to.equal(test[1].parsed_options.password);
             }
+            if (test[1].parsed_options && test[1].parsed_options.dbName) {
+              expect(object.dbName).to.equal(test[1].parsed_options.dbName);
+            }
           }
           done();
         });
