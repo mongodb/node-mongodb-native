@@ -803,6 +803,16 @@ export class FindOperators {
     this.bulkOperation.s.currentOp.collation = collation;
     return this;
   }
+
+  /** Specifies the collation for the query condition. */
+  arrayFilters(arrayFilters: Document[]): this {
+    if (!this.bulkOperation.s.currentOp) {
+      this.bulkOperation.s.currentOp = {};
+    }
+
+    this.bulkOperation.s.currentOp.arrayFilters = arrayFilters;
+    return this;
+  }
 }
 
 /** @internal */
