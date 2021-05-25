@@ -1949,13 +1949,10 @@ describe('Bulk', function () {
 
         bulk.insert({ person: 'Foo', scores: [4, 9, 12] });
         bulk.insert({ person: 'Bar', scores: [13, 0, 52] });
-
-        // updates
         bulk
           .find({ scores: { $lt: 1 } })
           .arrayFilters([{ e: { $lt: 1 } }])
           .updateOne({ $set: { 'scores.$[e]': 1 } });
-
         bulk
           .find({ scores: { $gte: 10 } })
           .arrayFilters([{ e: { $gte: 10 } }])

@@ -804,7 +804,7 @@ export class FindOperators {
     return this;
   }
 
-  /** Specifies the collation for the query condition. */
+  /** Specifies arrayFilters for UpdateOne or UpdateMany bulk operations. */
   arrayFilters(arrayFilters: Document[]): this {
     if (!this.bulkOperation.s.currentOp) {
       this.bulkOperation.s.currentOp = {};
