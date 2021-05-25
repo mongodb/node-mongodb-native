@@ -33,7 +33,7 @@ describe('Db', function () {
     })
   });
 
-  it('should not call callback twice on collection() with callback', {
+  it.skip('should not call callback twice on collection() with callback', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -67,7 +67,7 @@ describe('Db', function () {
     }
   });
 
-  it('should callback with an error only when a MongoError', {
+  it.skip('should callback with an error only when a MongoError', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

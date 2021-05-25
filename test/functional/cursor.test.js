@@ -4170,30 +4170,26 @@ describe('Cursor', function () {
     const findSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}, { sort: input });
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}, { sort: input });
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.be.instanceOf(Map);
-            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.be.instanceOf(Map);
+          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+          cursor.close(done);
         });
       });
 
     const cursorSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}).sort(input);
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}).sort(input);
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.be.instanceOf(Map);
-            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.be.instanceOf(Map);
+          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+          cursor.close(done);
         });
       });
 

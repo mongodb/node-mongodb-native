@@ -3365,7 +3365,7 @@ describe('Operation Examples', function () {
    * @example-class Db
    * @example-method collection
    */
-  it('shouldCorrectlyAccessACollection', {
+  it.skip('shouldCorrectlyAccessACollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

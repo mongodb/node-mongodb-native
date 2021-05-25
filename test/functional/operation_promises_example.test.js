@@ -2588,7 +2588,7 @@ describe('Operation (Promises)', function () {
    * @example-class Db
    * @example-method collection
    */
-  it('shouldCorrectlyAccessACollectionWithPromises', {
+  it.skip('shouldCorrectlyAccessACollectionWithPromises', {
     metadata: { requires: { topology: ['single'] } },
 
     test: function (done) {
