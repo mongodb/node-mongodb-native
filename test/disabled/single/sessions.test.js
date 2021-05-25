@@ -53,7 +53,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               $clusterTime: clusterTime
@@ -98,7 +98,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               $clusterTime: clusterTime
@@ -362,7 +362,7 @@ describe('Sessions (Single)', function () {
       let commands = [];
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -435,7 +435,7 @@ describe('Sessions (Single)', function () {
       let commands = [];
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -509,7 +509,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -538,7 +538,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -576,7 +576,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -614,7 +614,7 @@ describe('Sessions (Single)', function () {
       let insertCount = 0;
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(mock.DEFAULT_ISMASTER_36);
         } else if (doc.insert) {
           request.reply({
@@ -658,7 +658,7 @@ describe('Sessions (Single)', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6

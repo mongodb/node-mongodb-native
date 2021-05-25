@@ -17,7 +17,7 @@ describe('Max Staleness', function () {
       const serverIsMaster = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(serverIsMaster[0]);
           return;
         }

@@ -17,7 +17,8 @@
         },
         "data": {
           "failCommands": [
-            "isMaster"
+            "isMaster",
+            "hello"
           ],
           "appName": "timeoutMonitorHandshakeTest",
           "blockConnection": true,
@@ -120,7 +121,8 @@
               },
               "data": {
                 "failCommands": [
-                  "isMaster"
+                  "isMaster",
+                  "hello"
                 ],
                 "appName": "timeoutMonitorCheckTest",
                 "blockConnection": true,

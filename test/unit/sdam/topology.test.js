@@ -34,7 +34,7 @@ describe('Topology (unit)', function () {
       const ismasters = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           ismasters.push(doc);
           request.reply(mock.DEFAULT_ISMASTER);
         } else {
@@ -147,7 +147,7 @@ describe('Topology (unit)', function () {
         const doc = request.document;
 
         let initialIsMasterSent = false;
-        if (doc.ismaster && !initialIsMasterSent) {
+        if ((doc.ismaster || doc.hello) && !initialIsMasterSent) {
           request.reply(mock.DEFAULT_ISMASTER_36);
           initialIsMasterSent = true;
         } else {
@@ -182,7 +182,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
@@ -219,7 +219,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'not master' });
@@ -256,7 +256,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown on non-timeout network error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.connection.destroy();

@@ -20,7 +20,7 @@ describe('EventEmitters (Mongos)', function () {
     test: function (done) {
       test.server.setMessageHandler(req => {
         const doc = req.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           req.reply(Object.assign({}, test.defaultFields));
         }
       });

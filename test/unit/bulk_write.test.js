@@ -32,7 +32,7 @@ describe('Bulk Writes', function () {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });

@@ -18,7 +18,7 @@ describe('Pool (unit)', function () {
   it('should throw a MongoWriteConcernError when a writeConcernError is present', function (done) {
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.insert) {
         return request.reply({
@@ -53,7 +53,7 @@ describe('Pool (unit)', function () {
   it('should not allow overriding `slaveOk` when connected to a mongos', function (done) {
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(Object.assign({ msg: 'isdbgrid' }, mock.DEFAULT_ISMASTER));
       } else if (doc.insert) {
         request.reply({ ok: 1 });

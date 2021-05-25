@@ -327,7 +327,7 @@ describe('Mongos SRV Polling', function () {
           server.setMessageHandler(request => {
             const doc = request.document;
 
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(Object.assign({}, MONGOS_DEFAULT_ISMASTER));
             }
           });

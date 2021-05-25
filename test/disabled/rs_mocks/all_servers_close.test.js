@@ -89,7 +89,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
             request.connection.destroy();
           } else {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             } else if (doc.insert) {
               request.reply({ ok: 1, n: 1 });
@@ -103,7 +103,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
           } else {
             var doc = request.document;
 
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           }
@@ -115,7 +115,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
           } else {
             var doc = request.document;
 
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           }
@@ -233,7 +233,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
               request.connection.destroy();
             } else {
               var doc = request.document;
-              if (doc.ismaster) {
+              if (doc.ismaster || doc.hello) {
                 request.reply(primary[0]);
               }
             }
@@ -244,7 +244,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
               request.connection.destroy();
             } else {
               var doc = request.document;
-              if (doc.ismaster) {
+              if (doc.ismaster || doc.hello) {
                 request.reply(firstSecondary[0]);
               }
             }
@@ -255,7 +255,7 @@ describe('ReplSet All Servers Close (mocks)', function () {
               request.connection.destroy();
             } else {
               var doc = request.document;
-              if (doc.ismaster) {
+              if (doc.ismaster || doc.hello) {
                 request.reply(arbiter[0]);
               }
             }

@@ -15,7 +15,7 @@ describe('Compression (ReplSet)', function () {
     const compressionData = [];
     test.primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         compressionData.push(doc.compression);
         request.reply(test.primaryStates[0]);
       }
@@ -23,7 +23,7 @@ describe('Compression (ReplSet)', function () {
 
     test.firstSecondaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         compressionData.push(doc.compression);
         request.reply(test.firstSecondaryStates[0]);
       }

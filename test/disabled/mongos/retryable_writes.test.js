@@ -36,7 +36,7 @@ describe('Retryable Writes (Mongos)', function () {
       const messageHandler = () => {
         return request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(test.defaultFields);
           } else if (doc.insert) {
             command = doc;
@@ -90,7 +90,7 @@ describe('Retryable Writes (Mongos)', function () {
       const messageHandler = () => {
         return request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(test.defaultFields);
           } else if (doc.insert) {
             insertCount++;
@@ -147,7 +147,7 @@ describe('Retryable Writes (Mongos)', function () {
       const messageHandler = () => {
         return request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(test.defaultFields);
           } else if (doc.insert) {
             insertCount++;

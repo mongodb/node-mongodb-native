@@ -124,28 +124,28 @@ describe('ReplSet Add Remove (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
@@ -300,28 +300,28 @@ describe('ReplSet Add Remove (mocks)', function () {
 
         primaryServer.setMessageHandler(function (request) {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(function (request) {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(function (request) {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });
 
         arbiterServer.setMessageHandler(function (request) {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
@@ -520,28 +520,28 @@ describe('ReplSet Add Remove (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
@@ -720,28 +720,28 @@ describe('ReplSet Add Remove (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });

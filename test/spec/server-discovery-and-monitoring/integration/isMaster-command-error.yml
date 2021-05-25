@@ -16,7 +16,7 @@ tests:
       configureFailPoint: failCommand
       mode: { times: 2 }
       data:
-          failCommands: ["isMaster"]
+          failCommands: ["isMaster", "hello"]
           appName: commandErrorHandshakeTest
           closeConnection: false
           errorCode: 91 # ShutdownInProgress
@@ -94,7 +94,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["isMaster"]
+                failCommands: ["isMaster", "hello"]
                 appName: commandErrorCheckTest
                 closeConnection: false
                 blockConnection: true

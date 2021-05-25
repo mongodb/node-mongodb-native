@@ -1,6 +1,6 @@
 description: "CRUD Api Version 1"
 
-schemaVersion: "1.1"
+schemaVersion: "1.4"
 
 runOnRequirements:
   - minServerVersion: "4.9"
@@ -64,6 +64,10 @@ tests:
                 <<: *expectedApiVersion
 
   - description: "aggregate on database appends declared API version"
+    runOnRequirements:
+        # serverless does not support either of the current database-level aggregation stages ($listLocalSessions and
+        # $currentOp)
+      - serverless: forbid
     operations:
       - name: aggregate
         object: *adminDatabase
@@ -116,7 +120,10 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: 2 }, u: { $inc: { x: 1 } } }
+                  - q: { _id: 2 }
+                    u: { $inc: { x: 1 } }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 <<: *expectedApiVersion
           - commandStartedEvent:
               command:
@@ -128,7 +135,10 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: { $gt: 1 } }, u: { $inc: { x: 1 } }, multi: true }
+                  - q: { _id: { $gt: 1 } }
+                    u: { $inc: { x: 1 } }
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
                 <<: *expectedApiVersion
           - commandStartedEvent:
               command:
@@ -140,7 +150,10 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: 4 }, u: { _id: 4, x: 44 }, upsert: true }
+                  - q: { _id: 4 }
+                    u: { _id: 4, x: 44 }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: true
                 <<: *expectedApiVersion
 
   - description: "countDocuments appends declared API version"
@@ -225,7 +238,7 @@ tests:
                   - $group: { _id: 1, n: { $sum: $count }}
                 <<: *expectedApiVersion
 
-  - description: "find command with declared API version appends to the command, but getMore does not"
+  - description: "find and getMore append API version"
     operations:
       - name: find
         object: *collection
@@ -249,9 +262,7 @@ tests:
           - commandStartedEvent:
               command:
                 getMore: { $$type: [ int, long ] }
-                apiVersion: { $$exists: false }
-                apiStrict: { $$exists: false }
-                apiDeprecationErrors: { $$exists: false }
+                <<: *expectedApiVersion
 
   - description: "findOneAndDelete appends declared API version"
     operations:
@@ -353,7 +364,10 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: 4 }, u: { _id: 4, x: 44 }, upsert: true }
+                  - q: { _id: 4 }
+                    u: { _id: 4, x: 44 }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: true
                 <<: *expectedApiVersion
 
   - description: "updateMany appends declared API version"
@@ -370,7 +384,10 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: { $gt: 1 } }, u: { $inc: { x: 1 } }, multi: true }
+                  - q: { _id: { $gt: 1 } }
+                    u: { $inc: { x: 1 } }
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
                 <<: *expectedApiVersion
 
   - description: "updateOne appends declared API version"
@@ -387,5 +404,8 @@ tests:
               command:
                 update: *collectionName
                 updates:
-                  - { q: { _id: 2 }, u: { $inc: { x: 1 } } }
+                  - q: { _id: 2 }
+                    u: { $inc: { x: 1 } }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 <<: *expectedApiVersion

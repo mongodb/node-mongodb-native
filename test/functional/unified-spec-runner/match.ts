@@ -129,10 +129,14 @@ export function resultCheck(
 
       if (depth > 1) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
+        const actualKeys = Object.keys(actual);
+        const expectedKeys = Object.keys(expected);
+        // Don't check for full key set equality because some of the actual keys
+        // might be e.g. $$unsetOrMatches, which can be omitted.
         expect(
-          Object.keys(actual),
-          `[${Object.keys(actual)}] length !== [${Object.keys(expected)}]`
-        ).to.have.lengthOf(Object.keys(expected).length);
+          actualKeys.filter(key => !expectedKeys.includes(key)),
+          `[${Object.keys(actual)}] has more than the expected keys: [${Object.keys(expected)}]`
+        ).to.have.lengthOf(0);
       }
 
       for (const [key, value] of expectedEntries) {

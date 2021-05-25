@@ -44,7 +44,7 @@ describe('Connection Pool', function () {
   it('should destroy connections which have been closed', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       } else {
         // destroy on any other command
@@ -86,7 +86,7 @@ describe('Connection Pool', function () {
   it('should propagate socket timeouts to connections', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       } else {
         // blackhole other requests
@@ -116,7 +116,7 @@ describe('Connection Pool', function () {
   it('should clear timed out wait queue members if no connections are available', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
     });
@@ -152,7 +152,7 @@ describe('Connection Pool', function () {
     it('should manage a connection for a successful operation', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(mock.DEFAULT_ISMASTER_36);
         }
       });
@@ -177,7 +177,7 @@ describe('Connection Pool', function () {
     it('should allow user interaction with an error', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.connection.destroy();
         }
       });
@@ -203,7 +203,7 @@ describe('Connection Pool', function () {
     it('should return an error to the original callback', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(mock.DEFAULT_ISMASTER_36);
         }
       });
@@ -225,7 +225,7 @@ describe('Connection Pool', function () {
     it('should still manage a connection if no callback is provided', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(mock.DEFAULT_ISMASTER_36);
         }
       });
@@ -397,7 +397,7 @@ describe('Connection Pool', function () {
       // and establish valid connections
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(mock.DEFAULT_ISMASTER_36);
         }
       });

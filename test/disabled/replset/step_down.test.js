@@ -56,7 +56,7 @@ describe('Step Down (ReplSet)', function () {
       const makeMessageHandler = states => request => {
         const state = states[this.stateCounter % states.length];
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           return request.reply(state);
         }
 
