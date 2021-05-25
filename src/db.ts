@@ -311,8 +311,7 @@ export class Db {
   }
 
   /**
-   * Fetch a specific collection (containing the actual collection information).
-   * e.g. `const collection = db.collection('mycollection');`
+   * Returns a reference to a MongoDB Collection. If it does not exist it will be created implicitly.
    *
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance

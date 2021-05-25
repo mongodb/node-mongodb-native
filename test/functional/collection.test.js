@@ -163,23 +163,6 @@ describe('Collection', function () {
       });
     });
 
-    it.skip('should ensure strict access collection', function (done) {
-      db.collection('does-not-exist', { strict: true }, err => {
-        expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.equal(
-          'Collection does-not-exist does not exist. Currently in strict mode.'
-        );
-        db.createCollection('test_strict_access_collection', err => {
-          expect(err).to.not.exist;
-          db.collection('test_strict_access_collection', configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            // Let's close the db
-            done();
-          });
-        });
-      });
-    });
-
     it('should fail to insert due to illegal keys', function (done) {
       db.createCollection('test_invalid_key_names', (err, collection) => {
         // Legal inserts
