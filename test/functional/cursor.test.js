@@ -4299,13 +4299,11 @@ describe('Cursor', function () {
       metadata: { requires: { mongodb: '>=4.4' } },
       test: withClient(function (client, done) {
         const db = client.db('test');
-        db.collection('test_sort_allow_disk_use', (err, collection) => {
-          expect(err).to.not.exist;
-          expect(() => collection.find({}).allowDiskUse()).to.throw(
-            /allowDiskUse requires a sort specification/
-          );
-          done();
-        });
+        const collection = db.collection('test_sort_allow_disk_use');
+        expect(() => collection.find({}).allowDiskUse()).to.throw(
+          /allowDiskUse requires a sort specification/
+        );
+        done();
       })
     });
   });
