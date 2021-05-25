@@ -45,11 +45,6 @@ describe('db.listCollections', function () {
       description: 'should send nameOnly: true for db.collections',
       command: db => db.collections(() => {}),
       listCollectionsValue: true
-    },
-    {
-      description: 'should send nameOnly: true for db.collection',
-      command: db => db.collection('foo', { strict: true }, () => {}),
-      listCollectionsValue: true
     }
   ].forEach(config => {
     function testFn(done) {

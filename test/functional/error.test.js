@@ -53,29 +53,28 @@ describe('Errors', function () {
     db.dropCollection('test_failing_insert_due_to_unique_index_strict', () => {
       db.createCollection('test_failing_insert_due_to_unique_index_strict', err => {
         expect(err).to.not.exist;
-        db.collection('test_failing_insert_due_to_unique_index_strict', (err, collection) => {
-          collection.createIndexes(
-            [
-              {
-                name: 'test_failing_insert_due_to_unique_index_strict',
-                key: { a: 1 },
-                unique: true
-              }
-            ],
-            { writeConcern: { w: 1 } },
-            err => {
-              expect(err).to.not.exist;
-              collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-                expect(err).to.not.exist;
-
-                collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-                  expect(err.code).to.equal(11000);
-                  done();
-                });
-              });
+        const collection = db.collection('test_failing_insert_due_to_unique_index_strict');
+        collection.createIndexes(
+          [
+            {
+              name: 'test_failing_insert_due_to_unique_index_strict',
+              key: { a: 1 },
+              unique: true
             }
-          );
-        });
+          ],
+          { writeConcern: { w: 1 } },
+          err => {
+            expect(err).to.not.exist;
+            collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
+              expect(err).to.not.exist;
+
+              collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
+                expect(err.code).to.equal(11000);
+                done();
+              });
+            });
+          }
+        );
       });
     });
   });

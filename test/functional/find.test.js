@@ -2095,7 +2095,7 @@ describe('Find', function () {
         }
 
         // Create a collection we want to drop later
-        db.createCollectioon('Readpreferencesshouldworkfine', function (err, collection) {
+        db.createCollection('Readpreferencesshouldworkfine', function (err, collection) {
           // Insert a bunch of documents
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
