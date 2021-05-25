@@ -73,8 +73,12 @@ describe('Bulk Writes', function() {
       ]
     });
 
-    const kUpsertedIds = Object.getOwnPropertySymbols(result).filter(
-      s => s.description === 'upsertedIds'
+    const bulkWriteResultSymbols = Object.getOwnPropertySymbols(result);
+
+    expect(bulkWriteResultSymbols.length).to.be.equal(2);
+
+    const kUpsertedIds = bulkWriteResultSymbols.filter(
+      s => s.toString() === 'Symbol(upsertedIds)'
     )[0];
 
     expect(kUpsertedIds).to.be.a('symbol');
@@ -103,8 +107,12 @@ describe('Bulk Writes', function() {
       ]
     });
 
-    const kInsertedIds = Object.getOwnPropertySymbols(result).filter(
-      s => s.description === 'insertedIds'
+    const bulkWriteResultSymbols = Object.getOwnPropertySymbols(result);
+
+    expect(bulkWriteResultSymbols.length).to.be.equal(2);
+
+    const kInsertedIds = bulkWriteResultSymbols.filter(
+      s => s.toString() === 'Symbol(insertedIds)'
     )[0];
 
     expect(kInsertedIds).to.be.a('symbol');
