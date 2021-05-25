@@ -104,8 +104,6 @@ export interface CollectionOptions
     WriteConcernOptions,
     LoggerOptions {
   slaveOk?: boolean;
-  /** Returns an error if the collection does not exist */
-  strict?: boolean;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
