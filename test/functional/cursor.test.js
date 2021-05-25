@@ -4283,16 +4283,14 @@ describe('Cursor', function () {
       metadata: { requires: { mongodb: '>=4.4' } },
       test: withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_allow_disk_use', (err, collection) => {
+        const collection = db.collection('test_sort_allow_disk_use');
+        const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            const { command } = events.shift();
-            expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
-            expect(command.allowDiskUse).to.be.true;
-            cursor.close(done);
-          });
+          const { command } = events.shift();
+          expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
+          expect(command.allowDiskUse).to.be.true;
+          cursor.close(done);
         });
       })
     });

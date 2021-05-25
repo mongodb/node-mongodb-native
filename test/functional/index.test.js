@@ -475,7 +475,8 @@ describe('Indexes', function () {
             }
           );
         });
-      });    }
+      });
+    }
   });
 
   it('shouldThrowDuplicateKeyErrorWhenCreatingIndex', {
