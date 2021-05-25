@@ -6,7 +6,8 @@
       "minServerVersion": "4.9",
       "topologies": [
         "replicaset",
-        "sharded-replicaset"
+        "sharded-replicaset",
+        "load-balanced"
       ]
     }
   ],
@@ -53,17 +54,6 @@
         "apiDeprecationErrors": {
           "$$unsetOrMatches": false
         }
-      },
-      {
-        "apiVersion": {
-          "$$exists": false
-        },
-        "apiStrict": {
-          "$$exists": false
-        },
-        "apiDeprecationErrors": {
-          "$$exists": false
-        }
       }
     ]
   },
@@ -97,12 +87,13 @@
   ],
   "tests": [
     {
-      "description": "Only the first command in a transaction declares an API version",
+      "description": "All commands in a transaction declare an API version",
       "runOnRequirements": [
         {
           "topologies": [
             "replicaset",
-            "sharded-replicaset"
+            "sharded-replicaset",
+            "load-balanced"
           ]
         }
       ],
@@ -193,119 +184,6 @@
                   "lsid": {
                     "$$sessionLsid": "session"
                   },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
-                  "apiDeprecationErrors": {
-                    "$$exists": false
-                  }
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "commitTransaction": 1,
-                  "lsid": {
-                    "$$sessionLsid": "session"
-                  },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
-                  "apiDeprecationErrors": {
-                    "$$exists": false
-                  }
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "Committing a transaction twice does not append server API options",
-      "runOnRequirements": [
-        {
-          "topologies": [
-            "replicaset",
-            "sharded-replicaset"
-          ]
-        }
-      ],
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session",
-            "document": {
-              "_id": 6,
-              "x": 66
-            }
-          },
-          "expectResult": {
-            "$$unsetOrMatches": {
-              "insertedId": {
-                "$$unsetOrMatches": 6
-              }
-            }
-          }
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session",
-            "document": {
-              "_id": 7,
-              "x": 77
-            }
-          },
-          "expectResult": {
-            "$$unsetOrMatches": {
-              "insertedId": {
-                "$$unsetOrMatches": 7
-              }
-            }
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session"
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client",
-          "events": [
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "insert": "test",
-                  "documents": [
-                    {
-                      "_id": 6,
-                      "x": 66
-                    }
-                  ],
-                  "lsid": {
-                    "$$sessionLsid": "session"
-                  },
-                  "startTransaction": true,
                   "apiVersion": "1",
                   "apiStrict": {
                     "$$unsetOrMatches": false
@@ -319,62 +197,16 @@
             {
               "commandStartedEvent": {
                 "command": {
-                  "insert": "test",
-                  "documents": [
-                    {
-                      "_id": 7,
-                      "x": 77
-                    }
-                  ],
-                  "lsid": {
-                    "$$sessionLsid": "session"
-                  },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
-                  "apiDeprecationErrors": {
-                    "$$exists": false
-                  }
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "command": {
                   "commitTransaction": 1,
                   "lsid": {
                     "$$sessionLsid": "session"
                   },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
+                  "apiVersion": "1",
                   "apiStrict": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   },
                   "apiDeprecationErrors": {
-                    "$$exists": false
-                  }
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "commitTransaction": 1,
-                  "lsid": {
-                    "$$sessionLsid": "session"
-                  },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
-                  "apiDeprecationErrors": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   }
                 }
               }
@@ -384,12 +216,13 @@
       ]
     },
     {
-      "description": "abortTransaction does not include an API version",
+      "description": "abortTransaction includes an API version",
       "runOnRequirements": [
         {
           "topologies": [
             "replicaset",
-            "sharded-replicaset"
+            "sharded-replicaset",
+            "load-balanced"
           ]
         }
       ],
@@ -480,14 +313,12 @@
                   "lsid": {
                     "$$sessionLsid": "session"
                   },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
+                  "apiVersion": "1",
                   "apiStrict": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   },
                   "apiDeprecationErrors": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   }
                 }
               }
@@ -499,14 +330,12 @@
                   "lsid": {
                     "$$sessionLsid": "session"
                   },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
+                  "apiVersion": "1",
                   "apiStrict": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   },
                   "apiDeprecationErrors": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   }
                 }
               }

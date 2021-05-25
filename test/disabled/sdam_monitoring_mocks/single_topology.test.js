@@ -33,7 +33,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function () {
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           }
         });
@@ -170,7 +170,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function () {
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           }
         });

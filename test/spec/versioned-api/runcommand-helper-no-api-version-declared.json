@@ -1,6 +1,6 @@
 {
   "description": "RunCommand helper: No API version declared",
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.9",
@@ -29,6 +29,11 @@
   "tests": [
     {
       "description": "runCommand does not inspect or change the command document",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -72,6 +77,11 @@
     },
     {
       "description": "runCommand does not prevent sending invalid API version declarations",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",

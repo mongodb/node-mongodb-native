@@ -21,7 +21,7 @@ describe('Sessions - unit/sessions', function () {
         let insertOperationTime = Timestamp.fromNumber(Date.now());
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(
               Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.DEFAULT_ISMASTER_36)
             );
@@ -61,7 +61,7 @@ describe('Sessions - unit/sessions', function () {
         const options = Object.freeze({});
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(mock.DEFAULT_ISMASTER_36);
           } else if (doc.count || doc.aggregate || doc.endSessions) {
             request.reply({ ok: 1 });

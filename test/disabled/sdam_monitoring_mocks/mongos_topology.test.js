@@ -36,7 +36,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert && currentStep === 1) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -45,7 +45,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function () {
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -235,7 +235,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             mongos1.destroy();
@@ -246,7 +246,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function () {
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -425,16 +425,16 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster && currentStep === 0) {
+          if ((doc.ismaster || doc.hello) && currentStep === 0) {
             request.reply(serverIsMaster[0]);
-          } else if (doc.ismaster && currentStep === 1) {
+          } else if ((doc.ismaster || doc.hello) && currentStep === 1) {
             setTimeout(() => request.connection.destroy(), 1600);
           }
         });
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           }
         });

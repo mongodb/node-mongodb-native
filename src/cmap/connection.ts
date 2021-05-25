@@ -350,7 +350,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let finalCmd = Object.assign({}, cmd);
     const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
 
-    if (this.serverApi && supportsVersionedApi(cmd, session)) {
+    if (this.serverApi) {
       const { version, strict, deprecationErrors } = this.serverApi;
       finalCmd.apiVersion = version;
       if (strict != null) finalCmd.apiStrict = strict;
@@ -674,16 +674,6 @@ function supportsOpMsg(conn: Connection) {
   }
 
   return maxWireVersion(conn) >= 6 && !description.__nodejs_mock_server__;
-}
-
-function supportsVersionedApi(cmd: Document, session?: ClientSession) {
-  const inTransaction = session && (session.inTransaction() || isTransactionCommand(cmd));
-  // if an API version was declared, add the apiVersion option to every command, except:
-  // a. only in the initial command of a transaction
-  // b. only in a Cursor's initiating command, not subsequent getMore commands
-  return (
-    (!inTransaction || session?.transaction.isStarting) && !cmd.commitTransaction && !cmd.getMore
-  );
 }
 
 function messageHandler(conn: Connection) {

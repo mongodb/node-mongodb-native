@@ -123,28 +123,28 @@ describe('ReplSet Maintenance Mode (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });
 
         arbiterServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });

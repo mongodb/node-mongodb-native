@@ -17,7 +17,8 @@
         },
         "data": {
           "failCommands": [
-            "isMaster"
+            "isMaster",
+            "hello"
           ],
           "appName": "commandErrorHandshakeTest",
           "closeConnection": false,
@@ -120,7 +121,8 @@
               },
               "data": {
                 "failCommands": [
-                  "isMaster"
+                  "isMaster",
+                  "hello"
                 ],
                 "appName": "commandErrorCheckTest",
                 "closeConnection": false,

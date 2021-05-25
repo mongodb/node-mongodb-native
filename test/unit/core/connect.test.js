@@ -35,7 +35,7 @@ describe('Connect Tests', function () {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
 
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         whatHappened.ismaster = true;
         request.reply(
           Object.assign({}, mock.DEFAULT_ISMASTER, {
@@ -65,7 +65,7 @@ describe('Connect Tests', function () {
     test.server.setMessageHandler(request => {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         whatHappened.ismaster = true;
         request.reply(
           Object.assign({}, mock.DEFAULT_ISMASTER, {

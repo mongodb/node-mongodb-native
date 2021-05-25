@@ -1,6 +1,6 @@
 description: "RunCommand helper: No API version declared"
 
-schemaVersion: "1.1"
+schemaVersion: "1.4"
 
 runOnRequirements:
   - minServerVersion: "4.9"
@@ -19,6 +19,10 @@ createEntities:
 
 tests:
   - description: "runCommand does not inspect or change the command document"
+    runOnRequirements:
+      # serverless does not currently reject invalid API versions on
+      # certain commands (CLOUDP-87926)
+      - serverless: "forbid"
     operations:
       - name: runCommand
         object: *database
@@ -43,6 +47,10 @@ tests:
               databaseName: *databaseName
 
   - description: "runCommand does not prevent sending invalid API version declarations"
+    runOnRequirements:
+      # serverless does not currently reject invalid API versions on
+      # certain commands (CLOUDP-87926)
+      - serverless: "forbid"
     operations:
       - name: runCommand
         object: *database

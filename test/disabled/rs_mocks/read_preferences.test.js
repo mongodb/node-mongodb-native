@@ -85,7 +85,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
         primaryServer.setMessageHandler(request => {
           // Get the document
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -94,7 +94,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -103,7 +103,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -219,7 +219,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -228,7 +228,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -237,7 +237,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -353,7 +353,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -362,7 +362,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -371,7 +371,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -507,7 +507,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -516,7 +516,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -673,7 +673,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.connection.destroy();
@@ -682,7 +682,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -691,7 +691,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -843,7 +843,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -852,7 +852,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -861,7 +861,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.fromNumber(3), n: 1, ok: 1 });
@@ -983,7 +983,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -992,7 +992,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -1001,7 +1001,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -1102,7 +1102,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[0]);
             } else if (doc.count) {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -1212,7 +1212,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -1221,7 +1221,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
@@ -1230,7 +1230,7 @@ describe('ReplSet Read Preferences (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });

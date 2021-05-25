@@ -840,7 +840,7 @@ describe('Change Streams', function () {
         primaryServer.setMessageHandler(request => {
           const doc = request.document;
 
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(
               Object.assign(
                 {
@@ -941,7 +941,7 @@ describe('Change Streams', function () {
 
           if (die) {
             request.connection.destroy();
-          } else if (doc.ismaster) {
+          } else if (doc.ismaster || doc.hello) {
             request.reply(
               Object.assign(
                 {
@@ -1035,7 +1035,7 @@ describe('Change Streams', function () {
           const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(
               Object.assign(
                 {
@@ -1446,7 +1446,7 @@ describe('Change Streams', function () {
           const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(
               Object.assign(
                 {
@@ -1730,7 +1730,7 @@ describe('Change Streams', function () {
       function primaryServerHandler(request) {
         try {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             return request.reply(makeIsMaster(server));
           } else if (doc.aggregate) {
             return request.reply(AGGREGATE_RESPONSE);
@@ -1920,7 +1920,7 @@ describe('Change Streams', function () {
     class MockServerManager {
       constructor(config, commandIterators) {
         this.config = config;
-        this.cmdList = new Set(['ismaster', 'endSessions', 'aggregate', 'getMore']);
+        this.cmdList = new Set(['ismaster', 'hello', 'endSessions', 'aggregate', 'getMore']);
         this.database = 'test_db';
         this.collection = 'test_coll';
         this.ns = `${this.database}.${this.collection}`;
@@ -2016,6 +2016,10 @@ describe('Change Streams', function () {
           ok: 1,
           hosts: [uri]
         });
+      }
+
+      hello() {
+        return this.ismaster();
       }
 
       endSessions() {
@@ -2747,7 +2751,7 @@ context('NODE-2626 - handle null changes without error', function () {
   it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
     mockServer.setMessageHandler(req => {
       const doc = req.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         return req.reply(mock.DEFAULT_ISMASTER_36);
       }
       if (doc.aggregate) {

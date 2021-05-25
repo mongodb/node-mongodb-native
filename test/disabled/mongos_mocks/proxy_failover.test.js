@@ -32,7 +32,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             mongos1.destroy();
@@ -42,7 +42,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -106,7 +106,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert && currentStep === 0) {
             setTimeout(() => request.connection.destroy(), 1600);
@@ -117,7 +117,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert) {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -201,7 +201,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert && currentStep === 0) {
             setTimeout(() => request.connection.destroy(), 1600);
@@ -212,7 +212,7 @@ describe('Mongos Proxy Failover (mocks)', function () {
 
         mongos2.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.insert && currentStep === 0) {
             setTimeout(() => request.connection.destroy(), 1600);

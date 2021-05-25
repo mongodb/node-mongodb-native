@@ -33,7 +33,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["isMaster"]
+                failCommands: ["isMaster", "hello"]
                 appName: connectTimeoutMS=0
                 blockConnection: true
                 blockTimeMS: 550

@@ -68,7 +68,7 @@ describe('Sessions - unit/core', function () {
           test.server = server;
           test.server.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(
                 Object.assign({}, mock.DEFAULT_ISMASTER, { logicalSessionTimeoutMinutes: 10 })
               );

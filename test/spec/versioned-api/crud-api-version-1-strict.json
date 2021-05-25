@@ -1,6 +1,6 @@
 {
   "description": "CRUD Api Version 1 (strict)",
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.9"
@@ -141,6 +141,11 @@
     },
     {
       "description": "aggregate on database appends declared API version",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "aggregate",
@@ -301,6 +306,12 @@
                         "$inc": {
                           "x": 1
                         }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
                       }
                     }
                   ],
@@ -353,7 +364,10 @@
                           "x": 1
                         }
                       },
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "apiVersion": "1",
@@ -396,6 +410,9 @@
                       "u": {
                         "_id": 4,
                         "x": 44
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
                       },
                       "upsert": true
                     }
@@ -639,7 +656,7 @@
       ]
     },
     {
-      "description": "find command with declared API version appends to the command, but getMore does not",
+      "description": "find and getMore append API version",
       "operations": [
         {
           "name": "find",
@@ -700,14 +717,10 @@
                       "long"
                     ]
                   },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
+                  "apiVersion": "1",
+                  "apiStrict": true,
                   "apiDeprecationErrors": {
-                    "$$exists": false
+                    "$$unsetOrMatches": false
                   }
                 }
               }
@@ -966,6 +979,9 @@
                         "_id": 4,
                         "x": 44
                       },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
                       "upsert": true
                     }
                   ],
@@ -1021,7 +1037,10 @@
                           "x": 1
                         }
                       },
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "apiVersion": "1",
@@ -1071,6 +1090,12 @@
                         "$inc": {
                           "x": 1
                         }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
                       }
                     }
                   ],
