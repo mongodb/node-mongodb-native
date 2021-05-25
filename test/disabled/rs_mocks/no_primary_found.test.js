@@ -89,7 +89,7 @@ describe('ReplSet No Primary Found (mocks)', function () {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           }
         });
@@ -97,7 +97,7 @@ describe('ReplSet No Primary Found (mocks)', function () {
         firstSecondaryServer.setMessageHandler(request => {
           setTimeout(() => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[0]);
             }
           }, 9000000); // never respond?
@@ -105,7 +105,7 @@ describe('ReplSet No Primary Found (mocks)', function () {
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[0]);
           }
         });
@@ -113,7 +113,7 @@ describe('ReplSet No Primary Found (mocks)', function () {
         arbiterServer.setMessageHandler(request => {
           setTimeout(() => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(arbiter[0]);
             }
           }, 9000000); // never respond?

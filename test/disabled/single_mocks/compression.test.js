@@ -62,7 +62,7 @@ describe('Single Compression (mocks)', function () {
         server.setMessageHandler(request => {
           var doc = request.document;
 
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             if (!firstIsMasterSeen) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
 
@@ -163,7 +163,7 @@ describe('Single Compression (mocks)', function () {
         let firstIsMasterSeen = false;
         server.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             if (!firstIsMasterSeen) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;
@@ -260,7 +260,7 @@ describe('Single Compression (mocks)', function () {
         let firstIsMasterSeen = false;
         server.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             if (!firstIsMasterSeen) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;
@@ -357,7 +357,7 @@ describe('Single Compression (mocks)', function () {
       let firstIsMasterSeen = false;
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           if (!firstIsMasterSeen) {
             if (doc.compression == null) {
               expect(server.isCompressed).to.be.false;

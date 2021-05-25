@@ -227,15 +227,18 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
   const connection = monitor[kConnection];
   if (connection && !connection.closed) {
+    const { serverApi } = connection;
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
     const maxAwaitTimeMS = monitor.options.heartbeatFrequencyMS;
     const topologyVersion = monitor[kServer].description.topologyVersion;
     const isAwaitable = topologyVersion != null;
 
-    const cmd =
-      isAwaitable && topologyVersion
-        ? { ismaster: true, maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
-        : { ismaster: true };
+    const cmd = {
+      [serverApi?.version ? 'hello' : 'ismaster']: true,
+      ...(isAwaitable && topologyVersion
+        ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
+        : {})
+    };
 
     const options = isAwaitable
       ? {
@@ -258,6 +261,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
       if (err) {
         failureHandler(err);
         return;
+      }
+      if ('isWritablePrimary' in isMaster) {
+        // Provide pre-hello-style response document.
+        isMaster.ismaster = isMaster.isWritablePrimary;
       }
 
       const rttPinger = monitor[kRTTPinger];

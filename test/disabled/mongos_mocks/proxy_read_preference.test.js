@@ -36,7 +36,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
         mongos1.setMessageHandler(request => {
           var doc = request.document;
 
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.$query && doc.$readPreference) {
             command = doc;
@@ -115,7 +115,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.$query && doc.$readPreference) {
             command = doc;
@@ -195,7 +195,7 @@ describe('Mongos Proxy Read Preference (mocks)', function () {
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(serverIsMaster[0]);
           } else if (doc.$query && doc.$readPreference) {
             command = doc;

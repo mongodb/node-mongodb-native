@@ -85,7 +85,7 @@
 //           var request = yield primaryServer.receive();
 //           var doc = request.document;
 
-//           if(doc.ismaster) {
+//           if (doc.ismaster || doc.hello) {
 //             request.reply(primary[currentState]);
 //           } else if(doc.find) {
 //             request.reply({
@@ -126,7 +126,7 @@
 //           var request = yield firstSecondaryServer.receive();
 //           var doc = request.document;
 
-//           if(doc.ismaster) {
+//           if (doc.ismaster || doc.hello) {
 //             request.reply(firstSecondary[currentState]);
 //           } else if(doc.find) {
 //             request.reply({
@@ -167,7 +167,7 @@
 //           var request = yield arbiterServer.receive();
 //           var doc = request.document;
 
-//           if(doc.ismaster) {
+//           if (doc.ismaster || doc.hello) {
 //             request.reply(arbiter[0]);
 //           }
 //         }

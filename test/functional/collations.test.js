@@ -26,7 +26,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.count) {
           commandResult = doc;
@@ -62,7 +62,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.aggregate) {
           commandResult = doc;
@@ -100,7 +100,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.distinct) {
           commandResult = doc;
@@ -136,7 +136,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.mapReduce) {
           commandResult = doc;
@@ -177,7 +177,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.delete) {
           commandResult = doc;
@@ -213,7 +213,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.update) {
           commandResult = doc;
@@ -251,7 +251,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.find) {
           commandResult = doc;
@@ -287,7 +287,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.find) {
           commandResult = doc;
@@ -325,7 +325,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.find) {
           commandResult = doc;
@@ -361,7 +361,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.listCollections) {
           request.reply({
@@ -403,7 +403,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.find) {
           request.reply({ ok: 1 });
@@ -437,7 +437,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.find) {
           request.reply({ ok: 1 });
@@ -474,7 +474,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.update) {
           commandResult = doc;
@@ -527,7 +527,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.update) {
           request.reply({ ok: 1 });
@@ -578,7 +578,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.update) {
           request.reply({ ok: 1 });
@@ -629,7 +629,7 @@ describe('Collation', function () {
       let commandResult;
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.createIndexes) {
           commandResult = doc;
@@ -667,7 +667,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.createIndexes) {
           request.reply({ ok: 1 });
@@ -702,7 +702,7 @@ describe('Collation', function () {
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.createIndexes) {
           request.reply({ ok: 1 });

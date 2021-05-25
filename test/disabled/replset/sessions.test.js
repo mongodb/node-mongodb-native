@@ -143,7 +143,7 @@ describe('Sessions (ReplSet)', function () {
     test: function (done) {
       test.arbiterServer.setMessageHandler(req => {
         const doc = req.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           req.reply(Object.assign({}, test.arbiterStates[0], { logicalSessionTimeoutMinutes: 2 }));
         }
       });

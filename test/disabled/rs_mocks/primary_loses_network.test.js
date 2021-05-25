@@ -105,21 +105,21 @@ describe('ReplSet Primary Loses Network (mocks)', function () {
           // Fail primary
           if (step >= 1) return;
 
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[currentIsMasterIndex]);
           }
         });
 
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(firstSecondary[currentIsMasterIndex]);
           }
         });
 
         secondSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });

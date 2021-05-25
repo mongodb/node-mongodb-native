@@ -101,7 +101,7 @@ describe('Transaction Feature Decoration', function () {
             try {
               const doc = request.document;
 
-              if (doc.ismaster) {
+              if (doc.ismaster || doc.hello) {
                 return request.reply(test.primaryStates[0]);
               }
 

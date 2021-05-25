@@ -28,7 +28,7 @@ describe('Response', function () {
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
