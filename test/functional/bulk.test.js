@@ -1941,7 +1941,7 @@ describe('Bulk', function () {
   });
 
   it('should apply arrayFilters to bulk updates via FindOperators', {
-    metadata: { requires: { mongodb: '>= 3.4' } },
+    metadata: { requires: { mongodb: '>= 3.6' } },
     test: withMonitoredClient(['update', 'delete'], function (client, events, done) {
       client.db().dropCollection('bulkArrayFilters', () => {
         const coll = client.db().collection('bulkArrayFilters');
