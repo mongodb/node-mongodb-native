@@ -33,7 +33,7 @@ import {
   OpQueryOptions,
   Msg
 } from './commands';
-import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { BSONOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { Stream } from './connect';
@@ -55,7 +55,7 @@ const kIsMaster = Symbol('ismaster');
 const kAutoEncrypter = Symbol('autoEncrypter');
 
 /** @internal */
-export interface QueryOptions extends BSONSerializeOptions {
+export interface QueryOptions extends BSONOptions {
   readPreference: ReadPreference;
   documentsReturnedIn?: string;
   batchSize?: number;
@@ -72,7 +72,7 @@ export interface QueryOptions extends BSONSerializeOptions {
 }
 
 /** @public */
-export interface CommandOptions extends BSONSerializeOptions {
+export interface CommandOptions extends BSONOptions {
   command?: boolean;
   slaveOk?: boolean;
   /** Specify read preference if command supports it */

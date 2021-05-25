@@ -7,7 +7,7 @@ import { ClientSession, commandSupportsReadConcern } from '../sessions';
 import { MongoError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
-import type { BSONSerializeOptions, Document } from '../bson';
+import type { BSONOptions, Document } from '../bson';
 import type { ReadConcernLike } from './../read_concern';
 import { Explain, ExplainOptions } from '../explain';
 
@@ -56,7 +56,7 @@ export interface OperationParent {
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   logger?: Logger;
-  bsonOptions?: BSONSerializeOptions;
+  bsonOptions?: BSONOptions;
 }
 
 /** @internal */

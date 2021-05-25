@@ -1,5 +1,5 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
-import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
+import { Long, Document, BSONOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
 import { MongoError } from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
@@ -48,7 +48,7 @@ export interface CursorStreamOptions {
 export type CursorFlag = typeof CURSOR_FLAGS[number];
 
 /** @public */
-export interface AbstractCursorOptions extends BSONSerializeOptions {
+export interface AbstractCursorOptions extends BSONOptions {
   session?: ClientSession;
   readPreference?: ReadPreferenceLike;
   readConcern?: ReadConcernLike;

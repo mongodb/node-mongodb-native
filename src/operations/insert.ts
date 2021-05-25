@@ -5,7 +5,7 @@ import { prepareDocs } from './common_functions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { ObjectId, Document, BSONSerializeOptions } from '../bson';
+import type { ObjectId, Document, BSONOptions } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ClientSession } from '../sessions';
@@ -45,7 +45,7 @@ export class InsertOperation extends CommandOperation<Document> {
 }
 
 /** @public */
-export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface InsertOneOptions extends BSONOptions, WriteConcernOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
   /** Force server to assign _id values instead of driver. */

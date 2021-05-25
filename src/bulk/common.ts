@@ -1,5 +1,5 @@
 import { PromiseProvider } from '../promise_provider';
-import { Long, ObjectId, Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
+import { Long, ObjectId, Document, BSONOptions, resolveBSONOptions } from '../bson';
 import { MongoError, MongoWriteConcernError, AnyError, MONGODB_ERROR_CODES } from '../error';
 import {
   applyRetryableWrites,
@@ -831,7 +831,7 @@ export interface BulkOperationPrivate {
   // Options
   options: BulkWriteOptions;
   // BSON options
-  bsonOptions: BSONSerializeOptions;
+  bsonOptions: BSONOptions;
   // Document used to build a bulk operation
   currentOp?: Document;
   // Executed
@@ -1130,7 +1130,7 @@ export abstract class BulkOperationBase {
     );
   }
 
-  get bsonOptions(): BSONSerializeOptions {
+  get bsonOptions(): BSONOptions {
     return this.s.bsonOptions;
   }
 

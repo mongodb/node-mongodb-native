@@ -1,6 +1,6 @@
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from '../bson';
+import { Document, BSONOptions, resolveBSONOptions } from '../bson';
 import type { MongoDBNamespace, Callback } from '../utils';
 import type { Server } from '../sdam/server';
 
@@ -20,7 +20,7 @@ export interface OperationConstructor extends Function {
 }
 
 /** @public */
-export interface OperationOptions extends BSONSerializeOptions {
+export interface OperationOptions extends BSONOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
   willRetryWrites?: boolean;
@@ -46,7 +46,7 @@ export abstract class AbstractOperation<TResult = any> {
   fullResponse?: boolean;
 
   // BSON serialization options
-  bsonOptions?: BSONSerializeOptions;
+  bsonOptions?: BSONOptions;
 
   // TODO: Each operation defines its own options, there should be better typing here
   options: Document;

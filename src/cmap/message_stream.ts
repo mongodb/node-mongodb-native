@@ -10,7 +10,7 @@ import {
   CompressorName,
   CompressorId
 } from './wire_protocol/compression';
-import type { Document, BSONSerializeOptions } from '../bson';
+import type { Document, BSONOptions } from '../bson';
 import { BufferPool, Callback } from '../utils';
 import type { ClientSession } from '../sessions';
 
@@ -26,7 +26,7 @@ export interface MessageStreamOptions extends DuplexOptions {
 }
 
 /** @internal */
-export interface OperationDescription extends BSONSerializeOptions {
+export interface OperationDescription extends BSONOptions {
   started: number;
   cb: Callback<Document>;
   command: boolean;

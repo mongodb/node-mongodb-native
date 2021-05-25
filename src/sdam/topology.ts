@@ -44,7 +44,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent
 } from './events';
-import type { Document, BSONSerializeOptions } from '../bson';
+import type { Document, BSONOptions } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { Transaction } from '../transactions';
 import type { CloseOptions } from '../cmap/connection_pool';
@@ -131,7 +131,7 @@ export interface TopologyPrivate {
 }
 
 /** @public */
-export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
+export interface TopologyOptions extends BSONOptions, ServerOptions {
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;

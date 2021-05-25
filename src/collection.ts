@@ -7,7 +7,7 @@ import {
   Callback,
   getTopology
 } from './utils';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
+import { Document, BSONOptions, resolveBSONOptions } from './bson';
 import { MongoError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -91,10 +91,7 @@ import { FindCursor } from './cursor/find_cursor';
 import type { CountOptions } from './operations/count';
 
 /** @public */
-export interface CollectionOptions
-  extends BSONSerializeOptions,
-    WriteConcernOptions,
-    LoggerOptions {
+export interface CollectionOptions extends BSONOptions, WriteConcernOptions, LoggerOptions {
   slaveOk?: boolean;
   /** Returns an error if the collection does not exist */
   strict?: boolean;
@@ -111,7 +108,7 @@ export interface CollectionPrivate {
   options: any;
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
-  bsonOptions: BSONSerializeOptions;
+  bsonOptions: BSONOptions;
   slaveOk?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
@@ -216,7 +213,7 @@ export class Collection {
     return this.s.readPreference;
   }
 
-  get bsonOptions(): BSONSerializeOptions {
+  get bsonOptions(): BSONOptions {
     return this.s.bsonOptions;
   }
 

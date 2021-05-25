@@ -2,7 +2,7 @@ import { ReadPreference } from '../read_preference';
 import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
 import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
-import type { Long, Document, BSONSerializeOptions } from '../bson';
+import type { Long, Document, BSONOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
 import { MongoError } from '../error';
@@ -463,7 +463,7 @@ export interface MessageHeader {
   fromCompressed?: boolean;
 }
 
-export interface OpResponseOptions extends BSONSerializeOptions {
+export interface OpResponseOptions extends BSONOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
 }
@@ -550,7 +550,7 @@ export class Response {
     let bsonSize;
 
     // Set up the options
-    const _options: BSONSerializeOptions = {
+    const _options: BSONOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers
@@ -818,7 +818,7 @@ export class BinMsg {
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
 
     // Set up the options
-    const _options: BSONSerializeOptions = {
+    const _options: BSONOptions = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers

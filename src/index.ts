@@ -105,7 +105,7 @@ export { SrvPollingEvent } from './sdam/srv_polling';
 
 // type only exports below, these are removed from emitted JS
 export type { AdminPrivate } from './admin';
-export type { Document, BSONSerializeOptions } from './bson';
+export type { Document, BSONOptions as BSONSerializeOptions } from './bson';
 export type {
   InsertOneModel,
   ReplaceOneModel,

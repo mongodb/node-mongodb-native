@@ -8,7 +8,7 @@ import {
 } from './utils';
 import { loadAdmin } from './dynamic_loaders';
 import { AggregationCursor } from './cursor/aggregation_cursor';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
+import { Document, BSONOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import { MongoError } from './error';
 import { Collection, CollectionOptions } from './collection';
@@ -82,13 +82,13 @@ export interface DbPrivate {
   readPreference?: ReadPreference;
   pkFactory: PkFactory;
   readConcern?: ReadConcern;
-  bsonOptions: BSONSerializeOptions;
+  bsonOptions: BSONOptions;
   writeConcern?: WriteConcern;
   namespace: MongoDBNamespace;
 }
 
 /** @public */
-export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
+export interface DbOptions extends BSONOptions, WriteConcernOptions, LoggerOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
@@ -201,7 +201,7 @@ export class Db {
     return this.s.readPreference;
   }
 
-  get bsonOptions(): BSONSerializeOptions {
+  get bsonOptions(): BSONOptions {
     return this.s.bsonOptions;
   }
 

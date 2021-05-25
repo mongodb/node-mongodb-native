@@ -16,7 +16,7 @@ import { connect, MONGO_CLIENT_EVENTS } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { Logger, LoggerLevelId } from './logger';
 import type { ReadConcern, ReadConcernLevelId, ReadConcernLike } from './read_concern';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
+import { BSONOptions, Document, resolveBSONOptions } from './bson';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { AuthMechanismId } from './cmap/auth/defaultAuthProviders';
 import type { Topology, TopologyEvents } from './sdam/topology';
@@ -98,7 +98,7 @@ export type SupportedNodeConnectionOptions = SupportedTLSConnectionOptions &
  * @public
  * @see https://docs.mongodb.com/manual/reference/connection-string
  */
-export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeConnectionOptions {
+export interface MongoClientOptions extends BSONOptions, SupportedNodeConnectionOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /** Enables or disables TLS/SSL for the connection. */
@@ -246,7 +246,7 @@ export type WithSessionCallback = (session: ClientSession) => Promise<any> | voi
 export interface MongoClientPrivate {
   url: string;
   sessions: Set<ClientSession>;
-  bsonOptions: BSONSerializeOptions;
+  bsonOptions: BSONOptions;
   namespace: MongoDBNamespace;
   readonly options?: MongoOptions;
   readonly readConcern?: ReadConcern;
@@ -378,7 +378,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return this.s.readPreference;
   }
 
-  get bsonOptions(): BSONSerializeOptions {
+  get bsonOptions(): BSONOptions {
     return this.s.bsonOptions;
   }
 

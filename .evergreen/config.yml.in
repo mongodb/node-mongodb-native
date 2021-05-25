@@ -561,6 +561,17 @@ functions:
 
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
 
+  "run bson-ext test":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh
+
   "upload test results":
     # Upload the xunit-format test results.
     - command: attach.xunit_results

@@ -6,7 +6,7 @@ import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { MongoError } from '../../error';
 import { maxWireVersion, Callback, ns } from '../../utils';
-import type { BSONSerializeOptions } from '../../bson';
+import type { BSONOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
 import { AuthMechanism } from './defaultAuthProviders';
@@ -15,7 +15,7 @@ const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
 const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
-const bsonOptions: BSONSerializeOptions = {
+const bsonOptions: BSONOptions = {
   promoteLongs: true,
   promoteValues: true,
   promoteBuffers: false

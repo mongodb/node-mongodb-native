@@ -1,11 +1,14 @@
 import type { OperationParent } from './operations/command';
-// import type * as _BSON from 'bson';
-// let BSON: typeof _BSON = require('bson');
-// try {
-//   BSON = require('bson-ext');
-// } catch {} // eslint-disable-line
 
-// export = BSON;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+let BSON = require('bson');
+try {
+  BSON = require('bson-ext');
+} catch {} // eslint-disable-line
+
+export const deserialize = BSON.deserialize as typeof import('bson').deserialize;
+export const serialize = BSON.serialize as typeof import('bson').serialize;
+export const calculateObjectSize = BSON.calculateObjectSize as typeof import('bson').calculateObjectSize;
 
 export {
   Long,
@@ -22,42 +25,21 @@ export {
   BSONRegExp,
   BSONSymbol,
   Map,
-  deserialize,
-  serialize,
-  calculateObjectSize
+  Document
 } from 'bson';
 
-/** @public */
-export interface Document {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+import type { DeserializeOptions, SerializeOptions } from 'bson';
 
-import type { SerializeOptions } from 'bson';
-
-// TODO: Remove me when types from BSON are updated
 /**
  * BSON Serialization options.
  * @public
  */
-export interface BSONSerializeOptions extends Omit<SerializeOptions, 'index'> {
-  /** Return document results as raw BSON buffers */
-  fieldsAsRaw?: { [key: string]: boolean };
-  /** Promotes BSON values to native types where possible, set to false to only receive wrapper types */
-  promoteValues?: boolean;
-  /** Promotes Binary BSON values to native Node Buffers */
-  promoteBuffers?: boolean;
-  /** Promotes long values to number if they fit inside the 53 bits resolution */
-  promoteLongs?: boolean;
-  /** Serialize functions on any object */
-  serializeFunctions?: boolean;
-  /** Specify if the BSON serializer should ignore undefined fields */
-  ignoreUndefined?: boolean;
-
+export interface BSONOptions extends Omit<SerializeOptions, 'index'>, DeserializeOptions {
+  /** Return BSON filled buffers from operations */
   raw?: boolean;
 }
 
-export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {
+export function pluckBSONSerializeOptions(options: BSONOptions): BSONOptions {
   const {
     fieldsAsRaw,
     promoteValues,
@@ -84,10 +66,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
  *
  * @internal
  */
-export function resolveBSONOptions(
-  options?: BSONSerializeOptions,
-  parent?: OperationParent
-): BSONSerializeOptions {
+export function resolveBSONOptions(options?: BSONOptions, parent?: OperationParent): BSONOptions {
   const parentOptions = parent?.bsonOptions;
   return {
     raw: options?.raw ?? parentOptions?.raw ?? false,

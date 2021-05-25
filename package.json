@@ -23,7 +23,7 @@
     "kerberos": "^1.1.0",
     "mongodb-client-encryption": "^1.0.0",
     "snappy": "^6.1.1",
-    "bson-ext": "^2.0.0"
+    "bson-ext": "^4.0.0"
   },
   "dependencies": {
     "bson": "^4.2.2",
