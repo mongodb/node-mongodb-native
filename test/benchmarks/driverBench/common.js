@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-modules */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
-const { MongoClient } = require('../../../src/mongo_client');
-const { GridFsBucket } = require('../../../src/gridfs-stream');
+const { MongoClient } = require('../../..');
+const { GridFSBucket } = require('../../..');
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
@@ -54,7 +55,7 @@ function dropCollection() {
 }
 
 function initBucket() {
-  this.bucket = new GridFsBucket(this.db);
+  this.bucket = new GridFSBucket(this.db);
 }
 
 function dropBucket() {

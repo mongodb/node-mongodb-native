@@ -591,6 +591,28 @@ SINGLETON_TASKS.push({
   ]
 });
 
+// special case for custom BSON-ext test
+SINGLETON_TASKS.push({
+  name: 'run-bson-ext-test',
+  tags: ['run-bson-ext-test'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'erbium',
+      },
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: '4.4',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'run bson-ext test' }
+  ]
+});
+
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
 fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
