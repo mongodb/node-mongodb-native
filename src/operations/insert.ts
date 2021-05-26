@@ -1,13 +1,13 @@
 import { MongoError } from '../error';
 import { defineAspects, Aspect, AbstractOperation } from './operation';
-import { CommandOperation } from './command';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import type { Document, BSONSerializeOptions } from '../bson';
+import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
-import { WriteConcern, WriteConcernOptions } from '../write_concern';
+import { WriteConcern } from '../write_concern';
 import type { ClientSession } from '../sessions';
 import { BulkWriteOperation } from './bulk_write';
 import type { InferIdType } from '../mongo_types';
@@ -46,7 +46,7 @@ export class InsertOperation extends CommandOperation<Document> {
 }
 
 /** @public */
-export interface InsertOneOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface InsertOneOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
   /** Force server to assign _id values instead of driver. */
