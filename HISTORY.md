@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.9](https://github.com/mongodb/node-mongodb-native/compare/v3.6.8...v3.6.9) (2021-05-26)
+
+
+### Bug Fixes
+
+* **NODE-3309:** remove redundant iteration of bulk write result ([#2815](https://github.com/mongodb/node-mongodb-native/issues/2815)) ([fac9610](https://github.com/mongodb/node-mongodb-native/commit/fac961086eafa0f7437576fd6af900e1f9fe22ed))
+* fix url parsing for a mongodb+srv url that has commas in the database name ([#2789](https://github.com/mongodb/node-mongodb-native/issues/2789)) ([58c4e69](https://github.com/mongodb/node-mongodb-native/commit/58c4e693cc3a717254144d5f9bdddd8414217e97))
+
 ### [3.6.8](https://github.com/mongodb/node-mongodb-native/compare/v3.6.7...v3.6.8) (2021-05-21)
 
 
