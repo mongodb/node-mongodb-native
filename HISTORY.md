@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.5](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2021-05-26)
+
+
+### Bug Fixes
+
+* **NODE-3183,NODE-3249:** bring versioned API impl up to date ([#2814](https://github.com/mongodb/node-mongodb-native/issues/2814)) ([cd3b73a](https://github.com/mongodb/node-mongodb-native/commit/cd3b73a5c734a7a16a21af50a3a1cc1bc54da438))
+* **NODE-3245:** mark symbols as internal remove from type definitions ([#2810](https://github.com/mongodb/node-mongodb-native/issues/2810)) ([0b636ba](https://github.com/mongodb/node-mongodb-native/commit/0b636ba2148e486b0093850c6e0706d358723f44))
+* **NODE-3275:** Fix enum type export naming and serverApi validation ([#2809](https://github.com/mongodb/node-mongodb-native/issues/2809)) ([661511d](https://github.com/mongodb/node-mongodb-native/commit/661511d1fc3bff5785e5f9c7d70ab21789a395b4))
+
 ## [4.0.0-beta.4](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2021-05-18)
 
 
