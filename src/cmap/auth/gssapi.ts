@@ -93,7 +93,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
         `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
         initOptions,
         (err: string, client: KerberosClient): void => {
-          if (err) return callback(new MongoError(err));
+          if (err) return callback(new MongoDriverError(err));
           callback(undefined, client);
         }
       );

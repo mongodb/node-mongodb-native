@@ -170,6 +170,7 @@ export class MongoServerError extends MongoError {
  * @category Error
  */
 export class MongoDriverError extends MongoError {
+  // can have code: String
   constructor(message: string | Error | ErrorDescription) {
     super(message);
     this.name = 'MongoDriverError';

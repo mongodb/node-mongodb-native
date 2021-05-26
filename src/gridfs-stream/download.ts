@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { AnyError, MongoDriverError, MongoError } from '../error';
+import { AnyError, MongoDriverError } from '../error';
 import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
 import type { Sort } from '../sort';
@@ -315,8 +315,8 @@ function init(stream: GridFSBucketReadStream): void {
         ? stream.s.filter._id.toString()
         : stream.s.filter.filename;
       const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
-      const err = new MongoError(errmsg);
-      (err as any).code = 'ENOENT';
+      const err = new MongoDriverError(errmsg);
+      err.code = 'ENOENT';
       return __handleError(stream, err);
     }
 

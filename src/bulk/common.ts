@@ -655,6 +655,7 @@ function handleMongoWriteConcernError(
 ) {
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
+  // TODO: make more reasonable
   const wrappedWriteConcernError = new WriteConcernError(
     new MongoServerError({
       errmsg: err.result?.writeConcernError.errmsg,
