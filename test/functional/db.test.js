@@ -302,4 +302,14 @@ describe('Db', function () {
       });
     }
   });
+
+  it(
+    'should throw if Db.collection is passed a deprecated callback argument',
+    withClient((client, done) => {
+      expect(() => client.db('test').collection('test', () => {})).to.throw(
+        'The callback form of this helper has been removed.'
+      );
+      done();
+    })
+  );
 });
