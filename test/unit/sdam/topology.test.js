@@ -7,6 +7,10 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
 const { ns, makeClientMetadata } = require('../../../src/utils');
+const { TopologyDescriptionChangedEvent } = require('../../../src/sdam/events');
+const { TopologyDescription } = require('../../../src/sdam/topology_description');
+const { TopologyType } = require('../../../src/sdam/common');
+const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -313,6 +317,63 @@ describe('Topology (unit)', function () {
         );
       });
       return p;
+    });
+
+    it('should create use listeners when SRV Polling', function (done) {
+      const srvRecords = [{ priority: 1, weight: 1, port: 27017, name: 'localhost' }];
+
+      const orderOfAccess = ['listeners', 'on', 'start', 'stop', 'removeListener'];
+      let callCount = 0;
+
+      const handler = {
+        get(_, prop) {
+          expect(prop).to.equal(orderOfAccess[callCount]);
+          callCount += 1;
+
+          if (prop === 'listeners') {
+            return () => [];
+          }
+
+          if (prop === 'on') {
+            return (name, listener) => {
+              expect(name).to.equal(SrvPoller.SRV_RECORD_DISCOVERY);
+              expect(listener).to.equal(topology.s.handleSrvPolling);
+            };
+          }
+
+          if (prop === 'start') {
+            return () => {
+              // topology.s.srvPoller.emit('srvRecordDiscovery')
+              topology.s.handleSrvPolling(new SrvPollingEvent(srvRecords));
+
+              topology.s.state = 'connected';
+              topology.close(() => done());
+            };
+          }
+
+          if (prop === 'removeListener') {
+            return (name, listener) => {
+              expect(name).to.equal(SrvPoller.SRV_RECORD_DISCOVERY);
+              expect(listener).to.equal(topology.s.handleSrvPolling);
+            };
+          }
+
+          return () => undefined;
+        }
+      };
+
+      const topology = new Topology('', { srvHost: 'fakeHost', srvPoller: new Proxy({}, handler) });
+      expect(topology.s.handleSrvPolling).to.be.a('function');
+      expect(topology.s.detectTopologyDescriptionChange).to.be.a('function');
+
+      topology.emit(
+        Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+        new TopologyDescriptionChangedEvent(
+          2,
+          new TopologyDescription(TopologyType.Unknown),
+          new TopologyDescription(TopologyType.Sharded)
+        )
+      );
     });
   });
 });
