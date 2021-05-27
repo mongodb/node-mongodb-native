@@ -38,10 +38,7 @@ const exclusionList = [
 /** @public */
 export type MapFunction<TSchema = Document> = (this: TSchema) => void;
 /** @public */
-export type ReduceFunction<TKey = ObjectId, TValue = Document> = (
-  key: TKey,
-  values: TValue[]
-) => TValue;
+export type ReduceFunction<TKey = ObjectId, TValue = any> = (key: TKey, values: TValue[]) => TValue;
 /** @public */
 export type FinalizeFunction<TKey = ObjectId, TValue = Document> = (
   key: TKey,

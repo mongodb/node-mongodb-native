@@ -63,7 +63,7 @@ export interface ClientSessionOptions {
 }
 
 /** @public */
-export type WithTransactionCallback<T> = (session: ClientSession) => Promise<T> | void;
+export type WithTransactionCallback<T = void> = (session: ClientSession) => Promise<T>;
 
 /** @public */
 export type ClientSessionEvents = {
@@ -335,7 +335,10 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param fn - A lambda to run within a transaction
    * @param options - Optional settings for the transaction
    */
-  withTransaction<T>(fn: WithTransactionCallback<T>, options?: TransactionOptions): Promise<void> {
+  withTransaction<T = void>(
+    fn: WithTransactionCallback<T>,
+    options?: TransactionOptions
+  ): ReturnType<typeof fn> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }

@@ -10,6 +10,7 @@ import type { ClientSession } from '../sessions';
 import type { OperationParent } from '../operations/command';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
+import type { Projection } from '../mongo_types';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -106,6 +107,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a group stage to the aggregation pipeline */
+  group<T = TSchema>($group: Document): AggregationCursor<T>;
   group($group: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $group });
@@ -134,6 +136,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a project stage to the aggregation pipeline */
+  project<T = TSchema>($project: Document): AggregationCursor<T>;
   project($project: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $project });
@@ -169,7 +172,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a unwind stage to the aggregation pipeline */
-  unwind($unwind: number): this {
+  unwind($unwind: Document | string): this {
     assertUninitialized(this);
     this[kPipeline].push({ $unwind });
     return this;

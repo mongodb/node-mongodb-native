@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from './bson';
+import type { Binary, Document, ObjectId, BSONRegExp } from './bson';
 import { EventEmitter } from 'events';
 
 /** @internal */
@@ -42,34 +42,137 @@ export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecor
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
-export type Filter<TSchema> = Partial<TSchema> & Document;
+export type Filter<TSchema> = {
+  [P in keyof TSchema]?: Condition<TSchema[P]>;
+} &
+  RootFilterOperators<TSchema>;
+
+export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
+
+type AlternativeType<T> = T extends ReadonlyArray<infer U>
+  ? T | RegExpOrString<U>
+  : RegExpOrString<T>;
+
+// we can search using alternative types in mongodb e.g.
+// string types can be searched using a regex in mongo
+// array types can be searched using their element type
+type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
+
+export interface RootFilterOperators<TSchema> extends Document {
+  $and?: Filter<TSchema>[];
+  $nor?: Filter<TSchema>[];
+  $or?: Filter<TSchema>[];
+  $text?: {
+    $search: string;
+    $language?: string;
+    $caseSensitive?: boolean;
+    $diacriticSensitive?: boolean;
+  };
+  $where?: string | ((this: TSchema) => boolean);
+  $comment?: string | Document;
+}
+
+export interface FilterOperators<TValue> extends Document {
+  // Comparison
+  $eq?: TValue;
+  $gt?: TValue;
+  $gte?: TValue;
+  $in?: TValue[];
+  $lt?: TValue;
+  $lte?: TValue;
+  $ne?: TValue;
+  $nin?: TValue[];
+  // Logical
+  $not?: TValue extends string ? FilterOperators<TValue> | RegExp : FilterOperators<TValue>;
+  // Element
+  /**
+   * When `true`, `$exists` matches the documents that contain the field,
+   * including documents where the field value is null.
+   */
+  $exists?: boolean;
+  $type?: BSONType | BSONTypeAlias;
+  // Evaluation
+  $expr?: any;
+  $jsonSchema?: any;
+  $mod?: TValue extends number ? [number, number] : never;
+  $regex?: TValue extends string ? RegExp | BSONRegExp | string : never;
+  $options?: TValue extends string ? string : never;
+  // Geospatial
+  $geoIntersects?: { $geometry: Document };
+  $geoWithin?: Document;
+  $near?: Document;
+  $nearSphere?: Document;
+  $maxDistance?: number;
+  // Array
+  $all?: TValue extends ReadonlyArray<any> ? any[] : never;
+  $elemMatch?: TValue extends ReadonlyArray<any> ? Document : never;
+  $size?: TValue extends ReadonlyArray<any> ? number : never;
+  // Bitwise
+  $bitsAllClear?: BitwiseFilter;
+  $bitsAllSet?: BitwiseFilter;
+  $bitsAnyClear?: BitwiseFilter;
+  $bitsAnySet?: BitwiseFilter;
+}
+
+type BitwiseFilter =
+  | number /** numeric bit mask */
+  | Binary /** BinData bit mask */
+  | number[]; /** `[ <position1>, <position2>, ... ]` */
+
+/** @public */
+export const BSONType = Object.freeze({
+  double: 1,
+  string: 2,
+  object: 3,
+  array: 4,
+  binData: 5,
+  undefined: 6,
+  objectId: 7,
+  bool: 8,
+  date: 9,
+  null: 10,
+  regex: 11,
+  dbPointer: 12,
+  javascript: 13,
+  symbol: 14,
+  javascriptWithScope: 15,
+  int: 16,
+  timestamp: 17,
+  long: 18,
+  decimal: 19,
+  minKey: -1,
+  maxKey: 127
+} as const);
+
+/** @public */
+export type BSONType = typeof BSONType[keyof typeof BSONType];
+/** @public */
+export type BSONTypeAlias = keyof typeof BSONType;
 
 /** A MongoDB UpdateQuery is set of operators @public */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UpdateQuery<TSchema> = Document; // TODO(NODE-3274)
 
-/** @see https://docs.mongodb.com/manual/reference/operator/aggregation/meta/#proj._S_meta @public */
-export type MetaSortOperators = 'textScore' | 'indexKey';
-
 /** @public */
-export type MetaProjectionOperators =
-  | MetaSortOperators
-  /** Only for Atlas Search https://docs.atlas.mongodb.com/reference/atlas-search/scoring/ */
-  | 'searchScore'
-  /** Only for Atlas Search https://docs.atlas.mongodb.com/reference/atlas-search/highlighting/ */
-  | 'searchHighlights';
-
-/** @public */
-export interface ProjectionOperators {
+export interface ProjectionOperators extends Document {
   $elemMatch?: Document;
   $slice?: number | [number, number];
-  $meta?: MetaProjectionOperators;
+  $meta?: string;
+  /** @deprecated Since MongoDB 3.2, Use FindCursor#max */
+  $max?: any;
 }
 
 /** @public */
 export type Projection<TSchema> = {
   [Key in keyof TSchema]?: ProjectionOperators | 0 | 1 | boolean;
-};
+} &
+  Partial<Record<string, ProjectionOperators | 0 | 1 | boolean>>;
+
+/** @public */
+export type FlattenIfArray<T> = T extends ReadonlyArray<infer R> ? R : T;
+
+/** @public */
+export type SchemaMember<T, V> = { [P in keyof T]?: V } | { [key: string]: V };
 
 /** @public */
 export type Nullable<AnyType> = AnyType | null | undefined;

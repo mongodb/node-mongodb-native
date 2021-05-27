@@ -50,6 +50,7 @@ const stateMachine: { [state in TxnState]: TxnState[] } = {
  * @public
  */
 export interface TransactionOptions extends CommandOperationOptions {
+  // TODO: Improve the types and handling (NODE-3297)
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
