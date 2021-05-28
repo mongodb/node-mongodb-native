@@ -323,7 +323,7 @@ describe('Topology (unit)', function () {
       /** @type {Topology} */
       let topology;
 
-      before(() => {
+      beforeEach(() => {
         topology = new Topology('', { srvHost: 'fakeHost' });
 
         expect(topology.s.detectSrvRecords).to.be.a('function');
@@ -389,13 +389,6 @@ describe('Topology (unit)', function () {
       });
 
       describe('topologyDescriptionChange event listener', function () {
-        beforeEach(() => {
-          topology = new Topology('', { srvHost: 'fakeHost' });
-
-          expect(topology.s.detectSrvRecords).to.be.a('function');
-          expect(topology.s.detectShardedTopology).to.be.a('function');
-        });
-
         it('should not add more than one srvRecordDiscovery listener', function () {
           // fake a transition to Sharded
           transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 1
