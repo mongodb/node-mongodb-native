@@ -2,7 +2,7 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
-import { MongoError, MongoServerError } from '../error';
+import { MongoError /*, MongoServerError*/ } from '../error';
 import type { Server } from '../sdam/server';
 import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';

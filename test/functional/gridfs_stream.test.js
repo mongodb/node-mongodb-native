@@ -1313,7 +1313,10 @@ describe('GridFS Stream', function () {
 
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
-                      test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      test.equal(
+                        error.toString(),
+                        'MongoDriverError: Cannot call abort() on a stream twice'
+                      );
                       client.close(done);
                     });
                   });
