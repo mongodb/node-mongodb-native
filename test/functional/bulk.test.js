@@ -1960,13 +1960,11 @@ describe('Bulk', function () {
 
         bulk.execute(err => {
           expect(err).to.not.exist;
-          expect(events).to.be.an('array').with.length(1);
-          expect(events[0]).property('commandName').to.equal('update');
+          expect(events).to.be.an('array').with.lengthOf(1);
+          expect(events[0]).to.have.property('commandName', 'update');
           const updateCommand = events[0].command;
-          expect(updateCommand).property('updates').to.be.an('array').with.length(2);
-          updateCommand.updates.forEach(update => {
-            expect(update).to.have.property('arrayFilters');
-          });
+          expect(updateCommand).property('updates').to.be.an('array').with.lengthOf(2);
+          updateCommand.updates.forEach(update => expect(update).to.have.property('arrayFilters'));
           coll.find({}).toArray((err, result) => {
             expect(err).to.not.exist;
             expect(result[0]).to.containSubset({
