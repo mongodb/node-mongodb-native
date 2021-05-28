@@ -27,6 +27,9 @@ export interface OperationOptions extends BSONSerializeOptions {
 
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
   readPreference?: ReadPreferenceLike;
+
+  /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
+  bypassPinningCheck?: boolean;
 }
 
 /** @internal */
@@ -45,6 +48,7 @@ export abstract class AbstractOperation<TResult = any> {
   readPreference: ReadPreference;
   server!: Server;
   fullResponse?: boolean;
+  bypassPinningCheck: boolean;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
@@ -67,6 +71,7 @@ export abstract class AbstractOperation<TResult = any> {
     }
 
     this.options = options;
+    this.bypassPinningCheck = !!options.bypassPinningCheck;
   }
 
   abstract execute(server: Server, session: ClientSession, callback: Callback<TResult>): void;

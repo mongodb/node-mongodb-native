@@ -1,5 +1,4 @@
 import { MongoDriverError } from '../error';
-import type { Connection } from './connection';
 import type { ConnectionPool } from './connection_pool';
 
 /**
@@ -28,9 +27,9 @@ export class WaitQueueTimeoutError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
-  constructor(pool: Connection | ConnectionPool) {
-    super('Timed out while checking out a connection from connection pool');
-    this.address = pool.address;
+  constructor(message: string, address: string) {
+    super(message);
+    this.address = address;
   }
 
   get name(): string {

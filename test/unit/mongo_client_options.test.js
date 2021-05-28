@@ -534,4 +534,48 @@ describe('MongoOptions', function () {
       }
     });
   });
+
+  context('when loadBalanced=true is in the URI', function () {
+    it('sets the option', function () {
+      const options = parseOptions('mongodb://a/?loadBalanced=true');
+      expect(options.loadBalanced).to.be.true;
+    });
+
+    it('errors with multiple hosts', function () {
+      const parse = () => {
+        parseOptions('mongodb://a,b/?loadBalanced=true');
+      };
+      expect(parse).to.throw(/single host/);
+    });
+
+    it('errors with a replicaSet option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&replicaSet=test');
+      };
+      expect(parse).to.throw(/replicaSet/);
+    });
+
+    it('errors with a directConnection option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&directConnection=true');
+      };
+      expect(parse).to.throw(/directConnection/);
+    });
+  });
+
+  context('when loadBalanced is in the options object', function () {
+    it('errors when the option is true', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: true });
+      };
+      expect(parse).to.throw(/URI/);
+    });
+
+    it('errors when the option is false', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: false });
+      };
+      expect(parse).to.throw(/URI/);
+    });
+  });
 });

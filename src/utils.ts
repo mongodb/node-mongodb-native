@@ -12,6 +12,7 @@ import {
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
+import { ServerType } from './sdam/common';
 import type { Db } from './db';
 import type { Collection } from './collection';
 import type { OperationOptions, Hint } from './operations/operation';
@@ -25,6 +26,7 @@ import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import { ReadPreference } from './read_preference';
 import { URL } from 'url';
+import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 
 /**
  * MongoDB Driver style callback
@@ -674,6 +676,13 @@ export function uuidV4(): Buffer {
  */
 export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
+    if (topologyOrServer.loadBalanced) {
+      // Since we do not have a monitor, we assume the load balanced server is always
+      // pointed at the latest mongodb version. There is a risk that for on-prem
+      // deployments that don't upgrade immediately that this could alert to the
+      // application that a feature is avaiable that is actually not.
+      return MAX_SUPPORTED_WIRE_VERSION;
+    }
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
     }
@@ -1402,4 +1411,18 @@ export function emitWarningOnce(message: string): void {
  */
 export function enumToString(en: Record<string, unknown>): string {
   return Object.values(en).join(', ');
+}
+
+/**
+ * Determine if a server supports retryable writes.
+ *
+ * @internal
+ */
+export function supportsRetryableWrites(server: Server): boolean {
+  return (
+    !!server.loadBalanced ||
+    (server.description.maxWireVersion >= 6 &&
+      !!server.description.logicalSessionTimeoutMinutes &&
+      server.description.type !== ServerType.Standalone)
+  );
 }

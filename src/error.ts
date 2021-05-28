@@ -490,6 +490,12 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
   return err[kBeforeHandshake] === true;
 }
 
+/** @public */
+export interface MongoNetworkErrorOptions {
+  /** Indicates the timeout happened before a connection handshake completed */
+  beforeHandshake: boolean;
+}
+
 /**
  * An error indicating an issue with the network, including TCP errors and timeouts.
  * @public
@@ -499,7 +505,7 @@ export class MongoNetworkError extends MongoError {
   /** @internal */
   [kBeforeHandshake]?: boolean;
 
-  constructor(message: string | Error, options?: { beforeHandshake?: boolean }) {
+  constructor(message: string | Error, options?: MongoNetworkErrorOptions) {
     super(message);
 
     if (options && typeof options.beforeHandshake === 'boolean') {
@@ -512,12 +518,6 @@ export class MongoNetworkError extends MongoError {
   }
 }
 
-/** @public */
-export interface MongoNetworkTimeoutErrorOptions {
-  /** Indicates the timeout happened before a connection handshake completed */
-  beforeHandshake: boolean;
-}
-
 /**
  * An error indicating a network timeout occurred
  * @public
@@ -527,7 +527,7 @@ export interface MongoNetworkTimeoutErrorOptions {
  * CSFLE has a dependency on this error with an instanceof check
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
-  constructor(message: string, options?: MongoNetworkTimeoutErrorOptions) {
+  constructor(message: string, options?: MongoNetworkErrorOptions) {
     super(message, options);
   }
 
