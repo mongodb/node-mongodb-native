@@ -7,12 +7,32 @@ import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
 import { matchesEvents } from './match';
 import { satisfies as semverSatisfies } from 'semver';
+import { MongoClient } from '../../../src/mongo_client';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
 >;
 interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
+}
+
+export function trace(message: string): void {
+  if (process.env.UTR_TRACE) {
+    console.log(` > ${message}`);
+  }
+}
+
+async function terminateOpenTransactions(client: MongoClient) {
+  // TODO: on sharded clusters this has to be run on each mongos
+  try {
+    await client.db().admin().command({ killAllSessions: [] });
+  } catch (err) {
+    if (err.code === 11601 || err.code === 13 || err.code === 59) {
+      return;
+    }
+
+    throw err;
+  }
 }
 
 export async function runUnifiedTest(
@@ -51,7 +71,11 @@ export async function runUnifiedTest(
 
   let entities;
   try {
+    trace('\n starting test:');
     await utilClient.connect();
+
+    // terminate all sessions before each test suite
+    await terminateOpenTransactions(utilClient);
 
     // Must fetch parameters before checking runOnRequirements
     ctx.configuration.parameters = await utilClient.db().admin().command({ getParameter: '*' });
@@ -63,6 +87,7 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
+    trace('satisfiesRequirements');
     for (const requirement of allRequirements) {
       const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
       if (!met) {
@@ -75,15 +100,19 @@ export async function runUnifiedTest(
     // documents are specified, the test runner MUST create the collection with a "majority" write concern.
     // The test runner MUST use the internal MongoClient for these operations.
     if (unifiedSuite.initialData) {
+      trace('initialData');
       for (const collData of unifiedSuite.initialData) {
         const db = utilClient.db(collData.databaseName);
         const collection = db.collection(collData.collectionName, {
           writeConcern: { w: 'majority' }
         });
+
+        trace('listCollections');
         const collectionList = await db
           .listCollections({ name: collData.collectionName })
           .toArray();
         if (collectionList.length !== 0) {
+          trace('drop');
           expect(await collection.drop()).to.be.true;
         }
       }
@@ -95,16 +124,19 @@ export async function runUnifiedTest(
         });
 
         if (!collData.documents?.length) {
+          trace('createCollection');
           await db.createCollection(collData.collectionName, {
             writeConcern: { w: 'majority' }
           });
           continue;
         }
 
+        trace('insertMany');
         await collection.insertMany(collData.documents);
       }
     }
 
+    trace('createEntities');
     entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
 
     // Workaround for SERVER-39704:
@@ -125,7 +157,15 @@ export async function runUnifiedTest(
     }
 
     for (const operation of test.operations) {
-      await executeOperationAndCheck(operation, entities, utilClient);
+      trace(operation.name);
+      try {
+        await executeOperationAndCheck(operation, entities, utilClient);
+      } catch (err) {
+        // clean up all sessions on failed test, and rethrow
+        await terminateOpenTransactions(utilClient);
+
+        throw err;
+      }
     }
 
     const clientCommandEvents = new Map<string, CommandEvent[]>();

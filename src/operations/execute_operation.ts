@@ -136,6 +136,15 @@ function executeWithServerSelection(
     return;
   }
 
+  if (
+    session &&
+    session.isPinned &&
+    session.transaction.isCommitted &&
+    !operation.bypassPinningCheck
+  ) {
+    session.unpin();
+  }
+
   const serverSelectionOptions = { session };
   function callbackWithRetry(err?: any, result?: any) {
     if (err == null) {
@@ -241,8 +250,9 @@ function shouldRetryWrite(err: any) {
 
 function supportsRetryableWrites(server: Server) {
   return (
-    server.description.maxWireVersion >= 6 &&
-    server.description.logicalSessionTimeoutMinutes &&
-    server.description.type !== ServerType.Standalone
+    server.loadBalanced ||
+    (server.description.maxWireVersion >= 6 &&
+      server.description.logicalSessionTimeoutMinutes &&
+      server.description.type !== ServerType.Standalone)
   );
 }

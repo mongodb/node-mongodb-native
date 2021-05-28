@@ -17,9 +17,7 @@ import {
   HostAddress
 } from '../utils';
 import {
-  AnyError,
   MongoDriverError,
-  MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError,
@@ -35,13 +33,12 @@ import {
   OpQueryOptions,
   Msg
 } from './commands';
-import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions, ObjectId } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { Stream } from './connect';
 import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_protocol/shared';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { isTransactionCommand } from '../transactions';
 import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
@@ -152,6 +149,8 @@ export type ConnectionEvents = {
   clusterTimeReceived(clusterTime: Document): void;
   close(): void;
   message(message: any): void;
+  pinned(pinType: string): void;
+  unpinned(pinType: string): void;
 };
 
 /** @internal */
@@ -194,6 +193,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   static readonly CLOSE = 'close' as const;
   /** @event */
   static readonly MESSAGE = 'message' as const;
+  /** @event */
+  static readonly PINNED = 'pinned' as const;
+  /** @event */
+  static readonly UNPINNED = 'unpinned' as const;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -247,8 +250,20 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kIsMaster] = response;
   }
 
+  get serviceId(): ObjectId | undefined {
+    return this.ismaster?.serviceId;
+  }
+
+  get loadBalanced(): boolean {
+    return this.description.loadBalanced;
+  }
+
   get generation(): number {
     return this[kGeneration] || 0;
+  }
+
+  set generation(generation: number) {
+    this[kGeneration] = generation;
   }
 
   get idleTime(): number {
@@ -306,6 +321,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options = { force: false };
     }
 
+    this.removeAllListeners(Connection.PINNED);
+    this.removeAllListeners(Connection.UNPINNED);
+
     options = Object.assign({ force: false }, options);
     if (this[kStream] == null || this.destroyed) {
       this.destroyed = true;
@@ -351,7 +369,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     let clusterTime = this.clusterTime;
     let finalCmd = Object.assign({}, cmd);
-    const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
 
     if (this.serverApi) {
       const { version, strict, deprecationErrors } = this.serverApi;
@@ -367,18 +384,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         session.clusterTime.clusterTime.greaterThan(clusterTime.clusterTime)
       ) {
         clusterTime = session.clusterTime;
-      }
-
-      // We need to unpin any read or write commands that happen outside of a pinned
-      // transaction, so we check if we have a pinned transaction that is no longer
-      // active, and unpin for all except start or commit.
-      if (
-        !session.transaction.isActive &&
-        session.transaction.isPinned &&
-        !finalCmd.startTransaction &&
-        !finalCmd.commitTransaction
-      ) {
-        session.transaction.unpinServer();
       }
 
       const err = applySession(session, finalCmd, options as CommandOptions);
@@ -416,35 +421,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ? new Msg(cmdNs, finalCmd, commandOptions)
       : new Query(cmdNs, finalCmd, commandOptions);
 
-    const commandResponseHandler = inTransaction
-      ? (err?: AnyError, ...args: Document[]) => {
-          // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
-          if (
-            err &&
-            err instanceof MongoNetworkError &&
-            !err.hasErrorLabel('TransientTransactionError')
-          ) {
-            err.addErrorLabel('TransientTransactionError');
-          }
-
-          if (
-            session &&
-            !cmd.commitTransaction &&
-            err &&
-            err instanceof MongoError &&
-            err.hasErrorLabel('TransientTransactionError')
-          ) {
-            session.transaction.unpinServer();
-          }
-
-          return callback(err, ...args);
-        }
-      : callback;
-
     try {
-      write(this, message, commandOptions, commandResponseHandler);
+      write(this, message, commandOptions, callback);
     } catch (err) {
-      commandResponseHandler(err);
+      callback(err);
     }
   }
 
@@ -680,8 +660,10 @@ export class CryptoConnection extends Connection {
   }
 }
 
-function hasSessionSupport(conn: Connection) {
-  return conn.description.logicalSessionTimeoutMinutes != null;
+/** @public */
+export function hasSessionSupport(conn: Connection): boolean {
+  const description = conn.description;
+  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
 }
 
 function supportsOpMsg(conn: Connection) {

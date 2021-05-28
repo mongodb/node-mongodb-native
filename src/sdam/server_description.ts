@@ -7,14 +7,16 @@ import type { MongoError } from '../error';
 const WRITABLE_SERVER_TYPES = new Set<ServerType>([
   ServerType.RSPrimary,
   ServerType.Standalone,
-  ServerType.Mongos
+  ServerType.Mongos,
+  ServerType.LoadBalancer
 ]);
 
 const DATA_BEARING_SERVER_TYPES = new Set<ServerType>([
   ServerType.RSPrimary,
   ServerType.RSSecondary,
   ServerType.Mongos,
-  ServerType.Standalone
+  ServerType.Standalone,
+  ServerType.LoadBalancer
 ]);
 
 /** @public */
@@ -36,6 +38,9 @@ export interface ServerDescriptionOptions {
 
   /** The topologyVersion */
   topologyVersion?: TopologyVersion;
+
+  /** If the client is in load balancing mode. */
+  loadBalanced?: boolean;
 }
 
 /**
@@ -90,7 +95,7 @@ export class ServerDescription {
       this._hostAddress = address;
       this.address = this._hostAddress.toString();
     }
-    this.type = parseServerType(ismaster);
+    this.type = parseServerType(ismaster, options);
     this.hosts = ismaster?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
     this.passives = ismaster?.passives?.map((host: string) => host.toLowerCase()) ?? [];
     this.arbiters = ismaster?.arbiters?.map((host: string) => host.toLowerCase()) ?? [];
@@ -206,7 +211,14 @@ export class ServerDescription {
 }
 
 // Parses an `ismaster` message and determines the server type
-export function parseServerType(ismaster?: Document): ServerType {
+export function parseServerType(
+  ismaster?: Document,
+  options?: ServerDescriptionOptions
+): ServerType {
+  if (options?.loadBalanced) {
+    return ServerType.LoadBalancer;
+  }
+
   if (!ismaster || !ismaster.ok) {
     return ServerType.Unknown;
   }

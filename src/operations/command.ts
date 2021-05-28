@@ -47,6 +47,9 @@ export interface CommandOperationOptions
   dbName?: string;
   authdb?: string;
   noResponse?: boolean;
+
+  /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
+  bypassPinningCheck?: boolean;
 }
 
 /** @internal */
@@ -107,6 +110,10 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       return this.explain === undefined;
     }
     return true;
+  }
+
+  get bypassPinningCheck(): boolean {
+    return this.options.bypassPinningCheck || false;
   }
 
   abstract execute(server: Server, session: ClientSession, callback: Callback<T>): void;

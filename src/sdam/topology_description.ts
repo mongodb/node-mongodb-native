@@ -85,7 +85,13 @@ export class TopologyDescription {
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
-      if (serverDescription.type === ServerType.Unknown) continue;
+      // Load balancer mode is always compatible.
+      if (
+        serverDescription.type === ServerType.Unknown ||
+        serverDescription.type === ServerType.LoadBalancer
+      ) {
+        continue;
+      }
 
       if (serverDescription.minWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;

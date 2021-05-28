@@ -18,6 +18,7 @@ import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import { ReadPreference } from './read_preference';
 import { URL } from 'url';
+import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 
 /**
  * MongoDB Driver style callback
@@ -663,6 +664,9 @@ export function uuidV4(): Buffer {
  */
 export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
+    if (topologyOrServer.loadBalanced) {
+      return MAX_SUPPORTED_WIRE_VERSION;
+    }
     if (topologyOrServer.ismaster) {
       return topologyOrServer.ismaster.maxWireVersion;
     }

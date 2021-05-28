@@ -7,7 +7,13 @@ const {
   DEFAULT_ISMASTER_36
   // eslint-disable-next-line no-restricted-modules
 } = require('mongodb-mock-server');
+const { ObjectId } = require('bson');
 const { HostAddress } = require('../../src/utils');
+
+const DEFAULT_HELLO_50 = {
+  ...DEFAULT_ISMASTER_36,
+  serverId: new ObjectId()
+};
 
 /**
  * @callback GetHostAddress
@@ -71,5 +77,6 @@ module.exports = {
   createServer,
   cleanup,
   DEFAULT_ISMASTER,
-  DEFAULT_ISMASTER_36
+  DEFAULT_ISMASTER_36,
+  DEFAULT_HELLO_50
 };

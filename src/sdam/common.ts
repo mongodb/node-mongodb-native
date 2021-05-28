@@ -17,7 +17,8 @@ export const TopologyType = Object.freeze({
   ReplicaSetNoPrimary: 'ReplicaSetNoPrimary',
   ReplicaSetWithPrimary: 'ReplicaSetWithPrimary',
   Sharded: 'Sharded',
-  Unknown: 'Unknown'
+  Unknown: 'Unknown',
+  LoadBalanced: 'LoadBalanced'
 } as const);
 
 /** @public */
@@ -36,7 +37,8 @@ export const ServerType = Object.freeze({
   RSArbiter: 'RSArbiter',
   RSOther: 'RSOther',
   RSGhost: 'RSGhost',
-  Unknown: 'Unknown'
+  Unknown: 'Unknown',
+  LoadBalancer: 'LoadBalancer'
 } as const);
 
 /** @public */

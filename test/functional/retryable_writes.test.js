@@ -99,8 +99,8 @@ function executeScenarioTest(test, ctx) {
               /expected false to be true/
             );
             if (hasResult) expect(err.result).to.matchMongoSpec(test.outcome.result);
-            if (errorLabelsContain) expect(err.errorLabels).to.have.members(errorLabelsContain);
-            if (errorLabelsOmit) expect(err.errorLabels).to.not.have.members(errorLabelsOmit);
+            if (errorLabelsContain) expect(err.errorLabels).to.containSubset(errorLabelsContain);
+            if (errorLabelsOmit) expect(err.errorLabels).to.not.containSubset(errorLabelsOmit);
           });
       } else if (test.outcome.result) {
         const expected = test.outcome.result;

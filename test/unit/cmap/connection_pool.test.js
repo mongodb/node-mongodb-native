@@ -73,6 +73,7 @@ describe('Connection Pool', function () {
     });
 
     pool.withConnection(
+      undefined,
       (err, conn, cb) => {
         expect(err).to.not.exist;
         cb();
@@ -193,11 +194,15 @@ describe('Connection Pool', function () {
         pool.close(done);
       };
 
-      pool.withConnection((err, conn, cb) => {
-        expect(err).to.exist;
-        expect(err).to.match(/closed/);
-        cb(err);
-      }, callback);
+      pool.withConnection(
+        undefined,
+        (err, conn, cb) => {
+          expect(err).to.exist;
+          expect(err).to.match(/closed/);
+          cb(err);
+        },
+        callback
+      );
     });
 
     it('should return an error to the original callback', function (done) {
@@ -216,10 +221,14 @@ describe('Connection Pool', function () {
         pool.close(done);
       };
 
-      pool.withConnection((err, conn, cb) => {
-        expect(err).to.not.exist;
-        cb(new Error('my great error'));
-      }, callback);
+      pool.withConnection(
+        undefined,
+        (err, conn, cb) => {
+          expect(err).to.not.exist;
+          cb(new Error('my great error'));
+        },
+        callback
+      );
     });
 
     it('should still manage a connection if no callback is provided', function (done) {
@@ -243,9 +252,73 @@ describe('Connection Pool', function () {
         pool.close(done);
       });
 
-      pool.withConnection((err, conn, cb) => {
+      pool.withConnection(undefined, (err, conn, cb) => {
         expect(err).to.not.exist;
         cb();
+      });
+    });
+  });
+
+  describe.skip('#closeConnections', function () {
+    context('when the server id matches', function () {
+      let pool;
+
+      beforeEach(() => {
+        pool = new ConnectionPool({
+          minPoolSize: 1,
+          hostAddress: server.hostAddress()
+        });
+      });
+
+      afterEach(done => {
+        pool.close(done);
+      });
+
+      it('closes the matching connections', function (done) {
+        const hello = mock.DEFAULT_HELLO_50;
+        server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(hello);
+          }
+        });
+        pool.on(ConnectionPool.CONNECTION_CLOSED, event => {
+          console.log('event', event);
+          done();
+        });
+
+        const connection = pool.checkOut();
+        pool.checkIn(connection);
+        pool.closeConnections(hello.serverId);
+      });
+    });
+
+    context('when the server id does not match', function () {
+      let pool;
+
+      beforeEach(() => {
+        pool = new ConnectionPool({
+          minPoolSize: 3,
+          hostAddress: server.hostAddress()
+        });
+      });
+
+      afterEach(done => {
+        pool.close(done);
+      });
+
+      it('does not close any connections', function (done) {
+        const hello = mock.DEFAULT_HELLO_50;
+        server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(hello);
+          }
+        });
+        pool.closeConnections(hello.serverId);
+        process.nextTick(() => {
+          done();
+        });
       });
     });
   });

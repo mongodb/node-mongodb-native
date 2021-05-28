@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { Topology } = require('../../../../src/sdam/topology');
 const { Server } = require('../../../../src/sdam/server');
-const { ServerType } = require('../../../../src/sdam/common');
+const { ServerType, TopologyType } = require('../../../../src/sdam/common');
 const { ServerDescription } = require('../../../../src/sdam/server_description');
 const { ReadPreference } = require('../../../../src/read_preference');
 const { MongoServerSelectionError } = require('../../../../src/error');
@@ -150,8 +150,19 @@ function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
 
   const serverType = definition.type;
+
   if (serverType === ServerType.Unknown) {
     return new ServerDescription(definition.address);
+  }
+
+  // There's no monitor in load balanced mode so no fake hello
+  // is needed.
+  if (serverType === ServerType.LoadBalancer) {
+    const description = new ServerDescription(definition.address, undefined, {
+      loadBalanced: true
+    });
+    delete description.lastUpdateTime;
+    return description;
   }
 
   const fakeIsMaster = { ok: 1, hosts };
@@ -218,7 +229,8 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
 
   const topologyOptions = {
     heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS,
-    monitorFunction: () => {}
+    monitorFunction: () => {},
+    loadBalanced: topologyDescription.type === TopologyType.LoadBalanced
   };
 
   const topology = new Topology(seedData.seedlist, topologyOptions);

@@ -150,12 +150,12 @@ operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
 
 operations.set('assertSessionPinned', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.arguments.session);
-  expect(session.transaction.isPinned).to.be.true;
+  expect(session.isPinned, 'session should be pinned').to.be.true;
 });
 
 operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.arguments.session);
-  expect(session.transaction.isPinned).to.be.false;
+  expect(session.isPinned, 'session should be unpinned').to.be.false;
 });
 
 operations.set('assertSessionTransactionState', async ({ entities, operation }) => {
@@ -180,8 +180,9 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
     const pool = server.s.pool;
     return count + pool.currentCheckedOutCount;
   }, 0);
-  // TODO: Durran: Fix in NODE-3011
-  expect(checkedOutConnections || 0).to.equal(operation.arguments.connections);
+
+  await Promise.resolve(); // wait one tick
+  expect(checkedOutConnections).to.equal(operation.arguments.connections);
 });
 
 operations.set('bulkWrite', async ({ entities, operation }) => {
@@ -245,8 +246,9 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
+  const session = entities.getEntity('session', operation.arguments.session, false);
   const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
-  const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  const cursor = collection.find(filter, { session, sort, batchSize, limit, let: vars });
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
   // this.
@@ -375,11 +377,12 @@ operations.set('startTransaction', async ({ entities, operation }) => {
 
 operations.set('targetedFailPoint', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.arguments.session);
-  expect(session.transaction.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
-  await entities.failPoints.enableFailPoint(
-    session.transaction._pinnedServer.s.description.hostAddress,
-    operation.arguments.failPoint
-  );
+  expect(session.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
+  const address = session.transaction.isPinned
+    ? session.transaction._pinnedServer.s.description.hostAddress
+    : session.pinnedConnection.address;
+
+  await entities.failPoints.enableFailPoint(address, operation.arguments.failPoint);
 });
 
 operations.set('delete', async ({ entities, operation }) => {

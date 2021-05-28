@@ -155,6 +155,47 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
+  "start-load-balancer":
+    - command: shell.exec
+      params:
+        script: |
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
+            bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh start
+    - command: expansions.update
+      params:
+        file: lb-expansion.yml
+
+  "stop-load-balancer":
+    - command: shell.exec
+      params:
+        script: |
+          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
+          bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh stop
+
+  "run-lb-tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} \
+          SSL=${SSL} \
+          UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
+          SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}" \
+          MULTI_MONGOS_LB_URI="${MULTI_MONGOS_LB_URI}" \
+          TOPOLOGY="${TOPOLOGY}" \
+          SKIP_DEPS=${SKIP_DEPS|1} \
+          NO_EXIT=${NO_EXIT|1} \
+          TEST_NPM_SCRIPT="check:load-balancer" \
+          FAKE_MONGODB_SERVICE_ID="true" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
   "run checks":
     - command: shell.exec
       type: test

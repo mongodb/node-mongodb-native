@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Topology } = require('../../../src/sdam/topology');
+const { TopologyType } = require('../../../src/sdam/common');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
 const sdamEvents = require('../../../src/sdam/events');
@@ -249,7 +250,6 @@ function executeSDAMTest(testData, testDone) {
           phase.responses.forEach(response =>
             topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
           );
-
           phaseDone();
         } else if (phase.applicationErrors) {
           eachAsyncSeries(
@@ -272,6 +272,8 @@ function executeSDAMTest(testData, testDone) {
               phaseDone();
             }
           );
+        } else {
+          phaseDone();
         }
       },
       err => {
@@ -283,7 +285,7 @@ function executeSDAMTest(testData, testDone) {
 }
 
 function withConnectionStubImpl(appError) {
-  return function (fn, callback) {
+  return function (conn, fn, callback) {
     const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
     const fakeConnection = {
       generation:
@@ -351,6 +353,15 @@ function assertOutcomeExpectations(topology, events, outcome) {
       });
 
       return;
+    }
+
+    // Load balancer mode has no monitor ismaster response and
+    // only expects address and compatible to be set in the
+    // server description.
+    if (description.type === TopologyType.LoadBalanced) {
+      if (key !== 'address' || key !== 'compatible') {
+        return;
+      }
     }
 
     if (key === 'events') {

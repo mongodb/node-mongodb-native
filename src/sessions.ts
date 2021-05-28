@@ -2,7 +2,7 @@ import { PromiseProvider } from './promise_provider';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { resolveClusterTime, ClusterTime } from './sdam/common';
+import { resolveClusterTime, ClusterTime, TopologyType } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
@@ -11,7 +11,8 @@ import {
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
-  MongoServerError
+  MongoServerError,
+  AnyError
 } from './error';
 import {
   now,
@@ -28,6 +29,8 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { CommandOptions } from './cmap/connection';
+import { Connection } from './cmap/connection';
+import { ConnectionPoolMetrics } from './cmap/metrics';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
 import { ReadConcernLevel } from './read_concern';
@@ -79,6 +82,18 @@ const kServerSession = Symbol('serverSession');
 const kSnapshotTime = Symbol('snapshotTime');
 /** @internal */
 const kSnapshotEnabled = Symbol('snapshotEnabled');
+/** @internal */
+const kPinnedConnection = Symbol('pinnedConnection');
+
+/** @public */
+export interface EndSessionOptions {
+  /**
+   * An optional error which caused the call to end this session
+   * @internal
+   */
+  error?: AnyError;
+  force?: boolean;
+}
 
 /**
  * A class representing a client session on the server
@@ -107,6 +122,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   [kSnapshotTime]?: Timestamp;
   /** @internal */
   [kSnapshotEnabled] = false;
+  /** @internal */
+  [kPinnedConnection]?: Connection;
 
   /**
    * Create a client session.
@@ -181,6 +198,41 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return this[kSnapshotEnabled];
   }
 
+  get loadBalanced(): boolean {
+    return this.topology.description.type === TopologyType.LoadBalanced;
+  }
+
+  /** @internal */
+  get pinnedConnection(): Connection | undefined {
+    return this[kPinnedConnection];
+  }
+
+  /** @internal */
+  pin(conn: Connection): void {
+    if (this[kPinnedConnection]) {
+      throw TypeError('Cant pin multiple connections to the same session');
+    }
+
+    this[kPinnedConnection] = conn;
+    conn.emit(
+      Connection.PINNED,
+      this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
+    );
+  }
+
+  /** @internal */
+  unpin(options?: { force?: boolean; error?: AnyError }): void {
+    if (this.loadBalanced) {
+      return maybeClearPinnedConnection(this, options);
+    }
+
+    this.transaction.unpinServer();
+  }
+
+  get isPinned(): boolean {
+    return this.loadBalanced ? !!this[kPinnedConnection] : this.transaction.isPinned;
+  }
+
   /**
    * Ends this session on the server
    *
@@ -189,21 +241,25 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   endSession(): Promise<void>;
   endSession(callback: Callback<void>): void;
-  endSession(options: Record<string, unknown>): Promise<void>;
-  endSession(options: Record<string, unknown>, callback: Callback<void>): void;
+  endSession(options: EndSessionOptions): Promise<void>;
+  endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
-    options?: Record<string, unknown> | Callback<void>,
+    options?: EndSessionOptions | Callback<void>,
     callback?: Callback<void>
   ): void | Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    const _options = options ?? ({} as EndSessionOptions);
+    if (_options.force == null) _options.force = true;
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
+        maybeClearPinnedConnection(this, _options);
         return done();
       }
 
       const completeEndSession = () => {
+        maybeClearPinnedConnection(this, _options);
+
         // release the server session back to the pool
         this.sessionPool.release(this.serverSession);
         this[kServerSession] = undefined;
@@ -288,6 +344,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     assertAlive(this);
     if (this.inTransaction()) {
       throw new MongoDriverError('Transaction already in progress');
+    }
+
+    if (this.isPinned && this.transaction.isCommitted) {
+      this.unpin();
     }
 
     const topologyMaxWireVersion = maxWireVersion(this.topology);
@@ -395,6 +455,49 @@ function isUnknownTransactionCommitResult(err: MongoError) {
       err.code !== MONGODB_ERROR_CODES.UnsatisfiableWriteConcern &&
       err.code !== MONGODB_ERROR_CODES.UnknownReplWriteConcern)
   );
+}
+
+export function maybeClearPinnedConnection(
+  session: ClientSession,
+  options?: EndSessionOptions
+): void {
+  // unpin a connection if it has been pinned
+  const conn = session[kPinnedConnection];
+  const error = options?.error;
+
+  if (
+    session.inTransaction() &&
+    error &&
+    error instanceof MongoError &&
+    error.hasErrorLabel('TransientTransactionError')
+  ) {
+    return;
+  }
+
+  // NOTE: the spec talks about what to do on a network error only, but the tests seem to
+  //       to validate that we don't unpin on _all_ errors?
+  if (conn && (options?.error == null || options?.force)) {
+    const servers = Array.from(session.topology.s.servers.values());
+    if (servers.length === 0) {
+      // This can happen if the client is closed when the connection is still pinned
+      // NOTE: we don't usually do this, we could instead throw an error?
+      conn.destroy();
+
+      session[kPinnedConnection] = undefined;
+      return;
+    }
+
+    const loadBalancer = servers[0];
+    loadBalancer.s.pool.checkIn(conn);
+    conn.emit(
+      Connection.UNPINNED,
+      session.transaction.state !== TxnState.NO_TRANSACTION
+        ? ConnectionPoolMetrics.TXN
+        : ConnectionPoolMetrics.CURSOR
+    );
+
+    session[kPinnedConnection] = undefined;
+  }
 }
 
 function isMaxTimeMSExpiredError(err: MongoError) {
@@ -579,6 +682,10 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   function commandHandler(e?: MongoError, r?: Document) {
     if (commandName !== 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      if (session.loadBalanced) {
+        maybeClearPinnedConnection(session, { force: false });
+      }
+
       // The spec indicates that we should ignore all errors on `abortTransaction`
       return callback();
     }
@@ -595,12 +702,13 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           e.addErrorLabel('UnknownTransactionCommitResult');
 
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          session.unpin({ error: e });
         }
       } else if (e.hasErrorLabel('TransientTransactionError')) {
-        session.transaction.unpinServer();
+        session.unpin({ error: e });
       }
     }
+
     callback(e, r);
   }
 
@@ -614,14 +722,20 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     session.topology,
     new RunAdminCommandOperation(undefined, command, {
       session,
-      readPreference: ReadPreference.primary
+      readPreference: ReadPreference.primary,
+      bypassPinningCheck: true
     }),
     (err, reply) => {
+      if (command.abortTransaction) {
+        // always unpin on abort regardless of command outcome
+        session.unpin();
+      }
+
       if (err && isRetryableError(err as MongoError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          session.unpin({ force: true });
 
           command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
             w: 'majority'
@@ -632,7 +746,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           session.topology,
           new RunAdminCommandOperation(undefined, command, {
             session,
-            readPreference: ReadPreference.primary
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
           }),
           (_err, _reply) => commandHandler(_err as MongoError, _reply)
         );
@@ -731,7 +846,7 @@ export class ServerSessionPool {
 
     while (this.sessions.length) {
       const session = this.sessions.shift();
-      if (session && !session.hasTimedOut(sessionTimeoutMinutes)) {
+      if (session && (this.topology.loadBalanced || !session.hasTimedOut(sessionTimeoutMinutes))) {
         return session;
       }
     }
@@ -748,6 +863,11 @@ export class ServerSessionPool {
    */
   release(session: ServerSession): void {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
+
+    if (this.topology.loadBalanced) {
+      this.sessions.unshift(session);
+    }
+
     if (!sessionTimeoutMinutes) {
       return;
     }

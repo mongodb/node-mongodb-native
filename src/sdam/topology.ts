@@ -146,6 +146,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
+  loadBalanced: boolean;
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
@@ -248,6 +249,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       retryWrites: DEFAULT_OPTIONS.get('retryWrites'),
       serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
       directConnection: DEFAULT_OPTIONS.get('directConnection'),
+      loadBalanced: DEFAULT_OPTIONS.get('loadBalanced'),
       metadata: DEFAULT_OPTIONS.get('metadata'),
       monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
       tls: DEFAULT_OPTIONS.get('tls'),
@@ -325,7 +327,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
 
-    if (options.srvHost) {
+    if (options.srvHost && !options.loadBalanced) {
       this.s.srvPoller =
         options.srvPoller ??
         new SrvPoller({
@@ -379,6 +381,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.description;
   }
 
+  get loadBalanced(): boolean {
+    return this.s.options.loadBalanced;
+  }
+
   get capabilities(): ServerCapabilities {
     return new ServerCapabilities(this.lastIsMaster());
   }
@@ -411,7 +417,19 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     );
 
     // connect all known servers, then attempt server selection to connect
-    connectServers(this, Array.from(this.s.description.servers.values()));
+    const serverDescriptions = Array.from(this.s.description.servers.values());
+    connectServers(this, serverDescriptions);
+
+    // In load balancer mode we need to fake a server description getting
+    // emitted from the monitor, since the monitor doesn't exist.
+    if (this.s.options.loadBalanced) {
+      serverDescriptions.forEach(description => {
+        const newDescription = new ServerDescription(description.hostAddress, undefined, {
+          loadBalanced: this.s.options.loadBalanced
+        });
+        this.serverUpdateHandler(newDescription);
+      });
+    }
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
@@ -610,7 +628,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @returns Whether sessions are supported on the current topology
    */
   hasSessionSupport(): boolean {
-    return this.description.logicalSessionTimeoutMinutes != null;
+    return this.loadBalanced || this.description.logicalSessionTimeoutMinutes != null;
   }
 
   /** Start a logical session */
@@ -828,6 +846,10 @@ function topologyTypeFromOptions(options?: TopologyOptions) {
 
   if (options?.replicaSet) {
     return TopologyType.ReplicaSetNoPrimary;
+  }
+
+  if (options?.loadBalanced) {
+    return TopologyType.LoadBalanced;
   }
 
   return TopologyType.Unknown;

@@ -77,7 +77,6 @@ export class Transaction {
   /** Create a transaction @internal */
   constructor(options?: TransactionOptions) {
     options = options ?? {};
-
     this.state = TxnState.NO_TRANSACTION;
     this.options = {};
 
@@ -133,9 +132,19 @@ export class Transaction {
       TxnState.STARTING_TRANSACTION,
       TxnState.TRANSACTION_IN_PROGRESS
     ];
+
     return activeStates.includes(this.state);
   }
 
+  get isCommitted(): boolean {
+    const committedStates: TxnState[] = [
+      TxnState.TRANSACTION_COMMITTED,
+      TxnState.TRANSACTION_COMMITTED_EMPTY,
+      TxnState.TRANSACTION_ABORTED
+    ];
+
+    return committedStates.includes(this.state);
+  }
   /**
    * Transition the transaction in the state machine
    * @internal

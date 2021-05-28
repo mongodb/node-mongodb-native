@@ -13,6 +13,7 @@ export interface OperationDescription {
   expectError?: ExpectedError;
   expectResult?: unknown;
   saveResultAsEntity?: string;
+  ignoreResultAndError?: boolean;
 }
 export interface UnifiedSuite {
   description: string;

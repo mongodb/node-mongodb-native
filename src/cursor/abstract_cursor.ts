@@ -1,7 +1,7 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
-import { ClientSession } from '../sessions';
-import { MongoDriverError } from '../error';
+import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import { AnyError, MongoDriverError, MongoNetworkError } from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -211,6 +211,10 @@ export abstract class AbstractCursor<
     return this[kKilled];
   }
 
+  get loadBalanced(): boolean {
+    return this[kTopology].loadBalanced;
+  }
+
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this[kDocuments].length;
@@ -357,7 +361,7 @@ export abstract class AbstractCursor<
     });
   }
 
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
@@ -368,49 +372,7 @@ export abstract class AbstractCursor<
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
 
-    return maybePromise(callback, done => {
-      const cursorId = this[kId];
-      const cursorNs = this[kNamespace];
-      const server = this[kServer];
-      const session = this[kSession];
-
-      if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
-        if (needsToEmitClosed) {
-          this[kId] = Long.ZERO;
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          this.emit(AbstractCursor.CLOSE);
-        }
-
-        if (session && session.owner === this) {
-          return session.endSession(done);
-        }
-
-        return done();
-      }
-
-      this[kKilled] = true;
-      server.killCursors(
-        cursorNs,
-        [cursorId],
-        { ...pluckBSONSerializeOptions(this[kOptions]), session },
-        () => {
-          if (session && session.owner === this) {
-            return session.endSession(() => {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              this.emit(AbstractCursor.CLOSE);
-              done();
-            });
-          }
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          this.emit(AbstractCursor.CLOSE);
-          done();
-        }
-      );
-    });
+    return maybePromise(callback, done => cleanupCursor(this, { needsToEmitClosed }, done));
   }
 
   /**
@@ -714,7 +676,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
       cursor[kInitialized] = true;
 
       if (err || cursorIsDead(cursor)) {
-        return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+        return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
       }
 
       next(cursor, blocking, callback);
@@ -724,7 +686,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
   }
 
   if (cursorIsDead(cursor)) {
-    return cleanupCursor(cursor, () => callback(undefined, null));
+    return cleanupCursor(cursor, undefined, () => callback(undefined, null));
   }
 
   // otherwise need to call getMore
@@ -741,7 +703,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     }
 
     if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
@@ -757,18 +719,71 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   return !!cursorId && cursorId.isZero();
 }
 
-function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
-  if (cursor[kDocuments].length === 0) {
-    cursor[kClosed] = true;
-    cursor.emit(AbstractCursor.CLOSE);
+function cleanupCursor(
+  cursor: AbstractCursor,
+  options: { error?: AnyError | undefined; needsToEmitClosed?: boolean } | undefined,
+  callback: Callback
+): void {
+  const cursorId = cursor[kId];
+  const cursorNs = cursor[kNamespace];
+  const server = cursor[kServer];
+  const session = cursor[kSession];
+  const error = options?.error;
+  const needsToEmitClosed =
+    options?.needsToEmitClosed ||
+    (options?.needsToEmitClosed == null && cursor[kDocuments].length === 0);
+
+  if (error) {
+    if (cursor.loadBalanced && error instanceof MongoNetworkError) {
+      return completeCleanup();
+    }
   }
 
-  const session = cursor[kSession];
-  if (session && session.owner === cursor) {
-    session.endSession(callback);
-  } else {
-    callback();
+  if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
+    if (needsToEmitClosed) {
+      cursor[kClosed] = true;
+      cursor[kId] = Long.ZERO;
+      cursor.emit(AbstractCursor.CLOSE);
+    }
+
+    if (session) {
+      if (session.owner === cursor) {
+        return session.endSession({ error }, callback);
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error });
+      }
+    }
+
+    return callback();
   }
+
+  function completeCleanup() {
+    if (session) {
+      if (session.owner === cursor) {
+        return session.endSession({ error }, () => {
+          cursor.emit(AbstractCursor.CLOSE);
+          callback();
+        });
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error });
+      }
+    }
+
+    cursor.emit(AbstractCursor.CLOSE);
+    return callback();
+  }
+
+  cursor[kKilled] = true;
+  server.killCursors(
+    cursorNs,
+    [cursorId],
+    { ...pluckBSONSerializeOptions(cursor[kOptions]), session },
+    () => completeCleanup()
+  );
 }
 
 /** @internal */

@@ -66,6 +66,7 @@ before(function (_done) {
   // );
 
   const options = MONGODB_API_VERSION ? { serverApi: MONGODB_API_VERSION } : {};
+
   const client = new MongoClient(MONGODB_URI, options);
   const done = err => client.close(err2 => _done(err || err2));
 
