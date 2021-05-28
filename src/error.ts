@@ -101,8 +101,6 @@ export class MongoError extends Error {
           (this as any)[name] = message[name];
         }
       }
-
-      Error.captureStackTrace(this, this.constructor);
     }
 
     this.name = 'MongoError';
