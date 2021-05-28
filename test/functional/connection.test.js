@@ -110,7 +110,7 @@ describe('Connection - functional', function () {
       expect(err).to.not.exist;
       var db = client.db(configuration.db);
 
-      db.collection(testName, function (err, collection) {
+      db.createCollection(testName, function (err, collection) {
         expect(err).to.not.exist;
 
         collection.insert({ foo: 123 }, { writeConcern: { w: 1 } }, function (err) {

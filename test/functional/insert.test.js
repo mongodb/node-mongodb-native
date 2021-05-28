@@ -267,7 +267,7 @@ describe('Insert', function () {
           };
         }
 
-        db.collection(
+        db.createCollection(
           'users',
           getResult(function (user_collection) {
             user_collection.remove({}, configuration.writeConcernMax(), function (err) {

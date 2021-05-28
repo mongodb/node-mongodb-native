@@ -2583,64 +2583,6 @@ describe('Operation (Promises)', function () {
   });
 
   /**
-   * An example of retrieving a collection from a db using the collection function with a Promise.
-   *
-   * @example-class Db
-   * @example-method collection
-   */
-  it('shouldCorrectlyAccessACollectionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
-
-      client.connect().then(function (client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Grab a collection with a callback but no safe operation
-        db.collection('test_correctly_access_collections_with_promise', function (err) {
-          expect(err).to.not.exist;
-
-          // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-          db.collection(
-            'test_correctly_access_collections_with_promise',
-            { strict: true },
-            function (err) {
-              test.ok(err);
-
-              // Create the collection
-              db.createCollection('test_correctly_access_collections_with_promise').then(
-                function () {
-                  // Retry to get the collection, should work as it's now created
-                  db.collection(
-                    'test_correctly_access_collections_with_promise',
-                    { strict: true },
-                    function (err) {
-                      expect(err).to.not.exist;
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            }
-          );
-        });
-      });
-      // END
-    }
-  });
-
-  /**
    * An example of retrieving all collections for a db as Collection objects using a Promise.
    *
    * @example-class Db

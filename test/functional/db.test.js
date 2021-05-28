@@ -33,68 +33,6 @@ describe('Db', function () {
     })
   });
 
-  it('should not call callback twice on collection() with callback', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        var count = 0;
-
-        var coll = db.collection('coll_name', function (err) {
-          expect(err).to.not.exist;
-          count = count + 1;
-        });
-
-        try {
-          coll.findOne({}, null, function () {
-            //e - errors b/c findOne needs a query selector
-            test.equal(1, count);
-            client.close(done);
-          });
-        } catch (e) {
-          process.nextTick(function () {
-            test.equal(1, count);
-            client.close(done);
-          });
-        }
-      });
-    }
-  });
-
-  it('should callback with an error only when a MongoError', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      let configuration = this.configuration;
-      let client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      client.connect(function (err, client) {
-        let callbackCalled = 0;
-        expect(err).to.not.exist;
-        let db = client.db(configuration.db);
-
-        try {
-          db.collection('collectionCallbackTest', function (err) {
-            callbackCalled++;
-            expect(err).to.not.exist;
-            throw new Error('Erroring on purpose with a non MongoError');
-          });
-        } catch (e) {
-          test.equal(callbackCalled, 1);
-          client.close(done);
-        }
-      });
-    }
-  });
-
   it('shouldCorrectlyHandleFailedConnection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -364,4 +302,14 @@ describe('Db', function () {
       });
     }
   });
+
+  it(
+    'should throw if Db.collection is passed a deprecated callback argument',
+    withClient((client, done) => {
+      expect(() => client.db('test').collection('test', () => {})).to.throw(
+        'The callback form of this helper has been removed.'
+      );
+      done();
+    })
+  );
 });

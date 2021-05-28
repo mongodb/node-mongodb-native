@@ -77,7 +77,7 @@ describe('Multiple Databases', function () {
         db_instance = client.db('site2');
         db_instance = client.db('rss');
 
-        db_instance.collection('counters', function (err, collection) {
+        db_instance.createCollection('counters', function (err, collection) {
           expect(err).to.not.exist;
           collection.findOneAndUpdate(
             {},

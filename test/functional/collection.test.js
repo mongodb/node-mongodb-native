@@ -83,35 +83,32 @@ describe('Collection', function () {
       db.createCollection('test.spiderman', () => {
         db.createCollection('test.mario', () => {
           // Insert test documents (creates collections)
-          db.collection('test.spiderman', (err, spiderman_collection) => {
-            spiderman_collection.insertOne({ foo: 5 }, configuration.writeConcernMax(), err => {
+          const spiderman_collection = db.collection('test.spiderman');
+          spiderman_collection.insertOne({ foo: 5 }, configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
+            const mario_collection = db.collection('test.mario');
+            mario_collection.insertOne({ bar: 0 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              db.collection('test.mario', (err, mario_collection) => {
-                mario_collection.insertOne({ bar: 0 }, configuration.writeConcernMax(), err => {
-                  expect(err).to.not.exist;
-                  // Assert collections
-                  db.collections((err, collections) => {
-                    expect(err).to.not.exist;
+              // Assert collections
+              db.collections((err, collections) => {
+                expect(err).to.not.exist;
 
-                    let found_spiderman = false;
-                    let found_mario = false;
-                    let found_does_not_exist = false;
+                let found_spiderman = false;
+                let found_mario = false;
+                let found_does_not_exist = false;
 
-                    collections.forEach(collection => {
-                      if (collection.collectionName === 'test.spiderman') {
-                        found_spiderman = true;
-                      }
-                      if (collection.collectionName === 'test.mario') found_mario = true;
-                      if (collection.collectionName === 'does_not_exist')
-                        found_does_not_exist = true;
-                    });
-
-                    expect(found_spiderman).to.be.true;
-                    expect(found_mario).to.be.true;
-                    expect(found_does_not_exist).to.be.false;
-                    done();
-                  });
+                collections.forEach(collection => {
+                  if (collection.collectionName === 'test.spiderman') {
+                    found_spiderman = true;
+                  }
+                  if (collection.collectionName === 'test.mario') found_mario = true;
+                  if (collection.collectionName === 'does_not_exist') found_does_not_exist = true;
                 });
+
+                expect(found_spiderman).to.be.true;
+                expect(found_mario).to.be.true;
+                expect(found_does_not_exist).to.be.false;
+                done();
               });
             });
           });
@@ -161,23 +158,6 @@ describe('Collection', function () {
               // Let's close the db
               done();
             });
-          });
-        });
-      });
-    });
-
-    it('should ensure strict access collection', function (done) {
-      db.collection('does-not-exist', { strict: true }, err => {
-        expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.equal(
-          'Collection does-not-exist does not exist. Currently in strict mode.'
-        );
-        db.createCollection('test_strict_access_collection', err => {
-          expect(err).to.not.exist;
-          db.collection('test_strict_access_collection', configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            // Let's close the db
-            done();
           });
         });
       });
@@ -280,39 +260,25 @@ describe('Collection', function () {
     });
 
     it('should fail due to illegal listCollections', function (done) {
-      db.collection(5, err => {
-        expect(err.message).to.equal('collection name must be a String');
-      });
-
-      db.collection('', err => {
-        expect(err.message).to.equal('collection names cannot be empty');
-      });
-
-      db.collection('te$t', err => {
-        expect(err.message).to.equal("collection names must not contain '$'");
-      });
-
-      db.collection('.test', err => {
-        expect(err.message).to.equal("collection names must not start or end with '.'");
-      });
-
-      db.collection('test.', err => {
-        expect(err.message).to.equal("collection names must not start or end with '.'");
-      });
-
-      db.collection('test..t', err => {
-        expect(err.message).to.equal('collection names cannot be empty');
-        done();
-      });
+      expect(() => db.collection(5)).to.throw('collection name must be a String');
+      expect(() => db.collection('')).to.throw('collection names cannot be empty');
+      expect(() => db.collection('te$t')).to.throw("collection names must not contain '$'");
+      expect(() => db.collection('.test')).to.throw(
+        "collection names must not start or end with '.'"
+      );
+      expect(() => db.collection('test.')).to.throw(
+        "collection names must not start or end with '.'"
+      );
+      expect(() => db.collection('test..t')).to.throw('collection names cannot be empty');
+      done();
     });
 
     it('should correctly count on non-existent collection', function (done) {
-      db.collection('test_multiple_insert_2', (err, collection) => {
-        collection.countDocuments((err, count) => {
-          expect(count).to.equal(0);
-          // Let's close the db
-          done();
-        });
+      const collection = db.collection('test_multiple_insert_2');
+      collection.countDocuments((err, count) => {
+        expect(count).to.equal(0);
+        // Let's close the db
+        done();
       });
     });
 
@@ -351,22 +317,20 @@ describe('Collection', function () {
     });
 
     it('should perform collection remove with no callback', function (done) {
-      db.collection('remove_with_no_callback_bug_test', (err, collection) => {
+      const collection = db.collection('remove_with_no_callback_bug_test');
+      collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
         expect(err).to.not.exist;
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
+        collection.insertOne({ b: 1 }, configuration.writeConcernMax(), err => {
           expect(err).to.not.exist;
-          collection.insertOne({ b: 1 }, configuration.writeConcernMax(), err => {
+          collection.insertOne({ c: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            collection.insertOne({ c: 1 }, configuration.writeConcernMax(), err => {
+            collection.remove({ a: 1 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              collection.remove({ a: 1 }, configuration.writeConcernMax(), err => {
+              // Let's perform a count
+              collection.countDocuments((err, count) => {
                 expect(err).to.not.exist;
-                // Let's perform a count
-                collection.countDocuments((err, count) => {
-                  expect(err).to.not.exist;
-                  expect(count).to.equal(2);
-                  done();
-                });
+                expect(count).to.equal(2);
+                done();
               });
             });
           });

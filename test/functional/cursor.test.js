@@ -4170,30 +4170,26 @@ describe('Cursor', function () {
     const findSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}, { sort: input });
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}, { sort: input });
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.be.instanceOf(Map);
-            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.be.instanceOf(Map);
+          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+          cursor.close(done);
         });
       });
 
     const cursorSort = (input, output) =>
       withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_dos', (err, collection) => {
+        const collection = db.collection('test_sort_dos');
+        const cursor = collection.find({}).sort(input);
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}).sort(input);
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            expect(events[0].command.sort).to.be.instanceOf(Map);
-            expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-            cursor.close(done);
-          });
+          expect(events[0].command.sort).to.be.instanceOf(Map);
+          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+          cursor.close(done);
         });
       });
 
@@ -4287,16 +4283,14 @@ describe('Cursor', function () {
       metadata: { requires: { mongodb: '>=4.4' } },
       test: withMonitoredClient('find', function (client, events, done) {
         const db = client.db('test');
-        db.collection('test_sort_allow_disk_use', (err, collection) => {
+        const collection = db.collection('test_sort_allow_disk_use');
+        const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
+        cursor.next(err => {
           expect(err).to.not.exist;
-          const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
-          cursor.next(err => {
-            expect(err).to.not.exist;
-            const { command } = events.shift();
-            expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
-            expect(command.allowDiskUse).to.be.true;
-            cursor.close(done);
-          });
+          const { command } = events.shift();
+          expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
+          expect(command.allowDiskUse).to.be.true;
+          cursor.close(done);
         });
       })
     });
@@ -4305,13 +4299,11 @@ describe('Cursor', function () {
       metadata: { requires: { mongodb: '>=4.4' } },
       test: withClient(function (client, done) {
         const db = client.db('test');
-        db.collection('test_sort_allow_disk_use', (err, collection) => {
-          expect(err).to.not.exist;
-          expect(() => collection.find({}).allowDiskUse()).to.throw(
-            /allowDiskUse requires a sort specification/
-          );
-          done();
-        });
+        const collection = db.collection('test_sort_allow_disk_use');
+        expect(() => collection.find({}).allowDiskUse()).to.throw(
+          /allowDiskUse requires a sort specification/
+        );
+        done();
       })
     });
   });

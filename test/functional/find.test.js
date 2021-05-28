@@ -25,31 +25,30 @@ describe('Find', function () {
         expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
-        db.collection('test_find_simple', function (err, collection) {
-          const docs = [{ a: 2 }, { b: 3 }];
+        const collection = db.collection('test_find_simple');
+        const docs = [{ a: 2 }, { b: 3 }];
 
-          // Insert some test documents
-          collection.insert(docs, configuration.writeConcernMax(), err => {
+        // Insert some test documents
+        collection.insert(docs, configuration.writeConcernMax(), err => {
+          expect(err).to.not.exist;
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().toArray(function (err, documents) {
             expect(err).to.not.exist;
+            test.equal(2, documents.length);
 
-            // Ensure correct insertion testing via the cursor and the count function
-            collection.find().toArray(function (err, documents) {
+            collection.count(function (err, count) {
               expect(err).to.not.exist;
-              test.equal(2, documents.length);
+              test.equal(2, count);
 
-              collection.count(function (err, count) {
+              // Fetch values by selection
+              collection.find({ a: docs[0].a }).toArray(function (err, documents) {
                 expect(err).to.not.exist;
-                test.equal(2, count);
 
-                // Fetch values by selection
-                collection.find({ a: docs[0].a }).toArray(function (err, documents) {
-                  expect(err).to.not.exist;
-
-                  test.equal(1, documents.length);
-                  test.equal(docs[0].a, documents[0].a);
-                  // Let's close the db
-                  client.close(done);
-                });
+                test.equal(1, documents.length);
+                test.equal(docs[0].a, documents[0].a);
+                // Let's close the db
+                client.close(done);
               });
             });
           });
@@ -73,27 +72,26 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('test_find_simple_chained', function (err) {
           expect(err).to.not.exist;
-          db.collection('test_find_simple_chained', function (err, collection) {
-            const docs = [{ a: 2 }, { b: 3 }];
+          const collection = db.collection('test_find_simple_chained');
+          const docs = [{ a: 2 }, { b: 3 }];
 
-            // Insert some test documents
-            collection.insert(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+          // Insert some test documents
+          collection.insert(docs, configuration.writeConcernMax(), err => {
+            expect(err).to.not.exist;
 
-              // Ensure correct insertion testing via the cursor and the count function
-              collection.find().toArray(function (err, documents) {
-                test.equal(2, documents.length);
+            // Ensure correct insertion testing via the cursor and the count function
+            collection.find().toArray(function (err, documents) {
+              test.equal(2, documents.length);
 
-                collection.count(function (err, count) {
-                  test.equal(2, count);
+              collection.count(function (err, count) {
+                test.equal(2, count);
 
-                  // Fetch values by selection
-                  collection.find({ a: docs[0].a }).toArray(function (err, documents) {
-                    test.equal(1, documents.length);
-                    test.equal(docs[0].a, documents[0].a);
-                    // Let's close the db
-                    client.close(done);
-                  });
+                // Fetch values by selection
+                collection.find({ a: docs[0].a }).toArray(function (err, documents) {
+                  test.equal(1, documents.length);
+                  test.equal(docs[0].a, documents[0].a);
+                  // Let's close the db
+                  client.close(done);
                 });
               });
             });
@@ -213,115 +211,114 @@ describe('Find', function () {
         db.createCollection('test_find_sorting', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_find_sorting', function (err, collection) {
-            // Insert some test documents
-            collection.insert(
-              [
-                { a: 1, b: 2 },
-                { a: 2, b: 1 },
-                { a: 3, b: 2 },
-                { a: 4, b: 1 }
-              ],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
+          const collection = db.collection('test_find_sorting');
+          // Insert some test documents
+          collection.insert(
+            [
+              { a: 1, b: 2 },
+              { a: 2, b: 1 },
+              { a: 3, b: 2 },
+              { a: 4, b: 1 }
+            ],
+            configuration.writeConcernMax(),
+            function (err) {
+              expect(err).to.not.exist;
 
-                // Test sorting (ascending)
-                collection
-                  .find({ a: { $lt: 10 } }, { sort: [['a', 1]] })
-                  .toArray(function (err, documents) {
-                    test.equal(4, documents.length);
-                    test.equal(1, documents[0].a);
-                    test.equal(2, documents[1].a);
-                    test.equal(3, documents[2].a);
-                    test.equal(4, documents[3].a);
+              // Test sorting (ascending)
+              collection
+                .find({ a: { $lt: 10 } }, { sort: [['a', 1]] })
+                .toArray(function (err, documents) {
+                  test.equal(4, documents.length);
+                  test.equal(1, documents[0].a);
+                  test.equal(2, documents[1].a);
+                  test.equal(3, documents[2].a);
+                  test.equal(4, documents[3].a);
 
-                    // Test sorting (descending)
-                    collection
-                      .find({ a: { $lt: 10 } }, { sort: [['a', -1]] })
-                      .toArray(function (err, documents) {
-                        test.equal(4, documents.length);
-                        test.equal(4, documents[0].a);
-                        test.equal(3, documents[1].a);
-                        test.equal(2, documents[2].a);
-                        test.equal(1, documents[3].a);
+                  // Test sorting (descending)
+                  collection
+                    .find({ a: { $lt: 10 } }, { sort: [['a', -1]] })
+                    .toArray(function (err, documents) {
+                      test.equal(4, documents.length);
+                      test.equal(4, documents[0].a);
+                      test.equal(3, documents[1].a);
+                      test.equal(2, documents[2].a);
+                      test.equal(1, documents[3].a);
 
-                        // Test sorting (descending), sort is hash
-                        collection
-                          .find({ a: { $lt: 10 } }, { sort: { a: -1 } })
-                          .toArray(function (err, documents) {
-                            test.equal(4, documents.length);
-                            test.equal(4, documents[0].a);
-                            test.equal(3, documents[1].a);
-                            test.equal(2, documents[2].a);
-                            test.equal(1, documents[3].a);
+                      // Test sorting (descending), sort is hash
+                      collection
+                        .find({ a: { $lt: 10 } }, { sort: { a: -1 } })
+                        .toArray(function (err, documents) {
+                          test.equal(4, documents.length);
+                          test.equal(4, documents[0].a);
+                          test.equal(3, documents[1].a);
+                          test.equal(2, documents[2].a);
+                          test.equal(1, documents[3].a);
 
-                            // Sorting using array of names, assumes ascending order
-                            collection
-                              .find({ a: { $lt: 10 } }, { sort: ['a'] })
-                              .toArray(function (err, documents) {
-                                test.equal(4, documents.length);
-                                test.equal(1, documents[0].a);
-                                test.equal(2, documents[1].a);
-                                test.equal(3, documents[2].a);
-                                test.equal(4, documents[3].a);
+                          // Sorting using array of names, assumes ascending order
+                          collection
+                            .find({ a: { $lt: 10 } }, { sort: ['a'] })
+                            .toArray(function (err, documents) {
+                              test.equal(4, documents.length);
+                              test.equal(1, documents[0].a);
+                              test.equal(2, documents[1].a);
+                              test.equal(3, documents[2].a);
+                              test.equal(4, documents[3].a);
 
-                                // Sorting using single name, assumes ascending order
-                                collection
-                                  .find({ a: { $lt: 10 } }, { sort: 'a' })
-                                  .toArray(function (err, documents) {
-                                    test.equal(4, documents.length);
-                                    test.equal(1, documents[0].a);
-                                    test.equal(2, documents[1].a);
-                                    test.equal(3, documents[2].a);
-                                    test.equal(4, documents[3].a);
+                              // Sorting using single name, assumes ascending order
+                              collection
+                                .find({ a: { $lt: 10 } }, { sort: 'a' })
+                                .toArray(function (err, documents) {
+                                  test.equal(4, documents.length);
+                                  test.equal(1, documents[0].a);
+                                  test.equal(2, documents[1].a);
+                                  test.equal(3, documents[2].a);
+                                  test.equal(4, documents[3].a);
 
-                                    // Sorting using single name, assumes ascending order, sort is hash
-                                    collection
-                                      .find({ a: { $lt: 10 } }, { sort: { a: 1 } })
-                                      .toArray(function (err, documents) {
-                                        test.equal(4, documents.length);
-                                        test.equal(1, documents[0].a);
-                                        test.equal(2, documents[1].a);
-                                        test.equal(3, documents[2].a);
-                                        test.equal(4, documents[3].a);
+                                  // Sorting using single name, assumes ascending order, sort is hash
+                                  collection
+                                    .find({ a: { $lt: 10 } }, { sort: { a: 1 } })
+                                    .toArray(function (err, documents) {
+                                      test.equal(4, documents.length);
+                                      test.equal(1, documents[0].a);
+                                      test.equal(2, documents[1].a);
+                                      test.equal(3, documents[2].a);
+                                      test.equal(4, documents[3].a);
 
-                                        collection
-                                          .find({ a: { $lt: 10 } }, { sort: ['b', 'a'] })
-                                          .toArray(function (err, documents) {
-                                            test.equal(4, documents.length);
-                                            test.equal(2, documents[0].a);
-                                            test.equal(4, documents[1].a);
-                                            test.equal(1, documents[2].a);
-                                            test.equal(3, documents[3].a);
+                                      collection
+                                        .find({ a: { $lt: 10 } }, { sort: ['b', 'a'] })
+                                        .toArray(function (err, documents) {
+                                          test.equal(4, documents.length);
+                                          test.equal(2, documents[0].a);
+                                          test.equal(4, documents[1].a);
+                                          test.equal(1, documents[2].a);
+                                          test.equal(3, documents[3].a);
 
-                                            // Sorting using empty array, no order guarantee should not blow up
-                                            collection
-                                              .find({ a: { $lt: 10 } }, { sort: [] })
-                                              .toArray(function (err, documents) {
-                                                test.equal(4, documents.length);
+                                          // Sorting using empty array, no order guarantee should not blow up
+                                          collection
+                                            .find({ a: { $lt: 10 } }, { sort: [] })
+                                            .toArray(function (err, documents) {
+                                              test.equal(4, documents.length);
 
-                                                /* NONACTUAL */
-                                                // Sorting using ordered hash
-                                                collection
-                                                  .find({ a: { $lt: 10 } }, { sort: { a: -1 } })
-                                                  .toArray(function (err, documents) {
-                                                    // Fail test if not an error
-                                                    test.equal(4, documents.length);
-                                                    // Let's close the db
-                                                    client.close(done);
-                                                  });
-                                              });
-                                          });
-                                      });
-                                  });
-                              });
-                          });
-                      });
-                  });
-              }
-            );
-          });
+                                              /* NONACTUAL */
+                                              // Sorting using ordered hash
+                                              collection
+                                                .find({ a: { $lt: 10 } }, { sort: { a: -1 } })
+                                                .toArray(function (err, documents) {
+                                                  // Fail test if not an error
+                                                  test.equal(4, documents.length);
+                                                  // Let's close the db
+                                                  client.close(done);
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            }
+          );
         });
       });
     }
@@ -343,43 +340,42 @@ describe('Find', function () {
         db.createCollection('test_find_limits', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_find_limits', function (err, collection) {
-            // Insert some test documents
-            collection.insert(
-              [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
+          const collection = db.collection('test_find_limits');
+          // Insert some test documents
+          collection.insert(
+            [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }],
+            configuration.writeConcernMax(),
+            function (err) {
+              expect(err).to.not.exist;
 
-                // Test limits
-                collection.find({}, { limit: 1 }).toArray(function (err, documents) {
-                  test.equal(1, documents.length);
+              // Test limits
+              collection.find({}, { limit: 1 }).toArray(function (err, documents) {
+                test.equal(1, documents.length);
 
-                  collection.find({}, { limit: 2 }).toArray(function (err, documents) {
-                    test.equal(2, documents.length);
+                collection.find({}, { limit: 2 }).toArray(function (err, documents) {
+                  test.equal(2, documents.length);
 
-                    collection.find({}, { limit: 3 }).toArray(function (err, documents) {
-                      test.equal(3, documents.length);
+                  collection.find({}, { limit: 3 }).toArray(function (err, documents) {
+                    test.equal(3, documents.length);
 
-                      collection.find({}, { limit: 4 }).toArray(function (err, documents) {
+                    collection.find({}, { limit: 4 }).toArray(function (err, documents) {
+                      test.equal(4, documents.length);
+
+                      collection.find({}, {}).toArray(function (err, documents) {
                         test.equal(4, documents.length);
 
-                        collection.find({}, {}).toArray(function (err, documents) {
+                        collection.find({}, { limit: 99 }).toArray(function (err, documents) {
                           test.equal(4, documents.length);
-
-                          collection.find({}, { limit: 99 }).toArray(function (err, documents) {
-                            test.equal(4, documents.length);
-                            // Let's close the db
-                            client.close(done);
-                          });
+                          // Let's close the db
+                          client.close(done);
                         });
                       });
                     });
                   });
                 });
-              }
-            );
-          });
+              });
+            }
+          );
         });
       });
     }
@@ -401,23 +397,22 @@ describe('Find', function () {
         db.createCollection('test_find_non_quoted_values', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_find_non_quoted_values', function (err, collection) {
-            // insert test document
-            collection.insert(
-              [
-                { a: 19, b: 'teststring', c: 59920303 },
-                { a: '19', b: 'teststring', c: 3984929 }
-              ],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                collection.find({ a: 19 }).toArray(function (err, documents) {
-                  test.equal(1, documents.length);
-                  client.close(done);
-                });
-              }
-            );
-          });
+          const collection = db.collection('test_find_non_quoted_values');
+          // insert test document
+          collection.insert(
+            [
+              { a: 19, b: 'teststring', c: 59920303 },
+              { a: '19', b: 'teststring', c: 3984929 }
+            ],
+            configuration.writeConcernMax(),
+            function (err) {
+              expect(err).to.not.exist;
+              collection.find({ a: 19 }).toArray(function (err, documents) {
+                test.equal(1, documents.length);
+                client.close(done);
+              });
+            }
+          );
         });
       });
     }
@@ -439,34 +434,33 @@ describe('Find', function () {
         db.createCollection('test_find_embedded_document', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_find_embedded_document', function (err, collection) {
-            // insert test document
-            collection.insert(
-              [
-                { a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' } },
-                { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' } }
-              ],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
+          const collection = db.collection('test_find_embedded_document');
+          // insert test document
+          collection.insert(
+            [
+              { a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' } },
+              { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' } }
+            ],
+            configuration.writeConcernMax(),
+            function (err) {
+              expect(err).to.not.exist;
 
-                // test using integer value
-                collection.find({ 'a.id': 10 }).toArray(function (err, documents) {
-                  test.equal(1, documents.length);
+              // test using integer value
+              collection.find({ 'a.id': 10 }).toArray(function (err, documents) {
+                test.equal(1, documents.length);
+                test.equal('bar', documents[0].b);
+
+                // test using string value
+                collection.find({ 'a.value': 'foo' }).toArray(function (err, documents) {
+                  // should yield 2 documents
+                  test.equal(2, documents.length);
                   test.equal('bar', documents[0].b);
-
-                  // test using string value
-                  collection.find({ 'a.value': 'foo' }).toArray(function (err, documents) {
-                    // should yield 2 documents
-                    test.equal(2, documents.length);
-                    test.equal('bar', documents[0].b);
-                    test.equal('bar2', documents[1].b);
-                    client.close(done);
-                  });
+                  test.equal('bar2', documents[1].b);
+                  client.close(done);
                 });
-              }
-            );
-          });
+              });
+            }
+          );
         });
       });
     }
@@ -487,13 +481,12 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('test_find_one_no_records', function (err) {
           expect(err).to.not.exist;
-          db.collection('test_find_one_no_records', function (err, collection) {
-            expect(err).to.not.exist;
-            collection.find({ a: 1 }, {}).toArray(function (err, documents) {
-              test.equal(0, documents.length);
-              // Let's close the db
-              client.close(done);
-            });
+          const collection = db.collection('test_find_one_no_records');
+          expect(err).to.not.exist;
+          collection.find({ a: 1 }, {}).toArray(function (err, documents) {
+            test.equal(0, documents.length);
+            // Let's close the db
+            client.close(done);
           });
         });
       });
@@ -704,14 +697,10 @@ describe('Find', function () {
         ) {
           collection.insert({ a: 0 }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
-            db.collection('test_should_correctly_retrieve_one_record', function (
-              err,
-              usercollection
-            ) {
-              usercollection.findOne({ a: 0 }, function (err) {
-                expect(err).to.not.exist;
-                p_client.close(done);
-              });
+            const usercollection = db.collection('test_should_correctly_retrieve_one_record');
+            usercollection.findOne({ a: 0 }, function (err) {
+              expect(err).to.not.exist;
+              p_client.close(done);
             });
           });
         });
@@ -760,28 +749,27 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('test_field_select_with_options', function (err) {
           expect(err).to.not.exist;
-          db.collection('test_field_select_with_options', function (err, collection) {
-            var docCount = 25,
-              docs = [];
+          const collection = db.collection('test_field_select_with_options');
+          var docCount = 25,
+            docs = [];
 
-            // Insert some test documents
-            while (docCount--) docs.push({ a: docCount, b: docCount });
-            collection.insert(docs, configuration.writeConcernMax(), function (err, retDocs) {
-              docs = retDocs;
+          // Insert some test documents
+          while (docCount--) docs.push({ a: docCount, b: docCount });
+          collection.insert(docs, configuration.writeConcernMax(), function (err, retDocs) {
+            docs = retDocs;
 
-              collection
-                .find({}, { limit: 3, sort: [['a', -1]], projection: { a: 1 } })
-                .toArray(function (err, documents) {
-                  test.equal(3, documents.length);
+            collection
+              .find({}, { limit: 3, sort: [['a', -1]], projection: { a: 1 } })
+              .toArray(function (err, documents) {
+                test.equal(3, documents.length);
 
-                  documents.forEach(function (doc, idx) {
-                    expect(doc.b).to.not.exist; // making sure field select works
-                    test.equal(24 - idx, doc.a); // checking limit sort object with field select
-                  });
-
-                  client.close(done);
+                documents.forEach(function (doc, idx) {
+                  expect(doc.b).to.not.exist; // making sure field select works
+                  test.equal(24 - idx, doc.a); // checking limit sort object with field select
                 });
-            });
+
+                client.close(done);
+              });
           });
         });
       });
@@ -1626,7 +1614,7 @@ describe('Find', function () {
       p_client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Create a collection
-        db.collection('collection1', function (err, collection) {
+        db.createCollection('collection1', function (err, collection) {
           // Wait a bit and then execute something that will throw a duplicate error
           setTimeout(function () {
             var id = new ObjectId();
@@ -1643,7 +1631,7 @@ describe('Find', function () {
           }, 200);
         });
 
-        db.collection('collection2', function (err, collection) {
+        db.createCollection('collection2', function (err, collection) {
           // Keep hammering in inserts
           var insert;
           insert = function () {
@@ -1998,31 +1986,30 @@ describe('Find', function () {
         var db = client.db(configuration.db);
 
         // Create a collection we want to drop later
-        db.collection('shouldCorrectlyPerformNegativeLimit', function (err, collection) {
-          var docs = [];
-          for (var i = 0; i < 1000; i++) {
-            docs.push({
-              a: 1,
-              b:
-                'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
-            });
-          }
-
-          // Insert a bunch of documents
-          collection.insert(docs, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            // Perform a simple find and return all the documents
-            collection
-              .find({})
-              .limit(-10)
-              .toArray(function (err, docs) {
-                expect(err).to.not.exist;
-                test.equal(10, docs.length);
-
-                client.close(done);
-              });
+        const collection = db.collection('shouldCorrectlyPerformNegativeLimit');
+        var docs = [];
+        for (var i = 0; i < 1000; i++) {
+          docs.push({
+            a: 1,
+            b:
+              'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
           });
+        }
+
+        // Insert a bunch of documents
+        collection.insert(docs, configuration.writeConcernMax(), function (err) {
+          expect(err).to.not.exist;
+
+          // Perform a simple find and return all the documents
+          collection
+            .find({})
+            .limit(-10)
+            .toArray(function (err, docs) {
+              expect(err).to.not.exist;
+              test.equal(10, docs.length);
+
+              client.close(done);
+            });
         });
       });
     }
@@ -2041,7 +2028,7 @@ describe('Find', function () {
         var db = client.db(configuration.db);
 
         // Create a collection we want to drop later
-        db.collection('shouldCorrectlyExecuteExhaustQuery', function (err, collection) {
+        db.createCollection('shouldCorrectlyExecuteExhaustQuery', function (err, collection) {
           expect(err).to.not.exist;
 
           var docs1 = [];
@@ -2108,7 +2095,7 @@ describe('Find', function () {
         }
 
         // Create a collection we want to drop later
-        db.collection('Readpreferencesshouldworkfine', function (err, collection) {
+        db.createCollection('Readpreferencesshouldworkfine', function (err, collection) {
           // Insert a bunch of documents
           collection.insert(docs, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
@@ -2137,18 +2124,17 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Create a collection we want to drop later
-        db.collection('noresultAvailableForEachToIterate', function (err, collection) {
-          // Perform a simple find and return all the documents
-          collection.find({}).forEach(
-            doc => {
-              expect(doc).to.not.exist;
-            },
-            err => {
-              expect(err).to.not.exist;
-              client.close(done);
-            }
-          );
-        });
+        const collection = db.collection('noresultAvailableForEachToIterate');
+        // Perform a simple find and return all the documents
+        collection.find({}).forEach(
+          doc => {
+            expect(doc).to.not.exist;
+          },
+          err => {
+            expect(err).to.not.exist;
+            client.close(done);
+          }
+        );
       });
     }
   });
@@ -2350,26 +2336,25 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('test_find_simple_batchsize_0', function (err, collection) {
-          // Insert some test documents
-          collection.insert(
-            [{ a: 2 }, { b: 3 }, { b: 4 }],
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
-              // Ensure correct insertion testing via the cursor and the count function
-              collection
-                .find()
-                .batchSize(-5)
-                .toArray(function (err, documents) {
-                  expect(err).to.not.exist;
-                  test.equal(3, documents.length);
-                  // Let's close the db
-                  client.close(done);
-                });
-            }
-          );
-        });
+        const collection = db.collection('test_find_simple_batchsize_0');
+        // Insert some test documents
+        collection.insert(
+          [{ a: 2 }, { b: 3 }, { b: 4 }],
+          configuration.writeConcernMax(),
+          function (err) {
+            expect(err).to.not.exist;
+            // Ensure correct insertion testing via the cursor and the count function
+            collection
+              .find()
+              .batchSize(-5)
+              .toArray(function (err, documents) {
+                expect(err).to.not.exist;
+                test.equal(3, documents.length);
+                // Let's close the db
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -2387,29 +2372,27 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('test_find_simple_limit_0', function (err, collection) {
-          expect(err).to.not.exist;
+        const collection = db.collection('test_find_simple_limit_0');
 
-          // Insert some test documents
-          collection.insert(
-            [{ a: 2 }, { b: 3 }, { b: 4 }],
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
-              // Ensure correct insertion testing via the cursor and the count function
-              collection
-                .find()
-                .limit(-5)
-                .toArray(function (err, documents) {
-                  expect(err).to.not.exist;
-                  test.equal(3, documents.length);
+        // Insert some test documents
+        collection.insert(
+          [{ a: 2 }, { b: 3 }, { b: 4 }],
+          configuration.writeConcernMax(),
+          function (err) {
+            expect(err).to.not.exist;
+            // Ensure correct insertion testing via the cursor and the count function
+            collection
+              .find()
+              .limit(-5)
+              .toArray(function (err, documents) {
+                expect(err).to.not.exist;
+                test.equal(3, documents.length);
 
-                  // Let's close the db
-                  client.close(done);
-                });
-            }
-          );
-        });
+                // Let's close the db
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -2427,32 +2410,29 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('elem_match_test', function (err, collection) {
-          expect(err).to.not.exist;
+        const collection = db.collection('elem_match_test');
+        // Insert some test documents
+        collection.insert(
+          [
+            { _id: 1, results: [82, 85, 88] },
+            { _id: 2, results: [75, 88, 89] }
+          ],
+          configuration.writeConcernMax(),
+          function (err) {
+            expect(err).to.not.exist;
 
-          // Insert some test documents
-          collection.insert(
-            [
-              { _id: 1, results: [82, 85, 88] },
-              { _id: 2, results: [75, 88, 89] }
-            ],
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
+            // Ensure correct insertion testing via the cursor and the count function
+            collection
+              .find({ results: { $elemMatch: { $gte: 80, $lt: 85 } } })
+              .toArray(function (err, documents) {
+                expect(err).to.not.exist;
+                test.deepEqual([{ _id: 1, results: [82, 85, 88] }], documents);
 
-              // Ensure correct insertion testing via the cursor and the count function
-              collection
-                .find({ results: { $elemMatch: { $gte: 80, $lt: 85 } } })
-                .toArray(function (err, documents) {
-                  expect(err).to.not.exist;
-                  test.deepEqual([{ _id: 1, results: [82, 85, 88] }], documents);
-
-                  // Let's close the db
-                  client.close(done);
-                });
-            }
-          );
-        });
+                // Let's close the db
+                client.close(done);
+              });
+          }
+        );
       });
     }
   });
@@ -2470,50 +2450,47 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('test_find_simple_limit_101', function (err, collection) {
+        const collection = db.collection('test_find_simple_limit_101');
+        function clone(obj) {
+          var o = {};
+          for (var name in obj) o[name] = obj[name];
+          return o;
+        }
+
+        var template = {
+          linkid: '12633170',
+          advertisercid: '4612127',
+          websitename: 'Car Rental 8',
+          destinationurl: 'https://www.carrental8.com/en/',
+          who: '8027061-12633170-1467924618000',
+          href: 'http://www.tkqlhce.com',
+          src: 'http://www.awltovhc.com',
+          r1: 3,
+          r2: 44,
+          r3: 24,
+          r4: 58
+        };
+
+        var docs = [];
+        for (var i = 0; i < 1000; i++) {
+          docs.push(clone(template));
+        }
+
+        // Insert some test documents
+        collection.insertMany(docs, configuration.writeConcernMax(), function (err, r) {
           expect(err).to.not.exist;
+          test.ok(r);
 
-          function clone(obj) {
-            var o = {};
-            for (var name in obj) o[name] = obj[name];
-            return o;
-          }
-
-          var template = {
-            linkid: '12633170',
-            advertisercid: '4612127',
-            websitename: 'Car Rental 8',
-            destinationurl: 'https://www.carrental8.com/en/',
-            who: '8027061-12633170-1467924618000',
-            href: 'http://www.tkqlhce.com',
-            src: 'http://www.awltovhc.com',
-            r1: 3,
-            r2: 44,
-            r3: 24,
-            r4: 58
-          };
-
-          var docs = [];
-          for (var i = 0; i < 1000; i++) {
-            docs.push(clone(template));
-          }
-
-          // Insert some test documents
-          collection.insertMany(docs, configuration.writeConcernMax(), function (err, r) {
-            expect(err).to.not.exist;
-            test.ok(r);
-
-            // Ensure correct insertion testing via the cursor and the count function
-            collection
-              .find()
-              .limit(200)
-              .toArray(function (err, documents) {
-                expect(err).to.not.exist;
-                test.equal(200, documents.length);
-                // Let's close the db
-                client.close(done);
-              });
-          });
+          // Ensure correct insertion testing via the cursor and the count function
+          collection
+            .find()
+            .limit(200)
+            .toArray(function (err, documents) {
+              expect(err).to.not.exist;
+              test.equal(200, documents.length);
+              // Let's close the db
+              client.close(done);
+            });
         });
       });
     }

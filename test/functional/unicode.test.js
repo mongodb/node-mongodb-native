@@ -122,17 +122,15 @@ describe('Unicode', function () {
         var db = client.db(configuration.db);
         db.createCollection('create_object_with_chinese_object_name', function (err) {
           expect(err).to.not.exist;
-          db.collection('create_object_with_chinese_object_name', function (err, collection) {
+          const collection = db.collection('create_object_with_chinese_object_name');
+          collection.insert(object, { writeConcern: { w: 1 } }, function (err) {
             expect(err).to.not.exist;
-            collection.insert(object, { writeConcern: { w: 1 } }, function (err) {
-              expect(err).to.not.exist;
-              collection.findOne(function (err, item) {
-                test.equal(object['客家话'], item['客家话']);
+            collection.findOne(function (err, item) {
+              test.equal(object['客家话'], item['客家话']);
 
-                collection.find().toArray(function (err, items) {
-                  test.equal(object['客家话'], items[0]['客家话']);
-                  client.close(done);
-                });
+              collection.find().toArray(function (err, items) {
+                test.equal(object['客家话'], items[0]['客家话']);
+                client.close(done);
               });
             });
           });

@@ -25,31 +25,29 @@ describe('Remove', function () {
         db.createCollection('test_clear', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_clear', function (err, collection) {
+          const collection = db.collection('test_clear');
+
+          collection.insert({ i: 1 }, { writeConcern: { w: 1 } }, function (err) {
             expect(err).to.not.exist;
 
-            collection.insert({ i: 1 }, { writeConcern: { w: 1 } }, function (err) {
+            collection.insert({ i: 2 }, { writeConcern: { w: 1 } }, function (err) {
               expect(err).to.not.exist;
 
-              collection.insert({ i: 2 }, { writeConcern: { w: 1 } }, function (err) {
+              collection.count(function (err, count) {
                 expect(err).to.not.exist;
+                expect(count).to.equal(2);
 
-                collection.count(function (err, count) {
+                // Clear the collection
+                collection.remove({}, { writeConcern: { w: 1 } }, function (err, r) {
                   expect(err).to.not.exist;
-                  expect(count).to.equal(2);
+                  expect(r).property('deletedCount').to.equal(2);
 
-                  // Clear the collection
-                  collection.remove({}, { writeConcern: { w: 1 } }, function (err, r) {
+                  collection.count(function (err, count) {
                     expect(err).to.not.exist;
-                    expect(r).property('deletedCount').to.equal(2);
+                    expect(count).to.equal(0);
 
-                    collection.count(function (err, count) {
-                      expect(err).to.not.exist;
-                      expect(count).to.equal(0);
-
-                      // Let's close the db
-                      client.close(done);
-                    });
+                    // Let's close the db
+                    client.close(done);
                   });
                 });
               });
@@ -78,33 +76,31 @@ describe('Remove', function () {
         db.createCollection('test_remove_regexp', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('test_remove_regexp', function (err, collection) {
-            expect(err).to.not.exist;
+          const collection = db.collection('test_remove_regexp');
 
-            collection.insert(
-              { address: '485 7th ave new york' },
-              { writeConcern: { w: 1 } },
-              function (err) {
-                expect(err).to.not.exist;
+          collection.insert(
+            { address: '485 7th ave new york' },
+            { writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
 
-                // Clear the collection
-                collection.remove({ address: /485 7th ave/ }, { writeConcern: { w: 1 } }, function (
-                  err,
-                  r
-                ) {
-                  expect(r).property('deletedCount').to.equal(1);
+              // Clear the collection
+              collection.remove({ address: /485 7th ave/ }, { writeConcern: { w: 1 } }, function (
+                err,
+                r
+              ) {
+                expect(r).property('deletedCount').to.equal(1);
 
-                  collection.count(function (err, count) {
-                    expect(err).to.not.exist;
-                    expect(count).to.equal(0);
+                collection.count(function (err, count) {
+                  expect(err).to.not.exist;
+                  expect(count).to.equal(0);
 
-                    // Let's close the db
-                    client.close(done);
-                  });
+                  // Let's close the db
+                  client.close(done);
                 });
-              }
-            );
-          });
+              });
+            }
+          );
         });
       });
     }
@@ -128,30 +124,28 @@ describe('Remove', function () {
         db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function (err) {
           expect(err).to.not.exist;
 
-          db.collection('shouldCorrectlyRemoveOnlyFirstDocument', function (err, collection) {
-            expect(err).to.not.exist;
+          const collection = db.collection('shouldCorrectlyRemoveOnlyFirstDocument');
 
-            collection.insert(
-              [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
-              { writeConcern: { w: 1 } },
-              function (err) {
-                expect(err).to.not.exist;
+          collection.insert(
+            [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
+            { writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
 
-                // Remove the first
-                collection.remove({ a: 1 }, { writeConcern: { w: 1 }, single: true }, function (
-                  err,
-                  r
-                ) {
-                  expect(r).property('deletedCount').to.equal(1);
+              // Remove the first
+              collection.remove({ a: 1 }, { writeConcern: { w: 1 }, single: true }, function (
+                err,
+                r
+              ) {
+                expect(r).property('deletedCount').to.equal(1);
 
-                  collection.find({ a: 1 }).count(function (err, result) {
-                    expect(result).to.equal(3);
-                    client.close(done);
-                  });
+                collection.find({ a: 1 }).count(function (err, result) {
+                  expect(result).to.equal(3);
+                  client.close(done);
                 });
-              }
-            );
-          });
+              });
+            }
+          );
         });
       });
     }
