@@ -330,7 +330,7 @@ describe('Topology (unit)', function () {
         expect(topology.s.detectShardedTopology).to.be.a('function');
       });
 
-      function transitionTopology(from, to) {
+      function transitionTopology(topology, from, to) {
         topology.emit(
           Topology.TOPOLOGY_DESCRIPTION_CHANGED,
           new TopologyDescriptionChangedEvent(
@@ -346,7 +346,7 @@ describe('Topology (unit)', function () {
       describe('srvRecordDiscovery event listener', function () {
         beforeEach(() => {
           // fake a transition to Sharded
-          transitionTopology(TopologyType.Unknown, TopologyType.Sharded);
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded);
           expect(topology.s.srvPoller).to.be.instanceOf(SrvPoller);
 
           const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
@@ -398,14 +398,14 @@ describe('Topology (unit)', function () {
 
         it('should not add more than one srvRecordDiscovery listener', function () {
           // fake a transition to Sharded
-          transitionTopology(TopologyType.Unknown, TopologyType.Sharded); // Transition 1
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 1
 
           const srvListenersFirstTransition = topology.s.srvPoller.listeners(
             SrvPoller.SRV_RECORD_DISCOVERY
           );
           expect(srvListenersFirstTransition).to.have.lengthOf(1);
 
-          transitionTopology(TopologyType.Unknown, TopologyType.Sharded); // Transition 2
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 2
 
           const srvListenersSecondTransition = topology.s.srvPoller.listeners(
             SrvPoller.SRV_RECORD_DISCOVERY
@@ -415,7 +415,7 @@ describe('Topology (unit)', function () {
 
         it('should not add srvRecordDiscovery listener if transition is not to Sharded topology', function () {
           // fake a transition to **NOT** Sharded
-          transitionTopology(TopologyType.Unknown, TopologyType.ReplicaSetWithPrimary);
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.ReplicaSetWithPrimary);
 
           const srvListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
           expect(srvListeners).to.have.lengthOf(0);
