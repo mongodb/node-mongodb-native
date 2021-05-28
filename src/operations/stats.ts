@@ -72,7 +72,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
  * @public
  * @see https://docs.mongodb.org/manual/reference/command/collStats/
  */
-export interface CollStats {
+export interface CollStats extends Document {
   /**
    * Namespace.
    */
@@ -142,7 +142,7 @@ export interface CollStats {
 }
 
 /** @public */
-export interface WiredTigerData {
+export interface WiredTigerData extends Document {
   LSM: {
     'bloom filter false positives': number;
     'bloom filter hits': number;
@@ -156,7 +156,7 @@ export interface WiredTigerData {
     'sleep for LSM checkpoint throttle': number;
     'sleep for LSM merge throttle': number;
     'total size of bloom filters': number;
-  };
+  } & Document;
   'block-manager': {
     'allocations requiring file extension': number;
     'blocks allocated': number;
@@ -188,7 +188,7 @@ export interface WiredTigerData {
     'pages rewritten by compaction': number;
     'row-store internal pages': number;
     'row-store leaf pages': number;
-  };
+  } & Document;
   cache: {
     'bytes currently in the cache': number;
     'bytes read into cache': number;
@@ -213,7 +213,7 @@ export interface WiredTigerData {
     'pages written requiring in-memory restoration': number;
     'tracked dirty bytes in the cache': number;
     'unmodified pages evicted': number;
-  };
+  } & Document;
   cache_walk: {
     'Average difference between current eviction generation when the page was last considered': number;
     'Average on-disk page image size seen': number;
@@ -233,7 +233,7 @@ export interface WiredTigerData {
     'Refs skipped during cache traversal': number;
     'Size of the root page': number;
     'Total number of pages currently in cache': number;
-  };
+  } & Document;
   compression: {
     'compressed pages read': number;
     'compressed pages written': number;
@@ -242,7 +242,7 @@ export interface WiredTigerData {
     'raw compression call failed, additional data available': number;
     'raw compression call failed, no additional data available': number;
     'raw compression call succeeded': number;
-  };
+  } & Document;
   cursor: {
     'bulk-loaded cursor-insert calls': number;
     'create calls': number;
@@ -275,7 +275,7 @@ export interface WiredTigerData {
     'page reconciliation calls': number;
     'page reconciliation calls for eviction': number;
     'pages deleted': number;
-  };
+  } & Document;
 }
 
 defineAspects(CollStatsOperation, [Aspect.READ_OPERATION]);
