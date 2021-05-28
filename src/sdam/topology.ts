@@ -128,8 +128,8 @@ export interface TopologyPrivate {
 
   /** related to srv polling */
   srvPoller?: SrvPoller;
-  detectTopologyDescriptionChange: (event: TopologyDescriptionChangedEvent) => void;
-  handleSrvPolling: (event: SrvPollingEvent) => void;
+  detectShardedTopology: (event: TopologyDescriptionChangedEvent) => void;
+  detectSrvRecords: (event: SrvPollingEvent) => void;
 }
 
 /** @public */
@@ -321,8 +321,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // timer management
       connectionTimers: new Set<NodeJS.Timeout>(),
 
-      detectTopologyDescriptionChange: ev => this.onTopologyDescriptionChange(ev),
-      handleSrvPolling: ev => this.onSRVPollingEvent(ev)
+      detectShardedTopology: ev => this.detectShardedTopology(ev),
+      detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
 
     if (options.srvHost) {
@@ -333,26 +333,26 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           srvHost: options.srvHost
         });
 
-      this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectTopologyDescriptionChange);
+      this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
     }
   }
 
-  private onTopologyDescriptionChange(event: TopologyDescriptionChangedEvent) {
+  private detectShardedTopology(event: TopologyDescriptionChangedEvent) {
     const previousType = event.previousDescription.type;
     const newType = event.newDescription.type;
 
-    if (previousType !== TopologyType.Sharded && newType === TopologyType.Sharded) {
-      if (this.s.srvPoller) {
-        const srvListeners = this.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
-        if (!srvListeners.includes(this.s.handleSrvPolling)) {
-          this.s.srvPoller.on(SrvPoller.SRV_RECORD_DISCOVERY, this.s.handleSrvPolling);
-        }
-        this.s.srvPoller.start();
-      }
+    const transitionToSharded =
+      previousType !== TopologyType.Sharded && newType === TopologyType.Sharded;
+    const srvListeners = this.s.srvPoller?.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
+    const listeningToSrvPolling = !!srvListeners?.includes(this.s.detectSrvRecords);
+
+    if (transitionToSharded && !listeningToSrvPolling) {
+      this.s.srvPoller?.on(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
+      this.s.srvPoller?.start();
     }
   }
 
-  private onSRVPollingEvent(ev: SrvPollingEvent) {
+  private detectSrvRecords(ev: SrvPollingEvent) {
     const previousTopologyDescription = this.s.description;
     this.s.description = this.s.description.updateFromSrvPollingEvent(ev);
     if (this.s.description === previousTopologyDescription) {
@@ -477,13 +477,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     if (this.s.srvPoller) {
       this.s.srvPoller.stop();
-      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.handleSrvPolling);
+      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
     }
 
-    this.removeListener(
-      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-      this.s.detectTopologyDescriptionChange
-    );
+    this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
     for (const session of this.s.sessions) {
       session.endSession();

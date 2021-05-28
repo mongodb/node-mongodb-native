@@ -319,61 +319,102 @@ describe('Topology (unit)', function () {
       return p;
     });
 
-    it('should create use listeners when SRV Polling', function (done) {
-      const srvRecords = [{ priority: 1, weight: 1, port: 27017, name: 'localhost' }];
+    describe('srvRecordDiscovery event listener', function () {
+      const srvRecords = [{ priority: 1, weight: 1, port: 2, name: 'fake' }];
 
-      const orderOfAccess = ['listeners', 'on', 'start', 'stop', 'removeListener'];
-      let callCount = 0;
+      it('should emit topologyDescriptionChange event', function (done) {
+        const topology = new Topology('', { srvHost: 'fakeHost' });
 
-      const handler = {
-        get(_, prop) {
-          expect(prop).to.equal(orderOfAccess[callCount]);
-          callCount += 1;
+        expect(topology.s.detectSrvRecords).to.be.a('function');
+        expect(topology.s.detectShardedTopology).to.be.a('function');
 
-          if (prop === 'listeners') {
-            return () => [];
-          }
+        // fake a transition to Sharded
+        topology.emit(
+          Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+          new TopologyDescriptionChangedEvent(
+            2,
+            new TopologyDescription(TopologyType.Unknown),
+            new TopologyDescription(TopologyType.Sharded)
+          )
+        );
 
-          if (prop === 'on') {
-            return (name, listener) => {
-              expect(name).to.equal(SrvPoller.SRV_RECORD_DISCOVERY);
-              expect(listener).to.equal(topology.s.handleSrvPolling);
-            };
-          }
+        expect(topology.s.srvPoller).to.not.be.an('undefined');
+        clearTimeout(topology.s.srvPoller._timeout); // We don't want the SrvPoller to actually run
 
-          if (prop === 'start') {
-            return () => {
-              // topology.s.srvPoller.emit('srvRecordDiscovery')
-              topology.s.handleSrvPolling(new SrvPollingEvent(srvRecords));
+        const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
+        expect(srvPollerListeners).to.have.lengthOf(1);
+        expect(srvPollerListeners[0]).to.equal(topology.s.detectSrvRecords);
 
-              topology.s.state = 'connected';
-              topology.close(() => done());
-            };
-          }
+        topology.once(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
+          // The first event we get here is caused by the srv record discovery event below
+          expect(ev).to.have.nested.property('newDescription.servers');
+          expect(ev.newDescription.servers.get('fake:2')).to.not.be.an('undefined');
 
-          if (prop === 'removeListener') {
-            return (name, listener) => {
-              expect(name).to.equal(SrvPoller.SRV_RECORD_DISCOVERY);
-              expect(listener).to.equal(topology.s.handleSrvPolling);
-            };
-          }
+          // Check that the new event didn't add a new listener
+          const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
+          expect(srvPollerListeners).to.have.lengthOf(1);
 
-          return () => undefined;
-        }
-      };
+          topology.s.state = 'connected'; // fake state to test clean up logic
+          topology.close(e => {
+            const srvPollerListeners = topology.s.srvPoller.listeners(
+              SrvPoller.SRV_RECORD_DISCOVERY
+            );
+            expect(srvPollerListeners).to.have.lengthOf(0);
+            const topologyChangeListeners = topology.listeners(
+              Topology.TOPOLOGY_DESCRIPTION_CHANGED
+            );
+            expect(topologyChangeListeners).to.have.lengthOf(0); // This once handler only
+            done(e);
+          });
+        });
 
-      const topology = new Topology('', { srvHost: 'fakeHost', srvPoller: new Proxy({}, handler) });
-      expect(topology.s.handleSrvPolling).to.be.a('function');
-      expect(topology.s.detectTopologyDescriptionChange).to.be.a('function');
+        topology.s.srvPoller.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
+      });
+    });
 
-      topology.emit(
-        Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-        new TopologyDescriptionChangedEvent(
-          2,
-          new TopologyDescription(TopologyType.Unknown),
-          new TopologyDescription(TopologyType.Sharded)
-        )
-      );
+    describe('topologyDescriptionChange event listener', function () {
+      it('should not add multiple srvRecordDiscovery listeners', function () {
+        const topology = new Topology('', { srvHost: 'fakeHost' });
+
+        expect(topology.s.detectSrvRecords).to.be.a('function');
+        expect(topology.s.detectShardedTopology).to.be.a('function');
+
+        topology.s.srvPoller = new SrvPoller({ srvHost: 'fakeHost' });
+        topology.s.srvPoller.on(SrvPoller.SRV_RECORD_DISCOVERY, topology.s.detectSrvRecords);
+
+        // fake a transition to Sharded
+        topology.emit(
+          Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+          new TopologyDescriptionChangedEvent(
+            2,
+            new TopologyDescription(TopologyType.Unknown),
+            new TopologyDescription(TopologyType.Sharded)
+          )
+        );
+
+        expect(topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY)).to.have.lengthOf(1);
+      });
+
+      it('should not add srvRecordDiscovery listener if transition is not to Sharded topology', function () {
+        const topology = new Topology('', { srvHost: 'fakeHost' });
+
+        expect(topology.s.detectSrvRecords).to.be.a('function');
+        expect(topology.s.detectShardedTopology).to.be.a('function');
+
+        topology.s.srvPoller = new SrvPoller({ srvHost: 'fakeHost' });
+
+        // fake a transition to Sharded
+        topology.emit(
+          Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+          new TopologyDescriptionChangedEvent(
+            2,
+            new TopologyDescription(TopologyType.Unknown),
+            new TopologyDescription(TopologyType.ReplicaSetWithPrimary)
+          )
+        );
+
+        expect(topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY)).to.have.lengthOf(0);
+      });
     });
   });
 });
