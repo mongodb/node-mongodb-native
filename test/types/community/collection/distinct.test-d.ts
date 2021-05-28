@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expectType } from 'tsd';
 import { MongoClient, ObjectId } from '../../../../src/index';
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expectError, expectNotType, expectType } from 'tsd';
 import { MongoClient, ObjectId, OptionalId } from '../../../../src';
 import type { PropExists } from '../../utility_types';

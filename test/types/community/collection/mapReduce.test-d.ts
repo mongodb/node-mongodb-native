@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MongoClient, ReduceFunction } from '../../../../src/index';
 
 // https://docs.mongodb.com/manual/core/map-reduce/

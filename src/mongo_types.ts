@@ -47,17 +47,23 @@ export type Filter<TSchema> = {
 } &
   RootFilterOperators<TSchema>;
 
+/** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
 
-type AlternativeType<T> = T extends ReadonlyArray<infer U>
+/**
+ * It is possible to search using alternative types in mongodb e.g.
+ * string types can be searched using a regex in mongo
+ * array types can be searched using their element type
+ * @public
+ */
+export type AlternativeType<T> = T extends ReadonlyArray<infer U>
   ? T | RegExpOrString<U>
   : RegExpOrString<T>;
 
-// we can search using alternative types in mongodb e.g.
-// string types can be searched using a regex in mongo
-// array types can be searched using their element type
-type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
+/** @public */
+export type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
 
+/** @public */
 export interface RootFilterOperators<TSchema> extends Document {
   $and?: Filter<TSchema>[];
   $nor?: Filter<TSchema>[];
@@ -72,6 +78,7 @@ export interface RootFilterOperators<TSchema> extends Document {
   $comment?: string | Document;
 }
 
+/** @public */
 export interface FilterOperators<TValue> extends Document {
   // Comparison
   $eq?: TValue;
@@ -114,7 +121,8 @@ export interface FilterOperators<TValue> extends Document {
   $bitsAnySet?: BitwiseFilter;
 }
 
-type BitwiseFilter =
+/** @public */
+export type BitwiseFilter =
   | number /** numeric bit mask */
   | Binary /** BinData bit mask */
   | number[]; /** `[ <position1>, <position2>, ... ]` */

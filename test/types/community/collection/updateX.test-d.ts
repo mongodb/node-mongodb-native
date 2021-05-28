@@ -262,7 +262,7 @@ collectionTType.updateMany(
   }
 );
 
-async function testPushWithId() {
+export async function testPushWithId(): Promise<void> {
   interface Model {
     _id: ObjectId;
     foo: Array<{ _id?: string; name: string }>;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document } from '../../../../src';
 import type { PropExists } from '../../utility_types';

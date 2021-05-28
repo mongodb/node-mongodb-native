@@ -10,7 +10,6 @@ import type { ClientSession } from '../sessions';
 import type { OperationParent } from '../operations/command';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
-import type { Projection } from '../mongo_types';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}

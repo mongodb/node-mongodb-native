@@ -1,4 +1,4 @@
-import { DEFAULT_PK_FACTORY, emitWarningOnce, isRecord, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   normalizeHintField,

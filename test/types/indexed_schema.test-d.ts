@@ -1,4 +1,4 @@
-import { expectType, expectNotType, expectError, expectAssignable } from 'tsd';
+import { expectType, expectNotType, expectError } from 'tsd';
 
 import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
