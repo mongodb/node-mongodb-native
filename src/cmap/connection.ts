@@ -706,7 +706,7 @@ function messageHandler(conn: Connection) {
       // Pass in the entire description because it has BSON parsing options
       message.parse(operationDescription);
     } catch (err) {
-      callback(new MongoDriverError(err));
+      callback(new MongoError(err));
       return;
     }
 
