@@ -27,8 +27,9 @@ export const TopologyType = Object.freeze({
   single: 'single',
   replicaset: 'replicaset',
   sharded: 'sharded',
-  shardedReplicaset: 'sharded-replicaset'
-} as const);
+  shardedReplicaset: 'sharded-replicaset',
+  loadBalanced: 'load-balanced'
+}) as const;
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
   maxServerVersion?: string;

@@ -80,6 +80,7 @@ describe('MongoOptions', function () {
     compressors: 'snappy', // TODO
     connectTimeoutMS: 123,
     directConnection: true,
+    loadBalanced: false,
     dbName: 'test',
     driverInfo: { name: 'MyDriver', platform: 'moonOS' },
     family: 6,
@@ -448,6 +449,34 @@ describe('MongoOptions', function () {
       expect(() => parseOptions('mongodb://localhost/?serverApi=1')).to.throw(
         'URI cannot contain `serverApi`, it can only be passed to the client'
       );
+    });
+  });
+
+  context('when loadBalanced=true is in the URI', function () {
+    it('sets the option', function () {
+      const options = parseOptions('mongodb://a/?loadBalanced=true');
+      expect(options.loadBalanced).to.be.true;
+    });
+
+    it('errors with multiple hosts', function () {
+      const parse = () => {
+        parseOptions('mongodb://a,b/?loadBalanced=true');
+      };
+      expect(parse).to.throw(/single host/);
+    });
+
+    it('errors with a replicaSet option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&replicaSet=test');
+      };
+      expect(parse).to.throw(/replicaSet/);
+    });
+
+    it('errors with a directConnection option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&directConnection=true');
+      };
+      expect(parse).to.throw(/directConnection/);
     });
   });
 });

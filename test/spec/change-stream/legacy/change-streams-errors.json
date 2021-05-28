@@ -14,7 +14,7 @@
       "changeStreamPipeline": [],
       "changeStreamOptions": {},
       "operations": [],
-      "expectations": [],
+      "expectations": null,
       "result": {
         "error": {
           "code": 40573
@@ -78,7 +78,8 @@
       "target": "collection",
       "topology": [
         "replicaset",
-        "sharded"
+        "sharded",
+        "load-balanced"
       ],
       "changeStreamPipeline": [
         {
@@ -125,7 +126,8 @@
       "target": "collection",
       "topology": [
         "replicaset",
-        "sharded"
+        "sharded",
+        "load-balanced"
       ],
       "changeStreamPipeline": [],
       "changeStreamOptions": {},

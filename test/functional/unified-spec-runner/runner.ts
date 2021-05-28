@@ -15,6 +15,11 @@ interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
 }
 
+// Load balancer fronting 1 mongos.
+const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
+// Load balancer fronting 2 mongoses.
+const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
+
 export async function runUnifiedTest(
   ctx: MongoDBMochaTestContext,
   unifiedSuite: uni.UnifiedSuite,
@@ -41,7 +46,27 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  const utilClient = ctx.configuration.newClient();
+  let utilClient;
+  if (ctx.topologyType === uni.TopologyType.loadBalanced) {
+    // In load balanced mode we require these 2 environment
+    // variables to be set pointing at the load balancer
+    // frontends.
+    expect(SINGLE_MONGOS_LB_URI).to.exist;
+    expect(MULTI_MONGOS_LB_URI).to.exist;
+
+    // We determine which URI the load balancer to point at
+    // by looking at the MONGODB_URI - if it has 1 mongos
+    // then it's the single mongos frontend and if it has
+    // multiple mongoses then we use the multi mongos
+    // frontend.
+    if (isMultiHostUri(process.env.MONGODB_URI)) {
+      utilClient = ctx.configuration.newClient(MULTI_MONGOS_LB_URI);
+    } else {
+      utilClient = ctx.configuration.newClient(SINGLE_MONGOS_LB_URI);
+    }
+  } else {
+    utilClient = ctx.configuration.newClient();
+  }
 
   let entities;
   try {
@@ -107,7 +132,8 @@ export async function runUnifiedTest(
     // To ease the implementation, test runners MAY execute distinct before every test.
     if (
       ctx.topologyType === uni.TopologyType.sharded ||
-      ctx.topologyType === uni.TopologyType.shardedReplicaset
+      ctx.topologyType === uni.TopologyType.shardedReplicaset ||
+      ctx.topologyType === uni.TopologyType.loadBalanced
     ) {
       for (const [, collection] of entities.mapOf('collection')) {
         await utilClient.db(ns(collection.namespace).db).command({
@@ -175,4 +201,15 @@ export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: str
       }
     });
   }
+}
+
+/**
+ * Determine if the URI is multi-host. Our test suites
+ * use simple user/password combinations so we take the
+ * simple route here and just look for commas between the
+ * scheme and db.
+ */
+function isMultiHostUri(uri: string): boolean {
+  const plainUri = uri.substring(str.lastIndexOf('://') + 1, str.lastIndexOf('/'));
+  return plainUri.includes(',');
 }

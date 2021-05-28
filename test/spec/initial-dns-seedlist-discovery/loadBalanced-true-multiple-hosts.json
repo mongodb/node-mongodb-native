@@ -1,0 +1,7 @@
+{
+  "uri": "mongodb+srv://test1.test.build.10gen.cc/?loadBalanced=true",
+  "seeds": [],
+  "hosts": [],
+  "error": true,
+  "comment": "Should fail because loadBalanced is true but the SRV record resolves to multiple hosts"
+}

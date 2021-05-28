@@ -1,0 +1,270 @@
+description: state change errors are correctly handled
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+_yamlAnchors:
+  observedEvents: &observedEvents
+    - connectionCreatedEvent
+    - connectionReadyEvent
+    - connectionCheckedOutEvent
+    - connectionCheckOutFailedEvent
+    - connectionCheckedInEvent
+    - connectionClosedEvent
+    - poolClearedEvent
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &singleClient singleClient
+      useMultipleMongoses: false
+      uriOptions:
+        appname: &singleClientAppName lbSDAMErrorTestClient
+        retryWrites: false
+      observeEvents: *observedEvents
+  - database:
+      id: &singleDB singleDB
+      client: *singleClient
+      databaseName: &singleDBName singleDB
+  - collection:
+      id: &singleColl singleColl
+      database: *singleDB
+      collectionName: &singleCollName singleColl
+  - client:
+      id: &multiClient multiClient
+      useMultipleMongoses: true
+      uriOptions:
+        retryWrites: false
+      observeEvents: *observedEvents
+  - database:
+      id: &multiDB multiDB
+      client: *multiClient
+      databaseName: &multiDBName multiDB
+  - collection:
+      id: &multiColl multiColl
+      database: *multiDB
+      collectionName: &multiCollName multiColl
+
+initialData:
+  - collectionName: *singleCollName
+    databaseName: *singleDBName
+    documents:
+      - _id: 1
+      - _id: 2
+      - _id: 3
+  - collectionName: *multiCollName
+    databaseName: *multiDBName
+    documents:
+      - _id: 1
+      - _id: 2
+      - _id: 3
+
+tests:
+  - description: only connections for a specific serviceId are closed when pools are cleared
+    operations:
+      # Create two cursors to force two connections.
+      - name: createFindCursor
+        object: *multiColl
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor0 cursor0
+      - name: createFindCursor
+        object: *multiColl
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor1 cursor1
+      # Close both cursors to return the connections to the pool.
+      - name: close
+        object: *cursor0
+      - name: close
+        object: *cursor1
+      # Fail an operation with a state change error.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *multiClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [insert]
+              errorCode: &errorCode 11600 # InterruptedAtShutdown
+      - name: insertOne
+        object: *multiColl
+        arguments:
+          document: { x: 1 }
+        expectError:
+          errorCode: *errorCode
+      # Do another operation to ensure the relevant connection has been closed.
+      - name: insertOne
+        object: *multiColl
+        arguments:
+          document: { x: 1 }
+    expectEvents:
+      - client: *multiClient
+        eventType: cmap
+        events:
+          # Create cursors.
+          - connectionCreatedEvent: {}
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCreatedEvent: {}
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          # Close cursors.
+          - connectionCheckedInEvent: {}
+          - connectionCheckedInEvent: {}
+          # Set failpoint.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # First insertOne.
+          - connectionCheckedOutEvent: {}
+          - poolClearedEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent:
+              reason: stale
+          # Second insertOne.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  # This test uses singleClient to ensure that connection attempts are routed
+  # to the same mongos on which the failpoint is set.
+  - description: errors during the initial connection hello are ignore 
+    runOnRequirements:
+      # Server version 4.9+ is needed to set a fail point on the initial
+      # connection handshake with the appName filter due to SERVER-49336.
+      - minServerVersion: '4.9'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [isMaster]
+              closeConnection: true
+              appName: *singleClientAppName
+      - name: insertOne
+        object: *singleColl
+        arguments:
+          document: { x: 1 }
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *singleClient
+        eventType: cmap
+        events:
+          - connectionCreatedEvent: {}
+          - connectionClosedEvent:
+              reason: error
+          - connectionCheckOutFailedEvent:
+              reason: connectionError
+
+  - description: errors during authentication are processed
+    runOnRequirements:
+      - auth: true
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [saslContinue]
+              closeConnection: true
+              appName: *singleClientAppName
+      - name: insertOne
+        object: *singleColl
+        arguments:
+          document: { x: 1 }
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *singleClient
+        eventType: cmap
+        events:
+          - connectionCreatedEvent: {}
+          - poolClearedEvent: {}
+          - connectionClosedEvent:
+              reason: error
+          - connectionCheckOutFailedEvent:
+              reason: connectionError
+
+  - description: stale errors are ignored
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [getMore]
+              closeConnection: true
+      # Force two connections to be checked out from the pool.
+      - name: createFindCursor
+        object: *singleColl
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor0 cursor0
+      - name: createFindCursor
+        object: *singleColl
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor1 cursor1
+      # Iterate cursor0 three times to force a network error.
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectError:
+          isClientError: true
+      - name: close
+        object: *cursor0
+      # Iterate cursor1 three times to force a network error.
+      - name: iterateUntilDocumentOrError
+        object: *cursor1
+      - name: iterateUntilDocumentOrError
+        object: *cursor1
+      - name: iterateUntilDocumentOrError
+        object: *cursor1
+        expectError:
+          isClientError: true
+      - name: close
+        object: *cursor1
+    expectEvents:
+      - client: *singleClient
+        eventType: cmap
+        events:
+          # Events for creating both cursors.
+          - connectionCreatedEvent: {}
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCreatedEvent: {}
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          # Events for iterating and closing the first cursor.  The failed
+          # getMore should cause a poolClearedEvent to be published.
+          - poolClearedEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent: {}
+          # Events for iterating and closing the second cursor. The failed
+          # getMore should not clear the pool because the connection's
+          # generation number is stale.
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent: {}

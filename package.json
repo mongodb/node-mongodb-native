@@ -126,7 +126,8 @@
     "check:csfle": "mocha test/functional/client_side_encryption",
     "prepare": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md",
-    "test": "npm run check:lint && npm run check:test"
+    "test": "npm run check:lint && npm run check:test",
+    "test:load-balancer": "mocha test/manual/load-balancer.test.js"
   },
   "tsd": {
     "directory": "test/types"

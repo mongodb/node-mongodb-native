@@ -58,7 +58,7 @@ tests:
         arguments:
           document:
             x: 1
-    expectations: []
+    expectations: ~
     result:
       success:
         -

@@ -1,0 +1,50 @@
+description: server selection for load-balanced clusters
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+      collectionOptions:
+        readPreference:
+          # Use secondaryPreferred to ensure that operations can succeed even if the shards are only comprised of one
+          # server.
+          mode: &readPrefMode secondaryPreferred
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: $readPreference is sent for load-balanced clusters
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: {}
+                $readPreference:
+                  mode: *readPrefMode
+              commandName: find
+              databaseName: *database0Name

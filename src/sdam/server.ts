@@ -8,6 +8,7 @@ import {
 import { ServerDescription, compareTopologyVersion } from './server_description';
 import { Monitor, MonitorOptions } from './monitor';
 import { isTransactionCommand } from '../transactions';
+import { Metrics } from '../cmap/metrics';
 import {
   collationNotSupported,
   makeStateMachine,
@@ -43,6 +44,7 @@ import {
   CommandOptions,
   APM_EVENTS
 } from '../cmap/connection';
+import { Long } from '../bson';
 import type { Topology } from './topology';
 import type {
   ServerHeartbeatFailedEvent,
@@ -50,7 +52,7 @@ import type {
   ServerHeartbeatSucceededEvent
 } from './events';
 import type { ClientSession } from '../sessions';
-import type { Document, Long } from '../bson';
+import type { Document } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
@@ -151,31 +153,36 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.clusterTime = clusterTime;
     });
 
-    // create the monitor
-    this[kMonitor] = new Monitor(this, this.s.options);
+    if (!this.s.options.loadBalanced) {
+      // create the monitor
+      this[kMonitor] = new Monitor(this, this.s.options);
 
-    for (const event of HEARTBEAT_EVENTS) {
-      this[kMonitor].on(event, (e: any) => this.emit(event, e));
-    }
-
-    this[kMonitor].on('resetConnectionPool', () => {
-      this.s.pool.clear();
-    });
-
-    this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
-    this[kMonitor].on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
-      this.emit(
-        Server.DESCRIPTION_RECEIVED,
-        new ServerDescription(this.description.hostAddress, event.reply, {
-          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
-        })
-      );
-
-      if (this.s.state === STATE_CONNECTING) {
-        stateTransition(this, STATE_CONNECTED);
-        this.emit(Server.CONNECT, this);
+      for (const event of HEARTBEAT_EVENTS) {
+        this[kMonitor].on(event, (e: any) => this.emit(event, e));
       }
-    });
+
+      this[kMonitor].on('resetConnectionPool', () => {
+        this.s.pool.clear();
+      });
+
+      this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+      this[kMonitor].on(
+        Server.SERVER_HEARTBEAT_SUCCEEDED,
+        (event: ServerHeartbeatSucceededEvent) => {
+          this.emit(
+            Server.DESCRIPTION_RECEIVED,
+            new ServerDescription(this.description.hostAddress, event.reply, {
+              roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
+            })
+          );
+
+          if (this.s.state === STATE_CONNECTING) {
+            stateTransition(this, STATE_CONNECTED);
+            this.emit(Server.CONNECT, this);
+          }
+        }
+      );
+    }
   }
 
   get description(): ServerDescription {
@@ -192,6 +199,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
+  get loadBalanced(): boolean {
+    return this.s.options.loadBalanced;
+  }
+
   /**
    * Initiate server connect
    */
@@ -201,7 +212,16 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     stateTransition(this, STATE_CONNECTING);
-    this[kMonitor].connect();
+
+    // If in load balancer mode we automatically set the server to
+    // a load balancer. It never transitions out of this state and
+    // has no monitor.
+    if (!this.s.options.loadBalanced) {
+      this[kMonitor].connect();
+    } else {
+      stateTransition(this, STATE_CONNECTED);
+      this.emit(Server.CONNECT, this);
+    }
   }
 
   /** Destroy the server connection */
@@ -219,7 +239,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     stateTransition(this, STATE_CLOSING);
 
-    this[kMonitor].close();
+    if (!this.loadBalanced) {
+      this[kMonitor].close();
+    }
+
     this.s.pool.close(options, err => {
       stateTransition(this, STATE_CLOSED);
       this.emit('closed');
@@ -234,7 +257,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * this will be a no-op.
    */
   requestCheck(): void {
-    this[kMonitor].requestCheck();
+    if (!this.s.options.loadBalanced) {
+      this[kMonitor].requestCheck();
+    }
   }
 
   /**
@@ -364,6 +389,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
+    // TODO: Durran: Alert the connection pool to the type of operation.
     this.s.pool.withConnection((err, conn, cb) => {
       if (err || !conn) {
         markServerUnknown(this, err);
@@ -397,9 +423,10 @@ Object.defineProperty(Server.prototype, 'clusterTime', {
 
 function supportsRetryableWrites(server: Server) {
   return (
-    server.description.maxWireVersion >= 6 &&
-    server.description.logicalSessionTimeoutMinutes &&
-    server.description.type !== ServerType.Standalone
+    server.loadBalanced ||
+    (server.description.maxWireVersion >= 6 &&
+      server.description.logicalSessionTimeoutMinutes &&
+      server.description.type !== ServerType.Standalone)
   );
 }
 
@@ -471,8 +498,14 @@ function makeOperationHandler(
         }
 
         if (!(err instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(err)) {
-          markServerUnknown(server, err);
-          server.s.pool.clear();
+          // In load balanced mode we never mark the server as unknown and always
+          // clear for the specific service id.
+          if (server.loadBalanced) {
+            server.s.pool.clear(connection.serviceId);
+          } else {
+            markServerUnknown(server, err);
+            server.s.pool.clear();
+          }
         }
       } else {
         // if pre-4.4 server, then add error label if its a retryable write error
@@ -485,7 +518,7 @@ function makeOperationHandler(
           err.addErrorLabel('RetryableWriteError');
         }
 
-        if (isSDAMUnrecoverableError(err)) {
+        if (isSDAMUnrecoverableError(err) && !server.loadBalanced) {
           if (shouldHandleStateChangeError(server, err)) {
             if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(err)) {
               server.s.pool.clear();
@@ -498,6 +531,30 @@ function makeOperationHandler(
       }
     }
 
+    // Check the command result and determine if we need to pin the connection
+    // in load balanced mode.
+    if (server.loadBalanced && pinRequired(cmd, result)) {
+      pinConnection(server.s.pool, connection);
+    }
+
     callback(err, result);
   };
+}
+
+/**
+ * Connection pinning is required when using cursors and the cursor
+ * is not yet exhausted.
+ */
+function pinRequired(cmd: Document, result?: Document) {
+  if (result && (cmd.find || cmd.getMore || cmd.killCursors)) {
+    return result.cursorId && result.cursorId !== Long.ZERO;
+  }
+  return false;
+}
+
+/**
+ * Pin the connection.
+ */
+function pinConnection(connectionPool: ConnectionPool, connection: Connection) {
+  connectionPool.markPinned(connection, Metrics.CURSOR);
 }

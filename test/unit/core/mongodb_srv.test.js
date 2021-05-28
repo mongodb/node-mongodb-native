@@ -53,6 +53,9 @@ describe('mongodb+srv', function () {
                   expect(options).to.have.property('credentials');
                   expect(options.credentials.source).to.equal(testOptions.authSource);
                 }
+                if (testOptions && testOptions.loadBalanced) {
+                  expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
+                }
                 if (
                   test[1].parsed_options &&
                   test[1].parsed_options.user &&

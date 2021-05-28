@@ -35,7 +35,7 @@ import {
   OpQueryOptions,
   Msg
 } from './commands';
-import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions, ObjectId } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import type { Stream } from './connect';
@@ -247,8 +247,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kIsMaster] = response;
   }
 
+  get serviceId(): ObjectId {
+    return this.ismaster.serviceId;
+  }
+
   get generation(): number {
     return this[kGeneration] || 0;
+  }
+
+  set generation(generation: number) {
+    this[kGeneration] = generation;
   }
 
   get idleTime(): number {
@@ -265,6 +273,27 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   markAvailable(): void {
     this[kLastUseTime] = now();
+  }
+
+  /**
+   * Mark the connection as pinned if it isn't already pinned. An example
+   * of this is if the connection is pinned to a transaction, and we've
+   * started a cursor inside the transaction, we want to keep the tracking
+   * for the metrics as the transaction.
+   */
+  markPinned(pinType: string): void {
+    if (!this.pinType) {
+      this.pinType = pinType;
+    }
+  }
+
+  /**
+   * Mark the connection as unpinned only if the pin type is the same.
+   */
+  markUnpinned(pinType: string): void {
+    if (pinType === this.pinType) {
+      this.pinType = undefined;
+    }
   }
 
   handleIssue(issue: { isTimeout?: boolean; isClose?: boolean; destroy?: boolean | Error }): void {
@@ -680,8 +709,10 @@ export class CryptoConnection extends Connection {
   }
 }
 
-function hasSessionSupport(conn: Connection) {
-  return conn.description.logicalSessionTimeoutMinutes != null;
+/** @public */
+export function hasSessionSupport(conn: Connection): boolean {
+  const description = conn.description;
+  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
 }
 
 function supportsOpMsg(conn: Connection) {

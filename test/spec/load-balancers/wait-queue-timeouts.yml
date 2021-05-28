@@ -1,0 +1,82 @@
+description: wait queue timeout errors include details about checked out connections
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      uriOptions:
+        maxPoolSize: 1
+        waitQueueTimeoutMS: 5
+      observeEvents:
+        - connectionCheckedOutEvent
+        - connectionCheckOutFailedEvent
+  - session:
+      id: &session0 session0
+      client: *client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - _id: 1
+      - _id: 2
+      - _id: 3
+
+tests:
+  - description: wait queue timeout errors include cursor statistics
+    operations:
+      - name: createFindCursor
+        object: *collection0
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor0 cursor0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 1 }
+        expectError:
+          isClientError: true
+          errorContains: 'maxPoolSize: 1, connections in use by cursors: 1, connections in use by transactions: 0, connections in use by other operations: 0'
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionCheckedOutEvent: {}
+          - connectionCheckOutFailedEvent: {}
+
+  - description: wait queue timeout errors include transaction statistics
+    operations:
+      - name: startTransaction
+        object: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 1 }
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 1 }
+        expectError:
+          isClientError: true
+          errorContains: 'maxPoolSize: 1, connections in use by cursors: 0, connections in use by transactions: 1, connections in use by other operations: 0'
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionCheckedOutEvent: {}
+          - connectionCheckOutFailedEvent: {}

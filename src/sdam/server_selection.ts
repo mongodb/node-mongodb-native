@@ -207,6 +207,10 @@ function knownFilter(server: ServerDescription): boolean {
   return server.type !== ServerType.Unknown;
 }
 
+function loadBalancerFilter(server: ServerDescription): boolean {
+  return server.type === ServerType.LoadBalancer;
+}
+
 /**
  * Returns a function which selects servers based on a provided read preference
  *
@@ -230,6 +234,10 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
       throw new MongoDriverError(
         `Minimum wire version '${readPreference.minWireVersion}' required, but found '${commonWireVersion}'`
       );
+    }
+
+    if (topologyDescription.type === TopologyType.LoadBalanced) {
+      return servers.filter(loadBalancerFilter);
     }
 
     if (topologyDescription.type === TopologyType.Unknown) {

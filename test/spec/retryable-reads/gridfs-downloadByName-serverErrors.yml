@@ -4,7 +4,7 @@ runOn:
         topology: ["single", "replicaset"]
     -
         minServerVersion: "4.1.7"
-        topology: ["sharded"]
+        topology: ["sharded", "load-balanced"]
 
 database_name: &database_name "retryable-reads-tests"
 bucket_name: "fs"

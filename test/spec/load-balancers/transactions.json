@@ -1,0 +1,1606 @@
+{
+  "description": "transactions are correctly pinned to connections for load-balanced clusters",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": true,
+        "observeEvents": [
+          "commandStartedEvent",
+          "connectionReadyEvent",
+          "connectionClosedEvent",
+          "connectionCheckedOutEvent",
+          "connectionCheckedInEvent"
+        ]
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0Name"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "database0Name",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        },
+        {
+          "_id": 3
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "documents": [
+      {
+        "_id": 4
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "sessions are reused in LB mode",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "assertSameLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "all operations go to the same mongos",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "transaction can be committed multiple times",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is not released after a non-transient CRUD error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 51
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          },
+          "expectError": {
+            "errorCode": 51,
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is not released after a non-transient commit error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "errorCode": 51
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "expectError": {
+            "errorCode": 51,
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a non-transient abort error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "errorCode": 51
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient non-network CRUD error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 24
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          },
+          "expectError": {
+            "errorCode": 24,
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient network CRUD error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "error"
+              }
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient non-network commit error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "errorCode": 24
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "expectError": {
+            "errorCode": 24,
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient network commit error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "ignoreResultAndError": true
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "error"
+              }
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient non-network abort error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "errorCode": 24
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released after a transient network abort error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "error"
+              }
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is released on successful abort",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is returned when a new transaction is started",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "pinned connection is returned when a non-transaction operation uses the session",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "commitTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "a connection can be shared by a transaction and a cursor",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2,
+            "session": "session0"
+          },
+          "saveResultAsEntity": "cursor0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "close",
+          "object": "cursor0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 1
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertNumberConnectionsCheckedOut",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "connections": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "killCursors"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

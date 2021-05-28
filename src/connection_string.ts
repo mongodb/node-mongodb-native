@@ -33,6 +33,12 @@ import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
 
+const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
+
+const LB_SINGLE_HOST = 'loadBalanced option only supported with a single host in the URI';
+const LB_REPLICA_SET = 'loadBalanced option not supported with a replicaSet option';
+const LB_DIRECT_CONNECTION = 'loadBalanced option not supported when directConnection is provided';
+
 /**
  * Determines whether a provided address matches the provided parent domain in order
  * to avoid certain attack vectors.
@@ -85,6 +91,11 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
       HostAddress.fromString(`${r.name}:${r.port ?? 27017}`)
     );
 
+    const lbError = checkLoadBalancerOptions(options, hostAddresses);
+    if (lbError) {
+      return callback(lbError);
+    }
+
     // Resolve TXT record and add options from there if they exist.
     dns.resolveTxt(lookupAddress, (err, record) => {
       if (err) {
@@ -98,14 +109,15 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 
         const txtRecordOptions = new URLSearchParams(record[0].join(''));
         const txtRecordOptionKeys = [...txtRecordOptions.keys()];
-        if (txtRecordOptionKeys.some(key => key !== 'authSource' && key !== 'replicaSet')) {
+        if (txtRecordOptionKeys.some(key => !VALID_TXT_RECORDS.includes(key))) {
           return callback(
-            new MongoParseError('Text record must only set `authSource` or `replicaSet`')
+            new MongoParseError(`Text record must only set one of: ${VALID_TXT_RECORDS.join(', ')}`)
           );
         }
 
         const source = txtRecordOptions.get('authSource') ?? undefined;
         const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
+        const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
 
         if (source === '' || replicaSet === '') {
           return callback(new MongoParseError('Cannot have empty URI params in DNS TXT Record'));
@@ -118,11 +130,47 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         if (!options.userSpecifiedReplicaSet && replicaSet) {
           options.replicaSet = replicaSet;
         }
+
+        if (loadBalanced === 'true') {
+          options.loadBalanced = true;
+        }
+
+        const lbError = checkLoadBalancerOptions(options, hostAddresses);
+        if (lbError) {
+          return callback(lbError);
+        }
+
+        if (options.loadBalanced) {
+          if (options.replicaSet) {
+            return callback(new MongoParseError(LB_REPLICA_SET));
+          }
+
+          if (hostAddresses.length > 1) {
+            return callback(new MongoParseError(LB_SINGLE_HOST));
+          }
+        }
       }
 
       callback(undefined, hostAddresses);
     });
   });
+}
+
+function checkLoadBalancerOptions(
+  options: MongoOptions,
+  addresses: HostAddress[]
+): MongoParseError | null {
+  if (options.loadBalanced) {
+    if (options.replicaSet) {
+      return new MongoParseError(LB_REPLICA_SET);
+    }
+
+    if (addresses.length > 1) {
+      return new MongoParseError(LB_SINGLE_HOST);
+    }
+    return null;
+  }
+  return null;
 }
 
 /**
@@ -378,6 +426,8 @@ export function parseOptions(
     throw new MongoParseError('directConnection not supported with SRV URI');
   }
 
+  validateLoadBalancedOptions(hosts, mongoOptions);
+
   // Potential SRV Overrides
   mongoOptions.userSpecifiedAuthSource =
     objectOptions.has('authSource') || urlOptions.has('authSource');
@@ -391,6 +441,20 @@ export function parseOptions(
   }
 
   return mongoOptions;
+}
+
+function validateLoadBalancedOptions(hosts: HostAddress[] | string[], mongoOptions: MongoOptions) {
+  if (mongoOptions.loadBalanced) {
+    if (hosts.length > 1) {
+      throw new MongoParseError(LB_SINGLE_HOST);
+    }
+    if (mongoOptions.replicaSet) {
+      throw new MongoParseError(LB_REPLICA_SET);
+    }
+    if (mongoOptions.directConnection) {
+      throw new MongoParseError(LB_DIRECT_CONNECTION);
+    }
+  }
 }
 
 function setOption(
@@ -669,6 +733,10 @@ export const OPTIONS = {
   keepAliveInitialDelay: {
     default: 120000,
     type: 'uint'
+  },
+  loadBalanced: {
+    default: false,
+    type: 'boolean'
   },
   localThresholdMS: {
     default: 15,

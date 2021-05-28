@@ -12,7 +12,7 @@ tests:
     changeStreamPipeline: []
     changeStreamOptions: {}
     operations: []
-    expectations: []
+    expectations: ~
     result:
       error:
         code: 40573
@@ -57,6 +57,7 @@ tests:
     topology:
       - replicaset
       - sharded
+      - load-balanced
     changeStreamPipeline:
       -
         $project: { _id: 0 }
@@ -86,6 +87,7 @@ tests:
     topology:
       - replicaset
       - sharded
+      - load-balanced
     changeStreamPipeline: []
     changeStreamOptions: {}
     operations:

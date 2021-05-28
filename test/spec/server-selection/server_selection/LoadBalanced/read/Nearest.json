@@ -1,0 +1,35 @@
+{
+  "topology_description": {
+    "type": "LoadBalanced",
+    "servers": [
+      {
+        "address": "g:27017",
+        "avg_rtt_ms": 0,
+        "type": "LoadBalancer"
+      }
+    ]
+  },
+  "operation": "write",
+  "read_preference": {
+    "mode": "Nearest",
+    "tag_sets": [
+      {
+        "data_center": "nyc"
+      }
+    ]
+  },
+  "suitable_servers": [
+    {
+      "address": "g:27017",
+      "avg_rtt_ms": 0,
+      "type": "LoadBalancer"
+    }
+  ],
+  "in_latency_window": [
+    {
+      "address": "g:27017",
+      "avg_rtt_ms": 0,
+      "type": "LoadBalancer"
+    }
+  ]
+}

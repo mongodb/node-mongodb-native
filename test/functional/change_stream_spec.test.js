@@ -1,11 +1,13 @@
 'use strict';
 
 const chai = require('chai');
-const loadSpecTests = require('../spec').loadSpecTests;
+const { loadSpecTests } = require('../spec');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
-const setupDatabase = require('./shared').setupDatabase;
-const delay = require('./shared').delay;
+const { setupDatabase } = require('./shared');
+const { delay } = require('./shared');
 const expect = chai.expect;
+const path = require('path');
 
 describe('Change Stream Spec', function () {
   let globalClient;
@@ -28,7 +30,7 @@ describe('Change Stream Spec', function () {
     return new Promise(r => gc.close(() => r()));
   });
 
-  loadSpecTests('change-stream').forEach(suite => {
+  loadSpecTests(path.join('change-stream', 'legacy')).forEach(suite => {
     const ALL_DBS = [suite.database_name, suite.database2_name];
 
     describe(suite.name, () => {
@@ -277,5 +279,21 @@ describe('Change Stream Spec', function () {
       }
     }
     return () => target[command].apply(target, args);
+  }
+});
+
+describe('Change Streams Spec Unified Tests', function () {
+  for (const changeStreamTest of loadSpecTests(path.join('change-stream', 'unified'))) {
+    expect(changeStreamTest).to.exist;
+    context(String(changeStreamTest.description), function () {
+      for (const test of changeStreamTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test: async function () {
+            await runUnifiedTest(this, changeStreamTest, test);
+          }
+        });
+      }
+    });
   }
 });

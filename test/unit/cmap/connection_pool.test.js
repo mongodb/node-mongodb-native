@@ -3,8 +3,11 @@
 const util = require('util');
 const { loadSpecTests } = require('../../spec');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
+const { Connection } = require('../../../src/cmap/connection');
+const { Metrics } = require('../../../src/cmap/metrics');
 const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const { EventEmitter } = require('events');
+const { Socket } = require('net');
 const mock = require('../../tools/mock');
 const cmapEvents = require('../../../src/cmap/connection_pool_events');
 const sinon = require('sinon');
@@ -40,6 +43,98 @@ describe('Connection Pool', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
+
+  describe('#waitQueueErrorMetrics', function () {
+    let pool;
+
+    before(function () {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER);
+        } else {
+          request.connection.destroy();
+        }
+      });
+      pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+    });
+
+    it('returns the metrics information for the pool', function () {
+      expect(pool.waitQueueErrorMetrics()).to.equal(
+        `. maxPoolSize: 1, ` +
+          'connections in use by cursors: 0,' +
+          'connections in use by transactions: 0,' +
+          'connections in use by other operations: 0'
+      );
+    });
+  });
+
+  describe('#markPinned', function () {
+    const stream = new Socket();
+    let pool;
+    let connection;
+
+    before(function () {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER);
+        } else {
+          request.connection.destroy();
+        }
+      });
+      connection = new Connection(stream, {});
+      pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+      pool.markPinned(connection, Metrics.CURSOR);
+    });
+
+    it('sets the metrics information for the pool', function () {
+      expect(pool.waitQueueErrorMetrics()).to.equal(
+        `. maxPoolSize: 1, ` +
+          'connections in use by cursors: 1,' +
+          'connections in use by transactions: 0,' +
+          'connections in use by other operations: 0'
+      );
+    });
+
+    it('sets the pin type on the connection', function () {
+      expect(connection.pinType).to.equal(Metrics.CURSOR);
+    });
+  });
+
+  describe('#markUnpinned', function () {
+    const stream = new Socket();
+    let pool;
+    let connection;
+
+    before(function () {
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER);
+        } else {
+          request.connection.destroy();
+        }
+      });
+      connection = new Connection(stream, {});
+      pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+      pool.markPinned(connection, Metrics.CURSOR);
+      pool.markUnpinned(connection, Metrics.CURSOR);
+    });
+
+    it('sets the metrics information for the pool', function () {
+      expect(pool.waitQueueErrorMetrics()).to.equal(
+        `. maxPoolSize: 1, ` +
+          'connections in use by cursors: 0,' +
+          'connections in use by transactions: 0,' +
+          'connections in use by other operations: 0'
+      );
+    });
+
+    it('removes the pin type on the connection', function () {
+      expect(connection.pinType).to.not.exist;
+    });
+  });
 
   it('should destroy connections which have been closed', function (done) {
     server.setMessageHandler(request => {
@@ -246,6 +341,70 @@ describe('Connection Pool', function () {
       pool.withConnection((err, conn, cb) => {
         expect(err).to.not.exist;
         cb();
+      });
+    });
+  });
+
+  describe.skip('#closeConnections', function () {
+    context('when the server id matches', function () {
+      let pool;
+
+      beforeEach(() => {
+        pool = new ConnectionPool({
+          minPoolSize: 1,
+          hostAddress: server.hostAddress()
+        });
+      });
+
+      afterEach(done => {
+        pool.close(done);
+      });
+
+      it('closes the matching connections', function (done) {
+        const hello = mock.DEFAULT_HELLO_50;
+        server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(hello);
+          }
+        });
+        pool.on(ConnectionPool.CONNECTION_CLOSED, event => {
+          console.log('event', event);
+          done();
+        });
+
+        const connection = pool.checkOut();
+        pool.checkIn(connection);
+        pool.closeConnections(hello.serverId);
+      });
+    });
+
+    context('when the server id does not match', function () {
+      let pool;
+
+      beforeEach(() => {
+        pool = new ConnectionPool({
+          minPoolSize: 3,
+          hostAddress: server.hostAddress()
+        });
+      });
+
+      afterEach(done => {
+        pool.close(done);
+      });
+
+      it('does not close any connections', function (done) {
+        const hello = mock.DEFAULT_HELLO_50;
+        server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(hello);
+          }
+        });
+        pool.closeConnections(hello.serverId);
+        process.nextTick(() => {
+          done();
+        });
       });
     });
   });

@@ -1,6 +1,6 @@
 runOn:
     - minServerVersion: "4.3.1"
-      topology: ["replicaset", "sharded"]
+      topology: ["replicaset", "sharded", "load-balanced"]
 
 data: []
 
