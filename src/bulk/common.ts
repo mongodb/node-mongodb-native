@@ -803,6 +803,16 @@ export class FindOperators {
     this.bulkOperation.s.currentOp.collation = collation;
     return this;
   }
+
+  /** Specifies arrayFilters for UpdateOne or UpdateMany bulk operations. */
+  arrayFilters(arrayFilters: Document[]): this {
+    if (!this.bulkOperation.s.currentOp) {
+      this.bulkOperation.s.currentOp = {};
+    }
+
+    this.bulkOperation.s.currentOp.arrayFilters = arrayFilters;
+    return this;
+  }
 }
 
 /** @internal */

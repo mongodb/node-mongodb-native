@@ -1940,6 +1940,48 @@ describe('Bulk', function () {
     })
   });
 
+  it('should apply arrayFilters to bulk updates via FindOperators', {
+    metadata: { requires: { mongodb: '>= 3.6' } },
+    test: withMonitoredClient(['update', 'delete'], function (client, events, done) {
+      client.db().dropCollection('bulkArrayFilters', () => {
+        const coll = client.db().collection('bulkArrayFilters');
+        const bulk = coll.initializeOrderedBulkOp();
+
+        bulk.insert({ person: 'Foo', scores: [4, 9, 12] });
+        bulk.insert({ person: 'Bar', scores: [13, 0, 52] });
+        bulk
+          .find({ scores: { $lt: 1 } })
+          .arrayFilters([{ e: { $lt: 1 } }])
+          .updateOne({ $set: { 'scores.$[e]': 1 } });
+        bulk
+          .find({ scores: { $gte: 10 } })
+          .arrayFilters([{ e: { $gte: 10 } }])
+          .update({ $set: { 'scores.$[e]': 10 } });
+
+        bulk.execute(err => {
+          expect(err).to.not.exist;
+          expect(events).to.be.an('array').with.lengthOf(1);
+          expect(events[0]).to.have.property('commandName', 'update');
+          const updateCommand = events[0].command;
+          expect(updateCommand).property('updates').to.be.an('array').with.lengthOf(2);
+          updateCommand.updates.forEach(update => expect(update).to.have.property('arrayFilters'));
+          coll.find({}).toArray((err, result) => {
+            expect(err).to.not.exist;
+            expect(result[0]).to.containSubset({
+              person: 'Foo',
+              scores: [4, 9, 10]
+            });
+            expect(result[1]).to.containSubset({
+              person: 'Bar',
+              scores: [10, 1, 10]
+            });
+            client.close(done);
+          });
+        });
+      });
+    })
+  });
+
   it('should throw an error if raw operations are passed to bulkWrite', function () {
     const client = this.configuration.newClient();
     return client.connect().then(() => {
