@@ -32,6 +32,9 @@ export {
 
 export {
   MongoError,
+  MongoServerError,
+  MongoDriverError,
+  MongoDriverErrorOpts,
   MongoNetworkError,
   MongoTimeoutError,
   MongoServerSelectionError,

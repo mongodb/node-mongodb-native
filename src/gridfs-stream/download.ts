@@ -316,7 +316,7 @@ function init(stream: GridFSBucketReadStream): void {
         : stream.s.filter.filename;
       const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
       const err = new MongoDriverError(errmsg);
-      err.code = 'ENOENT';
+      (err.code as any) = 'ENOENT'; // TODO: fix this!
       return __handleError(stream, err);
     }
 
