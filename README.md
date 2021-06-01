@@ -92,7 +92,7 @@ If all the steps complete, you have the right toolchain installed. If you get th
 npm install -g node-gyp
 ```
 
-If it correctly compiles and runs the tests you are golden. We can now try to install the `mongod` driver by performing the following command.
+If it correctly compiles and runs the tests you are golden. We can now try to install the `mongodb` driver by performing the following command.
 
 ```bash
 cd yourproject
