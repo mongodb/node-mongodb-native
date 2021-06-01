@@ -246,6 +246,18 @@ class EventCollector {
   }
 }
 
+function getSymbolFrom(target, symbolName, assertExists = true) {
+  const symbol = Object.getOwnPropertySymbols(target).filter(
+    s => s.toString() === `Symbol(${symbolName})`
+  )[0];
+
+  if (assertExists && !symbol) {
+    throw new Error(`Did not find Symbol(${symbolName}) on ${target}`);
+  }
+
+  return symbol;
+}
+
 module.exports = {
   EventCollector,
   makeTestFunction,
@@ -253,5 +265,6 @@ module.exports = {
   ClassWithLogger,
   ClassWithoutLogger,
   ClassWithUndefinedLogger,
-  visualizeMonitoringEvents
+  visualizeMonitoringEvents,
+  getSymbolFrom
 };

@@ -11,6 +11,7 @@ const { TopologyDescriptionChangedEvent } = require('../../../src/sdam/events');
 const { TopologyDescription } = require('../../../src/sdam/topology_description');
 const { TopologyType } = require('../../../src/sdam/common');
 const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
+const { getSymbolFrom } = require('../../tools/utils');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -370,6 +371,12 @@ describe('Topology (unit)', function () {
             SrvPoller.SRV_RECORD_DISCOVERY,
             new SrvPollingEvent([{ priority: 1, weight: 1, port: 2, name: 'fake' }])
           );
+
+          // The srv event starts a monitor that we don't actually want running
+          const server = topology.s.servers.get('fake:2');
+          const kMonitor = getSymbolFrom(server, 'monitor');
+          const kMonitorId = getSymbolFrom(server[kMonitor], 'monitorId');
+          server[kMonitor][kMonitorId].stop();
         });
 
         it('should clean up listeners on close', function (done) {
