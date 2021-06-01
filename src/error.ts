@@ -234,7 +234,7 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
  * @public
  * @category Error
  */
-export class MongoParseError extends MongoError {
+export class MongoParseError extends MongoDriverError {
   constructor(message: string) {
     super(message);
     this.name = 'MongoParseError';
