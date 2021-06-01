@@ -358,7 +358,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param operations - Bulk operations to perform
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
-   * @throws MongoError if operations is not an array
+   * @throws MongoDriverError if operations is not an array
    */
   bulkWrite(operations: AnyBulkWriteOperation<TSchema>[]): Promise<BulkWriteResult>;
   bulkWrite(

@@ -52,7 +52,10 @@ export class RenameOperation extends RunAdminCommandOperation {
       try {
         newColl = new Collection(coll.s.db, this.newName, coll.s.options);
       } catch (err) {
-        return callback(new MongoError(err));
+        if (!(err instanceof MongoError)) {
+          throw new TypeError('SANITY CHECK: got a non-MongoError in rename execute');
+        }
+        return callback(err);
       }
 
       return callback(undefined, newColl);
