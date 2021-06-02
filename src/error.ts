@@ -258,23 +258,11 @@ export class MongoSystemError extends MongoError {
 }
 
 /**
- * An error signifying a client-side timeout event
- * @public
- * @category Error
- */
-export class MongoTimeoutError extends MongoSystemError {
-  constructor(message: string, reason: TopologyDescription) {
-    super(message, reason);
-    this.name = 'MongoTimeoutError';
-  }
-}
-
-/**
  * An error signifying a client-side server selection error
  * @public
  * @category Error
  */
-export class MongoServerSelectionError extends MongoTimeoutError {
+export class MongoServerSelectionError extends MongoSystemError {
   constructor(message: string, reason: TopologyDescription) {
     super(message, reason);
     this.name = 'MongoServerSelectionError';

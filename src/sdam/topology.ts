@@ -11,7 +11,7 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { MongoServerSelectionError, AnyError, MongoDriverError } from '../error';
+import { MongoServerSelectionError, MongoDriverError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
   makeStateMachine,
@@ -935,7 +935,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
+function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {

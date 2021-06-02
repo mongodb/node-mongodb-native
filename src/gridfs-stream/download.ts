@@ -178,7 +178,7 @@ export class GridFSBucketReadStream extends Readable {
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
-      this.s.cursor.close((error?: Error) => {
+      this.s.cursor.close(error => {
         this.emit(GridFSBucketReadStream.CLOSE);
         callback && callback(error);
       });
@@ -218,7 +218,7 @@ function doRead(stream: GridFSBucketReadStream): void {
 
       process.nextTick(() => {
         if (!stream.s.cursor) return;
-        stream.s.cursor.close((error?: Error) => {
+        stream.s.cursor.close(error => {
           if (error) {
             __handleError(stream, error);
             return;
