@@ -7,7 +7,9 @@ const SKIPPED_TESTS = [
   // These two tests need to run against multiple mongoses
   'Dirty explicit session is discarded',
   // Will be implemented as part of NODE-2034
-  'Client side error in command starting transaction'
+  'Client side error in command starting transaction',
+  // NODE-3308
+  'A successful find event with a getmore and the server kills the cursor'
 ];
 
 describe('Unified test format runner', function unifiedTestRunner() {
