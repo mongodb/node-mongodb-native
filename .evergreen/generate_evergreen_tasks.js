@@ -533,6 +533,11 @@ BUILD_VARIANTS.push({
   display_name: 'Custom FLE Version Test',
   run_on: 'ubuntu1804-test',
   tasks: ['run-custom-csfle-tests']
+},{
+  name: 'ubuntu1804-run-bson-ext-test',
+  display_name: 'BSON EXT Test',
+  run_on: 'ubuntu1804-test',
+  tasks: ['run-bson-ext-test']
 });
 
 // singleton build variant for mongosh integration tests

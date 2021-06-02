@@ -1707,6 +1707,11 @@ buildvariants:
     run_on: ubuntu1804-test
     tasks:
       - run-custom-csfle-tests
+  - name: ubuntu1804-run-bson-ext-test
+    display_name: BSON EXT Test
+    run_on: ubuntu1804-test
+    tasks:
+      - run-bson-ext-test
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test
