@@ -237,15 +237,14 @@ export class MongoParseError extends MongoDriverError {
 }
 
 /**
- * An error signifying a client-side timeout event
+ * An error signifying a general system issue
  * @public
  * @category Error
  */
-export class MongoTimeoutError extends MongoError {
-  /** An optional reason context for the timeout, generally an error saved during flow of monitoring and selecting servers */
+export class MongoSystemError extends MongoError {
+  /** An optional reason context, such as an error saved during flow of monitoring and selecting servers */
   reason?: TopologyDescription;
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
@@ -253,10 +252,22 @@ export class MongoTimeoutError extends MongoError {
       super(message);
     }
 
-    this.name = 'MongoTimeoutError';
+    this.name = 'MongoSystemError';
     if (reason) {
       this.reason = reason;
     }
+  }
+}
+
+/**
+ * An error signifying a client-side timeout event
+ * @public
+ * @category Error
+ */
+export class MongoTimeoutError extends MongoSystemError {
+  constructor(message: string, reason: TopologyDescription) {
+    super(message, reason);
+    this.name = 'MongoTimeoutError';
   }
 }
 
