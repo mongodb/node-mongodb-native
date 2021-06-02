@@ -48,7 +48,9 @@ export interface BSONSerializeOptions
       | 'evalFunctions'
       | 'cacheFunctions'
       | 'cacheFunctionsCrc32'
+      | 'bsonRegExp'
       | 'allowObjectSmallerThanBufferSize'
+      | 'index'
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;

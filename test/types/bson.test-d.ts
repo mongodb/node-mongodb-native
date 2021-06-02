@@ -1,5 +1,5 @@
 import { expectType } from 'tsd';
-import { BSONSerializeOptions, Document } from '../../src/bson';
+import type { BSONSerializeOptions, Document } from '../../src/bson';
 
 const options: BSONSerializeOptions = {};
 
@@ -10,7 +10,6 @@ expectType<boolean | undefined>(options.promoteLongs);
 expectType<boolean | undefined>(options.promoteBuffers);
 expectType<boolean | undefined>(options.promoteValues);
 expectType<Document | undefined>(options.fieldsAsRaw);
-expectType<boolean | undefined>(options.bsonRegExp);
 
 type PermittedBSONOptionKeys =
   | 'checkKeys'
@@ -19,7 +18,8 @@ type PermittedBSONOptionKeys =
   | 'promoteLongs'
   | 'promoteBuffers'
   | 'promoteValues'
-  | 'bsonRegExp';
+  | 'fieldsAsRaw'
+  | 'raw';
 
 const keys = (null as unknown) as PermittedBSONOptionKeys;
 // creates an explicit allow list assertion
