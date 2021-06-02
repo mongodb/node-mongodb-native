@@ -110,16 +110,6 @@ export class MongoError extends Error {
   }
 
   /**
-   * Creates a new MongoError object
-   *
-   * @param options - The options used to create the error.
-   * @deprecated Use `new MongoError()` instead.
-   */
-  static create(options: string | Error | ErrorDescription): MongoError {
-    return new MongoError(options);
-  }
-
-  /**
    * Checks the error to see if it has an error label
    *
    * @param label - The error label to check for
