@@ -84,22 +84,20 @@ export class MongoError extends Error {
     if (message instanceof Error) {
       super(message.message);
       this.stack = message.stack;
+    } else if (typeof message === 'string') {
+      super(message);
     } else {
-      if (typeof message === 'string') {
-        super(message);
-      } else {
-        super(message.message || message.errmsg || message.$err || 'n/a');
-        if (message.errorLabels) {
-          this[kErrorLabels] = new Set(message.errorLabels);
+      super(message.message || message.errmsg || message.$err || 'n/a');
+      if (message.errorLabels) {
+        this[kErrorLabels] = new Set(message.errorLabels);
+      }
+
+      for (const name in message) {
+        if (name === 'errorLabels' || name === 'errmsg') {
+          continue;
         }
 
-        for (const name in message) {
-          if (name === 'errorLabels' || name === 'errmsg') {
-            continue;
-          }
-
-          (this as any)[name] = message[name];
-        }
+        (this as any)[name] = message[name];
       }
     }
 
