@@ -40,7 +40,8 @@ operations.set('aggregate', async ({ entities, operation }) => {
       maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
       collation: operation.arguments.collation,
       hint: operation.arguments.hint,
-      out: operation.arguments.out
+      let: operation.arguments.let,
+      out: operation.arguments.out,
     })
     .toArray();
 });

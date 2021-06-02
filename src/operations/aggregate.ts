@@ -35,6 +35,8 @@ export interface AggregateOptions extends CommandOperationOptions {
   collation?: CollationOptions;
   /** Add an index selection hint to an aggregation command */
   hint?: Hint;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
   out?: string;
 }
 
@@ -114,6 +116,10 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (options.hint) {
       command.hint = options.hint;
+    }
+
+    if (options.let) {
+      command.let = options.let;
     }
 
     command.cursor = options.cursor || {};
