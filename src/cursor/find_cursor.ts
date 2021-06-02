@@ -64,6 +64,10 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     });
   }
 
+  map<T>(transform: (doc: TSchema) => T): FindCursor<T> {
+    return super.map(transform) as FindCursor<T>;
+  }
+
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {

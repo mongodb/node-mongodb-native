@@ -469,7 +469,7 @@ export abstract class AbstractCursor<
    *
    * @param transform - The mapping transformation method.
    */
-  map(transform: (doc: TSchema) => any): this {
+  map<T = TSchema>(transform: (doc: TSchema) => T): AbstractCursor<T> {
     assertUninitialized(this);
     const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
@@ -480,7 +480,7 @@ export abstract class AbstractCursor<
       this[kTransform] = transform;
     }
 
-    return this;
+    return (this as unknown) as AbstractCursor<T>;
   }
 
   /**
