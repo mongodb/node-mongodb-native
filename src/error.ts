@@ -301,7 +301,7 @@ function makeWriteConcernResultObject(input: any) {
  * @public
  * @category Error
  */
-export class MongoWriteConcernError extends MongoError {
+export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
 
