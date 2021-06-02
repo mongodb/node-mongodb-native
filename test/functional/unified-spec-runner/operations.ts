@@ -41,7 +41,7 @@ operations.set('aggregate', async ({ entities, operation }) => {
       collation: operation.arguments.collation,
       hint: operation.arguments.hint,
       let: operation.arguments.let,
-      out: operation.arguments.out,
+      out: operation.arguments.out
     })
     .toArray();
 });
