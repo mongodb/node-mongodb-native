@@ -412,14 +412,7 @@ export function isSDAMUnrecoverableError(error: MongoError): boolean {
     return true;
   }
 
-  if (typeof error.code !== 'undefined') {
-    return isRecoveringError(error) || isNotMasterError(error);
-  }
-  if (isRecoveringError(error) || isNotMasterError(error)) {
-    return true;
-  }
-
-  return false;
+  return isRecoveringError(error) || isNotMasterError(error);
 }
 
 export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError {
