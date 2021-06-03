@@ -55,12 +55,14 @@ describe('When importing BSON', function () {
     });
   }
 
-  describe('bson-ext should be imported if it exists', function () {
+  describe('bson-ext', function () {
     before(function () {
       if (!isBSONExtInstalled()) {
         this.skip();
       }
+    });
 
+    it('should be imported if it exists', function () {
       expect(BSON.deserialize.toString()).to.include('[native code]');
       expect(BSON.serialize.toString()).to.include('[native code]');
       expect(BSON.calculateObjectSize.toString()).to.include('[native code]');
@@ -69,12 +71,14 @@ describe('When importing BSON', function () {
     testTypes();
   });
 
-  describe('js-bson should be imported by default', function () {
+  describe('js-bson', function () {
     before(function () {
       if (isBSONExtInstalled()) {
         this.skip();
       }
+    });
 
+    it('should be imported by default', function () {
       expect(BSON.deserialize.toString()).to.not.include('[native code]');
       expect(BSON.serialize.toString()).to.not.include('[native code]');
       expect(BSON.calculateObjectSize.toString()).to.not.include('[native code]');
