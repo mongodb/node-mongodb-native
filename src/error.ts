@@ -93,7 +93,7 @@ export class MongoError extends Error {
       }
 
       for (const name in message) {
-        if (name === 'errorLabels' || name === 'errmsg') {
+        if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
           continue;
         }
 
@@ -275,12 +275,14 @@ export class MongoWriteConcernError extends MongoServerError {
   result?: Document;
 
   constructor(message: string, result: Document) {
-    super(message);
-    this.name = 'MongoWriteConcernError';
+    const errorDescription: ErrorDescription = { message };
 
     if (result && Array.isArray(result.errorLabels)) {
-      this[kErrorLabels] = new Set(result.errorLabels);
+      errorDescription.errorLabels = result.errorLabels;
     }
+
+    super(errorDescription);
+    this.name = 'MongoWriteConcernError';
 
     if (result != null) {
       this.result = makeWriteConcernResultObject(result);
