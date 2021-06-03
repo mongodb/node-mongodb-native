@@ -467,13 +467,15 @@ export abstract class AbstractCursor<
    * If there is a transform set on the cursor, that will be called first and the result passed to
    * this function's transform.
    * @remarks
-   *  
+   *
    * **NOTE:** adding a transform changes the return type of the iteration of this cursor, it **does not** return
-   * a new instance of a cursor. This means when calling map, you should always assign the result to a new 
+   * a new instance of a cursor. This means when calling map, you should always assign the result to a new
    * variable. Take note of the following example:
-   * 
+   *
    * ```typescript
-   * // fill in example
+   * const cursor: FindCursor<Document> = coll.find();
+   * const mappedCursor: FindCursor<number> = cursor.map(doc => Object.keys(doc).length);
+   * const keyCounts: number[] = await mappedCursor.toArray(); // cursor.toArray() still returns Document[]
    * ```
    * @param transform - The mapping transformation method.
    */
