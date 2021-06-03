@@ -3,7 +3,7 @@ import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoError } from '../error';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -283,7 +283,7 @@ export class TopologyDescription {
     );
   }
 
-  get error(): Error | undefined {
+  get error(): MongoError | undefined {
     const descriptionsWithError = Array.from(this.servers.values()).filter(
       (sd: ServerDescription) => sd.error
     );
