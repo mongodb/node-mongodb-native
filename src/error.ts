@@ -158,13 +158,6 @@ export class MongoServerError extends MongoError {
 export class MongoDriverError extends MongoError {
   // can have code: String
   constructor(message: string) {
-    // TODO: remove sanity check code
-    if (typeof message !== 'string') {
-      throw new TypeError(
-        `ErrorConstructorError: expected string, got: ${JSON.stringify(message)}`
-      );
-    }
-
     super(message);
     this.name = 'MongoDriverError';
   }

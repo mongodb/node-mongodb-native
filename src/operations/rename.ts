@@ -4,7 +4,7 @@ import { defineAspects, Aspect } from './operation';
 import type { Server } from '../sdam/server';
 import { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
-import { MongoError, MongoServerError } from '../error';
+import { MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
 import type { Document } from 'bson';
 
@@ -52,9 +52,6 @@ export class RenameOperation extends RunAdminCommandOperation {
       try {
         newColl = new Collection(coll.s.db, this.newName, coll.s.options);
       } catch (err) {
-        if (!(err instanceof MongoError)) {
-          throw new TypeError('SANITY CHECK: got a non-MongoError in rename execute');
-        }
         return callback(err);
       }
 
