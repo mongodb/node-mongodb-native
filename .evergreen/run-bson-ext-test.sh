@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -o xtrace   # Write all commands first to stderr
+set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
 # Supported/used environment variables:
@@ -7,13 +7,9 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       MONGODB_URI             Set the suggested connection MONGODB_URI (including credentials and topology info)
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "check:test"
 #       SKIP_DEPS               Skip installing dependencies
-#       NO_EXIT                 Don't exit early from tests that leak resources
 
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:test}
-if [[ -z "${NO_EXIT}" ]]; then
-  TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
-fi
 
 # ssl setup
 SSL=${SSL:-nossl}
