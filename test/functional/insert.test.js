@@ -1577,7 +1577,7 @@ describe('Insert', function () {
         var collection = db.collection('bson_types_insert_1');
 
         var document = {
-          symbol: new BSONSymbol('abcdefghijkl'),
+          string: 'abcdefghijkl',
           objid: new ObjectId('abcdefghijkl'),
           double: new Double(1),
           binary: new Binary(Buffer.from('hello world')),
@@ -1590,9 +1590,9 @@ describe('Insert', function () {
           expect(err).to.not.exist;
           test.ok(result);
 
-          collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
+          collection.findOne({ string: 'abcdefghijkl' }, function (err, doc) {
             expect(err).to.not.exist;
-            test.equal('abcdefghijkl', doc.symbol.toString());
+            test.equal('abcdefghijkl', doc.string.toString());
 
             collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
               expect(err).to.not.exist;

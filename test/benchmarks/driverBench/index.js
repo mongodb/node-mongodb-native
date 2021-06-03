@@ -5,7 +5,13 @@ const MongoBench = require('../mongoBench');
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
-const BSON = require('bson');
+let BSON = require('bson');
+try {
+  BSON = require('bson-ext');
+} catch (_) {
+  // do not care
+}
+
 const { EJSON } = require('bson');
 
 const makeClient = commonHelpers.makeClient;
@@ -359,5 +365,8 @@ benchmarkRunner
       driverBench
     };
   })
-  .then(data => console.log(data))
+  .then(data => {
+    data.bsonType = BSON.serialize.toString().includes('native code') ? 'bson-ext' : 'js-bson';
+    console.log(data);
+  })
   .catch(err => console.error(err));

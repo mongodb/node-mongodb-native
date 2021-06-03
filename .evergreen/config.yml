@@ -516,6 +516,16 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run bson-ext test:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh
   upload test results:
     - command: attach.xunit_results
       params:
@@ -1353,6 +1363,20 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: server
       - func: run custom csfle tests
+  - name: run-bson-ext-test
+    tags:
+      - run-bson-ext-test
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: fermium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+      - func: run bson-ext test
+        vars:
+          NODE_LTS_NAME: fermium
 buildvariants:
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium
@@ -1685,6 +1709,11 @@ buildvariants:
     run_on: ubuntu1804-test
     tasks:
       - run-custom-csfle-tests
+  - name: ubuntu1804-run-bson-ext-test
+    display_name: BSON EXT Test
+    run_on: ubuntu1804-test
+    tasks:
+      - run-bson-ext-test
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test
