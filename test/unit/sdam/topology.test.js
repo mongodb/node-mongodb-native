@@ -331,6 +331,15 @@ describe('Topology (unit)', function () {
         expect(topology.s.detectShardedTopology).to.be.a('function');
       });
 
+      afterEach(() => {
+        // The srv event starts a monitor that we need to clean up
+        for (const [, server] of topology.s.servers) {
+          const kMonitor = getSymbolFrom(server, 'monitor');
+          const kMonitorId = getSymbolFrom(server[kMonitor], 'monitorId');
+          server[kMonitor][kMonitorId].stop();
+        }
+      });
+
       function transitionTopology(topology, from, to) {
         topology.emit(
           Topology.TOPOLOGY_DESCRIPTION_CHANGED,
@@ -371,12 +380,6 @@ describe('Topology (unit)', function () {
             SrvPoller.SRV_RECORD_DISCOVERY,
             new SrvPollingEvent([{ priority: 1, weight: 1, port: 2, name: 'fake' }])
           );
-
-          // The srv event starts a monitor that we don't actually want running
-          const server = topology.s.servers.get('fake:2');
-          const kMonitor = getSymbolFrom(server, 'monitor');
-          const kMonitorId = getSymbolFrom(server[kMonitor], 'monitorId');
-          server[kMonitor][kMonitorId].stop();
         });
 
         it('should clean up listeners on close', function (done) {
