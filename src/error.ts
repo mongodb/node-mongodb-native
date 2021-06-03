@@ -274,14 +274,12 @@ export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
 
-  constructor(message: string, result: Document) {
-    const errorDescription: ErrorDescription = { message };
-
+  constructor(message: ErrorDescription, result: Document) {
     if (result && Array.isArray(result.errorLabels)) {
-      errorDescription.errorLabels = result.errorLabels;
+      message.errorLabels = result.errorLabels;
     }
 
-    super(errorDescription);
+    super(message);
     this.name = 'MongoWriteConcernError';
 
     if (result != null) {
