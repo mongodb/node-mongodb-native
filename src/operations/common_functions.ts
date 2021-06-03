@@ -1,4 +1,4 @@
-import { MongoDriverError, MongoServerError } from '../error';
+import { MongoDriverError } from '../error';
 import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -64,7 +64,7 @@ export function indexInformation(
   db.collection(name)
     .listIndexes(options)
     .toArray((err, indexes) => {
-      if (err) return callback(new MongoServerError(err));
+      if (err) return callback(err);
       if (!Array.isArray(indexes)) return callback(undefined, []);
       if (full) return callback(undefined, indexes);
       callback(undefined, processResults(indexes));
