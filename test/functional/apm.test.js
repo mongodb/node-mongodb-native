@@ -114,7 +114,8 @@ describe('APM', function () {
     }
   });
 
-  it('should correctly receive the APM events for a listIndexes command', {
+  // NODE-3308
+  it.skip('should correctly receive the APM events for a listIndexes command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
     test: function () {
@@ -908,6 +909,13 @@ describe('APM', function () {
           it(test.description, {
             metadata: { requires: requirements },
             test: function () {
+              if (
+                test.description ===
+                'A successful find event with a getmore and the server kills the cursor'
+              ) {
+                this.skip();
+              }
+
               const client = this.configuration.newClient({}, { monitorCommands: true });
               return client.connect().then(client => {
                 expect(client).to.exist;

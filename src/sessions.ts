@@ -85,9 +85,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   hasEnded: boolean;
   clientOptions?: MongoOptions;
   supports: { causalConsistency: boolean };
-  /** @internal */
   clusterTime?: ClusterTime;
-  /** @internal */
   operationTime?: Timestamp;
   explicit: boolean;
   /** @internal */
