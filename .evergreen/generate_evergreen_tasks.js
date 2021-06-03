@@ -604,7 +604,7 @@ SINGLETON_TASKS.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'erbium',
+        NODE_LTS_NAME: 'fermium',
       },
     },
     {
@@ -614,7 +614,11 @@ SINGLETON_TASKS.push({
         TOPOLOGY: 'server'
       }
     },
-    { func: 'run bson-ext test' }
+    { func: 'run bson-ext test',
+      vars: {
+        NODE_LTS_NAME: 'fermium',
+      }
+    }
   ]
 });
 

@@ -1369,12 +1369,14 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
           TOPOLOGY: server
       - func: run bson-ext test
+        vars:
+          NODE_LTS_NAME: fermium
 buildvariants:
   - name: macos-1014-dubnium
     display_name: macOS 10.14 Node Dubnium

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+[ -s "$PROJECT_DIRECTORY/node-artifacts/nvm/nvm.sh" ] && source "$PROJECT_DIRECTORY"/node-artifacts/nvm/nvm.sh
+
 set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
@@ -6,7 +9,6 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       SSL                     Set to enable SSL. Defaults to "nossl"
 #       MONGODB_URI             Set the suggested connection MONGODB_URI (including credentials and topology info)
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "check:test"
-#       SKIP_DEPS               Skip installing dependencies
 
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:test}
@@ -20,28 +22,6 @@ fi
 
 # run tests
 echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
-
-if [[ -z "${SKIP_DEPS}" ]]; then
-  source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
-else
-  export PATH="/opt/mongodbtoolchain/v2/bin:$PATH"
-  NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
-  export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
-  if [[ "$OS" == "Windows_NT" ]]; then
-    NVM_HOME=$(cygpath -m -a "$NVM_DIR")
-    export NVM_HOME
-    NVM_SYMLINK=$(cygpath -m -a "$NODE_ARTIFACTS_PATH/bin")
-    export NVM_SYMLINK
-    NVM_ARTIFACTS_PATH=$(cygpath -m -a "$NODE_ARTIFACTS_PATH/bin")
-    export NVM_ARTIFACTS_PATH
-    PATH=$(cygpath $NVM_SYMLINK):$(cygpath $NVM_HOME):$PATH
-    export PATH
-    echo "updated path on windows PATH=$PATH"
-  else
-    [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-  fi
-  echo "initializing NVM, NVM_DIR=$NVM_DIR"
-fi
 
 npm install bson-ext
 
