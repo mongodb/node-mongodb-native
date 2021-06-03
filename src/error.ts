@@ -80,25 +80,12 @@ export class MongoError extends Error {
   writeConcernError?: Document;
   topologyVersion?: TopologyVersion;
 
-  constructor(message: string | Error | ErrorDescription) {
+  constructor(message: string | Error) {
     if (message instanceof Error) {
       super(message.message);
       this.stack = message.stack;
-    } else if (typeof message === 'string') {
-      super(message);
     } else {
-      super(message.message || message.errmsg || message.$err || 'n/a');
-      if (message.errorLabels) {
-        this[kErrorLabels] = new Set(message.errorLabels);
-      }
-
-      for (const name in message) {
-        if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-          continue;
-        }
-
-        (this as any)[name] = message[name];
-      }
+      super(message);
     }
 
     this.name = 'MongoError';
@@ -144,7 +131,22 @@ export class MongoError extends Error {
  */
 export class MongoServerError extends MongoError {
   constructor(message: string | Error | ErrorDescription) {
-    super(message);
+    if (typeof message === 'string' || message instanceof Error) {
+      super(message);
+    } else {
+      super(message.message || message.errmsg || message.$err || 'n/a');
+      if (message.errorLabels) {
+        this[kErrorLabels] = new Set(message.errorLabels);
+      }
+
+      for (const name in message) {
+        if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
+          continue;
+        }
+
+        (this as any)[name] = message[name];
+      }
+    }
     this.name = 'MongoServerError';
   }
 }
