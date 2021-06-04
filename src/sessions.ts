@@ -10,7 +10,8 @@ import {
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
-  MongoDriverError
+  MongoDriverError,
+  MongoServerError
 } from './error';
 import {
   now,
@@ -353,7 +354,9 @@ function hasNotTimedOut(startTime: number, max: number) {
 
 function isUnknownTransactionCommitResult(err: MongoError) {
   const isNonDeterministicWriteConcernError =
-    err.codeName && NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName);
+    err instanceof MongoServerError &&
+    err.codeName &&
+    NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName);
 
   return (
     isMaxTimeMSExpiredError(err) ||
