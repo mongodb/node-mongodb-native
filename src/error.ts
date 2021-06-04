@@ -132,8 +132,8 @@ export class MongoServerError extends MongoError {
   codeName?: string;
   writeConcernError?: Document;
 
-  constructor(message: string | Error | ErrorDescription) {
-    if (typeof message === 'string' || message instanceof Error) {
+  constructor(message: Error | ErrorDescription) {
+    if (message instanceof Error) {
       super(message);
     } else {
       super(message.message || message.errmsg || message.$err || 'n/a');
