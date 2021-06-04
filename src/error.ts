@@ -75,7 +75,7 @@ export interface ErrorDescription {
 export class MongoError extends Error {
   /** @internal */
   [kErrorLabels]: Set<string>;
-  code?: number;
+  code?: number | string;
   topologyVersion?: TopologyVersion;
 
   constructor(message: string | Error) {
@@ -128,6 +128,7 @@ export class MongoError extends Error {
  * @category Error
  */
 export class MongoServerError extends MongoError {
+  code?: number;
   codeName?: string;
   writeConcernError?: Document;
 
@@ -159,7 +160,7 @@ export class MongoServerError extends MongoError {
  * @category Error
  */
 export class MongoDriverError extends MongoError {
-  // can have code: String
+  code?: string;
   constructor(message: string) {
     super(message);
     this.name = 'MongoDriverError';
@@ -325,14 +326,14 @@ export function isRetryableWriteError(error: MongoError): boolean {
   if (error instanceof MongoWriteConcernError) {
     return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
-  return RETRYABLE_WRITE_ERROR_CODES.has(error.code ?? 0);
+  return typeof error.code === 'number' && RETRYABLE_WRITE_ERROR_CODES.has(error.code);
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
 export function isRetryableError(error: MongoError): boolean {
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    RETRYABLE_ERROR_CODES.has(error.code!) ||
+    (typeof error.code === 'number' && RETRYABLE_ERROR_CODES.has(error.code!)) ||
     error instanceof MongoNetworkError ||
     !!error.message.match(/not master/) ||
     !!error.message.match(/node is recovering/)
@@ -359,7 +360,7 @@ const SDAM_NODE_SHUTTING_DOWN_ERROR_CODES = new Set<number>([
 ]);
 
 function isRecoveringError(err: MongoError) {
-  if (typeof err.code !== 'undefined') {
+  if (typeof err.code === 'number') {
     // If any error code exists, we ignore the error.message
     return SDAM_RECOVERING_CODES.has(err.code);
   }
@@ -368,7 +369,7 @@ function isRecoveringError(err: MongoError) {
 }
 
 function isNotMasterError(err: MongoError) {
-  if (typeof err.code !== 'undefined') {
+  if (typeof err.code === 'number') {
     // If any error code exists, we ignore the error.message
     return SDAM_NOTMASTER_CODES.has(err.code);
   }
@@ -381,7 +382,7 @@ function isNotMasterError(err: MongoError) {
 }
 
 export function isNodeShuttingDownError(err: MongoError): boolean {
-  return !!(err.code && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code));
+  return !!(typeof err.code === 'number' && SDAM_NODE_SHUTTING_DOWN_ERROR_CODES.has(err.code));
 }
 
 /**
