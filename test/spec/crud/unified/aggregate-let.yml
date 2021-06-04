@@ -1,0 +1,81 @@
+description: "aggregate-let"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+
+tests:
+  - description: "Aggregate with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline0
+            # $match takes a query expression, so $expr is necessary to utilize
+            # an aggregate expression context and access "let" variables.
+            - $match: { $expr: { $eq: ["$_id", "$$id"] } }
+            - $project: { _id: 0, x: "$$x", y: "$$y", rand: "$$rand" }
+          # Values in "let" must be constant or closed expressions that do not
+          # depend on document values. This test demonstrates a basic constant
+          # value, a value wrapped with $literal (to avoid expression parsing),
+          # and a closed expression (e.g. $rand).
+          let: &let0
+            id: 1
+            x: foo
+            y: { $literal: "$bar" }
+            rand: { $rand: {} }
+        expectResult:
+          - { x: "foo", y: "$bar", rand: { $$type: "double" } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline0
+                let: *let0
+
+  - description: "Aggregate with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "2.6.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline1
+            - $match: { _id: 1 }
+          let: &let1
+            x: foo
+        expectError:
+          # Older server versions may not report an error code, but the error
+          # message is consistent between 2.6.x and 4.4.x server versions.
+          errorContains: "unrecognized field 'let'"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline1
+                let: *let1
