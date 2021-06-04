@@ -7,6 +7,11 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
 const { ns, makeClientMetadata } = require('../../../src/utils');
+const { TopologyDescriptionChangedEvent } = require('../../../src/sdam/events');
+const { TopologyDescription } = require('../../../src/sdam/topology_description');
+const { TopologyType } = require('../../../src/sdam/common');
+const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
+const { getSymbolFrom } = require('../../tools/utils');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -313,6 +318,112 @@ describe('Topology (unit)', function () {
         );
       });
       return p;
+    });
+
+    describe('srv event listeners', function () {
+      /** @type {Topology} */
+      let topology;
+
+      beforeEach(() => {
+        topology = new Topology('', { srvHost: 'fakeHost' });
+
+        expect(topology.s.detectSrvRecords).to.be.a('function');
+        expect(topology.s.detectShardedTopology).to.be.a('function');
+      });
+
+      afterEach(() => {
+        // The srv event starts a monitor that we need to clean up
+        for (const [, server] of topology.s.servers) {
+          const kMonitor = getSymbolFrom(server, 'monitor');
+          const kMonitorId = getSymbolFrom(server[kMonitor], 'monitorId');
+          server[kMonitor][kMonitorId].stop();
+        }
+      });
+
+      function transitionTopology(topology, from, to) {
+        topology.emit(
+          Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+          new TopologyDescriptionChangedEvent(
+            2,
+            new TopologyDescription(from),
+            new TopologyDescription(to)
+          )
+        );
+        // We don't want the SrvPoller to actually run
+        clearTimeout(topology.s.srvPoller._timeout);
+      }
+
+      describe('srvRecordDiscovery event listener', function () {
+        beforeEach(() => {
+          // fake a transition to Sharded
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded);
+          expect(topology.s.srvPoller).to.be.instanceOf(SrvPoller);
+
+          const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
+          expect(srvPollerListeners).to.have.lengthOf(1);
+          expect(srvPollerListeners[0]).to.equal(topology.s.detectSrvRecords);
+          const topologyChangeListeners = topology.listeners(Topology.TOPOLOGY_DESCRIPTION_CHANGED);
+          expect(topologyChangeListeners).to.have.lengthOf(1);
+          expect(topologyChangeListeners[0]).to.equal(topology.s.detectShardedTopology);
+        });
+
+        it('should emit topologyDescriptionChange event', function () {
+          topology.once(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
+            // The first event we get here is caused by the srv record discovery event below
+            expect(ev).to.have.nested.property('newDescription.servers');
+            expect(ev.newDescription.servers.get('fake:2'))
+              .to.be.a('object')
+              .with.property('address', 'fake:2');
+          });
+
+          topology.s.srvPoller.emit(
+            SrvPoller.SRV_RECORD_DISCOVERY,
+            new SrvPollingEvent([{ priority: 1, weight: 1, port: 2, name: 'fake' }])
+          );
+        });
+
+        it('should clean up listeners on close', function (done) {
+          topology.s.state = 'connected'; // fake state to test clean up logic
+          topology.close(e => {
+            const srvPollerListeners = topology.s.srvPoller.listeners(
+              SrvPoller.SRV_RECORD_DISCOVERY
+            );
+            expect(srvPollerListeners).to.have.lengthOf(0);
+            const topologyChangeListeners = topology.listeners(
+              Topology.TOPOLOGY_DESCRIPTION_CHANGED
+            );
+            expect(topologyChangeListeners).to.have.lengthOf(0);
+            done(e);
+          });
+        });
+      });
+
+      describe('topologyDescriptionChange event listener', function () {
+        it('should not add more than one srvRecordDiscovery listener', function () {
+          // fake a transition to Sharded
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 1
+
+          const srvListenersFirstTransition = topology.s.srvPoller.listeners(
+            SrvPoller.SRV_RECORD_DISCOVERY
+          );
+          expect(srvListenersFirstTransition).to.have.lengthOf(1);
+
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 2
+
+          const srvListenersSecondTransition = topology.s.srvPoller.listeners(
+            SrvPoller.SRV_RECORD_DISCOVERY
+          );
+          expect(srvListenersSecondTransition).to.have.lengthOf(1);
+        });
+
+        it('should not add srvRecordDiscovery listener if transition is not to Sharded topology', function () {
+          // fake a transition to **NOT** Sharded
+          transitionTopology(topology, TopologyType.Unknown, TopologyType.ReplicaSetWithPrimary);
+
+          const srvListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
+          expect(srvListeners).to.have.lengthOf(0);
+        });
+      });
     });
   });
 });

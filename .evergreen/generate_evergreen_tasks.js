@@ -533,6 +533,11 @@ BUILD_VARIANTS.push({
   display_name: 'Custom FLE Version Test',
   run_on: 'ubuntu1804-test',
   tasks: ['run-custom-csfle-tests']
+},{
+  name: 'ubuntu1804-run-bson-ext-test',
+  display_name: 'BSON EXT Test',
+  run_on: 'ubuntu1804-test',
+  tasks: ['run-bson-ext-test']
 });
 
 // singleton build variant for mongosh integration tests
@@ -588,6 +593,32 @@ SINGLETON_TASKS.push({
       }
     },
     { func: 'run custom csfle tests' }
+  ]
+});
+
+// special case for custom BSON-ext test
+SINGLETON_TASKS.push({
+  name: 'run-bson-ext-test',
+  tags: ['run-bson-ext-test'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: 'fermium',
+      },
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: '4.4',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'run bson-ext test',
+      vars: {
+        NODE_LTS_NAME: 'fermium',
+      }
+    }
   ]
 });
 

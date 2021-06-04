@@ -358,3 +358,4 @@ export type {
   MetaProjectionOperators,
   MetaSortOperators
 } from './mongo_types';
+export type { serialize, deserialize } from './bson';

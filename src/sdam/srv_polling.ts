@@ -59,6 +59,9 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   generation: number;
   _timeout?: NodeJS.Timeout;
 
+  /** @event */
+  static readonly SRV_RECORD_DISCOVERY = 'srvRecordDiscovery' as const;
+
   constructor(options: SrvPollerOptions) {
     super();
 
@@ -110,7 +113,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   success(srvRecords: dns.SrvRecord[]): void {
     this.haMode = false;
     this.schedule();
-    this.emit('srvRecordDiscovery', new SrvPollingEvent(srvRecords));
+    this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
   }
 
   failure(message: string, obj?: NodeJS.ErrnoException): void {
