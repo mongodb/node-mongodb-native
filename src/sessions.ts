@@ -367,7 +367,7 @@ function isUnknownTransactionCommitResult(err: MongoError) {
 }
 
 function isMaxTimeMSExpiredError(err: MongoError) {
-  if (err == null) {
+  if (err == null || !(err instanceof MongoServerError)) {
     return false;
   }
 

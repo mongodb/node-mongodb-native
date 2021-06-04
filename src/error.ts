@@ -76,7 +76,6 @@ export class MongoError extends Error {
   /** @internal */
   [kErrorLabels]: Set<string>;
   code?: number;
-  writeConcernError?: Document;
   topologyVersion?: TopologyVersion;
 
   constructor(message: string | Error) {
@@ -130,6 +129,7 @@ export class MongoError extends Error {
  */
 export class MongoServerError extends MongoError {
   codeName?: string;
+  writeConcernError?: Document;
 
   constructor(message: string | Error | ErrorDescription) {
     if (typeof message === 'string' || message instanceof Error) {
