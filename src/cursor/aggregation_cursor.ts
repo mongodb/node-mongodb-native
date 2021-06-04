@@ -63,6 +63,10 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     });
   }
 
+  map<T>(transform: (doc: TSchema) => T): AggregationCursor<T> {
+    return super.map(transform) as AggregationCursor<T>;
+  }
+
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
     const aggregateOperation = new AggregateOperation(this[kParent], this[kPipeline], {
