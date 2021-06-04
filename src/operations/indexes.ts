@@ -1,6 +1,6 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
-import { MONGODB_ERROR_CODES, MongoDriverError, MongoError } from '../error';
+import { MONGODB_ERROR_CODES, MongoDriverError, MongoServerError } from '../error';
 import {
   maxWireVersion,
   parseIndexOptions,
@@ -282,7 +282,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     const cursor = this.db.collection(this.collectionName).listIndexes({ session });
     cursor.toArray((err, indexes) => {
       /// ignore "NamespaceNotFound" errors
-      if (err && (err as MongoError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+      if (err && (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
         return callback(err);
       }
 
