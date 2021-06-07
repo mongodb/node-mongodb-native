@@ -756,6 +756,25 @@ function streamIdentifier(stream: Stream) {
   return uuidV4().toString('hex');
 }
 
+// TODO: ensure this does a deep copy
+function cloneCommand(command: WriteProtocolMessageType): WriteProtocolMessageType {
+  let clonedCommand;
+  if (command === null || command === undefined) {
+    clonedCommand = command;
+  } else if (
+    command instanceof Query ||
+    command instanceof Msg ||
+    command instanceof GetMore ||
+    command instanceof KillCursor
+  ) {
+    clonedCommand = { ...command };
+  } else {
+    throw new Error(`Unrecognized command: ${command}`);
+  }
+
+  return clonedCommand as WriteProtocolMessageType;
+}
+
 function write(
   conn: Connection,
   command: WriteProtocolMessageType,
@@ -765,6 +784,7 @@ function write(
   if (typeof options === 'function') {
     callback = options;
   }
+  const clonedCommand = cloneCommand(command);
 
   options = options ?? {};
   const operationDescription: OperationDescription = {
@@ -799,25 +819,25 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
+    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, clonedCommand));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
         conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(conn, command, err, operationDescription.started)
+          new CommandFailedEvent(conn, clonedCommand, err, operationDescription.started)
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
           conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(conn, command, reply, operationDescription.started)
+            new CommandFailedEvent(conn, clonedCommand, reply, operationDescription.started)
           );
         } else {
           conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
+            new CommandSucceededEvent(conn, clonedCommand, reply, operationDescription.started)
           );
         }
       }
