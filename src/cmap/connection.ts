@@ -757,39 +757,6 @@ function streamIdentifier(stream: Stream) {
   return uuidV4().toString('hex');
 }
 
-// FIXME: ensure this does a deep copy
-function cloneCommand(command: WriteProtocolMessageType): WriteProtocolMessageType {
-  let clonedCommand: WriteProtocolMessageType;
-  if (command === null || command === undefined) {
-    clonedCommand = command;
-  } else if (command instanceof Query) {
-    clonedCommand = <Query>{ ...command };
-    clonedCommand.query = { ...command.query };
-    clonedCommand.returnFieldSelector = { ...command.returnFieldSelector };
-  } else if (command instanceof Msg) {
-    clonedCommand = <Msg>{ ...command };
-    clonedCommand.command = { ...command.command };
-    clonedCommand.options = { ...command.options };
-  } else if (command instanceof GetMore) {
-    clonedCommand = <GetMore>{ ...command };
-    // FIXME: get this deep copy to work
-    clonedCommand.cursorId = Long.fromNumber(command.cursorId.toNumber());
-  } else if (command instanceof KillCursor) {
-    //clonedCommand = _clone(command);
-    clonedCommand = <KillCursor>{ ...command };
-    // FIXME: get this deep copy to work
-    const cursorIds: Long[] = [];
-    command.cursorIds.forEach(id => {
-      cursorIds.push(id);
-    });
-    clonedCommand.cursorIds = cursorIds;
-  } else {
-    throw new Error(`Unrecognized command: ${command}`);
-  }
-
-  return clonedCommand as WriteProtocolMessageType;
-}
-
 function write(
   conn: Connection,
   command: WriteProtocolMessageType,
