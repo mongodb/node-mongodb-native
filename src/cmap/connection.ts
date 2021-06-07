@@ -368,6 +368,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
+      // We need to unpin any read or write commands that happen outside of a pinned
+      // transaction, so we check if we have a pinned transaction that is no longer
+      // active, and unpin for all except start or commit.
+      if (
+        !session.transaction.isActive &&
+        session.transaction.isPinned &&
+        !finalCmd.startTransaction &&
+        !finalCmd.commitTransaction
+      ) {
+        session.transaction.unpinServer();
+      }
+
       const err = applySession(session, finalCmd, options as CommandOptions);
       if (err) {
         return callback(err);

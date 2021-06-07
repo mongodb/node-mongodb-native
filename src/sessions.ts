@@ -548,18 +548,20 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   function commandHandler(e?: MongoError, r?: Document) {
     if (commandName === 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-
-      if (
-        e &&
-        (e instanceof MongoNetworkError ||
+      if (e) {
+        if (
+          e instanceof MongoNetworkError ||
           e instanceof MongoWriteConcernError ||
           isRetryableError(e) ||
-          isMaxTimeMSExpiredError(e))
-      ) {
-        if (isUnknownTransactionCommitResult(e)) {
-          e.addErrorLabel('UnknownTransactionCommitResult');
+          isMaxTimeMSExpiredError(e)
+        ) {
+          if (isUnknownTransactionCommitResult(e)) {
+            e.addErrorLabel('UnknownTransactionCommitResult');
 
-          // per txns spec, must unpin session in this case
+            // per txns spec, must unpin session in this case
+            session.transaction.unpinServer();
+          }
+        } else if (e.hasErrorLabel('TransientTransactionError')) {
           session.transaction.unpinServer();
         }
       }

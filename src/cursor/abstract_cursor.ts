@@ -193,6 +193,10 @@ export abstract class AbstractCursor<
     return this[kSession];
   }
 
+  set session(clientSession: ClientSession | undefined) {
+    this[kSession] = clientSession;
+  }
+
   /** @internal */
   get cursorOptions(): InternalAbstractCursorOptions {
     return this[kOptions];

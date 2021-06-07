@@ -31,19 +31,22 @@ operations.set('aggregate', async ({ entities, operation }) => {
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
     throw new Error(`Operation object '${operation.object}' must be a db or collection`);
   }
-  return dbOrCollection
-    .aggregate(operation.arguments.pipeline, {
-      allowDiskUse: operation.arguments.allowDiskUse,
-      batchSize: operation.arguments.batchSize,
-      bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
-      maxTimeMS: operation.arguments.maxTimeMS,
-      maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
-      collation: operation.arguments.collation,
-      hint: operation.arguments.hint,
-      let: operation.arguments.let,
-      out: operation.arguments.out
-    })
-    .toArray();
+  const session = entities.getEntity('session', operation.arguments.session, false);
+  const cursor = dbOrCollection.aggregate(operation.arguments.pipeline, {
+    allowDiskUse: operation.arguments.allowDiskUse,
+    batchSize: operation.arguments.batchSize,
+    bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
+    maxTimeMS: operation.arguments.maxTimeMS,
+    maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
+    collation: operation.arguments.collation,
+    hint: operation.arguments.hint,
+    let: operation.arguments.let,
+    out: operation.arguments.out
+  });
+  if (session) {
+    cursor.session = session;
+  }
+  return cursor.toArray();
 });
 
 operations.set('assertCollectionExists', async ({ operation, client }) => {
@@ -231,8 +234,13 @@ operations.set('endSession', async ({ entities, operation }) => {
 
 operations.set('find', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
+  const session = entities.getEntity('session', operation.arguments.session, false);
   const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
-  return collection.find(filter, { sort, batchSize, limit, let: vars }).toArray();
+  const cursor = collection.find(filter, { sort, batchSize, limit, session, let: vars });
+  if (session) {
+    cursor.session = session;
+  }
+  return cursor.toArray();
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {

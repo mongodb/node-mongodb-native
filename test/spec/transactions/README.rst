@@ -9,10 +9,14 @@ Transactions Tests
 Introduction
 ============
 
-The YAML and JSON files in this directory are platform-independent tests that
-drivers can use to prove their conformance to the Transactions Spec. They are
-designed with the intention of sharing some test-runner code with the CRUD Spec
-tests and the Command Monitoring Spec tests.
+The YAML and JSON files in the ``legacy`` and ``unified`` sub-directories are
+platform-independent tests that drivers can use to prove their conformance to
+the Transactions Spec. The tests in the ``legacy`` directory are designed with
+the intention of sharing some test-runner code with the CRUD Spec tests and the
+Command Monitoring Spec tests. The format for these tests and instructions for
+executing them are provided in the following sections. Tests in the
+``unified`` directory are written using the `Unified Test Format
+<../../unified-test-format/unified-test-format.rst>`_.
 
 Several prose tests, which are not easily expressed in YAML, are also presented
 in this file. Those tests will need to be manually implemented by each driver.
