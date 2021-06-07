@@ -61,6 +61,8 @@ export interface FindOptions<TSchema = Document> extends CommandOperationOptions
   allowPartialResults?: boolean;
   /** Determines whether to return the record identifier for each document. If true, adds a field $recordId to the returned documents. */
   showRecordId?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
@@ -284,6 +286,10 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
   if (typeof options.allowDiskUse === 'boolean') {
     findCommand.allowDiskUse = options.allowDiskUse;
+  }
+
+  if (options.let) {
+    findCommand.let = options.let;
   }
 
   return findCommand;

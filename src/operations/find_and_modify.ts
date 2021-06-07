@@ -27,6 +27,8 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
   projection?: Document;
   /** Determines which document the operation modifies if the query selects multiple documents. */
   sort?: Sort;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /** @public */
@@ -43,6 +45,8 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   sort?: Sort;
   /** Upsert the document if it does not exist. */
   upsert?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /** @public */
@@ -61,6 +65,8 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   sort?: Sort;
   /** Upsert the document if it does not exist. */
   upsert?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /** @internal */
@@ -74,6 +80,7 @@ interface FindAndModifyCmdBase {
   bypassDocumentValidation?: boolean;
   arrayFilters?: Document[];
   maxTimeMS?: number;
+  let?: Document;
   writeConcern?: WriteConcern | WriteConcernSettings;
 }
 
@@ -127,6 +134,10 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     // Decorate the findAndModify command with the write Concern
     if (options.writeConcern) {
       this.cmdBase.writeConcern = options.writeConcern;
+    }
+
+    if (options.let) {
+      this.cmdBase.let = options.let;
     }
 
     // force primary read preference
