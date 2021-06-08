@@ -1399,6 +1399,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<Document | Document[]> | void {
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must always be defined (make sure we don't break weirdly on pre 1.8+ servers)
+    // TODO NODE-3339: Figure out if this is still necessary given we no longer officially support pre-1.8
     if (options?.out == null) {
       throw new MongoDriverError(
         'the out option parameter must be defined, see mongodb docs for possible values'

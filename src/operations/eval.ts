@@ -68,7 +68,7 @@ export class EvalOperation extends CommandOperation<Document> {
       }
 
       if (result) {
-        callback(new MongoServerError({ message: `eval failed: ${result.errmsg}`, driver: true }));
+        callback(new MongoServerError({ message: `eval failed: ${result.errmsg}` }));
         return;
       }
 

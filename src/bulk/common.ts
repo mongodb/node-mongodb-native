@@ -655,7 +655,7 @@ function handleMongoWriteConcernError(
 ) {
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
-  // TODO: make more reasonable
+  // TODO: Remove multiple levels of wrapping (NODE-3337)
   const wrappedWriteConcernError = new WriteConcernError(
     new MongoServerError({
       errmsg: err.result?.writeConcernError.errmsg,

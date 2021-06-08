@@ -195,9 +195,7 @@ export class GridFSBucketReadStream extends Readable {
 
 function throwIfInitialized(stream: GridFSBucketReadStream): void {
   if (stream.s.init) {
-    throw new MongoDriverError(
-      'You cannot change options after the stream has entered flowing mode!'
-    );
+    throw new MongoDriverError('Options cannot be changed after the stream is initialized');
   }
 }
 
@@ -316,7 +314,7 @@ function init(stream: GridFSBucketReadStream): void {
         : stream.s.filter.filename;
       const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
       const err = new MongoDriverError(errmsg);
-      err.code = 'ENOENT';
+      err.code = 'ENOENT'; // TODO: NODE-3338 set property as part of constructor
       return __handleError(stream, err);
     }
 
