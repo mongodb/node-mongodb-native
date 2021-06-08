@@ -658,6 +658,41 @@ describe('APM', function () {
     }
   });
 
+  // NODE-1502
+  it('should not allow mutation of internal state from commands returned by event monitoring', {
+    metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
+    test: function () {
+      const self = this;
+      const started = [];
+      const succeeded = [];
+      const client = self.configuration.newClient(
+        { writeConcern: { w: 1 } },
+        { maxPoolSize: 1, monitorCommands: true }
+      );
+      client.on('commandStarted', filterForCommands('insert', started));
+      client.on('commandSucceeded', filterForCommands('insert', succeeded));
+
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
+        let documentToInsert = { a: 1 };
+        return db
+          .collection('apm_test')
+          .insertOne(documentToInsert, { forceServerObjectId: true })
+          .then(r => {
+            // Check if the returned document is a clone of the original
+            expect(documentToInsert).to.not.equal(started[0].command.documents[0]);
+
+            expect(r).property('insertedId').to.exist;
+            expect(started.length).to.equal(1);
+            expect(started[0].commandName).to.equal('insert');
+            expect(started[0].command.insert).to.equal('apm_test');
+            expect(succeeded.length).to.equal(1);
+            return client.close();
+          });
+      });
+    }
+  });
+
   describe('spec tests', function () {
     before(function () {
       return setupDatabase(this.configuration);
