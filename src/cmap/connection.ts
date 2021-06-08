@@ -766,7 +766,6 @@ function write(
   if (typeof options === 'function') {
     callback = options;
   }
-  const clonedCommand = deepCopy(command);
 
   options = options ?? {};
   const operationDescription: OperationDescription = {
@@ -801,6 +800,7 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
+    const clonedCommand: WriteProtocolMessageType = deepCopy(command);
     conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, clonedCommand));
 
     operationDescription.started = now();
