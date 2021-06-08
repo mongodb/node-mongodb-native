@@ -215,7 +215,8 @@ operations.set('createIndex', async ({ entities, operation }) => {
 
 operations.set('deleteOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.deleteOne(operation.arguments.filter);
+  const { filter, ...options } = operation.arguments;
+  return collection.deleteOne(filter, options);
 });
 
 operations.set('dropCollection', async ({ entities, operation }) => {
@@ -230,8 +231,8 @@ operations.set('endSession', async ({ entities, operation }) => {
 
 operations.set('find', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, sort, batchSize, limit } = operation.arguments;
-  return collection.find(filter, { sort, batchSize, limit }).toArray();
+  const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
+  return collection.find(filter, { sort, batchSize, limit, let: vars }).toArray();
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
@@ -398,12 +399,14 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
 
 operations.set('updateMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.updateMany(operation.arguments.filter, operation.arguments.update);
+  const { filter, update, ...options } = operation.arguments;
+  return collection.updateMany(filter, update, options);
 });
 
 operations.set('updateOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.updateOne(operation.arguments.filter, operation.arguments.update);
+  const { filter, update, ...options } = operation.arguments;
+  return collection.updateOne(filter, update, options);
 });
 
 export async function executeOperationAndCheck(

@@ -25,6 +25,8 @@ export interface UpdateOptions extends CommandOperationOptions {
   hint?: string | Document;
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /** @public */
@@ -95,6 +97,10 @@ export class UpdateOperation extends CommandOperation<Document> {
 
     if (typeof options.bypassDocumentValidation === 'boolean') {
       command.bypassDocumentValidation = options.bypassDocumentValidation;
+    }
+
+    if (options.let) {
+      command.let = options.let;
     }
 
     const statementWithCollation = this.statements.find(statement => !!statement.collation);

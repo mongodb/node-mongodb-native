@@ -1,0 +1,221 @@
+# NOTE: Not yet committed upstream as a spec test!
+
+description: "crud-let"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: "foo" }
+
+tests:
+  - description: "Find with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: &query0
+            $expr: { $eq: ["$_id", "$$id"] }
+          let: &let0
+            id: 1
+        expectResult:
+          - { x: "foo" }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: *query0
+                let: *let0
+
+  - description: "Find with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "4.2.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: &query1
+            $match: { _id: 1 }
+          let: &let1
+            x: foo
+        expectError:
+          errorContains: "Unrecognized field 'let'"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: *query1
+                let: *let1
+
+  - description: "FindOneAndUpdate with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: &query2
+            $expr: { $eq: ["$_id", "$$id"] }
+          update: &update2
+            $set: {}
+          let: &let2
+            id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *query2
+                update: *update2
+                let: *let2
+
+  - description: "FindOneAndUpdate with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "4.2.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: &query3
+            $match: { _id: 1 }
+          update: &update3
+            $set: {}
+          let: &let3
+            x: foo
+        expectError:
+          errorContains: "'let' is an unknown field"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *query3
+                update: *update3
+                let: *let3
+
+  - description: "Update with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: updateOne
+        object: *collection0
+        arguments:
+          filter: &query4
+            $expr: { $eq: ["$_id", "$$id"] }
+          update: &update4
+            $set: {}
+          let: &let4
+            id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: *query4
+                    u: *update4
+                let: *let4
+
+  - description: "Update with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "4.2.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: updateOne
+        object: *collection0
+        arguments:
+          filter: &query5
+            $expr: { $eq: ["$_id", "$$id"] }
+          update: &update5
+            $set: {}
+          let: &let5
+            id: 1
+        expectError:
+          errorContains: "'update.let' is an unknown field"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: *query5
+                    u: *update5
+                let: *let5
+
+  - description: "Delete with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: &query6
+            $expr: { $eq: ["$_id", "$$id"] }
+          let: &let6
+            id: 10
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: *query6
+                    limit: 1
+                let: *let6
+
+  - description: "Delete with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "4.2.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: &query7
+            $expr: { $eq: ["$_id", "$$id"] }
+          let: &let7
+            id: 10
+        expectError:
+          errorContains: "'delete.let' is an unknown field"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: *query7
+                    limit: 1
+                let: *let7

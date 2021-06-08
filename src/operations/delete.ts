@@ -18,6 +18,8 @@ export interface DeleteOptions extends CommandOperationOptions, WriteConcernOpti
   collation?: CollationOptions;
   /** Specify that the update query should only consider plans using the hinted index */
   hint?: string | Document;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 
   /** @deprecated use `removeOne` or `removeMany` to implicitly specify the limit */
   single?: boolean;
@@ -73,6 +75,10 @@ export class DeleteOperation extends CommandOperation<Document> {
       deletes: this.statements,
       ordered
     };
+
+    if (options.let) {
+      command.let = options.let;
+    }
 
     if (options.explain !== undefined && maxWireVersion(server) < 3) {
       return callback
