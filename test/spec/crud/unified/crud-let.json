@@ -99,7 +99,7 @@
       "description": "Find with let option unsupported (server-side error)",
       "runOnRequirements": [
         {
-          "minServerVersion": "2.6.0",
+          "minServerVersion": "4.2.0",
           "maxServerVersion": "4.4.99"
         }
       ],
@@ -208,7 +208,7 @@
       "description": "FindOneAndUpdate with let option unsupported (server-side error)",
       "runOnRequirements": [
         {
-          "minServerVersion": "2.6.0",
+          "minServerVersion": "4.2.0",
           "maxServerVersion": "4.4.99"
         }
       ],
@@ -327,7 +327,7 @@
       "description": "Update with let option unsupported (server-side error)",
       "runOnRequirements": [
         {
-          "minServerVersion": "2.6.0",
+          "minServerVersion": "4.2.0",
           "maxServerVersion": "4.4.99"
         }
       ],
@@ -451,7 +451,7 @@
       "description": "Delete with let option unsupported (server-side error)",
       "runOnRequirements": [
         {
-          "minServerVersion": "2.6.0",
+          "minServerVersion": "4.2.0",
           "maxServerVersion": "4.4.99"
         }
       ],
