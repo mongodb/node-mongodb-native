@@ -50,7 +50,7 @@ const stateMachine: { [state in TxnState]: TxnState[] } = {
  * @public
  */
 export interface TransactionOptions extends CommandOperationOptions {
-  // TODO(NODE-TODO): These options use the proper class forms of these settings, it should accept the basic enum values too
+  // TODO(NODE-3344): These options use the proper class forms of these settings, it should accept the basic enum values too
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
