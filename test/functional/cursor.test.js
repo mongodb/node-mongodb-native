@@ -3905,11 +3905,17 @@ describe('Cursor', function () {
   it('should propagate error when exceptions are thrown from an awaited forEach call', function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-    return client.connect().then(() => {
-      const db = client.db(configuration.db);
-      const collection = db.collection('cursor_session_tests2');
-      const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-      collection.insertMany(docs).then(() => {
+    const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+    let collection;
+    let db;
+    return client
+      .connect()
+      .then(() => {
+        db = client.db(configuration.db);
+        collection = db.collection('cursor_session_tests2');
+        return collection.insertMany(docs);
+      }, console.error)
+      .then(() => {
         const cursor = collection.find({});
         async function testAsync() {
           let val;
@@ -3922,15 +3928,14 @@ describe('Cursor', function () {
                 expect(err.message).to.eql('FAILURE IN FOREACH CALL');
               });
           } catch (err) {
-            expect(err).to.not.exist();
+            expect(err).to.equal(undefined);
           }
           expect(val).to.be.undefined;
           cursor.close();
           client.close();
         }
         return testAsync();
-      }, console.error);
-    });
+      });
   });
 
   it('should return a promise when no callback supplied to forEach method', function () {
