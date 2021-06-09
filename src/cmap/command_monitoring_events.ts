@@ -1,4 +1,4 @@
-import { GetMore, KillCursor, Msg, Query, WriteProtocolMessageType } from './commands';
+import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import type { ConnectionPool } from './connection_pool';
 import type { Connection } from './connection';
