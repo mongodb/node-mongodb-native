@@ -78,9 +78,6 @@ expectType<PropExists<typeof cursor, 'setCursorOption'>>(false);
 expectType<PropExists<typeof cursor, 'setReadPreference'>>(false);
 expectType<PropExists<typeof cursor, 'snapshot'>>(false);
 
-// Doesn't return cursor of new type:
-//   .map(result => ({ foo: result.age }));
-
 // Cursor returning functions don't take a callback
 const db = new MongoClient('').db();
 const collection = db.collection('');

@@ -8,8 +8,6 @@ const db = client.db('test');
 
 const anyCollection = db.collection('test-any-type');
 
-// should accept any _id type when it is not provided in Schema
-
 /**
  * test no collection type ("any")
  */
