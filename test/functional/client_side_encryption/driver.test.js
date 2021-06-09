@@ -20,6 +20,14 @@ describe('Client Side Encryption Functional', function () {
     }
   };
 
+  it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
+    if (process.env.CSFLE_KMS_PROVIDERS) {
+      expect(() => BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
+    } else {
+      this.skip();
+    }
+  });
+
   describe('BSON Options', function () {
     beforeEach(function () {
       this.client = this.configuration.newClient();
