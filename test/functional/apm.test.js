@@ -660,7 +660,9 @@ describe('APM', function () {
 
   // NODE-1502
   it('should not allow mutation of internal state from commands returned by event monitoring', {
-    metadata: { requires: { mongodb: '>= 3.6.0' } },
+    metadata: {
+      /*requires: { mongodb: '>= 3.6.0' } */
+    },
     test: function () {
       const self = this;
       const started = [];
@@ -671,27 +673,28 @@ describe('APM', function () {
       );
       client.on('commandStarted', filterForCommands('insert', started));
       client.on('commandSucceeded', filterForCommands('insert', succeeded));
+      let documentToInsert = { a: { b: 1 } };
+      return client
+        .connect()
+        .then(client => {
+          const db = client.db(self.configuration.db);
+          return db.collection('apm_test').insertOne(documentToInsert);
+        })
+        .then(r => {
+          expect(r).to.have.property('insertedId').that.is.an('object');
+          expect(started.length).to.equal(1);
+          // Check if contents of returned document are equal to document inserted (by value)
+          expect(documentToInsert).to.deep.equal(started[0].command.documents[0]);
+          // Check if the returned document is a clone of the original. This confirms that the
+          // reference is not the same.
+          expect(documentToInsert !== started[0].command.documents[0]).to.equal(true);
+          expect(documentToInsert.a !== started[0].command.documents[0].a).to.equal(true);
 
-      return client.connect().then(client => {
-        const db = client.db(self.configuration.db);
-        let documentToInsert = { a: { b: 1 } };
-        return db
-          .collection('apm_test')
-          .insertOne(documentToInsert)
-          .then(r => {
-            expect(r).property('insertedId').to.exist;
-            expect(started.length).to.equal(1);
-            expect(documentToInsert).to.eql(started[0].command.documents[0]);
-            // Check if the returned document is a clone of the original
-            expect(documentToInsert).to.not.equal(started[0].command.documents[0]);
-            expect(documentToInsert.a).to.not.equal(started[0].command.documents[0].a);
-
-            expect(started[0].commandName).to.equal('insert');
-            expect(started[0].command.insert).to.equal('apm_test');
-            expect(succeeded.length).to.equal(1);
-            return client.close();
-          });
-      });
+          expect(started[0].commandName).to.equal('insert');
+          expect(started[0].command.insert).to.equal('apm_test');
+          expect(succeeded.length).to.equal(1);
+          return client.close();
+        });
     }
   });
 

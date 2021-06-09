@@ -1,4 +1,4 @@
-import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
+import { GetMore, KillCursor, Msg, Query, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import type { ConnectionPool } from './connection_pool';
 import type { Connection } from './connection';
@@ -234,11 +234,23 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     if (command.query.$explain) {
       return { explain: result };
     }
-
     return result;
   }
 
-  return command.query ? command.query : command;
+  const clonedQuery: Record<string, unknown> = {};
+  const clonedCommand: Record<string, unknown> = {};
+  if (command.query) {
+    for (const k in command.query) {
+      clonedQuery[k] = deepCopy(command.query[k]);
+    }
+    clonedCommand.query = clonedQuery;
+  }
+
+  for (const k in command) {
+    if (k === 'query') continue;
+    clonedCommand[k] = deepCopy(((command as unknown) as Record<string, unknown>)[k]);
+  }
+  return command.query ? clonedQuery : clonedCommand;
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {
