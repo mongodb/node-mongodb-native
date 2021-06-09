@@ -14,8 +14,7 @@ import {
   Callback,
   MongoDBNamespace,
   maxWireVersion,
-  HostAddress,
-  deepCopy
+  HostAddress
 } from '../utils';
 import {
   AnyError,
@@ -800,26 +799,25 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    const clonedCommand: WriteProtocolMessageType = deepCopy(command);
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, clonedCommand));
+    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
         conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(conn, clonedCommand, err, operationDescription.started)
+          new CommandFailedEvent(conn, command, err, operationDescription.started)
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
           conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(conn, clonedCommand, reply, operationDescription.started)
+            new CommandFailedEvent(conn, command, reply, operationDescription.started)
           );
         } else {
           conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(conn, clonedCommand, reply, operationDescription.started)
+            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
           );
         }
       }
