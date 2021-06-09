@@ -324,20 +324,25 @@ export abstract class AbstractCursor<
           if (doc == null) return done();
           let result;
           // NOTE: no need to transform because `next` will do this automatically
-          try {
-            result = iterator(doc); // TODO(NODE-3283): Improve transform typing
-          } catch (e) {
+          //try {
+          result = iterator(doc); // TODO(NODE-3283): Improve transform typing
+          /*} catch (e) {
             return done(e);
           }
+          */
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
           const internalDocs = this[kDocuments].splice(0, this[kDocuments].length);
           if (internalDocs) {
             for (let i = 0; i < internalDocs.length; ++i) {
-              result = iterator(
-                (transform ? transform(internalDocs[i]) : internalDocs[i]) as T // TODO(NODE-3283): Improve transform typing
-              );
+              try {
+                result = iterator(
+                  (transform ? transform(internalDocs[i]) : internalDocs[i]) as T // TODO(NODE-3283): Improve transform typing
+                );
+              } catch (e) {
+                return done(e);
+              }
               if (result === false) return done();
             }
           }

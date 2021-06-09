@@ -3901,6 +3901,38 @@ describe('Cursor', function () {
     });
   });
 
+  // NODE-2035
+  it('should propagate error when exceptions are thrown from an awaited forEach call', function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    return client.connect().then(() => {
+      const db = client.db(configuration.db);
+      const collection = db.collection('cursor_session_tests2');
+      const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+      collection.insertMany(docs).then(() => {
+        const cursor = collection.find({});
+        async function testAsync() {
+          let val;
+          try {
+            val = await cursor
+              .forEach(() => {
+                throw new Error('FAILURE IN FOREACH CALL');
+              })
+              .catch(err => {
+                expect(err.message).to.eql('FAILURE IN FOREACH CALL');
+              });
+          } catch (err) {
+            expect(err).to.not.exist();
+          }
+          expect(val).to.be.undefined;
+          cursor.close();
+          client.close();
+        }
+        return testAsync();
+      }, console.error);
+    });
+  });
+
   it('should return a promise when no callback supplied to forEach method', function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
@@ -3916,25 +3948,6 @@ describe('Cursor', function () {
       const promise = cursor.forEach(() => {});
       expect(promise).to.exist.and.to.be.an.instanceof(Promise);
       return promise;
-    });
-  });
-
-  it('should propagate error when exceptions are thrown from an awaited forEach call', function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-    return client.connect().then(() => {
-      const db = client.db(configuration.db);
-      const collection = db.collection('cursor_session_tests2');
-      const cursor = collection.find();
-      //this.defer(() => );
-      async function testAsync() {
-        let val = await cursor.forEach(d => {
-          console.log('hello, this is a message');
-          throw new Error('FAILURE');
-        });
-        //console.log(val);
-      }
-      return testAsync().then(cursor.close);
     });
   });
 

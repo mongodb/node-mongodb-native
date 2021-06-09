@@ -625,7 +625,7 @@ export function maybePromise<T>(
       };
     });
   }
-
+  // FIXME: NODE-2035: when not provided with a callback, we return a promise with an unhandled erjection
   wrapper((err, res) => {
     if (err != null) {
       try {
