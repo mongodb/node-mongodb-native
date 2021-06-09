@@ -3919,6 +3919,25 @@ describe('Cursor', function () {
     });
   });
 
+  it('should propagate error when exceptions are thrown from an awaited forEach call', function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    return client.connect().then(() => {
+      const db = client.db(configuration.db);
+      const collection = db.collection('cursor_session_tests2');
+      const cursor = collection.find();
+      //this.defer(() => );
+      async function testAsync() {
+        let val = await cursor.forEach(d => {
+          console.log('hello, this is a message');
+          throw new Error('FAILURE');
+        });
+        //console.log(val);
+      }
+      return testAsync().then(cursor.close);
+    });
+  });
+
   it('should return false when exhausted and hasNext called more than once', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });

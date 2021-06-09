@@ -322,9 +322,13 @@ export abstract class AbstractCursor<
         next<T>(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
           if (doc == null) return done();
-
+          let result;
           // NOTE: no need to transform because `next` will do this automatically
-          let result = iterator(doc); // TODO(NODE-3283): Improve transform typing
+          try {
+            result = iterator(doc); // TODO(NODE-3283): Improve transform typing
+          } catch (e) {
+            return done(e);
+          }
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
