@@ -10,5 +10,4 @@ expectType<number>(await collection.countDocuments({ foo: 1 }));
 expectType<number>(await collection.countDocuments({ foo: 1 }, { limit: 10 }));
 
 // Make sure count is deprecated
-
 expectDeprecated(collection.count);
