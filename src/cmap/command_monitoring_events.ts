@@ -181,7 +181,7 @@ const OP_QUERY_KEYS = [
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof GetMore) {
     return {
-      getMore: command.cursorId,
+      getMore: deepCopy(command.cursorId),
       collection: collectionName(command),
       batchSize: command.numberToReturn
     };
@@ -190,15 +190,15 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof KillCursor) {
     return {
       killCursors: collectionName(command),
-      cursors: command.cursorIds
+      cursors: deepCopy(command.cursorIds)
     };
   }
 
   if (command instanceof Msg) {
-    return command.command;
+    return deepCopy(command.command);
   }
 
-  if (command.query && command.query.$query) {
+  if (command.query?.$query) {
     let result: Document;
     if (command.ns === 'admin.$cmd') {
       // up-convert legacy command
@@ -208,7 +208,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
         if (typeof command.query[key] !== 'undefined') {
-          result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
         }
       });
     }
@@ -216,7 +216,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] !== 'undefined') {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
       }
     });
 
