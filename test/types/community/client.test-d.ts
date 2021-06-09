@@ -12,6 +12,8 @@ import {
   W
 } from '../../../src/index';
 
+// TODO(NODE-3348): Improve the tests to expectType assertions
+
 export const connectionString = 'mongodb://127.0.0.1:27017/test';
 
 const options: MongoClientOptions = {
