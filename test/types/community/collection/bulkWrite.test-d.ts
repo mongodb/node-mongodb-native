@@ -40,7 +40,7 @@ const testDocument: TestSchema = {
   },
   subInterfaceArray: []
 };
-const { _id, ...testDocumentWithoutId } = testDocument;
+const { ...testDocumentWithoutId } = testDocument;
 
 // insertOne
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-// https://docs.com/manual/core/transactions/
 
 import { ClientSession, MongoClient, ReadConcern } from '../../../src/index';
 

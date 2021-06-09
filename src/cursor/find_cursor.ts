@@ -342,6 +342,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
    *
    * @param value - The field projection object.
    */
+  // TODO(NODE-3343): add parameterized cursor return type
   project<T = TSchema>(value: SchemaMember<T, ProjectionOperators | number | boolean | any>): this;
   project(value: Projection<TSchema>): this {
     assertUninitialized(this);

@@ -675,7 +675,7 @@ export class Collection<TSchema extends Document = Document> {
   findOne(): Promise<TSchema | undefined>;
   findOne(callback: Callback<TSchema | undefined>): void;
   findOne(filter: Filter<TSchema>): Promise<TSchema | undefined>;
-  findOne(filter: Filter<TSchema>, callback?: Callback<TSchema | undefined>): void;
+  findOne(filter: Filter<TSchema>, callback: Callback<TSchema | undefined>): void;
   findOne(filter: Filter<TSchema>, options: FindOptions<TSchema>): Promise<TSchema | undefined>;
   findOne(
     filter: Filter<TSchema>,
@@ -684,20 +684,20 @@ export class Collection<TSchema extends Document = Document> {
   ): void;
 
   // allow an override of the schema.
+  findOne<T = TSchema>(): Promise<T | undefined>;
+  findOne<T = TSchema>(callback: Callback<T | undefined>): void;
+  findOne<T = TSchema>(filter: Filter<T>): Promise<T | undefined>;
+  findOne<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): Promise<T | undefined>;
   findOne<T = TSchema>(
-    filter: Filter<TSchema>,
-    options?: FindOptions<T extends TSchema ? TSchema : T>
-  ): Promise<T | undefined>;
-  findOne<T = TSchema>(
-    filter: Filter<TSchema>,
-    options?: FindOptions<T extends TSchema ? TSchema : T>,
-    callback?: Callback<T extends TSchema ? TSchema : T | undefined>
+    filter: Filter<T>,
+    options?: FindOptions<T>,
+    callback?: Callback<T | undefined>
   ): void;
 
   findOne(
     filter?: Filter<TSchema> | Callback<TSchema | undefined>,
     options?: FindOptions<TSchema> | Callback<TSchema | undefined>,
-    callback?: Callback<TODO_NODE_3286>
+    callback?: Callback<TSchema>
   ): Promise<TSchema | undefined> | void {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new MongoDriverError('Third parameter to `findOne()` must be a callback or undefined');
@@ -716,7 +716,7 @@ export class Collection<TSchema extends Document = Document> {
         filter,
         resolveOptions(this, options)
       ) as TODO_NODE_3286,
-      callback
+      callback as TODO_NODE_3286
     );
   }
 
@@ -726,12 +726,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>, options: FindOptions<TSchema>): FindCursor<TSchema>;
-  find<T = TSchema>(
-    query: Filter<TSchema>,
-    options: FindOptions<T extends TSchema ? TSchema : T>
-  ): FindCursor<T>;
+  find(filter: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema>;
+  find<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): FindCursor<T>;
   find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new MongoDriverError('Third parameter to `collection.find()` must be undefined');

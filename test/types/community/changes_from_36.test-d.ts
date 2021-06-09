@@ -16,7 +16,6 @@ const mongodb: MongoDBImport = (null as unknown) as MongoDBImport;
 
 expectNotType<Function>(mongodb);
 expectType<PropExists<MongoDBImport, 'connect'>>(false);
-// (mongodb.ObjectId);
 
 // MongoClientOptions
 const options: MongoClientOptions = {};
@@ -37,7 +36,7 @@ expectNotType<Buffer>(options.sslKey);
 // .sslPass cannot be a Buffer
 expectNotType<Buffer>(options.sslPass);
 
-// Legacy option kept?
+// Legacy option kept
 expectType<PropExists<MongoClientOptions, 'w'>>(true);
 // Removed options
 expectType<PropExists<MongoClientOptions, 'wtimeout'>>(false);
@@ -67,14 +66,9 @@ expectAssignable<((host: string, cert: PeerCertificate) => Error | undefined) | 
   options.checkServerIdentity
 );
 
-// MongoClient.connect
-// the callback's error isn't specifically MongoError (actually, it is probably true in 3.6 that other errors could be passed here, but there is a ticket in progress to fix this.)
-
-// No such thing as UnifiedTopologyOptions
-
 // compression options have simpler specification:
 // old way: {compression: { compressors: ['zlib', 'snappy'] }}
-expectNotType<{ compressors: string[] }>(options.compressors);
+expectType<PropExists<MongoClientOptions, 'compression'>>(false);
 expectType<('none' | 'snappy' | 'zlib')[] | undefined>(options.compressors);
 
 // Removed cursor API
@@ -91,10 +85,13 @@ expectType<PropExists<typeof cursor, 'snapshot'>>(false);
 const db = new MongoClient('').db();
 const collection = db.collection('');
 // collection.find
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 expectError(collection.find({}, {}, (e: unknown, c: unknown) => undefined));
 // collection.aggregate
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 expectError(collection.aggregate({}, {}, (e: unknown, c: unknown) => undefined));
 // db.aggregate
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 expectError(db.aggregate({}, {}, (e: unknown, c: unknown) => undefined));
 
 // insertOne and insertMany doesn't return:

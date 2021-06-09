@@ -33,7 +33,6 @@ expectType<ObjectId[]>(await collection.distinct('_id'));
 expectType<ObjectId[]>(await collection.distinct('_id', { foo: 1 }));
 expectType<ObjectId[]>(await collection.distinct('_id', { foo: 1 }, { maxTimeMS: 400 }));
 
-collection.distinct('a.d');
 collection.distinct('nested.num', (err, fields) => {
   expectType<any[] | undefined>(fields);
 });

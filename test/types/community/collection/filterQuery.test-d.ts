@@ -49,7 +49,7 @@ const collectionT = db.collection<PetModel>('test.filterQuery');
 
 // Assert that collection.find uses the Filter helper like so:
 const filter: Filter<PetModel> = {};
-expectType<Parameters<typeof collectionT['find']>[0]>(filter);
+collectionT.find(filter);
 // Now tests below can directly test the Filter helper, and are implicitly checking collection.find
 
 /**

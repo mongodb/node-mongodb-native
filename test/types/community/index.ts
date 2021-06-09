@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// Test source : https://github.com/mongodb/node-mongodb-native
-
 import { expectType } from 'tsd';
 import {
   GridFSBucket,
@@ -29,6 +26,7 @@ const options: MongoClientOptions = {
   family: 4,
   ssl: true,
   sslValidate: false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   checkServerIdentity(host, cert) {
     return undefined;
   },
@@ -42,12 +40,12 @@ const options: MongoClientOptions = {
 MongoClient.connect(connectionString, options, (err, client?: MongoClient) => {
   if (err || !client) throw err;
   const db = client.db('test');
-  const collection = db.collection('test_crud');
+  db.collection('test_crud');
   // Let's close the db
   client.close();
 });
 
-async function testFunc(): Promise<MongoClient> {
+export async function testFunc(): Promise<MongoClient> {
   const testClient: MongoClient = await MongoClient.connect(connectionString);
   return testClient;
 }
@@ -79,7 +77,7 @@ new MongoNetworkError('network error');
 new MongoParseError('parse error');
 
 // Streams
-const gridFSBucketTests = (bucket: GridFSBucket) => {
+export function gridTest(bucket: GridFSBucket): void {
   const openUploadStream = bucket.openUploadStream('file.dat');
   openUploadStream.on('close', () => {});
   openUploadStream.on('end', () => {});
@@ -92,12 +90,13 @@ const gridFSBucketTests = (bucket: GridFSBucket) => {
   openUploadStream.abort(error => {
     error; // $ExpectType MongoError
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   openUploadStream.abort((error, result) => {});
-};
+}
 
 // Client-Side Field Level Encryption
 const keyVaultNamespace = 'encryption.__keyVault';
-const secureClient = new MongoClient(url, {
+new MongoClient(url, {
   monitorCommands: true,
   autoEncryption: {
     keyVaultNamespace,

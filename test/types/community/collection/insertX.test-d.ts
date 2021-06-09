@@ -30,7 +30,7 @@ expectType<number>(insertManyWithIdResult.insertedCount);
 expectType<{ [key: number]: ObjectId }>(insertManyWithIdResult.insertedIds);
 
 // should accept any _id type when it is not provided in Schema
-// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// NODE-3342
 // await anyCollection.insertMany([{ _id: 12, a: 2 }]);
 
 /**
@@ -57,10 +57,10 @@ const resultMany = await collection.insertMany([
 ]);
 
 // test results type
-// should add a _id field with ObjectId type if it does not exist on collection type
 expectType<PropExists<typeof resultMany, 'ops'>>(false);
 expectType<PropExists<typeof resultOne, 'ops'>>(false);
 
+// should add a _id field with ObjectId type if it does not exist on collection type
 expectType<{ [key: number]: ObjectId }>(resultMany.insertedIds);
 expectType<ObjectId>(resultOne.insertedId);
 
@@ -145,7 +145,7 @@ const indexTypeResult1 = await indexTypeCollection1.insertOne({
   stringField: 'hola',
   numberField: 23,
   randomField: [34, 54, 32],
-  randomFiel2: 32
+  randomField2: 32
 });
 const indexTypeResultMany1 = await indexTypeCollection1.insertMany([
   { stringField: 'hola', numberField: 0 },
@@ -180,7 +180,7 @@ const indexTypeResult2 = await indexTypeCollection2.insertOne({
   stringField: 'hola',
   numberField: 23,
   randomField: [34, 54, 32],
-  randomFiel2: 32
+  randomField2: 32
 });
 const indexTypeResultMany2 = await indexTypeCollection2.insertMany([
   { _id: 1, stringField: 'hola', numberField: 0 },
@@ -194,7 +194,7 @@ expectError(
     stringField: 'hola',
     numberField: 23,
     randomField: [34, 54, 32],
-    randomFiel2: 32
+    randomField2: 32
   })
 );
 
@@ -210,7 +210,7 @@ expectNotType<OptionalId<IndexTypeTestModelWithId>>({
   stringField: 'hola',
   numberField: 23,
   randomField: [34, 54, 32],
-  randomFiel2: 32
+  randomField2: 32
 });
 
 expectError(
@@ -225,17 +225,3 @@ expectType<PropExists<typeof indexTypeResultMany2, 'ops'>>(false);
 
 expectType<number>(indexTypeResult2.insertedId);
 expectType<{ [key: number]: number }>(indexTypeResultMany2.insertedIds);
-
-/**
- * test indexed types with custom _id (ObjectId)
- */
-interface IndexTypeTestModelWithObjectId {
-  _id: ObjectId;
-  stringField: string;
-  numberField?: number;
-  [key: string]: any;
-}
-const indexTypeCollection3 = db.collection<IndexTypeTestModelWithObjectId>('testCollection');
-
-// TODO: should not demand _id if it is ObjectId
-// await indexTypeCollection3.insertOne({ stringField: 'hola', numberField: 23, randomField: [34, 54, 32], randomFiel2: 32 });

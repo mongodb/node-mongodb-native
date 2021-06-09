@@ -1,6 +1,5 @@
-import { MongoClient, ReduceFunction } from '../../../../src/index';
+import { MongoClient } from '../../../../src/index';
 
-// https://docs.mongodb.com/manual/core/map-reduce/
 // Declare emit function to be called inside map function
 declare function emit(key: any, value: any): void;
 
