@@ -2,6 +2,8 @@ import type { Readable } from 'stream';
 import { expectType } from 'tsd';
 import { FindCursor, MongoClient } from '../../../src/index';
 
+// TODO(NODE-3346): Improve these tests to use expect assertions more
+
 const client = new MongoClient('');
 const db = client.db('test');
 const collection = db.collection<{ age: number }>('test.find');

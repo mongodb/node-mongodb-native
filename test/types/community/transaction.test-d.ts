@@ -2,6 +2,8 @@
 
 import { ClientSession, MongoClient, ReadConcern } from '../../../src/index';
 
+// TODO(NODE-3345): Improve these tests to use expect assertions more
+
 const client = new MongoClient('');
 const session = client.startSession();
 
