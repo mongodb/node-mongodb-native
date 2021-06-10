@@ -29,7 +29,7 @@ const cursor = collection
   .sort({})
   .map(result => ({ foo: result.age }));
 
-expectType<FindCursor<{ age: number }>>(cursor);
+expectType<FindCursor<{ foo: number }>>(cursor);
 expectType<Readable>(cursor.stream());
 
 collection.find().project({});
@@ -75,6 +75,6 @@ typedCollection.find().project<{ name: string }>({ name: 1 });
 void async function () {
   for await (const item of cursor) {
     if (!item) break;
-    expectType<number>(item.age);
+    expectType<number>(item.foo);
   }
 };
