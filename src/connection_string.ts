@@ -588,6 +588,9 @@ export const OPTIONS = {
   autoEncryption: {
     type: 'record'
   },
+  bsonRegExp: {
+    type: 'boolean'
+  },
   serverApi: {
     target: 'serverApi',
     transform({ values: [version] }): ServerApi {
