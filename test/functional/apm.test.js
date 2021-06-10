@@ -9,6 +9,7 @@ const {
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
 const { ReadPreference } = require('../../src/read_preference');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
 describe('APM', function () {
   before(function () {
@@ -963,5 +964,21 @@ describe('APM', function () {
         });
       });
     });
+  });
+
+  describe('command monitoring unified spec tests', () => {
+    for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
+      expect(loadedSpec).to.include.all.keys(['description', 'tests']);
+      context(String(loadedSpec.description), function () {
+        for (const test of loadedSpec.tests) {
+          it(String(test.description), {
+            metadata: { sessions: { skipLeakTests: true } }, // TODO: what is this for?
+            test: async function () {
+              await runUnifiedTest(this, loadedSpec, test);
+            }
+          });
+        }
+      });
+    }
   });
 });
