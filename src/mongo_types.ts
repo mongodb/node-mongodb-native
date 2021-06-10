@@ -119,6 +119,7 @@ export interface FilterOperators<TValue> extends Document {
   $bitsAllSet?: BitwiseFilter;
   $bitsAnyClear?: BitwiseFilter;
   $bitsAnySet?: BitwiseFilter;
+  $rand: Record<string, never>;
 }
 
 /** @public */
