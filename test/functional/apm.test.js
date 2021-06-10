@@ -695,7 +695,7 @@ describe('APM', function () {
       });
   });
 
-  describe('spec tests', function () {
+  describe('command monitoring spec tests', function () {
     before(function () {
       return setupDatabase(this.configuration);
     });
@@ -926,7 +926,7 @@ describe('APM', function () {
         });
     }
 
-    loadSpecTests('apm').forEach(scenario => {
+    loadSpecTests('command-monitoring').forEach(scenario => {
       if (scenario.name === 'command') return; // FIXME(NODE-3074): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
