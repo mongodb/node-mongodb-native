@@ -2,72 +2,67 @@
 
 const { expect } = require('chai');
 const { BSONRegExp } = require('../../src/index');
-const mock = require('../tools/mock');
 
 describe('BSONRegExp', () => {
-  let server;
-  afterEach(() => mock.cleanup());
-  beforeEach(async () => {
-    server = await mock.createServer();
-    server.setMessageHandler(request => {
-      const doc = request.document;
-      if (doc.ismaster || doc.hello) {
-        request.reply({ ...mock.DEFAULT_ISMASTER });
-      } else if (doc.insert) {
-        // insertOne handle
-        request.reply({ ok: 1 });
-      } else if (doc.find) {
-        // findOne handle
-        request.reply({
-          ok: 1,
-          cursor: { id: 1, firstBatch: [{ regex: new BSONRegExp('abc', 'imx') }] }
-        });
-      } else if (doc.endSessions) {
-        request.reply({ ok: 1 });
+  describe('bsonRegExp option', () => {
+    it('should respond with BSONRegExp class with flag passed to db', async function () {
+      let client;
+      try {
+        // create and connect to client
+        client = this.configuration.newClient();
+        await client.connect();
+
+        const db = client.db('a', { bsonRegExp: true });
+        const collection = db.collection('b');
+
+        await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
+        const res = await collection.findOne({ regex: new BSONRegExp('abc', 'imx') });
+
+        expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
+      } finally {
+        await client.close();
       }
     });
-  });
 
-  describe('option passed to client', () => {});
-  describe('option passed to db', () => {});
-  describe('option passed to collection', () => {});
+    it('should respond with BSONRegExp class with flag passed to collection', async function () {
+      let client;
+      try {
+        // create and connect to client
+        client = this.configuration.newClient(); // bsonRegex
+        await client.connect();
 
-  // Start here
-  describe('bsonRegex option passed to operation', () => {
-    // it('should respond with BSONRexExp class', async function () {
-    //   // create and connect to client
-    //   const client = this.configuration.newClient(`mongodb://${server.uri()}/`); // bsonRegex
-    //   await client.connect();
+        const db = client.db('a');
+        const collection = db.collection('b', { bsonRegExp: true });
 
-    //   const db = client.db('a');
-    //   const collection = db.collection('b');
+        await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
+        const res = await collection.findOne({ regex: new BSONRegExp('abc', 'imx') });
 
-    //   await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
-    //   const res = await collection.findOne(
-    //     { regex: new BSONRegExp('abc', 'imx') },
-    //     { bsonRegExp: true }
-    //   );
+        expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
+      } finally {
+        await client.close();
+      }
+    });
 
-    //   expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
-    // });
+    it('should respond with BSONRegExp class with flag passed to operation', async function () {
+      let client;
+      try {
+        // create and connect to client
+        client = this.configuration.newClient(); // bsonRegex
+        await client.connect();
 
-    it('should respond with BSONRexExp class REAL MONGO', async function () {
-      // create and connect to client
-      const client = this.configuration.newClient(); // bsonRegex
-      await client.connect();
+        const db = client.db('a');
+        const collection = db.collection('b');
 
-      const db = client.db('a');
-      const collection = db.collection('b');
+        await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
+        const res = await collection.findOne(
+          { regex: new BSONRegExp('abc', 'imx') },
+          { bsonRegExp: true }
+        );
 
-      await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
-      const res = await collection.findOne(
-        { regex: new BSONRegExp('abc', 'imx') },
-        { bsonRegExp: false }
-      );
-
-      expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
-
-      await client.close();
+        expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
+      } finally {
+        await client.close();
+      }
     });
   });
 });

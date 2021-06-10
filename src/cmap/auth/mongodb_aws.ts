@@ -18,7 +18,8 @@ const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 const bsonOptions: BSONSerializeOptions = {
   promoteLongs: true,
   promoteValues: true,
-  promoteBuffers: false
+  promoteBuffers: false,
+  bsonRegExp: false
 };
 
 interface AWSSaslContinuePayload {
