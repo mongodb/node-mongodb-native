@@ -3918,19 +3918,19 @@ describe('Cursor', function () {
       .then(() => {
         const cursor = collection.find({});
         async function testAsync() {
-          let val;
+          let promiseResult;
           try {
-            val = await cursor
+            promiseResult = await cursor
               .forEach(() => {
                 throw new Error('FAILURE IN FOREACH CALL');
               })
               .catch(err => {
-                expect(err.message).to.eql('FAILURE IN FOREACH CALL');
+                expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
               });
           } catch (err) {
-            expect(err).to.equal(undefined);
+            expect(err).to.be.undefined;
           }
-          expect(val).to.be.undefined;
+          expect(promiseResult).to.be.undefined;
           cursor.close();
           client.close();
         }
