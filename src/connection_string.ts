@@ -215,20 +215,20 @@ function getBoolean(name: string, value: unknown): boolean {
   const valueString = String(value).toLowerCase();
   if (TRUTHS.has(valueString)) return true;
   if (FALSEHOODS.has(valueString)) return false;
-  throw new TypeError(`For ${name} Expected stringified boolean value, got: ${value}`);
+  throw new MongoParseError(`For ${name} Expected stringified boolean value, got: ${value}`);
 }
 
 function getInt(name: string, value: unknown): number {
   if (typeof value === 'number') return Math.trunc(value);
   const parsedValue = Number.parseInt(String(value), 10);
   if (!Number.isNaN(parsedValue)) return parsedValue;
-  throw new TypeError(`Expected ${name} to be stringified int value, got: ${value}`);
+  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
 }
 
 function getUint(name: string, value: unknown): number {
   const parsedValue = getInt(name, value);
   if (parsedValue < 0) {
-    throw new TypeError(`${name} can only be a positive int value, got: ${value}`);
+    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
   }
   return parsedValue;
 }

@@ -5,7 +5,7 @@ import {
   CollationOptions
 } from './command';
 import { ReadPreference } from '../read_preference';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
@@ -75,11 +75,11 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
 
     if (this.explain && this.writeConcern) {
-      throw new MongoError('"explain" cannot be used on an aggregate call with writeConcern');
+      throw new MongoDriverError('"explain" cannot be used on an aggregate call with writeConcern');
     }
 
     if (options?.cursor != null && typeof options.cursor !== 'object') {
-      throw new MongoError('cursor options must be an object');
+      throw new MongoDriverError('cursor options must be an object');
     }
   }
 

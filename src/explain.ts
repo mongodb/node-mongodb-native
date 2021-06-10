@@ -1,4 +1,4 @@
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 
 /** @public */
 export const ExplainVerbosity = Object.freeze({
@@ -47,6 +47,8 @@ export class Explain {
       return new Explain(explain);
     }
 
-    throw new MongoError(`explain must be one of ${Object.keys(ExplainVerbosity)} or a boolean`);
+    throw new MongoDriverError(
+      `explain must be one of ${Object.keys(ExplainVerbosity)} or a boolean`
+    );
   }
 }

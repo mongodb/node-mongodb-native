@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { AnyError } from '../error';
+import { AnyError, MongoDriverError } from '../error';
 import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
 import type { Sort } from '../sort';
@@ -178,7 +178,7 @@ export class GridFSBucketReadStream extends Readable {
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
-      this.s.cursor.close((error?: Error) => {
+      this.s.cursor.close(error => {
         this.emit(GridFSBucketReadStream.CLOSE);
         callback && callback(error);
       });
@@ -195,7 +195,7 @@ export class GridFSBucketReadStream extends Readable {
 
 function throwIfInitialized(stream: GridFSBucketReadStream): void {
   if (stream.s.init) {
-    throw new Error('You cannot change options after the stream has entered flowing mode!');
+    throw new MongoDriverError('Options cannot be changed after the stream is initialized');
   }
 }
 
@@ -216,7 +216,7 @@ function doRead(stream: GridFSBucketReadStream): void {
 
       process.nextTick(() => {
         if (!stream.s.cursor) return;
-        stream.s.cursor.close((error?: Error) => {
+        stream.s.cursor.close(error => {
           if (error) {
             __handleError(stream, error);
             return;
@@ -237,12 +237,12 @@ function doRead(stream: GridFSBucketReadStream): void {
     let errmsg: string;
     if (doc.n > expectedN) {
       errmsg = 'ChunkIsMissing: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
-      return __handleError(stream, new Error(errmsg));
+      return __handleError(stream, new MongoDriverError(errmsg));
     }
 
     if (doc.n < expectedN) {
       errmsg = 'ExtraChunk: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
-      return __handleError(stream, new Error(errmsg));
+      return __handleError(stream, new MongoDriverError(errmsg));
     }
 
     let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
@@ -250,7 +250,7 @@ function doRead(stream: GridFSBucketReadStream): void {
     if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {
         errmsg = 'ExtraChunk: Got unexpected n: ' + doc.n;
-        return __handleError(stream, new Error(errmsg));
+        return __handleError(stream, new MongoDriverError(errmsg));
       }
 
       errmsg =
@@ -258,7 +258,7 @@ function doRead(stream: GridFSBucketReadStream): void {
         buf.byteLength +
         ', expected: ' +
         expectedLength;
-      return __handleError(stream, new Error(errmsg));
+      return __handleError(stream, new MongoDriverError(errmsg));
     }
 
     stream.s.bytesRead += buf.byteLength;
@@ -313,8 +313,8 @@ function init(stream: GridFSBucketReadStream): void {
         ? stream.s.filter._id.toString()
         : stream.s.filter.filename;
       const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
-      const err = new Error(errmsg);
-      (err as any).code = 'ENOENT';
+      const err = new MongoDriverError(errmsg);
+      err.code = 'ENOENT'; // TODO: NODE-3338 set property as part of constructor
       return __handleError(stream, err);
     }
 
@@ -391,7 +391,7 @@ function handleStartOption(
 ): number {
   if (options && options.start != null) {
     if (options.start > doc.length) {
-      throw new Error(
+      throw new MongoDriverError(
         'Stream start (' +
           options.start +
           ') must not be ' +
@@ -401,10 +401,10 @@ function handleStartOption(
       );
     }
     if (options.start < 0) {
-      throw new Error('Stream start (' + options.start + ') must not be ' + 'negative');
+      throw new MongoDriverError('Stream start (' + options.start + ') must not be ' + 'negative');
     }
     if (options.end != null && options.end < options.start) {
-      throw new Error(
+      throw new MongoDriverError(
         'Stream start (' +
           options.start +
           ') must not be ' +
@@ -419,7 +419,7 @@ function handleStartOption(
 
     return options.start - stream.s.bytesRead;
   }
-  throw new Error('No start option defined');
+  throw new MongoDriverError('No start option defined');
 }
 
 function handleEndOption(
@@ -430,7 +430,7 @@ function handleEndOption(
 ) {
   if (options && options.end != null) {
     if (options.end > doc.length) {
-      throw new Error(
+      throw new MongoDriverError(
         'Stream end (' +
           options.end +
           ') must not be ' +
@@ -440,7 +440,7 @@ function handleEndOption(
       );
     }
     if (options.start == null || options.start < 0) {
-      throw new Error('Stream end (' + options.end + ') must not be ' + 'negative');
+      throw new MongoDriverError('Stream end (' + options.end + ') must not be ' + 'negative');
     }
 
     const start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;
@@ -451,7 +451,7 @@ function handleEndOption(
 
     return Math.ceil(options.end / doc.chunkSize) * doc.chunkSize - options.end;
   }
-  throw new Error('No end option defined');
+  throw new MongoDriverError('No end option defined');
 }
 
 function __handleError(stream: GridFSBucketReadStream, error?: AnyError): void {

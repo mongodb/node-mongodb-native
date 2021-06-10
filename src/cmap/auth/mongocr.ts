@@ -1,13 +1,13 @@
 import * as crypto from 'crypto';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { Callback, ns } from '../../utils';
-import { MongoError } from '../../error';
+import { MongoDriverError } from '../../error';
 
 export class MongoCR extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoError('AuthContext must provide credentials.'));
+      return callback(new MongoDriverError('AuthContext must provide credentials.'));
     }
     const username = credentials.username;
     const password = credentials.password;

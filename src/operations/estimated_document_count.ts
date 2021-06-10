@@ -5,7 +5,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
-import type { MongoError } from '../error';
+import type { MongoServerError } from '../error';
 
 /** @public */
 export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
@@ -41,7 +41,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     }
 
     super.executeCommand(server, session, cmd, (err, response) => {
-      if (err && (err as MongoError).code !== 26) {
+      if (err && (err as MongoServerError).code !== 26) {
         callback(err);
         return;
       }

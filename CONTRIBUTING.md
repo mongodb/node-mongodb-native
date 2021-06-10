@@ -108,7 +108,7 @@ Below are some conventions that aren't enforced by any of our tooling but we non
   As a product of using TS we should be using es6 syntax features whenever possible.
 - **Errors**
   - Error messages should be sentence case, and have no periods at the end.
-  - Use built-in error types where possible (not just `Error`, but `TypeError`/`RangeError`), also endeavor to create new Mongo-specific error types (e.g. `MongoNetworkError`)
+  - Use driver-specific error types where possible (not just `Error`, but classes that extend `MongoError`, e.g. `MongoNetworkError`)
 
 ## Pull Request Process
 

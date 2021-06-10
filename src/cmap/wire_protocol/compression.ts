@@ -3,6 +3,7 @@ import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
 import { Snappy } from '../../deps';
+import { MongoDriverError } from '../../error';
 
 /** @public */
 export const Compressor = Object.freeze({
@@ -52,7 +53,7 @@ export function compress(
       zlib.deflate(dataToBeCompressed, zlibOptions, callback as zlib.CompressCallback);
       break;
     default:
-      throw new Error(
+      throw new MongoDriverError(
         'Attempt to compress message using unknown compressor "' +
           self.options.agreedCompressor +
           '".'
@@ -67,7 +68,7 @@ export function decompress(
   callback: Callback<Buffer>
 ): void {
   if (compressorID < 0 || compressorID > Math.max(2)) {
-    throw new Error(
+    throw new MongoDriverError(
       `Server sent message compressed using an unsupported compressor.` +
         ` (Received compressor ID ${compressorID})`
     );

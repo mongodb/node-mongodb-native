@@ -9,7 +9,9 @@ import {
   isRetryableError,
   MongoNetworkError,
   MongoWriteConcernError,
-  MONGODB_ERROR_CODES
+  MONGODB_ERROR_CODES,
+  MongoDriverError,
+  MongoServerError
 } from './error';
 import {
   now,
@@ -33,7 +35,7 @@ const minWireVersionForShardedTransactions = 8;
 
 function assertAlive(session: ClientSession, callback?: Callback): boolean {
   if (session.serverSession == null) {
-    const error = new MongoError('Cannot use a session that has ended');
+    const error = new MongoDriverError('Cannot use a session that has ended');
     if (typeof callback === 'function') {
       callback(error);
       return false;
@@ -112,11 +114,11 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     super();
 
     if (topology == null) {
-      throw new Error('ClientSession requires a topology');
+      throw new MongoDriverError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
-      throw new Error('ClientSession requires a ServerSessionPool');
+      throw new MongoDriverError('ClientSession requires a ServerSessionPool');
     }
 
     options = options ?? {};
@@ -257,7 +259,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   startTransaction(options?: TransactionOptions): void {
     assertAlive(this);
     if (this.inTransaction()) {
-      throw new MongoError('Transaction already in progress');
+      throw new MongoDriverError('Transaction already in progress');
     }
 
     const topologyMaxWireVersion = maxWireVersion(this.topology);
@@ -266,7 +268,9 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
-      throw new MongoError('Transactions are not supported on sharded clusters in MongoDB < 4.2.');
+      throw new MongoDriverError(
+        'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
+      );
     }
 
     // increment txnNumber
@@ -317,7 +321,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * This is here to ensure that ClientSession is never serialized to BSON.
    */
   toBSON(): never {
-    throw new Error('ClientSession cannot be serialized to BSON.');
+    throw new MongoDriverError('ClientSession cannot be serialized to BSON.');
   }
 
   /**
@@ -350,7 +354,9 @@ function hasNotTimedOut(startTime: number, max: number) {
 
 function isUnknownTransactionCommitResult(err: MongoError) {
   const isNonDeterministicWriteConcernError =
-    err.codeName && NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName);
+    err instanceof MongoServerError &&
+    err.codeName &&
+    NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName);
 
   return (
     isMaxTimeMSExpiredError(err) ||
@@ -361,7 +367,7 @@ function isUnknownTransactionCommitResult(err: MongoError) {
 }
 
 function isMaxTimeMSExpiredError(err: MongoError) {
-  if (err == null) {
+  if (err == null || !(err instanceof MongoServerError)) {
     return false;
   }
 
@@ -424,7 +430,7 @@ function attemptTransaction<TSchema>(
 
   if (!isPromiseLike(promise)) {
     session.abortTransaction();
-    throw new TypeError('Function provided to `withTransaction` must return a Promise');
+    throw new MongoDriverError('Function provided to `withTransaction` must return a Promise');
   }
 
   return promise.then(
@@ -471,7 +477,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   const txnState = session.transaction.state;
 
   if (txnState === TxnState.NO_TRANSACTION) {
-    callback(new MongoError('No transaction started'));
+    callback(new MongoDriverError('No transaction started'));
     return;
   }
 
@@ -487,7 +493,9 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     }
 
     if (txnState === TxnState.TRANSACTION_ABORTED) {
-      callback(new MongoError('Cannot call commitTransaction after calling abortTransaction'));
+      callback(
+        new MongoDriverError('Cannot call commitTransaction after calling abortTransaction')
+      );
       return;
     }
   } else {
@@ -499,7 +507,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     }
 
     if (txnState === TxnState.TRANSACTION_ABORTED) {
-      callback(new MongoError('Cannot call abortTransaction twice'));
+      callback(new MongoDriverError('Cannot call abortTransaction twice'));
       return;
     }
 
@@ -507,7 +515,9 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
       txnState === TxnState.TRANSACTION_COMMITTED ||
       txnState === TxnState.TRANSACTION_COMMITTED_EMPTY
     ) {
-      callback(new MongoError('Cannot call abortTransaction after calling commitTransaction'));
+      callback(
+        new MongoDriverError('Cannot call abortTransaction after calling commitTransaction')
+      );
       return;
     }
   }
@@ -651,7 +661,7 @@ class ServerSessionPool {
 
   constructor(topology: Topology) {
     if (topology == null) {
-      throw new Error('ServerSessionPool requires a topology');
+      throw new MongoDriverError('ServerSessionPool requires a topology');
     }
 
     this.topology = topology;
@@ -761,22 +771,22 @@ function applySession(
   session: ClientSession,
   command: Document,
   options?: CommandOptions
-): MongoError | undefined {
+): MongoDriverError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
-    return new MongoError('Attemped to use a session that has ended');
+    return new MongoDriverError('Attempted to use a session that has ended');
   }
 
   const serverSession = session.serverSession;
   if (serverSession == null) {
-    return new MongoError('Unable to acquire server session');
+    return new MongoDriverError('Unable to acquire server session');
   }
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
   if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
-      return new MongoError('Cannot have explicit session with unacknowledged writes');
+      return new MongoDriverError('Cannot have explicit session with unacknowledged writes');
     }
     return;
   }

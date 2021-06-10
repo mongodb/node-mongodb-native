@@ -2,6 +2,7 @@ import * as dns from 'dns';
 import { Logger, LoggerOptions } from '../logger';
 import { HostAddress } from '../utils';
 import { TypedEventEmitter } from '../mongo_types';
+import { MongoDriverError } from '../error';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order
@@ -66,7 +67,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     super();
 
     if (!options || !options.srvHost) {
-      throw new TypeError('options for SrvPoller must exist and include srvHost');
+      throw new MongoDriverError('options for SrvPoller must exist and include srvHost');
     }
 
     this.srvHost = options.srvHost;

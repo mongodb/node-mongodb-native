@@ -1,5 +1,5 @@
 import Denque = require('denque');
-import { MongoError, AnyError, isResumableError } from './error';
+import { MongoError, AnyError, isResumableError, MongoDriverError } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
   maxWireVersion,
@@ -46,11 +46,10 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-const NO_RESUME_TOKEN_ERROR = new MongoError(
-  'A change stream document has been received that lacks a resume token (_id).'
-);
-const NO_CURSOR_ERROR = new MongoError('ChangeStream has no cursor');
-const CHANGESTREAM_CLOSED_ERROR = new MongoError('ChangeStream is closed');
+const NO_RESUME_TOKEN_ERROR =
+  'A change stream document has been received that lacks a resume token (_id).';
+const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
+const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /** @public */
 export interface ResumeOptions {
@@ -254,7 +253,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
-      throw new TypeError(
+      throw new MongoDriverError(
         'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
       );
     }
@@ -352,11 +351,11 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
 
   /**
    * Return a modified Readable stream including a possible transform method.
-   * @throws MongoError if this.cursor is undefined
+   * @throws MongoDriverError if this.cursor is undefined
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
-    if (!this.cursor) throw NO_CURSOR_ERROR;
+    if (!this.cursor) throw new MongoDriverError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
 
@@ -606,7 +605,7 @@ function waitForTopologyConnected(
     }
 
     if (calculateDurationInMs(start) > timeout) {
-      return callback(new MongoError('Timed out waiting for connection'));
+      return callback(new MongoDriverError('Timed out waiting for connection'));
     }
 
     waitForTopologyConnected(topology, options, callback);
@@ -651,17 +650,17 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
-    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
-    return closeWithError(changeStream, CHANGESTREAM_CLOSED_ERROR, callback);
+    return closeWithError(changeStream, new MongoDriverError(CHANGESTREAM_CLOSED_ERROR), callback);
   }
 
   if (change && !change._id) {
-    return closeWithError(changeStream, NO_RESUME_TOKEN_ERROR, callback);
+    return closeWithError(changeStream, new MongoDriverError(NO_RESUME_TOKEN_ERROR), callback);
   }
 
   // cache the resume token
@@ -685,7 +684,7 @@ function processError<TSchema>(
 
   // If the change stream has been closed explicitly, do not process error.
   if (changeStream[kClosed]) {
-    if (callback) callback(CHANGESTREAM_CLOSED_ERROR);
+    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -745,7 +744,7 @@ function processError<TSchema>(
  */
 function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
-    callback(CHANGESTREAM_CLOSED_ERROR);
+    callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -770,11 +769,11 @@ function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: 
     const request = changeStream[kResumeQueue].pop();
     if (!err) {
       if (changeStream[kClosed]) {
-        request(CHANGESTREAM_CLOSED_ERROR);
+        request(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
         return;
       }
       if (!changeStream.cursor) {
-        request(NO_CURSOR_ERROR);
+        request(new MongoDriverError(NO_CURSOR_ERROR));
         return;
       }
     }

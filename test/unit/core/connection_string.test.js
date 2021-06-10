@@ -1,6 +1,6 @@
 'use strict';
 
-const { MongoParseError } = require('../../../src/error');
+const { MongoParseError, MongoDriverError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
 const { parseOptions } = require('../../../src/connection_string');
@@ -127,7 +127,7 @@ describe('Connection String', function () {
 
     it('should validate readPreference', function () {
       expect(() => parseOptions('mongodb://localhost/?readPreference=llamasPreferred')).to.throw(
-        TypeError, // not parse Error b/c thrown from ReadPreference construction
+        MongoDriverError, // not parse Error b/c thrown from ReadPreference construction
         'Invalid read preference mode "llamasPreferred"'
       );
     });

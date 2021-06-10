@@ -11,7 +11,7 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { MongoError, MongoServerSelectionError, AnyError } from '../error';
+import { MongoServerSelectionError, MongoDriverError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
   makeStateMachine,
@@ -274,7 +274,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       } else if (seed instanceof HostAddress) {
         seedlist.push(seed);
       } else {
-        throw new Error(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
+        throw new MongoDriverError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
       }
     }
 
@@ -472,7 +472,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     stateTransition(this, STATE_CLOSING);
 
-    drainWaitQueue(this[kWaitQueue], new MongoError('Topology closed'));
+    drainWaitQueue(this[kWaitQueue], new MongoDriverError('Topology closed'));
     drainTimerQueue(this.s.connectionTimers);
 
     if (this.s.srvPoller) {
@@ -692,7 +692,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // first update the TopologyDescription
     this.s.description = this.s.description.update(serverDescription);
     if (this.s.description.compatibilityError) {
-      this.emit(Topology.ERROR, new MongoError(this.s.description.compatibilityError));
+      this.emit(Topology.ERROR, new MongoDriverError(this.s.description.compatibilityError));
       return;
     }
 
@@ -935,7 +935,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
+function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {
@@ -954,7 +954,10 @@ function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: AnyError) {
 
 function processWaitQueue(topology: Topology) {
   if (topology.s.state === STATE_CLOSED) {
-    drainWaitQueue(topology[kWaitQueue], new MongoError('Topology is closed, please connect'));
+    drainWaitQueue(
+      topology[kWaitQueue],
+      new MongoDriverError('Topology is closed, please connect')
+    );
     return;
   }
 

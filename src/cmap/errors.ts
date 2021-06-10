@@ -1,4 +1,4 @@
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { Connection } from './connection';
 import type { ConnectionPool } from './connection_pool';
 
@@ -6,7 +6,7 @@ import type { ConnectionPool } from './connection_pool';
  * An error indicating a connection pool is closed
  * @category Error
  */
-export class PoolClosedError extends MongoError {
+export class PoolClosedError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
@@ -21,7 +21,7 @@ export class PoolClosedError extends MongoError {
  * An error thrown when a request to check out a connection times out
  * @category Error
  */
-export class WaitQueueTimeoutError extends MongoError {
+export class WaitQueueTimeoutError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 

@@ -2,7 +2,6 @@ import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { FindOptions } from './find';
-import { MongoError } from '../error';
 import type { Server } from '../sdam/server';
 import { CommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -32,7 +31,7 @@ export class FindOneOperation extends CommandOperation<Document> {
 
       // Return the item
       cursor.next((err, item) => {
-        if (err != null) return callback(new MongoError(err));
+        if (err != null) return callback(err);
         callback(undefined, item || undefined);
       });
     } catch (e) {

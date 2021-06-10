@@ -1,5 +1,5 @@
 import { ReadPreference } from './read_preference';
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
@@ -83,7 +83,7 @@ export class Transaction {
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
       if (writeConcern.w === 0) {
-        throw new MongoError('Transactions do not support unacknowledged write concern');
+        throw new MongoDriverError('Transactions do not support unacknowledged write concern');
       }
 
       this.options.writeConcern = writeConcern;
@@ -150,7 +150,7 @@ export class Transaction {
       return;
     }
 
-    throw new MongoError(
+    throw new MongoDriverError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
   }

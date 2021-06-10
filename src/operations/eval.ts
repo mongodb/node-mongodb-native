@@ -1,7 +1,7 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Code, Document } from '../bson';
 import { ReadPreference } from '../read_preference';
-import { MongoError } from '../error';
+import { MongoServerError } from '../error';
 import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
@@ -68,7 +68,7 @@ export class EvalOperation extends CommandOperation<Document> {
       }
 
       if (result) {
-        callback(MongoError.create({ message: `eval failed: ${result.errmsg}`, driver: true }));
+        callback(new MongoServerError({ message: `eval failed: ${result.errmsg}` }));
         return;
       }
 

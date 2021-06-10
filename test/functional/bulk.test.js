@@ -7,7 +7,7 @@ const {
   ignoreNsNotFound
 } = require('./shared');
 const test = require('./shared').assert;
-const { MongoError } = require('../../src/error');
+const { MongoDriverError } = require('../../src/error');
 const { Long } = require('../../src');
 const crypto = require('crypto');
 const chai = require('chai');
@@ -599,7 +599,7 @@ describe('Bulk', function () {
         var col = db.collection('batch_write_ordered_ops_8');
 
         col.initializeOrderedBulkOp().execute(function (err) {
-          expect(err).to.be.instanceOf(TypeError);
+          expect(err).to.be.instanceOf(MongoDriverError);
           expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
           client.close(done);
@@ -1108,7 +1108,7 @@ describe('Bulk', function () {
         col
           .initializeUnorderedBulkOp()
           .execute(self.configuration.writeConcernMax(), function (err) {
-            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.be.instanceOf(MongoDriverError);
             expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
             client.close(done);
@@ -1517,7 +1517,7 @@ describe('Bulk', function () {
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], function (err) {
-            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.be.instanceOf(MongoDriverError);
             expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
             client.close(done);
@@ -1538,7 +1538,7 @@ describe('Bulk', function () {
         client.connect(function (err, client) {
           var db = client.db(self.configuration.db);
           db.collection('doesnt_matter').insertMany([], { ordered: false }, function (err) {
-            expect(err).to.be.instanceOf(TypeError);
+            expect(err).to.be.instanceOf(MongoDriverError);
             expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
 
             client.close(done);
@@ -1562,7 +1562,7 @@ describe('Bulk', function () {
         test.equal(false, true); // this should not happen!
       })
       .catch(function (err) {
-        expect(err).to.be.instanceOf(TypeError);
+        expect(err).to.be.instanceOf(MongoDriverError);
         expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
       })
       .then(function () {
@@ -1678,11 +1678,11 @@ describe('Bulk', function () {
 
   function testPropagationOfBulkWriteError(bulk) {
     return bulk.execute().then(
-      err => {
-        expect(err).to.be.an.instanceOf(MongoError);
+      () => {
+        throw new Error('Expected execute to error but it passed');
       },
       err => {
-        expect(err).to.be.an.instanceOf(TypeError);
+        expect(err).to.be.an.instanceOf(MongoDriverError);
       }
     );
   }

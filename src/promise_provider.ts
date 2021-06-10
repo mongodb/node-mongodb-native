@@ -1,3 +1,5 @@
+import { MongoDriverError } from './error';
+
 /** @internal */
 const kPromise = Symbol('promise');
 
@@ -16,7 +18,8 @@ const store: PromiseStore = {
 export class PromiseProvider {
   /** Validates the passed in promise library */
   static validate(lib: unknown): lib is PromiseConstructor {
-    if (typeof lib !== 'function') throw new Error(`Promise must be a function, got ${lib}`);
+    if (typeof lib !== 'function')
+      throw new MongoDriverError(`Promise must be a function, got ${lib}`);
     return !!lib;
   }
 
