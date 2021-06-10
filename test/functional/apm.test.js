@@ -879,7 +879,7 @@ describe('APM', function() {
     }
   });
 
-  describe('spec tests', function() {
+  describe('command monitoring spec tests', function() {
     before(function() {
       return setupDatabase(this.configuration);
     });
@@ -1087,7 +1087,7 @@ describe('APM', function() {
         });
     }
 
-    loadSpecTests('apm').forEach(scenario => {
+    loadSpecTests('command-monitoring').forEach(scenario => {
       describe(scenario.name, function() {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
