@@ -759,4 +759,25 @@ describe('ReadPreference', function() {
         });
     })
   });
+
+  it('should use session readPreference', function(done) {
+    const configuration = this.configuration;
+    const client = this.configuration.newClient(configuration.writeConcernMax(), {
+      useUnifiedTopology: true,
+      readPreference: 'primaryPreferred'
+    });
+
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
+      const session = client.startSession({
+        readPreference: 'secondary',
+        causalConsistency: true
+      });
+
+      const result = ReadPreference.resolve(client, { session: session });
+      expect(result.mode).to.equal('secondary');
+      done();
+    });
+  });
 });
