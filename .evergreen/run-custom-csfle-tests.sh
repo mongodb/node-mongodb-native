@@ -58,6 +58,9 @@ npm install
 
 npm link mongodb-client-encryption
 
+# make a global link of mongodb
+npm link
+
 export MONGODB_URI=${MONGODB_URI}
 set +o errexit # We want to run both test suites even if the first fails
 npx mocha test/functional/client_side_encryption
@@ -72,7 +75,14 @@ pushd csfle-deps-tmp/libmongocrypt/bindings/node
 # these tests will start their own
 killall mongocryptd
 
-npm install
+npm install --ignore-scripts
+rm -rf build prebuilds
+npx node-gyp configure
+npx node-gyp build
+
+rm -rf node_modules/mongodb
+npm link mongodb
+
 # needs to be empty
 export MONGODB_NODE_SKIP_LIVE_TESTS=""
 # all of the below must be defined (as well as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
