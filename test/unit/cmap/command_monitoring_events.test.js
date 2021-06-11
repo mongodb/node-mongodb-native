@@ -19,47 +19,46 @@ describe('Command Monitoring Events - unit/cmap', function () {
     { ns: 'hello there', f1: { h: { a: 52, b: { c: 10, d: [1, 2, 3, 5] } } } }
   ];
 
-  commands.forEach(c => {
-    it(`should make a deep copy of object of type: ${c.constructor.name}`, done => {
-      const ev = new CommandStartedEvent({ id: 'someId', address: 'someHost' }, c);
-      if (c instanceof Query) {
-        if (c.ns === 'admin.$cmd') {
-          expect(ev.command !== c.query.$query).to.equal(true);
-          for (const k in c.query.$query) {
-            expect(ev.command[k]).to.deep.equal(c.query.$query[k]);
+  for (const command of commands) {
+    it(`should make a deep copy of object of type: ${command.constructor.name}`, () => {
+      const ev = new CommandStartedEvent({ id: 'someId', address: 'someHost' }, command);
+      if (command instanceof Query) {
+        if (command.ns === 'admin.$cmd') {
+          expect(ev.command !== command.query.$query).to.equal(true);
+          for (const k in command.query.$query) {
+            expect(ev.command[k]).to.deep.equal(command.query.$query[k]);
           }
         } else {
-          expect(ev.command.filter !== c.query.$query).to.equal(true);
-          for (const k in c.query.$query) {
-            expect(ev.command.filter[k]).to.deep.equal(c.query.$query[k]);
+          expect(ev.command.filter !== command.query.$query).to.equal(true);
+          for (const k in command.query.$query) {
+            expect(ev.command.filter[k]).to.deep.equal(command.query.$query[k]);
           }
         }
-      } else if (c instanceof Msg) {
-        expect(ev.command !== c.command).to.equal(true);
-        expect(ev.command).to.deep.equal(c.command);
-      } else if (c instanceof GetMore) {
+      } else if (command instanceof Msg) {
+        expect(ev.command !== command.command).to.equal(true);
+        expect(ev.command).to.deep.equal(command.command);
+      } else if (command instanceof GetMore) {
         // NOTE: BSON Longs pass strict equality when their internal values are equal
         // i.e.
         // let l1 = Long(10);
         // let l2 = Long(10);
         // l1 === l2 // returns true
-        // expect(ev.command.getMore !== c.cursorId).to.equal(true);
-        expect(ev.command.getMore).to.deep.equal(c.cursorId);
+        // expect(ev.command.getMore !== command.cursorId).to.equal(true);
+        expect(ev.command.getMore).to.deep.equal(command.cursorId);
 
         ev.command.getMore = Long.fromNumber(50128);
-        expect(c.cursorId).to.not.deep.equal(ev.command.getMore);
-      } else if (c instanceof KillCursor) {
-        expect(ev.command.cursors !== c.cursorIds).to.equal(true);
-        expect(ev.command.cursors).to.deep.equal(c.cursorIds);
-      } else if (typeof c === 'object') {
-        if (c.ns === 'admin.$cmd') {
-          expect(ev.command !== c.query.$query).to.equal(true);
-          for (const k in c.query.$query) {
-            expect(ev.command[k]).to.deep.equal(c.query.$query[k]);
+        expect(command.cursorId).to.not.deep.equal(ev.command.getMore);
+      } else if (command instanceof KillCursor) {
+        expect(ev.command.cursors !== command.cursorIds).to.equal(true);
+        expect(ev.command.cursors).to.deep.equal(command.cursorIds);
+      } else if (typeof command === 'object') {
+        if (command.ns === 'admin.$cmd') {
+          expect(ev.command !== command.query.$query).to.equal(true);
+          for (const k in command.query.$query) {
+            expect(ev.command[k]).to.deep.equal(command.query.$query[k]);
           }
         }
       }
-      done();
     });
-  });
+  }
 });
