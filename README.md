@@ -15,10 +15,10 @@ Check out our [beta version 4.0 here](https://github.com/mongodb/node-mongodb-na
 
 | what          | where                                                |
 | ------------- | ---------------------------------------------------- |
-| documentation | http://mongodb.github.io/node-mongodb-native         |
-| api-doc       | http://mongodb.github.io/node-mongodb-native/3.6/api |
+| documentation | https://mongodb.github.io/node-mongodb-native         |
+| api-doc       | https://mongodb.github.io/node-mongodb-native/3.6/api |
 | source        | https://github.com/mongodb/node-mongodb-native       |
-| mongodb       | http://www.mongodb.org                               |
+| mongodb       | https://www.mongodb.org                               |
 
 ### Bugs / Feature Requests
 
@@ -481,7 +481,7 @@ For more detailed information, see the [tutorials](docs/reference/content/tutori
 
 ## Next Steps
 
-- [MongoDB Documentation](http://mongodb.org)
+- [MongoDB Documentation](https://mongodb.org)
 - [Read about Schemas](http://learnmongodbthehardway.com)
 - [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
