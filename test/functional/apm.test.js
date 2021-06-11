@@ -1088,7 +1088,7 @@ describe('APM', function() {
         });
     }
 
-    loadSpecTests('command-monitoring').forEach(scenario => {
+    loadSpecTests('command-monitoring/legacy').forEach(scenario => {
       describe(scenario.name, function() {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
