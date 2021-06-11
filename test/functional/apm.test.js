@@ -969,12 +969,22 @@ describe('APM', function () {
   describe('command monitoring unified spec tests', () => {
     for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
       expect(loadedSpec).to.include.all.keys(['description', 'tests']);
+      // TODO: NODE-3356 unskip redaction tests
+      const testsToSkip =
+        loadedSpec.description === 'redacted-commands'
+          ? loadedSpec.tests
+              .map(test => test.description)
+              .filter(
+                description =>
+                  description !== 'hello without speculative authenticate is not redacted'
+              )
+          : [];
       context(String(loadedSpec.description), function () {
         for (const test of loadedSpec.tests) {
           it(String(test.description), {
-            metadata: { sessions: { skipLeakTests: true } }, // TODO: what is this for?
+            metadata: { sessions: { skipLeakTests: true } },
             test: async function () {
-              await runUnifiedTest(this, loadedSpec, test);
+              await runUnifiedTest(this, loadedSpec, test, testsToSkip);
             }
           });
         }
