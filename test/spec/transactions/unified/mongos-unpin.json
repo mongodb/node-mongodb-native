@@ -1,0 +1,324 @@
+{
+  "description": "mongos-unpin",
+  "schemaVersion": "1.1",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.2",
+      "topologies": [
+        "sharded-replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": true
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "mongos-unpin-db"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "mongos-unpin-db",
+      "documents": []
+    }
+  ],
+  "_yamlAnchors": {
+    "anchors": 24
+  },
+  "tests": [
+    {
+      "description": "unpin after TransientTransctionError error on commit",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "commitTransaction"
+                ],
+                "errorCode": 24
+              }
+            }
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "expectError": {
+            "errorCode": 24,
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "unpin on successful abort",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "unpin after TransientTransctionError error on abort",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "errorCode": 24
+              }
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "unpin when a new transaction is started",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "unpin when a non-transaction write operation uses a session",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    },
+    {
+      "description": "unpin when a non-transaction read operation uses a session",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionPinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ]
+    }
+  ]
+}
