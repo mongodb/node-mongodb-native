@@ -3911,31 +3911,25 @@ describe('Cursor', function () {
     return client
       .connect()
       .then(() => {
+        this.defer(() => client.close());
         db = client.db(configuration.db);
         collection = db.collection('cursor_session_tests2');
         return collection.insertMany(docs);
       }, console.error)
       .then(() => {
         const cursor = collection.find({});
-        async function testAsync() {
-          let promiseResult;
-          try {
-            promiseResult = await cursor
-              .forEach(() => {
-                throw new Error('FAILURE IN FOREACH CALL');
-              })
-              .catch(err => {
-                expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
-              });
-          } catch (err) {
-            expect(err).to.be.undefined;
-          }
-          expect(promiseResult).to.be.undefined;
-          cursor.close();
-          client.close();
-        }
-        return testAsync();
-      });
+        this.defer(() => cursor.close());
+        expect(() => {
+          cursor
+            .forEach(() => {
+              throw new Error('FAILURE IN FOREACH CALL');
+            })
+            .catch(err => {
+              expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
+            });
+        }).to.not.throw();
+      })
+      .catch(console.error);
   });
 
   it('should return a promise when no callback supplied to forEach method', function () {
