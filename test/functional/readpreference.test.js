@@ -760,7 +760,7 @@ describe('ReadPreference', function() {
     })
   });
 
-  it('should use session readPreference', function(done) {
+  it('should use session readPreference instead of client readPreference', function(done) {
     const configuration = this.configuration;
     const client = this.configuration.newClient(configuration.writeConcernMax(), {
       useUnifiedTopology: true,
@@ -768,16 +768,27 @@ describe('ReadPreference', function() {
     });
 
     client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+      this.defer(() => {
+        client.close();
+      });
+      expect(err).to.be.null;
+      expect(client).to.not.be.null;
+      const db = client.db(configuration.db);
+      const collection = db.collection('read_pref_1', {
+        readPreference: ReadPreference.SECONDARY_PREFERRED
+      });
       const session = client.startSession({
-        readPreference: 'secondary',
+        defaultTransactionOptions: { readPreference: 'secondary' },
         causalConsistency: true
       });
 
+      session.startTransaction();
       const result = ReadPreference.resolve(client, { session: session });
-      expect(result.mode).to.equal('secondary');
-      done();
+      expect(result).to.not.be.undefined;
+      expect(result.mode).to.deep.equal('secondary');
+      session.abortTransaction();
+
+      session.endSession(undefined, done);
     });
   });
 });
