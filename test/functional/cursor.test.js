@@ -3924,9 +3924,14 @@ describe('Cursor', function () {
             .forEach(() => {
               throw new Error('FAILURE IN FOREACH CALL');
             })
-            .catch(err => {
-              expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
-            });
+            .then(
+              () => {
+                expect(false).to.equal(true, 'Failed to catch error thrown in awaited forEach');
+              },
+              err => {
+                expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
+              }
+            );
         }).to.not.throw();
       })
       .catch(console.error);
