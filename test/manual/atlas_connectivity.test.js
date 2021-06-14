@@ -1,6 +1,9 @@
 'use strict';
 const { MongoClient } = require('../../src');
 
+// TODO(NODE-3357): Unskip this test
+const SKIP_TESTS = ['replica_set_4_0_free'];
+
 describe('Atlas Connectivity', function () {
   if (process.env.ATLAS_CONNECTIVITY == null) {
     console.error(
@@ -15,7 +18,10 @@ describe('Atlas Connectivity', function () {
     context(configName, function () {
       CONFIGS[configName].forEach(connectionString => {
         const name = connectionString.indexOf('mongodb+srv') >= 0 ? 'mongodb+srv' : 'normal';
-        it(`${name}`, makeConnectionTest(connectionString));
+        it(`${name}`, function () {
+          if (SKIP_TESTS.include(configName)) this.skip();
+          makeConnectionTest(connectionString);
+        });
       });
     });
   });
