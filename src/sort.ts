@@ -13,6 +13,7 @@ export type SortDirection =
 /** @public */
 export type Sort =
   | string
+  | Exclude<SortDirection, { $meta: string }>
   | string[]
   | { [key: string]: SortDirection }
   | Map<string, SortDirection>
@@ -32,7 +33,7 @@ type SortPairForCmd = [string, SortDirectionForCmd];
 
 /** @internal */
 function prepareDirection(direction: any = 1): SortDirectionForCmd {
-  const value = ('' + direction).toLowerCase();
+  const value = `${direction}`.toLowerCase();
   if (isMeta(direction)) return direction;
   switch (value) {
     case 'ascending':

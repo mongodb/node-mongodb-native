@@ -92,10 +92,10 @@ import type { CountOptions } from './operations/count';
 import type {
   Filter,
   TODO_NODE_3286,
-  UpdateQuery,
+  UpdateFilter,
   WithId,
   OptionalId,
-  FlattenIfArray
+  Flatten
 } from './mongo_types';
 
 /** @public */
@@ -414,27 +414,27 @@ export class Collection<TSchema extends Document = Document> {
    */
   updateOne(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema> | Partial<TSchema>
+    update: UpdateFilter<TSchema> | Partial<TSchema>
   ): Promise<UpdateResult | Document>;
   updateOne(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema> | Partial<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema> | Partial<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
     options: UpdateOptions
   ): Promise<UpdateResult | Document>;
   updateOne(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema> | Partial<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
     options: UpdateOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateOne(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema> | Partial<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
     options?: UpdateOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
   ): Promise<UpdateResult | Document> | void {
@@ -502,27 +502,27 @@ export class Collection<TSchema extends Document = Document> {
    */
   updateMany(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>
+    update: UpdateFilter<TSchema>
   ): Promise<UpdateResult | Document>;
   updateMany(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options: UpdateOptions
   ): Promise<UpdateResult | Document>;
   updateMany(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options: UpdateOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   updateMany(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options?: UpdateOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
   ): Promise<UpdateResult | Document> | void {
@@ -1116,30 +1116,30 @@ export class Collection<TSchema extends Document = Document> {
    */
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key
-  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
+    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
   ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>
-  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
-    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
+    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
   ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions
-  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions,
-    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
+    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
   ): void;
 
   // Embedded documents overload
@@ -1320,27 +1320,27 @@ export class Collection<TSchema extends Document = Document> {
    */
   findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>
+    update: UpdateFilter<TSchema>
   ): Promise<ModifyResult<TSchema>>;
   findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options: FindOneAndUpdateOptions
   ): Promise<ModifyResult<TSchema>>;
   findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options: FindOneAndUpdateOptions,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options?: FindOneAndUpdateOptions | Callback<ModifyResult<TSchema>>,
     callback?: Callback<ModifyResult<TSchema>>
   ): Promise<ModifyResult<TSchema>> | void {
@@ -1536,7 +1536,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   update(
     selector: Filter<TSchema>,
-    update: UpdateQuery<TSchema>,
+    update: UpdateFilter<TSchema>,
     options: UpdateOptions,
     callback: Callback<Document>
   ): Promise<UpdateResult> | void {

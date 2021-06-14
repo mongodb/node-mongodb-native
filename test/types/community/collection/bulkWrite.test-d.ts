@@ -1,4 +1,4 @@
-import { expectError } from 'tsd';
+import { expectAssignable, expectError } from 'tsd';
 import { MongoClient, ObjectId } from '../../../../src/index';
 
 // TODO(NODE-3347): Improve these tests to use more expect assertions
@@ -100,11 +100,16 @@ expectError(
   ])
 );
 
-collectionType.bulkWrite([
-  { updateOne: { filter: { stringField: 'foo' }, update: { $set: { numberField: 'bar' } } } }
-]);
+expectError(
+  collectionType.bulkWrite([
+    { updateOne: { filter: { stringField: 'foo' }, update: { $set: { numberField: 'bar' } } } }
+  ])
+);
 
+// This is a runtime error, the "update" has no Atomic operators ($ keys)
+// We want our driver to automatically support future operators, so we cannot constrain the UpdateFilter
 collectionType.bulkWrite([
+  // no top-level $ operator
   { updateOne: { filter: { stringField: 'foo' }, update: { 'dot.notation': true } } }
 ]);
 
@@ -144,11 +149,16 @@ expectError(
   ])
 );
 
-collectionType.bulkWrite([
-  { updateMany: { filter: { stringField: 'foo' }, update: { $set: { numberField: 'bar' } } } }
-]);
+expectError(
+  collectionType.bulkWrite([
+    { updateMany: { filter: { stringField: 'foo' }, update: { $set: { numberField: 'bar' } } } }
+  ])
+);
 
+// This is a runtime error, the "update" & "updateMany" has no Atomic operators ($ keys)
+// We want our driver to automatically support future operators, so we cannot constrain the UpdateFilter
 collectionType.bulkWrite([
+  // no top-level $ operator
   { updateMany: { filter: { stringField: 'foo' }, update: { 'dot.notation': true } } }
 ]);
 
