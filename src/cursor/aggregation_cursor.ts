@@ -106,6 +106,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a group stage to the aggregation pipeline */
+  group<T = TSchema>($group: Document): AggregationCursor<T>;
   group($group: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $group });
@@ -134,6 +135,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a project stage to the aggregation pipeline */
+  project<T = TSchema>($project: Document): AggregationCursor<T>;
   project($project: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $project });
@@ -169,7 +171,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a unwind stage to the aggregation pipeline */
-  unwind($unwind: number): this {
+  unwind($unwind: Document | string): this {
     assertUninitialized(this);
     this[kPipeline].push({ $unwind });
     return this;

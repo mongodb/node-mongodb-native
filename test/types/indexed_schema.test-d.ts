@@ -1,4 +1,4 @@
-import { expectType, expectNotType, expectError, expectAssignable } from 'tsd';
+import { expectType, expectNotType, expectError } from 'tsd';
 
 import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
@@ -18,9 +18,6 @@ const randomKeysIncludeIdC = new Collection<RandomKeysToNumberIncludingId>(db, '
 expectType<InsertRes<number>>(randomKeysIncludeIdC.insertOne({ a: 2, randomKey: 23, _id: 23 }));
 expectError(randomKeysIncludeIdC.insertOne({ a: 2, randomKey: 23 }));
 expectError(randomKeysIncludeIdC.insertOne({ _id: 2, randomKey: 'string' }));
-
-const arg1 = (null as unknown) as Parameters<typeof randomKeysIncludeIdC.findOne>[0];
-expectAssignable<Partial<RandomKeysToNumberIncludingId>>(arg1);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

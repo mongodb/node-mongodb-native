@@ -12,6 +12,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
+import type { Projection, ProjectionOperators, SchemaMember } from '../mongo_types';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -341,7 +342,9 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
    *
    * @param value - The field projection object.
    */
-  project(value: Document): this {
+  // TODO(NODE-3343): add parameterized cursor return type
+  project<T = TSchema>(value: SchemaMember<T, ProjectionOperators | number | boolean | any>): this;
+  project(value: Projection<TSchema>): this {
     assertUninitialized(this);
     this[kBuiltOptions].projection = value;
     return this;

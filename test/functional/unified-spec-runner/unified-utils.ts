@@ -60,7 +60,6 @@ export function* zip<T = unknown, U = unknown>(
   iter1: T[],
   iter2: U[]
 ): Generator<[T | undefined, U | undefined], void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const longerArrayLength = Math.max(iter1.length, iter2.length);
   for (let index = 0; index < longerArrayLength; index++) {
     yield [iter1[index], iter2[index]];

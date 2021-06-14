@@ -8,7 +8,6 @@ import { Admin } from './admin';
 import { MongoClient } from './mongo_client';
 import { Db } from './db';
 import { Collection } from './collection';
-import { ReadPreference } from './read_preference';
 import { Logger } from './logger';
 import { GridFSBucket } from './gridfs-stream';
 import { CancellationToken } from './mongo_types';
@@ -49,7 +48,6 @@ export {
   MongoClient,
   Db,
   Collection,
-  ReadPreference,
   Logger,
   AbstractCursor,
   AggregationCursor,
@@ -74,6 +72,13 @@ export { ExplainVerbosity } from './explain';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';
 export { ServerApiVersion } from './mongo_client';
+export { BSONType } from './mongo_types';
+
+// Helper classes
+export { WriteConcern } from './write_concern';
+export { ReadConcern } from './read_concern';
+export { ReadPreference } from './read_preference';
+
 // events
 export {
   CommandStartedEvent,
@@ -274,7 +279,12 @@ export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
-export type { CollStatsOptions, DbStatsOptions } from './operations/stats';
+export type {
+  CollStatsOptions,
+  DbStatsOptions,
+  CollStats,
+  WiredTigerData
+} from './operations/stats';
 export type {
   UpdateResult,
   UpdateOptions,
@@ -282,7 +292,7 @@ export type {
   UpdateStatement
 } from './operations/update';
 export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type { ReadConcern, ReadConcernLike } from './read_concern';
+export type { ReadConcernLike } from './read_concern';
 export type {
   ReadPreferenceLike,
   ReadPreferenceOptions,
@@ -340,7 +350,7 @@ export type {
   HostAddress,
   EventEmitterWithState
 } from './utils';
-export type { WriteConcern, W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
+export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type { BulkOperationBase, BulkOperationPrivate, FindOperators, Batch } from './bulk/common';
@@ -357,7 +367,14 @@ export type {
   Projection,
   InferIdType,
   ProjectionOperators,
-  MetaProjectionOperators,
-  MetaSortOperators
+  FlattenIfArray,
+  SchemaMember,
+  Condition,
+  RootFilterOperators,
+  AlternativeType,
+  FilterOperators,
+  BSONTypeAlias,
+  BitwiseFilter,
+  RegExpOrString
 } from './mongo_types';
 export type { serialize, deserialize } from './bson';

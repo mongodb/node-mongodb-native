@@ -79,7 +79,7 @@ import {
 } from './operations/map_reduce';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
-import { CollStatsOperation, CollStatsOptions } from './operations/stats';
+import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
 import { executeOperation } from './operations/execute_operation';
 import type { Db } from './db';
 import type { OperationOptions, Hint } from './operations/operation';
@@ -89,7 +89,14 @@ import type { PkFactory } from './mongo_client';
 import type { Logger, LoggerOptions } from './logger';
 import { FindCursor } from './cursor/find_cursor';
 import type { CountOptions } from './operations/count';
-import type { Filter, TODO_NODE_3286, UpdateQuery, WithId, OptionalId } from './mongo_types';
+import type {
+  Filter,
+  TODO_NODE_3286,
+  UpdateQuery,
+  WithId,
+  OptionalId,
+  FlattenIfArray
+} from './mongo_types';
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
@@ -665,25 +672,42 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOne(): Promise<TSchema>;
-  findOne(callback: Callback<TSchema>): void;
-  findOne(filter: Filter<TSchema>): Promise<TSchema>;
-  findOne(filter: Filter<TSchema>, callback?: Callback<TSchema>): void;
-  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema>;
-  findOne(filter: Filter<TSchema>, options: FindOptions, callback: Callback<TSchema>): void;
+  findOne(): Promise<TSchema | undefined>;
+  findOne(callback: Callback<TSchema | undefined>): void;
+  findOne(filter: Filter<TSchema>): Promise<TSchema | undefined>;
+  findOne(filter: Filter<TSchema>, callback: Callback<TSchema | undefined>): void;
+  findOne(filter: Filter<TSchema>, options: FindOptions<TSchema>): Promise<TSchema | undefined>;
   findOne(
-    filter?: Filter<TSchema> | Callback<TSchema>,
-    options?: FindOptions | Callback<TSchema>,
+    filter: Filter<TSchema>,
+    options: FindOptions<TSchema>,
+    callback: Callback<TSchema | undefined>
+  ): void;
+
+  // allow an override of the schema.
+  findOne<T = TSchema>(): Promise<T | undefined>;
+  findOne<T = TSchema>(callback: Callback<T | undefined>): void;
+  findOne<T = TSchema>(filter: Filter<T>): Promise<T | undefined>;
+  findOne<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): Promise<T | undefined>;
+  findOne<T = TSchema>(
+    filter: Filter<T>,
+    options?: FindOptions<T>,
+    callback?: Callback<T | undefined>
+  ): void;
+
+  findOne(
+    filter?: Filter<TSchema> | Callback<TSchema | undefined>,
+    options?: FindOptions<TSchema> | Callback<TSchema | undefined>,
     callback?: Callback<TSchema>
-  ): Promise<TSchema> | void {
+  ): Promise<TSchema | undefined> | void {
     if (callback !== undefined && typeof callback !== 'function') {
       throw new MongoDriverError('Third parameter to `findOne()` must be a callback or undefined');
     }
 
     if (typeof filter === 'function')
-      (callback = filter as Callback<Document>), (filter = {}), (options = {});
+      (callback = filter as Callback<Document | undefined>), (filter = {}), (options = {});
     if (typeof options === 'function') (callback = options), (options = {});
-    filter = filter || {};
+
+    filter ??= {};
 
     return executeOperation(
       getTopology(this),
@@ -692,7 +716,7 @@ export class Collection<TSchema extends Document = Document> {
         filter,
         resolveOptions(this, options)
       ) as TODO_NODE_3286,
-      callback
+      callback as TODO_NODE_3286
     );
   }
 
@@ -702,8 +726,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>, options: FindOptions<TSchema>): FindCursor<TSchema>;
+  find(filter: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema>;
+  find<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): FindCursor<T>;
   find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new MongoDriverError('Third parameter to `collection.find()` must be undefined');
@@ -1054,6 +1078,7 @@ export class Collection<TSchema extends Document = Document> {
     options: CountDocumentsOptions,
     callback: Callback<number>
   ): void;
+  countDocuments(filter: Filter<TSchema>, callback: Callback<number>): void;
   countDocuments(
     filter?: Document | CountDocumentsOptions | Callback<number>,
     options?: CountDocumentsOptions | Callback<number>,
@@ -1089,25 +1114,47 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  distinct<Key extends keyof WithId<TSchema>>(key: Key): Promise<any[]>;
-  distinct<Key extends keyof WithId<TSchema>>(key: Key, callback: Callback<any[]>): void;
-  distinct<Key extends keyof WithId<TSchema>>(key: Key, filter: Filter<TSchema>): Promise<any[]>;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key
+  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
+  ): void;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    filter: Filter<TSchema>
+  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
-    callback: Callback<any[]>
+    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
   ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions
-  ): Promise<any[]>;
+  ): Promise<Array<FlattenIfArray<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions,
+    callback: Callback<Array<FlattenIfArray<WithId<TSchema>[Key]>>>
+  ): void;
+
+  // Embedded documents overload
+  distinct(key: string): Promise<any[]>;
+  distinct(key: string, callback: Callback<any[]>): void;
+  distinct(key: string, filter: Filter<TSchema>): Promise<any[]>;
+  distinct(key: string, filter: Filter<TSchema>, callback: Callback<any[]>): void;
+  distinct(key: string, filter: Filter<TSchema>, options: DistinctOptions): Promise<any[]>;
+  distinct(
+    key: string,
+    filter: Filter<TSchema>,
+    options: DistinctOptions,
     callback: Callback<any[]>
   ): void;
+  // Implementation
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter?: Filter<TSchema> | DistinctOptions | Callback<any[]>,
@@ -1164,14 +1211,14 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  stats(): Promise<Document>;
-  stats(callback: Callback<Document>): void;
-  stats(options: CollStatsOptions): Promise<Document>;
-  stats(options: CollStatsOptions, callback: Callback<Document>): void;
+  stats(): Promise<CollStats>;
+  stats(callback: Callback<CollStats>): void;
+  stats(options: CollStatsOptions): Promise<CollStats>;
+  stats(options: CollStatsOptions, callback: Callback<CollStats>): void;
   stats(
-    options?: CollStatsOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: CollStatsOptions | Callback<CollStats>,
+    callback?: Callback<CollStats>
+  ): Promise<CollStats> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
@@ -1372,27 +1419,27 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TValue>,
+    map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>
   ): Promise<Document | Document[]>;
   mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TValue>,
+    map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>,
     callback: Callback<Document | Document[]>
   ): void;
   mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TValue>,
+    map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>,
     options: MapReduceOptions<TKey, TValue>
   ): Promise<Document | Document[]>;
   mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TValue>,
+    map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>,
     options: MapReduceOptions<TKey, TValue>,
     callback: Callback<Document | Document[]>
   ): void;
   mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TValue>,
+    map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>,
     options?: MapReduceOptions<TKey, TValue> | Callback<Document | Document[]>,
     callback?: Callback<Document | Document[]>
