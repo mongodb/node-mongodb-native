@@ -9,6 +9,7 @@ expectType<boolean | undefined>(options.ignoreUndefined);
 expectType<boolean | undefined>(options.promoteLongs);
 expectType<boolean | undefined>(options.promoteBuffers);
 expectType<boolean | undefined>(options.promoteValues);
+expectType<boolean | undefined>(options.bsonRegExp);
 expectType<Document | undefined>(options.fieldsAsRaw);
 
 type PermittedBSONOptionKeys =
@@ -18,6 +19,7 @@ type PermittedBSONOptionKeys =
   | 'promoteLongs'
   | 'promoteBuffers'
   | 'promoteValues'
+  | 'bsonRegExp'
   | 'fieldsAsRaw'
   | 'raw';
 
