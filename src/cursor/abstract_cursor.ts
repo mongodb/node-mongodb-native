@@ -326,8 +326,8 @@ export abstract class AbstractCursor<
           // NOTE: no need to transform because `next` will do this automatically
           try {
             result = iterator(doc); // TODO(NODE-3283): Improve transform typing
-          } catch (e) {
-            return done(e);
+          } catch (error) {
+            return done(error);
           }
 
           if (result === false) return done();
@@ -340,8 +340,8 @@ export abstract class AbstractCursor<
                 result = iterator(
                   (transform ? transform(internalDocs[i]) : internalDocs[i]) as T // TODO(NODE-3283): Improve transform typing
                 );
-              } catch (e) {
-                return done(e);
+              } catch (error) {
+                return done(error);
               }
               if (result === false) return done();
             }
