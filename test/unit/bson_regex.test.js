@@ -5,7 +5,7 @@ const { BSONRegExp } = require('../../src/index');
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {
-    it('should respond with BSONRegExp class with flag passed to db', async function () {
+    it('should respond with BSONRegExp class with option passed to db', async function () {
       let client;
       try {
         // create and connect to client
@@ -24,7 +24,7 @@ describe('BSONRegExp', () => {
       }
     });
 
-    it('should respond with BSONRegExp class with flag passed to collection', async function () {
+    it('should respond with BSONRegExp class with option passed to collection', async function () {
       let client;
       try {
         // create and connect to client
@@ -43,7 +43,7 @@ describe('BSONRegExp', () => {
       }
     });
 
-    it('should respond with BSONRegExp class with flag passed to operation', async function () {
+    it('should respond with BSONRegExp class with option passed to operation', async function () {
       let client;
       try {
         // create and connect to client
