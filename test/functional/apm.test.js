@@ -9,6 +9,7 @@ const {
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
 const { ReadPreference } = require('../../src/read_preference');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
 describe('APM', function () {
   before(function () {
@@ -695,7 +696,7 @@ describe('APM', function () {
       });
   });
 
-  describe('spec tests', function () {
+  describe('command monitoring spec tests', function () {
     before(function () {
       return setupDatabase(this.configuration);
     });
@@ -926,7 +927,7 @@ describe('APM', function () {
         });
     }
 
-    loadSpecTests('apm').forEach(scenario => {
+    loadSpecTests('command-monitoring/legacy').forEach(scenario => {
       if (scenario.name === 'command') return; // FIXME(NODE-3074): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
@@ -963,5 +964,31 @@ describe('APM', function () {
         });
       });
     });
+  });
+
+  describe('command monitoring unified spec tests', () => {
+    for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
+      expect(loadedSpec).to.include.all.keys(['description', 'tests']);
+      // TODO: NODE-3356 unskip redaction tests
+      const testsToSkip =
+        loadedSpec.description === 'redacted-commands'
+          ? loadedSpec.tests
+              .map(test => test.description)
+              .filter(
+                description =>
+                  description !== 'hello without speculative authenticate is not redacted'
+              )
+          : [];
+      context(String(loadedSpec.description), function () {
+        for (const test of loadedSpec.tests) {
+          it(String(test.description), {
+            metadata: { sessions: { skipLeakTests: true } },
+            test: async function () {
+              await runUnifiedTest(this, loadedSpec, test, testsToSkip);
+            }
+          });
+        }
+      });
+    }
   });
 });
