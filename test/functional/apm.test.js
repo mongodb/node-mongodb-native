@@ -9,6 +9,7 @@ const ignoreNsNotFound = shared.ignoreNsNotFound;
 const loadSpecTests = require('../spec').loadSpecTests;
 const chai = require('chai');
 const expect = chai.expect;
+const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
 
 describe('APM', function() {
   before(function() {
@@ -879,7 +880,7 @@ describe('APM', function() {
     }
   });
 
-  describe('spec tests', function() {
+  describe('command monitoring spec tests', function() {
     before(function() {
       return setupDatabase(this.configuration);
     });
@@ -1087,7 +1088,7 @@ describe('APM', function() {
         });
     }
 
-    loadSpecTests('apm').forEach(scenario => {
+    loadSpecTests('command-monitoring/legacy').forEach(scenario => {
       describe(scenario.name, function() {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
@@ -1106,6 +1107,13 @@ describe('APM', function() {
           it(test.description, {
             metadata: { requires: requirements },
             test: function() {
+              // NODE-3308
+              if (
+                test.description ===
+                'A successful find event with a getmore and the server kills the cursor'
+              ) {
+                this.skip();
+              }
               const client = this.configuration.newClient({}, { monitorCommands: true });
               return client.connect().then(client => {
                 expect(client).to.exist;
@@ -1116,5 +1124,31 @@ describe('APM', function() {
         });
       });
     });
+  });
+
+  describe('command monitoring unified spec tests', () => {
+    for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
+      expect(loadedSpec).to.include.all.keys(['description', 'tests']);
+      // TODO: NODE-3356 unskip redaction tests
+      const testsToSkip =
+        loadedSpec.description === 'redacted-commands'
+          ? loadedSpec.tests
+              .map(test => test.description)
+              .filter(
+                description =>
+                  description !== 'hello without speculative authenticate is not redacted'
+              )
+          : [];
+      context(String(loadedSpec.description), function() {
+        for (const test of loadedSpec.tests) {
+          it(String(test.description), {
+            metadata: { sessions: { skipLeakTests: true } },
+            test: async function() {
+              await runUnifiedTest(this, loadedSpec, test, testsToSkip);
+            }
+          });
+        }
+      });
+    }
   });
 });
