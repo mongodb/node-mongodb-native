@@ -1,6 +1,20 @@
 'use strict';
 const { MongoClient } = require('../../src');
 
+/**
+ * ATLAS_CONNECTIVITY env variable is JSON
+ * Here's some typescript describing the shape:
+ *
+ * ```typescript
+ * interface AtlasConnectivity {
+ *  [atlasDeployment: string]: [normalUri: string, srvUri: string]
+ * }
+ * ```
+ *
+ * It should be an object with descriptive strings about the deployment type and version (i.e. sharded_cluster_3_4)
+ * that map to a two string tuple that are the normal URI and SRV URI, order doesn't matter, but it should be that order.
+ */
+
 describe('Atlas Connectivity', function () {
   if (process.env.ATLAS_CONNECTIVITY == null) {
     console.error(
@@ -23,6 +37,7 @@ describe('Atlas Connectivity', function () {
 
 function makeConnectionTest(connectionString, clientOptions) {
   return function () {
+    this.timeout(40000);
     const client = new MongoClient(connectionString, clientOptions);
 
     return client
