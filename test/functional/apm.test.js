@@ -622,7 +622,7 @@ describe('APM', function() {
           expect(started).to.have.length(1);
           expect(succeeded).to.have.length(1);
           expect(failed).to.have.length(0);
-          expect(started[0].commandObj).to.eql({ getnonce: true });
+          expect(started[0].command).to.eql({});
           expect(succeeded[0].reply).to.eql({});
           return client.close();
         });
