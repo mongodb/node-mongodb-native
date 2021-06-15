@@ -3926,7 +3926,7 @@ describe('Cursor', function () {
             })
             .then(
               () => {
-                expect(false).to.equal(true, 'Failed to catch error thrown in awaited forEach');
+                expect.fail('Failed to catch error thrown in awaited forEach');
               },
               err => {
                 expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
@@ -3934,7 +3934,9 @@ describe('Cursor', function () {
             );
         }).to.not.throw();
       })
-      .catch(console.error);
+      .catch(() => {
+        expect.fail('Failed to make connection');
+      });
   });
 
   it('should return a promise when no callback supplied to forEach method', function () {
