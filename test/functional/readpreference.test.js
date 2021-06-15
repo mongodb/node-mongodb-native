@@ -760,31 +760,34 @@ describe('ReadPreference', function() {
     })
   });
 
-  it('should use session readPreference instead of client readPreference', function(done) {
-    const configuration = this.configuration;
-    const client = this.configuration.newClient(configuration.writeConcernMax(), {
-      useUnifiedTopology: true,
-      readPreference: 'primaryPreferred'
-    });
-
-    client.connect((err, client) => {
-      this.defer(() => {
-        client.close();
-      });
-      expect(err).to.be.null;
-      expect(client).to.not.be.null;
-      const session = client.startSession({
-        defaultTransactionOptions: { readPreference: 'secondary' },
-        causalConsistency: true
+  it('should use session readPreference instead of client readPreference', {
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = this.configuration.newClient(configuration.writeConcernMax(), {
+        useUnifiedTopology: true,
+        readPreference: 'primaryPreferred'
       });
 
-      session.startTransaction();
-      const result = ReadPreference.resolve(client, { session: session });
-      expect(result).to.not.be.undefined;
-      expect(result.mode).to.deep.equal('secondary');
-      session.abortTransaction();
+      client.connect((err, client) => {
+        this.defer(() => {
+          client.close();
+        });
+        expect(err).to.be.null;
+        expect(client).to.not.be.null;
+        const session = client.startSession({
+          defaultTransactionOptions: { readPreference: 'secondary' },
+          causalConsistency: true
+        });
 
-      session.endSession(undefined, done);
-    });
+        session.startTransaction();
+        const result = ReadPreference.resolve(client, { session: session });
+        expect(result).to.not.be.undefined;
+        expect(result.mode).to.deep.equal('secondary');
+        session.abortTransaction();
+
+        session.endSession(undefined, done);
+      });
+    }
   });
 });
