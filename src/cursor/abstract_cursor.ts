@@ -189,6 +189,7 @@ export abstract class AbstractCursor<
     return this[kOptions].readConcern;
   }
 
+  /** @internal */
   get session(): ClientSession | undefined {
     return this[kSession];
   }
