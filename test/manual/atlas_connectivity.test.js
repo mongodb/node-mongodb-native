@@ -29,8 +29,9 @@ describe('Atlas Connectivity', function() {
     context(configName, function() {
       CONFIGS[configName].forEach(connectionString => {
         const name = connectionString.indexOf('mongodb+srv') >= 0 ? 'mongodb+srv' : 'normal';
-        it(`${name} (unified)`, makeConnectionTest(connectionString, { useUnifiedTopology: true }));
-        it(`${name} (legacy)`, makeConnectionTest(connectionString, { useUnifiedTopology: false }));
+        // TODO: Skipping until NODE-3308 is merged.
+        it.skip(`${name} (unified)`, makeConnectionTest(connectionString, { useUnifiedTopology: true }));
+        it.skip(`${name} (legacy)`, makeConnectionTest(connectionString, { useUnifiedTopology: false }));
       });
     });
   });
