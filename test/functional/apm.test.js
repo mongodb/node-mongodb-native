@@ -1143,8 +1143,8 @@ describe('APM', function() {
         for (const test of loadedSpec.tests) {
           it(String(test.description), {
             metadata: { sessions: { skipLeakTests: true } },
-            test: async function() {
-              await runUnifiedTest(this, loadedSpec, test, testsToSkip);
+            test() {
+              return runUnifiedTest(this, loadedSpec, test, testsToSkip);
             }
           });
         }
