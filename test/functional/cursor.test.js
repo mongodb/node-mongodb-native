@@ -3910,12 +3910,17 @@ describe('Cursor', function () {
     let db;
     return client
       .connect()
-      .then(() => {
-        this.defer(() => client.close());
-        db = client.db(configuration.db);
-        collection = db.collection('cursor_session_tests2');
-        return collection.insertMany(docs);
-      }, console.error)
+      .then(
+        () => {
+          this.defer(() => client.close());
+          db = client.db(configuration.db);
+          collection = db.collection('cursor_session_tests2');
+          return collection.insertMany(docs);
+        },
+        () => {
+          expect.fail('Failed to connect to client');
+        }
+      )
       .then(() => {
         const cursor = collection.find({});
         this.defer(() => cursor.close());
@@ -3935,7 +3940,7 @@ describe('Cursor', function () {
         }).to.not.throw();
       })
       .catch(() => {
-        expect.fail('Failed to make connection');
+        expect.fail('Failed to insert documents');
       });
   });
 
