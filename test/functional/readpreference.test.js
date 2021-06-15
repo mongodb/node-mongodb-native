@@ -773,10 +773,6 @@ describe('ReadPreference', function() {
       });
       expect(err).to.be.null;
       expect(client).to.not.be.null;
-      const db = client.db(configuration.db);
-      const collection = db.collection('read_pref_1', {
-        readPreference: ReadPreference.SECONDARY_PREFERRED
-      });
       const session = client.startSession({
         defaultTransactionOptions: { readPreference: 'secondary' },
         causalConsistency: true
