@@ -546,32 +546,30 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   }
 
   function commandHandler(e?: MongoError, r?: Document) {
-    if (commandName === 'commitTransaction') {
-      session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-      if (e) {
-        if (
-          e instanceof MongoNetworkError ||
-          e instanceof MongoWriteConcernError ||
-          isRetryableError(e) ||
-          isMaxTimeMSExpiredError(e)
-        ) {
-          if (isUnknownTransactionCommitResult(e)) {
-            e.addErrorLabel('UnknownTransactionCommitResult');
-
-            // per txns spec, must unpin session in this case
-            session.transaction.unpinServer();
-          }
-        } else if (e.hasErrorLabel('TransientTransactionError')) {
-          session.transaction.unpinServer();
-        }
-      }
-    } else {
+    if (commandName !== 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
-
       // The spec indicates that we should ignore all errors on `abortTransaction`
       return callback();
     }
 
+    session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
+    if (e) {
+      if (
+        e instanceof MongoNetworkError ||
+        e instanceof MongoWriteConcernError ||
+        isRetryableError(e) ||
+        isMaxTimeMSExpiredError(e)
+      ) {
+        if (isUnknownTransactionCommitResult(e)) {
+          e.addErrorLabel('UnknownTransactionCommitResult');
+
+          // per txns spec, must unpin session in this case
+          session.transaction.unpinServer();
+        }
+      } else if (e.hasErrorLabel('TransientTransactionError')) {
+        session.transaction.unpinServer();
+      }
+    }
     callback(e, r);
   }
 
