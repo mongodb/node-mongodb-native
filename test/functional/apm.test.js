@@ -1107,6 +1107,13 @@ describe('APM', function() {
           it(test.description, {
             metadata: { requires: requirements },
             test: function() {
+              // NODE-3308
+              if (
+                test.description ===
+                'A successful find event with a getmore and the server kills the cursor'
+              ) {
+                this.skip();
+              }
               const client = this.configuration.newClient({}, { monitorCommands: true });
               return client.connect().then(client => {
                 expect(client).to.exist;
