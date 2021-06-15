@@ -54,6 +54,8 @@ export interface BSONSerializeOptions extends Omit<SerializeOptions, 'index'> {
   promoteBuffers?: boolean;
   /** Promotes long values to number if they fit inside the 53 bits resolution */
   promoteLongs?: boolean;
+  /** Promotes RegExp to BSONRegExp object if enabled */
+  bsonRegExp?: boolean;
   /** Serialize functions on any object */
   serializeFunctions?: boolean;
   /** Specify if the BSON serializer should ignore undefined fields */
