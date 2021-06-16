@@ -19,7 +19,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 # CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
 
 CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
-CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.4}
+CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
 
 rm -rf csfle-deps-tmp
 mkdir -p csfle-deps-tmp
@@ -41,25 +41,22 @@ popd # mongo-c-driver
 
 pushd libmongocrypt/bindings/node
 
+npm install --production --ignore-scripts
 source ./.evergreen/find_cmake.sh
 bash ./etc/build-static.sh
 
-npm install --ignore-scripts
-rm -rf build prebuilds
-npx node-gyp configure
-npx node-gyp build
 # make a global mongodb-client-encryption link
-npm link
+npm link --loglevel verbose --ignore-scripts
 
 popd # libmongocrypt/bindings/node
 popd # csfle-deps-tmp
 
+# Back in Driver Root
 npm install
-
-npm link mongodb-client-encryption
+npm link --ignore-scripts mongodb-client-encryption
 
 # make a global link of mongodb
-npm link
+npm link --ignore-scripts
 
 export MONGODB_URI=${MONGODB_URI}
 set +o errexit # We want to run both test suites even if the first fails
@@ -67,23 +64,30 @@ npx mocha test/functional/client_side_encryption
 DRIVER_CSFLE_TEST_RESULT=$?
 set -o errexit
 
-# Great! our drivers tests pass but
+# Great! our drivers tests ran
 # there are tests inside the bindings repo that we also want to check
 
 pushd csfle-deps-tmp/libmongocrypt/bindings/node
 
-# these tests will start their own
+# a mongocryptd was certainly started by the driver tests,
+# let us let the bindings tests start their own
 killall mongocryptd
 
+# only prod deps were installed earlier, install devDependencies here (except for mongodb!)
+rm -f package-lock.json
+node <<HEREDOC
+var fs = require('fs');
+var pkg = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf8' }));
+delete pkg.devDependencies.mongodb;
+fs.writeFileSync('package.json', JSON.stringify(pkg, undefined, '\t') + '\n', { encoding: 'utf8' });
+HEREDOC
+cat package.json
 npm install --ignore-scripts
-rm -rf build prebuilds
-npx node-gyp configure
-npx node-gyp build
 
-rm -rf node_modules/mongodb
-npm link mongodb
+# test against the driver code in this CI run
+npm link --ignore-scripts mongodb
 
-# needs to be empty
+# this variable needs to be empty
 export MONGODB_NODE_SKIP_LIVE_TESTS=""
 # all of the below must be defined (as well as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 export AWS_REGION="us-east-1"

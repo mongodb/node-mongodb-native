@@ -71,6 +71,9 @@ export interface ErrorDescription {
 /**
  * @public
  * @category Error
+ *
+ * @privateRemarks
+ * CSFLE has a dependency on this error, it uses the constructor with a string argument
  */
 export class MongoError extends Error {
   /** @internal */
@@ -192,7 +195,8 @@ export class MongoNetworkError extends MongoError {
   }
 }
 
-interface MongoNetworkTimeoutErrorOptions {
+/** @public */
+export interface MongoNetworkTimeoutErrorOptions {
   /** Indicates the timeout happened before a connection handshake completed */
   beforeHandshake: boolean;
 }
@@ -201,6 +205,9 @@ interface MongoNetworkTimeoutErrorOptions {
  * An error indicating a network timeout occurred
  * @public
  * @category Error
+ *
+ * @privateRemarks
+ * CSFLE has a dependency on this error with an instanceof check
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
   constructor(message: string, options?: MongoNetworkTimeoutErrorOptions) {
