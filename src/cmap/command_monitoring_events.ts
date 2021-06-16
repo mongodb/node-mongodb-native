@@ -41,7 +41,7 @@ export class CommandStartedEvent {
     this.requestId = command.requestId;
     this.databaseName = databaseName(command);
     this.commandName = commandName;
-    this.command = cmd;
+    this.command = maybeRedact(commandName, cmd, cmd);
   }
 }
 
@@ -82,7 +82,7 @@ export class CommandSucceededEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, extractReply(command, reply));
+    this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
   }
 }
 
@@ -123,7 +123,7 @@ export class CommandFailedEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.failure = maybeRedact(commandName, error) as Error;
+    this.failure = maybeRedact(commandName, cmd, error) as Error;
   }
 }
 
@@ -140,13 +140,18 @@ const SENSITIVE_COMMANDS = new Set([
   'copydb'
 ]);
 
+const HELLO_COMMANDS = new Set(['hello', 'ismaster', 'isMaster']);
+
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: WriteProtocolMessageType) => command.ns;
 const databaseName = (command: WriteProtocolMessageType) => command.ns.split('.')[0];
 const collectionName = (command: WriteProtocolMessageType) => command.ns.split('.')[1];
-const maybeRedact = (commandName: string, result?: Error | Document) =>
-  SENSITIVE_COMMANDS.has(commandName) ? {} : result;
+const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
+  SENSITIVE_COMMANDS.has(commandName) ||
+  (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
+    ? {}
+    : result;
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $query: 'filter',
