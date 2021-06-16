@@ -79,6 +79,18 @@ interface OperationFunctionParams {
 type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
 export const operations = new Map<string, RunOperationFn>();
 
+function executeWithPotentialSession(
+  entities: EntitiesMap,
+  operation: OperationDescription,
+  cursor: AbstractCursor
+) {
+  const session = entities.getEntity('session', operation.arguments.session, false);
+  if (session) {
+    cursor.session = session;
+  }
+  return cursor.toArray();
+}
+
 operations.set('abortTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
   return session.abortTransaction();
@@ -89,7 +101,6 @@ operations.set('aggregate', async ({ entities, operation }) => {
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
     throw new Error(`Operation object '${operation.object}' must be a db or collection`);
   }
-  const session = entities.getEntity('session', operation.arguments.session, false);
   const cursor = dbOrCollection.aggregate(operation.arguments.pipeline, {
     allowDiskUse: operation.arguments.allowDiskUse,
     batchSize: operation.arguments.batchSize,
@@ -100,10 +111,7 @@ operations.set('aggregate', async ({ entities, operation }) => {
     hint: operation.arguments.hint,
     out: operation.arguments.out
   });
-  if (session) {
-    cursor.session = session;
-  }
-  return cursor.toArray();
+  return executeWithPotentialSession(entities, operation, cursor);
 });
 
 operations.set('assertCollectionExists', async ({ operation, client }) => {
@@ -290,13 +298,9 @@ operations.set('endSession', async ({ entities, operation }) => {
 
 operations.set('find', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const session = entities.getEntity('session', operation.arguments.session, false);
   const { filter, sort, batchSize, limit } = operation.arguments;
   const cursor = collection.find(filter, { sort, batchSize, limit });
-  if (session) {
-    cursor.session = session;
-  }
-  return cursor.toArray();
+  return executeWithPotentialSession(entities, operation, cursor);
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
