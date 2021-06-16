@@ -3911,9 +3911,9 @@ describe('Cursor', function () {
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     });
 
-    afterEach(function () {
-      cursor.close();
-      client.close();
+    afterEach(async function () {
+      await cursor.close();
+      await client.close();
     });
 
     // NODE-2035
