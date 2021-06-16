@@ -57,7 +57,6 @@ expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string>>({ b: 'hello
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string, boolean>>({ b: true });
 
 // test generic schema, essentially we expect no safety here
-
 expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ a: 2 });
 expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ a: 'hello' });
 
