@@ -24,7 +24,7 @@ describe('Views', function() {
 
         singleServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(primary[0]);
           } else if (doc.listCollections) {
             request.reply({
@@ -58,6 +58,7 @@ describe('Views', function() {
           ) {
             expect(r).to.exist;
             expect(err).to.not.exist;
+            delete commandResult.apiVersion;
             expect(commandResult).to.eql({
               create: 'test',
               viewOn: 'users',

@@ -10,7 +10,7 @@ describe('Authentication', function() {
   });
 
   it('should still work for auth when using new url parser and no database is in url', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], apiVersion: false } }, // FIXME(NODE-3191)
     test: function(done) {
       const configuration = this.configuration;
       const username = 'testUser';
@@ -146,8 +146,9 @@ describe('Authentication', function() {
    *
    * @ignore
    */
+  // FIXME(NODE-3191)
   it('should correctly call validateCollection using authenticatedMode', {
-    metadata: { requires: { topology: ['single', 'heap', 'wiredtiger'] } },
+    metadata: { requires: { topology: ['single', 'heap', 'wiredtiger'], apiVersion: false } },
 
     // The actual test we wish to run
     test: function(done) {

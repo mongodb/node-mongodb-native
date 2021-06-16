@@ -21,7 +21,7 @@ describe('Sessions', function() {
         let insertOperationTime = Timestamp.fromNumber(Date.now());
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(mock.DEFAULT_ISMASTER_36);
           } else if (doc.insert) {
             request.reply({ ok: 1, operationTime: insertOperationTime });
@@ -59,9 +59,9 @@ describe('Sessions', function() {
         const options = Object.freeze({});
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster) {
+          if (doc.ismaster || doc.hello) {
             request.reply(mock.DEFAULT_ISMASTER_36);
-          } else if (doc.count || doc.endSessions) {
+          } else if (doc.count || doc.aggregate || doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -70,7 +70,7 @@ describe('Sessions', function() {
         return client.connect().then(client => {
           const coll = client.db('foo').collection('bar');
 
-          return coll.count({}, options).then(() => {
+          return coll.countDocuments({}, options).then(() => {
             expect(options).to.deep.equal({});
             return client.close();
           });

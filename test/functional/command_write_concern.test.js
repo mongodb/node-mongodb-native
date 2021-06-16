@@ -56,7 +56,7 @@ class WriteConcernTest {
 
       primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(self.serverStates.primary[0]);
         } else if (doc[resultKey]) {
           self.commandResult = doc;
@@ -68,7 +68,7 @@ class WriteConcernTest {
 
       firstSecondaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(self.serverStates.firstSecondary[0]);
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });
@@ -77,7 +77,7 @@ class WriteConcernTest {
 
       arbiterServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(self.serverStates.arbiter[0]);
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });

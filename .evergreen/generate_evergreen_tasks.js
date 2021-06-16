@@ -74,6 +74,7 @@ const OPERATING_SYSTEMS = [
   )
 );
 
+// TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set([
   'atlas-connect',
   'auth'
@@ -112,6 +113,29 @@ MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology =>
     BASE_TASKS.push(makeTask({ mongoVersion, topology }))
   );
+});
+BASE_TASKS.push({
+  name: `test-latest-server-v1-api`,
+  tags: ['latest', 'server', 'v1-api'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        TOPOLOGY: 'server',
+        REQUIRE_API_VERSION: '1'
+      }
+    },
+    {
+      func: 'run tests',
+      vars: {
+        MONGODB_API_VERSION: '1',
+        UNIFIED: 1,
+        NO_EXIT: ''
+      }
+    }
+  ]
 });
 
 TASKS.push(

@@ -73,7 +73,7 @@ describe('Sessions', function() {
           test.server = server;
           test.server.setMessageHandler(request => {
             var doc = request.document;
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(
                 Object.assign({}, mock.DEFAULT_ISMASTER, { logicalSessionTimeoutMinutes: 10 })
               );
@@ -227,7 +227,7 @@ describe('Sessions', function() {
     it('should not mark session as dirty on network error if already ended', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, { logicalSessionTimeoutMinutes: 10 })
           );

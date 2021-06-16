@@ -424,7 +424,8 @@ describe('Sessions (Single)', function() {
     }
   });
 
-  it('should use the same session for any killCursor issued by a cursor', {
+  // FIXME(NODE-3191)
+  it.skip('should use the same session for any killCursor issued by a cursor', {
     metadata: { requires: { topology: 'single' } },
     test: function(_done) {
       const client = new Server(test.server.address());

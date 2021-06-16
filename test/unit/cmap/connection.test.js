@@ -14,7 +14,7 @@ describe('Connection', function() {
   it('should support fire-and-forget messages', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
 
@@ -40,7 +40,7 @@ describe('Connection', function() {
   it('should destroy streams which time out', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
 
@@ -70,7 +70,7 @@ describe('Connection', function() {
   it('should throw a network error with kBeforeHandshake set to false on timeout after hand shake', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(mock.DEFAULT_ISMASTER_36);
       }
       // respond to no other requests to trigger timeout event

@@ -16,7 +16,7 @@ tests:
       configureFailPoint: failCommand
       mode: { times: 2 }
       data:
-          failCommands: ["isMaster"]
+          failCommands: ["isMaster", "hello"]
           appName: timeoutMonitorHandshakeTest
           blockConnection: true
           blockTimeMS: 1000
@@ -32,11 +32,6 @@ tests:
         object: testRunner
         arguments:
           event: ServerMarkedUnknownEvent
-          count: 1
-      - name: waitForEvent
-        object: testRunner
-        arguments:
-          event: PoolClearedEvent
           count: 1
       # Perform an operation to ensure the node is discovered.
       - name: insertMany
@@ -98,7 +93,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["isMaster"]
+                failCommands: ["isMaster", "hello"]
                 appName: timeoutMonitorCheckTest
                 blockConnection: true
                 # blockTimeMS is evaluated after the waiting for heartbeatFrequencyMS server-side, so this value only

@@ -22,6 +22,7 @@ class NativeConfiguration {
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.serverApi = context.serverApi;
     this.parameters = undefined;
     this.options = Object.assign(
       {
@@ -70,21 +71,22 @@ class NativeConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
+    const unifiedOptions = { useUnifiedTopology: true, minHeartbeatFrequencyMS: 100 };
+    if (this.serverApi) {
+      Object.assign(unifiedOptions, { serverApi: this.serverApi });
+    }
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
       return new MongoClient(
         dbOptions,
-        this.usingUnifiedTopology()
-          ? Object.assign({ useUnifiedTopology: true, minHeartbeatFrequencyMS: 100 }, serverOptions)
-          : serverOptions
+        this.usingUnifiedTopology() ? Object.assign(unifiedOptions, serverOptions) : serverOptions
       );
     }
 
     dbOptions = dbOptions || {};
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
     if (this.usingUnifiedTopology()) {
-      serverOptions.useUnifiedTopology = true;
-      serverOptions.minHeartbeatFrequencyMS = 100;
+      serverOptions = Object.assign(serverOptions, unifiedOptions);
     }
 
     // Fall back
@@ -148,6 +150,9 @@ class NativeConfiguration {
     options = Object.assign({}, options);
     const hosts = host == null ? [].concat(this.options.hosts) : [{ host, port }];
     if (this.usingUnifiedTopology()) {
+      if (this.serverApi) {
+        Object.assign(options, { serverApi: this.serverApi });
+      }
       return new core.Topology(hosts, options);
     }
 

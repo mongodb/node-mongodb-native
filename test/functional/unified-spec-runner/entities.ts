@@ -38,10 +38,19 @@ interface UnifiedChangeStream extends ChangeStream {
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
+function serverApiConfig() {
+  if (process.env.MONGODB_API_VERSION) {
+    return { version: process.env.MONGODB_API_VERSION };
+  }
+}
+
 function getClient(address) {
-  return new MongoClient(`mongodb://${address}`, {
-    useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY)
-  });
+  const options: any = { useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY) };
+  const serverApi = serverApiConfig();
+  if (serverApi) {
+    options.serverApi = serverApi;
+  }
+  return new MongoClient(`mongodb://${address}`, options);
 }
 
 export interface UnifiedMongoClient {
@@ -73,8 +82,10 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY)
+      useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY),
+      serverApi: description.serverApi || serverApiConfig()
     });
+
     this.events = [];
     this.failPoints = [];
     this.ignoredEvents = [

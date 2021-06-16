@@ -1,7 +1,7 @@
 {
   "runOn": [
     {
-      "minServerVersion": "4.4"
+      "minServerVersion": "4.9"
     }
   ],
   "database_name": "sdam-tests",
@@ -17,7 +17,8 @@
         },
         "data": {
           "failCommands": [
-            "isMaster"
+            "isMaster",
+            "hello"
           ],
           "appName": "networkErrorHandshakeTest",
           "closeConnection": true
@@ -35,14 +36,6 @@
           "object": "testRunner",
           "arguments": {
             "event": "ServerMarkedUnknownEvent",
-            "count": 1
-          }
-        },
-        {
-          "name": "waitForEvent",
-          "object": "testRunner",
-          "arguments": {
-            "event": "PoolClearedEvent",
             "count": 1
           }
         },
@@ -127,7 +120,8 @@
               },
               "data": {
                 "failCommands": [
-                  "isMaster"
+                  "isMaster",
+                  "hello"
                 ],
                 "appName": "networkErrorCheckTest",
                 "closeConnection": true

@@ -325,7 +325,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('test connect good auth', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } }, // FIXME(NODE-3191)
 
     // The actual test we wish to run
     test: function(done) {
@@ -361,7 +361,7 @@ describe('Connection', function() {
    * @ignore
    */
   it('test connect good auth as option', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } }, // FIXME(NODE-3191)
 
     // The actual test we wish to run
     test: function(done) {

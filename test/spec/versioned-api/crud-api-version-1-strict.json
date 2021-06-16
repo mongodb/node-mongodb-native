@@ -1,0 +1,1115 @@
+{
+  "description": "CRUD Api Version 1 (strict)",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.9"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "serverApi": {
+          "version": "1",
+          "strict": true
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "versioned-api-tests"
+      }
+    },
+    {
+      "database": {
+        "id": "adminDatabase",
+        "client": "client",
+        "databaseName": "admin"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "_yamlAnchors": {
+    "versions": [
+      {
+        "apiVersion": "1",
+        "apiStrict": true,
+        "apiDeprecationErrors": {
+          "$$unsetOrMatches": false
+        }
+      }
+    ]
+  },
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "versioned-api-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        },
+        {
+          "_id": 5,
+          "x": 55
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "aggregate on collection appends declared API version",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "aggregate on database appends declared API version",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "adminDatabase",
+          "arguments": {
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              }
+            ]
+          },
+          "expectError": {
+            "errorCodeName": "APIStrictError"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "pipeline": [
+                    {
+                      "$listLocalSessions": {}
+                    },
+                    {
+                      "$limit": 1
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "bulkWrite appends declared API version",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 6,
+                    "x": 66
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "filter": {
+                    "x": {
+                      "$nin": [
+                        24,
+                        34
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 7
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "_id": 4,
+                    "x": 44
+                  },
+                  "upsert": true
+                }
+              }
+            ],
+            "ordered": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "x": {
+                          "$nin": [
+                            24,
+                            34
+                          ]
+                        }
+                      },
+                      "limit": 0
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 7
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 4
+                      },
+                      "u": {
+                        "_id": 4,
+                        "x": 44
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": true
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "countDocuments appends declared API version",
+      "operations": [
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "x": {
+                "$gt": 11
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "x": {
+                          "$gt": 11
+                        }
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "deleteMany appends declared API version",
+      "operations": [
+        {
+          "name": "deleteMany",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "x": {
+                "$nin": [
+                  24,
+                  34
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "x": {
+                          "$nin": [
+                            24,
+                            34
+                          ]
+                        }
+                      },
+                      "limit": 0
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "deleteOne appends declared API version",
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 7
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 7
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "distinct appends declared API version",
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {}
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "command distinct is not in API Version 1",
+            "errorCodeName": "APIStrictError"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "test",
+                  "key": "x",
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount appends declared API version",
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection",
+          "arguments": {}
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "find and getMore append API version",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "_id": 1
+            },
+            "batchSize": 3
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 5,
+              "x": 55
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "findOneAndDelete appends declared API version",
+      "operations": [
+        {
+          "name": "findOneAndDelete",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "remove": true,
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "findOneAndReplace appends declared API version",
+      "operations": [
+        {
+          "name": "findOneAndReplace",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "x": 33
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "x": 33
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "findOneAndUpdate appends declared API version",
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "insertMany appends declared API version",
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 6,
+                "x": 66
+              },
+              {
+                "_id": 7,
+                "x": 77
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    },
+                    {
+                      "_id": 7,
+                      "x": 77
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "insertOne appends declared API version",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 6,
+              "x": 66
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "replaceOne appends declared API version",
+      "operations": [
+        {
+          "name": "replaceOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "replacement": {
+              "_id": 4,
+              "x": 44
+            },
+            "upsert": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 4
+                      },
+                      "u": {
+                        "_id": 4,
+                        "x": 44
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": true
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "updateMany appends declared API version",
+      "operations": [
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "updateOne appends declared API version",
+      "operations": [
+        {
+          "name": "updateOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

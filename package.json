@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.6.9",
+  "version": "3.7.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "files": [
@@ -98,7 +98,7 @@
     "check:tls": "mocha --opts '{}' test/manual/tls_support.test.js",
     "format": "npm run check:lint -- --fix",
     "release": "standard-version -i HISTORY.md",
-    "test": "npm run lint && mocha --recursive test/functional test/unit"
+    "test": "npm run check:lint && mocha --recursive test/functional test/unit"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {
