@@ -761,11 +761,10 @@ describe('ReadPreference', function() {
   });
 
   it('should use session readPreference instead of client readPreference', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    metadata: { requires: { unifiedTopology: true, topology: ['single', 'replicaset'] } },
     test: function(done) {
       const configuration = this.configuration;
       const client = this.configuration.newClient(configuration.writeConcernMax(), {
-        useUnifiedTopology: true,
         readPreference: 'primaryPreferred'
       });
 
@@ -773,8 +772,8 @@ describe('ReadPreference', function() {
         this.defer(() => {
           client.close();
         });
-        expect(err).to.be.null;
-        expect(client).to.not.be.null;
+        expect(err).to.not.exist;
+        expect(client).to.exist;
         const session = client.startSession({
           defaultTransactionOptions: { readPreference: 'secondary' },
           causalConsistency: true
@@ -782,7 +781,7 @@ describe('ReadPreference', function() {
 
         session.startTransaction();
         const result = ReadPreference.resolve(client, { session: session });
-        expect(result).to.not.be.undefined;
+        expect(result).to.exist;
         expect(result.mode).to.deep.equal('secondary');
         session.abortTransaction();
 
