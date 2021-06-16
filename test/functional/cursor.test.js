@@ -3905,10 +3905,15 @@ describe('Cursor', function () {
     let configuration;
     let client;
     let cursor;
+    let collection;
 
-    beforeEach(function () {
+    beforeEach(async function () {
       configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+      await client.connect().catch(() => {
+        expect.fail('Failed to connect to client');
+      });
+      collection = client.db(configuration.db).collection('cursor_session_tests2');
     });
 
     afterEach(async function () {
@@ -3917,41 +3922,26 @@ describe('Cursor', function () {
     });
 
     // NODE-2035
-    it('should propagate error when exceptions are thrown from an awaited forEach call', function () {
-      const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-      let collection;
-      return client
-        .connect()
-        .then(
-          () => {
-            let db = client.db(configuration.db);
-            collection = db.collection('cursor_session_tests2');
-            return collection.insertMany(docs);
-          },
-          () => {
-            expect.fail('Failed to connect to client');
-          }
-        )
-        .then(() => {
-          cursor = collection.find({});
-          expect(() => {
-            cursor
-              .forEach(() => {
-                throw new Error('FAILURE IN FOREACH CALL');
-              })
-              .then(
-                () => {
-                  expect.fail('Failed to catch error thrown in awaited forEach');
-                },
-                err => {
-                  expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
-                }
-              );
-          }).to.not.throw();
-        })
-        .catch(() => {
-          expect.fail('Failed to insert documents');
-        });
+    it('should propagate error when exceptions are thrown from an awaited forEach call', async function () {
+      const docs = [{ unique_key_2035: 1 }, { unique_key_2035: 2 }, { unique_key_2035: 3 }];
+      await collection.insertMany(docs).catch(() => {
+        expect.fail('Failed to insert documents');
+      });
+      cursor = collection.find({
+        unique_key_2035: {
+          $exists: true
+        }
+      });
+      expect(async function () {
+        await cursor
+          .forEach(() => {
+            throw new Error('FAILURE IN FOREACH CALL');
+          })
+          .catch(err => {
+            console.log(err.message);
+            expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
+          });
+      }).to.not.throw();
     });
   });
 
