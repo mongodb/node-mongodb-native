@@ -306,6 +306,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     // Debug log
     if (this.s.logger.isDebug()) {
+      // TODO: redact or remove
       this.s.logger.debug(
         `executing command [${JSON.stringify({
           ns,

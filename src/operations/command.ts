@@ -161,6 +161,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     }
 
     if (this.logger && this.logger.isDebug()) {
+      // TODO: redact or remove
       this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
