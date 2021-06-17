@@ -3932,16 +3932,20 @@ describe('Cursor', function () {
           $exists: true
         }
       });
-      expect(async function () {
+      async function checkForEach() {
         await cursor
           .forEach(() => {
             throw new Error('FAILURE IN FOREACH CALL');
+          })
+          .then(() => {
+            expect.fail('Error in forEach call not caught');
           })
           .catch(err => {
             console.log(err.message);
             expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
           });
-      }).to.not.throw();
+      }
+      await checkForEach();
     });
   });
 
