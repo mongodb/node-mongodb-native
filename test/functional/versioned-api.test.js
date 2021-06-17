@@ -23,14 +23,6 @@ describe('Versioned API', function() {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },
           test() {
-            // FIXME(NODE-3191)
-            // MongoError: BSON field 'FindCommandRequest.returnKey' is not allowed with apiStrict:true.
-            if (
-              versionedApiTest.description.match(/strict/) &&
-              test.description.match(/find and getMore append API version/)
-            ) {
-              return this.skip();
-            }
             return runUnifiedTest(this, versionedApiTest, test);
           }
         });

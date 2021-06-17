@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 1200
+exec_timeout_secs: 1500
 timeout:
   - command: shell.exec
     params:
@@ -499,39 +499,6 @@ post:
 ignore:
   - '*.md'
 tasks:
-  - name: test-latest-server
-    tags:
-      - latest
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-      - func: run tests
-  - name: test-latest-replica_set
-    tags:
-      - latest
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-      - func: run tests
-  - name: test-latest-sharded_cluster
-    tags:
-      - latest
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: sharded_cluster
-      - func: run tests
   - name: test-latest-server-unified
     tags:
       - latest
@@ -1582,9 +1549,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
     tasks: &ref_0
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
@@ -1693,9 +1657,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
     tasks: &ref_1
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
@@ -1881,9 +1842,6 @@ buildvariants:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
     tasks: &ref_3
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified

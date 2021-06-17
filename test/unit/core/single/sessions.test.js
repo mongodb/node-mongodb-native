@@ -424,8 +424,7 @@ describe('Sessions (Single)', function() {
     }
   });
 
-  // FIXME(NODE-3191)
-  it.skip('should use the same session for any killCursor issued by a cursor', {
+  it('should use the same session for any killCursor issued by a cursor', {
     metadata: { requires: { topology: 'single' } },
     test: function(_done) {
       const client = new Server(test.server.address());
@@ -436,7 +435,7 @@ describe('Sessions (Single)', function() {
       let commands = [];
       test.server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(
             Object.assign({}, mock.DEFAULT_ISMASTER, {
               maxWireVersion: 6
@@ -485,9 +484,11 @@ describe('Sessions (Single)', function() {
         // Execute next
         cursor._next(function(err) {
           expect(err).to.not.exist;
+          expect(session.id).to.exist;
 
           cursor.kill(err => {
             expect(err).to.not.exist;
+
             commands.forEach(command => expect(command.lsid).to.eql(session.id));
 
             client.destroy();

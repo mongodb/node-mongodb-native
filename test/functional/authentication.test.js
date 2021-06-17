@@ -10,7 +10,7 @@ describe('Authentication', function() {
   });
 
   it('should still work for auth when using new url parser and no database is in url', {
-    metadata: { requires: { topology: ['single'], apiVersion: false } }, // FIXME(NODE-3191)
+    metadata: { requires: { topology: ['single'] } },
     test: function(done) {
       const configuration = this.configuration;
       const username = 'testUser';
@@ -146,9 +146,8 @@ describe('Authentication', function() {
    *
    * @ignore
    */
-  // FIXME(NODE-3191)
   it('should correctly call validateCollection using authenticatedMode', {
-    metadata: { requires: { topology: ['single', 'heap', 'wiredtiger'], apiVersion: false } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -163,9 +162,7 @@ describe('Authentication', function() {
         collection.insert({ a: 1 }, { w: 1 }, function(err) {
           test.equal(null, err);
           var adminDb = db.admin();
-          adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function(err) {
-            test.equal(null, err);
-
+          adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function() {
             const validationClient = configuration.newClient(
               'mongodb://admin:admin@localhost:27017/admin'
             );

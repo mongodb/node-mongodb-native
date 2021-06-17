@@ -45,11 +45,10 @@ function serverApiConfig() {
 }
 
 function getClient(address) {
-  const options: any = { useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY) };
-  const serverApi = serverApiConfig();
-  if (serverApi) {
-    options.serverApi = serverApi;
-  }
+  const options: any = { 
+    useUnifiedTopology: Boolean(process.env.MONGODB_UNIFIED_TOPOLOGY), 
+    serverApi: serverApiConfig() 
+  };
   return new MongoClient(`mongodb://${address}`, options);
 }
 

@@ -61,7 +61,11 @@ describe('Sessions', function() {
           const doc = request.document;
           if (doc.ismaster || doc.hello) {
             request.reply(mock.DEFAULT_ISMASTER_36);
-          } else if (doc.count || doc.aggregate || doc.endSessions) {
+          } else if (
+            doc.count ||
+            doc.aggregate || // count changed behavior to use agg 3.6.x+
+            doc.endSessions
+          ) {
             request.reply({ ok: 1 });
           }
         });

@@ -5,16 +5,15 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const LEGACY_MONGODB_VERSIONS = new Set(['4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6']);
+const MONGODB_VERSIONS = ['latest'].concat(Array.from(LEGACY_MONGODB_VERSIONS));
 const AWS_AUTH_VERSIONS = ['latest', '4.4'];
 const OCSP_VERSIONS = ['latest', '4.4'];
 const TLS_VERSIONS = ['latest', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
 const NODE_VERSIONS = ['fermium', 'erbium', 'dubnium', 'carbon', 'boron', 'argon'];
-const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
-  'server-unified',
-  'replica_set-unified',
-  'sharded_cluster-unified'
-]);
+const LEGACY_TOPOLOGIES = new Set(['server', 'replica_set', 'sharded_cluster']);
+const UNIFIED_TOPOLOGIES = Array.from(LEGACY_TOPOLOGIES).map(topology => `${topology}-unified`);
+
 
 const OPERATING_SYSTEMS = [
   {
@@ -110,10 +109,16 @@ function makeTask({ mongoVersion, topology }) {
 }
 
 MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology =>
+  Array.from(LEGACY_TOPOLOGIES).concat(UNIFIED_TOPOLOGIES).forEach(topology => {
+    if (LEGACY_TOPOLOGIES.has(topology) && !LEGACY_MONGODB_VERSIONS.has(mongoVersion)) {
+      // MongoDB 5.0+ is only supported by the Unified Topology in driver 3.7+
+      // therefore testing the legacy toplogy can be skipped
+      return;
+    }
     BASE_TASKS.push(makeTask({ mongoVersion, topology }))
-  );
+  });
 });
+
 BASE_TASKS.push({
   name: `test-latest-server-v1-api`,
   tags: ['latest', 'server', 'v1-api'],

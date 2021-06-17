@@ -110,7 +110,7 @@ describe('Transactions', function() {
           'commitTransaction retry succeeds on new mongos',
           'commitTransaction retry fails on new mongos',
           'unpin after transient error within a transaction and commit',
-          // FIXME(NODE-3074): unskip count tests when spec tests have been updated
+          // FIXME(NODE-3369): unskip count tests when spec tests have been updated
           'count',
           // This test needs there to be multiple mongoses
           'increment txnNumber',
