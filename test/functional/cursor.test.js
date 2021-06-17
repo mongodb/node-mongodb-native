@@ -3901,6 +3901,50 @@ describe('Cursor', function () {
     });
   });
 
+  describe('Cursor forEach Error propagation', function () {
+    let configuration;
+    let client;
+    let cursor;
+    let collection;
+
+    beforeEach(async function () {
+      configuration = this.configuration;
+      client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+      await client.connect().catch(() => {
+        expect.fail('Failed to connect to client');
+      });
+      collection = client.db(configuration.db).collection('cursor_session_tests2');
+    });
+
+    afterEach(async function () {
+      await cursor.close();
+      await client.close();
+    });
+
+    // NODE-2035
+    it('should propagate error when exceptions are thrown from an awaited forEach call', async function () {
+      const docs = [{ unique_key_2035: 1 }, { unique_key_2035: 2 }, { unique_key_2035: 3 }];
+      await collection.insertMany(docs).catch(() => {
+        expect.fail('Failed to insert documents');
+      });
+      cursor = collection.find({
+        unique_key_2035: {
+          $exists: true
+        }
+      });
+      await cursor
+        .forEach(() => {
+          throw new Error('FAILURE IN FOREACH CALL');
+        })
+        .then(() => {
+          expect.fail('Error in forEach call not caught');
+        })
+        .catch(err => {
+          expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
+        });
+    });
+  });
+
   it('should return a promise when no callback supplied to forEach method', function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
