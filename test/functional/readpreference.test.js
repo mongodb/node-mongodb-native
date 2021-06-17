@@ -760,33 +760,44 @@ describe('ReadPreference', function() {
     })
   });
 
-  it('should use session readPreference instead of client readPreference', {
-    metadata: { requires: { unifiedTopology: true, topology: ['single', 'replicaset'] } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const client = this.configuration.newClient(configuration.writeConcernMax(), {
+  describe('Session readPreference', function() {
+    let client;
+    let session;
+
+    beforeEach(function(done) {
+      let configuration = this.configuration;
+      client = configuration.newClient(configuration.writeConcernMax(), {
         readPreference: 'primaryPreferred'
       });
+      client.connect(err => {
+        done(err);
+      });
+    });
 
-      client.connect((err, client) => {
-        this.defer(() => {
-          client.close();
+    afterEach(function(done) {
+      if (session) {
+        session.abortTransaction(() => {
+          session.endSession(() => {
+            client.close(() => done());
+          });
         });
-        expect(err).to.not.exist;
-        expect(client).to.exist;
-        const session = client.startSession({
+      } else {
+        client.close(() => done());
+      }
+    });
+
+    it('should use session readPreference instead of client readPreference', {
+      metadata: { requires: { unifiedTopology: true, topology: ['single', 'replicaset'] } },
+      test: function() {
+        session = client.startSession({
           defaultTransactionOptions: { readPreference: 'secondary' },
           causalConsistency: true
         });
-
         session.startTransaction();
         const result = ReadPreference.resolve(client, { session: session });
         expect(result).to.exist;
         expect(result.mode).to.deep.equal('secondary');
-        session.abortTransaction();
-
-        session.endSession(undefined, done);
-      });
-    }
+      }
+    });
   });
 });
