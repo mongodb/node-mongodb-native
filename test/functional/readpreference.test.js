@@ -795,8 +795,7 @@ describe('ReadPreference', function() {
         });
         session.startTransaction();
         const result = ReadPreference.resolve(client, { session: session });
-        expect(result).to.exist;
-        expect(result.mode).to.deep.equal('secondary');
+        expect(result).to.have.property('mode', 'secondary');
       }
     });
   });
