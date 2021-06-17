@@ -3940,7 +3940,6 @@ describe('Cursor', function () {
           expect.fail('Error in forEach call not caught');
         })
         .catch(err => {
-          console.log(err.message);
           expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
         });
     });
