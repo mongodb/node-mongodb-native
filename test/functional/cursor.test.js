@@ -4378,17 +4378,28 @@ describe('Cursor', function() {
     let cursor;
     let collection;
 
-    beforeEach(function() {
+    beforeEach(function(done) {
       configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-      return client
+      client
         .connect()
         .then(() => {
           collection = client.db(configuration.db).collection('cursor_session_tests2');
+          done();
         })
-        .catch(() => {
-          expect.fail('Failed to connect to client');
+        .catch(error => {
+          done(error);
         });
+    });
+
+    afterEach(function(done) {
+      if (cursor) {
+        cursor.close().then(() => {
+          client.close().then(() => done());
+        });
+      } else {
+        client.close().then(() => done());
+      }
     });
 
     // NODE-2035
@@ -4407,20 +4418,20 @@ describe('Cursor', function() {
             })
             .then(
               () => {
-                expect.fail('Error in forEach call not caught');
+                done(new Error('Error in forEach call not caught'));
               },
               err => {
-                cursor.close().then(() => {
-                  client.close().then(() => {
-                    expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
-                    done();
-                  });
-                });
+                try {
+                  expect(err.message).to.deep.equal('FAILURE IN FOREACH CALL');
+                  done();
+                } catch (error) {
+                  done(error);
+                }
               }
             );
         },
-        () => {
-          expect.fail('Failed to insert documents');
+        error => {
+          done(error);
         }
       );
     });
