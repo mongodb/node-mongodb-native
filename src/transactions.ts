@@ -145,7 +145,11 @@ export class Transaction {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.includes(nextState)) {
       this.state = nextState;
-      if (this.state === TxnState.NO_TRANSACTION || this.state === TxnState.STARTING_TRANSACTION) {
+      if (
+        this.state === TxnState.NO_TRANSACTION ||
+        this.state === TxnState.STARTING_TRANSACTION ||
+        this.state === TxnState.TRANSACTION_ABORTED
+      ) {
         this.unpinServer();
       }
       return;

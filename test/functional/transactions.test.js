@@ -1,10 +1,12 @@
 'use strict';
 
+const path = require('path');
 const { expect } = require('chai');
 const { Topology } = require('../../src/sdam/topology');
 const { ClientSession } = require('../../src/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 const { MongoNetworkError } = require('../../src/error');
 
 function ignoreNsNotFoundForListIndexes(err) {
@@ -79,14 +81,30 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
+describe('Transactions Spec Unified Tests', function () {
+  for (const transactionTest of loadSpecTests(path.join('transactions', 'unified'))) {
+    expect(transactionTest).to.exist;
+    context(String(transactionTest.description), function () {
+      for (const test of transactionTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test: async function () {
+            await runUnifiedTest(this, transactionTest, test);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('Transactions', function () {
   const testContext = new TransactionsRunnerContext();
 
   [
-    { name: 'spec tests', specPath: 'transactions' },
+    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
     {
       name: 'withTransaction spec tests',
-      specPath: 'transactions/convenient-api'
+      specPath: path.join('transactions', 'convenient-api')
     }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function () {

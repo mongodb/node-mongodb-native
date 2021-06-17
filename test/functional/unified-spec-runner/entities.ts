@@ -272,7 +272,6 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
             options.defaultTransactionOptions.maxCommitTimeMS = defaultOptions.maxCommitTimeMS;
           }
         }
-
         const session = client.startSession(options);
         map.set(entity.session.id, session);
       } else if ('bucket' in entity) {
