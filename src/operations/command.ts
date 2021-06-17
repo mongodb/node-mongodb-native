@@ -160,11 +160,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       cmd.comment = options.comment;
     }
 
-    if (this.logger && this.logger.isDebug()) {
-      // TODO: redact or remove
-      this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
-    }
-
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
       if (serverWireVersion < 6 && cmd.aggregate) {
         // Prior to 3.6, with aggregate, verbosity is ignored, and we must pass in "explain: true"

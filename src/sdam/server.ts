@@ -10,7 +10,6 @@ import { Monitor, MonitorOptions } from './monitor';
 import { isTransactionCommand } from '../transactions';
 import {
   collationNotSupported,
-  debugOptions,
   makeStateMachine,
   maxWireVersion,
   Callback,
@@ -55,34 +54,6 @@ import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
-
-// Used for filtering out fields for logging
-const DEBUG_FIELDS = [
-  'reconnect',
-  'reconnectTries',
-  'reconnectInterval',
-  'emitError',
-  'cursorFactory',
-  'host',
-  'port',
-  'size',
-  'keepAlive',
-  'keepAliveInitialDelay',
-  'noDelay',
-  'connectionTimeout',
-  'checkServerIdentity',
-  'socketTimeoutMS',
-  'ssl',
-  'ca',
-  'crl',
-  'cert',
-  'key',
-  'rejectUnauthorized',
-  'promoteLongs',
-  'promoteValues',
-  'promoteBuffers',
-  'servername'
-];
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -303,18 +274,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     // Clone the options
     const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
-
-    // Debug log
-    if (this.s.logger.isDebug()) {
-      // TODO: redact or remove
-      this.s.logger.debug(
-        `executing command [${JSON.stringify({
-          ns,
-          cmd,
-          options: debugOptions(DEBUG_FIELDS, options)
-        })}] against ${this.name}`
-      );
-    }
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
