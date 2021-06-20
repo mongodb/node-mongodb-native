@@ -91,8 +91,8 @@ describe('Transactions Spec Unified Tests', function() {
       for (const test of transactionTest.tests) {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },
-          test: async function() {
-            await runUnifiedTest(this, transactionTest, test);
+          test() {
+            return runUnifiedTest(this, transactionTest, test);
           }
         });
       }
