@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
 import { Collection, Db, GridFSFile, MongoClient, ObjectId } from '../../../index';
+import { CoreCursor } from '../../../lib/core/cursor';
 import ReadConcern from '../../../lib/read_concern';
 import ReadPreference from '../../../lib/core/topologies/read_preference';
 import WriteConcern from '../../../lib/write_concern';
@@ -82,7 +83,7 @@ export const operations = new Map<string, RunOperationFn>();
 function executeWithPotentialSession(
   entities: EntitiesMap,
   operation: OperationDescription,
-  cursor: { session?: ClientSession }
+  cursor: CoreCursor
 ) {
   const session = entities.getEntity('session', operation.arguments.session, false);
   if (session) {
