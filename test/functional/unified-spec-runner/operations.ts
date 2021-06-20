@@ -82,7 +82,7 @@ export const operations = new Map<string, RunOperationFn>();
 function executeWithPotentialSession(
   entities: EntitiesMap,
   operation: OperationDescription,
-  cursor: AbstractCursor
+  cursor: { session?: ClientSession }
 ) {
   const session = entities.getEntity('session', operation.arguments.session, false);
   if (session) {
