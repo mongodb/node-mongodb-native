@@ -186,8 +186,8 @@ export class MongoNetworkError extends MongoError {
     super(message);
     this.name = 'MongoNetworkError';
 
-    if (options && options.beforeHandshake === true) {
-      this[kBeforeHandshake] = true;
+    if (options && typeof options.beforeHandshake === 'boolean') {
+      this[kBeforeHandshake] = options.beforeHandshake;
     }
   }
 }
