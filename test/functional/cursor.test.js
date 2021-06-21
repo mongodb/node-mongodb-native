@@ -4394,9 +4394,10 @@ describe('Cursor', function() {
 
     afterEach(function(done) {
       if (cursor) {
-        cursor.close().then(() => {
-          client.close().then(() => done());
-        });
+        cursor
+          .close()
+          .then(() => client.close())
+          .then(() => done());
       } else {
         client.close().then(() => done());
       }
