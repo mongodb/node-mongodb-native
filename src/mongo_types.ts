@@ -110,8 +110,8 @@ export interface FilterOperators<TValue> extends Document {
   $exists?: boolean;
   $type?: BSONType | BSONTypeAlias;
   // Evaluation
-  $expr?: any;
-  $jsonSchema?: any;
+  $expr?: Record<string, any>;
+  $jsonSchema?: Record<string, any>;
   $mod?: TValue extends number ? [number, number] : never;
   $regex?: TValue extends string ? RegExp | BSONRegExp | string : never;
   $options?: TValue extends string ? string : never;
@@ -185,7 +185,9 @@ export type Projection<TSchema> = {
   Partial<Record<string, ProjectionOperators | 0 | 1 | boolean>>;
 
 /** @public */
-export type IsAny<Type, Yes, No> = true extends false & Type ? Yes : No;
+export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
+  ? ResultIfAny
+  : ResultIfNotAny;
 
 /** @public */
 export type Flatten<Type> = Type extends ReadonlyArray<infer Item> ? Item : Type;
@@ -200,7 +202,7 @@ export type IntegerType = number | Int32 | Long;
 export type NumericType = IntegerType | Decimal128 | Double;
 
 /** @public */
-export type ObjectFilterOperators<T> = T extends Record<string, any>
+export type FilterOperations<T> = T extends Record<string, any>
   ? { [key in keyof T]?: FilterOperators<T[key]> }
   : FilterOperators<T>;
 
@@ -225,21 +227,16 @@ export type NotAcceptedFields<TSchema, FieldType> = {
 };
 
 /** @public */
-export type DotAndArrayNotation<AssignableType> = {
-  readonly [key: string]: AssignableType;
-};
-
-/** @public */
 export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldType> = IsAny<
   TSchema[keyof TSchema],
-  Document,
+  Record<string, FieldType>,
   AcceptedFields<TSchema, FieldType, AssignableType> &
     NotAcceptedFields<TSchema, FieldType> &
-    DotAndArrayNotation<AssignableType>
+    Record<string, AssignableType>
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & DotAndArrayNotation<any>;
+export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
@@ -278,7 +275,7 @@ export type PushOperator<TSchema> = ({
 export type PullOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
     | Partial<Flatten<TSchema[key]>>
-    | ObjectFilterOperators<Flatten<TSchema[key]>>;
+    | FilterOperations<Flatten<TSchema[key]>>;
 } &
   NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: FilterOperators<any> | any;
@@ -303,7 +300,7 @@ export type UpdateFilter<TSchema> = {
   $min?: MatchKeysAndValues<TSchema>;
   $max?: MatchKeysAndValues<TSchema>;
   $mul?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
-  $rename?: { [key: string]: string };
+  $rename?: Record<string, string>;
   $set?: MatchKeysAndValues<TSchema>;
   $setOnInsert?: MatchKeysAndValues<TSchema>;
   $unset?: OnlyFieldsOfType<TSchema, any, '' | true | 1>;
@@ -312,7 +309,11 @@ export type UpdateFilter<TSchema> = {
   $pull?: PullOperator<TSchema>;
   $push?: PushOperator<TSchema>;
   $pullAll?: PullAllOperator<TSchema>;
-  $bit?: Record<string, Record<'and' | 'or' | 'xor', IntegerType>>;
+  $bit?: OnlyFieldsOfType<
+    TSchema,
+    NumericType | undefined,
+    { and: IntegerType } | { or: IntegerType } | { xor: IntegerType }
+  >;
 } & Document;
 
 /** @public */

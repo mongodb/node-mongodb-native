@@ -387,10 +387,9 @@ export type {
   PullAllOperator,
   AcceptedFields,
   NotAcceptedFields,
-  DotAndArrayNotation,
   AddToSetOperators,
   ArrayOperator,
-  ObjectFilterOperators,
+  FilterOperations,
   KeysOfAType,
   KeysOfOtherType,
   IsAny

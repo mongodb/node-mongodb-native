@@ -1,12 +1,11 @@
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotAssignable, expectNotType, expectType } from 'tsd';
 import type {
   AcceptedFields,
   KeysOfAType,
   KeysOfOtherType,
   NotAcceptedFields,
   NumericType,
-  ObjectFilterOperators,
-  DotAndArrayNotation,
+  FilterOperations,
   OnlyFieldsOfType,
   IntegerType,
   IsAny
@@ -24,7 +23,7 @@ expectNotType<IsAny<any[], true, false>>(true);
 
 expectAssignable<IntegerType>(2);
 expectAssignable<IntegerType>(2.3); // Typescript cannot assert anything about this
-expectNotType<IntegerType>(new Double(2));
+expectNotAssignable<IntegerType>(new Double(2));
 
 expectAssignable<NumericType>(2);
 expectAssignable<NumericType>(Long.fromInt(3));
@@ -32,40 +31,65 @@ expectAssignable<NumericType>(new Decimal128('2.3'));
 expectAssignable<NumericType>(new Int32(23));
 expectAssignable<NumericType>(new Double(2.3));
 
-// ObjectFilterOperators
-expectAssignable<ObjectFilterOperators<{ a: number }>>({ a: { $eq: 2 } });
+// FilterOperations - map a schema or simple type to the filter $key operations
+expectAssignable<FilterOperations<{ a: number }>>({ a: { $eq: 2 } });
+expectAssignable<FilterOperations<string>>({ $eq: 'a' });
 
 // KeysOfAType - union of keys that are the second type argument
-expectType<KeysOfAType<{ a: number; b: string }, number>>('a');
+const permittedKeysOfAType: 'a' | 'c' = '' as 'a' | 'c'; // notice type is a union of the "number" keys
+expectType<KeysOfAType<{ a: number; c: number; b: string }, number>>(permittedKeysOfAType);
+const notPermittedKeysOfAType: 'a' | 'b' = '' as 'a' | 'b'; // notice type is a union of a number key and a string key
+expectNotType<KeysOfAType<{ a: number; c: number; b: string }, number>>(notPermittedKeysOfAType);
 
 // KeysOfOtherType - union of keys that aren't the second type argument
-expectType<KeysOfOtherType<{ a: number; b: string }, number>>('b');
+const permittedKeysOfOtherType: 'b' | 'c' = '' as 'b' | 'c';
+expectType<KeysOfOtherType<{ a: number; b: string; c: boolean }, number>>(permittedKeysOfOtherType);
+const notPermittedKeysOfOtherType: 'a' | 'd' = '' as 'a' | 'd';
+expectNotType<KeysOfOtherType<{ a: number; b: string; c: boolean; d: number }, number>>(
+  notPermittedKeysOfOtherType
+);
 
 // AcceptedFields - essentially rewrites the type of keys that have the second argument type
 expectAssignable<AcceptedFields<{ a: number; b: string }, number, boolean>>({ a: true });
+expectNotAssignable<AcceptedFields<{ a: number; b: string }, number, boolean>>({ a: 3 }); // not assignable to its original type
 
 // NotAcceptedFields - prevents the usage of keys with an unacceptable type
-expectNotType<NotAcceptedFields<{ a: number; b: string }, number>>({ b: 'hello' }); // { b: never }
-
-// DotAndArrayNotation - map string index to type, for MongoDB's dotted and array keys
-expectAssignable<DotAndArrayNotation<number>>({ 'dot.array.notation': 3 });
-expectNotType<DotAndArrayNotation<number>>({ 'dot.array.notation': true });
+expectNotType<NotAcceptedFields<{ a: number; b: string }, number>>({ b: 'hello' });
+// This helper type doesn't produce a useful type alone, it ensures that key of the given type are no longer permitted
+// It's used in conjunction with OnlyFieldsOfType to filter out fields of a type that don't apply / can't be used
+// A good example is not allowing string typed keys in $inc
+const notAcceptedField: { readonly b?: never; readonly c?: never } = {}; // 'a' is not included here, but its also not excluded
+expectType<NotAcceptedFields<{ a: number; b: string; c: string }, number>>(notAcceptedField);
 
 // OnlyFieldsOfType - filters for keys of a type, and optionally replaces type (combo KeysOfAType & AcceptedFields)
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, number>>({ a: 2 });
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string>>({ b: 'hello' });
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string, boolean>>({ b: true });
 
-// test generic schema, essentially we expect no safety here
-expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ a: 2 });
-expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ a: 'hello' });
+// test generic schema, essentially we expect nearly no safety here
+expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ someKey: 2 });
+// We can still at least enforce the type that the keys map to
+expectNotAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ someKey: 'hello' });
 
-// If you use any at all, then we cannot do type hinting, is this fair?
-expectAssignable<OnlyFieldsOfType<{ a: number; b: any }, NumericType | undefined>>({ a: 'hello' });
+// LIMITATION: If users have 'any' in their schema, type checking becomes weaker(-ish):
+expectAssignable<OnlyFieldsOfType<{ a: number; b: any; c: string }, NumericType | undefined>>({
+  a: 2,
+  b: 3,
+  c: 4 // Since any is present we can't filter away types that aren't numeric (the restriction requested by the second argument)
+  // So now 'c' is coerced to numeric instead of being not allowed altogether
+});
+// Here's the opposite of above, if I make b a concrete type then only 'a' is permitted
+expectNotAssignable<
+  OnlyFieldsOfType<{ a: number; b: boolean; c: string }, NumericType | undefined>
+>({ a: 2, b: 3, c: 4 });
 
+// LIMITATION
 // Using indexed types makes determining permitted keys tricky!
 interface IndexedSchema {
   a: number;
-  [key: string]: string | number;
+  [key: string]: boolean | number;
 }
-expectNotType<OnlyFieldsOfType<IndexedSchema, NumericType>>({ a: 'hello' });
+// Even though a is narrowed in the interface above to be only number, all keys are number or boolean
+// This means we can't properly enforce the subtype and there doesn't seem to be a way to detect it
+// and reduce strictness like we can with any, users with indexed schemas will have to use `as any`
+expectNotAssignable<OnlyFieldsOfType<IndexedSchema, NumericType>>({ a: 2 });

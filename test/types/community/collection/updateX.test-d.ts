@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectNotType } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
 import {
   Decimal128,
   Double,
@@ -56,9 +56,10 @@ expectNotType<PullAllOperator<{ a: string[]; b: number[] }>>({ a: [0, 5] });
 
 // Schema-less tests
 expectAssignable<UpdateFilter<Document>>({});
-expectAssignable<UpdateFilter<Document>>({ $inc: { numberField: 2 } });
-// This is an error!! But no type help when you have no schema
-expectAssignable<UpdateFilter<Document>>({ $inc: { numberField: '2' } });
+expectAssignable<UpdateFilter<Document>>({ $inc: { anyKeyWhatsoever: 2 } });
+// We can at least keep type assertions working inside the $inc ensuring provided values are numeric
+// But this no longer asserts anything about what the original keys map to
+expectNotType<UpdateFilter<Document>>({ $inc: { numberField: '2' } });
 
 // collection.updateX tests
 const client = new MongoClient('');
@@ -133,6 +134,10 @@ expectAssignable<UpdateFilter<TestModel>>({
 expectAssignable<UpdateFilter<TestModel>>({ $inc: { 'subInterfaceArray.$': -10 } });
 expectAssignable<UpdateFilter<TestModel>>({ $inc: { 'subInterfaceArray.$[bla]': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $inc: { 'subInterfaceArray.$[]': 1000.2 } });
+
+expectAssignable<UpdateFilter<TestModel>>({ $bit: { numberField: { or: 3 } } });
+expectAssignable<UpdateFilter<TestModel>>({ $bit: { numberField: { or: 3, and: 3, xor: 3 } } });
+expectNotAssignable<UpdateFilter<TestModel>>({ $bit: { stringField: {} } });
 
 expectAssignable<UpdateFilter<TestModel>>({ $min: { numberField: 1 } });
 expectAssignable<UpdateFilter<TestModel>>({
