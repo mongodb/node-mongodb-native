@@ -173,17 +173,6 @@ export function isObject(arg: unknown): arg is object {
 }
 
 /** @internal */
-export function debugOptions(debugFields: string[], options?: AnyOptions): Document {
-  const finalOptions: AnyOptions = {};
-  if (!options) return finalOptions;
-  debugFields.forEach(n => {
-    finalOptions[n] = options[n];
-  });
-
-  return finalOptions;
-}
-
-/** @internal */
 export function decorateCommand(command: Document, options: Document, exclude: string[]): Document {
   for (const name in options) {
     if (!exclude.includes(name)) {
