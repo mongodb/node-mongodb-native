@@ -1,7 +1,7 @@
 {
   "name": "mongodb",
   "version": "4.0.0-beta.5",
-  "description": "The official MongoDB driver for Node.js",
+  "description": "The official MongoDB driver for Node.js (test)",
   "main": "lib/index.js",
   "files": [
     "lib",
