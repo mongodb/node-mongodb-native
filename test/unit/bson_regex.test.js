@@ -1,74 +1,38 @@
 'use strict';
 
 const expect = require('chai').expect;
-const BSON = require('bson');
+const BSONRegExp = require('bson').BSONRegExp;
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {
-    it('should respond with BSONRegExp class with option passed to db', async function() {
-      let client;
-      try {
-        // create and connect to client
-        client = this.configuration.newClient();
-        await client.connect();
+    // define client and option for tests to use
+    let client;
+    const option = { bsonRegExp: true };
+    for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
+      it(`should respond with BSONRegExp class with option passed to ${passOptionTo}`, async function() {
+        try {
+          client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
+          await client.connect();
 
-        const db = client.db('a', { bsonRegExp: true });
-        const collection = db.collection('b');
+          const db = client.db('bson_regex_db', passOptionTo === 'db' ? option : undefined);
+          const collection = db.collection(
+            'bson_regex_coll',
+            passOptionTo === 'collection' ? option : undefined
+          );
 
-        await collection.insertOne({ regex: new BSON.BSONRegExp('abc', 'imx') });
-        const res = await collection.findOne({ regex: new BSON.BSONRegExp('abc', 'imx') });
+          await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
+          const res = await collection.findOne(
+            { regex: new BSONRegExp('abc', 'imx') },
+            passOptionTo === 'operation' ? option : undefined
+          );
 
-        expect(res)
-          .has.property('regex')
-          .that.is.instanceOf(BSON.BSONRegExp);
-      } finally {
-        await client.close();
-      }
-    });
-
-    it('should respond with BSONRegExp class with option passed to collection', async function() {
-      let client;
-      try {
-        // create and connect to client
-        client = this.configuration.newClient(); // bsonRegex
-        await client.connect();
-
-        const db = client.db('a');
-        const collection = db.collection('b', { bsonRegExp: true });
-
-        await collection.insertOne({ regex: new BSON.BSONRegExp('abc', 'imx') });
-        const res = await collection.findOne({ regex: new BSON.BSONRegExp('abc', 'imx') });
-
-        expect(res)
-          .has.property('regex')
-          .that.is.instanceOf(BSON.BSONRegExp);
-      } finally {
-        await client.close();
-      }
-    });
-
-    it('should respond with BSONRegExp class with option passed to operation', async function() {
-      let client;
-      try {
-        // create and connect to client
-        client = this.configuration.newClient(); // bsonRegex
-        await client.connect();
-
-        const db = client.db('a');
-        const collection = db.collection('b');
-
-        await collection.insertOne({ regex: new BSON.BSONRegExp('abc', 'imx') });
-        const res = await collection.findOne(
-          { regex: new BSON.BSONRegExp('abc', 'imx') },
-          { bsonRegExp: true }
-        );
-
-        expect(res)
-          .has.property('regex')
-          .that.is.instanceOf(BSON.BSONRegExp);
-      } finally {
-        await client.close();
-      }
-    });
+          expect(res)
+            .has.property('regex')
+            .that.is.instanceOf(BSONRegExp);
+        } finally {
+          await client.close();
+        }
+      });
+    }
   });
 });
