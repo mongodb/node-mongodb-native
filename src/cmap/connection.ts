@@ -281,7 +281,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (issue.isTimeout) {
         op.cb(
           new MongoNetworkTimeoutError(`connection ${this.id} to ${this.address} timed out`, {
-            beforeHandshake: !!this[kIsMaster]
+            beforeHandshake: this.ismaster == null
           })
         );
       } else if (issue.isClose) {
