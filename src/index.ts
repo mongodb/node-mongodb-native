@@ -34,6 +34,7 @@ export {
   MongoServerError,
   MongoDriverError,
   MongoNetworkError,
+  MongoNetworkTimeoutError,
   MongoSystemError,
   MongoServerSelectionError,
   MongoParseError,
@@ -186,7 +187,7 @@ export type {
 } from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncrypter } from './deps';
-export type { AnyError, ErrorDescription } from './error';
+export type { AnyError, ErrorDescription, MongoNetworkTimeoutErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
   GridFSBucketReadStream,
