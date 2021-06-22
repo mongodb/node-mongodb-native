@@ -1,11 +1,13 @@
 'use strict';
 
+const path = require('path');
 const chai = require('chai');
 const expect = chai.expect;
 const core = require('../../lib/core');
 const sessions = core.Sessions;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const loadSpecTests = require('../spec').loadSpecTests;
+const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
 const semver = require('semver');
@@ -82,14 +84,30 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
+describe('Transactions Spec Unified Tests', function() {
+  for (const transactionTest of loadSpecTests(path.join('transactions', 'unified'))) {
+    expect(transactionTest).to.exist;
+    context(String(transactionTest.description), function() {
+      for (const test of transactionTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test() {
+            return runUnifiedTest(this, transactionTest, test);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('Transactions', function() {
   const testContext = new TransactionsRunnerContext();
 
   [
-    { name: 'spec tests', specPath: 'transactions' },
+    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
     {
       name: 'withTransaction spec tests',
-      specPath: 'transactions/convenient-api'
+      specPath: path.join('transactions', 'convenient-api')
     }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
