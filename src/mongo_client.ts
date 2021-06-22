@@ -1,7 +1,7 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { MongoError, AnyError } from './error';
+import { AnyError, MongoDriverError } from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
   maybePromise,
@@ -403,7 +403,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
-      throw new TypeError('`connect` only accepts a callback');
+      throw new MongoDriverError('`connect` only accepts a callback');
     }
 
     return maybePromise(callback, cb => {
@@ -475,7 +475,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     // If no topology throw an error message
     if (!this.topology) {
-      throw new MongoError('MongoClient must be connected before calling MongoClient.prototype.db');
+      throw new MongoDriverError(
+        'MongoClient must be connected before calling MongoClient.prototype.db'
+      );
     }
 
     // Return the db object
@@ -526,7 +528,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
-      throw new MongoError('Must connect to a server before calling this method');
+      throw new MongoDriverError('Must connect to a server before calling this method');
     }
 
     return this.topology.startSession(options, this.s.options);
@@ -554,7 +556,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     if (callback == null) {
-      throw new TypeError('Missing required callback parameter');
+      throw new MongoDriverError('Missing required callback parameter');
     }
 
     const session = this.startSession(options);
@@ -563,7 +565,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     let cleanupHandler: CleanUpHandlerFunction = ((err, result, opts) => {
       // prevent multiple calls to cleanupHandler
       cleanupHandler = () => {
-        throw new ReferenceError('cleanupHandler was called too many times');
+        throw new MongoDriverError('cleanupHandler was called too many times');
       };
 
       opts = Object.assign({ throw: true }, opts);

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
-import { Collection, Db, GridFSFile, MongoClient, ObjectId } from '../../../src';
+import { Collection, Db, GridFSFile, MongoClient, ObjectId, AbstractCursor } from '../../../src';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
@@ -11,6 +11,7 @@ import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { translateOptions } from './unified-utils';
+import { getSymbolFrom } from '../../tools/utils';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -20,6 +21,18 @@ interface OperationFunctionParams {
 
 type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
 export const operations = new Map<string, RunOperationFn>();
+
+function executeWithPotentialSession(
+  entities: EntitiesMap,
+  operation: OperationDescription,
+  cursor: AbstractCursor
+) {
+  const session = entities.getEntity('session', operation.arguments.session, false);
+  if (session) {
+    cursor.session = session;
+  }
+  return cursor.toArray();
+}
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
@@ -31,19 +44,18 @@ operations.set('aggregate', async ({ entities, operation }) => {
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
     throw new Error(`Operation object '${operation.object}' must be a db or collection`);
   }
-  return dbOrCollection
-    .aggregate(operation.arguments.pipeline, {
-      allowDiskUse: operation.arguments.allowDiskUse,
-      batchSize: operation.arguments.batchSize,
-      bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
-      maxTimeMS: operation.arguments.maxTimeMS,
-      maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
-      collation: operation.arguments.collation,
-      hint: operation.arguments.hint,
-      let: operation.arguments.let,
-      out: operation.arguments.out
-    })
-    .toArray();
+  const cursor = dbOrCollection.aggregate(operation.arguments.pipeline, {
+    allowDiskUse: operation.arguments.allowDiskUse,
+    batchSize: operation.arguments.batchSize,
+    bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
+    maxTimeMS: operation.arguments.maxTimeMS,
+    maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
+    collation: operation.arguments.collation,
+    hint: operation.arguments.hint,
+    let: operation.arguments.let,
+    out: operation.arguments.out
+  });
+  return executeWithPotentialSession(entities, operation, cursor);
 });
 
 operations.set('assertCollectionExists', async ({ operation, client }) => {
@@ -232,7 +244,8 @@ operations.set('endSession', async ({ entities, operation }) => {
 operations.set('find', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
-  return collection.find(filter, { sort, batchSize, limit, let: vars }).toArray();
+  const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  return executeWithPotentialSession(entities, operation, cursor);
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {

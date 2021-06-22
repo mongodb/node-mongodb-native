@@ -4,8 +4,9 @@ import { defineAspects, Aspect } from './operation';
 import type { Server } from '../sdam/server';
 import { Collection } from '../collection';
 import type { CommandOperationOptions } from './command';
-import { MongoError } from '../error';
+import { MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
+import type { Document } from 'bson';
 
 /** @public */
 export interface RenameOptions extends CommandOperationOptions {
@@ -44,14 +45,17 @@ export class RenameOperation extends RunAdminCommandOperation {
       if (err) return callback(err);
       // We have an error
       if (doc.errmsg) {
-        return callback(new MongoError(doc));
+        return callback(new MongoServerError(doc));
       }
 
+      let newColl: Collection<Document>;
       try {
-        return callback(undefined, new Collection(coll.s.db, this.newName, coll.s.options));
+        newColl = new Collection(coll.s.db, this.newName, coll.s.options);
       } catch (err) {
-        return callback(new MongoError(err));
+        return callback(err);
       }
+
+      return callback(undefined, newColl);
     });
   }
 }

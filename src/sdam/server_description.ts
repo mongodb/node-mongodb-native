@@ -2,6 +2,7 @@ import { arrayStrictEqual, errorStrictEqual, now, HostAddress } from '../utils';
 import { ServerType } from './common';
 import { ObjectId, Long, Document } from '../bson';
 import type { ClusterTime } from './common';
+import type { MongoError } from '../error';
 
 const WRITABLE_SERVER_TYPES = new Set<ServerType>([
   ServerType.RSPrimary,
@@ -28,7 +29,7 @@ export type TagSet = { [key: string]: string };
 /** @internal */
 export interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
-  error?: Error;
+  error?: MongoError;
 
   /** The round trip time to ping this server (in ms) */
   roundTripTime?: number;
@@ -52,7 +53,7 @@ export class ServerDescription {
   arbiters: string[];
   tags: TagSet;
 
-  error?: Error;
+  error?: MongoError;
   topologyVersion?: TopologyVersion;
   minWireVersion: number;
   maxWireVersion: number;

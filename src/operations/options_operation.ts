@@ -1,5 +1,5 @@
 import { AbstractOperation, OperationOptions } from './operation';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
@@ -28,9 +28,7 @@ export class OptionsOperation extends AbstractOperation<Document> {
       .toArray((err, collections) => {
         if (err || !collections) return callback(err);
         if (collections.length === 0) {
-          return callback(
-            MongoError.create({ message: `collection ${coll.namespace} not found`, driver: true })
-          );
+          return callback(new MongoDriverError(`collection ${coll.namespace} not found`));
         }
 
         callback(err, collections[0].options || null);

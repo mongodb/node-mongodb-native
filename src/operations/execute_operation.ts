@@ -1,5 +1,11 @@
 import { ReadPreference } from '../read_preference';
-import { MongoError, isRetryableError, MONGODB_ERROR_CODES } from '../error';
+import {
+  MongoError,
+  isRetryableError,
+  MONGODB_ERROR_CODES,
+  MongoDriverError,
+  MongoServerError
+} from '../error';
 import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
 import { ServerType } from '../sdam/common';
@@ -58,7 +64,7 @@ export function executeOperation<
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
-    throw new TypeError('This method requires a valid operation instance');
+    throw new MongoDriverError('This method requires a valid operation instance');
   }
 
   return maybePromise(callback, cb => {
@@ -79,12 +85,12 @@ export function executeOperation<
         owner = Symbol();
         session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
-        return cb(new MongoError('Use of expired sessions is not permitted'));
+        return cb(new MongoDriverError('Use of expired sessions is not permitted'));
       }
     } else if (session) {
       // If the user passed an explicit session and we are still, after server selection,
       // trying to run against a topology that doesn't support sessions we error out.
-      return cb(new MongoError('Current topology does not support sessions'));
+      return cb(new MongoDriverError('Current topology does not support sessions'));
     }
 
     try {
@@ -120,7 +126,7 @@ function executeWithServerSelection(
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     callback(
-      new MongoError(
+      new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
     );
@@ -149,7 +155,7 @@ function executeWithServerSelection(
       err.errmsg.match(/Transaction numbers/)
     ) {
       callback(
-        new MongoError({
+        new MongoServerError({
           message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
           errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
           originalError: err
@@ -181,7 +187,7 @@ function executeWithServerSelection(
     session.inTransaction()
   ) {
     callback(
-      new MongoError(
+      new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
     );

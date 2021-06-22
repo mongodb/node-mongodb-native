@@ -4,7 +4,7 @@ import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersio
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { ClientSession } from '../sessions';
 
 /** @public */
@@ -68,7 +68,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
     }
 
     if (this.explain && maxWireVersion(server) < 4) {
-      callback(new MongoError(`server ${server.name} does not support explain on distinct`));
+      callback(new MongoDriverError(`server ${server.name} does not support explain on distinct`));
       return;
     }
 

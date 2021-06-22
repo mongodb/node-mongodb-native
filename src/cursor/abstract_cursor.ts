@@ -1,7 +1,7 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -189,8 +189,13 @@ export abstract class AbstractCursor<
     return this[kOptions].readConcern;
   }
 
+  /** @internal */
   get session(): ClientSession | undefined {
     return this[kSession];
+  }
+
+  set session(clientSession: ClientSession | undefined) {
+    this[kSession] = clientSession;
   }
 
   /** @internal */
@@ -279,7 +284,7 @@ export abstract class AbstractCursor<
   next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoError('Cursor is exhausted'));
+        return done(new MongoDriverError('Cursor is exhausted'));
       }
 
       next(this, true, done);
@@ -294,7 +299,7 @@ export abstract class AbstractCursor<
   tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoError('Cursor is exhausted'));
+        return done(new MongoDriverError('Cursor is exhausted'));
       }
 
       next(this, false, done);
@@ -314,28 +319,34 @@ export abstract class AbstractCursor<
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
-      throw new TypeError('Missing required parameter `iterator`');
+      throw new MongoDriverError('Missing required parameter `iterator`');
     }
     return maybePromise(callback, done => {
       const transform = this[kTransform];
       const fetchDocs = () => {
         next<T>(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
-          if (doc == null) return done();
-
+          let result;
           // NOTE: no need to transform because `next` will do this automatically
-          let result = iterator(doc); // TODO(NODE-3283): Improve transform typing
+          try {
+            result = iterator(doc); // TODO(NODE-3283): Improve transform typing
+          } catch (error) {
+            return done(error);
+          }
+
           if (result === false) return done();
 
           // these do need to be transformed since they are copying the rest of the batch
           const internalDocs = this[kDocuments].splice(0, this[kDocuments].length);
-          if (internalDocs) {
-            for (let i = 0; i < internalDocs.length; ++i) {
+          for (let i = 0; i < internalDocs.length; ++i) {
+            try {
               result = iterator(
                 (transform ? transform(internalDocs[i]) : internalDocs[i]) as T // TODO(NODE-3283): Improve transform typing
               );
-              if (result === false) return done();
+            } catch (error) {
+              return done(error);
             }
+            if (result === false) return done();
           }
 
           fetchDocs();
@@ -451,11 +462,11 @@ export abstract class AbstractCursor<
   addCursorFlag(flag: CursorFlag, value: boolean): this {
     assertUninitialized(this);
     if (!CURSOR_FLAGS.includes(flag)) {
-      throw new MongoError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
+      throw new MongoDriverError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
 
     if (typeof value !== 'boolean') {
-      throw new MongoError(`flag ${flag} must be a boolean value`);
+      throw new MongoDriverError(`flag ${flag} must be a boolean value`);
     }
 
     this[kOptions][flag] = value;
@@ -505,7 +516,7 @@ export abstract class AbstractCursor<
     } else if (typeof readPreference === 'string') {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
-      throw new TypeError('Invalid read preference: ' + readPreference);
+      throw new MongoDriverError('Invalid read preference: ' + readPreference);
     }
 
     return this;
@@ -534,7 +545,7 @@ export abstract class AbstractCursor<
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new TypeError('maxTimeMS must be a number');
+      throw new MongoDriverError('maxTimeMS must be a number');
     }
 
     this[kOptions].maxTimeMS = value;
@@ -549,11 +560,11 @@ export abstract class AbstractCursor<
   batchSize(value: number): this {
     assertUninitialized(this);
     if (this[kOptions].tailable) {
-      throw new MongoError('Tailable cursors do not support batchSize');
+      throw new MongoDriverError('Tailable cursors do not support batchSize');
     }
 
     if (typeof value !== 'number') {
-      throw new TypeError('batchSize requires an integer');
+      throw new MongoDriverError('batchSize requires an integer');
     }
 
     this[kOptions].batchSize = value;
@@ -605,12 +616,12 @@ export abstract class AbstractCursor<
     const server = this[kServer];
 
     if (cursorId == null) {
-      callback(new MongoError('Unable to iterate cursor with no id'));
+      callback(new MongoDriverError('Unable to iterate cursor with no id'));
       return;
     }
 
     if (server == null) {
-      callback(new MongoError('Unable to iterate cursor without selected server'));
+      callback(new MongoDriverError('Unable to iterate cursor without selected server'));
       return;
     }
 
@@ -762,7 +773,7 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
 /** @internal */
 export function assertUninitialized(cursor: AbstractCursor): void {
   if (cursor[kInitialized]) {
-    throw new MongoError('Cursor is already initialized');
+    throw new MongoDriverError('Cursor is already initialized');
   }
 }
 

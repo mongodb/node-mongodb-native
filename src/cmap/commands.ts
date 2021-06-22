@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -77,12 +77,12 @@ export class Query {
 
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (ns == null) throw new Error('ns must be specified for query');
-    if (query == null) throw new Error('query must be specified for query');
+    if (ns == null) throw new MongoDriverError('ns must be specified for query');
+    if (query == null) throw new MongoDriverError('query must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
-      throw new Error('namespace cannot contain a null character');
+      throw new MongoDriverError('namespace cannot contain a null character');
     }
 
     // Basic options
@@ -655,7 +655,7 @@ export class Msg {
 
   constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (command == null) throw new Error('query must be specified for query');
+    if (command == null) throw new MongoDriverError('query must be specified for query');
 
     // Basic options
     this.ns = ns;
@@ -834,7 +834,7 @@ export class BinMsg {
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
-        throw new MongoError('OP_MSG Payload Type 1 detected unsupported protocol');
+        throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
 

@@ -9,7 +9,7 @@ import {
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 import { Collection, CollectionOptions } from './collection';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
@@ -287,13 +287,13 @@ export class Db {
    */
   aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
-      throw new TypeError('Third parameter to `db.aggregate()` must be undefined');
+      throw new MongoDriverError('Third parameter to `db.aggregate()` must be undefined');
     }
     if (typeof pipeline === 'function') {
-      throw new TypeError('`pipeline` parameter must not be function');
+      throw new MongoDriverError('`pipeline` parameter must not be function');
     }
     if (typeof options === 'function') {
-      throw new TypeError('`options` parameter must not be function');
+      throw new MongoDriverError('`options` parameter must not be function');
     }
 
     return new AggregationCursor(
@@ -324,7 +324,7 @@ export class Db {
     if (!options) {
       options = {};
     } else if (typeof options === 'function') {
-      throw new TypeError('The callback form of this helper has been removed.');
+      throw new MongoDriverError('The callback form of this helper has been removed.');
     }
     const finalOptions = resolveOptions(this, options);
     return new Collection<TSchema>(this, name, finalOptions);
@@ -723,13 +723,17 @@ export class Db {
 
 // Validate the database name
 function validateDatabaseName(databaseName: string) {
-  if (typeof databaseName !== 'string') throw new MongoError('database name must be a string');
-  if (databaseName.length === 0) throw new MongoError('database name cannot be the empty string');
+  if (typeof databaseName !== 'string')
+    throw new MongoDriverError('database name must be a string');
+  if (databaseName.length === 0)
+    throw new MongoDriverError('database name cannot be the empty string');
   if (databaseName === '$external') return;
 
   const invalidChars = [' ', '.', '$', '/', '\\'];
   for (let i = 0; i < invalidChars.length; i++) {
     if (databaseName.indexOf(invalidChars[i]) !== -1)
-      throw new MongoError(`database names cannot contain the character '${invalidChars[i]}'`);
+      throw new MongoDriverError(
+        `database names cannot contain the character '${invalidChars[i]}'`
+      );
   }
 }

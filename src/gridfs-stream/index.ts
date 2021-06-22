@@ -1,4 +1,4 @@
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
@@ -228,7 +228,7 @@ function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): 
       // Delete orphaned chunks before returning FileNotFound
       if (!res?.deletedCount) {
         const errmsg = 'FileNotFound: no file with id ' + id + ' found';
-        return callback(new Error(errmsg));
+        return callback(new MongoDriverError(errmsg));
       }
 
       return callback();
@@ -250,7 +250,7 @@ function _rename(
     }
 
     if (!res?.matchedCount) {
-      return callback(new MongoError(`File with id ${id} not found`));
+      return callback(new MongoDriverError(`File with id ${id} not found`));
     }
 
     return callback();

@@ -85,7 +85,9 @@ describe('Multiple Databases', function () {
             { returnDocument: ReturnDocument.AFTER },
             function (err) {
               expect(err).to.not.exist;
-              client.close(done);
+              collection.drop(() => {
+                client.close(done);
+              });
             }
           );
         });

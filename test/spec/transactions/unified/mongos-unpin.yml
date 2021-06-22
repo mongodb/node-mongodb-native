@@ -1,0 +1,132 @@
+description: mongos-unpin
+
+schemaVersion: '1.1'
+
+runOnRequirements:
+  - minServerVersion: '4.2'
+    topologies: [ sharded-replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name mongos-unpin-db
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+_yamlAnchors:
+  anchors:
+    # LockTimeout will cause the server to add a TransientTransactionError label. It is not retryable.
+    &lockTimeoutErrorCode 24
+
+tests:
+  - description: unpin after TransientTransctionError error on commit
+    operations:
+      - &startTransaction
+        name: startTransaction
+        object: *session0
+      - &insertOne
+        name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 1 }
+          session: *session0
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ commitTransaction ]
+              errorCode: *lockTimeoutErrorCode
+      - name: commitTransaction
+        object: *session0
+        expectError:
+          # LockTimeout is not retryable, so the commit fails.
+          errorCode: *lockTimeoutErrorCode
+          errorLabelsContain: [ TransientTransactionError ]
+          errorLabelsOmit: [ UnknownTransactionCommitResult ]
+      - &assertNoPinnedServer
+        name: assertSessionUnpinned
+        object: testRunner
+        arguments:
+          session: *session0
+
+  - description: unpin on successful abort
+    operations:
+      - *startTransaction
+      - *insertOne
+      - &abortTransaction
+        name: abortTransaction
+        object: *session0
+      - *assertNoPinnedServer
+
+  - description: unpin after TransientTransctionError error on abort
+    operations:
+      - *startTransaction
+      - *insertOne
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ abortTransaction ]
+              errorCode: *lockTimeoutErrorCode
+      - *abortTransaction
+      - *assertNoPinnedServer
+
+  - description: unpin when a new transaction is started
+    operations:
+      - *startTransaction
+      - *insertOne
+      - name: commitTransaction
+        object: *session0
+      - &assertPinnedServer
+        name: assertSessionPinned
+        object: testRunner
+        arguments:
+          session: *session0
+      - *startTransaction
+      - *assertNoPinnedServer
+
+  - description: unpin when a non-transaction write operation uses a session
+    operations:
+      - *startTransaction
+      - *insertOne
+      - name: commitTransaction
+        object: *session0
+      - *assertPinnedServer
+      - *insertOne
+      - *assertNoPinnedServer
+
+  - description: unpin when a non-transaction read operation uses a session
+    operations:
+      - *startTransaction
+      - *insertOne
+      - name: commitTransaction
+        object: *session0
+      - *assertPinnedServer
+      - name: find
+        object: *collection0
+        arguments:
+          filter: { x: 1 }
+          session: *session0
+      - *assertNoPinnedServer

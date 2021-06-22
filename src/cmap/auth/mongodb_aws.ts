@@ -4,7 +4,7 @@ import * as url from 'url';
 import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
-import { MongoError } from '../../error';
+import { MongoDriverError } from '../../error';
 import { maxWireVersion, Callback, ns } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
@@ -31,7 +31,7 @@ export class MongoDBAWS extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoError('AuthContext must provide credentials.'));
+      return callback(new MongoDriverError('AuthContext must provide credentials.'));
     }
 
     if ('kModuleError' in aws4) {
@@ -39,7 +39,9 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     if (maxWireVersion(connection) < 9) {
-      callback(new MongoError('MONGODB-AWS authentication requires MongoDB version 4.4 or later'));
+      callback(
+        new MongoDriverError('MONGODB-AWS authentication requires MongoDB version 4.4 or later')
+      );
       return;
     }
 
@@ -78,19 +80,19 @@ export class MongoDBAWS extends AuthProvider {
         const serverNonce = serverResponse.s.buffer;
         if (serverNonce.length !== 64) {
           callback(
-            new MongoError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
+            new MongoDriverError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
           );
 
           return;
         }
 
         if (serverNonce.compare(nonce, 0, nonce.length, 0, nonce.length) !== 0) {
-          callback(new MongoError('Server nonce does not begin with client nonce'));
+          callback(new MongoDriverError('Server nonce does not begin with client nonce'));
           return;
         }
 
         if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
-          callback(new MongoError(`Server returned an invalid host: "${host}"`));
+          callback(new MongoDriverError(`Server returned an invalid host: "${host}"`));
           return;
         }
 
@@ -145,7 +147,7 @@ interface AWSCredentials {
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
   function done(creds: AWSCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
-      callback(new MongoError('Could not obtain temporary MONGODB-AWS credentials'));
+      callback(new MongoDriverError('Could not obtain temporary MONGODB-AWS credentials'));
       return;
     }
 
@@ -262,7 +264,7 @@ function request(uri: string, _options: RequestOptions | Callback, _callback?: C
         const parsed = JSON.parse(data);
         callback(undefined, parsed);
       } catch (err) {
-        callback(new MongoError(`Invalid JSON response: "${data}"`));
+        callback(new MongoDriverError(`Invalid JSON response: "${data}"`));
       }
     });
   });

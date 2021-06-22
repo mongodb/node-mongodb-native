@@ -38,7 +38,8 @@ describe('Client Side Encryption', function () {
     return (
       !spec.description.match(/type=regex/) &&
       !spec.description.match(/type=symbol/) &&
-      !spec.description.match(/maxWireVersion < 8/)
+      !spec.description.match(/maxWireVersion < 8/) &&
+      !spec.description.match(/Count with deterministic encryption/) // TODO(NODE-3369): Unskip
     );
   });
 });

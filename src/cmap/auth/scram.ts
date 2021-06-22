@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
-import { MongoError, AnyError } from '../../error';
+import { AnyError, MongoDriverError, MongoServerError } from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { Callback, ns, emitWarning } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
@@ -22,7 +22,7 @@ class ScramSHA extends AuthProvider {
     const cryptoMethod = this.cryptoMethod;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoError('AuthContext must provide credentials.'));
+      return callback(new MongoDriverError('AuthContext must provide credentials.'));
     }
     if (cryptoMethod === 'sha256' && saslprep == null) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
@@ -103,10 +103,10 @@ function makeFirstMessage(
 function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
   const { connection, credentials } = authContext;
   if (!credentials) {
-    return callback(new MongoError('AuthContext must provide credentials.'));
+    return callback(new MongoDriverError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoError('AuthContext must contain a valid nonce property'));
+    return callback(new MongoDriverError('AuthContext must contain a valid nonce property'));
   }
   const nonce = authContext.nonce;
   const db = credentials.source;
@@ -131,10 +131,10 @@ function continueScramConversation(
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   if (!credentials) {
-    return callback(new MongoError('AuthContext must provide credentials.'));
+    return callback(new MongoDriverError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoError('Unable to continue SCRAM without valid nonce'));
+    return callback(new MongoDriverError('Unable to continue SCRAM without valid nonce'));
   }
   const nonce = authContext.nonce;
 
@@ -160,14 +160,17 @@ function continueScramConversation(
 
   const iterations = parseInt(dict.i, 10);
   if (iterations && iterations < 4096) {
-    callback(new MongoError(`Server returned an invalid iteration count ${iterations}`), false);
+    callback(
+      new MongoDriverError(`Server returned an invalid iteration count ${iterations}`),
+      false
+    );
     return;
   }
 
   const salt = dict.s;
   const rnonce = dict.r;
   if (rnonce.startsWith('nonce')) {
-    callback(new MongoError(`Server returned an invalid nonce: ${rnonce}`), false);
+    callback(new MongoDriverError(`Server returned an invalid nonce: ${rnonce}`), false);
     return;
   }
 
@@ -206,7 +209,7 @@ function continueScramConversation(
 
     const parsedResponse = parsePayload(r.payload.value());
     if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
-      callback(new MongoError('Server returned an invalid signature'));
+      callback(new MongoDriverError('Server returned an invalid signature'));
       return;
     }
 
@@ -237,15 +240,15 @@ function parsePayload(payload: string) {
 
 function passwordDigest(username: string, password: string) {
   if (typeof username !== 'string') {
-    throw new MongoError('username must be a string');
+    throw new MongoDriverError('username must be a string');
   }
 
   if (typeof password !== 'string') {
-    throw new MongoError('password must be a string');
+    throw new MongoDriverError('password must be a string');
   }
 
   if (password.length === 0) {
-    throw new MongoError('password cannot be empty');
+    throw new MongoDriverError('password cannot be empty');
   }
 
   const md5 = crypto.createHash('md5');
@@ -343,7 +346,7 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
 function resolveError(err?: AnyError, result?: Document) {
   if (err) return err;
   if (result) {
-    if (result.$err || result.errmsg) return new MongoError(result);
+    if (result.$err || result.errmsg) return new MongoServerError(result);
   }
 }
 

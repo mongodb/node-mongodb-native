@@ -12,6 +12,9 @@ Command Monitoring
 Testing
 =======
 
+Tests in ``unified`` are implemented in the `Unified Test Format <../../unified-test-format/unified-test-format.rst>`__ and require
+schema version 1.0. Tests in ``legacy`` should be run as described below.
+
 Tests are provided in YML and JSON format to assert proper upconversion of commands.
 
 Database and Collection Names

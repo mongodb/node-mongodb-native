@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { MongoError, MongoNetworkError } = require('../../../src/error');
+const { MongoError, MongoNetworkError, MongoServerError } = require('../../../src/error');
 
 describe('Error tests', function () {
   it('should create a MongoError from string', {
@@ -36,16 +36,16 @@ describe('Error tests', function () {
     }
   });
 
-  it('should create a MongoError from object', {
+  it('should create a MongoServerError from object', {
     metadata: {
       requires: { topology: ['single'] }
     },
 
     test: function (done) {
       var errorMessage = 'A test error';
-      var err = new MongoError({ message: errorMessage, someData: 12345 });
+      var err = new MongoServerError({ message: errorMessage, someData: 12345 });
       expect(err).to.be.an.instanceof(Error);
-      expect(err.name).to.equal('MongoError');
+      expect(err.name).to.equal('MongoServerError');
       expect(err.message).to.equal(errorMessage);
       expect(err.someData).to.equal(12345);
 

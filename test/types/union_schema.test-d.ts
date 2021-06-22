@@ -31,9 +31,9 @@ expectAssignable<ShapeInsert>({ height: 4, width: 4 });
 expectAssignable<ShapeInsert>({ radius: 4 });
 
 const c: Collection<Shape> = null as never;
-expectType<Promise<Shape>>(c.findOne({ height: 4, width: 4 }));
+expectType<Promise<Shape | undefined>>(c.findOne({ height: 4, width: 4 }));
 // collection API can only respect TSchema given, cannot pick a type inside a union
-expectNotType<Promise<Rectangle>>(c.findOne({ height: 4, width: 4 }));
+expectNotType<Promise<Rectangle | undefined>>(c.findOne({ height: 4, width: 4 }));
 
 interface A {
   _id: number;

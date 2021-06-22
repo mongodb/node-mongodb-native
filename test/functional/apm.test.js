@@ -9,6 +9,7 @@ const {
 const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
 const { ReadPreference } = require('../../src/read_preference');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
 describe('APM', function () {
   before(function () {
@@ -411,7 +412,7 @@ describe('APM', function () {
           expect(started).to.have.length(1);
           expect(succeeded).to.have.length(1);
           expect(failed).to.have.length(0);
-          expect(started[0].commandObj).to.eql({ getnonce: true });
+          expect(started[0].command).to.eql({});
           expect(succeeded[0].reply).to.eql({});
           return client.close();
         });
@@ -658,7 +659,44 @@ describe('APM', function () {
     }
   });
 
-  describe('spec tests', function () {
+  // NODE-1502
+  it('should not allow mutation of internal state from commands returned by event monitoring', function () {
+    const started = [];
+    const succeeded = [];
+    const client = this.configuration.newClient(
+      { writeConcern: { w: 1 } },
+      { maxPoolSize: 1, monitorCommands: true }
+    );
+    client.on('commandStarted', filterForCommands('insert', started));
+    client.on('commandSucceeded', filterForCommands('insert', succeeded));
+    let documentToInsert = { a: { b: 1 } };
+    return client
+      .connect()
+      .then(client => {
+        const db = client.db(this.configuration.db);
+        return db.collection('apm_test').insertOne(documentToInsert);
+      })
+      .then(r => {
+        expect(r).to.have.property('insertedId').that.is.an('object');
+        expect(started).to.have.lengthOf(1);
+        // Check if contents of returned document are equal to document inserted (by value)
+        expect(documentToInsert).to.deep.equal(started[0].command.documents[0]);
+        // Check if the returned document is a clone of the original. This confirms that the
+        // reference is not the same.
+        expect(documentToInsert !== started[0].command.documents[0]).to.equal(true);
+        expect(documentToInsert.a !== started[0].command.documents[0].a).to.equal(true);
+
+        started[0].command.documents[0].a.b = 2;
+        expect(documentToInsert.a.b).to.equal(1);
+
+        expect(started[0].commandName).to.equal('insert');
+        expect(started[0].command.insert).to.equal('apm_test');
+        expect(succeeded).to.have.lengthOf(1);
+        return client.close();
+      });
+  });
+
+  describe('command monitoring spec tests', function () {
     before(function () {
       return setupDatabase(this.configuration);
     });
@@ -889,7 +927,7 @@ describe('APM', function () {
         });
     }
 
-    loadSpecTests('apm').forEach(scenario => {
+    loadSpecTests('command-monitoring/legacy').forEach(scenario => {
       if (scenario.name === 'command') return; // FIXME(NODE-3074): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
@@ -926,5 +964,21 @@ describe('APM', function () {
         });
       });
     });
+  });
+
+  describe('command monitoring unified spec tests', () => {
+    for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
+      expect(loadedSpec).to.include.all.keys(['description', 'tests']);
+      context(String(loadedSpec.description), function () {
+        for (const test of loadedSpec.tests) {
+          it(String(test.description), {
+            metadata: { sessions: { skipLeakTests: true } },
+            test: async function () {
+              await runUnifiedTest(this, loadedSpec, test);
+            }
+          });
+        }
+      });
+    }
   });
 });

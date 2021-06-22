@@ -1,4 +1,4 @@
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 import type { MongoClient } from './mongo_client';
 import type { deserialize, Document, serialize } from './bson';
 import type { Callback } from './utils';
@@ -19,7 +19,7 @@ function makeErrorModule(error: any) {
 }
 
 export let Kerberos: typeof import('kerberos') = makeErrorModule(
-  new MongoError(
+  new MongoDriverError(
     'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
   )
 );
@@ -39,7 +39,7 @@ export interface KerberosClient {
 }
 
 export let Snappy: typeof import('snappy') = makeErrorModule(
-  new MongoError(
+  new MongoDriverError(
     'Optional module `snappy` not found. Please install it to enable snappy compression'
   )
 );
@@ -49,7 +49,7 @@ try {
 } catch {} // eslint-disable-line
 
 export let saslprep: typeof import('saslprep') = makeErrorModule(
-  new MongoError(
+  new MongoDriverError(
     'Optional module `saslprep` not found.' +
       ' Please install it to enable Stringprep Profile for User Names and Passwords'
   )
@@ -60,7 +60,9 @@ try {
 } catch {} // eslint-disable-line
 
 export let aws4: typeof import('aws4') = makeErrorModule(
-  new MongoError('Optional module `aws4` not found. Please install it to enable AWS authentication')
+  new MongoDriverError(
+    'Optional module `aws4` not found. Please install it to enable AWS authentication'
+  )
 );
 
 try {

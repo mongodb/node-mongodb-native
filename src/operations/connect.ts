@@ -1,4 +1,4 @@
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
@@ -21,7 +21,7 @@ export function connect(
   callback: Callback<MongoClient>
 ): void {
   if (!callback) {
-    throw new Error('no callback function provided');
+    throw new MongoDriverError('no callback function provided');
   }
 
   // If a connection already been established, we can terminate early
@@ -41,7 +41,7 @@ export function connect(
       }
 
       // Return a more specific error message for MongoClient.connect
-      return callback(new MongoError(warningMessage));
+      return callback(new MongoDriverError(warningMessage));
     }
 
     callback(err, mongoClient);

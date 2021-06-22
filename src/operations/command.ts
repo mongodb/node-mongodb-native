@@ -4,7 +4,7 @@ import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import type { ReadPreference } from '../read_preference';
 import { ClientSession, commandSupportsReadConcern } from '../sessions';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
@@ -98,7 +98,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
     } else if (options?.explain !== undefined) {
-      throw new MongoError(`explain is not supported on this command`);
+      throw new MongoDriverError(`explain is not supported on this command`);
     }
   }
 
@@ -131,7 +131,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
-        new MongoError(
+        new MongoDriverError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
         )
       );
@@ -158,10 +158,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (typeof options.comment === 'string') {
       cmd.comment = options.comment;
-    }
-
-    if (this.logger && this.logger.isDebug()) {
-      this.logger.debug(`executing command ${JSON.stringify(cmd)} against ${this.ns}`);
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {

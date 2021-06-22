@@ -1,5 +1,5 @@
 import { ReadPreference } from './read_preference';
-import { MongoError } from './error';
+import { MongoDriverError } from './error';
 import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
@@ -50,6 +50,7 @@ const stateMachine: { [state in TxnState]: TxnState[] } = {
  * @public
  */
 export interface TransactionOptions extends CommandOperationOptions {
+  // TODO(NODE-3344): These options use the proper class forms of these settings, it should accept the basic enum values too
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcern;
   /** A default writeConcern for commands in this transaction */
@@ -83,7 +84,7 @@ export class Transaction {
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
       if (writeConcern.w === 0) {
-        throw new MongoError('Transactions do not support unacknowledged write concern');
+        throw new MongoDriverError('Transactions do not support unacknowledged write concern');
       }
 
       this.options.writeConcern = writeConcern;
@@ -144,13 +145,17 @@ export class Transaction {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.includes(nextState)) {
       this.state = nextState;
-      if (this.state === TxnState.NO_TRANSACTION || this.state === TxnState.STARTING_TRANSACTION) {
+      if (
+        this.state === TxnState.NO_TRANSACTION ||
+        this.state === TxnState.STARTING_TRANSACTION ||
+        this.state === TxnState.TRANSACTION_ABORTED
+      ) {
         this.unpinServer();
       }
       return;
     }
 
-    throw new MongoError(
+    throw new MongoDriverError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
   }

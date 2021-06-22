@@ -1,6 +1,6 @@
 import { ServerType, TopologyType } from './common';
 import { ReadPreference } from '../read_preference';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import type { TopologyDescription } from './topology_description';
 import type { ServerDescription, TagSet } from './server_description';
 
@@ -50,11 +50,13 @@ function maxStalenessReducer(
   const maxStalenessVariance =
     (topologyDescription.heartbeatFrequencyMS + IDLE_WRITE_PERIOD) / 1000;
   if (maxStaleness < maxStalenessVariance) {
-    throw new MongoError(`maxStalenessSeconds must be at least ${maxStalenessVariance} seconds`);
+    throw new MongoDriverError(
+      `maxStalenessSeconds must be at least ${maxStalenessVariance} seconds`
+    );
   }
 
   if (maxStaleness < SMALLEST_MAX_STALENESS_SECONDS) {
-    throw new MongoError(
+    throw new MongoDriverError(
       `maxStalenessSeconds must be at least ${SMALLEST_MAX_STALENESS_SECONDS} seconds`
     );
   }
@@ -212,7 +214,7 @@ function knownFilter(server: ServerDescription): boolean {
  */
 export function readPreferenceServerSelector(readPreference: ReadPreference): ServerSelector {
   if (!readPreference.isValid()) {
-    throw new TypeError('Invalid read preference specified');
+    throw new MongoDriverError('Invalid read preference specified');
   }
 
   return (
@@ -225,7 +227,7 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
       readPreference.minWireVersion &&
       readPreference.minWireVersion > commonWireVersion
     ) {
-      throw new MongoError(
+      throw new MongoDriverError(
         `Minimum wire version '${readPreference.minWireVersion}' required, but found '${commonWireVersion}'`
       );
     }

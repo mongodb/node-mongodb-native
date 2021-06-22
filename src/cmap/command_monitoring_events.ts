@@ -41,7 +41,7 @@ export class CommandStartedEvent {
     this.requestId = command.requestId;
     this.databaseName = databaseName(command);
     this.commandName = commandName;
-    this.command = cmd;
+    this.command = maybeRedact(commandName, cmd, cmd);
   }
 }
 
@@ -82,7 +82,7 @@ export class CommandSucceededEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, extractReply(command, reply));
+    this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
   }
 }
 
@@ -123,7 +123,7 @@ export class CommandFailedEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.failure = maybeRedact(commandName, error) as Error;
+    this.failure = maybeRedact(commandName, cmd, error) as Error;
   }
 }
 
@@ -140,13 +140,18 @@ const SENSITIVE_COMMANDS = new Set([
   'copydb'
 ]);
 
+const HELLO_COMMANDS = new Set(['hello', 'ismaster', 'isMaster']);
+
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: WriteProtocolMessageType) => command.ns;
 const databaseName = (command: WriteProtocolMessageType) => command.ns.split('.')[0];
 const collectionName = (command: WriteProtocolMessageType) => command.ns.split('.')[1];
-const maybeRedact = (commandName: string, result?: Error | Document) =>
-  SENSITIVE_COMMANDS.has(commandName) ? {} : result;
+const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
+  SENSITIVE_COMMANDS.has(commandName) ||
+  (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
+    ? {}
+    : result;
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $query: 'filter',
@@ -181,7 +186,7 @@ const OP_QUERY_KEYS = [
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof GetMore) {
     return {
-      getMore: command.cursorId,
+      getMore: deepCopy(command.cursorId),
       collection: collectionName(command),
       batchSize: command.numberToReturn
     };
@@ -190,15 +195,15 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof KillCursor) {
     return {
       killCursors: collectionName(command),
-      cursors: command.cursorIds
+      cursors: deepCopy(command.cursorIds)
     };
   }
 
   if (command instanceof Msg) {
-    return command.command;
+    return deepCopy(command.command);
   }
 
-  if (command.query && command.query.$query) {
+  if (command.query?.$query) {
     let result: Document;
     if (command.ns === 'admin.$cmd') {
       // up-convert legacy command
@@ -208,7 +213,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
         if (typeof command.query[key] !== 'undefined') {
-          result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
         }
       });
     }
@@ -216,7 +221,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] !== 'undefined') {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
       }
     });
 
@@ -234,11 +239,23 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     if (command.query.$explain) {
       return { explain: result };
     }
-
     return result;
   }
 
-  return command.query ? command.query : command;
+  const clonedQuery: Record<string, unknown> = {};
+  const clonedCommand: Record<string, unknown> = {};
+  if (command.query) {
+    for (const k in command.query) {
+      clonedQuery[k] = deepCopy(command.query[k]);
+    }
+    clonedCommand.query = clonedQuery;
+  }
+
+  for (const k in command) {
+    if (k === 'query') continue;
+    clonedCommand[k] = deepCopy(((command as unknown) as Record<string, unknown>)[k]);
+  }
+  return command.query ? clonedQuery : clonedCommand;
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {

@@ -9,7 +9,11 @@ const { parseOptions } = require('../../../src/connection_string');
 const sinon = require('sinon');
 const { EJSON } = require('bson');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const { MongoError, MongoNetworkError, MongoNetworkTimeoutError } = require('../../../src/error');
+const {
+  MongoNetworkError,
+  MongoNetworkTimeoutError,
+  MongoServerError
+} = require('../../../src/error');
 const { eachAsyncSeries, ns } = require('../../../src/utils');
 
 const chai = require('chai');
@@ -292,7 +296,7 @@ function withConnectionStubImpl(appError) {
             })
           );
         } else {
-          callback(new MongoError(appError.response));
+          callback(new MongoServerError(appError.response));
         }
       }
     };

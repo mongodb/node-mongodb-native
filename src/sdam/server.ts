@@ -10,7 +10,6 @@ import { Monitor, MonitorOptions } from './monitor';
 import { isTransactionCommand } from '../transactions';
 import {
   collationNotSupported,
-  debugOptions,
   makeStateMachine,
   maxWireVersion,
   Callback,
@@ -33,7 +32,8 @@ import {
   isSDAMUnrecoverableError,
   isRetryableWriteError,
   isNodeShuttingDownError,
-  isNetworkErrorBeforeHandshake
+  isNetworkErrorBeforeHandshake,
+  MongoDriverError
 } from '../error';
 import {
   Connection,
@@ -54,34 +54,6 @@ import type { Document, Long } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
-
-// Used for filtering out fields for logging
-const DEBUG_FIELDS = [
-  'reconnect',
-  'reconnectTries',
-  'reconnectInterval',
-  'emitError',
-  'cursorFactory',
-  'host',
-  'port',
-  'size',
-  'keepAlive',
-  'keepAliveInitialDelay',
-  'noDelay',
-  'connectionTimeout',
-  'checkServerIdentity',
-  'socketTimeoutMS',
-  'ssl',
-  'ca',
-  'crl',
-  'cert',
-  'key',
-  'rejectUnauthorized',
-  'promoteLongs',
-  'promoteValues',
-  'promoteBuffers',
-  'servername'
-];
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -288,35 +260,24 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (callback == null) {
-      throw new TypeError('callback must be provided');
+      throw new MongoDriverError('callback must be provided');
     }
 
     if (ns.db == null || typeof ns === 'string') {
-      throw new TypeError('ns must not be a string');
+      throw new MongoDriverError('ns must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
     // Clone the options
     const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
 
-    // Debug log
-    if (this.s.logger.isDebug()) {
-      this.s.logger.debug(
-        `executing command [${JSON.stringify({
-          ns,
-          cmd,
-          options: debugOptions(DEBUG_FIELDS, options)
-        })}] against ${this.name}`
-      );
-    }
-
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
+      callback(new MongoDriverError(`server ${this.name} does not support collation`));
       return;
     }
 
@@ -341,7 +302,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
@@ -366,7 +327,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     callback: Callback<Document>
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoError('server is closed'));
+      callback(new MongoDriverError('server is closed'));
       return;
     }
 
@@ -397,7 +358,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
-        callback(new MongoError('server is closed'));
+        callback(new MongoDriverError('server is closed'));
       }
 
       return;

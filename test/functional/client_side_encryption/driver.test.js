@@ -20,6 +20,38 @@ describe('Client Side Encryption Functional', function () {
     }
   };
 
+  it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
+    if (process.env.CSFLE_KMS_PROVIDERS) {
+      /**
+       * The shape of CSFLE_KMS_PROVIDERS is as follows:
+       *
+       * interface CSFLE_kms_providers {
+       *    aws: {
+       *      accessKeyId: string;
+       *      secretAccessKey: string;
+       *   };
+       *   azure: {
+       *     tenantId: string;
+       *     clientId: string;
+       *     clientSecret: string;
+       *   };
+       *   gcp: {
+       *     email: string;
+       *     privateKey: string;
+       *   };
+       *   local: {
+       *     // EJSON handle converting this, its actually the canonical -> { $binary: { base64: string; subType: string } }
+       *     // **NOTE**: The dollar sign has to be escaped when using this as an ENV variable
+       *     key: Binary;
+       *   }
+       * }
+       */
+      expect(() => BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
+    } else {
+      this.skip();
+    }
+  });
+
   describe('BSON Options', function () {
     beforeEach(function () {
       this.client = this.configuration.newClient();

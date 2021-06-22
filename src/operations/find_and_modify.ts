@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { maxWireVersion, decorateWithCollation, hasAtomicOperators, Callback } from '../utils';
-import { MongoError } from '../error';
+import { MongoDriverError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
@@ -172,7 +172,9 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       const unacknowledgedWrite = this.writeConcern?.w === 0;
       if (unacknowledgedWrite || maxWireVersion(server) < 8) {
         callback(
-          new MongoError('The current topology does not support a hint on findAndModify commands')
+          new MongoDriverError(
+            'The current topology does not support a hint on findAndModify commands'
+          )
         );
 
         return;
@@ -182,7 +184,9 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     }
 
     if (this.explain && maxWireVersion(server) < 4) {
-      callback(new MongoError(`server ${server.name} does not support explain on findAndModify`));
+      callback(
+        new MongoDriverError(`server ${server.name} does not support explain on findAndModify`)
+      );
       return;
     }
 
@@ -199,7 +203,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindOneAndDeleteOptions) {
     // Basic validation
     if (filter == null || typeof filter !== 'object') {
-      throw new TypeError('Filter parameter must be an object');
+      throw new MongoDriverError('Filter parameter must be an object');
     }
 
     super(collection, filter, options);
@@ -216,15 +220,15 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     options: FindOneAndReplaceOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new TypeError('Filter parameter must be an object');
+      throw new MongoDriverError('Filter parameter must be an object');
     }
 
     if (replacement == null || typeof replacement !== 'object') {
-      throw new TypeError('Replacement parameter must be an object');
+      throw new MongoDriverError('Replacement parameter must be an object');
     }
 
     if (hasAtomicOperators(replacement)) {
-      throw new TypeError('Replacement document must not contain atomic operators');
+      throw new MongoDriverError('Replacement document must not contain atomic operators');
     }
 
     super(collection, filter, options);
@@ -242,15 +246,15 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     options: FindOneAndUpdateOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new TypeError('Filter parameter must be an object');
+      throw new MongoDriverError('Filter parameter must be an object');
     }
 
     if (update == null || typeof update !== 'object') {
-      throw new TypeError('Update parameter must be an object');
+      throw new MongoDriverError('Update parameter must be an object');
     }
 
     if (!hasAtomicOperators(update)) {
-      throw new TypeError('Update document requires atomic operators');
+      throw new MongoDriverError('Update document requires atomic operators');
     }
 
     super(collection, filter, options);

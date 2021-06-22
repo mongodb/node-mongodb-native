@@ -3,6 +3,7 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
+import { MongoDriverError } from '../error';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 /** @public */
@@ -49,12 +50,14 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     const level = this.level;
 
     if (!levelValues.has(level)) {
-      return callback(new Error('Error: illegal profiling level value ' + level));
+      return callback(new MongoDriverError('Error: illegal profiling level value ' + level));
     }
 
     super.executeCommand(server, session, { profile: this.profile }, (err, doc) => {
       if (err == null && doc.ok === 1) return callback(undefined, level);
-      return err != null ? callback(err) : callback(new Error('Error with profile command'));
+      return err != null
+        ? callback(err)
+        : callback(new MongoDriverError('Error with profile command'));
     });
   }
 }
