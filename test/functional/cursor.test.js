@@ -4406,8 +4406,9 @@ describe('Cursor', function() {
     // NODE-2035
     it('should propagate error when exceptions are thrown from an awaited forEach call', function(done) {
       const docs = [{ unique_key_2035: 1 }, { unique_key_2035: 2 }, { unique_key_2035: 3 }];
-      collection.insertMany(docs).then(
-        () => {
+      collection
+        .insertMany(docs)
+        .then(() => {
           cursor = collection.find({
             unique_key_2035: {
               $exists: true
@@ -4430,11 +4431,8 @@ describe('Cursor', function() {
                 }
               }
             );
-        },
-        error => {
-          done(error);
-        }
-      );
+        })
+        .catch(error => done(error));
     });
   });
 
