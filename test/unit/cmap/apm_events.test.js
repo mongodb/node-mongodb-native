@@ -23,7 +23,7 @@ describe('Command Monitoring Events - unit/cmap', function() {
   ];
 
   for (const command of commands) {
-    it(`should make a deep copy of object of type: ${command.constructor.name}`, () => {
+    it(`CommandStartedEvent should make a deep copy of object of type: ${command.constructor.name}`, () => {
       const ev = new CommandStartedEvent({ id: 'someId', address: 'someHost' }, command);
       if (command instanceof Query) {
         if (command.ns === 'admin.$cmd') {
