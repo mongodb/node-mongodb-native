@@ -3,12 +3,36 @@ const { MongoClient } = require('../../src');
 const chai = require('chai');
 const expect = chai.expect;
 
+function verifyKerberosAuthentication(client, done) {
+  client
+    .db('kerberos')
+    .collection('test')
+    .find()
+    .toArray(function (err, docs) {
+      let expectError;
+      try {
+        expect(err).to.not.exist;
+        expect(docs).to.have.length(1);
+        expect(docs[0].kerberos).to.be.true;
+      } catch (e) {
+        expectError = e;
+      }
+      client.close(e => done(expectError || e));
+    });
+}
+
 describe('Kerberos', function () {
   if (process.env.MONGODB_URI == null) {
     console.error('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
     return;
   }
   let krb5Uri = process.env.MONGODB_URI;
+
+  if (!process.env.KRB5_PRINCIPAL) {
+    console.error('skipping Kerberos tests, KRB5_PRINCIPAL environment variable is not defined');
+    return;
+  }
+
   if (process.platform === 'win32') {
     console.error('Win32 run detected');
     if (process.env.LDAPTEST_PASSWORD == null) {
@@ -22,54 +46,48 @@ describe('Kerberos', function () {
     const client = new MongoClient(krb5Uri);
     client.connect(function (err, client) {
       expect(err).to.not.exist;
-      client
-        .db('kerberos')
-        .collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          expect(err).to.not.exist;
-          expect(docs[0].kerberos).to.be.true;
-
-          client.close(done);
-        });
+      verifyKerberosAuthentication(client, done);
     });
   });
 
+  // TODO: this test only tests that these properties do not crash anything - but not that they actually have an effect
   it('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', function (done) {
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`
     );
     client.connect(function (err, client) {
       expect(err).to.not.exist;
-      client
-        .db('kerberos')
-        .collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          expect(err).to.not.exist;
-          expect(docs[0].kerberos).to.be.true;
-
-          client.close(done);
-        });
+      verifyKerberosAuthentication(client, done);
     });
   });
 
-  it('should authenticate with additional authentication properties', function (done) {
-    const client = new MongoClient(
-      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`
-    );
-    client.connect(function (err, client) {
-      expect(err).to.not.exist;
-      client
-        .db('kerberos')
-        .collection('test')
-        .find()
-        .toArray(function (err, docs) {
-          expect(err).to.not.exist;
-          expect(docs[0].kerberos).to.be.true;
+  describe('should use the SERVICE_NAME property', function () {
+    it('as an option handed to the MongoClient', function (done) {
+      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+        authMechanismProperties: {
+          SERVICE_NAME: 'alternate'
+        }
+      });
+      client.connect(function (err) {
+        expect(err).to.exist;
+        expect(err.message).to.match(
+          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)/
+        );
+        done();
+      });
+    });
 
-          client.close(done);
-        });
+    it('as part of the query string parameters', function (done) {
+      const client = new MongoClient(
+        `${krb5Uri}&authMechanismProperties=SERVICE_NAME:alternate&maxPoolSize=1`
+      );
+      client.connect(function (err) {
+        expect(err).to.exist;
+        expect(err.message).to.match(
+          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)/
+        );
+        done();
+      });
     });
   });
 
