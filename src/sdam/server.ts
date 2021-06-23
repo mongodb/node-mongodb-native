@@ -55,35 +55,6 @@ import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 
-// Used for filtering out fields for logging
-const DEBUG_FIELDS = [
-  'reconnect',
-  'reconnectTries',
-  'reconnectInterval',
-  'emitError',
-  'cursorFactory',
-  'host',
-  'port',
-  'size',
-  'keepAlive',
-  'keepAliveInitialDelay',
-  'noDelay',
-  'connectionTimeout',
-  'checkServerIdentity',
-  'socketTimeoutMS',
-  'ssl',
-  'ca',
-  'crl',
-  'cert',
-  'key',
-  'rejectUnauthorized',
-  'promoteLongs',
-  'promoteValues',
-  'promoteBuffers',
-  'bsonRegExp',
-  'servername'
-];
-
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
   [STATE_CONNECTING]: [STATE_CONNECTING, STATE_CLOSING, STATE_CONNECTED, STATE_CLOSED],
