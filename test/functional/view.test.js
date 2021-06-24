@@ -58,12 +58,15 @@ describe('Views', function() {
           ) {
             expect(r).to.exist;
             expect(err).to.not.exist;
-            delete commandResult.apiVersion;
-            expect(commandResult).to.eql({
+            const expectation = {
               create: 'test',
               viewOn: 'users',
               pipeline: [{ $match: {} }]
-            });
+            };
+            if (self.configuration.serverApi) {
+              expectation.apiVersion = self.configuration.serverApi;
+            }
+            expect(commandResult).to.eql(expectation);
 
             client.close(done);
           });

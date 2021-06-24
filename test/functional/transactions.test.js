@@ -8,7 +8,6 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const loadSpecTests = require('../spec').loadSpecTests;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
-const semver = require('semver');
 
 function ignoreNsNotFoundForListIndexes(err) {
   if (err.code !== 26) {

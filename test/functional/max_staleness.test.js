@@ -6,9 +6,16 @@ const mock = require('mongodb-mock-server');
 const test = {};
 describe('Max Staleness', function() {
   afterEach(() => mock.cleanup());
-  beforeEach(() => {
+  beforeEach(function() {
     return mock.createServer().then(server => {
       test.server = server;
+      test.expectation = {
+        $query: { find: 'test', filter: {} },
+        $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+      };
+      if (this.configuration.serverApi) {
+        test.expectation.$query.apiVersion = this.configuration.serverApi;
+      }
 
       const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -64,11 +71,7 @@ describe('Max Staleness', function() {
           .find({})
           .toArray(function(err) {
             expect(err).to.not.exist;
-            delete test.checkCommand.$query.apiVersion;
-            expect(test.checkCommand).to.eql({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+            expect(test.checkCommand).to.eql(test.expectation);
 
             client.close(done);
           });
@@ -103,11 +106,7 @@ describe('Max Staleness', function() {
           .find({})
           .toArray(function(err) {
             expect(err).to.not.exist;
-            delete test.checkCommand.$query.apiVersion;
-            expect(test.checkCommand).to.eql({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+            expect(test.checkCommand).to.eql(test.expectation);
 
             client.close(done);
           });
@@ -142,11 +141,8 @@ describe('Max Staleness', function() {
             .find({})
             .toArray(function(err) {
               expect(err).to.not.exist;
-              delete test.checkCommand.$query.apiVersion;
-              expect(test.checkCommand).to.eql({
-                $query: { find: 'test', filter: {} },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
+
+              expect(test.checkCommand).to.eql(test.expectation);
 
               client.close(done);
             });
@@ -180,11 +176,7 @@ describe('Max Staleness', function() {
           .setReadPreference(readPreference)
           .toArray(function(err) {
             expect(err).to.not.exist;
-            delete test.checkCommand.$query.apiVersion;
-            expect(test.checkCommand).to.eql({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+            expect(test.checkCommand).to.eql(test.expectation);
 
             client.close(done);
           });

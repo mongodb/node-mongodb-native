@@ -678,11 +678,14 @@ describe('Collation', function() {
           .collection('test')
           .createIndex({ a: 1 }, { collation: { caseLevel: true } })
           .then(() => {
-            delete commandResult.apiVersion; // might or might not exist, this test isn't concerned with checking this
-            expect(commandResult).to.eql({
+            const expectation = {
               createIndexes: 'test',
               indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
-            });
+            };
+            if (configuration.serverApi) {
+              expectation.apiVersion = configuration.serverApi;
+            }
+            expect(commandResult).to.eql(expectation);
 
             return client.close();
           });
