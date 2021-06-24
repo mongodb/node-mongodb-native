@@ -65,12 +65,12 @@ typedCollection
   .map(x => x.name2 && x.age2);
 typedCollection.find({ name: '123' }, { projection: { age: 1 } }).map(x => x.tag);
 
-typedCollection.find().project({ name: 1 });
-typedCollection.find().project({ notExistingField: 1 });
-typedCollection.find().project({ max: { $max: [] } });
-
-// $ExpectType Cursor<{ name: string; }>
-typedCollection.find().project<{ name: string }>({ name: 1 });
+expectType<FindCursor<{ name: string }>>(typedCollection.find().project({ name: 1 }));
+expectType<FindCursor<TypedDoc>>(typedCollection.find().project({ notExistingField: 1 }));
+expectType<FindCursor<TypedDoc>>(typedCollection.find().project({ max: { $max: [] } }));
+expectType<FindCursor<{ name: string }>>(
+  typedCollection.find().project<{ name: string }>({ name: 1 })
+);
 
 void async function () {
   for await (const item of cursor) {
