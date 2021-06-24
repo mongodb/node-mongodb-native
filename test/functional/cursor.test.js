@@ -4119,6 +4119,54 @@ describe('Cursor', function() {
     }
   });
 
+  it('Correctly decorate the collection count command with skip, limit, hint, readConcern', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '<4.9.0' }
+    },
+
+    test: function(done) {
+      var started = [];
+
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+      client.on('commandStarted', function(event) {
+        if (event.commandName === 'count') started.push(event);
+      });
+
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+
+        const db = client.db(configuration.db);
+        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
+          {
+            project: '123'
+          },
+          {
+            readConcern: { level: 'local' },
+            limit: 5,
+            skip: 5,
+            hint: { project: 1 }
+          },
+          err => {
+            expect(err).to.not.exist;
+            test.equal(1, started.length);
+            if (started[0].command.readConcern)
+              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+            test.deepEqual({ project: 1 }, started[0].command.hint);
+            test.equal(5, started[0].command.skip);
+            test.equal(5, started[0].command.limit);
+
+            done();
+          }
+        );
+      });
+    }
+  });
+
   it('Should properly kill a cursor', {
     metadata: {
       requires: {
