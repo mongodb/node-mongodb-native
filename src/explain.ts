@@ -9,7 +9,7 @@ export const ExplainVerbosity = Object.freeze({
 } as const);
 
 /** @public */
-export type ExplainVerbosity = typeof ExplainVerbosity[keyof typeof ExplainVerbosity];
+export type ExplainVerbosity = string;
 
 /**
  * For backwards compatibility, true is interpreted as "allPlansExecution"
@@ -35,7 +35,7 @@ export class Explain {
         ? ExplainVerbosity.allPlansExecution
         : ExplainVerbosity.queryPlanner;
     } else {
-      this.verbosity = ExplainVerbosity[verbosity];
+      this.verbosity = verbosity;
     }
   }
 
@@ -43,12 +43,10 @@ export class Explain {
     if (options?.explain === undefined) return;
 
     const explain = options.explain;
-    if (typeof explain === 'boolean' || explain in ExplainVerbosity) {
+    if (typeof explain === 'boolean' || typeof explain === 'string') {
       return new Explain(explain);
     }
 
-    throw new MongoDriverError(
-      `explain must be one of ${Object.keys(ExplainVerbosity)} or a boolean`
-    );
+    throw new MongoDriverError('explain must be a string or a boolean');
   }
 }
