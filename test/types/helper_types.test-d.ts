@@ -72,11 +72,15 @@ expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ someKey:
 expectNotAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ someKey: 'hello' });
 
 // LIMITATION: If users have 'any' in their schema, type checking becomes weaker(-ish):
+// This case is the same for `Document` usage for schema
 expectAssignable<OnlyFieldsOfType<{ a: number; b: any; c: string }, NumericType | undefined>>({
   a: 2,
   b: 3,
   c: 4 // Since any is present we can't filter away types that aren't numeric (the restriction requested by the second argument)
   // So now 'c' is coerced to numeric instead of being not allowed altogether
+});
+expectNotAssignable<OnlyFieldsOfType<{ a: number; b: any; c: string }, NumericType | undefined>>({
+  c: 'hello' // We can still limit the types the keys map to though
 });
 // Here's the opposite of above, if I make b a concrete type then only 'a' is permitted
 expectNotAssignable<
