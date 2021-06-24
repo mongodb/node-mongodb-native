@@ -7,9 +7,17 @@
     "lib",
     "src",
     "etc/prepare.js",
-    "mongodb.d.ts"
+    "mongodb.d.ts",
+    "mongodb.ts34.d.ts"
   ],
   "types": "mongodb.d.ts",
+  "typesVersions": {
+    "<=4.0.2": {
+      "mongodb.d.ts": [
+        "mongodb.ts34.d.ts"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:mongodb/node-mongodb-native.git"
@@ -49,6 +57,7 @@
     "chalk": "^4.1.0",
     "co": "4.6.0",
     "coveralls": "^3.0.11",
+    "downlevel-dts": "^0.7.0",
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-jsdoc": "^30.7.8",
@@ -95,7 +104,7 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "rimraf lib && tsc",
-    "build:dts": "npm run build:ts && api-extractor run && rimraf 'lib/**/*.d.ts*'",
+    "build:dts": "npm run build:ts && api-extractor run && rimraf 'lib/**/*.d.ts*' && downlevel-dts mongodb.d.ts mongodb.ts34.d.ts",
     "build:docs": "typedoc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run check:test",

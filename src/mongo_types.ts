@@ -320,6 +320,9 @@ export type UpdateFilter<TSchema> = {
 export type Nullable<AnyType> = AnyType | null | undefined;
 
 /** @public */
+export type OneOrMore<T> = T | T[];
+
+/** @public */
 export type GenericListener = (...args: any[]) => void;
 
 /**
