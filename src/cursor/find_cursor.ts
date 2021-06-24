@@ -12,7 +12,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
-import type { Projection, ProjectionOperators, SchemaMember } from '../mongo_types';
+import type { Projection } from '../mongo_types';
 
 /** @internal */
 const kFilter = Symbol('filter');
