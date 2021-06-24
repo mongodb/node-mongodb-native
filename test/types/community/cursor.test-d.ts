@@ -1,5 +1,5 @@
 import type { Readable } from 'stream';
-import { expectType } from 'tsd';
+import { expectNotType, expectType } from 'tsd';
 import { FindCursor, MongoClient } from '../../../src/index';
 
 // TODO(NODE-3346): Improve these tests to use expect assertions more
@@ -40,6 +40,7 @@ collection.find().sort({});
 interface TypedDoc {
   name: string;
   age: number;
+  listOfNumbers: number[];
   tag: {
     name: string;
   };
@@ -65,11 +66,30 @@ typedCollection
   .map(x => x.name2 && x.age2);
 typedCollection.find({ name: '123' }, { projection: { age: 1 } }).map(x => x.tag);
 
-expectType<FindCursor<{ name: string }>>(typedCollection.find().project({ name: 1 }));
-expectType<FindCursor<TypedDoc>>(typedCollection.find().project({ notExistingField: 1 }));
-expectType<FindCursor<TypedDoc>>(typedCollection.find().project({ max: { $max: [] } }));
-expectType<FindCursor<{ name: string }>>(
-  typedCollection.find().project<{ name: string }>({ name: 1 })
+// A known key with a constant projection
+expectType<{ name: string }[]>(await typedCollection.find().project({ name: 1 }).toArray());
+expectNotType<{ age: number }[]>(await typedCollection.find().project({ name: 1 }).toArray());
+
+// An unknown key
+expectType<{ notExistingField: unknown }[]>(
+  await typedCollection.find().project({ notExistingField: 1 }).toArray()
+);
+expectNotType<TypedDoc[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
+
+// Projection operator
+expectType<{ listOfNumbers: number[] }[]>(
+  await typedCollection
+    .find()
+    .project({ listOfNumbers: { $slice: [0, 4] } })
+    .toArray()
+);
+
+// Using the override parameter works
+expectType<{ name: string }[]>(
+  await typedCollection
+    .find()
+    .project<{ name: string }>({ name: 1 })
+    .toArray()
 );
 
 void async function () {
