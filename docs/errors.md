@@ -154,16 +154,36 @@ The test plan consists of a series of prose tests. As numerous errors are being 
 
 ## `MongoLogicError`
 ### `MongoInvalidArgumentError`
+- Create a `MongoClient` object and supply a number in place of the connection string when calling `.connect()`
+    - Assert that `MongoInvalidArgumentError` is thrown.
 ### `MongoClientInstantiationError`
+- Create a `MongoClient` object and supply `"error"` as the connection string.
+    - Assert that `MongoClientInstantiationError` is thrown.
 ### `MongoMissingCredentialsError`
+- Fail to provide credentials when authenticating with the x509 mechanism.
+    - Assert that `MongoMissingCredentialsError` is thrown.
 
 ## `MongoRuntimeError`
-### `MongoClientNotConnected`
+### `MongoClientNotConnectedError`
+- Attempt to access a database without establishing a connection to a MongoDB server.
+    - Assert that `MongoClientNotConnectedError` is thrown.
 ### `MongoServerClosedError`
+- Attempt to execute a query against a server that has closed.
+    - Assert that `MongoServerClosedError` is thrown.
 ### `MongoStreamClosedError`
+- Attempt to execute `tryNext()` on a `ChangeStream` object that is closed.
+    - Assert that `MongoStreamClosedError` is thrown.
 ### `MongoTopologyClosedError`
+- Attempt to execute `createCollection()` against a database that has been closed.
+    - Assert that `MongoTopologyClosedError` is thrown.
 ### `MongoCursorExhaustedError`
+- Attempt to continue reading a cursor after it has reached the end of the batch.
+    - Assert that `MongoCursorExhaustedError` is thrown.
 ### `MongoIOError`
+- Attempt to read from a file that does not exist.
+    - Assert that `MongoIOError` is thrown.
 
 ## `MongoNetworkError`
 ### `MongoNetworkTimeoutError`
+- Create a `MongoClient` object and set the `connectTimeoutMS` option to 1.
+    - Assert that a `MongoNetworkTimeoutError` is thrown.
