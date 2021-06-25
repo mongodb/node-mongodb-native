@@ -1,4 +1,24 @@
-# Error Classes
+# Error Class Hierarchy
+**Title**: Error Class Hierarchy
+
+**Authors**: Warren James, Andy Mina
+
+**Advisory Group**: Daria Purdue, Eric Adum, Neal Beeken
+
+### Contents
+- [Introduction](#Introduction)
+- [Errors](#errors)
+    - [`MongoError`](#MongoError)
+    - [`MongoDriverError`](#MongoDriverError)
+        - [`MongoLogicError`](#MongoLogicError)
+        - [`MongoRuntimeError`](#MongoRuntimeError)
+    - [`MongoNetworkError`](#MongoNetworkError)
+    - [`MongoServerError`](#MongoServerError)
+    - [`MongoSystemError`](#MongoSystemError)
+- [Test Plan](#Test-Plan)
+    - Mongo
+
+# Errors
 All errors are derived from the `MongoError` class which should **never** be instantiated. There are five main error classes which stem from `MongoError`: `MongoLogicError`, `MongoRuntimeError`, `MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
 ## `MongoError`
 The base class from which all errors in the Node driver subclass. `MongoError` should **never** be be directly instantiated.
@@ -103,3 +123,8 @@ These are errors which wrap error responses received from the server.
 
 ## `MongoSystemError`
 These are errors which originate from faulty environment setup.
+
+# Test Plan
+The test plan consists of a series of prose tests. As numerous errors are being introduced, select classes will be tested. The classes to be tested will be selected based on two characteristics:
+1. The **frequency** of which the user may encounter this error. Errors that users will likely catch in their code, including but not limited to `MongoIOError` and `MongoNetworkTimeoutError`, are part of the test plan. *Note:* Error classes that should never be instantiated, such as `MongoLogicError` and `MongoRuntimeError`, will not be tested as the user should not encounter them.
+2. The **scope** of the error. Errors that tackle a large subset of issues, including but not limited to `MongoServerError` and `MongoSystemError`, will *not* be part of the test plan.
