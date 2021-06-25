@@ -2,7 +2,7 @@
 All errors are derived from the `MongoError` class which should **never** be instantiated. There are five main error classes which stem from `MongoError`: `MongoLogicError`, `MongoRuntimeError`, `MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
 ## `MongoError`
 The base class from which all errors in the Node driver subclass. `MongoError` should **never** be be directly instantiated.
-![(MongoError hierarchy tree)](charts/output/MongoError.svg)
+![(MongoError hierarchy tree)](charts/imgs/MongoError.svg)
 Children of `MongoError` include:
 - [`MongoLogicError`](#MongoLogicError)
 - [`MongoRuntimeError`](#MongoRuntimeError)
@@ -13,7 +13,7 @@ Children of `MongoError` include:
 
 ## `MongoLogicError`
 This class represents errors which originate from misuse of the driver API and will generally be thrown before making contact with the server. This class should **never** be directly instantiated.
-![(MongoLogicError hierarchy tree)](charts/output/MongoLogicError.svg)
+![(MongoLogicError hierarchy tree)](charts/imgs/MongoLogicError.svg)
 Children of `MongoLogicError` include:
 
 * #### `MongoInvalidArgumentError`
@@ -34,7 +34,7 @@ Children of `MongoLogicError` include:
 
 ## `MongoRuntimeError`
 This class represents errors which occur when the driver encounters unexpected input or reaches an unexpected/invalid internal state. This class should **never** be directly instantiated.
-![(MongoRuntimeError hierarchy tree)](charts/output/MongoRuntimeError.svg)
+![(MongoRuntimeError hierarchy tree)](charts/imgs/MongoRuntimeError.svg)
 Children of `MongoRuntimeError` include:
 
 * #### `MongoInternalDriverError`
