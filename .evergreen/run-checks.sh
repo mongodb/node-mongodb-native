@@ -6,8 +6,6 @@ NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-set -o xtrace
-
 npm run check:lint
 
 echo "Typescript $(npx tsc -v)"
