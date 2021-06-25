@@ -12,7 +12,7 @@ describe('BSONRegExp', () => {
         const client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
         let collection;
 
-        return client
+        client
           .connect()
           .then(() => {
             const db = client.db('bson_regex_db', passOptionTo === 'db' ? option : undefined);
