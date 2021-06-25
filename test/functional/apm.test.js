@@ -661,16 +661,15 @@ describe('APM', function () {
 
   describe('Internal state references', function () {
     let client;
-    beforeEach(function (done) {
+    beforeEach(function () {
       client = this.configuration.newClient(
         { writeConcern: { w: 1 } },
         { maxPoolSize: 1, monitorCommands: true }
       );
-      done();
     });
 
     afterEach(function (done) {
-      client.close(() => done());
+      client.close(done);
     });
 
     // NODE-1502
