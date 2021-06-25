@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "bson": "^4.4.0",
-    "denque": "^1.5.0"
+    "denque": "^1.5.0",
+    "mongodb-connection-string-url": "^1.0.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",

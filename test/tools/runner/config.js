@@ -1,4 +1,5 @@
 'use strict';
+const ConnectionString = require('mongodb-connection-string-url').default;
 const url = require('url');
 const qs = require('querystring');
 const { expect } = require('chai');
@@ -6,7 +7,6 @@ const { expect } = require('chai');
 const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
-const { parseURI } = require('../../../src/connection_string');
 const { HostAddress } = require('../../../src/utils');
 
 /**
@@ -35,7 +35,8 @@ function convertToConnStringMap(obj) {
 
 class TestConfiguration {
   constructor(uri, context) {
-    const { url, hosts } = parseURI(uri);
+    const url = new ConnectionString(uri);
+    const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.topologyType = context.topologyType;
     this.version = context.version;

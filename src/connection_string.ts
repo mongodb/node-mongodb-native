@@ -1,6 +1,7 @@
 import * as dns from 'dns';
 import * as fs from 'fs';
-import { URL, URLSearchParams } from 'url';
+import ConnectionString from 'mongodb-connection-string-url';
+import { URLSearchParams } from 'url';
 import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
@@ -146,68 +147,6 @@ export function checkTLSOptions(options: AnyOptions): void {
   check('tlsDisableCertificateRevocationCheck', 'tlsDisableOCSPEndpointCheck');
 }
 
-const HOSTS_REGEX = new RegExp(
-  String.raw`(?<protocol>mongodb(?:\+srv|)):\/\/(?:(?<username>[^:]*)(?::(?<password>[^@]*))?@)?(?<hosts>(?!:)[^\/?@]+)(?<rest>.*)`
-);
-
-/** @internal */
-export function parseURI(uri: string): { isSRV: boolean; url: URL; hosts: string[] } {
-  const match = uri.match(HOSTS_REGEX);
-  if (!match) {
-    throw new MongoParseError(`Invalid connection string ${uri}`);
-  }
-
-  const protocol = match.groups?.protocol;
-  const username = match.groups?.username;
-  const password = match.groups?.password;
-  const hosts = match.groups?.hosts;
-  const rest = match.groups?.rest;
-
-  if (!protocol || !hosts) {
-    throw new MongoParseError('Invalid connection string, protocol and host(s) required');
-  }
-
-  decodeURIComponent(username ?? '');
-  decodeURIComponent(password ?? '');
-
-  // characters not permitted in username nor password Set([':', '/', '?', '#', '[', ']', '@'])
-  const illegalCharacters = new RegExp(String.raw`[:/?#\[\]@]`, 'gi');
-  if (username?.match(illegalCharacters)) {
-    throw new MongoParseError(`Username contains unescaped characters ${username}`);
-  }
-  if (!username || !password) {
-    const uriWithoutProtocol = uri.replace(`${protocol}://`, '');
-    if (uriWithoutProtocol.startsWith('@') || uriWithoutProtocol.startsWith(':')) {
-      throw new MongoParseError('URI contained empty userinfo section');
-    }
-  }
-
-  if (password?.match(illegalCharacters)) {
-    throw new MongoParseError('Password contains unescaped characters');
-  }
-
-  let authString = '';
-  if (typeof username === 'string') authString += username;
-  if (typeof password === 'string') authString += `:${password}`;
-
-  const isSRV = protocol.includes('srv');
-  const hostList = hosts.split(',');
-  const url = new URL(`${protocol.toLowerCase()}://${authString}@dummyHostname${rest}`);
-
-  if (isSRV && hostList.length !== 1) {
-    throw new MongoParseError('mongodb+srv URI cannot have multiple service names');
-  }
-  if (isSRV && hostList[0].includes(':')) {
-    throw new MongoParseError('mongodb+srv URI cannot have port number');
-  }
-
-  return {
-    isSRV,
-    url,
-    hosts: hosts.split(',')
-  };
-}
-
 const TRUTHS = new Set(['true', 't', '1', 'y', 'yes']);
 const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
 function getBoolean(name: string, value: unknown): boolean {
@@ -285,7 +224,8 @@ export function parseOptions(
     mongoClient = undefined;
   }
 
-  const { url, hosts, isSRV } = parseURI(uri);
+  const url = new ConnectionString(uri);
+  const { hosts, isSRV } = url;
 
   const mongoOptions = Object.create(null);
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
