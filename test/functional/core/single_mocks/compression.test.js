@@ -10,6 +10,7 @@ describe('Single Compression (mocks)', function() {
   it("server should recieve list of client's supported compressors in handshake", {
     metadata: {
       requires: {
+        apiVersion: false,
         generators: true,
         topology: 'single'
       }
@@ -45,6 +46,7 @@ describe('Single Compression (mocks)', function() {
     {
       metadata: {
         requires: {
+          apiVersion: false,
           generators: true,
           topology: 'single'
         }
@@ -143,6 +145,7 @@ describe('Single Compression (mocks)', function() {
     {
       metadata: {
         requires: {
+          apiVersion: false,
           generators: true,
           topology: 'single'
         }
@@ -237,6 +240,7 @@ describe('Single Compression (mocks)', function() {
     {
       metadata: {
         requires: {
+          apiVersion: false,
           generators: true,
           topology: 'single'
         }
@@ -331,6 +335,7 @@ describe('Single Compression (mocks)', function() {
   it('should not compress uncompressible commands', {
     metadata: {
       requires: {
+        apiVersion: false,
         generators: true,
         topology: 'single'
       }

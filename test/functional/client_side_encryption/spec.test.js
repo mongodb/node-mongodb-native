@@ -35,6 +35,10 @@ describe('Client Side Encryption', function() {
   generateTopologyTests(testSuites, testContext, spec => {
     // Note: we are skipping regex tests b/c we currently deserialize straight to native
     // regex representation instead of to BSONRegExp.
-    return !spec.description.match(/type=regex/) && !spec.description.match(/maxWireVersion < 8/);
+    return (
+      !spec.description.match(/type=regex/) &&
+      !spec.description.match(/maxWireVersion < 8/) &&
+      !spec.description.match(/Count with deterministic encryption/) // TODO(NODE-3369): Unskip
+    );
   });
 });

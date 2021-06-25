@@ -29,7 +29,7 @@ describe('monitoring', function() {
   it('should record roundTripTime', function(done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -72,7 +72,7 @@ describe('monitoring', function() {
       }
 
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -104,7 +104,7 @@ describe('monitoring', function() {
     it('should connect and issue an initial server check', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
         }
       });
@@ -121,7 +121,7 @@ describe('monitoring', function() {
     it('should ignore attempts to connect when not already closed', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
         }
       });
@@ -139,7 +139,7 @@ describe('monitoring', function() {
     it('should not initiate another check if one is in progress', function(done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           setTimeout(() => request.reply(Object.assign({}, mock.DEFAULT_ISMASTER)), 250);
         }
       });
@@ -178,7 +178,7 @@ describe('monitoring', function() {
       let isMasterCount = 0;
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster) {
+        if (doc.ismaster || doc.hello) {
           isMasterCount++;
           if (isMasterCount === 2) {
             request.reply({ ok: 0, errmsg: 'forced from mock server' });

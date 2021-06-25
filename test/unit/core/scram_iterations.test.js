@@ -35,7 +35,7 @@ describe('SCRAM Iterations Tests', function() {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.saslStart) {
         return request.reply({
@@ -81,7 +81,7 @@ describe('SCRAM Iterations Tests', function() {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.saslStart) {
         return request.reply({
@@ -128,7 +128,7 @@ describe('SCRAM Iterations Tests', function() {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
       } else if (doc.saslStart) {
         return request.reply({

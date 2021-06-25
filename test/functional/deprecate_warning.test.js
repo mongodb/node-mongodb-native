@@ -1,5 +1,4 @@
 'use strict';
-const MongoClient = require('../../index').MongoClient;
 const MONGODB_WARNING_CODE = require('../../lib/utils').MONGODB_WARNING_CODE;
 const exec = require('child_process').exec;
 const chai = require('chai');
@@ -40,7 +39,7 @@ describe('Deprecation Warnings', function() {
   it('should carry the driver warning code', {
     metadata: { requires: { node: '>=8.0.0' } },
     test() {
-      const client = new MongoClient(this.configuration.url(), { madeUpOption: 3 });
+      const client = this.configuration.newClient(this.configuration.url(), { madeUpOption: 3 });
       let warning;
       process.once('warning', w => {
         warning = w;

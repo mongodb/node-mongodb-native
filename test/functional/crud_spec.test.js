@@ -12,6 +12,9 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const gatherTestSuites = require('./spec-runner').gatherTestSuites;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
+const loadSpecTests = require('../spec/index').loadSpecTests;
+const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
+
 function enforceServerVersionLimits(requires, scenario) {
   const versionLimits = [];
   if (scenario.minServerVersion) {
@@ -475,4 +478,20 @@ describe('CRUD v2', function() {
   });
 
   generateTopologyTests(testSuites, testContext);
+});
+
+describe('CRUD unified', function() {
+  for (const crudSpecTest of loadSpecTests('crud/unified')) {
+    expect(crudSpecTest).to.exist;
+    context(String(crudSpecTest.description), function() {
+      for (const test of crudSpecTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test() {
+            return runUnifiedTest(this, crudSpecTest, test);
+          }
+        });
+      }
+    });
+  }
 });

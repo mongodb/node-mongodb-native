@@ -27,7 +27,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly connect pool to single server', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       // Attempt to connect
@@ -50,7 +50,7 @@ describe('Pool tests', function() {
   });
 
   it('Should only listen on connect once', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
     test: function(done) {
       const pool = new Pool(null, {
         host: this.configuration.host,
@@ -75,7 +75,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly write ismaster operation to the server', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       // Attempt to connect
@@ -108,7 +108,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly grow server pool on concurrent operations', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       // Index
@@ -158,7 +158,7 @@ describe('Pool tests', function() {
 
   // Skipped due to use of topology manager
   it('should correctly write ismaster operation to the server and handle timeout', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       this.timeout(0);
@@ -195,7 +195,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly error out operations if pool is closed in the middle of a set', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       // Attempt to connect
@@ -247,7 +247,7 @@ describe('Pool tests', function() {
   });
 
   it.skip('should correctly recover from a server outage', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       var self = this;
@@ -322,7 +322,7 @@ describe('Pool tests', function() {
   // Skipped due to use of topology manager
   it.skip('should correctly recover from a longer server outage', {
     metadata: {
-      requires: { topology: 'single' },
+      requires: { topology: 'single', apiVersion: false },
       ignore: { travis: true }
     },
 
@@ -399,7 +399,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly reclaim immediateRelease socket', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       var pool = new Pool(null, {
@@ -1052,7 +1052,7 @@ describe('Pool tests', function() {
   });
 
   it('should correctly exit _execute loop when single available connection is destroyed', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       // Enable connections accounting
@@ -1111,7 +1111,7 @@ describe('Pool tests', function() {
   });
 
   it('should properly emit errors on forced destroy', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
 
     test: function(done) {
       const pool = new Pool(null, {
@@ -1143,7 +1143,7 @@ describe('Pool tests', function() {
   });
 
   it('should support callback mode for connect', {
-    metadata: { requires: { topology: 'single' } },
+    metadata: { requires: { topology: 'single', apiVersion: false } },
     test: function(done) {
       const pool = new Pool(null, {
         host: this.configuration.host,
@@ -1161,44 +1161,47 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should support resetting', function(done) {
-    const pool = new Pool(null, {
-      host: this.configuration.host,
-      port: this.configuration.port,
-      bson: new Bson()
-    });
+  it('should support resetting', {
+    metadata: { requires: { apiVersion: false } },
+    test: function(done) {
+      const pool = new Pool(null, {
+        host: this.configuration.host,
+        port: this.configuration.port,
+        bson: new Bson()
+      });
 
-    const isMasterQuery = new Query(
-      new Bson(),
-      'system.$cmd',
-      { ismaster: true },
-      { numberToSkip: 0, numberToReturn: 1 }
-    );
+      const isMasterQuery = new Query(
+        new Bson(),
+        'system.$cmd',
+        { ismaster: true },
+        { numberToSkip: 0, numberToReturn: 1 }
+      );
 
-    pool.once('connect', () => {
-      const connections = pool.allConnections().map(conn => conn.id);
-      expect(connections).to.have.length(1);
+      pool.once('connect', () => {
+        const connections = pool.allConnections().map(conn => conn.id);
+        expect(connections).to.have.length(1);
 
-      pool.write(isMasterQuery, err => {
-        expect(err).to.not.exist;
-
-        pool.reset(err => {
+        pool.write(isMasterQuery, err => {
           expect(err).to.not.exist;
 
-          pool.write(isMasterQuery, err => {
+          pool.reset(err => {
             expect(err).to.not.exist;
 
-            // verify the previous connection was dropped, and a new connection was created
-            const newConnections = pool.allConnections().map(conn => conn.id);
-            expect(newConnections).to.have.length(1);
-            expect(newConnections[0]).to.not.equal(connections[0]);
+            pool.write(isMasterQuery, err => {
+              expect(err).to.not.exist;
 
-            pool.destroy(done);
+              // verify the previous connection was dropped, and a new connection was created
+              const newConnections = pool.allConnections().map(conn => conn.id);
+              expect(newConnections).to.have.length(1);
+              expect(newConnections[0]).to.not.equal(connections[0]);
+
+              pool.destroy(done);
+            });
           });
         });
       });
-    });
 
-    pool.connect();
+      pool.connect();
+    }
   });
 });

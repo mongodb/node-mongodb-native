@@ -1,0 +1,127 @@
+{
+  "description": "RunCommand helper: No API version declared",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.9",
+      "serverParameters": {
+        "requireApiVersion": false
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "versioned-api-tests"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "runCommand does not inspect or change the command document",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1,
+              "apiVersion": "server_will_never_support_this_api_version"
+            }
+          },
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "apiVersion": "server_will_never_support_this_api_version",
+                  "apiStrict": {
+                    "$$exists": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "ping",
+                "databaseName": "versioned-api-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "runCommand does not prevent sending invalid API version declarations",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1,
+              "apiStrict": true
+            }
+          },
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "apiVersion": {
+                    "$$exists": false
+                  },
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "ping",
+                "databaseName": "versioned-api-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
