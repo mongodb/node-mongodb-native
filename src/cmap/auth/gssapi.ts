@@ -6,6 +6,7 @@ import type { Document } from '../../bson';
 
 type MechanismProperties = {
   gssapiCanonicalizeHostName?: boolean;
+  SERVICE_NAME?: string;
 };
 
 import * as dns from 'dns';
@@ -72,15 +73,14 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
     return callback(Kerberos['kModuleError']);
   }
 
-  const { username, password, mechanismProperties } = credentials;
-  const serviceName =
-    mechanismProperties['gssapiservicename'] ||
-    mechanismProperties['gssapiServiceName'] ||
-    'mongodb';
+  const { username, password } = credentials;
+  const mechanismProperties = credentials.mechanismProperties as MechanismProperties;
+
+  const serviceName = mechanismProperties.SERVICE_NAME ?? 'mongodb';
 
   performGssapiCanonicalizeHostName(
     hostAddress.host,
-    mechanismProperties as MechanismProperties,
+    mechanismProperties,
     (err?: Error | MongoError, host?: string) => {
       if (err) return callback(err);
 

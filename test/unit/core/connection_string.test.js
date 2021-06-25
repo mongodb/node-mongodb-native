@@ -8,7 +8,7 @@ const { AuthMechanism } = require('../../../src/cmap/auth/defaultAuthProviders')
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-// NOTE: These are cases we could never check for unless we write out own
+// NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we
 //       are safe skipping them.
 const skipTests = [
@@ -22,10 +22,7 @@ const skipTests = [
   'Unsupported option values are ignored',
 
   // We don't actually support `wtimeoutMS` which this test depends upon
-  'Deprecated (or unknown) options are ignored if replacement exists',
-
-  // We already handle this case in different ways
-  'may support deprecated gssapiServiceName option (GSSAPI)'
+  'Deprecated (or unknown) options are ignored if replacement exists'
 ];
 
 describe('Connection String', function () {
