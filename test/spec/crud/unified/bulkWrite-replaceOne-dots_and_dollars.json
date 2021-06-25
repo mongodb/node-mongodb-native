@@ -1,0 +1,532 @@
+{
+  "description": "bulkWrite-replaceOne-dots_and_dollars",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Replacing document with top-level dotted key on 3.6+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a.b": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a.b": 1
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a.b": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replacing document with top-level dotted key on pre-3.6 server yields server-side error",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "3.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a.b": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a.b": 1
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replacing document with dollar-prefixed key in embedded doc on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a": {
+                      "$b": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a": {
+                          "$b": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a": {
+                "$b": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replacing document with dollar-prefixed key in embedded doc on pre-5.0 server yields server-side error",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a": {
+                      "$b": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a": {
+                          "$b": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replacing document with dotted key in embedded doc on 3.6+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a": {
+                      "b.c": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a": {
+                          "b.c": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a": {
+                "b.c": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replacing document with dotted key in embedded doc on pre-3.6 server yields server-side error",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "3.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "a": {
+                      "b.c": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "a": {
+                          "b.c": 1
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

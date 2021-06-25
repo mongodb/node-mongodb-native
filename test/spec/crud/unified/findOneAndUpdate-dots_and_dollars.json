@@ -1,0 +1,380 @@
+{
+  "description": "findOneAndUpdate-dots_and_dollars",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "foo": {}
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Updating document to set top-level dollar-prefixed key on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$replaceWith": {
+                  "$setField": {
+                    "field": {
+                      "$literal": "$a"
+                    },
+                    "value": 1,
+                    "input": "$$ROOT"
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "foo": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": [
+                    {
+                      "$replaceWith": {
+                        "$setField": {
+                          "field": {
+                            "$literal": "$a"
+                          },
+                          "value": 1,
+                          "input": "$$ROOT"
+                        }
+                      }
+                    }
+                  ],
+                  "new": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "foo": {},
+              "$a": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Updating document to set top-level dotted key on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$replaceWith": {
+                  "$setField": {
+                    "field": {
+                      "$literal": "a.b"
+                    },
+                    "value": 1,
+                    "input": "$$ROOT"
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "foo": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": [
+                    {
+                      "$replaceWith": {
+                        "$setField": {
+                          "field": {
+                            "$literal": "a.b"
+                          },
+                          "value": 1,
+                          "input": "$$ROOT"
+                        }
+                      }
+                    }
+                  ],
+                  "new": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "foo": {},
+              "a.b": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Updating document to set dollar-prefixed key in embedded doc on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$set": {
+                  "foo": {
+                    "$setField": {
+                      "field": {
+                        "$literal": "$a"
+                      },
+                      "value": 1,
+                      "input": "$foo"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "foo": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "foo": {
+                          "$setField": {
+                            "field": {
+                              "$literal": "$a"
+                            },
+                            "value": 1,
+                            "input": "$foo"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "new": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "foo": {
+                "$a": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Updating document to set dotted key in embedded doc on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$set": {
+                  "foo": {
+                    "$setField": {
+                      "field": {
+                        "$literal": "a.b"
+                      },
+                      "value": 1,
+                      "input": "$foo"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "foo": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "foo": {
+                          "$setField": {
+                            "field": {
+                              "$literal": "a.b"
+                            },
+                            "value": 1,
+                            "input": "$foo"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "new": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "foo": {
+                "a.b": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

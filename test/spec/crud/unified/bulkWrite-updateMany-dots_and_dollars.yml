@@ -1,0 +1,150 @@
+description: "bulkWrite-updateMany-dots_and_dollars"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, foo: {} }
+
+tests:
+  - description: "Updating document to set top-level dollar-prefixed key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - updateMany:
+                filter: { _id: 1 }
+                update: &dollarPrefixedKey
+                  - { $replaceWith: { $setField: { field: { $literal: $a }, value: 1, input: $$ROOT } } }
+        expectResult: &bulkWriteResult
+          deletedCount: 0
+          insertedCount: 0
+          insertedIds: { $$unsetOrMatches: { } }
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+          upsertedIds: { }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: { _id: 1 }
+                    u: *dollarPrefixedKey
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: {}, $a: 1 }
+
+  - description: "Updating document to set top-level dotted key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - updateMany:
+                filter: { _id: 1 }
+                update: &dottedKey
+                  - { $replaceWith: { $setField: { field: { $literal: a.b }, value: 1, input: $$ROOT } } }
+        expectResult: *bulkWriteResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: { _id: 1 }
+                    u: *dottedKey
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: {}, a.b: 1 }
+
+  - description: "Updating document to set dollar-prefixed key in embedded doc on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - updateMany:
+                filter: { _id: 1 }
+                update: &dollarPrefixedKeyInEmbedded
+                  - { $set: { foo: { $setField: { field: { $literal: $a }, value: 1, input: $foo } } } }
+        expectResult: *bulkWriteResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: { _id: 1 }
+                    u: *dollarPrefixedKeyInEmbedded
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: { $a: 1 } }
+
+  - description: "Updating document to set dotted key in embedded doc on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - updateMany:
+                filter: { _id: 1 }
+                update: &dottedKeyInEmbedded
+                  - { $set: { foo: { $setField: { field: { $literal: a.b }, value: 1, input: $foo } } } }
+        expectResult: *bulkWriteResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: { _id: 1 }
+                    u: *dottedKeyInEmbedded
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: { a.b: 1 } }

@@ -61,14 +61,15 @@
           "object": "session0"
         },
         {
-          "name": "insertOne",
+          "name": "updateOne",
           "object": "collection0",
           "arguments": {
             "session": "session0",
-            "document": {
-              "_id": {
-                ".": "."
-              }
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "x": 1
             }
           },
           "expectError": {

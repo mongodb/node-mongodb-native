@@ -251,7 +251,7 @@ operations.set('find', async ({ entities, operation }) => {
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments;
-  return collection.findOneAndReplace(filter, replacement, translateOptions(opts));
+  return (await collection.findOneAndReplace(filter, replacement, translateOptions(opts))).value;
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {

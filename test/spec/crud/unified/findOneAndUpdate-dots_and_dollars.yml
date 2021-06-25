@@ -1,0 +1,127 @@
+description: "findOneAndUpdate-dots_and_dollars"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - &initialDocument { _id: 1, foo: {} }
+
+tests:
+  - description: "Updating document to set top-level dollar-prefixed key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: &dollarPrefixedKey
+            - { $replaceWith: { $setField: { field: { $literal: $a }, value: 1, input: $$ROOT } } }
+        expectResult: *initialDocument
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: *dollarPrefixedKey
+                new: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: {}, $a: 1 }
+
+  - description: "Updating document to set top-level dotted key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: &dottedKey
+            - { $replaceWith: { $setField: { field: { $literal: a.b }, value: 1, input: $$ROOT } } }
+        expectResult: *initialDocument
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: *dottedKey
+                new: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: {}, a.b: 1 }
+
+  - description: "Updating document to set dollar-prefixed key in embedded doc on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: &dollarPrefixedKeyInEmbedded
+            - { $set: { foo: { $setField: { field: { $literal: $a }, value: 1, input: $foo } } } }
+        expectResult: *initialDocument
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: *dollarPrefixedKeyInEmbedded
+                new: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: { $a: 1 } }
+
+  - description: "Updating document to set dotted key in embedded doc on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: &dottedKeyInEmbedded
+            - { $set: { foo: { $setField: { field: { $literal: a.b }, value: 1, input: $foo } } } }
+        expectResult: *initialDocument
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: *dottedKeyInEmbedded
+                new: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, foo: { a.b: 1 } }

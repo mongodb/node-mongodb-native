@@ -1,0 +1,128 @@
+description: "insertMany-dots_and_dollars"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "Inserting document with top-level dollar-prefixed key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - &dollarPrefixedKey { _id: 1, $a: 1 }
+        expectResult: &insertResult
+          insertedCount: 1
+          insertedIds: { $$unsetOrMatches: { 0: 1 } }
+    expectEvents: &expectEventsDollarPrefixedKey
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dollarPrefixedKey
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dollarPrefixedKey
+
+  - description: "Inserting document with top-level dollar-prefixed key on pre-5.0 server yields server-side error"
+    runOnRequirements:
+      - maxServerVersion: "4.99"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - *dollarPrefixedKey
+        expectError:
+          isClientError: false
+    expectEvents: *expectEventsDollarPrefixedKey
+    outcome: *initialData
+
+  - description: "Inserting document with top-level dotted key"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - &dottedKey { _id: 1, a.b: 1 }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dottedKey
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dottedKey
+
+  - description: "Inserting document with dollar-prefixed key in embedded doc"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - &dollarPrefixedKeyInEmbedded { _id: 1, a: { $b: 1 } }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dollarPrefixedKeyInEmbedded
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dollarPrefixedKeyInEmbedded
+
+  - description: "Inserting document with dotted key in embedded doc"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - &dottedKeyInEmbedded { _id: 1, a: { b.c: 1 } }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dottedKeyInEmbedded
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dottedKeyInEmbedded

@@ -152,7 +152,7 @@ export async function runUnifiedTest(
 
         expect(documents).to.have.lengthOf(collectionData.documents.length);
         for (const [expected, actual] of zip(collectionData.documents, documents)) {
-          expect(actual).to.include(expected, 'Test outcome did not match expected');
+          expect(actual).to.deep.include(expected);
         }
       }
     }
