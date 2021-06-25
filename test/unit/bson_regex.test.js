@@ -8,7 +8,7 @@ describe('BSONRegExp', () => {
     // define option for tests to use
     const option = { bsonRegExp: true };
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
-      it(`should respond with BSONRegExp class with option passed to ${passOptionTo}`, function() {
+      it(`should respond with BSONRegExp class with option passed to ${passOptionTo}`, function(done) {
         const client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
         let collection;
 
@@ -33,7 +33,10 @@ describe('BSONRegExp', () => {
               .has.property('regex')
               .that.is.instanceOf(BSONRegExp)
           )
-          .then(() => client.close());
+          .then(
+            () => client.close(done),
+            err => client.close(() => done(err))
+          );
       });
     }
   });
