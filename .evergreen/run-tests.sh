@@ -33,19 +33,7 @@ echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
 if [[ -z "${SKIP_DEPS}" ]]; then
   source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 else
-  export PATH="/opt/mongodbtoolchain/v2/bin:$PATH"
-  NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
-  export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
-  if [[ "$OS" == "Windows_NT" ]]; then
-    export NVM_HOME=`cygpath -m -a "$NVM_DIR"`
-    export NVM_SYMLINK=`cygpath -m -a "$NODE_ARTIFACTS_PATH/bin"`
-    export NVM_ARTIFACTS_PATH=`cygpath -m -a "$NODE_ARTIFACTS_PATH/bin"`
-    export PATH=`cygpath $NVM_SYMLINK`:`cygpath $NVM_HOME`:$PATH
-    echo "updated path on windows PATH=$PATH"
-  else
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  fi
-  echo "initializing NVM, NVM_DIR=$NVM_DIR"
+  source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 fi
 
 # only run FLE tets on hosts we explicitly choose to test on
