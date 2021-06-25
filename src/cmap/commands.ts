@@ -491,6 +491,7 @@ export class Response {
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
+  bsonRegExp?: boolean;
   index?: number;
 
   constructor(
@@ -502,7 +503,12 @@ export class Response {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+    this.opts = opts ?? {
+      promoteLongs: true,
+      promoteValues: true,
+      promoteBuffers: false,
+      bsonRegExp: false
+    };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -530,6 +536,7 @@ export class Response {
       typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
     this.promoteBuffers =
       typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
+    this.bsonRegExp = typeof this.opts.bsonRegExp === 'boolean' ? this.opts.bsonRegExp : false;
   }
 
   isParsed(): boolean {
@@ -547,13 +554,15 @@ export class Response {
     const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
+    const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
     let bsonSize;
 
     // Set up the options
     const _options: BSONSerializeOptions = {
-      promoteLongs: promoteLongs,
-      promoteValues: promoteValues,
-      promoteBuffers: promoteBuffers
+      promoteLongs,
+      promoteValues,
+      promoteBuffers,
+      bsonRegExp
     };
 
     // Position within OP_REPLY at which documents start
@@ -765,6 +774,7 @@ export class BinMsg {
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
+  bsonRegExp: boolean;
   documents: (Document | Buffer)[];
   index?: number;
 
@@ -777,7 +787,12 @@ export class BinMsg {
     this.parsed = false;
     this.raw = message;
     this.data = msgBody;
-    this.opts = opts ?? { promoteLongs: true, promoteValues: true, promoteBuffers: false };
+    this.opts = opts ?? {
+      promoteLongs: true,
+      promoteValues: true,
+      promoteBuffers: false,
+      bsonRegExp: false
+    };
 
     // Read the message header
     this.length = msgHeader.length;
@@ -796,6 +811,7 @@ export class BinMsg {
       typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
     this.promoteBuffers =
       typeof this.opts.promoteBuffers === 'boolean' ? this.opts.promoteBuffers : false;
+    this.bsonRegExp = typeof this.opts.bsonRegExp === 'boolean' ? this.opts.bsonRegExp : false;
 
     this.documents = [];
   }
@@ -816,12 +832,14 @@ export class BinMsg {
     const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
+    const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
 
     // Set up the options
     const _options: BSONSerializeOptions = {
-      promoteLongs: promoteLongs,
-      promoteValues: promoteValues,
-      promoteBuffers: promoteBuffers
+      promoteLongs,
+      promoteValues,
+      promoteBuffers,
+      bsonRegExp
     };
 
     while (this.index < this.data.length) {

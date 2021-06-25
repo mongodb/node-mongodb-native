@@ -48,7 +48,6 @@ export interface BSONSerializeOptions
       | 'evalFunctions'
       | 'cacheFunctions'
       | 'cacheFunctionsCrc32'
-      | 'bsonRegExp'
       | 'allowObjectSmallerThanBufferSize'
       | 'index'
     > {
@@ -64,6 +63,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     promoteLongs,
     serializeFunctions,
     ignoreUndefined,
+    bsonRegExp,
     raw
   } = options;
   return {
@@ -73,6 +73,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     promoteLongs,
     serializeFunctions,
     ignoreUndefined,
+    bsonRegExp,
     raw
   };
 }
@@ -94,6 +95,7 @@ export function resolveBSONOptions(
     promoteValues: options?.promoteValues ?? parentOptions?.promoteValues ?? true,
     promoteBuffers: options?.promoteBuffers ?? parentOptions?.promoteBuffers ?? false,
     ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false,
+    bsonRegExp: options?.bsonRegExp ?? parentOptions?.bsonRegExp ?? false,
     serializeFunctions: options?.serializeFunctions ?? parentOptions?.serializeFunctions ?? false,
     fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {}
   };

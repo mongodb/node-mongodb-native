@@ -25,6 +25,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'promoteLongs',
   'promoteValues',
   'promoteBuffers',
+  'bsonRegExp',
   'serializeFunctions',
   'ignoreUndefined'
 ]);

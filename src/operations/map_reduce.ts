@@ -30,6 +30,7 @@ const exclusionList = [
   'promoteLongs',
   'promoteValues',
   'promoteBuffers',
+  'bsonRegExp',
   'serializeFunctions',
   'ignoreUndefined',
   'scope' // this option is reformatted thus exclude the original

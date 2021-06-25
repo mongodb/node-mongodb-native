@@ -42,7 +42,8 @@ export function applyCommonQueryOptions(
     raw: typeof options.raw === 'boolean' ? options.raw : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
+    bsonRegExp: typeof options.bsonRegExp === 'boolean' ? options.bsonRegExp : false
   });
 
   if (options.session) {

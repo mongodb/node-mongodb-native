@@ -61,7 +61,6 @@ const DB_OPTIONS_ALLOW_LIST = [
   'raw',
   'authSource',
   'ignoreUndefined',
-  'promoteLongs',
   'readConcern',
   'retryMiliSeconds',
   'numberOfRetries',
@@ -69,6 +68,7 @@ const DB_OPTIONS_ALLOW_LIST = [
   'logger',
   'promoteBuffers',
   'promoteLongs',
+  'bsonRegExp',
   'promoteValues',
   'compression',
   'retryWrites'
