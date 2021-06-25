@@ -16,7 +16,19 @@
     - [`MongoServerError`](#MongoServerError)
     - [`MongoSystemError`](#MongoSystemError)
 - [Test Plan](#Test-Plan)
-    - Mongo
+    - [`MongoLogicError`](#MongoLogicError-1)
+        - [`MongoInvalidArgumentError`](#MongoInvalidArgumentError-1)
+        - [`MongoClientInstantiationError`](#MongoClientInstantiationError-1)
+        - [`MongoMissingCredentialsError`](#MongoMissingCredentialsError-1)
+    - [`MongoRuntimeError`](#MongoRuntimeError-1)
+        - [`MongoClientNotConnectedError`](#MongoClientNotConnectedError-1)
+        - [`MongoServerClosedError`](#MongoServerClosedError-1)
+        - [`MongoStreamClosedError`](#MongoStreamClosedError-1)
+        - [`MongoTopologyClosedError`](#MongoTopologyClosedError-1)
+        - [`MongoCursorExhaustedError`](#MongoCursorExhaustedError-1)
+        - [`MongoIOError`](#MongoIOError-1)
+    - [`MongoNetworkError`](#MongoNetworkError-1)
+        - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
 
 # Errors
 All errors are derived from the `MongoError` class which should **never** be instantiated. There are four main error classes which stem from `MongoError`: `MongoDriverError`, `MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
@@ -144,15 +156,14 @@ The test plan consists of a series of prose tests. As numerous errors are being 
 ### `MongoInvalidArgumentError`
 ### `MongoClientInstantiationError`
 ### `MongoMissingCredentialsError`
-### `MongoClientNotConnected`
 
 ## `MongoRuntimeError`
+### `MongoClientNotConnected`
 ### `MongoServerClosedError`
 ### `MongoStreamClosedError`
 ### `MongoTopologyClosedError`
 ### `MongoCursorExhaustedError`
 ### `MongoIOError`
-### `MongoNetworkTimeoutError`
 
 ## `MongoNetworkError`
 ### `MongoNetworkTimeoutError`
