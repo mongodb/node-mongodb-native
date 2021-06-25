@@ -1,24 +1,12 @@
 graph TD
-  MongoRuntimeError --> MongoResourceClosedError
   MongoRuntimeError --> MongoBatchError
   MongoRuntimeError --> MongoCursorError
   MongoRuntimeError --> MongoUnsupportedOperationError
-  MongoRuntimeError --> MongoStreamError
-
-  MongoResourceClosedError --> MongoServerClosedError
-  MongoResourceClosedError --> MongoStreamClosedError
-  MongoResourceClosedError --> MongoTopologyClosedError
+  MongoRuntimeError --> MongoDecompressionError
+  MongoRuntimeError --> MongoCompressionError
 
   MongoBatchError --> MongoBatchReExecutionError
 
   MongoCursorError --> MongoCursorExhaustedError
 
   MongoUnsupportedOperationError --> MongoInvalidCursorOperationError
-
-  MongoStreamError --> MongoChangeStreamError
-  MongoStreamError --> MongoGridFSStreamError
-
-  MongoChangeStreamError --> MongoNoResumeTokenInChangeStreamError
-  MongoChangeStreamError --> MongoNoCursorInChangeStreamError
-
-  MongoGridFSStreamError --> MongoGridFSChunkError

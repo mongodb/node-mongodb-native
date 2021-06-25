@@ -20,6 +20,10 @@
 
 # Errors
 All errors are derived from the `MongoError` class which should **never** be instantiated. There are four main error classes which stem from `MongoError`: `MongoDriverError`, `MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
+<<<<<<< HEAD
+=======
+
+>>>>>>> fddce9179 (docs: Break diagram down into 3 parts)
 ## `MongoError`
 The base class from which all errors in the Node driver subclass. `MongoError` should **never** be be directly instantiated.
 ![(MongoError hierarchy tree)](charts/imgs/MongoError.svg)
@@ -49,7 +53,7 @@ Children of `MongoLogicError` include:
     * Thrown when a user supplies a poorly-formatted connection string to the MongoClient constructor.
 
 * #### `MongoMissingCredentialsError`
-    * Thrown when a user fails to provide authentication credentials before attempting to connect to the server.
+    * Thrown when a user fails to provide authentication credentials before attempting to connect to the mongo server.
 
 * #### `MongoDependencyError`
     * Thrown when a required module or dependency is not present.

@@ -1,12 +1,13 @@
 graph TD
-  MongoRuntimeError --> MongoClientNotConnectedError
-  MongoRuntimeError --> MongoTransactionError
-  MongoRuntimeError --> MongoExpiredSessionError
-  MongoRuntimeError --> MongoKerberosClientConnectionError
-  MongoRuntimeError --> MongoInternalDriverError
-  MongoRuntimeError --> MongoDecompressionError
-  MongoRuntimeError --> MongoCompressionError
   MongoRuntimeError --> MongoEncryptionError
   MongoRuntimeError --> MongoParseError
   MongoRuntimeError --> MongoIOError
   MongoRuntimeError --> MongoServerSelectionError
+  MongoRuntimeError --> MongoStreamError
+
+  MongoStreamError --> MongoChangeStreamError
+  MongoStreamError --> MongoGridFSStreamError
+
+  MongoChangeStreamError --> MongoNoResumeTokenInChangeStreamError
+  MongoChangeStreamError --> MongoNoCursorInChangeStreamError
+  MongoGridFSStreamError --> MongoGridFSChunkError

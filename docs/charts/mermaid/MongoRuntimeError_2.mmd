@@ -1,0 +1,11 @@
+graph TD
+  MongoRuntimeError --> MongoClientNotConnectedError
+  MongoRuntimeError --> MongoTransactionError
+  MongoRuntimeError --> MongoExpiredSessionError
+  MongoRuntimeError --> MongoKerberosClientConnectionError
+  MongoRuntimeError --> MongoInternalDriverError
+  MongoRuntimeError --> MongoResourceClosedError
+
+  MongoResourceClosedError --> MongoServerClosedError
+  MongoResourceClosedError --> MongoStreamClosedError
+  MongoResourceClosedError --> MongoTopologyClosedError
