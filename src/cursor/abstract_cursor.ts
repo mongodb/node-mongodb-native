@@ -483,6 +483,7 @@ export abstract class AbstractCursor<
    * a new instance of a cursor. This means when calling map, you should always assign the result to a new
    * variable. Take note of the following example:
    *
+   * @example
    * ```typescript
    * const cursor: FindCursor<Document> = coll.find();
    * const mappedCursor: FindCursor<number> = cursor.map(doc => Object.keys(doc).length);

@@ -10,6 +10,7 @@ import type { ClientSession } from '../sessions';
 import type { OperationParent } from '../operations/command';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
+import type { Projection } from '../mongo_types';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -134,8 +135,25 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     return this;
   }
 
-  /** Add a project stage to the aggregation pipeline */
-  project<T = TSchema>($project: Document): AggregationCursor<T>;
+  /**
+   * Add a project stage to the aggregation pipeline
+   *
+   * @remarks
+   * In order to strictly type this function you must provide an interface
+   * that represents the effect of your projection on the result documents.
+   *
+   * **NOTE:** adding a projection changes the return type of the iteration of this cursor,
+   * it **does not** return a new instance of a cursor. This means when calling project,
+   * you should always assign the result to a new variable. Take note of the following example:
+   *
+   * @example
+   * ```typescript
+   * const cursor: AggregationCursor<{ a: number; b: string }> = coll.aggregate([]);
+   * const projectCursor = cursor.project<{ a: number }>({ a: true });
+   * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   * ```
+   */
+  project<T = TSchema>($project: Projection<T>): AggregationCursor<T>;
   project($project: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $project });

@@ -12,7 +12,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
-import type { Projection, ProjectionOperators, SchemaMember } from '../mongo_types';
+import type { Projection } from '../mongo_types';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -338,12 +338,24 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   }
 
   /**
-   * Sets a field projection for the query.
+   * Add a project stage to the aggregation pipeline
    *
-   * @param value - The field projection object.
+   * @remarks
+   * In order to strictly type this function you must provide an interface
+   * that represents the effect of your projection on the result documents.
+   *
+   * **NOTE:** adding a projection changes the return type of the iteration of this cursor,
+   * it **does not** return a new instance of a cursor. This means when calling project,
+   * you should always assign the result to a new variable. Take note of the following example:
+   *
+   * @example
+   * ```typescript
+   * const cursor: FindCursor<{ a: number; b: string }> = coll.find();
+   * const projectCursor = cursor.project<{ a: number }>({ a: true });
+   * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   * ```
    */
-  // TODO(NODE-3343): add parameterized cursor return type
-  project<T = TSchema>(value: SchemaMember<T, ProjectionOperators | number | boolean | any>): this;
+  project<T = TSchema>(value: Projection<T>): FindCursor<T>;
   project(value: Projection<TSchema>): this {
     assertUninitialized(this);
     this[kBuiltOptions].projection = value;
