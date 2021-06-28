@@ -185,14 +185,6 @@ The classes to be tested will be selected based on two characteristics:
 - Create a `MongoClient` object and supply a number in place of the connection string when calling `.connect()`
   - Assert that `MongoInvalidArgumentError` is thrown.
 
-<<<<<<< HEAD
-=======
-#### `MongoClientInstantiationError`
-
-- Create a `MongoClient` object and supply `"error"` as the connection string.
-  - Assert that `MongoClientInstantiationError` is thrown.
-
->>>>>>> 1947d46d7 (docs(NODE-3363): resized headings in the test plan)
 #### `MongoMissingCredentialsError`
 
 - Fail to provide credentials when authenticating with the x509 mechanism.
@@ -200,11 +192,7 @@ The classes to be tested will be selected based on two characteristics:
 
 ## `MongoRuntimeError`
 
-<<<<<<< HEAD
 #### `MongoNotConnectedError`
-=======
-#### `MongoClientNotConnectedError`
->>>>>>> 1947d46d7 (docs(NODE-3363): resized headings in the test plan)
 
 - Attempt to access a database without establishing a connection to a MongoDB server.
   - Assert that `MongoNotConnectedError` is thrown.
