@@ -204,6 +204,9 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   [kCursorStream]?: Readable;
   /** @internal */
   [kClosed]: boolean;
+  /** @internal */
+  isIterator: boolean;
+  isEmitter: boolean;
 
   /** @event */
   static readonly RESPONSE = 'response' as const;
@@ -243,6 +246,8 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   ) {
     super();
 
+    this.isIterator = false;
+    this.isEmitter = false;
     this.pipeline = pipeline;
     this.options = options;
 
@@ -371,6 +376,18 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
         return cursor.tryNext(cb);
       });
     });
+  }
+
+  on(
+    event: 'resumeTokenChanged' | 'init' | 'more' | 'response' | 'end' | 'error' | 'change',
+    callback: Callback<Document | null>
+  ): ChangeStream<TSchema> {
+    if (this.isIterator) {
+      throw new MongoDriverError(
+        'Cannot use ChangeStream as EventEmitter if it has already been used as an iterator'
+      );
+    }
+    return super.on(event, callback);
   }
 }
 
