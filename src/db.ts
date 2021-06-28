@@ -359,7 +359,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   listCollections(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor {
-    return new ListCollectionsCursor(this, filter || {}, resolveOptions(this, options));
+    return new ListCollectionsCursor(this, filter ?? {}, resolveOptions(this, options));
   }
 
   /**

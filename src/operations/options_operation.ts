@@ -31,7 +31,7 @@ export class OptionsOperation extends AbstractOperation<Document> {
           return callback(new MongoDriverError(`collection ${coll.namespace} not found`));
         }
 
-        callback(err, collections[0].options || null);
+        callback(err, collections[0].options);
       });
   }
 }
