@@ -34,11 +34,12 @@ tests:
     operations:
       - name: startTransaction
         object: *session0
-      - name: insertOne
+      - name: updateOne
         object: *collection0
         arguments:
           session: *session0
-          document: { _id: { .: . } }
+          filter: { _id: 1 }
+          update: { x: 1 }
         # Original test only asserted a generic error
         expectError: { isClientError: true }
       - name: assertSessionTransactionState

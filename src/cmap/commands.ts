@@ -104,7 +104,7 @@ export class Query {
     this.ignoreUndefined =
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
+    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
     this.batchSize = this.numberToReturn;
 
     // Flags
@@ -686,7 +686,7 @@ export class Msg {
       typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
     this.ignoreUndefined =
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
-    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
+    this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
     this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
 
     // flags

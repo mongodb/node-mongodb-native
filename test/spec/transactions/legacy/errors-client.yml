@@ -16,12 +16,12 @@ tests:
     operations:
       - name: startTransaction
         object: session0
-      - name: insertOne
+      - name: updateOne
         object: collection
         arguments:
           session: session0
-          document:
-            _id: {.: .}
+          filter: { _id: 1 }
+          update: { x: 1 }
         error: true
       - name: assertSessionTransactionState
         object: testRunner
@@ -38,16 +38,15 @@ tests:
         object: collection
         arguments:
           session: session0
-          document:
-            _id: 4
+          document: { _id: 1 }
         result:
-          insertedId: 4
-      - name: insertOne
+          insertedId: 1
+      - name: updateOne
         object: collection
         arguments:
           session: session0
-          document:
-            _id: {.: .}
+          filter: { _id: 1 }
+          update: { x: 1 }
         error: true
       - name: assertSessionTransactionState
         object: testRunner

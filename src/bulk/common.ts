@@ -977,7 +977,7 @@ export abstract class BulkOperationBase {
       // Fundamental error
       err: undefined,
       // check keys
-      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : true
+      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : false
     };
 
     // bypass Validation

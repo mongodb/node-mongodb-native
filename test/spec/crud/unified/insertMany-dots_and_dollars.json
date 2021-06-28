@@ -1,0 +1,334 @@
+{
+  "description": "insertMany-dots_and_dollars",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Inserting document with top-level dollar-prefixed key on 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "$a": 1
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "$a": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "$a": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Inserting document with top-level dollar-prefixed key on pre-5.0 server yields server-side error",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "$a": 1
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "$a": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "Inserting document with top-level dotted key",
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "a.b": 1
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "a.b": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a.b": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Inserting document with dollar-prefixed key in embedded doc",
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "a": {
+                  "$b": 1
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "a": {
+                        "$b": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a": {
+                "$b": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Inserting document with dotted key in embedded doc",
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "a": {
+                  "b.c": 1
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "a": {
+                        "b.c": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "a": {
+                "b.c": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

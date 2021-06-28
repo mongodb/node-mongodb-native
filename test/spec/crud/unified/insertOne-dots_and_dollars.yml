@@ -1,0 +1,235 @@
+description: "insertOne-dots_and_dollars"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+  - collection:
+      id: &collection1 collection1
+      database: *database0
+      collectionName: &collection1Name coll1
+      collectionOptions:
+        writeConcern: { w: 0 }
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "Inserting document with top-level dollar-prefixed key on 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dollarPrefixedKey { _id: 1, $a: 1 }
+        expectResult: &insertResult
+          insertedId: { $$unsetOrMatches: 1 }
+    expectEvents: &expectEventsDollarPrefixedKey
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dollarPrefixedKey
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dollarPrefixedKey
+
+  - description: "Inserting document with top-level dollar-prefixed key on pre-5.0 server yields server-side error"
+    runOnRequirements:
+      - maxServerVersion: "4.99"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: *dollarPrefixedKey
+        expectError:
+          isClientError: false
+    expectEvents: *expectEventsDollarPrefixedKey
+    outcome: *initialData
+
+  - description: "Inserting document with top-level dotted key"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dottedKey { _id: 1, a.b: 1 }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dottedKey
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dottedKey
+
+  - description: "Inserting document with dollar-prefixed key in embedded doc"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dollarPrefixedKeyInEmbedded { _id: 1, a: { $b: 1 } }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dollarPrefixedKeyInEmbedded
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dollarPrefixedKeyInEmbedded
+
+  - description: "Inserting document with dotted key in embedded doc"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dottedKeyInEmbedded { _id: 1, a: { b.c: 1 } }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dottedKeyInEmbedded
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dottedKeyInEmbedded
+
+  - description: "Inserting document with dollar-prefixed key in _id yields server-side error"
+    # Note: 5.0+ did not remove restrictions on dollar-prefixed keys in _id documents
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dollarPrefixedKeyInId { _id: { $a: 1 } }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dollarPrefixedKeyInId
+    outcome: *initialData
+
+  - description: "Inserting document with dotted key in _id on 3.6+ server"
+    runOnRequirements:
+      - minServerVersion: "3.6"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &dottedKeyInId { _id: { a.b: 1 } }
+        expectResult:
+          insertedId: { $$unsetOrMatches: { a.b: 1 } }
+    expectEvents: &expectEventsDottedKeyInId
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dottedKeyInId
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dottedKeyInId
+
+  - description: "Inserting document with dotted key in _id on pre-3.6 server yields server-side error"
+    runOnRequirements:
+      - maxServerVersion: "3.4.99"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: *dottedKeyInId
+        expectError:
+          isClientError: false
+    expectEvents: *expectEventsDottedKeyInId
+    outcome: *initialData
+
+  - description: "Inserting document with DBRef-like keys"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          # Note: an incomplete DBRef document may cause issues loading the test
+          # file with an Extended JSON parser, since the presence of one DBRef
+          # key may cause the parser to require others and/or enforce expected
+          # types (e.g. $ref and $db must be strings).
+          #
+          # Using "$db" here works for libmongoc so long as it's a string type;
+          # however, neither $ref nor $id would be accepted on their own.
+          #
+          # See https://github.com/mongodb/specifications/blob/master/source/extended-json.rst#parsers
+          document: &dbrefLikeKey { _id: 1, a: { $db: "foo" } }
+        expectResult: *insertResult
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *dbrefLikeKey
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - *dbrefLikeKey
+
+  - description: "Unacknowledged write using dollar-prefixed or dotted keys may be silently rejected on pre-5.0 server"
+    runOnRequirements:
+      - maxServerVersion: "4.99"
+    operations:
+      - name: insertOne
+        object: *collection1
+        arguments:
+          document: *dollarPrefixedKeyInId
+        expectResult:
+          acknowledged: { $$unsetOrMatches: false }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection1Name
+                documents:
+                  - *dollarPrefixedKeyInId
+                writeConcern: { w: 0 }
+    outcome: *initialData

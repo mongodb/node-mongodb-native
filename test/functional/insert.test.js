@@ -900,34 +900,6 @@ describe('Insert', function () {
     }
   });
 
-  it('Should fail on insert due to key starting with $', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var doc = {
-        _id: new ObjectId('4e886e687ff7ef5e00000162'),
-        $key: 'foreign'
-      };
-
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
-        collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-          test.ok(err != null);
-          expect(result).to.not.exist;
-
-          client.close(done);
-        });
-      });
-    }
-  });
-
   it('Should Correctly allow for control of serialization of functions on command level', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
