@@ -1,7 +1,7 @@
 {
   "root": true,
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 2019
   },
   "plugins": ["prettier", "jsdoc"],
   "extends": ["eslint:recommended", "plugin:prettier/recommended", "plugin:jsdoc/recommended"],
