@@ -72,6 +72,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
   if ('kModuleError' in Kerberos) {
     return callback(Kerberos['kModuleError']);
   }
+  const { initializeClient } = Kerberos;
 
   const { username, password } = credentials;
   const mechanismProperties = credentials.mechanismProperties as MechanismProperties;
@@ -89,7 +90,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
         Object.assign(initOptions, { user: username, password: password });
       }
 
-      Kerberos.initializeClient(
+      initializeClient(
         `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
         initOptions,
         (err: string, client: KerberosClient): void => {

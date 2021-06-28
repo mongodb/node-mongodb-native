@@ -25,7 +25,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter, OptionalId, UpdateQuery } from '../mongo_types';
+import type { Filter, OptionalId, UpdateFilter } from '../mongo_types';
 
 /** @public */
 export const BatchType = Object.freeze({
@@ -82,7 +82,7 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
   filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
+  update: UpdateFilter<TSchema> | UpdateFilter<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -98,7 +98,7 @@ export interface UpdateManyModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
   filter: Filter<TSchema>;
   /** A document or pipeline containing update operators. */
-  update: UpdateQuery<TSchema> | UpdateQuery<TSchema>[];
+  update: UpdateFilter<TSchema> | UpdateFilter<TSchema>[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */

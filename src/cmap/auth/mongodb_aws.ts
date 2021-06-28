@@ -38,6 +38,7 @@ export class MongoDBAWS extends AuthProvider {
     if ('kModuleError' in aws4) {
       return callback(aws4['kModuleError']);
     }
+    const { sign } = aws4;
 
     if (maxWireVersion(connection) < 9) {
       callback(
@@ -98,7 +99,7 @@ export class MongoDBAWS extends AuthProvider {
         }
 
         const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-        const options = aws4.sign(
+        const options = sign(
           {
             method: 'POST',
             host,

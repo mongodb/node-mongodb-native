@@ -77,7 +77,7 @@ export class WriteConcern {
   ): WriteConcern | undefined {
     if (options == null) return undefined;
     inherit = inherit ?? {};
-    let opts;
+    let opts: WriteConcernSettings | WriteConcern | undefined;
     if (typeof options === 'string' || typeof options === 'number') {
       opts = { w: options };
     } else if (options instanceof WriteConcern) {
@@ -88,7 +88,17 @@ export class WriteConcern {
     const parentOpts: WriteConcern | WriteConcernSettings | undefined =
       inherit instanceof WriteConcern ? inherit : inherit.writeConcern;
 
-    const { w, wtimeout, j, fsync, journal, wtimeoutMS } = { ...parentOpts, ...opts };
+    const {
+      w = undefined,
+      wtimeout = undefined,
+      j = undefined,
+      fsync = undefined,
+      journal = undefined,
+      wtimeoutMS = undefined
+    } = {
+      ...parentOpts,
+      ...opts
+    };
     if (
       w != null ||
       wtimeout != null ||

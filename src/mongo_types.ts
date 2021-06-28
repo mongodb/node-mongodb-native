@@ -1,5 +1,16 @@
-import type { Binary, Document, ObjectId, BSONRegExp } from './bson';
+import type {
+  Binary,
+  Document,
+  ObjectId,
+  BSONRegExp,
+  Timestamp,
+  Decimal128,
+  Double,
+  Int32,
+  Long
+} from './bson';
 import { EventEmitter } from 'events';
+import type { Sort } from './sort';
 
 /** @internal */
 export type TODO_NODE_3286 = any;
@@ -99,8 +110,8 @@ export interface FilterOperators<TValue> extends Document {
   $exists?: boolean;
   $type?: BSONType | BSONTypeAlias;
   // Evaluation
-  $expr?: any;
-  $jsonSchema?: any;
+  $expr?: Record<string, any>;
+  $jsonSchema?: Record<string, any>;
   $mod?: TValue extends number ? [number, number] : never;
   $regex?: TValue extends string ? RegExp | BSONRegExp | string : never;
   $options?: TValue extends string ? string : never;
@@ -119,7 +130,7 @@ export interface FilterOperators<TValue> extends Document {
   $bitsAllSet?: BitwiseFilter;
   $bitsAnyClear?: BitwiseFilter;
   $bitsAnySet?: BitwiseFilter;
-  $rand: Record<string, never>;
+  $rand?: Record<string, never>;
 }
 
 /** @public */
@@ -158,10 +169,6 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 /** @public */
 export type BSONTypeAlias = keyof typeof BSONType;
 
-/** A MongoDB UpdateQuery is set of operators @public */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type UpdateQuery<TSchema> = Document; // TODO(NODE-3274)
-
 /** @public */
 export interface ProjectionOperators extends Document {
   $elemMatch?: Document;
@@ -178,10 +185,136 @@ export type Projection<TSchema> = {
   Partial<Record<string, ProjectionOperators | 0 | 1 | boolean>>;
 
 /** @public */
-export type FlattenIfArray<T> = T extends ReadonlyArray<infer R> ? R : T;
+export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
+  ? ResultIfAny
+  : ResultIfNotAny;
+
+/** @public */
+export type Flatten<Type> = Type extends ReadonlyArray<infer Item> ? Item : Type;
 
 /** @public */
 export type SchemaMember<T, V> = { [P in keyof T]?: V } | { [key: string]: V };
+
+/** @public */
+export type IntegerType = number | Int32 | Long;
+
+/** @public */
+export type NumericType = IntegerType | Decimal128 | Double;
+
+/** @public */
+export type FilterOperations<T> = T extends Record<string, any>
+  ? { [key in keyof T]?: FilterOperators<T[key]> }
+  : FilterOperators<T>;
+
+/** @public */
+export type KeysOfAType<TSchema, Type> = {
+  [key in keyof TSchema]: NonNullable<TSchema[key]> extends Type ? key : never;
+}[keyof TSchema];
+
+/** @public */
+export type KeysOfOtherType<TSchema, Type> = {
+  [key in keyof TSchema]: NonNullable<TSchema[key]> extends Type ? never : key;
+}[keyof TSchema];
+
+/** @public */
+export type AcceptedFields<TSchema, FieldType, AssignableType> = {
+  readonly [key in KeysOfAType<TSchema, FieldType>]?: AssignableType;
+};
+
+/** It avoids using fields with not acceptable types @public */
+export type NotAcceptedFields<TSchema, FieldType> = {
+  readonly [key in KeysOfOtherType<TSchema, FieldType>]?: never;
+};
+
+/** @public */
+export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldType> = IsAny<
+  TSchema[keyof TSchema],
+  Record<string, FieldType>,
+  AcceptedFields<TSchema, FieldType, AssignableType> &
+    NotAcceptedFields<TSchema, FieldType> &
+    Record<string, AssignableType>
+>;
+
+/** @public */
+export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
+
+/** @public */
+export type AddToSetOperators<Type> = {
+  $each?: Array<Flatten<Type>>;
+};
+
+/** @public */
+export type ArrayOperator<Type> = {
+  $each?: Array<Flatten<Type>>;
+  $slice?: number;
+  $position?: number;
+  $sort?: Sort;
+};
+
+/** @public */
+export type SetFields<TSchema> = ({
+  readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
+    | OptionalId<Flatten<TSchema[key]>>
+    | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
+} &
+  NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>) & {
+  readonly [key: string]: AddToSetOperators<any> | any;
+};
+
+/** @public */
+export type PushOperator<TSchema> = ({
+  readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
+    | Flatten<TSchema[key]>
+    | ArrayOperator<Array<Flatten<TSchema[key]>>>;
+} &
+  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+  readonly [key: string]: ArrayOperator<any> | any;
+};
+
+/** @public */
+export type PullOperator<TSchema> = ({
+  readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
+    | Partial<Flatten<TSchema[key]>>
+    | FilterOperations<Flatten<TSchema[key]>>;
+} &
+  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+  readonly [key: string]: FilterOperators<any> | any;
+};
+
+/** @public */
+export type PullAllOperator<TSchema> = ({
+  readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?: TSchema[key];
+} &
+  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+  readonly [key: string]: any[];
+};
+
+/** @public */
+export type UpdateFilter<TSchema> = {
+  $currentDate?: OnlyFieldsOfType<
+    TSchema,
+    Date | Timestamp,
+    true | { $type: 'date' | 'timestamp' }
+  >;
+  $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
+  $min?: MatchKeysAndValues<TSchema>;
+  $max?: MatchKeysAndValues<TSchema>;
+  $mul?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
+  $rename?: Record<string, string>;
+  $set?: MatchKeysAndValues<TSchema>;
+  $setOnInsert?: MatchKeysAndValues<TSchema>;
+  $unset?: OnlyFieldsOfType<TSchema, any, '' | true | 1>;
+  $addToSet?: SetFields<TSchema>;
+  $pop?: OnlyFieldsOfType<TSchema, ReadonlyArray<any>, 1 | -1>;
+  $pull?: PullOperator<TSchema>;
+  $push?: PushOperator<TSchema>;
+  $pullAll?: PullAllOperator<TSchema>;
+  $bit?: OnlyFieldsOfType<
+    TSchema,
+    NumericType | undefined,
+    { and: IntegerType } | { or: IntegerType } | { xor: IntegerType }
+  >;
+} & Document;
 
 /** @public */
 export type Nullable<AnyType> = AnyType | null | undefined;

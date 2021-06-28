@@ -7,6 +7,10 @@ import { ClientSession, MongoClient, ReadConcern } from '../../../src/index';
 const client = new MongoClient('');
 const session = client.startSession();
 
+interface Account {
+  balance: number;
+}
+
 async function commitWithRetry(session: ClientSession) {
   try {
     await session.commitTransaction();
@@ -80,7 +84,7 @@ session.startTransaction();
 try {
   const opts = { session, returnOriginal: false };
   const res = await db
-    .collection('Account')
+    .collection<Account>('Account')
     .findOneAndUpdate({ name: from }, { $inc: { balance: -amount } }, opts);
   const A = res.value!;
   if (A.balance < 0) {
@@ -90,7 +94,7 @@ try {
   }
 
   const resB = await db
-    .collection('Account')
+    .collection<Account>('Account')
     .findOneAndUpdate({ name: to }, { $inc: { balance: amount } }, opts);
   const B = resB.value!;
 
