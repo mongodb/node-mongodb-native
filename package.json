@@ -83,7 +83,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=12.22.1"
+    "node": ">=12.9.0"
   },
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
