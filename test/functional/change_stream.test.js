@@ -1792,6 +1792,67 @@ describe('Change Streams', function () {
     }
   });
 
+  // FIXME: NODE-1797
+  describe('should error when used as iterator and emitter concurrently', function () {
+    let client, coll, changeStream;
+
+    beforeEach(function () {
+      client = this.configuration.newClient();
+      return client.connect().then(_client => {
+        client = _client;
+        coll = client.db(this.configuration.db).collection('tester');
+        changeStream = coll.watch();
+      });
+    });
+
+    afterEach(function () {
+      return Promise.resolve()
+        .then(() => {
+          if (changeStream && !changeStream.closed) {
+            return changeStream.close();
+          }
+        })
+        .then(() => {
+          if (client) {
+            return client.close();
+          }
+        })
+        .then(() => {
+          coll = undefined;
+          changeStream = undefined;
+          client = undefined;
+        });
+    });
+
+    // TODO: Better Errors
+    it('should throw MongoDriverError when set as an emitter and used as an iterator', {
+      metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
+      test: function () {
+        changeStream.on('change', nextVal => {
+          console.log(nextVal);
+        });
+
+        expect(() => {
+          changeStream.next().then();
+        }).to.throw();
+      }
+    });
+
+    it('should throw MongoDriverError when set as an iterator and used as an emitter', {
+      metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
+      test: function () {
+        function readIter() {
+          return changeStream.next();
+        }
+        readIter().then();
+        expect(() => {
+          changeStream.on('change', nextVal => {
+            console.log(nextVal);
+          });
+        }).to.throw();
+      }
+    });
+  });
   describe('should properly handle a changeStream event being processed mid-close', function () {
     let client, coll, changeStream;
 
