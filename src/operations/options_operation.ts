@@ -23,7 +23,7 @@ export class OptionsOperation extends AbstractOperation<Document> {
     coll.s.db
       .listCollections(
         { name: coll.collectionName },
-        { ...this.options, readPreference: this.readPreference, session }
+        { ...this.options, nameOnly: false, readPreference: this.readPreference, session }
       )
       .toArray((err, collections) => {
         if (err || !collections) return callback(err);
