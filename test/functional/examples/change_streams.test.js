@@ -1,7 +1,7 @@
 /* eslint no-unused-vars: 0 */
 'use strict';
 
-const setupDatabase = require('../functional/shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 const expect = require('chai').expect;
 
 describe('examples(change-stream):', function () {
