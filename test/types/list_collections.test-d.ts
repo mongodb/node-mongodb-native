@@ -6,14 +6,38 @@ import type { CollectionInfo, ListCollectionsCursor } from '../../src/operations
 const db = new MongoClient('').db();
 
 // We default to the CollectionInfo result type
-expectType<ListCollectionsCursor<CollectionInfo>>(db.listCollections());
-// We do not return the string result, and since its a runtime option there's not a great TS way to capture this
-expectNotType<ListCollectionsCursor<string>>(db.listCollections());
+expectType<ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo>>(
+  db.listCollections()
+);
+// By default it isn't narrowed to either type
+expectNotType<ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'>>>(db.listCollections());
+expectNotType<ListCollectionsCursor<CollectionInfo>>(db.listCollections());
 
-// toArray is a good way for TS users to keep their code simple
+// Testings each argument variation
+db.listCollections();
+db.listCollections({ a: 2 });
+db.listCollections({ a: 2 }, { batchSize: 2 });
+
 const collections = await db.listCollections().toArray();
-expectType<CollectionInfo[]>(collections);
+expectType<(CollectionInfo | string)[]>(collections);
 
-// toArray takes an override so here we can get an array of strings easily
-const collectionNames = await db.listCollections({}, { nameOnly: true }).toArray<string>();
-expectType<string[]>(collectionNames);
+const nameOnly = await db.listCollections({}, { nameOnly: true }).toArray();
+expectType<Pick<CollectionInfo, 'name' | 'type'>[]>(nameOnly);
+
+const fullInfo = await db.listCollections({}, { nameOnly: false }).toArray();
+expectType<CollectionInfo[]>(fullInfo);
+
+const couldBeEither = await db.listCollections({}, { nameOnly: Math.random() > 0.5 }).toArray();
+expectType<(CollectionInfo | string)[]>(couldBeEither);
+
+// Showing here that:
+// regardless of the option the generic parameter can be used to coerce the result if need be
+// note the nameOnly: false, yet strings are returned
+const overridden = await db
+  .listCollections<Pick<CollectionInfo, 'name' | 'type'>>({}, { nameOnly: false })
+  .toArray();
+expectType<Pick<CollectionInfo, 'name' | 'type'>[]>(overridden);
+const overriddenWithToArray = await db
+  .listCollections({}, { nameOnly: false })
+  .toArray<Pick<CollectionInfo, 'name' | 'type'>>();
+expectType<Pick<CollectionInfo, 'name' | 'type'>[]>(overriddenWithToArray);
