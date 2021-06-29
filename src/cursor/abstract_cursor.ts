@@ -387,6 +387,7 @@ export abstract class AbstractCursor<
         }
 
         if (session && session.owner === this) {
+          unpinConnection(this);
           return session.endSession(done);
         }
 
@@ -400,6 +401,7 @@ export abstract class AbstractCursor<
         { ...pluckBSONSerializeOptions(this[kOptions]), session },
         () => {
           if (session && session.owner === this) {
+            unpinConnection(this);
             return session.endSession(() => {
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error
@@ -722,7 +724,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
       cursor[kInitialized] = true;
 
       if (err || cursorIsDead(cursor)) {
-        return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+        return cleanupCursor(cursor, !!err, () => callback(err, nextDocument(cursor)));
       }
 
       next(cursor, blocking, callback);
@@ -732,7 +734,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
   }
 
   if (cursorIsDead(cursor)) {
-    return cleanupCursor(cursor, () => callback(undefined, null));
+    return cleanupCursor(cursor, false, () => callback(undefined, null));
   }
 
   // otherwise need to call getMore
@@ -749,7 +751,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     }
 
     if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+      return cleanupCursor(cursor, !!err, () => callback(err, nextDocument(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
@@ -765,7 +767,7 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   return !!cursorId && cursorId.isZero();
 }
 
-function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
+function cleanupCursor(cursor: AbstractCursor, errored: boolean, callback: Callback): void {
   if (cursor[kDocuments].length === 0) {
     cursor[kClosed] = true;
     cursor.emit(AbstractCursor.CLOSE);
@@ -773,9 +775,24 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
 
   const session = cursor[kSession];
   if (session && session.owner === cursor) {
+    if (!errored) {
+      unpinConnection(cursor);
+    }
     session.endSession(callback);
   } else {
     callback();
+  }
+}
+
+function unpinConnection(cursor: AbstractCursor): void {
+  const session = cursor[kSession];
+  if (session && cursor.loadBalanced) {
+    const server = cursor[kServer];
+    const pinnedConnection = session.pinnedConnection;
+    if (server && pinnedConnection) {
+      session.unpinConnection();
+      server.unpinConnection(pinnedConnection);
+    }
   }
 }
 

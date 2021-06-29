@@ -2,10 +2,21 @@
 
 set -o errexit  # Exit the script with error if any of the commands fail
 
+DRIVERS_TOOLS=$(cd "$(dirname "$0")" && pwd)/..
+MONGODB_URI=${MONGODB_URI:-}
+if [ -z "$MONGODB_URI" ]; then
+    echo 'The MONGODB_URI environment variable is required!'
+    echo 'For example: '
+    echo '   MONGODB_URI="mongodb://localhost:27017,localhost:27018/'
+    echo 'or:'
+    echo '   MONGODB_URI="mongodb://user:password@localhost:27017,localhost:27018/?authSource=admin&tls=true'
+    exit 1
+fi
+
 start() {
   echo "Starting HAProxy..."
 
-  cat <<EOF_HAPROXY_CONFIG >> $DRIVERS_TOOLS/haproxy.conf
+  cat <<EOF_HAPROXY_CONFIG > $DRIVERS_TOOLS/haproxy.conf
   defaults
       mode tcp
       timeout connect 10s
@@ -58,7 +69,7 @@ EOF_HAPROXY_CONFIG
   echo "Single Mongos LB: $SINGLE_MONGOS_LB_URI"
   echo "Multiple Mongos LB: $MULTI_MONGOS_LB_URI"
 
-  /usr/sbin/haproxy -D -f $DRIVERS_TOOLS/haproxy.conf -p $DRIVERS_TOOLS/haproxy.pid
+  haproxy -D -f $DRIVERS_TOOLS/haproxy.conf -p $DRIVERS_TOOLS/haproxy.pid
 
   echo 'SINGLE_MONGOS_LB_URI: "'$SINGLE_MONGOS_LB_URI'"' > lb-expansion.yml
   echo 'MULTI_MONGOS_LB_URI: "'$MULTI_MONGOS_LB_URI'"' >> lb-expansion.yml

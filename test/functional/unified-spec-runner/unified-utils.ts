@@ -31,10 +31,14 @@ export async function topologySatisfies(
       Single: 'single',
       ReplicaSetNoPrimary: 'replicaset',
       ReplicaSetWithPrimary: 'replicaset',
-      Sharded: 'sharded'
+      Sharded: 'sharded',
+      LoadBalanced: 'load-balanced'
     }[config.topologyType];
 
-    if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
+    if (
+      r.topologies.includes('sharded-replicaset') &&
+      (topologyType === 'sharded' || topologyType === 'load-balanced')
+    ) {
       const shards = await utilClient.db('config').collection('shards').find({}).toArray();
       ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
     } else {

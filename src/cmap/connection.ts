@@ -247,8 +247,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kIsMaster] = response;
   }
 
-  get serviceId(): ObjectId {
-    return this.ismaster.serviceId;
+  get serviceId(): ObjectId | undefined {
+    return this.ismaster?.serviceId;
+  }
+
+  get loadBalanced(): boolean {
+    return this.description.loadBalanced;
   }
 
   get generation(): number {
@@ -844,25 +848,37 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
+    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command, conn.serviceId));
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       if (err) {
         conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(conn, command, err, operationDescription.started)
+          new CommandFailedEvent(conn, command, err, operationDescription.started, conn.serviceId)
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
           conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(conn, command, reply, operationDescription.started)
+            new CommandFailedEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn.serviceId
+            )
           );
         } else {
           conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
+            new CommandSucceededEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn.serviceId
+            )
           );
         }
       }

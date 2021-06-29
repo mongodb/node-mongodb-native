@@ -1,0 +1,25 @@
+{
+  "description": "expectedCommandEvent-minProperties",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {}
+          ]
+        }
+      ]
+    }
+  ]
+}

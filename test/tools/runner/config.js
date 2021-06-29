@@ -38,13 +38,13 @@ class TestConfiguration {
     const url = new ConnectionString(uri);
     const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);
-    this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
     this.serverApi = context.serverApi;
     this.parameters = undefined;
-    this.singleMongosLoadBalancerUri = undefined;
-    this.multiMongosLoadBalancerUri = undefined;
+    this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
+    this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
+    this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.options = {
       hosts,
       hostAddresses,
@@ -60,6 +60,10 @@ class TestConfiguration {
         password: url.password
       };
     }
+  }
+
+  get isLoadBalanced() {
+    return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
   }
 
   writeConcern() {
@@ -208,6 +212,10 @@ class TestConfiguration {
     if (options.username) url.username = options.username;
     if (options.password) url.password = options.password;
 
+    if (this.isLoadBalanced) {
+      url.searchParams.append('loadBalanced', true);
+    }
+
     if (options.username || options.password) {
       if (options.authMechanism) {
         url.searchParams.append('authMechanism', options.authMechanism);
@@ -227,10 +235,20 @@ class TestConfiguration {
 
     let actualHostsString;
     if (options.useMultipleMongoses) {
-      expect(this.options.hostAddresses).to.have.length.greaterThan(1);
-      actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+      if (this.isLoadBalanced) {
+        const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
+        actualHostsString = multiUri.hosts[0].toString();
+      } else {
+        expect(this.options.hostAddresses).to.have.length.greaterThan(1);
+        actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+      }
     } else {
-      actualHostsString = this.options.hostAddresses[0].toString();
+      if (this.isLoadBalanced) {
+        const singleUri = new ConnectionString(this.singleMongosLoadBalancerUri);
+        actualHostsString = singleUri.hosts[0].toString();
+      } else {
+        actualHostsString = this.options.hostAddresses[0].toString();
+      }
     }
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);

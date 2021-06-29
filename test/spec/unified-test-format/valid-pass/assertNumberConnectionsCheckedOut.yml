@@ -1,0 +1,17 @@
+description: assertNumberConnectionsCheckedOut
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+
+tests:
+  - description: basic assertion succeeds
+    operations:
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0

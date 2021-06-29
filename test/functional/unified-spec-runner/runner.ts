@@ -15,11 +15,6 @@ interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
 }
 
-// Load balancer fronting 1 mongos.
-const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
-// Load balancer fronting 2 mongoses.
-const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
-
 export async function runUnifiedTest(
   ctx: MongoDBMochaTestContext,
   unifiedSuite: uni.UnifiedSuite,
@@ -47,23 +42,9 @@ export async function runUnifiedTest(
   }
 
   let utilClient;
-  if (ctx.topologyType === uni.TopologyType.loadBalanced) {
-    // In load balanced mode we require these 2 environment
-    // variables to be set pointing at the load balancer
-    // frontends.
-    expect(SINGLE_MONGOS_LB_URI).to.exist;
-    expect(MULTI_MONGOS_LB_URI).to.exist;
-
-    // We determine which URI the load balancer to point at
-    // by looking at the MONGODB_URI - if it has 1 mongos
-    // then it's the single mongos frontend and if it has
-    // multiple mongoses then we use the multi mongos
-    // frontend.
-    if (isMultiHostUri(process.env.MONGODB_URI)) {
-      utilClient = ctx.configuration.newClient(MULTI_MONGOS_LB_URI);
-    } else {
-      utilClient = ctx.configuration.newClient(SINGLE_MONGOS_LB_URI);
-    }
+  if (ctx.configuration.isLoadBalanced) {
+    // The util client can always point at the single mongos LB frontend.
+    utilClient = ctx.configuration.newClient(ctx.configuration.singleMongosLoadBalancerUri);
   } else {
     utilClient = ctx.configuration.newClient();
   }
@@ -147,18 +128,27 @@ export async function runUnifiedTest(
       await executeOperationAndCheck(operation, entities, utilClient);
     }
 
-    const clientEvents = new Map<string, CommandEvent[]>();
+    const clientCommandEvents = new Map<string, CommandEvent[]>();
+    const clientCmapEvents = new Map<string, CmapEvents[]>();
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {
-      clientEvents.set(id, client.stopCapturingEvents());
+      clientCommandEvents.set(id, client.stopCapturingCommandEvents());
+      clientCmapEvents.set(id, client.stopCapturingCmapEvents());
     }
 
     if (test.expectEvents) {
       for (const expectedEventList of test.expectEvents) {
         const clientId = expectedEventList.client;
-        const actualEvents = clientEvents.get(clientId);
-
+        const eventType = expectedEventList.eventType;
+        let actualEvents;
+        // If no event type is provided it defaults to 'command', so just
+        // check for 'cmap' here for now.
+        if (eventType === 'cmap') {
+          actualEvents = clientCmapEvents.get(clientId);
+        } else {
+          actualEvents = clientCommandEvents.get(clientId);
+        }
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
         matchesEvents(expectedEventList.events, actualEvents, entities);
       }
@@ -201,15 +191,4 @@ export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: str
       }
     });
   }
-}
-
-/**
- * Determine if the URI is multi-host. Our test suites
- * use simple user/password combinations so we take the
- * simple route here and just look for commas between the
- * scheme and db.
- */
-function isMultiHostUri(uri: string): boolean {
-  const plainUri = uri.substring(str.lastIndexOf('://') + 1, str.lastIndexOf('/'));
-  return plainUri.includes(',');
 }

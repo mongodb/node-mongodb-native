@@ -16,7 +16,7 @@ const RESPONSE_FIELDS = [
 export interface StreamDescriptionOptions {
   compressors?: CompressorName[];
   logicalSessionTimeoutMinutes?: number;
-  loadBalanced?: boolean;
+  loadBalanced: boolean;
 }
 
 /** @public */
@@ -31,7 +31,7 @@ export class StreamDescription {
   compressors: CompressorName[];
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
-  loadBalanced?: boolean;
+  loadBalanced: boolean;
 
   __nodejs_mock_server__?: boolean;
 

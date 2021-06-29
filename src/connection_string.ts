@@ -35,9 +35,10 @@ import { Encrypter } from './encrypter';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
-const LB_SINGLE_HOST = 'loadBalanced option only supported with a single host in the URI';
-const LB_REPLICA_SET = 'loadBalanced option not supported with a replicaSet option';
-const LB_DIRECT_CONNECTION = 'loadBalanced option not supported when directConnection is provided';
+const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
+const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
+const LB_DIRECT_CONNECTION_ERROR =
+  'loadBalanced option not supported when directConnection is provided';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order
@@ -111,7 +112,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         const txtRecordOptionKeys = [...txtRecordOptions.keys()];
         if (txtRecordOptionKeys.some(key => !VALID_TXT_RECORDS.includes(key))) {
           return callback(
-            new MongoParseError(`Text record must only set one of: ${VALID_TXT_RECORDS.join(', ')}`)
+            new MongoParseError(`Text record may only set any of: ${VALID_TXT_RECORDS.join(', ')}`)
           );
         }
 
@@ -142,11 +143,11 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 
         if (options.loadBalanced) {
           if (options.replicaSet) {
-            return callback(new MongoParseError(LB_REPLICA_SET));
+            return callback(new MongoParseError(LB_REPLICA_SET_ERROR));
           }
 
           if (hostAddresses.length > 1) {
-            return callback(new MongoParseError(LB_SINGLE_HOST));
+            return callback(new MongoParseError(LB_SINGLE_HOST_ERROR));
           }
         }
       }
@@ -162,11 +163,11 @@ function checkLoadBalancerOptions(
 ): MongoParseError | null {
   if (options.loadBalanced) {
     if (options.replicaSet) {
-      return new MongoParseError(LB_REPLICA_SET);
+      return new MongoParseError(LB_REPLICA_SET_ERROR);
     }
 
     if (addresses.length > 1) {
-      return new MongoParseError(LB_SINGLE_HOST);
+      return new MongoParseError(LB_SINGLE_HOST_ERROR);
     }
     return null;
   }
@@ -446,13 +447,13 @@ export function parseOptions(
 function validateLoadBalancedOptions(hosts: HostAddress[] | string[], mongoOptions: MongoOptions) {
   if (mongoOptions.loadBalanced) {
     if (hosts.length > 1) {
-      throw new MongoParseError(LB_SINGLE_HOST);
+      throw new MongoParseError(LB_SINGLE_HOST_ERROR);
     }
     if (mongoOptions.replicaSet) {
-      throw new MongoParseError(LB_REPLICA_SET);
+      throw new MongoParseError(LB_REPLICA_SET_ERROR);
     }
     if (mongoOptions.directConnection) {
-      throw new MongoParseError(LB_DIRECT_CONNECTION);
+      throw new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
     }
   }
 }

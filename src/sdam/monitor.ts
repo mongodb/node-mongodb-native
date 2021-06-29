@@ -60,7 +60,6 @@ export interface MonitorOptions
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
-  loadBalanced?: boolean;
 }
 
 /** @public */
@@ -79,10 +78,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   s: MonitorPrivate;
   address: string;
   options: Readonly<
-    Pick<
-      MonitorOptions,
-      'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS' | 'loadBalanced'
-    >
+    Pick<MonitorOptions, 'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS'>
   >;
   connectOptions: ConnectionOptions;
   [kServer]: Server;
@@ -108,8 +104,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.options = Object.freeze({
       connectTimeoutMS: options.connectTimeoutMS ?? 10000,
       heartbeatFrequencyMS: options.heartbeatFrequencyMS ?? 10000,
-      minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500,
-      loadBalanced: options.loadBalanced ?? false
+      minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
     });
 
     const cancellationToken = this[kCancellationToken];

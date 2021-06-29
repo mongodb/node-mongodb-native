@@ -17,11 +17,13 @@ import {
   MIN_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
-import type { Document, ObjectId } from '../bson';
+import type { Document } from '../bson';
+import { ObjectId, Int32 } from '../bson';
 
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
-import { Int32 } from '../bson';
+
+const FAKE_MONGODB_SERVICE_ID = process.env.FAKE_MONGODB_SERVICE_ID;
 
 /** @public */
 export type Stream = Socket | TLSSocket;
@@ -129,13 +131,23 @@ function performInitialHandshake(
         return;
       }
 
-      if (options.loadBalanced && !response.serviceId) {
-        return callback(
-          new MongoDriverError(
-            'Driver attempted to initialize in load balancing mode, ' +
-              'but the server does not support this mode.'
-          )
-        );
+      if (options.loadBalanced) {
+        // TODO: Durran: Remove when server support exists.
+        if (FAKE_MONGODB_SERVICE_ID) {
+          if (response.topologyVersion) {
+            response.serviceId = response.topologyVersion.processId;
+          } else {
+            response.serviceId = new ObjectId();
+          }
+        }
+        if (!response.serviceId) {
+          return callback(
+            new MongoDriverError(
+              'Driver attempted to initialize in load balancing mode, ' +
+                'but the server does not support this mode.'
+            )
+          );
+        }
       }
 
       // NOTE: This is metadata attached to the connection while porting away from
@@ -175,7 +187,7 @@ export interface HandshakeDocument extends Document {
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
-  loadBalanced?: boolean;
+  loadBalanced: boolean;
 }
 
 function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
@@ -327,7 +339,7 @@ function makeConnection(options: ConnectionOptions, _callback: CallbackWithType<
   socket.setNoDelay(noDelay);
 
   const connectEvent = useTLS ? 'secureConnect' : 'connect';
-  let cancellationHandler: (err: Error, serviceId?: ObjectId) => void;
+  let cancellationHandler: (err: Error) => void;
   function errorHandler(eventName: ErrorHandlerEventName) {
     return (err: Error) => {
       SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));

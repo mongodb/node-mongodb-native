@@ -4,6 +4,7 @@ import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
+import type { Connection } from './cmap/connection';
 import type { Document } from './bson';
 
 /** @internal */
@@ -59,6 +60,8 @@ export interface TransactionOptions extends CommandOperationOptions {
   readPreference?: ReadPreference;
 
   maxCommitTimeMS?: number;
+
+  loadBalanced: boolean;
 }
 
 /**
@@ -72,14 +75,14 @@ export class Transaction {
   /** @internal */
   _pinnedServer?: Server;
   /** @internal */
+  _pinnedConnection?: Connection;
+  /** @internal */
   _recoveryToken?: Document;
 
   /** Create a transaction @internal */
-  constructor(options?: TransactionOptions) {
-    options = options ?? {};
-
+  constructor(options: TransactionOptions) {
     this.state = TxnState.NO_TRANSACTION;
-    this.options = {};
+    this.options = { loadBalanced: options.loadBalanced };
 
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
@@ -104,6 +107,7 @@ export class Transaction {
 
     // TODO: This isn't technically necessary
     this._pinnedServer = undefined;
+    this._pinnedConnection = undefined;
     this._recoveryToken = undefined;
   }
 
@@ -112,12 +116,21 @@ export class Transaction {
     return this._pinnedServer;
   }
 
+  /** @internal */
+  get pinnedConnection(): Connection | undefined {
+    return this._pinnedConnection;
+  }
+
   get recoveryToken(): Document | undefined {
     return this._recoveryToken;
   }
 
   get isPinned(): boolean {
     return !!this.server;
+  }
+
+  get isConnectionPinned(): boolean {
+    return !!this._pinnedConnection;
   }
 
   /** @returns Whether the transaction has started */
@@ -151,6 +164,9 @@ export class Transaction {
         this.state === TxnState.TRANSACTION_ABORTED
       ) {
         this.unpinServer();
+        if (this.options.loadBalanced) {
+          this.unpinConnection();
+        }
       }
       return;
     }
@@ -158,6 +174,18 @@ export class Transaction {
     throw new MongoDriverError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
+  }
+
+  /** @internal */
+  pinConnection(connection: Connection): void {
+    if (this.isActive) {
+      this._pinnedConnection = connection;
+    }
+  }
+
+  /** @internal */
+  unpinConnection(): void {
+    this._pinnedConnection = undefined;
   }
 
   /** @internal */

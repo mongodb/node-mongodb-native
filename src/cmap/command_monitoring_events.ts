@@ -2,7 +2,7 @@ import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import type { ConnectionPool } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document } from '../bson';
+import type { Document, ObjectId } from '../bson';
 
 /**
  * An event indicating the start of a given
@@ -17,6 +17,7 @@ export class CommandStartedEvent {
   command: Document;
   address: string;
   connectionId?: string | number;
+  serviceId?: ObjectId;
 
   /**
    * Create a started event
@@ -25,7 +26,11 @@ export class CommandStartedEvent {
    * @param pool - the pool that originated the command
    * @param command - the command
    */
-  constructor(pool: Connection | ConnectionPool, command: WriteProtocolMessageType) {
+  constructor(
+    pool: Connection | ConnectionPool,
+    command: WriteProtocolMessageType,
+    serviceId?: ObjectId
+  ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId } = extractConnectionDetails(pool);
@@ -42,6 +47,11 @@ export class CommandStartedEvent {
     this.databaseName = databaseName(command);
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
+    this.serviceId = serviceId;
+  }
+
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 
@@ -57,6 +67,7 @@ export class CommandSucceededEvent {
   duration: number;
   commandName: string;
   reply: unknown;
+  serviceId?: ObjectId;
 
   /**
    * Create a succeeded event
@@ -71,7 +82,8 @@ export class CommandSucceededEvent {
     pool: Connection | ConnectionPool,
     command: WriteProtocolMessageType,
     reply: Document | undefined,
-    started: number
+    started: number,
+    serviceId?: ObjectId
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -83,6 +95,11 @@ export class CommandSucceededEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
+    this.serviceId = serviceId;
+  }
+
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 
@@ -98,6 +115,8 @@ export class CommandFailedEvent {
   duration: number;
   commandName: string;
   failure: Error;
+  serviceId?: ObjectId;
+
   /**
    * Create a failure event
    *
@@ -111,7 +130,8 @@ export class CommandFailedEvent {
     pool: Connection | ConnectionPool,
     command: WriteProtocolMessageType,
     error: Error | Document,
-    started: number
+    started: number,
+    serviceId?: ObjectId
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -124,6 +144,11 @@ export class CommandFailedEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
+    this.serviceId = serviceId;
+  }
+
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 

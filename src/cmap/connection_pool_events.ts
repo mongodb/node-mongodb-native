@@ -91,12 +91,14 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   connectionId: number | '<monitor>';
   /** The reason the connection was closed */
   reason: string;
+  serviceId?: ObjectId;
 
   /** @internal */
   constructor(pool: ConnectionPool, connection: Connection, reason: string) {
     super(pool);
     this.connectionId = connection.id;
     this.reason = reason || 'unknown';
+    this.serviceId = connection.serviceId;
   }
 }
 
@@ -173,5 +175,9 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool, serviceId?: ObjectId) {
     super(pool);
     this.serviceId = serviceId;
+  }
+
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }

@@ -1,0 +1,28 @@
+{
+  "description": "expectedEventsForClient-events_conflicts_with_command_eventType",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "invalid event when eventType is command",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "command",
+          "events": [
+            {
+              "poolCreatedEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

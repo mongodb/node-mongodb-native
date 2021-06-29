@@ -1,0 +1,24 @@
+{
+  "description": "expectedEventsForClient-eventType-enum",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "invalid eventType value",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "foo",
+          "events": []
+        }
+      ]
+    }
+  ]
+}

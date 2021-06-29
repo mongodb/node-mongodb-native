@@ -1,5 +1,5 @@
 /** @internal */
-export class Metrics {
+export class ConnectionPoolMetrics {
   static readonly TXN = 'txn' as const;
   static readonly CURSOR = 'cursor' as const;
   static readonly OTHER = 'other' as const;
@@ -21,9 +21,9 @@ export class Metrics {
    * Mark a connection as pinned for a specific operation.
    */
   markPinned(pinType: string): void {
-    if (pinType === Metrics.TXN) {
+    if (pinType === ConnectionPoolMetrics.TXN) {
       this.txnConnections += 1;
-    } else if (pinType === Metrics.CURSOR) {
+    } else if (pinType === ConnectionPoolMetrics.CURSOR) {
       this.cursorConnections += 1;
     } else {
       this.otherConnections += 1;
@@ -34,9 +34,9 @@ export class Metrics {
    * Unmark a connection as pinned for an operation.
    */
   markUnpinned(pinType: string): void {
-    if (pinType === Metrics.TXN) {
+    if (pinType === ConnectionPoolMetrics.TXN) {
       this.txnConnections -= 1;
-    } else if (pinType === Metrics.CURSOR) {
+    } else if (pinType === ConnectionPoolMetrics.CURSOR) {
       this.cursorConnections -= 1;
     } else {
       this.otherConnections -= 1;

@@ -1,0 +1,22 @@
+{
+  "description": "storeEventsAsEntity-events-required",
+  "schemaVersion": "1.2",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "storeEventsAsEntities": [
+          {
+            "id": "client0_events"
+          }
+        ]
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

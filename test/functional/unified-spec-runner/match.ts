@@ -5,7 +5,19 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { CommandEvent, EntitiesMap } from './entities';
+import {
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionReadyEvent,
+  ConnectionClosedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckedInEvent,
+  ConnectionPoolClearedEvent
+} from '../../../src/cmap/connection_pool_events';
+import { CommandEvent, CmapEvent, EntitiesMap } from './entities';
 import { ExpectedError, ExpectedEvent } from './schema';
 
 export interface ExistsOperator {
@@ -235,9 +247,28 @@ export function specialCheck(
   }
 }
 
+// CMAP events where the payload does not matter.
+const EMPTY_CMAP_EVENTS = {
+  poolCreatedEvent: ConnectionPoolCreatedEvent,
+  poolClosedEvent: ConnectionPoolClosedEvent,
+  connectionCreatedEvent: ConnectionCreatedEvent,
+  connectionReadyEvent: ConnectionReadyEvent,
+  connectionCheckOutStartedEvent: ConnectionCheckOutStartedEvent,
+  connectionCheckOutFailedEvent: ConnectionCheckOutFailedEvent,
+  connectionCheckedOutEvent: ConnectionCheckedOutEvent,
+  connectionCheckedInEvent: ConnectionCheckedInEvent
+};
+
+function validEmptyCmapEvent(expected: ExpectedEvent, actual: CommandEvent | CmapEvent) {
+  return Object.keys(EMPTY_CMAP_EVENTS).some(key => {
+    const eventType = EMPTY_CMAP_EVENTS[key];
+    return actual instanceof eventType;
+  });
+}
+
 export function matchesEvents(
   expected: ExpectedEvent[],
-  actual: CommandEvent[],
+  actual: (CommandEvent | CmapEvent)[],
   entities: EntitiesMap
 ): void {
   // TODO: NodeJS Driver has extra events
@@ -259,6 +290,18 @@ export function matchesEvents(
       ]);
     } else if (expectedEvent.commandFailedEvent && actualEvent instanceof CommandFailedEvent) {
       expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
+    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
+      // This should just always pass since the event must exist and match the type.
+    } else if (
+      expectedEvent.connectionClosedEvent &&
+      actualEvent instanceof ConnectionClosedEvent
+    ) {
+      expect(actualEvent.hasServiceId).to.equal(expectedEvent.connectionClosedEvent.hasServiceId);
+    } else if (
+      expectedEvent.poolClearedEvent &&
+      actualEvent instanceof ConnectionPoolClearedEvent
+    ) {
+      expect(actualEvent.hasServiceId).to.equal(expectedEvent.poolClearedEvent.hasServiceId);
     } else {
       expect.fail(`Events must be one of the known types, got ${actualEvent}`);
     }
