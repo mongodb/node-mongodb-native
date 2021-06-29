@@ -4,8 +4,10 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const LOWEST_LTS = 'erbium';
-const NODE_VERSIONS = [LOWEST_LTS, 'fermium'];
+const NODE_VERSIONS = ['erbium', 'fermium'];
+NODE_VERSIONS.sort()
+const LOWEST_LTS = NODE_VERSIONS[0];
+
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
 const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
