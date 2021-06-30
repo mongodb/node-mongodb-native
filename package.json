@@ -16,6 +16,10 @@
     "driver",
     "official"
   ],
+  "author": { 
+    "name" : "The MongoDB NodeJS Team", 
+    "email" : "dbx-node@mongodb.com"
+  },
   "peerDependenciesMeta": {
     "kerberos": {
       "optional": true
