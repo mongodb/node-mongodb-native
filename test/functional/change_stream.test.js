@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
-const { MongoNetworkError } = require('../../src/error');
+const { MongoNetworkError, MongoDriverError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
@@ -1825,34 +1825,106 @@ describe('Change Streams', function () {
     });
 
     // TODO: Better Errors
-    it('should throw MongoDriverError when set as an emitter and used as an iterator', {
-      metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
-      test: function () {
-        changeStream.on('change', nextVal => {
-          console.log(nextVal);
-        });
-
-        expect(() => {
-          changeStream.next().then();
-        }).to.throw();
-      }
-    });
-
-    it('should throw MongoDriverError when set as an iterator and used as an emitter', {
-      metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
-      test: function () {
-        function readIter() {
-          return changeStream.next();
+    it(
+      'should throw MongoDriverError when set as an emitter and used as an iterator using promises',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: function (done) {
+          changeStream.on('change', console.log);
+          coll.insertOne({ c: 10 });
+          try {
+            changeStream
+              .hasNext()
+              .then()
+              .catch(err => expect.fail(err ? err.message : ''));
+          } catch (error) {
+            expect(error).to.be.instanceof(MongoDriverError);
+            done();
+            return;
+          }
+          expect.fail('Should not reach here');
         }
-        readIter().then();
-        expect(() => {
+      }
+    );
+
+    // FIXME:
+    it(
+      'should throw MongoDriverError when set as an iterator and used as an emitter using promises',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: function (done) {
+          coll.insertOne({ c: 10 });
+          let promise = changeStream.hasNext();
+          promise
+            .then(() => {
+              try {
+                changeStream.on('change', console.log);
+              } catch (error) {
+                expect(error).to.be.instanceof(MongoDriverError);
+                done();
+                return;
+              }
+              expect.fail('Should not reach here');
+            })
+            .catch(err => {
+              expect.fail(err.message);
+            });
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an emitter and used as an iterator using callbacks',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: function (done) {
           changeStream.on('change', nextVal => {
             console.log(nextVal);
           });
-        }).to.throw();
+          coll.insertOne({ c: 10 });
+
+          try {
+            changeStream.hasNext(console.log);
+          } catch (error) {
+            console.log('Hello there');
+            expect(error).to.be.instanceof(MongoDriverError);
+            done();
+            return;
+          }
+          expect.fail('Should not reach here');
+        }
       }
-    });
+    );
+
+    // FIXME:
+    it(
+      'should throw MongoDriverError when set as an iterator and used as an emitter using callbacks',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: function (done) {
+          coll.insertOne({ c: 10 }).then(() => {
+            console.log('About to call hasNext');
+            changeStream.next((err, res) => {
+              console.log(res);
+              console.log('Inside hasNext callback');
+              try {
+                changeStream.on('change', console.log);
+                console.log('Here now');
+              } catch (error) {
+                expect(error).to.be.instanceof(MongoDriverError);
+                console.log("now I'm here");
+                done();
+                return;
+              }
+              console.log('oopsie');
+              expect.fail('Should not reach here');
+            });
+          });
+        }
+      }
+    );
   });
+
   describe('should properly handle a changeStream event being processed mid-close', function () {
     let client, coll, changeStream;
 
