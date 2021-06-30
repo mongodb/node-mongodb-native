@@ -392,6 +392,7 @@ export type {
   FilterOperations,
   KeysOfAType,
   KeysOfOtherType,
-  IsAny
+  IsAny,
+  OneOrMore
 } from './mongo_types';
 export type { serialize, deserialize } from './bson';

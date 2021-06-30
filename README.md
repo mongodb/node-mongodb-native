@@ -41,6 +41,12 @@ For version compatibility matrices, please refer to the following links:
 - [MongoDB](https://docs.mongodb.com/drivers/node/compatibility#mongodb-compatibility)
 - [NodeJS](https://docs.mongodb.com/drivers/node/compatibility#language-compatibility)
 
+#### Typescript Version
+
+We recommend using the latest version of typescript, however we do provide a [downleveled](https://github.com/sandersn/downlevel-dts#readme) version of the type definitions that we test compiling against `typescript@4.0.2`.
+Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
+If you run into any unexpected compiler failures please let us know and we will do our best to correct it.
+
 ## Installation
 
 The recommended way to get started using the Node.js 4.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.

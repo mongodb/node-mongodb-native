@@ -22,6 +22,7 @@ import type { Db } from '../db';
 import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { ClientSession } from '../sessions';
 import { executeOperation, ExecutionResult } from './execute_operation';
+import type { OneOrMore } from '../mongo_types';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
@@ -58,14 +59,15 @@ const VALID_INDEX_OPTIONS = new Set([
 
 /** @public */
 export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+
 /** @public */
-export type IndexSpecification =
+export type IndexSpecification = OneOrMore<
   | string
   | [string, IndexDirection]
   | { [key: string]: IndexDirection }
   | [string, IndexDirection][]
   | { [key: string]: IndexDirection }[]
-  | IndexSpecification[];
+>;
 
 /** @public */
 export interface IndexDescription {
