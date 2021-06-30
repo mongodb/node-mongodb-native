@@ -2003,4 +2003,82 @@ describe('Bulk', function () {
         );
     });
   });
+
+  describe('Bulk operation transaction rollback', () => {
+    /** @type {import('../../src/index').MongoClient} */
+    let client;
+    /** @type {import('../../src/index').Collection<{ answer: number }>} */
+    let collection;
+
+    beforeEach(async function () {
+      const config = this.configuration;
+      client = config.newClient();
+      await client.connect();
+
+      collection = client
+        .db('bulk_operation_writes_test')
+        .collection('bulk_write_transaction_test');
+
+      await collection.deleteMany({});
+    });
+
+    it('should abort ordered/unordered bulk operation writes', async () => {
+      const session = client.startSession();
+      session.startTransaction({
+        readConcern: { level: 'snapshot' },
+        writeConcern: { w: 'majority' }
+      });
+
+      let bulk = undefined;
+
+      // 1.
+      bulk = collection.initializeUnorderedBulkOp({ session });
+      bulk.insert({ answer: 42 });
+      await bulk.execute();
+
+      // 2.
+      bulk = collection.initializeOrderedBulkOp({ session });
+      bulk.insert({ answer: 43 });
+      await bulk.execute();
+
+      await session.abortTransaction();
+      await session.endSession();
+
+      const documents = await collection.find().toArray();
+
+      expect(documents).to.be.lengthOf(0, 'bulk operation writes were made outside of transaction');
+
+      await client.close(); // session leak checker doesn't let you put the close in an after hook
+    });
+
+    it('should abort ordered/unordered bulk operation writes using withTransaction', async () => {
+      const session = client.startSession();
+
+      await session.withTransaction(
+        async () => {
+          let bulk = undefined;
+          // 1.
+          bulk = collection.initializeUnorderedBulkOp({ session });
+          bulk.insert({ answer: 42 });
+          await bulk.execute();
+
+          // 2.
+          bulk = collection.initializeOrderedBulkOp({ session });
+          bulk.insert({ answer: 43 });
+          await bulk.execute();
+
+          await session.abortTransaction();
+        },
+        { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } }
+      );
+
+      await session.endSession();
+
+      const documents = await collection.find().toArray();
+
+      expect(documents).to.be.lengthOf(0, 'bulk operation writes were made outside of transaction');
+
+      await client.close(); // session leak checker doesn't let you put the close in an after hook
+    });
+  });
 });

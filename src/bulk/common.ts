@@ -1200,7 +1200,8 @@ export abstract class BulkOperationBase {
     }
 
     this.s.executed = true;
-    return executeLegacyOperation(this.s.topology, executeCommands, [this, options, callback]);
+    const finalOptions = { ...this.s.options, ...options };
+    return executeLegacyOperation(this.s.topology, executeCommands, [this, finalOptions, callback]);
   }
 
   /**
