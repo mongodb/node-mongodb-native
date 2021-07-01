@@ -50,8 +50,8 @@ describe('Kerberos', function () {
     });
   });
 
-  // TODO: this test only tests that these properties do not crash anything - but not that they actually have an effect
-  it('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', function (done) {
+  // Unskip this test when a proper setup is available - see NODE-3060
+  it.skip('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', function (done) {
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`
     );

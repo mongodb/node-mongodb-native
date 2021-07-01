@@ -7,6 +7,7 @@ import type { Document } from '../../bson';
 type MechanismProperties = {
   gssapiCanonicalizeHostName?: boolean;
   SERVICE_NAME?: string;
+  SERVICE_REALM?: string;
 };
 
 import * as dns from 'dns';
@@ -90,14 +91,15 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
         Object.assign(initOptions, { user: username, password: password });
       }
 
-      initializeClient(
-        `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`,
-        initOptions,
-        (err: string, client: KerberosClient): void => {
-          if (err) return callback(new MongoDriverError(err));
-          callback(undefined, client);
-        }
-      );
+      let spn = `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`;
+      if ('SERVICE_REALM' in mechanismProperties) {
+        spn = `${spn}@${mechanismProperties.SERVICE_REALM}`;
+      }
+
+      initializeClient(spn, initOptions, (err: string, client: KerberosClient): void => {
+        if (err) return callback(new MongoDriverError(err));
+        callback(undefined, client);
+      });
     }
   );
 }
