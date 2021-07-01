@@ -2022,63 +2022,75 @@ describe('Bulk', function () {
       await collection.deleteMany({});
     });
 
-    it('should abort ordered/unordered bulk operation writes', async () => {
-      const session = client.startSession();
-      session.startTransaction({
-        readConcern: { level: 'snapshot' },
-        writeConcern: { w: 'majority' }
-      });
+    it('should abort ordered/unordered bulk operation writes', {
+      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset', 'sharded'] } },
+      async test() {
+        const session = client.startSession();
+        session.startTransaction({
+          readConcern: { level: 'snapshot' },
+          writeConcern: { w: 'majority' }
+        });
 
-      let bulk = undefined;
+        let bulk = undefined;
 
-      // 1.
-      bulk = collection.initializeUnorderedBulkOp({ session });
-      bulk.insert({ answer: 42 });
-      await bulk.execute();
+        // 1.
+        bulk = collection.initializeUnorderedBulkOp({ session });
+        bulk.insert({ answer: 42 });
+        await bulk.execute();
 
-      // 2.
-      bulk = collection.initializeOrderedBulkOp({ session });
-      bulk.insert({ answer: 43 });
-      await bulk.execute();
+        // 2.
+        bulk = collection.initializeOrderedBulkOp({ session });
+        bulk.insert({ answer: 43 });
+        await bulk.execute();
 
-      await session.abortTransaction();
-      await session.endSession();
+        await session.abortTransaction();
+        await session.endSession();
 
-      const documents = await collection.find().toArray();
+        const documents = await collection.find().toArray();
 
-      expect(documents).to.be.lengthOf(0, 'bulk operation writes were made outside of transaction');
+        expect(documents).to.be.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
 
-      await client.close(); // session leak checker doesn't let you put the close in an after hook
+        await client.close(); // session leak checker doesn't let you put the close in an after hook
+      }
     });
 
-    it('should abort ordered/unordered bulk operation writes using withTransaction', async () => {
-      const session = client.startSession();
+    it('should abort ordered/unordered bulk operation writes using withTransaction', {
+      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset', 'sharded'] } },
+      async test() {
+        const session = client.startSession();
 
-      await session.withTransaction(
-        async () => {
-          let bulk = undefined;
-          // 1.
-          bulk = collection.initializeUnorderedBulkOp({ session });
-          bulk.insert({ answer: 42 });
-          await bulk.execute();
+        await session.withTransaction(
+          async () => {
+            let bulk = undefined;
+            // 1.
+            bulk = collection.initializeUnorderedBulkOp({ session });
+            bulk.insert({ answer: 42 });
+            await bulk.execute();
 
-          // 2.
-          bulk = collection.initializeOrderedBulkOp({ session });
-          bulk.insert({ answer: 43 });
-          await bulk.execute();
+            // 2.
+            bulk = collection.initializeOrderedBulkOp({ session });
+            bulk.insert({ answer: 43 });
+            await bulk.execute();
 
-          await session.abortTransaction();
-        },
-        { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } }
-      );
+            await session.abortTransaction();
+          },
+          { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } }
+        );
 
-      await session.endSession();
+        await session.endSession();
 
-      const documents = await collection.find().toArray();
+        const documents = await collection.find().toArray();
 
-      expect(documents).to.be.lengthOf(0, 'bulk operation writes were made outside of transaction');
+        expect(documents).to.be.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
 
-      await client.close(); // session leak checker doesn't let you put the close in an after hook
+        await client.close(); // session leak checker doesn't let you put the close in an after hook
+      }
     });
   });
 });
