@@ -1,13 +1,9 @@
 graph TD
-  MongoRuntimeError --> MongoBatchError
+  MongoRuntimeError --> MongoBatchReExecutionError
   MongoRuntimeError --> MongoCursorError
-  MongoRuntimeError --> MongoUnsupportedOperationError
-  MongoRuntimeError --> MongoDecompressionError
-  MongoRuntimeError --> MongoCompressionError
   MongoRuntimeError --> MongoInvalidClassInstantiationError
+  MongoRuntimeError --> MongoNotConnectedError
 
-  MongoBatchError --> MongoBatchReExecutionError
-
+  MongoCursorError --> MongoTailableCursorError
+  MongoCursorError --> MongoCursorInUseError
   MongoCursorError --> MongoCursorExhaustedError
-
-  MongoUnsupportedOperationError --> MongoInvalidCursorOperationError

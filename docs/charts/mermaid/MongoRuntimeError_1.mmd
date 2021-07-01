@@ -1,11 +1,10 @@
 graph TD
-  MongoRuntimeError --> MongoEncryptionError
   MongoRuntimeError --> MongoURIError
-  MongoRuntimeError --> MongoIOError
   MongoRuntimeError --> MongoServerSelectionError
   MongoRuntimeError --> MongoStreamError
+  MongoRuntimeError --> MongoCompressionError
+  MongoRuntimeError --> MongoDecompressionError
 
   MongoStreamError --> MongoChangeStreamError
   MongoStreamError --> MongoGridFSStreamError
-
-  MongoGridFSStreamError --> MongoGridFSChunkError
+  MongoStreamError --> MongoGridFSChunkError
