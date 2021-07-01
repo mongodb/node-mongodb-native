@@ -2015,9 +2015,18 @@ describe('Bulk', function () {
       client = config.newClient();
       await client.connect();
 
-      collection = client
+      try {
+        await client
+          .db('bulk_operation_writes_test')
+          .collection('bulk_write_transaction_test')
+          .drop();
+      } catch (_) {
+        // do not care
+      }
+
+      collection = await client
         .db('bulk_operation_writes_test')
-        .collection('bulk_write_transaction_test');
+        .createCollection('bulk_write_transaction_test');
 
       await collection.deleteMany({});
     });
@@ -2027,7 +2036,7 @@ describe('Bulk', function () {
       async test() {
         const session = client.startSession();
         session.startTransaction({
-          readConcern: { level: 'snapshot' },
+          readConcern: { level: 'majority' },
           writeConcern: { w: 'majority' }
         });
 
@@ -2077,7 +2086,7 @@ describe('Bulk', function () {
 
             await session.abortTransaction();
           },
-          { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } }
+          { readConcern: { level: 'majority' }, writeConcern: { w: 'majority' } }
         );
 
         await session.endSession();
