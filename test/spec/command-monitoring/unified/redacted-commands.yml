@@ -1,15 +1,18 @@
 description: "redacted-commands"
 
-schemaVersion: "1.0"
+schemaVersion: "1.5"
 
 runOnRequirements:
   - minServerVersion: "5.0"
+    auth: false
 
 createEntities:
   - client:
       id: &client client
       observeEvents:
         - commandStartedEvent
+        - commandSucceededEvent
+      observeSensitiveCommands: true
   - database:
       id: &database database
       client: *client
@@ -23,10 +26,12 @@ tests:
         arguments:
           commandName: authenticate
           command:
-            authenticate: "private"
-        # Malformed authentication commands will fail against the server, but we
-        # just want to assert that security-related commands are redacted
-        # in command monitoring.
+            authenticate: 1
+            mechanism: "MONGODB-X509"
+            user: "CN=myName,OU=myOrgUnit,O=myOrg,L=myLocality,ST=myState,C=myCountry"
+            db: "$external"
+        # An authentication error is expected, but we want to check that the
+        # CommandStartedEvent is redacted
         expectError:
           isError: true
     expectEvents:
@@ -34,11 +39,14 @@ tests:
         events:
           - commandStartedEvent:
               commandName: authenticate
-              # This only asserts that the command name has been redacted from the published command;
-              # however, it's unlikely that a driver would redact this but leave other, sensitive fields.
-              # We cannot simply assert that command is an empty document because it's at root-level, so
-              # additional fields in the actual document will be permitted.
-              command: { authenticate: { $$exists: false } }
+              # We cannot simply assert that command is an empty document
+              # because it's at root-level, so we make a best effort to make
+              # sure sensitive fields are redacted.
+              command:
+                authenticate: { $$exists: false }
+                mechanism: { $$exists: false }
+                user: { $$exists: false }
+                db: { $$exists: false }
 
   - description: "saslStart"
     operations:
@@ -47,7 +55,9 @@ tests:
         arguments:
           commandName: saslStart
           command:
-            saslStart: "private"
+            saslStart: 1
+            payload: "definitely-invalid-payload"
+            db: "admin"
         expectError:
           isError: true
     expectEvents:
@@ -55,7 +65,10 @@ tests:
         events:
           - commandStartedEvent:
               commandName: saslStart
-              command: { saslStart: { $$exists: false } }
+              command:
+                saslStart: { $$exists: false }
+                payload: { $$exists: false }
+                db: { $$exists: false }
 
   - description: "saslContinue"
     operations:
@@ -64,7 +77,9 @@ tests:
         arguments:
           commandName: saslContinue
           command:
-            saslContinue: "private"
+            saslContinue: 1
+            conversationId: 0
+            payload: "definitely-invalid-payload"
         expectError:
           isError: true
     expectEvents:
@@ -72,7 +87,10 @@ tests:
         events:
           - commandStartedEvent:
               commandName: saslContinue
-              command: { saslContinue: { $$exists: false } }
+              command:
+                saslContinue: { $$exists: false }
+                conversationId: { $$exists: false }
+                payload: { $$exists: false }
 
   - description: "getnonce"
     operations:
@@ -81,13 +99,18 @@ tests:
         arguments:
           commandName: getnonce
           command:
-            getnonce: "private"
+            getnonce: 1
     expectEvents:
       - client: *client
         events:
           - commandStartedEvent:
               commandName: getnonce
               command: { getnonce: { $$exists: false } }
+          - commandSucceededEvent:
+              commandName: getnonce
+              reply:
+                ok: { $$exists: false }
+                nonce: { $$exists: false }
 
   - description: "createUser"
     operations:
@@ -97,6 +120,10 @@ tests:
           commandName: createUser
           command:
             createUser: "private"
+            # Passing an object is prohibited and we want to trigger a command
+            # failure
+            pwd: {}
+            roles: []
         expectError:
           isError: true
     expectEvents:
@@ -104,7 +131,10 @@ tests:
         events:
           - commandStartedEvent:
               commandName: createUser
-              command: { createUser: { $$exists: false } }
+              command:
+                createUser: { $$exists: false }
+                pwd: { $$exists: false }
+                roles: { $$exists: false }
 
   - description: "updateUser"
     operations:
@@ -114,6 +144,8 @@ tests:
           commandName: updateUser
           command:
             updateUser: "private"
+            pwd: {}
+            roles: []
         expectError:
           isError: true
     expectEvents:
@@ -121,7 +153,10 @@ tests:
         events:
           - commandStartedEvent:
               commandName: updateUser
-              command: { updateUser: { $$exists: false } }
+              command:
+                updateUser: { $$exists: false }
+                pwd: { $$exists: false }
+                roles: { $$exists: false }
 
   - description: "copydbgetnonce"
     operations:
@@ -175,76 +210,131 @@ tests:
               command: { copydb: { $$exists: false } }
 
   - description: "hello with speculative authenticate"
+    runOnRequirements:
+      - minServerVersion: "4.9"
     operations:
       - name: runCommand
         object: *database
         arguments:
           commandName: hello
           command:
-            hello: "private"
-            speculativeAuthenticate: "foo"
-        expectError:
-          isError: true
-      - name: runCommand
-        object: *database
-        arguments:
-          commandName: ismaster
-          command:
-            ismaster: "private"
-            speculativeAuthenticate: "foo"
-        expectError:
-          isError: true
-      - name: runCommand
-        object: *database
-        arguments:
-          commandName: isMaster
-          command:
-            isMaster: "private"
-            speculativeAuthenticate: "foo"
-        expectError:
-          isError: true
+            hello: 1
+            speculativeAuthenticate:
+              saslStart: 1
     expectEvents:
       - client: *client
         events:
           - commandStartedEvent:
               commandName: hello
-              command: { hello: { $$exists: false } }
+              command:
+                hello: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: hello
+              reply:
+                # Even though authentication above fails and the reply does not
+                # contain sensitive information, we're expecting the reply to be
+                # redacted as well.
+                isWritablePrimary: { $$exists: false }
+                # This assertion will currently always hold true since we're
+                # not expecting successful authentication, in which case this
+                # field is missing anyways.
+                speculativeAuthenticate: { $$exists: false }
+
+  - description: "legacy hello with speculative authenticate"
+    operations:
+      - name: runCommand
+        object: *database
+        arguments:
+          commandName: ismaster
+          command:
+            ismaster: 1
+            speculativeAuthenticate:
+              saslStart: 1
+      - name: runCommand
+        object: *database
+        arguments:
+          commandName: isMaster
+          command:
+            isMaster: 1
+            speculativeAuthenticate:
+              saslStart: 1
+    expectEvents:
+      - client: *client
+        events:
           - commandStartedEvent:
               commandName: ismaster
-              command: { ismaster: { $$exists: false } }
+              command:
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: ismaster
+              reply:
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
           - commandStartedEvent:
               commandName: isMaster
-              command: { isMaster: { $$exists: false } }
+              command:
+                isMaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: isMaster
+              reply:
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
 
   - description: "hello without speculative authenticate is not redacted"
+    runOnRequirements:
+      - minServerVersion: "4.9"
     operations:
       - name: runCommand
         object: *database
         arguments:
           commandName: hello
           command:
-            hello: "public"
-      - name: runCommand
-        object: *database
-        arguments:
-          commandName: ismaster
-          command:
-            ismaster: "public"
-      - name: runCommand
-        object: *database
-        arguments:
-          commandName: isMaster
-          command:
-            isMaster: "public"
+            hello: 1
     expectEvents:
       - client: *client
         events:
           - commandStartedEvent:
               commandName: hello
-              command: { hello: "public" }
+              command:
+                hello: 1
+          - commandSucceededEvent:
+              commandName: hello
+              reply:
+                isWritablePrimary: { $$exists: true }
+
+  - description: "legacy hello without speculative authenticate is not redacted"
+    operations:
+      - name: runCommand
+        object: *database
+        arguments:
+          commandName: ismaster
+          command:
+            ismaster: 1
+      - name: runCommand
+        object: *database
+        arguments:
+          commandName: isMaster
+          command:
+            isMaster: 1
+    expectEvents:
+      - client: *client
+        events:
           - commandStartedEvent:
               commandName: ismaster
-              command: { ismaster: "public" }
+              command:
+                ismaster: 1
+          - commandSucceededEvent:
+              commandName: ismaster
+              reply:
+                ismaster: { $$exists: true }
           - commandStartedEvent:
               commandName: isMaster
-              command: { isMaster: "public" }
+              command:
+                isMaster: 1
+          - commandSucceededEvent:
+              commandName: isMaster
+              reply:
+                ismaster: { $$exists: true }
