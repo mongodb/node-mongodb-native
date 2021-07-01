@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0-beta.6](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2021-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-3291:** Standardize error representation in the driver (#2824)
+* **NODE-3272:** emit correct event type when SRV Polling (#2825)
+* remove strict/callback mode from Db.collection helper (#2817)
+
+### Features
+
+* **NODE-2751:** add arrayFilters builder to bulk FindOperators ([#2820](https://github.com/mongodb/node-mongodb-native/issues/2820)) ([d099622](https://github.com/mongodb/node-mongodb-native/commit/d099622cdd1ba60d108b1b6a1b323dff847f99b5))
+* **NODE-3274:** add type hinting for UpdateFilter ([#2842](https://github.com/mongodb/node-mongodb-native/issues/2842)) ([05035eb](https://github.com/mongodb/node-mongodb-native/commit/05035eb2d7bdb0820181de5f86f0004cc77c1c00))
+* **NODE-3325:** support 'let' option for aggregate command ([#2828](https://github.com/mongodb/node-mongodb-native/issues/2828)) ([e38838e](https://github.com/mongodb/node-mongodb-native/commit/e38838e28d075126c8702de18247230d05965e11))
+* **NODE-3331:** offer downleveled types for legacy typescript versions ([#2859](https://github.com/mongodb/node-mongodb-native/issues/2859)) ([27cf1d2](https://github.com/mongodb/node-mongodb-native/commit/27cf1d241549c06fb69aee313176d87dcd13514a))
+* **NODE-3333:** support 'let' option for CRUD commands ([#2829](https://github.com/mongodb/node-mongodb-native/issues/2829)) ([0d91da1](https://github.com/mongodb/node-mongodb-native/commit/0d91da1b1388e6946ec991fee82f92647a199ece))
+
+
+### Bug Fixes
+
+* **NODE-1502:** command monitoring objects hold internal state references ([#2832](https://github.com/mongodb/node-mongodb-native/issues/2832)) ([a2887db](https://github.com/mongodb/node-mongodb-native/commit/a2887dbcc191a5779c5f5858a907ccae9095c901))
+* **NODE-2026:** SERVICE_REALM kerberos mechanism property not attached ([#2865](https://github.com/mongodb/node-mongodb-native/issues/2865)) ([5caa354](https://github.com/mongodb/node-mongodb-native/commit/5caa354b244e514a956b789662ee67c1d7b50eda))
+* **NODE-2035:** exceptions thrown from awaited cursor forEach do not propagate ([#2835](https://github.com/mongodb/node-mongodb-native/issues/2835)) ([ac49df6](https://github.com/mongodb/node-mongodb-native/commit/ac49df6214f58df496118a6a04277ca22c7bef43))
+* **NODE-2905:** support SERVICE_NAME authentication mechanism property ([#2857](https://github.com/mongodb/node-mongodb-native/issues/2857)) ([dfb91b8](https://github.com/mongodb/node-mongodb-native/commit/dfb91b8f5bd2b985caa484be96c1116e762ec5ee))
+* **NODE-2944:** Reintroduce bson-ext support ([#2823](https://github.com/mongodb/node-mongodb-native/issues/2823)) ([8eb0081](https://github.com/mongodb/node-mongodb-native/commit/8eb0081815bd27031a5390c6ed560347f31db3e7))
+* **NODE-3150:** allow retrieving PCRE-style RegExp ([ca9e2dc](https://github.com/mongodb/node-mongodb-native/commit/ca9e2dc3b6e8da6ff7dd8533fabe2ce4036f37f4))
+* **NODE-3272:** emit correct event type when SRV Polling ([#2825](https://github.com/mongodb/node-mongodb-native/issues/2825)) ([579119f](https://github.com/mongodb/node-mongodb-native/commit/579119f04ad86ff78f78ea1facb9d9eb733af3cd))
+* **NODE-3305:** beforeHandshake flag is always true ([#2854](https://github.com/mongodb/node-mongodb-native/issues/2854)) ([079bd6c](https://github.com/mongodb/node-mongodb-native/commit/079bd6cdc58f7ac11ba3af781776ad95361a7aaf))
+* **NODE-3311:** InsertOneOptions extends CommandOperationOptions ([#2816](https://github.com/mongodb/node-mongodb-native/issues/2816)) ([734b481](https://github.com/mongodb/node-mongodb-native/commit/734b481bb13091b45320f4ef77ca3d0d2442e771))
+* **NODE-3335:** do not validate explain verbosity in client ([#2834](https://github.com/mongodb/node-mongodb-native/issues/2834)) ([1a57ba8](https://github.com/mongodb/node-mongodb-native/commit/1a57ba87b5f204ed714a9505ee4a36ed82880d7d))
+* **NODE-3343:** allow overriding result document after projection applied ([#2856](https://github.com/mongodb/node-mongodb-native/issues/2856)) ([988f9c8](https://github.com/mongodb/node-mongodb-native/commit/988f9c80ba1e622e980ba3649e421b83e3872f77))
+* **NODE-3356:** update redaction logic for command monitoring events ([#2849](https://github.com/mongodb/node-mongodb-native/issues/2849)) ([536e5ff](https://github.com/mongodb/node-mongodb-native/commit/536e5ffbc941e8b99ad1c12c5239a688162a494e))
+
+
+* **NODE-3291:** Standardize error representation in the driver ([#2824](https://github.com/mongodb/node-mongodb-native/issues/2824)) ([9608c6a](https://github.com/mongodb/node-mongodb-native/commit/9608c6a46cea0ec536debd47492fe4007391d6fa))
+* remove strict/callback mode from Db.collection helper ([#2817](https://github.com/mongodb/node-mongodb-native/issues/2817)) ([53abfe7](https://github.com/mongodb/node-mongodb-native/commit/53abfe74652a1aff2a27606df4cb179e42ee00fa))
+
 ## [4.0.0-beta.5](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2021-05-26)
 
 
