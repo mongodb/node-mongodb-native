@@ -1641,6 +1641,7 @@ buildvariants:
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: erbium
+      CLIENT_ENCRYPTION: true
     tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
@@ -1714,12 +1715,14 @@ buildvariants:
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: fermium
+      CLIENT_ENCRYPTION: true
     tasks: *ref_0
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: erbium
+      CLIENT_ENCRYPTION: true
     tasks: &ref_1
       - test-latest-server
       - test-latest-replica_set
@@ -1793,12 +1796,14 @@ buildvariants:
     run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: fermium
+      CLIENT_ENCRYPTION: true
     tasks: *ref_1
   - name: windows-64-vs2019-erbium
     display_name: Windows (VS2019) Node Erbium
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: erbium
+      CLIENT_ENCRYPTION: true
       MSVS_VERSION: 2019
     tasks: &ref_2
       - test-latest-server
@@ -1870,6 +1875,7 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
+      CLIENT_ENCRYPTION: true
       MSVS_VERSION: 2019
     tasks: *ref_2
   - name: lint

@@ -36,7 +36,7 @@ const OPERATING_SYSTEMS = [
   mongoVersion: '>=2.6',
   nodeVersion: LOWEST_LTS,
   auth: false, // TODO test auth?
-  clientEncryption: false, // TODO(NODE-3372): Reenable with the next FLE release
+  clientEncryption: true,
   ...osConfig
 }));
 

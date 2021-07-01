@@ -30,10 +30,11 @@ const kEvents = Symbol('events');
 const kClientsCreated = Symbol('clientsCreated');
 const CapturingMongoClient = class extends require('../../../src/index').MongoClient {
   constructor(url, options) {
-    options = options || {};
-    options.useUnifiedTopology = true;
-    options.useNewUrlParser = true;
-    options.monitorCommands = true;
+    options = { ...options, monitorCommands: true };
+    if (process.env.MONGODB_API_VERSION) {
+      options.serverApi = process.env.MONGODB_API_VERSION;
+    }
+
     super(url, options);
 
     this[kEvents] = [];
