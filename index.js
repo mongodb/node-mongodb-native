@@ -17,6 +17,9 @@ connect.MongoWriteConcernError = core.MongoWriteConcernError;
 connect.MongoBulkWriteError = require('./lib/bulk/common').BulkWriteError;
 connect.BulkWriteError = connect.MongoBulkWriteError;
 
+// Expose server versions
+connect.ServerApiVersion = core.ServerApiVersion;
+
 // Actual driver classes exported
 connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
