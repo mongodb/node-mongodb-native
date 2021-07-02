@@ -1795,9 +1795,9 @@ describe('Change Streams', function () {
   // FIXME: NODE-1797
   describe('should error when used as iterator and emitter concurrently', function () {
     let client, coll, changeStream, repeatInsert, val;
+    val = 0;
 
     beforeEach(async function () {
-      val = 0;
       client = this.configuration.newClient();
       await client.connect().catch(() => expect.fail('Failed to connect to client'));
 
@@ -1805,20 +1805,25 @@ describe('Change Streams', function () {
       changeStream = coll.watch();
 
       repeatInsert = setInterval(async function () {
-        await coll.insertOne({ c: val++ }).catch('Failed to insert document');
-      }, 100);
+        await coll.insertOne({ c: val }).catch('Failed to insert document');
+        val++;
+      }, 75);
     });
 
     afterEach(async function () {
+      if (repeatInsert) {
+        clearInterval(repeatInsert);
+      }
+
       if (changeStream && !changeStream.closed) {
-        await changeStream.close();
+        await changeStream.close().catch(changeStream.close);
       }
 
-      if (client && !client.closed) {
-        await client.close();
+      if (client) {
+        await client.close().catch(client.close);
       }
 
-      clearInterval(repeatInsert);
+      await mock.cleanup();
     });
 
     // TODO: Better Errors
@@ -1827,14 +1832,15 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.on('change', console.log);
+          changeStream.on('change', () => {});
           try {
             await changeStream.hasNext().catch(err => {
               expect.fail(err.message);
             });
           } catch (error) {
-            expect(error).to.be.instanceof(MongoDriverError);
+            return expect(error).to.be.instanceof(MongoDriverError);
           }
+          return expect.fail('Should not reach here');
         }
       }
     );
@@ -1844,15 +1850,14 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.on('change', console.log);
+          changeStream.on('change', () => {});
 
           try {
-            changeStream.hasNext(console.log);
+            changeStream.hasNext(() => {});
           } catch (error) {
-            expect(error).to.be.instanceof(MongoDriverError);
-            return;
+            return expect(error).to.be.instanceof(MongoDriverError);
           }
-          expect.fail('Should not reach here');
+          return expect.fail('Should not reach here');
         }
       }
     );
@@ -1865,12 +1870,11 @@ describe('Change Streams', function () {
             .hasNext()
             .catch(() => expect.fail('Failed to set changeStream to iterator'));
           try {
-            changeStream.on('change', console.log);
+            changeStream.on('change', () => {});
           } catch (error) {
-            expect(error).to.be.instanceof(MongoDriverError);
-            return;
+            return expect(error).to.be.instanceof(MongoDriverError);
           }
-          expect.fail('Should not reach here');
+          return expect.fail('Should not reach here');
         }
       }
     );
@@ -1880,15 +1884,80 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.hasNext(() => {
-            try {
-              changeStream.on('change', console.log);
-            } catch (error) {
-              expect(error).to.be.instanceof(MongoDriverError);
-              return;
-            }
-            expect.fail('Should not reach here');
-          });
+          changeStream.hasNext(() => {});
+          try {
+            changeStream.on('change', () => {});
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+    it(
+      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next" using promises',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          changeStream.once('change', () => {});
+          try {
+            await changeStream.next().catch(err => {
+              expect.fail(err.message);
+            });
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next" using callbacks',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          changeStream.once('change', () => {});
+
+          try {
+            changeStream.next(() => {});
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+    it(
+      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on" using promises',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          await changeStream
+            .tryNext()
+            .catch(() => expect.fail('Failed to set changeStream to iterator'));
+          try {
+            changeStream.on('change', () => {});
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on" using callbacks',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          changeStream.tryNext(() => {});
+          try {
+            changeStream.on('change', () => {});
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
         }
       }
     );
@@ -2077,6 +2146,7 @@ describe('Change Streams', function () {
         this.changeStream.on('resumeTokenChanged', resumeToken => {
           this.resumeTokenChangedEvents.push({ resumeToken });
         });
+        this.changeStream.isEmitter = false;
 
         return this.changeStream;
       }
