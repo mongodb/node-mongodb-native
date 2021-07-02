@@ -684,8 +684,11 @@ export class MongoBulkWriteError extends MongoServerError {
     super(error as Error);
     Object.assign(this, error);
 
-    this.name = 'MongoBulkWriteError';
     this.result = result;
+  }
+
+  get name(): string {
+    return 'MongoBulkWriteError';
   }
 
   /** Number of documents inserted. */
