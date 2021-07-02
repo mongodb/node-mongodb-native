@@ -140,11 +140,6 @@ describe('Client Side Encryption Corpus', function () {
   }
 
   before(function () {
-    if (process.platform === 'win32') {
-      // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
-      this.skip();
-    }
-
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
     client = this.configuration.newClient();
 

@@ -1803,7 +1803,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: erbium
-      CLIENT_ENCRYPTION: true
       MSVS_VERSION: 2019
     tasks: &ref_2
       - test-latest-server
@@ -1875,7 +1874,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
-      CLIENT_ENCRYPTION: true
       MSVS_VERSION: 2019
     tasks: *ref_2
   - name: lint
