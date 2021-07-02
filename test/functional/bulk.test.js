@@ -2032,7 +2032,7 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered/unordered bulk operation writes', {
-      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset'] } },
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
         session.startTransaction({
@@ -2067,7 +2067,7 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered/unordered bulk operation writes using withTransaction', {
-      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset'] } },
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
 
