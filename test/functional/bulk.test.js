@@ -2032,11 +2032,11 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered/unordered bulk operation writes', {
-      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset', 'sharded'] } },
+      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
         session.startTransaction({
-          readConcern: { level: 'majority' },
+          readConcern: { level: 'local' },
           writeConcern: { w: 'majority' }
         });
 
@@ -2067,7 +2067,7 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered/unordered bulk operation writes using withTransaction', {
-      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset', 'sharded'] } },
+      metadata: { requires: { mongodb: '>= 3.6', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
 
@@ -2086,7 +2086,7 @@ describe('Bulk', function () {
 
             await session.abortTransaction();
           },
-          { readConcern: { level: 'majority' }, writeConcern: { w: 'majority' } }
+          { readConcern: { level: 'local' }, writeConcern: { w: 'majority' } }
         );
 
         await session.endSession();
