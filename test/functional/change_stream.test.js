@@ -1814,13 +1814,12 @@ describe('Change Streams', function () {
       if (repeatInsert) {
         clearInterval(repeatInsert);
       }
-
       if (changeStream && !changeStream.closed) {
-        await changeStream.close().catch(changeStream.close);
+        await changeStream.close();
       }
 
       if (client) {
-        await client.close().catch(client.close);
+        await client.close();
       }
 
       await mock.cleanup();
@@ -1832,7 +1831,7 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.on('change', () => {});
+          await new Promise(resolve => changeStream.on('change', resolve));
           try {
             await changeStream.hasNext().catch(err => {
               expect.fail(err.message);
@@ -1850,10 +1849,10 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.on('change', () => {});
+          await new Promise(resolve => changeStream.on('change', resolve));
 
           try {
-            changeStream.hasNext(() => {});
+            await new Promise(resolve => changeStream.hasNext(resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
@@ -1870,7 +1869,7 @@ describe('Change Streams', function () {
             .hasNext()
             .catch(() => expect.fail('Failed to set changeStream to iterator'));
           try {
-            changeStream.on('change', () => {});
+            await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
@@ -1884,9 +1883,9 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.hasNext(() => {});
+          await new Promise(resolve => changeStream.hasNext(resolve));
           try {
-            changeStream.on('change', () => {});
+            await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
@@ -1899,7 +1898,7 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.once('change', () => {});
+          await new Promise(resolve => changeStream.once('change', resolve));
           try {
             await changeStream.next().catch(err => {
               expect.fail(err.message);
@@ -1917,10 +1916,10 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.once('change', () => {});
+          await new Promise(resolve => changeStream.once('change', resolve));
 
           try {
-            changeStream.next(() => {});
+            await new Promise(resolve => changeStream.next(resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
@@ -1937,7 +1936,7 @@ describe('Change Streams', function () {
             .tryNext()
             .catch(() => expect.fail('Failed to set changeStream to iterator'));
           try {
-            changeStream.on('change', () => {});
+            await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
@@ -1951,9 +1950,9 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          changeStream.tryNext(() => {});
+          await new Promise(resolve => changeStream.tryNext(resolve));
           try {
-            changeStream.on('change', () => {});
+            await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
             return expect(error).to.be.instanceof(MongoDriverError);
           }
