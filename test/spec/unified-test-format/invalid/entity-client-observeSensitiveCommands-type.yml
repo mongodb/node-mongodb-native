@@ -1,6 +1,6 @@
 description: "entity-client-observeSensitiveCommands-type"
 
-schemaVersion: "1.0"
+schemaVersion: "1.5"
 
 createEntities:
   - client:
