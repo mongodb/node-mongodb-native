@@ -6,7 +6,8 @@ import {
   MongoNetworkTimeoutError,
   AnyError,
   MongoDriverError,
-  MongoServerError
+  MongoServerError,
+  MongoInvalidArgumentError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -236,7 +237,7 @@ export const LEGAL_TCP_SOCKET_OPTIONS = [
 
 function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   const hostAddress = options.hostAddress;
-  if (!hostAddress) throw new MongoDriverError('HostAddress required');
+  if (!hostAddress) throw new MongoInvalidArgumentError('HostAddress required');
 
   const result: Partial<net.TcpNetConnectOpts & net.IpcNetConnectOpts> = {};
   for (const name of LEGAL_TCP_SOCKET_OPTIONS) {

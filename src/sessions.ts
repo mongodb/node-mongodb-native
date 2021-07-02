@@ -6,6 +6,7 @@ import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
+  MongoInvalidArgumentError,
   isRetryableError,
   MongoNetworkError,
   MongoWriteConcernError,
@@ -461,7 +462,9 @@ function attemptTransaction<TSchema>(
 
   if (!isPromiseLike(promise)) {
     session.abortTransaction();
-    throw new MongoDriverError('Function provided to `withTransaction` must return a Promise');
+    throw new MongoInvalidArgumentError(
+      'Function provided to `withTransaction` must return a Promise'
+    );
   }
 
   return promise.then(

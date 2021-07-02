@@ -1,5 +1,11 @@
 import Denque = require('denque');
-import { MongoError, AnyError, isResumableError, MongoDriverError } from './error';
+import {
+  MongoError,
+  AnyError,
+  isResumableError,
+  MongoDriverError,
+  MongoInvalidArgumentError
+} from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
   maxWireVersion,
@@ -259,7 +265,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
-      throw new MongoDriverError(
+      throw new MongoInvalidArgumentError(
         'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
       );
     }
@@ -364,7 +370,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
-    if (!this.cursor) throw new MongoDriverError(NO_CURSOR_ERROR);
+    if (!this.cursor) throw new MongoInvalidArgumentError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
 

@@ -598,6 +598,44 @@ export class MongoParseError extends MongoDriverError {
   }
 }
 
+export class MongoAPIError extends MongoDriverError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoAPIError';
+  }
+}
+
+export class MongoInvalidArgumentError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoInvalidArgumentError';
+  }
+}
+
+export class MongoCompatibilityError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoCompatibilityError';
+  }
+}
+export class MongoClientInstantiationError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoClientInstantiationError';
+  }
+}
+export class MongoMissingCredentialsError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoMissingCredentialsError';
+  }
+}
+export class MongoMissingDependencyError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MongoMissingDependencyError';
+  }
+}
 /**
  * An error signifying a general system issue
  * @public

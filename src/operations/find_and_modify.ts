@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { maxWireVersion, decorateWithCollation, hasAtomicOperators, Callback } from '../utils';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
@@ -203,7 +203,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindOneAndDeleteOptions) {
     // Basic validation
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoDriverError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Filter parameter must be an object');
     }
 
     super(collection, filter, options);
@@ -220,15 +220,15 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     options: FindOneAndReplaceOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoDriverError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Filter parameter must be an object');
     }
 
     if (replacement == null || typeof replacement !== 'object') {
-      throw new MongoDriverError('Replacement parameter must be an object');
+      throw new MongoInvalidArgumentError('Replacement parameter must be an object');
     }
 
     if (hasAtomicOperators(replacement)) {
-      throw new MongoDriverError('Replacement document must not contain atomic operators');
+      throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
 
     super(collection, filter, options);
@@ -246,15 +246,15 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     options: FindOneAndUpdateOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoDriverError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Filter parameter must be an object');
     }
 
     if (update == null || typeof update !== 'object') {
-      throw new MongoDriverError('Update parameter must be an object');
+      throw new MongoInvalidArgumentError('Update parameter must be an object');
     }
 
     if (!hasAtomicOperators(update)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
 
     super(collection, filter, options);
