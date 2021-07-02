@@ -6,7 +6,7 @@ import {
   normalizeHintField,
   decorateWithExplain
 } from '../utils';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -84,14 +84,14 @@ export class FindOperation extends CommandOperation<Document> {
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
-      throw new MongoDriverError('Query filter must be a plain object or ObjectId');
+      throw new MongoInvalidArgumentError('Query filter must be a plain object or ObjectId');
     }
 
     // If the filter is a buffer, validate that is a valid BSON document
     if (Buffer.isBuffer(filter)) {
       const objectSize = filter[0] | (filter[1] << 8) | (filter[2] << 16) | (filter[3] << 24);
       if (objectSize !== filter.length) {
-        throw new MongoDriverError(
+        throw new MongoInvalidArgumentError(
           `query filter raw message size does not match message header size [${filter.length}] != [${objectSize}]`
         );
       }

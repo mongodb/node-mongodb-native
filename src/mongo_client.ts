@@ -1,7 +1,7 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { AnyError, MongoDriverError } from './error';
+import { AnyError, MongoDriverError, MongoInvalidArgumentError } from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
   maybePromise,
@@ -403,7 +403,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
-      throw new MongoDriverError('`connect` only accepts a callback');
+      throw new MongoInvalidArgumentError('`connect` only accepts a callback');
     }
 
     return maybePromise(callback, cb => {

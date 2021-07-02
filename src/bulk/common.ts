@@ -5,7 +5,8 @@ import {
   AnyError,
   MONGODB_ERROR_CODES,
   MongoServerError,
-  MongoDriverError
+  MongoDriverError,
+  MongoInvalidArgumentError
 } from '../error';
 import {
   applyRetryableWrites,
@@ -1049,7 +1050,7 @@ export abstract class BulkOperationBase {
    */
   find(selector: Document): FindOperators {
     if (!selector) {
-      throw new MongoDriverError('Bulk find operation must specify a selector');
+      throw new MongoInvalidArgumentError('Bulk find operation must specify a selector');
     }
 
     // Save a current selector
@@ -1091,7 +1092,7 @@ export abstract class BulkOperationBase {
           { ...op.replaceOne, multi: false }
         );
         if (hasAtomicOperators(updateStatement.u)) {
-          throw new MongoDriverError('Replacement document must not use atomic operators');
+          throw new MongoInvalidArgumentError('Replacement document must not use atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
@@ -1105,7 +1106,7 @@ export abstract class BulkOperationBase {
           multi: false
         });
         if (!hasAtomicOperators(updateStatement.u)) {
-          throw new MongoDriverError('Update document requires atomic operators');
+          throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
@@ -1119,7 +1120,7 @@ export abstract class BulkOperationBase {
           multi: true
         });
         if (!hasAtomicOperators(updateStatement.u)) {
-          throw new MongoDriverError('Update document requires atomic operators');
+          throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
       }
