@@ -1,0 +1,129 @@
+description: "timeseries-collection"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "5.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name ts-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "createCollection with all options"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          # expireAfterSeconds should be an int64 (as it is stored on the server).
+          expireAfterSeconds: 604800
+          timeseries: &timeseries0
+            timeField: "time"
+            metaField: "meta"
+            granularity: "minutes"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0Name
+                expireAfterSeconds: 604800
+                timeseries: *timeseries0
+              databaseName: *database0Name
+
+  # Unlike regular collections, time-series collections allow duplicate ids.
+  - description: "insertMany with duplicate ids"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          # expireAfterSeconds should be an int64 (as it is stored on the server).
+          expireAfterSeconds: 604800
+          timeseries: *timeseries0
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents: &docs
+            - {
+                _id: 1,
+                time: {
+                  $date: {
+                    $numberLong: "1552949630482"
+                  }
+                }
+              }
+            - {
+                _id: 1,
+                time: {
+                  $date: {
+                    $numberLong: "1552949630483"
+                  }
+                }
+              }
+      - name: find
+        object: *collection0
+        arguments:
+          filter: {}
+          sort: { time: 1 }
+        expectResult: *docs
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0Name
+                expireAfterSeconds: 604800
+                timeseries: *timeseries0
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents: *docs
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: {}
+                sort: { time: 1 }
+              databaseName: *database0Name

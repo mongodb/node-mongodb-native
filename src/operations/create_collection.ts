@@ -60,6 +60,10 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pipeline?: Document[];
   /** A primary key factory function for generation of custom _id keys. */
   pkFactory?: PkFactory;
+  /** A document specifying configuration options for timeseries collections. */
+  timeseries?: Document;
+  /** The number of seconds after which a document in a timeseries collection expires. */
+  expireAfterSeconds?: number;
 }
 
 /** @internal */
