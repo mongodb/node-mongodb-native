@@ -4,7 +4,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { UpdateStatement } from '../operations/update';
 import type { DeleteStatement } from '../operations/delete';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 
 /** @public */
 export class OrderedBulkOperation extends BulkOperationBase {
@@ -68,7 +68,7 @@ export class OrderedBulkOperation extends BulkOperationBase {
 
     // We have an array of documents
     if (Array.isArray(document)) {
-      throw new MongoDriverError('Operation passed in cannot be an Array');
+      throw new MongoInvalidArgumentError('Operation passed in cannot be an Array');
     }
 
     this.s.currentBatch.originalIndexes.push(this.s.currentIndex);

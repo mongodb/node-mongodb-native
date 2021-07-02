@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -77,12 +77,12 @@ export class Query {
 
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (ns == null) throw new MongoDriverError('ns must be specified for query');
-    if (query == null) throw new MongoDriverError('query must be specified for query');
+    if (ns == null) throw new MongoInvalidArgumentError('ns must be specified for query');
+    if (query == null) throw new MongoInvalidArgumentError('query must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
-      throw new MongoDriverError('namespace cannot contain a null character');
+      throw new MongoInvalidArgumentError('namespace cannot contain a null character');
     }
 
     // Basic options

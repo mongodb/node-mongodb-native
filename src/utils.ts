@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { AnyError, MongoParseError, MongoDriverError } from './error';
+import { AnyError, MongoParseError, MongoDriverError, MongoInvalidArgumentError } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -54,27 +54,27 @@ export function getSingleProperty(
  */
 export function checkCollectionName(collectionName: string): void {
   if ('string' !== typeof collectionName) {
-    throw new MongoDriverError('collection name must be a String');
+    throw new MongoInvalidArgumentError('collection name must be a String');
   }
 
   if (!collectionName || collectionName.indexOf('..') !== -1) {
-    throw new MongoDriverError('collection names cannot be empty');
+    throw new MongoInvalidArgumentError('collection names cannot be empty');
   }
 
   if (
     collectionName.indexOf('$') !== -1 &&
     collectionName.match(/((^\$cmd)|(oplog\.\$main))/) == null
   ) {
-    throw new MongoDriverError("collection names must not contain '$'");
+    throw new MongoInvalidArgumentError("collection names must not contain '$'");
   }
 
   if (collectionName.match(/^\.|\.$/) != null) {
-    throw new MongoDriverError("collection names must not start or end with '.'");
+    throw new MongoInvalidArgumentError("collection names must not start or end with '.'");
   }
 
   // Validate that we are not passing 0x00 in the collection name
   if (collectionName.indexOf('\x00') !== -1) {
-    throw new MongoDriverError('collection names cannot contain a null character');
+    throw new MongoInvalidArgumentError('collection names cannot contain a null character');
   }
 }
 
@@ -228,7 +228,7 @@ export function executeLegacyOperation(
   const Promise = PromiseProvider.get();
 
   if (!Array.isArray(args)) {
-    throw new MongoDriverError('This method requires an array of arguments to apply');
+    throw new MongoInvalidArgumentError('This method requires an array of arguments to apply');
   }
 
   options = options ?? {};
@@ -248,7 +248,7 @@ export function executeLegacyOperation(
       const optionsIndex = args.length - 2;
       args[optionsIndex] = Object.assign({}, args[optionsIndex], { session: session });
     } else if (opOptions.session && opOptions.session.hasEnded) {
-      throw new MongoDriverError('Use of expired sessions is not permitted');
+      throw new MongoInvalidArgumentError('Use of expired sessions is not permitted');
     }
   }
 
@@ -289,7 +289,7 @@ export function executeLegacyOperation(
 
   // Return a Promise
   if (args[args.length - 1] != null) {
-    throw new MongoDriverError('final argument to `executeLegacyOperation` must be a callback');
+    throw new MongoInvalidArgumentError('final argument to `executeLegacyOperation` must be a callback');
   }
 
   return new Promise<any>((resolve, reject) => {
@@ -921,7 +921,7 @@ export function now(): number {
 /** @internal */
 export function calculateDurationInMs(started: number): number {
   if (typeof started !== 'number') {
-    throw new MongoDriverError('numeric value required to calculate duration');
+    throw new MongoInvalidArgumentError('numeric value required to calculate duration');
   }
 
   const elapsed = now() - started;
@@ -1222,7 +1222,7 @@ export class BufferPool {
   /** Reads the requested number of bytes, optionally consuming them */
   read(size: number, consume = true): Buffer {
     if (typeof size !== 'number' || size < 0) {
-      throw new MongoDriverError('Parameter size must be a non-negative number');
+      throw new MongoInvalidArgumentError('Parameter size must be a non-negative number');
     }
 
     if (size > this[kLength]) {
@@ -1324,7 +1324,7 @@ export class HostAddress {
         throw new MongoParseError('Invalid port (zero) with hostname');
       }
     } else {
-      throw new MongoDriverError('Either socketPath or host must be defined.');
+      throw new MongoInvalidArgumentError('Either socketPath or host must be defined.');
     }
     Object.freeze(this);
   }

@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { MongoDriverError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { Callback, emitWarningOnce, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -54,7 +54,7 @@ export class AddUserOperation extends CommandOperation<Document> {
     // Error out if digestPassword set
     if (options.digestPassword != null) {
       return callback(
-        new MongoDriverError(
+        new MongoInvalidArgumentError(
           'The digestPassword option is not supported via add_user. ' +
             "Please use db.command('createUser', ...) instead for this option."
         )

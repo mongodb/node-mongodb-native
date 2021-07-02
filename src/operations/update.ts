@@ -11,7 +11,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ObjectId, Document } from '../bson';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError, MongoServerError } from '../error';
+import { MongoDriverError, MongoServerError, MongoInvalidArgumentError } from '../error';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {
@@ -144,7 +144,7 @@ export class UpdateOneOperation extends UpdateOperation {
     );
 
     if (!hasAtomicOperators(update)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
@@ -181,7 +181,7 @@ export class UpdateManyOperation extends UpdateOperation {
     );
 
     if (!hasAtomicOperators(update)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
@@ -235,7 +235,7 @@ export class ReplaceOneOperation extends UpdateOperation {
     );
 
     if (hasAtomicOperators(replacement)) {
-      throw new MongoDriverError('Replacement document must not contain atomic operators');
+      throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
   }
 

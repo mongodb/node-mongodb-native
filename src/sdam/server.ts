@@ -33,7 +33,8 @@ import {
   isRetryableWriteError,
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake,
-  MongoDriverError
+  MongoDriverError,
+  MongoInvalidArgumentError
 } from '../error';
 import {
   Connection,
@@ -260,15 +261,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (callback == null) {
-      throw new MongoDriverError('callback must be provided');
+      throw new MongoInvalidArgumentError('callback must be provided');
     }
 
     if (ns.db == null || typeof ns === 'string') {
-      throw new MongoDriverError('ns must not be a string');
+      throw new MongoInvalidArgumentError('ns must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoDriverError('server is closed'));
+      callback(new MongoInvalidArgumentError('server is closed'));
       return;
     }
 
