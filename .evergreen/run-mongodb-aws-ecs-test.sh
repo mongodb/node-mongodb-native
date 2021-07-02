@@ -11,8 +11,7 @@ tar -xzf src.tgz .
 
 # load node.js
 set +x
-export NVM_DIR="${PROJECT_DIRECTORY}/node-artifacts/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 set -x
 
 # run the tests

@@ -1,9 +1,9 @@
 'use strict';
 
-const setupDatabase = require('../functional/shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(query):', function () {
+describe('examples(query-embedded-documents):', function () {
   let client;
   let db;
 
@@ -16,7 +16,7 @@ describe('examples(query):', function () {
     db = client.db(this.configuration.db);
 
     await db.collection('inventory').deleteMany({});
-    // Start Example 6
+    // Start Example 14
     await db.collection('inventory').insertMany([
       {
         item: 'journal',
@@ -49,7 +49,7 @@ describe('examples(query):', function () {
         status: 'A'
       }
     ]);
-    // End Example 6
+    // End Example 14
   });
 
   afterEach(async function () {
@@ -58,75 +58,70 @@ describe('examples(query):', function () {
     db = undefined;
   });
 
-  it('select all documents in a collection', {
+  it('Match an Embedded/Nested Document', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
     test: async function () {
-      // Start Example 7
-      const cursor = db.collection('inventory').find({});
-      // End Example 7
+      // Start Example 15
+      const cursor = db.collection('inventory').find({
+        size: { h: 14, w: 21, uom: 'cm' }
+      });
+      // End Example 15
 
-      expect(await cursor.count()).to.equal(5);
+      expect(await cursor.count()).to.equal(1);
     }
   });
 
-  it('Specify Equality Condition', {
+  it('Match an Embedded/Nested Document - document order', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
     test: async function () {
-      // Start Example 9
-      const cursor = db.collection('inventory').find({ status: 'D' });
-      // End Example 9
+      // Start Example 16
+      const cursor = db.collection('inventory').find({
+        size: { w: 21, h: 14, uom: 'cm' }
+      });
+      // End Example 16
+
+      expect(await cursor.count()).to.equal(0);
+    }
+  });
+
+  it('Specify Equality Match on a Nested Field', {
+    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    test: async function () {
+      // Start Example 17
+      const cursor = db.collection('inventory').find({
+        'size.uom': 'in'
+      });
+      // End Example 17
 
       expect(await cursor.count()).to.equal(2);
     }
   });
 
-  it('Specify Conditions Using Query Operators', {
+  it('Specify Match using Query Operator', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
     test: async function () {
-      // Start Example 10
+      // Start Example 18
       const cursor = db.collection('inventory').find({
-        status: { $in: ['A', 'D'] }
+        'size.h': { $lt: 15 }
       });
-      // End Example 10
-      expect(await cursor.count()).to.equal(5);
+      // End Example 18
+
+      expect(await cursor.count()).to.equal(4);
     }
   });
 
   it('Specify ``AND`` Condition', {
     metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
     test: async function () {
-      // Start Example 11
+      // Start Example 19
       const cursor = db.collection('inventory').find({
-        status: 'A',
-        qty: { $lt: 30 }
+        'size.h': { $lt: 15 },
+        'size.uom': 'in',
+        status: 'D'
       });
-      // End Example 11
+      // End Example 19
+
       expect(await cursor.count()).to.equal(1);
-    }
-  });
-
-  it('Specify ``OR`` Condition', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
-      // Start Example 12
-      const cursor = db.collection('inventory').find({
-        $or: [{ status: 'A' }, { qty: { $lt: 30 } }]
-      });
-      // End Example 12
-      expect(await cursor.count()).to.equal(3);
-    }
-  });
-
-  it('Specify ``AND`` as well as ``OR`` Conditions', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
-      // Start Example 13
-      const cursor = db.collection('inventory').find({
-        status: 'A',
-        $or: [{ qty: { $lt: 30 } }, { item: { $regex: '^p' } }]
-      });
-      // End Example 13
-      expect(await cursor.count()).to.equal(2);
     }
   });
 });

@@ -4,10 +4,11 @@
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
-    "target": "ES2018",
+    "target": "ES2019",
     "module": "commonJS",
     "moduleResolution": "node",
-    "lib": ["ES2018"],
+    "skipLibCheck": true,
+    "lib": ["es2020"],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
     "noEmitHelpers": true,

@@ -27,19 +27,16 @@ describe('Cursor Async Iterator Tests', function () {
 
     afterEach(() => client.close());
 
-    it('should be able to use a for-await loop on a find command cursor', {
-      metadata: { requires: { node: '>=10.5.0' } },
-      test: async function () {
-        const cursor = collection.find({ bar: 1 });
+    it('should be able to use a for-await loop on a find command cursor', async function () {
+      const cursor = collection.find({ bar: 1 });
 
-        let counter = 0;
-        for await (const doc of cursor) {
-          expect(doc).to.have.property('bar', 1);
-          counter += 1;
-        }
-
-        expect(counter).to.equal(1000);
+      let counter = 0;
+      for await (const doc of cursor) {
+        expect(doc).to.have.property('bar', 1);
+        counter += 1;
       }
+
+      expect(counter).to.equal(1000);
     });
 
     it('should be able to use a for-await loop on an aggregation cursor', {
@@ -58,7 +55,7 @@ describe('Cursor Async Iterator Tests', function () {
     });
 
     it('should be able to use a for-await loop on a command cursor', {
-      metadata: { requires: { node: '>=10.5.0', mongodb: '>=3.0.0' } },
+      metadata: { requires: { mongodb: '>=3.0.0' } },
       test: async function () {
         const cursor1 = collection.listIndexes();
         const cursor2 = collection.listIndexes();
@@ -74,20 +71,17 @@ describe('Cursor Async Iterator Tests', function () {
       }
     });
 
-    it('should properly stop when cursor is closed', {
-      metadata: { requires: { node: '>=10.5.0' } },
-      test: async function () {
-        const cursor = collection.find();
+    it('should properly stop when cursor is closed', async function () {
+      const cursor = collection.find();
 
-        let count = 0;
-        for await (const doc of cursor) {
-          expect(doc).to.exist;
-          count++;
-          await cursor.close();
-        }
-
-        expect(count).to.equal(1);
+      let count = 0;
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
+        count++;
+        await cursor.close();
       }
+
+      expect(count).to.equal(1);
     });
   });
   context('custom promise library', () => {
@@ -118,17 +112,14 @@ describe('Cursor Async Iterator Tests', function () {
       return client.close();
     });
 
-    it('should properly use custom promise', {
-      metadata: { requires: { node: '>=10.5.0' } },
-      test: async function () {
-        const cursor = collection.find();
-        const countBeforeIteration = promiseSpy.callCount;
-        for await (const doc of cursor) {
-          expect(doc).to.exist;
-        }
-        expect(countBeforeIteration).to.not.equal(promiseSpy.callCount);
-        expect(promiseSpy.called).to.equal(true);
+    it('should properly use custom promise', async function () {
+      const cursor = collection.find();
+      const countBeforeIteration = promiseSpy.callCount;
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
       }
+      expect(countBeforeIteration).to.not.equal(promiseSpy.callCount);
+      expect(promiseSpy.called).to.equal(true);
     });
   });
 });
