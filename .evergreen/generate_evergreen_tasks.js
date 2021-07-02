@@ -3,62 +3,43 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const NODE_VERSIONS = ['dubnium', 'erbium', 'fermium'];
+const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const NODE_VERSIONS = ['erbium', 'fermium'];
+NODE_VERSIONS.sort()
+const LOWEST_LTS = NODE_VERSIONS[0];
+
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
-const AWS_AUTH_VERSIONS = ['latest', '4.4'];
-const OCSP_VERSIONS = ['latest', '4.4'];
-const TLS_VERSIONS = ['latest', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
+const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
+const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
+const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2'];
+
+const DEFAULT_OS = 'ubuntu1804-large'
 
 const OPERATING_SYSTEMS = [
   {
     name: 'macos-1014',
     display_name: 'macOS 10.14',
-    run_on: 'macos-1014',
-    auth: false
-  },
-  {
-    name: 'rhel70',
-    display_name: 'RHEL 7.0',
-    run_on: 'rhel70-small'
-  },
-  {
-    name: 'ubuntu-14.04',
-    display_name: 'Ubuntu 14.04',
-    run_on: 'ubuntu1404-large',
-    mongoVersion: '<4.2'
+    run_on: 'macos-1014'
   },
   {
     name: 'ubuntu-18.04',
     display_name: 'Ubuntu 18.04',
-    run_on: 'ubuntu1804-large',
-    mongoVersion: '>=3.2',
-    clientEncryption: true
+    run_on: 'ubuntu1804-large'
   },
   {
-    name: 'windows-64-vs2015',
-    display_name: 'Windows (VS2015)',
-    run_on: 'windows-64-vs2015-large',
-    msvsVersion: 2015,
-    mongoVersion: '<4.4'
-  },
-  {
-    name: 'windows-64-vs2017',
-    display_name: 'Windows (VS2017)',
-    run_on: 'windows-64-vs2017-large',
-    msvsVersion: 2017,
-    mongoVersion: '<4.4'
+    name: 'windows-64-vs2019',
+    display_name: 'Windows (VS2019)',
+    run_on: 'windows-64-vs2019-large',
+    msvsVersion: 2019,
+    clientEncryption: false, // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
-].map(osConfig =>
-  Object.assign(
-    {
-      mongoVersion: '>=2.6',
-      nodeVersion: 'dubnium',
-      auth: false
-    },
-    osConfig
-  )
-);
+].map(osConfig => ({
+  mongoVersion: '>=2.6',
+  nodeVersion: LOWEST_LTS,
+  auth: false, // TODO test auth?
+  clientEncryption: true,
+  ...osConfig
+}));
 
 // TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth']);
@@ -112,7 +93,7 @@ BASE_TASKS.push({
 });
 
 // manually added tasks
-Array.prototype.push.apply(TASKS, [
+TASKS.push(...[
   {
     name: 'test-atlas-connectivity',
     tags: ['atlas-connect'],
@@ -276,7 +257,7 @@ TLS_VERSIONS.forEach(VERSION => {
 
 OCSP_VERSIONS.forEach(VERSION => {
   // manually added tasks
-  Array.prototype.push.apply(TASKS, [
+  TASKS.push(...[
     {
       name: `test-${VERSION}-ocsp-valid-cert-server-staples`,
       tags: ['ocsp'],
@@ -400,7 +381,7 @@ OCSP_VERSIONS.forEach(VERSION => {
 const AWS_AUTH_TASKS = [];
 
 AWS_AUTH_VERSIONS.forEach(VERSION => {
-  const name = (ex) => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
+  const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   const aws_funcs = [
     { func: 'run aws auth test with regular aws credentials' },
     { func: 'run aws auth test with assume role credentials' },
@@ -427,12 +408,11 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
       { func: 'setup aws env' },
       fn
     ]
-  }))
+  }));
 
   TASKS.push(...aws_tasks);
-  AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name))
+  AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name));
 });
-
 
 const BUILD_VARIANTS = [];
 
@@ -516,29 +496,33 @@ SINGLETON_TASKS.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'erbium'
+        NODE_LTS_NAME: LOWEST_LTS
       }
     },
     { func: 'run checks' }
   ]
 });
 
-BUILD_VARIANTS.push({
-  name: 'lint',
-  display_name: 'lint',
-  run_on: 'rhel70',
-  tasks: ['run-checks']
-}, {
-  name: 'ubuntu1804-custom-csfle-tests',
-  display_name: 'Custom FLE Version Test',
-  run_on: 'ubuntu1804-test',
-  tasks: ['run-custom-csfle-tests']
-},{
-  name: 'ubuntu1804-run-bson-ext-test',
-  display_name: 'BSON EXT Test',
-  run_on: 'ubuntu1804-test',
-  tasks: ['run-bson-ext-test']
-});
+BUILD_VARIANTS.push(
+  {
+    name: 'lint',
+    display_name: 'lint',
+    run_on: DEFAULT_OS,
+    tasks: ['run-checks']
+  },
+  {
+    name: 'ubuntu1804-custom-csfle-tests',
+    display_name: 'Custom FLE Version Test',
+    run_on: DEFAULT_OS,
+    tasks: ['run-custom-csfle-tests']
+  },
+  {
+    name: 'ubuntu1804-run-bson-ext-test',
+    display_name: 'BSON EXT Test',
+    run_on: DEFAULT_OS,
+    tasks: ['run-bson-ext-test']
+  }
+);
 
 // singleton build variant for mongosh integration tests
 SINGLETON_TASKS.push({
@@ -569,7 +553,7 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: 'ubuntu1804-test',
   expansions: {
-    NODE_LTS_NAME: 'dubnium'
+    NODE_LTS_NAME: LOWEST_LTS
   },
   tasks: AWS_AUTH_TASKS
 });
@@ -582,8 +566,8 @@ SINGLETON_TASKS.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'erbium',
-      },
+        NODE_LTS_NAME: LOWEST_LTS
+      }
     },
     {
       func: 'bootstrap mongo-orchestration',
@@ -604,8 +588,8 @@ SINGLETON_TASKS.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'fermium',
-      },
+        NODE_LTS_NAME: LOWEST_LTS
+      }
     },
     {
       func: 'bootstrap mongo-orchestration',
@@ -614,9 +598,10 @@ SINGLETON_TASKS.push({
         TOPOLOGY: 'server'
       }
     },
-    { func: 'run bson-ext test',
+    {
+      func: 'run bson-ext test',
       vars: {
-        NODE_LTS_NAME: 'fermium',
+        NODE_LTS_NAME: LOWEST_LTS
       }
     }
   ]

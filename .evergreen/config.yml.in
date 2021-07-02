@@ -245,7 +245,10 @@ functions:
           . ./prepare_atlas_connectivity.sh
           rm -f ./prepare_atlas_connectivity.sh
 
-          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
   "run kerberos tests":
     - command: shell.exec
@@ -253,9 +256,13 @@ functions:
       params:
         working_dir: src
         script: |
-          KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
-          MONGODB_URI='${gssapi_auth_mongodb_uri}' \
-          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export KRB5_KEYTAB='${gssapi_auth_keytab_base64}'
+          export KRB5_PRINCIPAL='${gssapi_auth_principal}'
+          export MONGODB_URI='${gssapi_auth_mongodb_uri}'
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
 
   "run ldap tests":
     - command: shell.exec
@@ -263,7 +270,10 @@ functions:
       params:
         working_dir: "src"
         script: |
-          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          export PROJECT_DIRECTORY="$(pwd)"
+          export MONGODB_URI='${plain_auth_mongodb_uri}'
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
 
   "run data lake tests":
@@ -272,7 +282,10 @@ functions:
         params:
           working_dir: src
           script: |
-            MONGODB_URI='mongodb://mhuser:pencil@localhost' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+            export PROJECT_DIRECTORY="$(pwd)"
+            export MONGODB_URI='mongodb://mhuser:pencil@localhost'
+            export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
             bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
 
   "run tls tests":
@@ -281,9 +294,14 @@ functions:
       params:
         working_dir: "src"
         script: |
-          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
-          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
-          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export NODE_LTS_NAME=${NODE_LTS_NAME}
+          export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
+          export SSL_CA_FILE="${SSL_CA_FILE}"
+          export SSL_KEY_FILE="${SSL_KEY_FILE}"
+          export MONGODB_URI="${MONGODB_URI}"
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
   "add aws auth variables to file":
     - command: shell.exec
@@ -497,14 +515,18 @@ functions:
       params:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo "/opt/mongodbtoolchain/v3/bin/python3")
+          export PYTHON_VENV_PATH=$([ "Windows_NT" = "$OS" ] && echo "./venv/Scripts" || echo "./venv/bin")
+
+          $PYTHON_BINARY -m venv ./venv
+          $PYTHON_VENV_PATH/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup $PYTHON_VENV_PATH/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -515,14 +537,19 @@ functions:
       params:
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+
+          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo "/opt/mongodbtoolchain/v3/bin/python3")
+          export PYTHON_VENV_PATH=$([ "Windows_NT" = "$OS" ] && echo "./venv/Scripts" || echo "./venv/bin")
+
+          $PYTHON_BINARY -m venv ./venv
+          $PYTHON_VENV_PATH/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup $PYTHON_VENV_PATH/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \

@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable no-unused-vars */
 
-const setupDatabase = require('../functional/shared').setupDatabase;
+const setupDatabase = require('../shared').setupDatabase;
 
 describe('examples.aggregaton:', function () {
   let client;

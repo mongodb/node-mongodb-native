@@ -217,23 +217,33 @@ functions:
           . ./prepare_atlas_connectivity.sh
           rm -f ./prepare_atlas_connectivity.sh
 
-          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
   run kerberos tests:
     - command: shell.exec
       type: test
       params:
         working_dir: src
         script: |
-          KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
-          MONGODB_URI='${gssapi_auth_mongodb_uri}' \
-          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export KRB5_KEYTAB='${gssapi_auth_keytab_base64}'
+          export KRB5_PRINCIPAL='${gssapi_auth_principal}'
+          export MONGODB_URI='${gssapi_auth_mongodb_uri}'
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   run ldap tests:
     - command: shell.exec
       type: test
       params:
         working_dir: src
         script: |
-          MONGODB_URI='${plain_auth_mongodb_uri}' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          export PROJECT_DIRECTORY="$(pwd)"
+          export MONGODB_URI='${plain_auth_mongodb_uri}'
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
   run data lake tests:
     - command: shell.exec
@@ -241,7 +251,10 @@ functions:
       params:
         working_dir: src
         script: |
-          MONGODB_URI='mongodb://mhuser:pencil@localhost' NODE_LTS_NAME='${NODE_LTS_NAME}' \
+          export PROJECT_DIRECTORY="$(pwd)"
+          export MONGODB_URI='mongodb://mhuser:pencil@localhost'
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
           bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
   run tls tests:
     - command: shell.exec
@@ -249,9 +262,14 @@ functions:
       params:
         working_dir: src
         script: |
-          NODE_LTS_NAME=${NODE_LTS_NAME} DRIVERS_TOOLS="${DRIVERS_TOOLS}" \
-          SSL_CA_FILE="${SSL_CA_FILE}" SSL_KEY_FILE="${SSL_KEY_FILE}" \
-          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
+          export PROJECT_DIRECTORY="$(pwd)"
+          export NODE_LTS_NAME=${NODE_LTS_NAME}
+          export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
+          export SSL_CA_FILE="${SSL_CA_FILE}"
+          export SSL_KEY_FILE="${SSL_KEY_FILE}"
+          export MONGODB_URI="${MONGODB_URI}"
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
   add aws auth variables to file:
     - command: shell.exec
       type: test
@@ -453,16 +471,24 @@ functions:
   run-valid-ocsp-server:
     - command: shell.exec
       params:
-        script: |
+        script: >
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+
+          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo
+          "/opt/mongodbtoolchain/v3/bin/python3")
+
+          export PYTHON_VENV_PATH=$([ "Windows_NT" = "$OS" ] && echo "./venv/Scripts" || echo "./venv/bin")
+
+
+          $PYTHON_BINARY -m venv ./venv
+
+          $PYTHON_VENV_PATH/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup $PYTHON_VENV_PATH/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -470,16 +496,25 @@ functions:
   run-revoked-ocsp-server:
     - command: shell.exec
       params:
-        script: |
+        script: >
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          /opt/mongodbtoolchain/v3/bin/python3 -m venv ./venv
-          ./venv/bin/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
+
+
+          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo
+          "/opt/mongodbtoolchain/v3/bin/python3")
+
+          export PYTHON_VENV_PATH=$([ "Windows_NT" = "$OS" ] && echo "./venv/Scripts" || echo "./venv/bin")
+
+
+          $PYTHON_BINARY -m venv ./venv
+
+          $PYTHON_VENV_PATH/pip3 install -r ${DRIVERS_TOOLS}/.evergreen/ocsp/mock-ocsp-responder-requirements.txt
     - command: shell.exec
       params:
         background: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/ocsp
-          nohup ./venv/bin/python3 ocsp_mock.py \
+          nohup $PYTHON_VENV_PATH/python3 ocsp_mock.py \
             --ca_file rsa/ca.pem \
             --ocsp_responder_cert rsa/ca.crt \
             --ocsp_responder_key rsa/ca.key \
@@ -573,6 +608,39 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-5.0-server
+    tags:
+      - '5.0'
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-5.0-replica_set
+    tags:
+      - '5.0'
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-5.0-sharded_cluster
+    tags:
+      - '5.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
   - name: test-4.4-server
@@ -987,6 +1055,28 @@ tasks:
           SSL: ssl
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-tls-support-5.0
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
+  - name: test-tls-support-4.4
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-tls-support-4.2
     tags:
       - tls-support
@@ -1090,6 +1180,102 @@ tasks:
         vars:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-valid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-invalid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-valid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-invalid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-soft-fail
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run-ocsp-test
         vars:
@@ -1262,6 +1448,78 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-5.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
@@ -1369,278 +1627,112 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_NAME: erbium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
           TOPOLOGY: server
       - func: run bson-ext test
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_NAME: erbium
 buildvariants:
-  - name: macos-1014-dubnium
-    display_name: macOS 10.14 Node Dubnium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_0
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-ocsp-valid-cert-server-staples
-      - test-ocsp-invalid-cert-server-staples
-      - test-ocsp-valid-cert-server-does-not-staple
-      - test-ocsp-invalid-cert-server-does-not-staple
-      - test-ocsp-soft-fail
-      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-tls-support-latest
-      - test-tls-support-4.2
-      - test-latest-ocsp-valid-cert-server-staples
-      - test-latest-ocsp-invalid-cert-server-staples
-      - test-latest-ocsp-valid-cert-server-does-not-staple
-      - test-latest-ocsp-invalid-cert-server-does-not-staple
-      - test-latest-ocsp-soft-fail
-      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-valid-cert-server-staples
-      - test-4.4-ocsp-invalid-cert-server-staples
-      - test-4.4-ocsp-valid-cert-server-does-not-staple
-      - test-4.4-ocsp-invalid-cert-server-does-not-staple
-      - test-4.4-ocsp-soft-fail
-      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: erbium
-    tasks: *ref_0
+      CLIENT_ENCRYPTION: true
+    tasks: &ref_0
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
+      - test-atlas-data-lake
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
   - name: macos-1014-fermium
     display_name: macOS 10.14 Node Fermium
     run_on: macos-1014
     expansions:
       NODE_LTS_NAME: fermium
-    tasks: *ref_0
-  - name: rhel70-dubnium
-    display_name: RHEL 7.0 Node Dubnium
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_1
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-ocsp-valid-cert-server-staples
-      - test-ocsp-invalid-cert-server-staples
-      - test-ocsp-valid-cert-server-does-not-staple
-      - test-ocsp-invalid-cert-server-does-not-staple
-      - test-ocsp-soft-fail
-      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-tls-support-latest
-      - test-tls-support-4.2
-      - test-latest-ocsp-valid-cert-server-staples
-      - test-latest-ocsp-invalid-cert-server-staples
-      - test-latest-ocsp-valid-cert-server-does-not-staple
-      - test-latest-ocsp-invalid-cert-server-does-not-staple
-      - test-latest-ocsp-soft-fail
-      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-valid-cert-server-staples
-      - test-4.4-ocsp-invalid-cert-server-staples
-      - test-4.4-ocsp-valid-cert-server-does-not-staple
-      - test-4.4-ocsp-invalid-cert-server-does-not-staple
-      - test-4.4-ocsp-soft-fail
-      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-  - name: rhel70-erbium
-    display_name: RHEL 7.0 Node Erbium
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_1
-  - name: rhel70-fermium
-    display_name: RHEL 7.0 Node Fermium
-    run_on: rhel70-small
-    expansions:
-      NODE_LTS_NAME: fermium
-    tasks: *ref_1
-  - name: ubuntu-14.04-dubnium
-    display_name: Ubuntu 14.04 Node Dubnium
-    run_on: ubuntu1404-large
-    expansions:
-      NODE_LTS_NAME: dubnium
-    tasks: &ref_2
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-3.0-server
-      - test-3.0-replica_set
-      - test-3.0-sharded_cluster
-      - test-2.6-server
-      - test-2.6-replica_set
-      - test-2.6-sharded_cluster
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-  - name: ubuntu-14.04-erbium
-    display_name: Ubuntu 14.04 Node Erbium
-    run_on: ubuntu1404-large
-    expansions:
-      NODE_LTS_NAME: erbium
-    tasks: *ref_2
-  - name: ubuntu-14.04-fermium
-    display_name: Ubuntu 14.04 Node Fermium
-    run_on: ubuntu1404-large
-    expansions:
-      NODE_LTS_NAME: fermium
-    tasks: *ref_2
-  - name: ubuntu-18.04-dubnium
-    display_name: Ubuntu 18.04 Node Dubnium
-    run_on: ubuntu1804-large
-    expansions:
-      NODE_LTS_NAME: dubnium
       CLIENT_ENCRYPTION: true
-    tasks: &ref_3
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-3.4-server
-      - test-3.4-replica_set
-      - test-3.4-sharded_cluster
-      - test-3.2-server
-      - test-3.2-replica_set
-      - test-3.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-ocsp-valid-cert-server-staples
-      - test-ocsp-invalid-cert-server-staples
-      - test-ocsp-valid-cert-server-does-not-staple
-      - test-ocsp-invalid-cert-server-does-not-staple
-      - test-ocsp-soft-fail
-      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-tls-support-latest
-      - test-tls-support-4.2
-      - test-latest-ocsp-valid-cert-server-staples
-      - test-latest-ocsp-invalid-cert-server-staples
-      - test-latest-ocsp-valid-cert-server-does-not-staple
-      - test-latest-ocsp-invalid-cert-server-does-not-staple
-      - test-latest-ocsp-soft-fail
-      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-valid-cert-server-staples
-      - test-4.4-ocsp-invalid-cert-server-staples
-      - test-4.4-ocsp-valid-cert-server-does-not-staple
-      - test-4.4-ocsp-invalid-cert-server-does-not-staple
-      - test-4.4-ocsp-soft-fail
-      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
-      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tasks: *ref_0
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_3
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
-    run_on: ubuntu1804-large
-    expansions:
-      NODE_LTS_NAME: fermium
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_3
-  - name: windows-64-vs2015-dubnium
-    display_name: Windows (VS2015) Node Dubnium
-    run_on: windows-64-vs2015-large
-    expansions:
-      NODE_LTS_NAME: dubnium
-      MSVS_VERSION: 2015
-    tasks: &ref_4
+    tasks: &ref_1
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
@@ -1662,56 +1754,141 @@ buildvariants:
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
       - test-atlas-data-lake
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2015-erbium
-    display_name: Windows (VS2015) Node Erbium
-    run_on: windows-64-vs2015-large
-    expansions:
-      NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2015
-    tasks: *ref_4
-  - name: windows-64-vs2015-fermium
-    display_name: Windows (VS2015) Node Fermium
-    run_on: windows-64-vs2015-large
-    expansions:
-      NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2015
-    tasks: *ref_4
-  - name: windows-64-vs2017-dubnium
-    display_name: Windows (VS2017) Node Dubnium
-    run_on: windows-64-vs2017-large
-    expansions:
-      NODE_LTS_NAME: dubnium
-      MSVS_VERSION: 2017
-    tasks: *ref_4
-  - name: windows-64-vs2017-erbium
-    display_name: Windows (VS2017) Node Erbium
-    run_on: windows-64-vs2017-large
-    expansions:
-      NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2017
-    tasks: *ref_4
-  - name: windows-64-vs2017-fermium
-    display_name: Windows (VS2017) Node Fermium
-    run_on: windows-64-vs2017-large
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: ubuntu-18.04-fermium
+    display_name: Ubuntu 18.04 Node Fermium
+    run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2017
-    tasks: *ref_4
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_1
+  - name: windows-64-vs2019-erbium
+    display_name: Windows (VS2019) Node Erbium
+    run_on: windows-64-vs2019-large
+    expansions:
+      NODE_LTS_NAME: erbium
+      MSVS_VERSION: 2019
+    tasks: &ref_2
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-data-lake
+      - test-ocsp-valid-cert-server-staples
+      - test-ocsp-invalid-cert-server-staples
+      - test-ocsp-valid-cert-server-does-not-staple
+      - test-ocsp-invalid-cert-server-does-not-staple
+      - test-ocsp-soft-fail
+      - test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
+      - test-latest-ocsp-valid-cert-server-staples
+      - test-latest-ocsp-invalid-cert-server-staples
+      - test-latest-ocsp-valid-cert-server-does-not-staple
+      - test-latest-ocsp-invalid-cert-server-does-not-staple
+      - test-latest-ocsp-soft-fail
+      - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-valid-cert-server-staples
+      - test-4.4-ocsp-invalid-cert-server-staples
+      - test-4.4-ocsp-valid-cert-server-does-not-staple
+      - test-4.4-ocsp-invalid-cert-server-does-not-staple
+      - test-4.4-ocsp-soft-fail
+      - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: windows-64-vs2019-fermium
+    display_name: Windows (VS2019) Node Fermium
+    run_on: windows-64-vs2019-large
+    expansions:
+      NODE_LTS_NAME: fermium
+      MSVS_VERSION: 2019
+    tasks: *ref_2
   - name: lint
     display_name: lint
-    run_on: rhel70
+    run_on: ubuntu1804-large
     tasks:
       - run-checks
   - name: ubuntu1804-custom-csfle-tests
     display_name: Custom FLE Version Test
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     tasks:
       - run-custom-csfle-tests
   - name: ubuntu1804-run-bson-ext-test
     display_name: BSON EXT Test
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     tasks:
       - run-bson-ext-test
   - name: mongosh_integration_tests
@@ -1723,7 +1900,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: dubnium
+      NODE_LTS_NAME: erbium
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -1731,6 +1908,12 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-5.0-auth-test-run-aws-ECS-auth-test
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
