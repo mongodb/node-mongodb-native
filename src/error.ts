@@ -90,7 +90,6 @@ export class MongoError extends Error {
     }
   }
 
-  // Returns name of the error
   get name(): string {
     return 'MongoError';
   }
