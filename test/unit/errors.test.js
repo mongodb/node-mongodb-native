@@ -1,3 +1,4 @@
+/* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
 'use strict';
 
 const expect = require('chai').expect;
