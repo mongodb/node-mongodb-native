@@ -1,6 +1,6 @@
 import { indexInformation, IndexInformationOptions } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
-import { MONGODB_ERROR_CODES, MongoDriverError, MongoServerError } from '../error';
+import { MONGODB_ERROR_CODES, MongoServerError, MongoCompatibilityError } from '../error';
 import {
   maxWireVersion,
   parseIndexOptions,
@@ -188,7 +188,7 @@ export class CreateIndexesOperation<
       // Did the user pass in a collation, check if our write server supports it
       if (indexes[i].collation && serverWireVersion < 5) {
         callback(
-          new MongoDriverError(
+          new MongoCompatibilityError(
             `Server ${server.name}, which reports wire version ${serverWireVersion}, ` +
               'does not support collation'
           )
@@ -213,7 +213,7 @@ export class CreateIndexesOperation<
     if (options.commitQuorum != null) {
       if (serverWireVersion < 9) {
         callback(
-          new MongoDriverError(
+          new MongoCompatibilityError(
             '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
           )
         );

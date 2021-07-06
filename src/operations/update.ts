@@ -11,7 +11,12 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ObjectId, Document } from '../bson';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError, MongoServerError, MongoInvalidArgumentError } from '../error';
+import {
+  MongoDriverError,
+  MongoServerError,
+  MongoInvalidArgumentError,
+  MongoCompatibilityError
+} from '../error';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {
@@ -108,25 +113,27 @@ export class UpdateOperation extends CommandOperation<Document> {
       collationNotSupported(server, options) ||
       (statementWithCollation && collationNotSupported(server, statementWithCollation))
     ) {
-      callback(new MongoDriverError(`server ${server.name} does not support collation`));
+      callback(new MongoCompatibilityError(`server ${server.name} does not support collation`));
       return;
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoDriverError(`servers < 3.4 do not support hint on update`));
+        callback(new MongoCompatibilityError(`servers < 3.4 do not support hint on update`));
         return;
       }
     }
 
     if (this.explain && maxWireVersion(server) < 3) {
-      callback(new MongoDriverError(`server ${server.name} does not support explain on update`));
+      callback(
+        new MongoCompatibilityError(`server ${server.name} does not support explain on update`)
+      );
       return;
     }
 
     if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
-      callback(new MongoDriverError('arrayFilters are only supported on MongoDB 3.6+'));
+      callback(new MongoCompatibilityError('arrayFilters are only supported on MongoDB 3.6+'));
       return;
     }
 

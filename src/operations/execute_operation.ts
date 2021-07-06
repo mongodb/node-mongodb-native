@@ -4,6 +4,7 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoCompatibilityError,
   MongoServerError
 } from '../error';
 import { Aspect, AbstractOperation } from './operation';
@@ -92,7 +93,7 @@ export function executeOperation<
     } else if (session) {
       // If the user passed an explicit session and we are still, after server selection,
       // trying to run against a topology that doesn't support sessions we error out.
-      return cb(new MongoDriverError('Current topology does not support sessions'));
+      return cb(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     try {

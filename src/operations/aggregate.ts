@@ -5,7 +5,7 @@ import {
   CollationOptions
 } from './command';
 import { ReadPreference } from '../read_preference';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
