@@ -21,7 +21,7 @@ describe('MongoErrors', () => {
         const errorPrototype = Object.getPrototypeOf(error);
 
         // expect name property to be class name
-        expect(error.name).to.have.property('name', errorName);
+        expect(error).to.have.property('name', errorName);
         expect(errorPrototype).to.have.ownPropertyDescriptor('name').that.has.property('get');
       });
     });
