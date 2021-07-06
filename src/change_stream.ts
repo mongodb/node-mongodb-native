@@ -34,6 +34,8 @@ const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 /** @internal */
 const kClosed = Symbol('closed');
+/** @internal */
+const kMode = Symbol('mode');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
 const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
@@ -205,8 +207,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   /** @internal */
   [kClosed]: boolean;
   /** @internal */
-  isIterator: boolean;
-  isEmitter: boolean;
+  [kMode]: false | 'iterator' | 'emitter';
 
   /** @event */
   static readonly RESPONSE = 'response' as const;
@@ -246,8 +247,6 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   ) {
     super();
 
-    this.isIterator = false;
-    this.isEmitter = false;
     this.pipeline = pipeline;
     this.options = options;
 
@@ -382,13 +381,21 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   }
 
   _setIsEmitter(): void {
-    errorIfIsIterator(this);
-    this.isEmitter = true;
+    if (this[kMode] === 'iterator') {
+      throw new MongoDriverError(
+        'Cannot use ChangeStream as an EventEmitter after using as an iterator'
+      );
+    }
+    this[kMode] = 'emitter';
   }
 
   _setIsIterator(): void {
-    errorIfIsEmmiter(this);
-    this.isIterator = true;
+    if (this[kMode] === 'emitter') {
+      throw new MongoDriverError(
+        'Cannot use ChangeStream as iterator after using as an EventEmitter'
+      );
+    }
+    this[kMode] = 'iterator';
   }
 }
 
@@ -756,21 +763,6 @@ function processError<TSchema>(
   return closeWithError(changeStream, error, callback);
 }
 
-function errorIfIsEmmiter(changeStream: ChangeStream<any>) {
-  if (changeStream.isEmitter) {
-    throw new MongoDriverError(
-      'Cannot use ChangeStream as iterator after using as an EventEmitter'
-    );
-  }
-}
-
-function errorIfIsIterator(changeStream: ChangeStream<any>) {
-  if (changeStream.isIterator) {
-    throw new MongoDriverError(
-      'Cannot use ChangeStream as an EventEmitter after using as an iterator'
-    );
-  }
-}
 /**
  * Safely provides a cursor across resume attempts
  *
