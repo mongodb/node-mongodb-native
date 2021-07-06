@@ -1,4 +1,4 @@
-import { MongoDriverError } from './error';
+import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
 import type { deserialize, Document, serialize } from './bson';
 import type { Callback } from './utils';
@@ -20,8 +20,8 @@ function makeErrorModule(error: any) {
 
 export let Kerberos:
   | typeof import('kerberos')
-  | { kModuleError: MongoDriverError } = makeErrorModule(
-  new MongoDriverError(
+  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+  new MongoMissingDependencyError(
     'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
   )
 );
@@ -41,8 +41,10 @@ export interface KerberosClient {
   unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
 }
 
-export let Snappy: typeof import('snappy') | { kModuleError: MongoDriverError } = makeErrorModule(
-  new MongoDriverError(
+export let Snappy:
+  | typeof import('snappy')
+  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+  new MongoMissingDependencyError(
     'Optional module `snappy` not found. Please install it to enable snappy compression'
   )
 );
@@ -54,8 +56,8 @@ try {
 
 export let saslprep:
   | typeof import('saslprep')
-  | { kModuleError: MongoDriverError } = makeErrorModule(
-  new MongoDriverError(
+  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+  new MongoMissingDependencyError(
     'Optional module `saslprep` not found.' +
       ' Please install it to enable Stringprep Profile for User Names and Passwords'
   )
@@ -66,8 +68,10 @@ try {
   saslprep = require('saslprep');
 } catch {} // eslint-disable-line
 
-export let aws4: typeof import('aws4') | { kModuleError: MongoDriverError } = makeErrorModule(
-  new MongoDriverError(
+export let aws4:
+  | typeof import('aws4')
+  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+  new MongoMissingDependencyError(
     'Optional module `aws4` not found. Please install it to enable AWS authentication'
   )
 );
