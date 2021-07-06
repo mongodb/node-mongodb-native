@@ -172,8 +172,10 @@ export class MongoDriverError extends MongoError {
 
 /**
  * An error generated when the driver encounters unexpected unexpected input
- * or reaches an unexpected/invalid internal state. Should never be
- * directly instantiated.
+ * or reaches an unexpected/invalid internal state. 
+ * 
+ * @privateRemarks
+ * Should **never** be directly instantiated.
  *
  * @public
  * @category Error
