@@ -1,6 +1,12 @@
 import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
-import { AnyError, MongoServerError, MongoInvalidArgumentError } from '../../error';
+import {
+  AnyError,
+  MongoDriverError,
+  MongoServerError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { Callback, ns, emitWarning } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
@@ -103,10 +109,12 @@ function makeFirstMessage(
 function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
   const { connection, credentials } = authContext;
   if (!credentials) {
-    return callback(new MongoDriverError('AuthContext must provide credentials.'));
+    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoDriverError('AuthContext must contain a valid nonce property'));
+    return callback(
+      new MongoInvalidArgumentError('AuthContext must contain a valid nonce property')
+    );
   }
   const nonce = authContext.nonce;
   const db = credentials.source;
@@ -131,10 +139,10 @@ function continueScramConversation(
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   if (!credentials) {
-    return callback(new MongoDriverError('AuthContext must provide credentials.'));
+    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoDriverError('Unable to continue SCRAM without valid nonce'));
+    return callback(new MongoInvalidArgumentError('Unable to continue SCRAM without valid nonce'));
   }
   const nonce = authContext.nonce;
 

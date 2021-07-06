@@ -87,7 +87,9 @@ function performInitialHandshake(
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
       !AUTH_PROVIDERS.get(credentials.mechanism)
     ) {
-      callback(new MongoDriverError(`authMechanism '${credentials.mechanism}' not supported`));
+      callback(
+        new MongoCompatibilityError(`authMechanism '${credentials.mechanism}' not supported`)
+      );
       return;
     }
   }
