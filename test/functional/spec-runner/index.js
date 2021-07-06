@@ -53,6 +53,21 @@ function translateClientOptions(options) {
           kmsProviders.local = options.autoEncryptOpts.kmsProviders.local;
         }
 
+        if (options.autoEncryptOpts.kmsProviders.awsTemporary) {
+          kmsProviders.aws = {
+            accessKeyId: process.env.CSFLE_AWS_TEMP_ACCESS_KEY_ID,
+            secretAccessKey: process.env.CSFLE_AWS_TEMP_SECRET_ACCESS_KEY,
+            sessionToken: process.env.CSFLE_AWS_TEMP_SESSION_TOKEN
+          };
+        }
+
+        if (options.autoEncryptOpts.kmsProviders.awsTemporaryNoSessionToken) {
+          kmsProviders.aws = {
+            accessKeyId: process.env.CSFLE_AWS_TEMP_ACCESS_KEY_ID,
+            secretAccessKey: process.env.CSFLE_AWS_TEMP_SECRET_ACCESS_KEY
+          };
+        }
+
         options.autoEncryption.kmsProviders = kmsProviders;
       }
 

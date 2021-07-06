@@ -42,6 +42,11 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_SECRET_ACCESS_KEY;
 else
   npm install mongodb-client-encryption@">=1.2.6"
+
+  # Get access to the AWS temporary credentials:
+  echo "adding temporary AWS credentials to environment"
+  # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
+  . $DRIVERS_TOOLS/.evergreen/csfle/set-temp-creds.sh
 fi
 
 MONGODB_API_VERSION=${MONGODB_API_VERSION} MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} npm run ${TEST_NPM_SCRIPT}
