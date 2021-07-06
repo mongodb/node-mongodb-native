@@ -1,0 +1,12 @@
+description: "entity-client-observeSensitiveCommands-type"
+
+schemaVersion: "1.5"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+      observeSensitiveCommands: 0
+
+tests:
+  - description: "foo"
+    operations: []
