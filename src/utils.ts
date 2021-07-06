@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { AnyError, MongoParseError, MongoDriverError, MongoInvalidArgumentError } from './error';
+import { AnyError, MongoParseError, MongoDriverError, MongoCompatibilityError, MongoInvalidArgumentError } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -399,7 +399,7 @@ export function decorateWithCollation(
     if (capabilities && capabilities.commandsTakeCollation) {
       command.collation = options.collation;
     } else {
-      throw new MongoDriverError(`Current topology does not support collation`);
+      throw new MongoCompatibilityError(`Current topology does not support collation`);
     }
   }
 }

@@ -754,7 +754,7 @@ export class FindOperators {
   /** Add a single update operation to the bulk operation */
   updateOne(updateDocument: Document): BulkOperationBase {
     if (!hasAtomicOperators(updateDocument)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
 
     const currentOp = buildCurrentOp(this.bulkOperation);
@@ -767,7 +767,7 @@ export class FindOperators {
   /** Add a replace one operation to the bulk operation */
   replaceOne(replacement: Document): BulkOperationBase {
     if (hasAtomicOperators(replacement)) {
-      throw new MongoDriverError('Replacement document must not use atomic operators');
+      throw new MongoInvalidArgumentError('Replacement document must not use atomic operators');
     }
 
     const currentOp = buildCurrentOp(this.bulkOperation);
@@ -1084,7 +1084,7 @@ export abstract class BulkOperationBase {
     if ('replaceOne' in op || 'updateOne' in op || 'updateMany' in op) {
       if ('replaceOne' in op) {
         if ('q' in op.replaceOne) {
-          throw new MongoDriverError('Raw operations are not allowed');
+          throw new MongoInvalidArgumentError('Raw operations are not allowed');
         }
         const updateStatement = makeUpdateStatement(
           op.replaceOne.filter,
@@ -1099,7 +1099,7 @@ export abstract class BulkOperationBase {
 
       if ('updateOne' in op) {
         if ('q' in op.updateOne) {
-          throw new MongoDriverError('Raw operations are not allowed');
+          throw new MongoInvalidArgumentError('Raw operations are not allowed');
         }
         const updateStatement = makeUpdateStatement(op.updateOne.filter, op.updateOne.update, {
           ...op.updateOne,
@@ -1113,7 +1113,7 @@ export abstract class BulkOperationBase {
 
       if ('updateMany' in op) {
         if ('q' in op.updateMany) {
-          throw new MongoDriverError('Raw operations are not allowed');
+          throw new MongoInvalidArgumentError('Raw operations are not allowed');
         }
         const updateStatement = makeUpdateStatement(op.updateMany.filter, op.updateMany.update, {
           ...op.updateMany,
@@ -1128,7 +1128,7 @@ export abstract class BulkOperationBase {
 
     if ('deleteOne' in op) {
       if ('q' in op.deleteOne) {
-        throw new MongoDriverError('Raw operations are not allowed');
+        throw new MongoInvalidArgumentError('Raw operations are not allowed');
       }
       return this.addToOperationsList(
         BatchType.DELETE,
@@ -1138,7 +1138,7 @@ export abstract class BulkOperationBase {
 
     if ('deleteMany' in op) {
       if ('q' in op.deleteMany) {
-        throw new MongoDriverError('Raw operations are not allowed');
+        throw new MongoInvalidArgumentError('Raw operations are not allowed');
       }
       return this.addToOperationsList(
         BatchType.DELETE,

@@ -1,6 +1,6 @@
 import { ReadPreference } from '../read_preference';
 import { maxWireVersion, decorateWithCollation, hasAtomicOperators, Callback } from '../utils';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
@@ -172,7 +172,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       const unacknowledgedWrite = this.writeConcern?.w === 0;
       if (unacknowledgedWrite || maxWireVersion(server) < 8) {
         callback(
-          new MongoDriverError(
+          new MongoCompatibilityError(
             'The current topology does not support a hint on findAndModify commands'
           )
         );
@@ -185,7 +185,9 @@ class FindAndModifyOperation extends CommandOperation<Document> {
 
     if (this.explain && maxWireVersion(server) < 4) {
       callback(
-        new MongoDriverError(`server ${server.name} does not support explain on findAndModify`)
+        new MongoCompatibilityError(
+          `server ${server.name} does not support explain on findAndModify`
+        )
       );
       return;
     }

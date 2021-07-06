@@ -6,7 +6,7 @@ import {
   normalizeHintField,
   decorateWithExplain
 } from '../utils';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
@@ -107,13 +107,15 @@ export class FindOperation extends CommandOperation<Document> {
     const serverWireVersion = maxWireVersion(server);
     const options = this.options;
     if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
-      callback(new MongoDriverError('The `allowDiskUse` option is not supported on MongoDB < 3.2'));
+      callback(
+        new MongoCompatibilityError('The `allowDiskUse` option is not supported on MongoDB < 3.2')
+      );
       return;
     }
 
     if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
-        new MongoDriverError(
+        new MongoCompatibilityError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
         )
       );
@@ -124,7 +126,7 @@ export class FindOperation extends CommandOperation<Document> {
     if (serverWireVersion < 4) {
       if (this.readConcern && this.readConcern.level !== 'local') {
         callback(
-          new MongoDriverError(
+          new MongoCompatibilityError(
             `server find command does not support a readConcern level of ${this.readConcern.level}`
           )
         );
