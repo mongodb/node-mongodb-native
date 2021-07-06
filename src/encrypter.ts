@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { MongoClient, MongoClientOptions } from './mongo_client';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
-import { MongoDriverError } from './error';
+import { MongoDriverError, MongoMissingDependencyError } from './error';
 import { deserialize, serialize } from './bson';
 import type { Callback } from './utils';
 import { MONGO_CLIENT_EVENTS } from './operations/connect';
@@ -106,7 +106,7 @@ export class Encrypter {
     try {
       require.resolve('mongodb-client-encryption');
     } catch (err) {
-      throw new MongoDriverError(
+      throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project'
       );
@@ -114,7 +114,7 @@ export class Encrypter {
 
     const mongodbClientEncryption = require('mongodb-client-encryption');
     if (typeof mongodbClientEncryption.extension !== 'function') {
-      throw new MongoDriverError(
+      throw new MongoMissingDependencyError(
         'loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
           'Please make sure you are loading the correct version of `mongodb-client-encryption`'
       );
