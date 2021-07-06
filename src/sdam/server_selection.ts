@@ -1,6 +1,6 @@
 import { ServerType, TopologyType } from './common';
 import { ReadPreference } from '../read_preference';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
 import type { TopologyDescription } from './topology_description';
 import type { ServerDescription, TagSet } from './server_description';
 
@@ -227,7 +227,7 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
       readPreference.minWireVersion &&
       readPreference.minWireVersion > commonWireVersion
     ) {
-      throw new MongoDriverError(
+      throw new MongoCompatibilityError(
         `Minimum wire version '${readPreference.minWireVersion}' required, but found '${commonWireVersion}'`
       );
     }

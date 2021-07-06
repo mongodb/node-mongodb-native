@@ -6,6 +6,7 @@ import {
   MongoNetworkTimeoutError,
   AnyError,
   MongoDriverError,
+  MongoCompatibilityError,
   MongoServerError,
   MongoInvalidArgumentError
 } from '../error';
@@ -59,13 +60,13 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     const message = `Server at ${options.hostAddress} reports minimum wire version ${JSON.stringify(
       ismaster.minWireVersion
     )}, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
-    return new MongoDriverError(message);
+    return new MongoCompatibilityError(message);
   }
 
   const message = `Server at ${options.hostAddress} reports maximum wire version ${
     JSON.stringify(ismaster.maxWireVersion) ?? 0
   }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
-  return new MongoDriverError(message);
+  return new MongoCompatibilityError(message);
 }
 
 function performInitialHandshake(

@@ -4,7 +4,7 @@ import * as url from 'url';
 import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
-import { MongoDriverError } from '../../error';
+import { MongoDriverError, MongoCompatibilityError } from '../../error';
 import { maxWireVersion, Callback, ns } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
@@ -42,7 +42,9 @@ export class MongoDBAWS extends AuthProvider {
 
     if (maxWireVersion(connection) < 9) {
       callback(
-        new MongoDriverError('MONGODB-AWS authentication requires MongoDB version 4.4 or later')
+        new MongoCompatibilityError(
+          'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
+        )
       );
       return;
     }
