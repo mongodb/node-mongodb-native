@@ -1,5 +1,10 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoDriverError, MongoError } from '../../error';
+import {
+  MongoDriverError,
+  MongoMissingCredentialsError,
+  MongoError,
+  MongoMissingDependencyError
+} from '../../error';
 import { Kerberos, KerberosClient } from '../../deps';
 import { Callback, ns } from '../../utils';
 import type { Document } from '../../bson';
@@ -15,7 +20,8 @@ import * as dns from 'dns';
 export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
-    if (credentials == null) return callback(new MongoDriverError('credentials required'));
+    if (credentials == null)
+      return callback(new MongoMissingCredentialsError('credentials required'));
     const { username } = credentials;
     function externalCommand(
       command: Document,
@@ -25,7 +31,7 @@ export class GSSAPI extends AuthProvider {
     }
     makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);
-      if (client == null) return callback(new MongoDriverError('gssapi client missing'));
+      if (client == null) return callback(new MongoMissingDependencyError('gssapi client missing'));
       client.step('', (err, payload) => {
         if (err) return callback(err);
 
