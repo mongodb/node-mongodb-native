@@ -16,7 +16,7 @@ export class PoolClosedError extends MongoDriverError {
   }
 
   get name(): string {
-    return 'PoolClosedError';
+    return 'MongoPoolClosedError';
   }
 }
 
@@ -34,6 +34,6 @@ export class WaitQueueTimeoutError extends MongoDriverError {
   }
 
   get name(): string {
-    return 'WaitQueueTimeoutError';
+    return 'MongoWaitQueueTimeoutError';
   }
 }
