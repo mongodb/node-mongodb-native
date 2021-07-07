@@ -549,7 +549,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     if (callback == null) {
-      throw new MongoDriverError('Missing required callback parameter');
+      throw new MongoInvalidArgumentError('Missing required callback parameter');
     }
 
     const session = this.startSession(options);
