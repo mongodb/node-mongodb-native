@@ -38,8 +38,14 @@ describe('mongodb+srv', function () {
                 expect(result).to.exist;
                 // Implicit SRV options must be set.
                 expect(options.directConnection).to.be.false;
-                expect(options.tls).to.be.true;
                 const testOptions = test[1].options;
+                if (testOptions && 'tls' in testOptions) {
+                  expect(options).to.have.property('tls', testOptions.tls);
+                } else if (testOptions && 'ssl' in testOptions) {
+                  expect(options).to.have.property('tls', testOptions.ssl);
+                } else {
+                  expect(options.tls).to.be.true;
+                }
                 if (testOptions && testOptions.replicaSet) {
                   expect(options).to.have.property('replicaSet', testOptions.replicaSet);
                 }
