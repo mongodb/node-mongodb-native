@@ -2031,7 +2031,11 @@ describe('Bulk', function () {
       await collection.deleteMany({});
     });
 
-    it('should abort ordered/unordered bulk operation writes', {
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
+    it('should abort ordered bulk operation writes', {
       metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
@@ -2042,14 +2046,8 @@ describe('Bulk', function () {
 
         let bulk = undefined;
 
-        // 1.
-        bulk = collection.initializeUnorderedBulkOp({ session });
-        bulk.insert({ answer: 42 });
-        await bulk.execute();
-
-        // 2.
         bulk = collection.initializeOrderedBulkOp({ session });
-        bulk.insert({ answer: 43 });
+        bulk.insert({ answer: 42 });
         await bulk.execute();
 
         await session.abortTransaction();
@@ -2057,16 +2055,41 @@ describe('Bulk', function () {
 
         const documents = await collection.find().toArray();
 
-        expect(documents).to.be.lengthOf(
+        expect(documents).to.have.lengthOf(
           0,
           'bulk operation writes were made outside of transaction'
         );
-
-        await client.close(); // session leak checker doesn't let you put the close in an after hook
       }
     });
 
-    it('should abort ordered/unordered bulk operation writes using withTransaction', {
+    it('should abort unordered bulk operation writes', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+        session.startTransaction({
+          readConcern: { level: 'local' },
+          writeConcern: { w: 'majority' }
+        });
+
+        let bulk = undefined;
+
+        bulk = collection.initializeUnorderedBulkOp({ session });
+        bulk.insert({ answer: 42 });
+        await bulk.execute();
+
+        await session.abortTransaction();
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
+      }
+    });
+
+    it('should abort unordered bulk operation writes using withTransaction', {
       metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
@@ -2074,16 +2097,10 @@ describe('Bulk', function () {
         await session.withTransaction(
           async () => {
             let bulk = undefined;
-            // 1.
+
             bulk = collection.initializeUnorderedBulkOp({ session });
             bulk.insert({ answer: 42 });
             await bulk.execute();
-
-            // 2.
-            bulk = collection.initializeOrderedBulkOp({ session });
-            bulk.insert({ answer: 43 });
-            await bulk.execute();
-
             await session.abortTransaction();
           },
           { readConcern: { level: 'local' }, writeConcern: { w: 'majority' } }
@@ -2093,12 +2110,38 @@ describe('Bulk', function () {
 
         const documents = await collection.find().toArray();
 
-        expect(documents).to.be.lengthOf(
+        expect(documents).to.have.lengthOf(
           0,
           'bulk operation writes were made outside of transaction'
         );
+      }
+    });
 
-        await client.close(); // session leak checker doesn't let you put the close in an after hook
+    it('should abort ordered bulk operation writes using withTransaction', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+
+        await session.withTransaction(
+          async () => {
+            let bulk = undefined;
+
+            bulk = collection.initializeOrderedBulkOp({ session });
+            bulk.insert({ answer: 42 });
+            await bulk.execute();
+            await session.abortTransaction();
+          },
+          { readConcern: { level: 'local' }, writeConcern: { w: 'majority' } }
+        );
+
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
       }
     });
   });
