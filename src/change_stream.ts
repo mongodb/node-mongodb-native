@@ -301,7 +301,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
 
   /** Check if there is any document still available in the Change Stream */
   hasNext(callback?: Callback): Promise<void> | void {
-    this._setIsIterator();
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -316,7 +316,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   next(
     callback?: Callback<ChangeStreamDocument<TSchema>>
   ): Promise<ChangeStreamDocument<TSchema>> | void {
-    this._setIsIterator();
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -371,31 +371,13 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
   tryNext(): Promise<Document | null>;
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
-    this._setIsIterator();
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
         return cursor.tryNext(cb);
       });
     });
-  }
-
-  _setIsEmitter(): void {
-    if (this[kMode] === 'iterator') {
-      throw new MongoDriverError(
-        'Cannot use ChangeStream as an EventEmitter after using as an iterator'
-      );
-    }
-    this[kMode] = 'emitter';
-  }
-
-  _setIsIterator(): void {
-    if (this[kMode] === 'emitter') {
-      throw new MongoDriverError(
-        'Cannot use ChangeStream as iterator after using as an EventEmitter'
-      );
-    }
-    this[kMode] = 'iterator';
   }
 }
 
@@ -558,6 +540,23 @@ const CHANGE_STREAM_EVENTS = [
   ChangeStream.CLOSE
 ];
 
+function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
+  if (changeStream[kMode] === 'iterator') {
+    throw new MongoDriverError(
+      'Cannot use ChangeStream as an EventEmitter after using as an iterator'
+    );
+  }
+  changeStream[kMode] = 'emitter';
+}
+
+function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
+  if (changeStream[kMode] === 'emitter') {
+    throw new MongoDriverError(
+      'Cannot use ChangeStream as iterator after using as an EventEmitter'
+    );
+  }
+  changeStream[kMode] = 'iterator';
+}
 /**
  * Create a new change stream cursor based on self's configuration
  * @internal
@@ -653,7 +652,7 @@ function streamEvents<TSchema>(
   changeStream: ChangeStream<TSchema>,
   cursor: ChangeStreamCursor<TSchema>
 ): void {
-  changeStream._setIsEmitter();
+  setIsEmitter(changeStream);
   const stream = changeStream[kCursorStream] || cursor.stream();
   changeStream[kCursorStream] = stream;
   stream.on('data', change => processNewChange(changeStream, change));
