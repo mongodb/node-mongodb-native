@@ -27,6 +27,10 @@
     "driver",
     "official"
   ],
+  "author": { 
+    "name" : "The MongoDB NodeJS Team", 
+    "email" : "dbx-node@mongodb.com"
+  },
   "peerOptionalDependencies": {
     "kerberos": "^1.1.0",
     "mongodb-client-encryption": "^1.0.0",
@@ -95,7 +99,7 @@
     "node": ">=12.9.0"
   },
   "bugs": {
-    "url": "https://github.com/mongodb/node-mongodb-native/issues"
+    "url": "https://jira.mongodb.org/projects/NODE/issues/"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {
