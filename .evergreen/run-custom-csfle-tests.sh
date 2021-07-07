@@ -14,6 +14,11 @@ export CSFLE_KMS_PROVIDERS=${CSFLE_KMS_PROVIDERS}
 set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
+# Get access to the AWS temporary credentials:
+echo "adding temporary AWS credentials to environment"
+# CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
+. $DRIVERS_TOOLS/.evergreen/csfle/set-temp-creds.sh
+
 ABS_PATH_TO_PATCH=$(pwd)
 
 # Environment Variables:
@@ -84,6 +89,7 @@ export MONGODB_NODE_SKIP_LIVE_TESTS=""
 # all of the below must be defined (as well as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 export AWS_REGION="us-east-1"
 export AWS_CMK_ID="arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+
 npm test -- --colors
 
 popd # ../csfle-deps-tmp/libmongocrypt/bindings/node
