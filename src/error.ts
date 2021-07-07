@@ -181,7 +181,6 @@ export class MongoDriverError extends MongoError {
  * @category Error
  */
 export class MongoRuntimeError extends MongoDriverError {
-  code?: string;
   protected constructor(message: string) {
     super(message);
   }
