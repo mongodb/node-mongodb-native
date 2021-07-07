@@ -1,11 +1,11 @@
 'use strict';
 
+const path = require('path');
 const expect = require('chai').expect;
-const setupDatabase = require('./shared').setupDatabase;
-const withMonitoredClient = require('./shared').withMonitoredClient;
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-const loadSpecTests = require('../spec').loadSpecTests;
+const { setupDatabase, withMonitoredClient } = require('./shared');
+const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
+const { loadSpecTests } = require('../spec');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
 const ignoredCommands = ['ismaster'];
 const test = {
@@ -148,7 +148,7 @@ describe('Sessions - functional', function () {
     }
   });
 
-  describe('spec tests', function () {
+  describe('legacy spec tests', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
         const session = options.session;
@@ -176,7 +176,7 @@ describe('Sessions - functional', function () {
     }
 
     const testContext = new SessionSpecTestContext();
-    const testSuites = loadSpecTests('sessions/legacy');
+    const testSuites = loadSpecTests(path.join('sessions', 'legacy'));
 
     after(() => testContext.teardown());
     before(function () {
@@ -195,6 +195,22 @@ describe('Sessions - functional', function () {
     }
 
     generateTopologyTests(testSuites, testContext, testFilter);
+  });
+
+  describe('unified spec tests', function () {
+    for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
+      expect(sessionTests).to.be.an('object');
+      context(String(sessionTests.description), function () {
+        for (const test of sessionTests.tests) {
+          it(String(test.description), {
+            metadata: { sessions: { skipLeakTests: true } },
+            test: async function () {
+              await runUnifiedTest(this, sessionTests, test);
+            }
+          });
+        }
+      });
+    }
   });
 
   context('unacknowledged writes', () => {
