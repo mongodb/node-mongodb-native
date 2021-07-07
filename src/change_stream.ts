@@ -274,6 +274,7 @@ export class ChangeStream<TSchema extends Document> extends TypedEventEmitter<Ch
     this.cursor = createChangeStreamCursor(this, options);
 
     this[kClosed] = false;
+    this[kMode] = false;
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
