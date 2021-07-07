@@ -176,7 +176,7 @@ describe('Sessions - functional', function () {
     }
 
     const testContext = new SessionSpecTestContext();
-    const testSuites = loadSpecTests('sessions');
+    const testSuites = loadSpecTests('sessions/legacy');
 
     after(() => testContext.teardown());
     before(function () {
@@ -186,6 +186,7 @@ describe('Sessions - functional', function () {
     function testFilter(spec) {
       const SKIP_TESTS = [
         // These two tests need to run against multiple mongoses
+        // TODO: maybe create ticket?
         'Dirty explicit session is discarded',
         'Dirty implicit session is discarded (write)'
       ];
