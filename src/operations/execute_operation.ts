@@ -4,6 +4,7 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoInvalidArgumentError,
   MongoCompatibilityError,
   MongoServerError
 } from '../error';
@@ -65,7 +66,7 @@ export function executeOperation<
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
-    throw new MongoDriverError('This method requires a valid operation instance');
+    throw new MongoInvalidArgumentError('This method requires a valid operation instance');
   }
 
   return maybePromise(callback, cb => {

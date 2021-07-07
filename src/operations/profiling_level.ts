@@ -17,6 +17,7 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     this.options = options;
   }
 
+  // TODO(NODE-3402): Determine errors to put here
   execute(server: Server, session: ClientSession, callback: Callback<string>): void {
     super.executeCommand(server, session, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
