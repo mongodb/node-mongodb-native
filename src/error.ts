@@ -88,8 +88,10 @@ export class MongoError extends Error {
     } else {
       super(message);
     }
+  }
 
-    this.name = 'MongoError';
+  get name(): string {
+    return 'MongoError';
   }
 
   /** Legacy name for server error responses */
@@ -152,7 +154,10 @@ export class MongoServerError extends MongoError {
         (this as any)[name] = message[name];
       }
     }
-    this.name = 'MongoServerError';
+  }
+
+  get name(): string {
+    return 'MongoServerError';
   }
 }
 
@@ -166,7 +171,10 @@ export class MongoDriverError extends MongoError {
   code?: string;
   constructor(message: string) {
     super(message);
-    this.name = 'MongoDriverError';
+  }
+
+  get name(): string {
+    return 'MongoDriverError';
   }
 }
 
@@ -187,11 +195,14 @@ export class MongoNetworkError extends MongoError {
 
   constructor(message: string | Error, options?: { beforeHandshake?: boolean }) {
     super(message);
-    this.name = 'MongoNetworkError';
 
     if (options && typeof options.beforeHandshake === 'boolean') {
       this[kBeforeHandshake] = options.beforeHandshake;
     }
+  }
+
+  get name(): string {
+    return 'MongoNetworkError';
   }
 }
 
@@ -212,7 +223,10 @@ export interface MongoNetworkTimeoutErrorOptions {
 export class MongoNetworkTimeoutError extends MongoNetworkError {
   constructor(message: string, options?: MongoNetworkTimeoutErrorOptions) {
     super(message, options);
-    this.name = 'MongoNetworkTimeoutError';
+  }
+
+  get name(): string {
+    return 'MongoNetworkTimeoutError';
   }
 }
 
@@ -224,7 +238,10 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
 export class MongoParseError extends MongoDriverError {
   constructor(message: string) {
     super(message);
-    this.name = 'MongoParseError';
+  }
+
+  get name(): string {
+    return 'MongoParseError';
   }
 }
 
@@ -244,10 +261,13 @@ export class MongoSystemError extends MongoError {
       super(message);
     }
 
-    this.name = 'MongoSystemError';
     if (reason) {
       this.reason = reason;
     }
+  }
+
+  get name(): string {
+    return 'MongoSystemError';
   }
 }
 
@@ -259,7 +279,10 @@ export class MongoSystemError extends MongoError {
 export class MongoServerSelectionError extends MongoSystemError {
   constructor(message: string, reason: TopologyDescription) {
     super(message, reason);
-    this.name = 'MongoServerSelectionError';
+  }
+
+  get name(): string {
+    return 'MongoServerSelectionError';
   }
 }
 
@@ -291,11 +314,14 @@ export class MongoWriteConcernError extends MongoServerError {
     }
 
     super(message);
-    this.name = 'MongoWriteConcernError';
 
     if (result != null) {
       this.result = makeWriteConcernResultObject(result);
     }
+  }
+
+  get name(): string {
+    return 'MongoWriteConcernError';
   }
 }
 

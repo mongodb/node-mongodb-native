@@ -12,8 +12,11 @@ export class PoolClosedError extends MongoDriverError {
 
   constructor(pool: ConnectionPool) {
     super('Attempted to check out a connection from closed connection pool');
-    this.name = 'MongoPoolClosedError';
     this.address = pool.address;
+  }
+
+  get name(): string {
+    return 'MongoPoolClosedError';
   }
 }
 
@@ -27,7 +30,10 @@ export class WaitQueueTimeoutError extends MongoDriverError {
 
   constructor(pool: Connection | ConnectionPool) {
     super('Timed out while checking out a connection from connection pool');
-    this.name = 'MongoWaitQueueTimeoutError';
     this.address = pool.address;
+  }
+
+  get name(): string {
+    return 'MongoWaitQueueTimeoutError';
   }
 }
