@@ -28,7 +28,7 @@ Bug fix support for our 3.x branch will not be ending until summer 2022!
 
 #### AbstractCursor, FindCursor, AggregationCursor, ChangeStreamCursor, ListCollectionsCursor
 
-Our Cursor implementation has been updated to make more clear what is possible before and after execution of an operation. Take this example:
+Our Cursor implementation has been updated to clarify what is possible before and after execution of an operation. Take this example:
 
 ```javascript
 const cursor = collection.find({ a: 2.3 }).skip(1)
