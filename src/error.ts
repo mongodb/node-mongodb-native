@@ -171,7 +171,7 @@ export class MongoDriverError extends MongoError {
 }
 
 /**
- * An error generated when the driver encounters unexpected unexpected input
+ * An error generated when the driver encounters unexpected input
  * or reaches an unexpected/invalid internal state
  *
  * @privateRemarks
