@@ -1825,7 +1825,7 @@ describe('Change Streams', function () {
     });
 
     it(
-      'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext" using promises',
+      'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext"',
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
@@ -1843,23 +1843,7 @@ describe('Change Streams', function () {
     );
 
     it(
-      'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext" using callbacks',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          await new Promise(resolve => changeStream.on('change', resolve));
-
-          try {
-            await new Promise(resolve => changeStream.hasNext(resolve));
-          } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
-          }
-          return expect.fail('Should not reach here');
-        }
-      }
-    );
-    it(
-      'should throw MongoDriverError when set as an iterator with "hasNext" and used as an emitter with "on" using promises',
+      'should throw MongoDriverError when set as an iterator with "hasNext" and used as an emitter with "on"',
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
@@ -1877,22 +1861,7 @@ describe('Change Streams', function () {
     );
 
     it(
-      'should throw MongoDriverError when set as an iterator with "hasNext" and used as an emitter with "on" using callbacks',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          await new Promise(resolve => changeStream.hasNext(resolve));
-          try {
-            await new Promise(resolve => changeStream.on('change', resolve));
-          } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
-          }
-          return expect.fail('Should not reach here');
-        }
-      }
-    );
-    it(
-      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next" using promises',
+      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next"',
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
@@ -1910,45 +1879,13 @@ describe('Change Streams', function () {
     );
 
     it(
-      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next" using callbacks',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          await new Promise(resolve => changeStream.once('change', resolve));
-
-          try {
-            await new Promise(resolve => changeStream.next(resolve));
-          } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
-          }
-          return expect.fail('Should not reach here');
-        }
-      }
-    );
-    it(
-      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on" using promises',
+      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on"',
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
           await changeStream
             .tryNext()
             .catch(() => expect.fail('Failed to set changeStream to iterator'));
-          try {
-            await new Promise(resolve => changeStream.on('change', resolve));
-          } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
-          }
-          return expect.fail('Should not reach here');
-        }
-      }
-    );
-
-    it(
-      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on" using callbacks',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          await new Promise(resolve => changeStream.tryNext(resolve));
           try {
             await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
