@@ -26,7 +26,14 @@ Bug fix support for our 3.x branch will not be ending until summer 2022!
 
 ### Cursor changes
 
-#### AbstractCursor, FindCursor, AggregationCursor, ChangeStreamCursor, ListCollectionsCursor
+Affected classes:
+
+- `AbstractCursor`
+- `FindCursor`
+- `AggregationCursor`
+- `ChangeStreamCursor`
+  - This is the underlying cursor for `ChangeStream`
+- `ListCollectionsCursor`
 
 Our Cursor implementation has been updated to clarify what is possible before and after execution of an operation. Take this example:
 
