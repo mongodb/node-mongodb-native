@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { AnyError, MongoDriverError } from '../error';
+import { AnyError, MongoDriverError, MongoInvalidArgumentError } from '../error';
 import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
 import type { Sort } from '../sort';
@@ -419,7 +419,7 @@ function handleStartOption(
 
     return options.start - stream.s.bytesRead;
   }
-  throw new MongoDriverError('No start option defined');
+  throw new MongoInvalidArgumentError('No start option defined');
 }
 
 function handleEndOption(
@@ -451,7 +451,7 @@ function handleEndOption(
 
     return Math.ceil(options.end / doc.chunkSize) * doc.chunkSize - options.end;
   }
-  throw new MongoDriverError('No end option defined');
+  throw new MongoInvalidArgumentError('No end option defined');
 }
 
 function __handleError(stream: GridFSBucketReadStream, error?: AnyError): void {

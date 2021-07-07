@@ -19,6 +19,7 @@ import {
 import {
   AnyError,
   MongoDriverError,
+  MongoInvalidArgumentError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -342,7 +343,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (typeof ns.db === 'undefined' || typeof ns === 'string') {
-      throw new MongoDriverError('ns cannot be a string');
+      throw new MongoInvalidArgumentError('ns cannot be a string');
     }
 
     const readPreference = getReadPreference(cmd, options);
