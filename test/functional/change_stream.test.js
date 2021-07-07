@@ -1814,18 +1814,16 @@ describe('Change Streams', function () {
       if (repeatInsert) {
         clearInterval(repeatInsert);
       }
-      if (changeStream && !changeStream.closed) {
+      if (changeStream) {
         await changeStream.close();
       }
 
+      await mock.cleanup();
       if (client) {
         await client.close();
       }
-
-      await mock.cleanup();
     });
 
-    // TODO: Better Errors
     it(
       'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext" using promises',
       {
@@ -2145,7 +2143,6 @@ describe('Change Streams', function () {
         this.changeStream.on('resumeTokenChanged', resumeToken => {
           this.resumeTokenChangedEvents.push({ resumeToken });
         });
-        this.changeStream.isEmitter = false;
 
         return this.changeStream;
       }
