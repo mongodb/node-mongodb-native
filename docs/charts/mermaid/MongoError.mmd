@@ -1,0 +1,8 @@
+graph TD
+    MongoError --> MongoDriverError
+    MongoError --> MongoNetworkError
+    MongoError --> MongoServerError
+    MongoError --> MongoSystemError
+    MongoDriverError --> MongoAPIError
+    MongoDriverError --> MongoRuntimeError
+    

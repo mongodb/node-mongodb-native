@@ -1,0 +1,10 @@
+graph TD
+  MongoRuntimeError --> MongoURIError
+  MongoRuntimeError --> MongoServerSelectionError
+  MongoRuntimeError --> MongoStreamError
+  MongoRuntimeError --> MongoCompressionError
+  MongoRuntimeError --> MongoDecompressionError
+
+  MongoStreamError --> MongoChangeStreamError
+  MongoStreamError --> MongoGridFSStreamError
+  MongoStreamError --> MongoGridFSChunkError

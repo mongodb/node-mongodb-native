@@ -1,0 +1,9 @@
+graph TD
+  MongoRuntimeError --> MongoBatchReExecutionError
+  MongoRuntimeError --> MongoCursorError
+  MongoRuntimeError --> MongoInvalidClassInstantiationError
+  MongoRuntimeError --> MongoNotConnectedError
+
+  MongoCursorError --> MongoTailableCursorError
+  MongoCursorError --> MongoCursorInUseError
+  MongoCursorError --> MongoCursorExhaustedError
