@@ -94,15 +94,17 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  _getMore(batchSize: number, callback: Callback<Document>): void {
+  _getMore(batchSize: number | undefined, callback: Callback<Document>): void {
     // NOTE: this is to support client provided limits in pre-command servers
     const numReturned = this[kNumReturned];
     if (numReturned) {
       const limit = this[kBuiltOptions].limit;
       batchSize =
-        limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
+        limit && limit > 0 && (batchSize === undefined || numReturned + batchSize > limit)
+          ? limit - numReturned
+          : batchSize;
 
-      if (batchSize <= 0) {
+      if (batchSize !== undefined && batchSize <= 0) {
         return this.close(callback);
       }
     }

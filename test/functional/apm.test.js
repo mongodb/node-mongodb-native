@@ -597,18 +597,19 @@ describe('APM', function () {
             return db
               .collection('apm_test_u_4')
               .aggregate([{ $match: {} }])
+              .batchSize(1000)
               .toArray();
           })
           .then(r => {
             expect(r).to.exist;
-            expect(started).to.have.length(4);
-            expect(succeeded).to.have.length(4);
+            expect(started).to.have.length(3);
+            expect(succeeded).to.have.length(3);
             const cursors = succeeded.map(x => x.reply.cursor);
 
             // Check we have a cursor
             expect(cursors[0].id).to.exist;
             expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
-            expect(cursors[3].id.toString()).to.equal('0');
+            expect(cursors[2].id.toString()).to.equal('0');
 
             return client.close();
           });

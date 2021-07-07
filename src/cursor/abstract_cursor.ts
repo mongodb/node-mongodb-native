@@ -611,7 +611,7 @@ export abstract class AbstractCursor<
   ): void;
 
   /** @internal */
-  _getMore(batchSize: number, callback: Callback<Document>): void {
+  _getMore(batchSize: number | undefined, callback: Callback<Document>): void {
     const cursorId = this[kId];
     const cursorNs = this[kNamespace];
     const server = this[kServer];
@@ -626,16 +626,15 @@ export abstract class AbstractCursor<
       return;
     }
 
-    server.getMore(
-      cursorNs,
-      cursorId,
-      {
-        ...this[kOptions],
-        session: this[kSession],
-        batchSize
-      },
-      callback
-    );
+    const options = {
+      ...this[kOptions],
+      session: this[kSession]
+    };
+    if (batchSize !== undefined) {
+      options.batchSize = batchSize;
+    }
+
+    server.getMore(cursorNs, cursorId, options, callback);
   }
 }
 
@@ -728,8 +727,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
   }
 
   // otherwise need to call getMore
-  const batchSize = cursor[kOptions].batchSize || 1000;
-  cursor._getMore(batchSize, (err, response) => {
+  cursor._getMore(cursor[kOptions].batchSize, (err, response) => {
     if (response) {
       const cursorId =
         typeof response.cursor.id === 'number'
