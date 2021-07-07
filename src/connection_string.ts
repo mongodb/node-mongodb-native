@@ -232,7 +232,9 @@ export function parseOptions(
   if (isSRV) {
     // SRV Record is resolved upon connecting
     mongoOptions.srvHost = hosts[0];
-    options.tls = true;
+    if (!url.searchParams.has('tls') && !url.searchParams.has('ssl')) {
+      options.tls = true;
+    }
   }
 
   const urlOptions = new CaseInsensitiveMap();

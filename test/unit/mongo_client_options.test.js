@@ -229,6 +229,19 @@ describe('MongoOptions', function () {
   it('srvHost saved to options for later resolution', function () {
     const options = parseOptions('mongodb+srv://server.example.com/');
     expect(options).has.property('srvHost', 'server.example.com');
+    expect(options).has.property('tls', true);
+  });
+
+  it('ssl= can be used to set tls=false', function () {
+    const options = parseOptions('mongodb+srv://server.example.com/?ssl=false');
+    expect(options).has.property('srvHost', 'server.example.com');
+    expect(options).has.property('tls', false);
+  });
+
+  it('tls= can be used to set tls=false', function () {
+    const options = parseOptions('mongodb+srv://server.example.com/?tls=false');
+    expect(options).has.property('srvHost', 'server.example.com');
+    expect(options).has.property('tls', false);
   });
 
   it('supports ReadPreference option in url', function () {
