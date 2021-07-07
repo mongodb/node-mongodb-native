@@ -1,7 +1,13 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { AnyError, MongoParseError, MongoDriverError, MongoCompatibilityError, MongoInvalidArgumentError } from './error';
+import {
+  AnyError,
+  MongoParseError,
+  MongoDriverError,
+  MongoCompatibilityError,
+  MongoInvalidArgumentError
+} from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -289,7 +295,9 @@ export function executeLegacyOperation(
 
   // Return a Promise
   if (args[args.length - 1] != null) {
-    throw new MongoInvalidArgumentError('final argument to `executeLegacyOperation` must be a callback');
+    throw new MongoInvalidArgumentError(
+      'final argument to `executeLegacyOperation` must be a callback'
+    );
   }
 
   return new Promise<any>((resolve, reject) => {
