@@ -3,11 +3,7 @@
   "schemaVersion": "1.0",
   "runOnRequirements": [
     {
-      "minServerVersion": "3.6",
-      "maxServerVersion": "4.4.99"
-    },
-    {
-      "minServerVersion": "3.6",
+      "minServerVersion": "5.0",
       "topologies": [
         "single"
       ]
@@ -20,11 +16,6 @@
         "observeEvents": [
           "commandStartedEvent",
           "commandFailedEvent"
-        ],
-        "ignoreCommandMonitoringEvents": [
-          "findAndModify",
-          "insert",
-          "update"
         ]
       }
     },
@@ -101,6 +92,91 @@
             {
               "commandFailedEvent": {
                 "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Server returns an error on aggregate with snapshot",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "pipeline": []
+          },
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "readConcern": {
+                    "level": "snapshot",
+                    "atClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Server returns an error on distinct with snapshot",
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "session": "session0"
+          },
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "collection0",
+                  "readConcern": {
+                    "level": "snapshot",
+                    "atClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "distinct"
               }
             }
           ]
