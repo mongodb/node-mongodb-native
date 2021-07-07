@@ -1,5 +1,5 @@
 import { format } from 'util';
-import { MongoDriverError, MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError } from './error';
 
 // Filters for classes
 const classFilters: any = {};
