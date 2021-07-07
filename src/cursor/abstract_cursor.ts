@@ -546,7 +546,7 @@ export abstract class AbstractCursor<
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoDriverError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('maxTimeMS must be a number');
     }
 
     this[kOptions].maxTimeMS = value;
@@ -565,7 +565,7 @@ export abstract class AbstractCursor<
     }
 
     if (typeof value !== 'number') {
-      throw new MongoDriverError('batchSize requires an integer');
+      throw new MongoInvalidArgumentError('batchSize requires an integer');
     }
 
     this[kOptions].batchSize = value;

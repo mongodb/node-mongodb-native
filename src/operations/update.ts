@@ -11,12 +11,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ObjectId, Document } from '../bson';
 import type { ClientSession } from '../sessions';
-import {
-  MongoDriverError,
-  MongoServerError,
-  MongoInvalidArgumentError,
-  MongoCompatibilityError
-} from '../error';
+import { MongoServerError, MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {
@@ -275,11 +270,11 @@ export function makeUpdateStatement(
   options: UpdateOptions & { multi?: boolean }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
-    throw new MongoDriverError('selector must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('selector must be a valid JavaScript object');
   }
 
   if (update == null || typeof update !== 'object') {
-    throw new MongoDriverError('document must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('document must be a valid JavaScript object');
   }
 
   const op: UpdateStatement = { q: filter, u: update };
