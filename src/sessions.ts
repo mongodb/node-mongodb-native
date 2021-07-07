@@ -269,7 +269,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
-      throw new MongoDriverError(
+      throw new MongoCompatibilityError(
         'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
       );
     }
