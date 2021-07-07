@@ -21,7 +21,9 @@ export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (credentials == null)
-      return callback(new MongoMissingCredentialsError('credentials required'));
+      return callback(
+        new MongoMissingCredentialsError('credentials required for gssapi authentication')
+      );
     const { username } = credentials;
     function externalCommand(
       command: Document,

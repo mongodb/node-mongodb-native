@@ -50,9 +50,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     const level = this.level;
 
     if (!levelValues.has(level)) {
-      return callback(
-        new MongoInvalidArgumentError('Error: illegal profiling level value ' + level)
-      );
+      return callback(new MongoInvalidArgumentError('Illegal profiling level value ' + level));
     }
 
     super.executeCommand(server, session, { profile: this.profile }, (err, doc) => {

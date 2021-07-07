@@ -4,7 +4,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { UpdateStatement } from '../operations/update';
 import type { DeleteStatement } from '../operations/delete';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 
 /** @public */
 export class OrderedBulkOperation extends BulkOperationBase {
@@ -26,7 +26,7 @@ export class OrderedBulkOperation extends BulkOperationBase {
 
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize)
-      throw new MongoDriverError(
+      throw new MongoInvalidArgumentError(
         `Document is larger than the maximum size ${this.s.maxBsonObjectSize}`
       );
 

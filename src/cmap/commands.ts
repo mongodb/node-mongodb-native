@@ -852,7 +852,7 @@ export class BinMsg {
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
-        throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
+        throw new MongoInvalidArgumentError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
 
