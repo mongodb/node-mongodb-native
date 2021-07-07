@@ -3,7 +3,7 @@ import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import { MongoDriverError, MongoError, MongoInvalidArgumentError } from '../error';
+import { MongoError, MongoInvalidArgumentError } from '../error';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
