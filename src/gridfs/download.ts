@@ -391,7 +391,7 @@ function handleStartOption(
 ): number {
   if (options && options.start != null) {
     if (options.start > doc.length) {
-      throw new MongoDriverError(
+      throw new MongoInvalidArgumentError(
         'Stream start (' +
           options.start +
           ') must not be ' +
@@ -404,7 +404,7 @@ function handleStartOption(
       throw new MongoDriverError('Stream start (' + options.start + ') must not be ' + 'negative');
     }
     if (options.end != null && options.end < options.start) {
-      throw new MongoDriverError(
+      throw new MongoInvalidArgumentError(
         'Stream start (' +
           options.start +
           ') must not be ' +
@@ -430,7 +430,7 @@ function handleEndOption(
 ) {
   if (options && options.end != null) {
     if (options.end > doc.length) {
-      throw new MongoDriverError(
+      throw new MongoInvalidArgumentError(
         'Stream end (' +
           options.end +
           ') must not be ' +
@@ -440,7 +440,9 @@ function handleEndOption(
       );
     }
     if (options.start == null || options.start < 0) {
-      throw new MongoDriverError('Stream end (' + options.end + ') must not be ' + 'negative');
+      throw new MongoInvalidArgumentError(
+        'Stream end (' + options.end + ') must not be ' + 'negative'
+      );
     }
 
     const start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;
