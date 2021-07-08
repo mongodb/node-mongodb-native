@@ -178,6 +178,26 @@ export class MongoDriverError extends MongoError {
   }
 }
 
+/**
+ * An error generated when the driver encounters unexpected input
+ * or reaches an unexpected/invalid internal state
+ *
+ * @privateRemarks
+ * Should **never** be directly instantiated.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoRuntimeError extends MongoDriverError {
+  protected constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoRuntimeError';
+  }
+}
+
 /** @internal */
 const kBeforeHandshake = Symbol('beforeHandshake');
 export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
