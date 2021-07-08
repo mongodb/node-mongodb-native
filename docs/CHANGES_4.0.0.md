@@ -38,10 +38,10 @@ Affected classes:
 Our Cursor implementation has been updated to clarify what is possible before and after execution of an operation. Take this example:
 
 ```javascript
-const cursor = collection.find({ a: 2.3 }).skip(1)
+const cursor = collection.find({ a: 2.3 }).skip(1);
 for await (const doc of cursor) {
-    console.log(doc);
-    fc.limit(1) // bad.
+  console.log(doc);
+  fc.limit(1); // bad.
 }
 ```
 
@@ -53,9 +53,9 @@ The Cursor no longer extends Readable directly, it must be transformed into a st
 
 ```javascript
 const cursor = collection.find({});
-const stream = cursor.stream()
-stream.on("data", data => console.log(data));
-stream.on("end", () => client.close());
+const stream = cursor.stream();
+stream.on('data', data => console.log(data));
+stream.on('end', () => client.close());
 ```
 
 ### MongoClientOptions interface
@@ -104,11 +104,11 @@ The strict option would return an error if the collection does not exist.
 Another way to assert a collection's existence is using this snippet below:
 
 ```javascript
-const collections = (await db.listCollections({}, { nameOnly: true })
-  .toArray())
-  .map(({name}) => name); // map to get string[]
+const collections = (await db.listCollections({}, { nameOnly: true }).toArray()).map(
+  ({ name }) => name
+); // map to get string[]
 if (!collections.includes(myNewCollectionName)) {
-    await db.createCollection(myNewCollectionName)
+  await db.createCollection(myNewCollectionName);
 }
 ```
 
@@ -147,35 +147,39 @@ const bucket = new GridFSBucket(client.db('test')[, options])
 Since GridFSBucket uses the Node.js Stream API you can replicate file seek-ing by using the start and end options creating a download stream from your GridFSBucket
 
 ```javascript
-bucket.openDownloadStreamByName(filename, { start: 23, end: 52 })
+bucket.openDownloadStreamByName(filename, { start: 23, end: 52 });
 ```
 
 #### File Upload & File Download
 
-``` javascript
+```javascript
 await client.connect();
-const filename = 'test.txt' // whatever local file name you want
-const db = client.db()
-const bucket = new GridFSBucket(db)
+const filename = 'test.txt'; // whatever local file name you want
+const db = client.db();
+const bucket = new GridFSBucket(db);
 
 fs.createReadStream(filename)
-    .pipe(bucket.openUploadStream(filename))
-    .on('error', console.error)
-    .on('finish', () => {
-    console.log('done writing to db!')
+  .pipe(bucket.openUploadStream(filename))
+  .on('error', console.error)
+  .on('finish', () => {
+    console.log('done writing to db!');
 
-    bucket.find().toArray().then((files) => {
-        console.log(files)
+    bucket
+      .find()
+      .toArray()
+      .then(files => {
+        console.log(files);
 
-        bucket.openDownloadStreamByName(filename)
-        .pipe(fs.createWriteStream('downloaded_' + filename))
-        .on('error', console.error)
-        .on('finish', () => {
-            console.log('done downloading!')
-            client.close()
-        })
-    })
-})
+        bucket
+          .openDownloadStreamByName(filename)
+          .pipe(fs.createWriteStream('downloaded_' + filename))
+          .on('error', console.error)
+          .on('finish', () => {
+            console.log('done downloading!');
+            client.close();
+          });
+      });
+  });
 ```
 
 Notably, **GridFSBucket does not need to be closed like GridStore.**
@@ -185,8 +189,8 @@ Notably, **GridFSBucket does not need to be closed like GridStore.**
 Deleting files hasn't changed much:
 
 ```javascript
-GridStore.unlink(db, name, callback) // Old way
-bucket.delete(file_id) // New way!
+GridStore.unlink(db, name, callback); // Old way
+bucket.delete(file_id); // New way!
 ```
 
 #### Finding File Metadata
@@ -194,7 +198,7 @@ bucket.delete(file_id) // New way!
 File metadata that used to be accessible on the GridStore instance can be found by querying the bucket
 
 ```typescript
-const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray()
+const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 ```
 
 ## Intentional Breaking Changes
@@ -221,7 +225,7 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray()
 - [`NODE-2816`](https://jira.mongodb.org/browse/NODE-2816): remove deprecated find options ([#2571](https://github.com/mongodb/node-mongodb-native/pull/2571))
 - [`NODE-2820`](https://jira.mongodb.org/browse/NODE-2820): pull CursorStream out of Cursor ([#2543](https://github.com/mongodb/node-mongodb-native/pull/2543))
 - [`NODE-2320`](https://jira.mongodb.org/browse/NODE-2320): remove deprecated GridFS API ([#2290](https://github.com/mongodb/node-mongodb-native/pull/2290))
-- [`NODE-2850`](https://jira.mongodb.org/browse/NODE-2850): only store topology on MongoClient  ([#2594](https://github.com/mongodb/node-mongodb-native/pull/2594))
+- [`NODE-2850`](https://jira.mongodb.org/browse/NODE-2850): only store topology on MongoClient ([#2594](https://github.com/mongodb/node-mongodb-native/pull/2594))
 
 ## Removed deprecations
 
@@ -230,12 +234,12 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray()
 - `Collection.prototype.save` - use `insertOne` instead
 - `Collection.prototype.dropAllIndexes`
 - `Collection.prototype.ensureIndex`
-- `Collection.prototype.findAndModify` - use `findOneAndUpdate`/`findOneAndReplace`
+- `Collection.prototype.findAndModify` - use `findOneAndUpdate`/`findOneAndReplace` instead
 - `Collection.prototype.findAndRemove` - use `findOneAndDelete` instead
 - `Collection.prototype.parallelCollectionScan`
 - `MongoError.create`
 - `Topology.destroy`
-- `Cursor.prototype.each` - `forEach`
+- `Cursor.prototype.each` - use `forEach` instead
 - `Db.prototype.eval`
 - `Db.prototype.ensureIndex`
 - `Db.prototype.profilingInfo`
@@ -249,6 +253,8 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray()
 - Top-Level export no longer a function: `typeof require('mongodb') !== 'function'`
   - Must construct a MongoClient and call `.connect()` on it.
 - No more `Symbol` export, now `BSONSymbol` which is a deprecated BSON type
+  - Users should use plain strings instead of BSONSymbol
+  - existing bson symbols in your database will be deserialized to a BSONSymbol instance
 - No more `connect` export, use `MongoClient` construction
 
 ---
