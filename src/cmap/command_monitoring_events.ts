@@ -1,6 +1,5 @@
 import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import type { ConnectionPool } from './connection_pool';
 import type { Connection } from './connection';
 import type { Document, ObjectId } from '../bson';
 
@@ -26,14 +25,10 @@ export class CommandStartedEvent {
    * @param pool - the pool that originated the command
    * @param command - the command
    */
-  constructor(
-    pool: Connection | ConnectionPool,
-    command: WriteProtocolMessageType,
-    serviceId?: ObjectId
-  ) {
+  constructor(connection: Connection, command: WriteProtocolMessageType) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     // TODO: remove in major revision, this is not spec behavior
     if (SENSITIVE_COMMANDS.has(commandName)) {
@@ -43,13 +38,14 @@ export class CommandStartedEvent {
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
     this.requestId = command.requestId;
     this.databaseName = databaseName(command);
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
-    this.serviceId = serviceId;
   }
 
+  /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
@@ -79,25 +75,25 @@ export class CommandSucceededEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    pool: Connection | ConnectionPool,
+    connection: Connection,
     command: WriteProtocolMessageType,
     reply: Document | undefined,
-    started: number,
-    serviceId?: ObjectId
+    started: number
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
-    this.serviceId = serviceId;
   }
 
+  /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
@@ -127,26 +123,26 @@ export class CommandFailedEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    pool: Connection | ConnectionPool,
+    connection: Connection,
     command: WriteProtocolMessageType,
     error: Error | Document,
-    started: number,
-    serviceId?: ObjectId
+    started: number
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
 
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
-    this.serviceId = serviceId;
   }
 
+  /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
@@ -325,13 +321,14 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   return deepCopy(reply.result ? reply.result : reply);
 }
 
-function extractConnectionDetails(connection: Connection | ConnectionPool) {
+function extractConnectionDetails(connection: Connection) {
   let connectionId;
   if ('id' in connection) {
     connectionId = connection.id;
   }
   return {
     address: connection.address,
+    serviceId: connection.serviceId,
     connectionId
   };
 }
