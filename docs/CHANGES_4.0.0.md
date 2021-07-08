@@ -18,7 +18,7 @@ Recently we migrated our BSON library to TypeScript as well, this version of the
 If you are a user of the community types (@types/mongodb) there will likely be compilation errors while adopting the types from our codebase.
 Unfortunately we could not achieve a one to one match in types due to the details of writing the codebase in Typescript vs definitions for the user layer API along with the breaking changes of this major version. Please let us know if there's anything that is a blocker to upgrading [on JIRA](https://jira.mongodb.org/browse/NODE).
 
-### NodeJS Version
+### Node.js Version
 
 We now require node 12.9 or greater for version 4 of the driver.
 If that's outside your support matrix at this time, that's okay!
