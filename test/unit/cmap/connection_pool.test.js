@@ -3,11 +3,8 @@
 const util = require('util');
 const { loadSpecTests } = require('../../spec');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const { Connection } = require('../../../src/cmap/connection');
-const { ConnectionPoolMetrics } = require('../../../src/cmap/metrics');
 const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const { EventEmitter } = require('events');
-const { Socket } = require('net');
 const mock = require('../../tools/mock');
 const cmapEvents = require('../../../src/cmap/connection_pool_events');
 const sinon = require('sinon');
