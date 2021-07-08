@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { MongoClient, MongoClientOptions } from './mongo_client';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
-import { MongoDriverError, MongoMissingDependencyError } from './error';
+import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { deserialize, serialize } from './bson';
 import type { Callback } from './utils';
 import { MONGO_CLIENT_EVENTS } from './operations/connect';
@@ -26,7 +26,7 @@ export class Encrypter {
 
   constructor(client: MongoClient, uri: string, options: MongoClientOptions) {
     if (typeof options.autoEncryption !== 'object') {
-      throw new MongoDriverError('Options autoEncryption must be specified');
+      throw new MongoInvalidArgumentError('Options autoEncryption must be specified');
     }
 
     this.bypassAutoEncryption = !!options.autoEncryption.bypassAutoEncryption;

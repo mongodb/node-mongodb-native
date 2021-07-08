@@ -28,7 +28,7 @@ class ScramSHA extends AuthProvider {
     const cryptoMethod = this.cryptoMethod;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     if (cryptoMethod === 'sha256' && saslprep == null) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
