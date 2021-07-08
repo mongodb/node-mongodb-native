@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ReadPreference } from '../../../src/read_preference';
 import * as uni from './schema';
 import { zip, topologySatisfies, patchVersion } from './unified-utils';
-import { CommandEvent, EntitiesMap } from './entities';
+import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
 import { matchesEvents } from './match';
@@ -124,12 +124,14 @@ export async function runUnifiedTest(
       }
     }
 
+    console.log('\n\n\n starting test:');
     for (const operation of test.operations) {
+      console.log(' > ', operation.name);
       await executeOperationAndCheck(operation, entities, utilClient);
     }
 
     const clientCommandEvents = new Map<string, CommandEvent[]>();
-    const clientCmapEvents = new Map<string, CmapEvents[]>();
+    const clientCmapEvents = new Map<string, CmapEvent[]>();
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {

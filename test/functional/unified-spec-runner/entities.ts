@@ -317,7 +317,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     for (const entity of entities ?? []) {
       if ('client' in entity) {
         const useMultipleMongoses =
-          config.topologyType === 'Sharded' && entity.client.useMultipleMongoses;
+          config.topologyType === 'LoadBalanced' && entity.client.useMultipleMongoses;
         const uri = config.url({ useMultipleMongoses });
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();

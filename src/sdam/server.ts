@@ -23,7 +23,8 @@ import {
   STATE_CLOSING,
   STATE_CONNECTING,
   STATE_CONNECTED,
-  ClusterTime
+  ClusterTime,
+  TopologyType
 } from './common';
 import {
   MongoError,
@@ -62,10 +63,6 @@ const stateTransition = makeStateMachine({
   [STATE_CONNECTED]: [STATE_CONNECTED, STATE_CLOSING, STATE_CLOSED],
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
-
-const PINNED_NO_SESSION = new MongoDriverError(
-  'Cannot execute on pinned connection without a session.'
-);
 
 /** @internal */
 const kMonitor = Symbol('monitor');
@@ -203,7 +200,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   get loadBalanced(): boolean {
-    return this.s.options.loadBalanced;
+    return this.s.topology.description.type === TopologyType.LoadBalanced;
   }
 
   /**
@@ -310,28 +307,28 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     const session = finalOptions.session;
-    if (this.loadBalanced && isPinnableCommand(cmd, session)) {
-      if (session) {
-        this.s.pool.withPinnedConnection(
-          session,
-          (err, conn, cb) => {
-            if (err || !conn) {
-              return cb(err);
-            }
-            conn.command(
-              ns,
-              cmd,
-              finalOptions,
-              makeOperationHandler(this, conn, cmd, finalOptions, cb) as Callback<Document>
-            );
-          },
-          callback
-        );
-      } else {
-        callback(PINNED_NO_SESSION);
-      }
-    } else {
-      this.s.pool.withConnection((err, conn, cb) => {
+    const conn = session?.pinnedConnection;
+
+    // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
+    //       (and prevent them from being checked back in) at the point of operation execution.
+    //       This should be considered as part of the work for NODE-2882
+    if (session && conn == null && this.loadBalanced && isPinnableCommand(cmd, session)) {
+      this.s.pool.checkOut((err, checkedOut) => {
+        if (err || checkedOut == null) {
+          if (callback) return callback(err);
+          return;
+        }
+
+        session.pinConnection(checkedOut);
+        this.command(ns, cmd, finalOptions, callback as Callback<Document>);
+      });
+
+      return;
+    }
+
+    this.s.pool.withConnection(
+      conn,
+      (err, conn, cb) => {
         if (err || !conn) {
           markServerUnknown(this, err);
           return cb(err);
@@ -343,15 +340,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           finalOptions,
           makeOperationHandler(this, conn, cmd, finalOptions, cb) as Callback<Document>
         );
-      }, callback);
-    }
-  }
-
-  /**
-   * Unpinning a connection returns it to the pool.
-   */
-  unpinConnection(connection: Connection): void {
-    this.s.pool.checkIn(connection);
+      },
+      callback
+    );
   }
 
   /**
@@ -364,14 +355,23 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    this.s.pool.withConnection((err, conn, cb) => {
-      if (err || !conn) {
-        markServerUnknown(this, err);
-        return cb(err);
-      }
+    this.s.pool.withConnection(
+      undefined,
+      (err, conn, cb) => {
+        if (err || !conn) {
+          markServerUnknown(this, err);
+          return cb(err);
+        }
 
-      conn.query(ns, cmd, options, makeOperationHandler(this, conn, cmd, options, cb) as Callback);
-    }, callback);
+        conn.query(
+          ns,
+          cmd,
+          options,
+          makeOperationHandler(this, conn, cmd, options, cb) as Callback
+        );
+      },
+      callback
+    );
   }
 
   /**
@@ -389,29 +389,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    if (this.loadBalanced) {
-      const session = options.session;
-      if (session) {
-        this.s.pool.withPinnedConnection(
-          session,
-          (err, conn, cb) => {
-            if (err || !conn) {
-              return cb(err);
-            }
-            conn.getMore(
-              ns,
-              cursorId,
-              options,
-              makeOperationHandler(this, conn, {}, options, cb) as Callback
-            );
-          },
-          callback
-        );
-      } else {
-        callback(PINNED_NO_SESSION);
-      }
-    } else {
-      this.s.pool.withConnection((err, conn, cb) => {
+    const conn = options.session?.pinnedConnection;
+    this.s.pool.withConnection(
+      conn,
+      (err, conn, cb) => {
         if (err || !conn) {
           markServerUnknown(this, err);
           return cb(err);
@@ -423,8 +404,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           options,
           makeOperationHandler(this, conn, {}, options, cb) as Callback
         );
-      }, callback);
-    }
+      },
+      callback
+    );
   }
 
   /**
@@ -445,32 +427,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    if (this.loadBalanced) {
-      const session = options.session;
-      if (session) {
-        this.s.pool.withPinnedConnection(
-          session,
-          (err, conn, cb) => {
-            if (err || !conn) {
-              return cb(err);
-            }
-
-            conn.killCursors(
-              ns,
-              cursorIds,
-              options,
-              makeOperationHandler(this, conn, {}, undefined, cb) as Callback
-            );
-          },
-          callback
-        );
-      } else {
-        if (callback) {
-          callback(PINNED_NO_SESSION);
-        }
-      }
-    } else {
-      this.s.pool.withConnection((err, conn, cb) => {
+    const conn = options.session?.pinnedConnection;
+    this.s.pool.withConnection(
+      conn,
+      (err, conn, cb) => {
         if (err || !conn) {
           markServerUnknown(this, err);
           return cb(err);
@@ -482,8 +442,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           options,
           makeOperationHandler(this, conn, {}, undefined, cb) as Callback
         );
-      }, callback);
-    }
+      },
+      callback
+    );
   }
 }
 
@@ -522,22 +483,22 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
 
 function markServerUnknown(server: Server, error?: MongoError) {
   // Load balancer servers can never be marked unknown.
-  if (!server.loadBalanced) {
-    if (error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError)) {
-      server[kMonitor].reset();
-    }
-
-    server.emit(
-      Server.DESCRIPTION_RECEIVED,
-      new ServerDescription(server.description.hostAddress, undefined, {
-        error,
-        topologyVersion:
-          error && error.topologyVersion
-            ? error.topologyVersion
-            : server.description.topologyVersion
-      })
-    );
+  if (server.loadBalanced) {
+    return;
   }
+
+  if (error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError)) {
+    server[kMonitor].reset();
+  }
+
+  server.emit(
+    Server.DESCRIPTION_RECEIVED,
+    new ServerDescription(server.description.hostAddress, undefined, {
+      error,
+      topologyVersion:
+        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion
+    })
+  );
 }
 
 function isPinnableCommand(cmd: Document, session?: ClientSession): boolean {
@@ -555,6 +516,12 @@ function isPinnableCommand(cmd: Document, session?: ClientSession): boolean {
 }
 
 function connectionIsStale(pool: ConnectionPool, connection: Connection) {
+  if (connection.serviceId) {
+    return (
+      connection.generation !== pool.serviceGenerations.get(connection.serviceId.toHexString())
+    );
+  }
+
   return connection.generation !== pool.generation;
 }
 
@@ -600,11 +567,10 @@ function makeOperationHandler(
         if (!(err instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(err)) {
           // In load balanced mode we never mark the server as unknown and always
           // clear for the specific service id.
-          if (server.loadBalanced) {
-            server.s.pool.clear(connection.serviceId);
-          } else {
+
+          server.s.pool.clear(connection.serviceId);
+          if (!server.loadBalanced) {
             markServerUnknown(server, err);
-            server.s.pool.clear();
           }
         }
       } else {
@@ -618,14 +584,16 @@ function makeOperationHandler(
           err.addErrorLabel('RetryableWriteError');
         }
 
-        if (isSDAMUnrecoverableError(err) && !server.loadBalanced) {
+        if (isSDAMUnrecoverableError(err)) {
           if (shouldHandleStateChangeError(server, err)) {
             if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(err)) {
-              server.s.pool.clear();
+              server.s.pool.clear(connection.serviceId);
             }
 
-            markServerUnknown(server, err);
-            process.nextTick(() => server.requestCheck());
+            if (!server.loadBalanced) {
+              markServerUnknown(server, err);
+              process.nextTick(() => server.requestCheck());
+            }
           }
         }
       }

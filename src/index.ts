@@ -335,6 +335,7 @@ export type {
   ClientSession,
   ClientSessionEvents,
   ClientSessionOptions,
+  EndSessionOptions,
   ServerSessionPool,
   ServerSession,
   ServerSessionId,

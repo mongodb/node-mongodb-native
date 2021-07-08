@@ -83,11 +83,7 @@ export function executeOperation<
     if (topology.hasSessionSupport()) {
       if (session == null) {
         owner = Symbol();
-        session = topology.startSession({
-          owner,
-          explicit: false,
-          loadBalanced: topology.loadBalanced
-        });
+        session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
         return cb(new MongoDriverError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { inspect } from 'util';
 import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
 import {
   CommandFailedEvent,
@@ -18,7 +19,7 @@ import {
   ConnectionPoolClearedEvent
 } from '../../../src/cmap/connection_pool_events';
 import { CommandEvent, CmapEvent, EntitiesMap } from './entities';
-import { ExpectedError, ExpectedCommandEvent, ExpectedCmapEvent } from './schema';
+import { ExpectedCmapEvent, ExpectedCommandEvent, ExpectedError } from './schema';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -270,47 +271,52 @@ function validEmptyCmapEvent(
 }
 
 export function matchesEvents(
-  expected: (ExpectedCommandEvent | ExpectedCmap)[],
-  actual: (CommandEvent | CmapEvent)[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+  actual: (CommandEvent & CmapEvent)[],
   entities: EntitiesMap
 ): void {
   // TODO: NodeJS Driver has extra events
   // expect(actual).to.have.lengthOf(expected.length);
+  if (actual.length !== expected.length) {
+    const actualNames = actual.map(a => a.constructor.name);
+    const expectedNames = expected.map(e => Object.keys(e)[0]);
+    expect.fail(
+      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+        actualNames
+      )}`
+    );
+  }
 
   for (const [index, actualEvent] of actual.entries()) {
     const expectedEvent = expected[index];
 
-    if (expectedEvent.commandStartedEvent && actualEvent instanceof CommandStartedEvent) {
+    if (expectedEvent.commandStartedEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandStartedEvent);
       resultCheck(actualEvent, expectedEvent.commandStartedEvent, entities, [
         `events[${index}].commandStartedEvent`
       ]);
-    } else if (
-      expectedEvent.commandSucceededEvent &&
-      actualEvent instanceof CommandSucceededEvent
-    ) {
+    } else if (expectedEvent.commandSucceededEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandSucceededEvent);
       resultCheck(actualEvent, expectedEvent.commandSucceededEvent, entities, [
         `events[${index}].commandSucceededEvent`
       ]);
-    } else if (expectedEvent.commandFailedEvent && actualEvent instanceof CommandFailedEvent) {
+    } else if (expectedEvent.commandFailedEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandFailedEvent);
       expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
     } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
       // This should just always pass since the event must exist and match the type.
-    } else if (
-      expectedEvent.connectionClosedEvent &&
-      actualEvent instanceof ConnectionClosedEvent
-    ) {
+    } else if (expectedEvent.connectionClosedEvent) {
+      expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
       if (expectedEvent.connectionClosedEvent.hasServiceId) {
-        expect(actualEvent.serviceId).to.exist;
+        expect(actualEvent).property('serviceId').to.exist;
       }
-    } else if (
-      expectedEvent.poolClearedEvent &&
-      actualEvent instanceof ConnectionPoolClearedEvent
-    ) {
+    } else if (expectedEvent.poolClearedEvent) {
+      expect(actualEvent).to.be.instanceOf(ConnectionPoolClearedEvent);
       if (expectedEvent.poolClearedEvent.hasServiceId) {
-        expect(actualEvent.serviceId).to.exist;
+        expect(actualEvent).property('serviceId').to.exist;
       }
     } else {
-      expect.fail(`Events must be one of the known types, got ${actualEvent}`);
+      expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
     }
   }
 }

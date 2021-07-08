@@ -151,19 +151,34 @@ export interface ExpectedCmapEvent {
   poolCreatedEvent?: Record<string, never>;
   poolReadyEvent?: Record<string, never>;
   poolClearedEvent?: {
-    hasServiceId?: ObjectId;
+    serviceId?: ObjectId;
+    hasServiceId?: boolean;
   };
   poolClosedEvent?: Record<string, never>;
   connectionCreatedEvent?: Record<string, never>;
   connectionReadyEvent?: Record<string, never>;
   connectionClosedEvent?: {
     reason?: string;
-    hasServiceId?: ObjectId;
+    hasServiceId?: boolean;
   };
   connectionCheckOutStartedEvent?: Record<string, never>;
   connectionCheckOutFailedEvent?: Record<string, never>;
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
+}
+export interface ExpectedEvent {
+  commandStartedEvent?: {
+    command?: Document;
+    commandName?: string;
+    databaseName?: string;
+  };
+  commandSucceededEvent?: {
+    reply?: Document;
+    commandName?: string;
+  };
+  commandFailedEvent?: {
+    commandName?: string;
+  };
 }
 export interface ExpectedError {
   isError?: true;

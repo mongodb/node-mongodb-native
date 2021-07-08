@@ -554,7 +554,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     let options: ClientSessionOptions = optionsOrOperation as ClientSessionOptions;
     if (typeof optionsOrOperation === 'function') {
       callback = optionsOrOperation as WithSessionCallback;
-      options = { owner: Symbol(), loadBalanced: this.topology?.loadBalanced || false };
+      options = { owner: Symbol() };
     }
 
     if (callback == null) {

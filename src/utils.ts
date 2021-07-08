@@ -245,7 +245,7 @@ export function executeLegacyOperation(
     opOptions = args[args.length - 2];
     if (opOptions == null || opOptions.session == null) {
       owner = Symbol();
-      session = topology.startSession({ owner, loadBalanced: topology.loadBalanced });
+      session = topology.startSession({ owner });
       const optionsIndex = args.length - 2;
       args[optionsIndex] = Object.assign({}, args[optionsIndex], { session: session });
     } else if (opOptions.session && opOptions.session.hasEnded) {

@@ -75,7 +75,8 @@ export class Transaction {
   _recoveryToken?: Document;
 
   /** Create a transaction @internal */
-  constructor(options: TransactionOptions) {
+  constructor(options?: TransactionOptions) {
+    options = options ?? {};
     this.state = TxnState.NO_TRANSACTION;
     this.options = {};
 

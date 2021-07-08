@@ -2,7 +2,7 @@ import { PromiseProvider } from './promise_provider';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { resolveClusterTime, ClusterTime } from './sdam/common';
+import { resolveClusterTime, ClusterTime, TopologyType } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
@@ -11,7 +11,8 @@ import {
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
-  MongoServerError
+  MongoServerError,
+  AnyError
 } from './error';
 import {
   now,
@@ -31,6 +32,7 @@ import type { CommandOptions, Connection } from './cmap/connection';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
 import { ReadConcernLevel } from './read_concern';
+import type { Server } from './sdam/server';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -63,8 +65,6 @@ export interface ClientSessionOptions {
   explicit?: boolean;
   /** @internal */
   initialClusterTime?: ClusterTime;
-  /** @internal */
-  loadBalanced: boolean;
 }
 
 /** @public */
@@ -83,6 +83,12 @@ const kSnapshotTime = Symbol('snapshotTime');
 const kSnapshotEnabled = Symbol('snapshotEnabled');
 /** @internal */
 const kPinnedConnection = Symbol('pinnedConnection');
+
+/** @public */
+export interface EndSessionOptions {
+  /** An optional error which caused the call to end this session */
+  error?: AnyError;
+}
 
 /**
  * A class representing a client session on the server
@@ -105,7 +111,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
-  loadBalanced: boolean;
   /** @internal */
   [kServerSession]?: ServerSession;
   /** @internal */
@@ -165,9 +170,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.operationTime = undefined;
     this.explicit = !!options.explicit;
     this.owner = options.owner;
-    this.loadBalanced = options.loadBalanced;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
-    this.transaction = new Transaction({});
+    this.transaction = new Transaction();
   }
 
   /** The server id associated with this session */
@@ -189,6 +193,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return this[kSnapshotEnabled];
   }
 
+  get loadBalanced(): boolean {
+    return this.topology.description.type === TopologyType.LoadBalanced;
+  }
+
   /** @internal */
   get pinnedConnection(): Connection | undefined {
     return this[kPinnedConnection];
@@ -196,12 +204,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
   /** @internal */
   pinConnection(conn: Connection): void {
-    this[kPinnedConnection] = conn;
-  }
+    if (this[kPinnedConnection]) {
+      throw TypeError('Cant pin multiple connections to the same session');
+    }
 
-  /** @internal */
-  unpinConnection(): void {
-    this[kPinnedConnection] = undefined;
+    // console.trace('pinned connection');
+    this[kPinnedConnection] = conn;
   }
 
   /**
@@ -212,21 +220,24 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   endSession(): Promise<void>;
   endSession(callback: Callback<void>): void;
-  endSession(options: Record<string, unknown>): Promise<void>;
-  endSession(options: Record<string, unknown>, callback: Callback<void>): void;
+  endSession(options: EndSessionOptions): Promise<void>;
+  endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
-    options?: Record<string, unknown> | Callback<void>,
+    options?: EndSessionOptions | Callback<void>,
     callback?: Callback<void>
   ): void | Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    const _options = options ?? ({} as EndSessionOptions);
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
+        maybeClearPinnedConnection(this, _options.error);
         return done();
       }
 
       const completeEndSession = () => {
+        maybeClearPinnedConnection(this, _options.error);
+
         // release the server session back to the pool
         this.sessionPool.release(this.serverSession);
         this[kServerSession] = undefined;
@@ -420,6 +431,28 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
+function maybeClearPinnedConnection(session: ClientSession, error?: AnyError) {
+  // unpin a connection if it has been pinned
+  const conn = session[kPinnedConnection];
+
+  // NOTE: the spec talks about what to do on a network error only, but the tests seem to
+  //       to validate that we don't unpin on _all_ errors?
+  if (conn && error == null /* || !(error instanceof MongoNetworkError) */) {
+    const servers = Array.from(session.topology.s.servers.values());
+    if (servers.length === 0) {
+      // This can happen if the client is closed when the connection is still pinned
+      // NOTE: we don't usually do this, we could instead throw an error?
+      conn.destroy();
+      session[kPinnedConnection] = undefined;
+      return;
+    }
+
+    const loadBalancer: Server = servers[0];
+    loadBalancer.s.pool.checkIn(conn);
+    session[kPinnedConnection] = undefined;
+  }
+}
+
 function isMaxTimeMSExpiredError(err: MongoError) {
   if (err == null || !(err instanceof MongoServerError)) {
     return false;
@@ -603,7 +636,10 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     if (commandName !== 'commitTransaction') {
       if (!session.loadBalanced) {
         session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      } else {
+        maybeClearPinnedConnection(session);
       }
+
       // The spec indicates that we should ignore all errors on `abortTransaction`
       return callback();
     }
@@ -620,12 +656,21 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           e.addErrorLabel('UnknownTransactionCommitResult');
 
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          if (session.loadBalanced) {
+            maybeClearPinnedConnection(session);
+          } else {
+            session.transaction.unpinServer();
+          }
         }
       } else if (e.hasErrorLabel('TransientTransactionError')) {
-        session.transaction.unpinServer();
+        if (session.loadBalanced) {
+          maybeClearPinnedConnection(session);
+        } else {
+          session.transaction.unpinServer();
+        }
       }
     }
+
     callback(e, r);
   }
 
@@ -646,7 +691,11 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          if (session.loadBalanced) {
+            maybeClearPinnedConnection(session);
+          } else {
+            session.transaction.unpinServer();
+          }
 
           command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
             w: 'majority'

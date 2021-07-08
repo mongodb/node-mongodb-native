@@ -4,7 +4,6 @@ import type { ObjectId } from 'bson';
 import { Logger } from '../logger';
 import { ConnectionPoolMetrics } from './metrics';
 import { connect } from './connect';
-import type { ClientSession } from '../sessions';
 import { eachAsync, makeCounter, Callback } from '../utils';
 import { MongoDriverError, MongoError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
@@ -327,7 +326,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     if (!willDestroy) {
       connection.markAvailable();
-      this[kConnections].push(connection);
+      this[kConnections].unshift(connection);
     }
 
     this[kCheckedOut] = this[kCheckedOut] - 1;
@@ -362,6 +361,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     } else {
       this[kGeneration] += 1;
     }
+
     this.emit('connectionPoolCleared', new ConnectionPoolClearedEvent(this, serviceId));
   }
 
@@ -435,7 +435,26 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @param fn - A function which operates on a managed connection
    * @param callback - The original callback
    */
-  withConnection(fn: WithConnectionCallback, callback?: Callback<Connection>): void {
+  withConnection(
+    conn: Connection | undefined,
+    fn: WithConnectionCallback,
+    callback?: Callback<Connection>
+  ): void {
+    if (conn) {
+      // use the provided connection, and do _not_ check it in after execution
+      fn(undefined, conn, (fnErr, result) => {
+        if (typeof callback === 'function') {
+          if (fnErr) {
+            callback(fnErr);
+          } else {
+            callback(undefined, result);
+          }
+        }
+      });
+
+      return;
+    }
+
     this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
       fn(err as MongoError, conn, (fnErr, result) => {
@@ -453,51 +472,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       });
     });
   }
-
-  /**
-   * Executes a function against a pinned connection. If a pinned connection is
-   * already on the session, then it will use that connection. If not a new
-   * connection will be checked out and pinned to the session. Check ins are to
-   * be handled separately when the operations fully complete.
-   *
-   * @param session - The client session.
-   * @param fn - A function which operates on a managed connection
-   * @param callback - The original callback
-   */
-  withPinnedConnection(
-    session: ClientSession,
-    fn: WithConnectionCallback,
-    callback?: Callback<Connection>
-  ): void {
-    const pinnedConnection = session.pinnedConnection;
-    if (!pinnedConnection) {
-      this.checkOut((err, conn) => {
-        if (conn) {
-          executePinned(err as MongoError, conn, fn, callback);
-          session.pinConnection(conn);
-        }
-      });
-    } else {
-      executePinned(undefined, pinnedConnection, fn, callback);
-    }
-  }
-}
-
-function executePinned(
-  error: any,
-  connection: Connection,
-  fn: WithConnectionCallback,
-  callback?: Callback<Connection>
-): void {
-  fn(error, connection, (fnErr, result) => {
-    if (typeof callback === 'function') {
-      if (fnErr) {
-        callback(fnErr);
-      } else {
-        callback(undefined, result);
-      }
-    }
-  });
 }
 
 function ensureMinPoolSize(pool: ConnectionPool) {
@@ -520,6 +494,7 @@ function connectionIsStale(pool: ConnectionPool, connection: Connection) {
     const generation = pool.serviceGenerations.get(sid);
     return connection.generation !== generation;
   }
+
   return connection.generation !== pool[kGeneration];
 }
 
@@ -701,7 +676,7 @@ export const CMAP_EVENTS = [
  * @param callback - A function to call back after connection management is complete
  */
 export type WithConnectionCallback = (
-  error: MongoError,
+  error: MongoError | undefined,
   connection: Connection | undefined,
   callback: Callback<Connection>
 ) => void;
