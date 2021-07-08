@@ -582,7 +582,7 @@ export class MongoDBNamespace {
 
   static fromString(namespace?: string): MongoDBNamespace {
     if (!namespace) {
-      throw new MongoDriverError(`Cannot parse namespace from "${namespace}"`);
+      throw new MongoInvalidArgumentError(`Cannot parse namespace from "${namespace}"`);
     }
 
     const [db, ...collection] = namespace.split('.');

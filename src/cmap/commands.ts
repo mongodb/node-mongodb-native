@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -664,7 +664,7 @@ export class Msg {
 
   constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (command == null) throw new MongoDriverError('query must be specified for query');
+    if (command == null) throw new MongoInvalidArgumentError('query must be specified for query');
 
     // Basic options
     this.ns = ns;
