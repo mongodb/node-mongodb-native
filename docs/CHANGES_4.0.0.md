@@ -206,26 +206,38 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 - [`NODE-3368`](https://jira.mongodb.org/browse/NODE-3368): make name prop on error classes read-only ([#2879](https://github.com/mongodb/node-mongodb-native/pull/2879))
 - [`NODE-3291`](https://jira.mongodb.org/browse/NODE-3291): standardize error representation in the driver ([#2824](https://github.com/mongodb/node-mongodb-native/pull/2824))
 - [`NODE-3272`](https://jira.mongodb.org/browse/NODE-3272): emit correct event type when SRV Polling ([#2825](https://github.com/mongodb/node-mongodb-native/pull/2825))
-- [`NODE-2752`](https://jira.mongodb.org/browse/NODE-2752): remove strict/callback mode from Db.collection helper ([#2817](https://github.com/mongodb/node-mongodb-native/pull/2817))
 - [`NODE-1812`](https://jira.mongodb.org/browse/NODE-1812): replace returnOriginal with returnDocument option ([#2803](https://github.com/mongodb/node-mongodb-native/pull/2803))
 - [`NODE-3157`](https://jira.mongodb.org/browse/NODE-3157): update find and modify interfaces for 4.0 ([#2799](https://github.com/mongodb/node-mongodb-native/pull/2799))
-- [`NODE-2978`](https://jira.mongodb.org/browse/NODE-2978): remove deprecated bulk ops ([#2794](https://github.com/mongodb/node-mongodb-native/pull/2794))
-- [`NODE-2317`](https://jira.mongodb.org/browse/NODE-2317): remove deprecated items ([#2740](https://github.com/mongodb/node-mongodb-native/pull/2740)) ([listed below](#removed-deprecations))
 - [`NODE-2961`](https://jira.mongodb.org/browse/NODE-2961): clarify empty BulkOperation error message ([#2697](https://github.com/mongodb/node-mongodb-native/pull/2697))
 - [`NODE-1709`](https://jira.mongodb.org/browse/NODE-1709): stop emitting topology events from `Db` ([#2251](https://github.com/mongodb/node-mongodb-native/pull/2251))
 - [`NODE-2704`](https://jira.mongodb.org/browse/NODE-2704): integrate MongoOptions parser into driver ([#2680](https://github.com/mongodb/node-mongodb-native/pull/2680))
 - [`NODE-2757`](https://jira.mongodb.org/browse/NODE-2757): add collation to FindOperators ([#2679](https://github.com/mongodb/node-mongodb-native/pull/2679))
-- [`NODE-1722`](https://jira.mongodb.org/browse/NODE-1722): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/pull/2642))
 - [`NODE-2602`](https://jira.mongodb.org/browse/NODE-2602): createIndexOp returns string, CreateIndexesOp returns array ([#2666](https://github.com/mongodb/node-mongodb-native/pull/2666))
 - [`NODE-2936`](https://jira.mongodb.org/browse/NODE-2936): conform CRUD result types to specification ([#2651](https://github.com/mongodb/node-mongodb-native/pull/2651))
-- [`NODE-1487`](https://jira.mongodb.org/browse/NODE-1487): remove deprecated Collection.group helper ([#2609](https://github.com/mongodb/node-mongodb-native/pull/2609))
 - [`NODE-2590`](https://jira.mongodb.org/browse/NODE-2590): adds async iterator for custom promises ([#2578](https://github.com/mongodb/node-mongodb-native/pull/2578))
 - [`NODE-2458`](https://jira.mongodb.org/browse/NODE-2458): format sort in cursor and in sort builder ([#2573](https://github.com/mongodb/node-mongodb-native/pull/2573))
+- [`NODE-2820`](https://jira.mongodb.org/browse/NODE-2820): pull CursorStream out of Cursor ([#2543](https://github.com/mongodb/node-mongodb-native/pull/2543))
+- [`NODE-2850`](https://jira.mongodb.org/browse/NODE-2850): only store topology on MongoClient ([#2594](https://github.com/mongodb/node-mongodb-native/pull/2594))
+- [`NODE-2423`](https://jira.mongodb.com/browse/NODE-2423): deprecate `oplogReplay` for find commands ([24155e7](https://github.com/mongodb/node-mongodb-native/commit/24155e7905422460afc7e6abb120c596f40712c1))
+
+## Removals
+
+- [`NODE-2752`](https://jira.mongodb.org/browse/NODE-2752): remove strict/callback mode from Db.collection helper ([#2817](https://github.com/mongodb/node-mongodb-native/pull/2817))
+- [`NODE-2978`](https://jira.mongodb.org/browse/NODE-2978): remove deprecated bulk ops ([#2794](https://github.com/mongodb/node-mongodb-native/pull/2794))
+- [`NODE-1722`](https://jira.mongodb.org/browse/NODE-1722): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/pull/2642))
+- [`NODE-1487`](https://jira.mongodb.org/browse/NODE-1487): remove deprecated Collection.group helper ([#2609](https://github.com/mongodb/node-mongodb-native/pull/2609))
 - [`NODE-2324`](https://jira.mongodb.org/browse/NODE-2324): remove Cursor#transformStream ([#2574](https://github.com/mongodb/node-mongodb-native/pull/2574))
 - [`NODE-2816`](https://jira.mongodb.org/browse/NODE-2816): remove deprecated find options ([#2571](https://github.com/mongodb/node-mongodb-native/pull/2571))
-- [`NODE-2820`](https://jira.mongodb.org/browse/NODE-2820): pull CursorStream out of Cursor ([#2543](https://github.com/mongodb/node-mongodb-native/pull/2543))
 - [`NODE-2320`](https://jira.mongodb.org/browse/NODE-2320): remove deprecated GridFS API ([#2290](https://github.com/mongodb/node-mongodb-native/pull/2290))
-- [`NODE-2850`](https://jira.mongodb.org/browse/NODE-2850): only store topology on MongoClient ([#2594](https://github.com/mongodb/node-mongodb-native/pull/2594))
+- [`NODE-2713`](https://jira.mongodb.com/browse/NODE-2713): remove `parallelCollectionScan` helper ([#2449](https://github.com/mongodb/node-mongodb-native/pull/2449)) ([9dee21f](https://github.com/mongodb/node-mongodb-native/commit/9dee21feefab9a8f20e289e6ff7abece40ef7d0b))
+- [`NODE-2324`](https://jira.mongodb.com/browse/NODE-2324): remove Cursor#transformStream ([#2574](https://github.com/mongodb/node-mongodb-native/pull/2574)) ([a54be7a](https://github.com/mongodb/node-mongodb-native/commit/a54be7afd665d92337a8ba2e206cc3e6ce5e5773))
+- [`NODE-2318`](https://jira.mongodb.com/browse/NODE-2318): remove legacy topology types ([6aa2434](https://github.com/mongodb/node-mongodb-native/commit/6aa2434628e85ead8e5be620c27ebe8ab08a1c05))
+- [`NODE-2560`](https://jira.mongodb.com/browse/NODE-2560): remove reIndex ([#2370](https://github.com/mongodb/node-mongodb-native/pull/2370)) ([6b510a6](https://github.com/mongodb/node-mongodb-native/commit/6b510a689ab0dc44b3302ad21c171e75f9059716))
+- [`NODE-2736`](https://jira.mongodb.com/browse/NODE-2736): remove the collection save method ([#2477](https://github.com/mongodb/node-mongodb-native/pull/2477)) ([d5bb496](https://github.com/mongodb/node-mongodb-native/commit/d5bb49637853c841b47df020807edf9adb5ef804))
+- [`NODE-1722`](https://jira.mongodb.com/browse/NODE-1722): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/issues/2642)) ([6914e87](https://github.com/mongodb/node-mongodb-native/commit/6914e875b37fb0ad444105ad24839d50c5c224d4))
+- [`NODE-2506`](https://jira.mongodb.com/browse/NODE-2506): remove createCollection strict mode ([#2506](https://github.com/mongodb/node-mongodb-native/pull/2506)) ([bb13764](https://github.com/mongodb/node-mongodb-native/commit/bb137643b2a95bd5898d2fef4d761de5f2e2cde0))
+- [`NODE-2562`](https://jira.mongodb.com/browse/NODE-2562): remove geoHaystackSearch ([#2315](https://github.com/mongodb/node-mongodb-native/pull/2315)) ([5a1b61c](https://github.com/mongodb/node-mongodb-native/commit/5a1b61c9f2baf8f6f3cec4c34ce2db52272cd49d))
+- [`NODE-2317`](https://jira.mongodb.org/browse/NODE-2317): remove deprecated items ([#2740](https://github.com/mongodb/node-mongodb-native/pull/2740)) ([listed below](#removed-deprecations))
 
 ## Removed deprecations
 
@@ -252,10 +264,9 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
   - Use command monitoring: `client.on('commandStarted', (ev) => {})`
 - Top-Level export no longer a function: `typeof require('mongodb') !== 'function'`
   - Must construct a MongoClient and call `.connect()` on it.
-- No more `Symbol` export, now `BSONSymbol` which is a deprecated BSON type
-  - Users should use plain strings instead of BSONSymbol
-  - existing bson symbols in your database will be deserialized to a BSONSymbol instance
-- No more `connect` export, use `MongoClient` construction
+- Removed `Symbol` export, now `BSONSymbol` which is a deprecated BSON type
+  - Existing BSON symbols in your database will be deserialized to a BSONSymbol instance; however, users should use plain strings instead of BSONSymbol
+- Removed `connect` export, use `MongoClient` construction
 
 ---
 
