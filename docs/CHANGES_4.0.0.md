@@ -101,7 +101,7 @@ Users should use authMechanismProperties.SERVICE_NAME like so:
 The only option that required the use of the callback was strict mode. Users who wish to ensure operations only execute against existing collections should use `db.listCollections` directly.
 The strict option would return an error if the collection does not exist.
 
-Another way to assert a collections existence is using this snippet below:
+Another way to assert a collection's existence is using this snippet below:
 
 ```javascript
 const collections = (await db.listCollections({}, { nameOnly: true })
