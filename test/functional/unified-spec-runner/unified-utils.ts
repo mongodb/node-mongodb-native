@@ -56,6 +56,13 @@ export async function topologySatisfies(
     }
   }
 
+  if (r.auth) {
+    ok &&=
+      !!utilClient.options.auth ||
+      !!utilClient.options.authSource ||
+      !!utilClient.options.authMechanism;
+  }
+
   return ok;
 }
 
