@@ -8,6 +8,7 @@ import {
   MongoError,
   MongoInvalidArgumentError,
   isRetryableError,
+  MongoCompatibilityError,
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
