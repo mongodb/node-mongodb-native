@@ -3,7 +3,7 @@
 const mock = require('../../tools/mock');
 const { connect } = require('../../../src/cmap/connect');
 const { Connection, hasSessionSupport } = require('../../../src/cmap/connection');
-const { Metrics } = require('../../../src/cmap/metrics');
+const { ConnectionPoolMetrics } = require('../../../src/cmap/metrics');
 const { expect } = require('chai');
 const { Socket } = require('net');
 const { ns } = require('../../../src/utils');
@@ -103,22 +103,22 @@ describe('Connection - unit/cmap', function () {
 
     context('when the connection is not pinned', function () {
       beforeEach(function () {
-        connection.markPinned(Metrics.TXN);
+        connection.markPinned(ConnectionPoolMetrics.TXN);
       });
 
       it('sets the connection as pinned', function () {
-        expect(connection.pinType).to.equal(Metrics.TXN);
+        expect(connection.pinType).to.equal(ConnectionPoolMetrics.TXN);
       });
     });
 
     context('when the connection is already pinned', function () {
       beforeEach(function () {
-        connection.markPinned(Metrics.CURSOR);
-        connection.markPinned(Metrics.TXN);
+        connection.markPinned(ConnectionPoolMetrics.CURSOR);
+        connection.markPinned(ConnectionPoolMetrics.TXN);
       });
 
       it('does not override the existing pin', function () {
-        expect(connection.pinType).to.equal(Metrics.CURSOR);
+        expect(connection.pinType).to.equal(ConnectionPoolMetrics.CURSOR);
       });
     });
   });
@@ -136,8 +136,8 @@ describe('Connection - unit/cmap', function () {
 
     context('when the connection is pinned to the same type', function () {
       beforeEach(function () {
-        connection.markPinned(Metrics.TXN);
-        connection.markUnpinned(Metrics.TXN);
+        connection.markPinned(ConnectionPoolMetrics.TXN);
+        connection.markUnpinned(ConnectionPoolMetrics.TXN);
       });
 
       it('removes the connection pinning', function () {
@@ -147,12 +147,12 @@ describe('Connection - unit/cmap', function () {
 
     context('when the connection is not pinned to the same type', function () {
       beforeEach(function () {
-        connection.markPinned(Metrics.CURSOR);
-        connection.markUnpinned(Metrics.TXN);
+        connection.markPinned(ConnectionPoolMetrics.CURSOR);
+        connection.markUnpinned(ConnectionPoolMetrics.TXN);
       });
 
       it('does not remove the existing pin', function () {
-        expect(connection.pinType).to.equal(Metrics.CURSOR);
+        expect(connection.pinType).to.equal(ConnectionPoolMetrics.CURSOR);
       });
     });
   });
