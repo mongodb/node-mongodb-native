@@ -85,7 +85,7 @@ Specifying username and password as options is only supported in these two forma
 Specifying `checkServerIdentity === false` (along with enabling tls) is different from leaving it `undefined`.
 The 3.x version intercepted `checkServerIdentity: false` and turned it into a no-op function which is the required way to skip checking the server identity by nodejs.
 Setting this option to `false` is only for testing anyway as it disables essential verification to TLS.
-So it made sense for our library to directly expose the option validation from nodejs.
+So it made sense for our library to directly expose the option validation from Node.js.
 If you need to test TLS connections without verifying server identity pass in `{ checkServerIdentity: () => {} }`.
 
 #### Kerberos / GSSAPI
