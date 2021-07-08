@@ -144,7 +144,7 @@ const bucket = new GridFSBucket(client.db('test')[, options])
 
 #### File seeking
 
-Since GridFSBucket uses NodeJS Stream API you can replicate file seek-ing by using the start and end options creating a download stream from your GridFSBucket
+Since GridFSBucket uses the Node.js Stream API you can replicate file seek-ing by using the start and end options creating a download stream from your GridFSBucket
 
 ```javascript
 bucket.openDownloadStreamByName(filename, { start: 23, end: 52 })
