@@ -29,7 +29,6 @@ export class WaitQueueTimeoutError extends MongoDriverError {
 
   constructor(message: string, address: string) {
     super(`Timed out while checking out a connection from connection pool${message}`);
-    this.name = 'MongoWaitQueueTimeoutError';
     this.address = address;
   }
 
