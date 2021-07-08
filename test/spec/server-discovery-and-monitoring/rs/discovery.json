@@ -8,7 +8,8 @@
           "a:27017",
           {
             "ok": 1,
-            "ismaster": false,
+            "helloOk": true,
+            "isWritablePrimary": false,
             "secondary": true,
             "setName": "rs",
             "hosts": [
@@ -47,7 +48,8 @@
           "b:27017",
           {
             "ok": 1,
-            "ismaster": false,
+            "helloOk": true,
+            "isWritablePrimary": false,
             "secondary": true,
             "setName": "rs",
             "primary": "d:27017",
@@ -91,7 +93,8 @@
           "d:27017",
           {
             "ok": 1,
-            "ismaster": true,
+            "helloOk": true,
+            "isWritablePrimary": true,
             "setName": "rs",
             "hosts": [
               "b:27017",
@@ -134,7 +137,8 @@
           "c:27017",
           {
             "ok": 1,
-            "ismaster": false,
+            "helloOk": true,
+            "isWritablePrimary": false,
             "secondary": true,
             "setName": "rs",
             "hosts": [

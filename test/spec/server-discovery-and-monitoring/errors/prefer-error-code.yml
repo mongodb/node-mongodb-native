@@ -5,7 +5,8 @@ phases:
   responses:
   - - a:27017
     - ok: 1
-      ismaster: true
+      helloOk: true
+      isWritablePrimary: true
       hosts:
       - a:27017
       setName: rs
@@ -28,7 +29,7 @@ phases:
     logicalSessionTimeoutMinutes: null
     setName: rs
 
-- description: errmsg "not master" gets ignored when error code exists
+- description: errmsg "not writable primary" gets ignored when error code exists
   applicationErrors:
   - address: a:27017
     when: afterHandshakeCompletes
@@ -36,8 +37,8 @@ phases:
     type: command
     response:
       ok: 0
-      errmsg: "not master"
-      code: 1  # Not a "not master" error code.
+      errmsg: "not writable primary"
+      code: 1  # Not a "not writable primary" error code.
   outcome: *outcome
 
 - description: errmsg "node is recovering" gets ignored when error code exists

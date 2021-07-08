@@ -34,7 +34,7 @@ tests:
       # This should:
       # 1) Mark the server Unknown
       # 2) Clear the connection pool
-      # 3) Cancel the in progress isMaster check and close the Monitor
+      # 3) Cancel the in progress hello or legacy hello check and close the Monitor
       #    connection
       # 4) The write will be then we retried, server selection will request an
       #    immediate check, and block for ~500ms until the next Monitor check
