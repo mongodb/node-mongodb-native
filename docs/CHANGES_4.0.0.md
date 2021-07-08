@@ -75,7 +75,7 @@ Feel free to remove the `useUnifiedTopology` and `useNewUrlParser` options at yo
 
 #### Authentication
 
-Specifying username and password as options are supported in only these two formats:
+Specifying username and password as options is only supported in these two formats:
 
 - `new MongoClient(url, { auth: { username: '', password: '' } })`
 - `new MongoClient('mongodb://username:password@myDb.host')`
