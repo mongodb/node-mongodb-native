@@ -2003,4 +2003,146 @@ describe('Bulk', function () {
         );
     });
   });
+
+  describe('Bulk operation transaction rollback', () => {
+    /** @type {import('../../src/index').MongoClient} */
+    let client;
+    /** @type {import('../../src/index').Collection<{ answer: number }>} */
+    let collection;
+
+    beforeEach(async function () {
+      const config = this.configuration;
+      client = config.newClient();
+      await client.connect();
+
+      try {
+        await client
+          .db('bulk_operation_writes_test')
+          .collection('bulk_write_transaction_test')
+          .drop();
+      } catch (_) {
+        // do not care
+      }
+
+      collection = await client
+        .db('bulk_operation_writes_test')
+        .createCollection('bulk_write_transaction_test');
+
+      await collection.deleteMany({});
+    });
+
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
+    it('should abort ordered bulk operation writes', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+        session.startTransaction({
+          readConcern: { level: 'local' },
+          writeConcern: { w: 'majority' }
+        });
+
+        let bulk = undefined;
+
+        bulk = collection.initializeOrderedBulkOp({ session });
+        bulk.insert({ answer: 42 });
+        await bulk.execute();
+
+        await session.abortTransaction();
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
+      }
+    });
+
+    it('should abort unordered bulk operation writes', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+        session.startTransaction({
+          readConcern: { level: 'local' },
+          writeConcern: { w: 'majority' }
+        });
+
+        let bulk = undefined;
+
+        bulk = collection.initializeUnorderedBulkOp({ session });
+        bulk.insert({ answer: 42 });
+        await bulk.execute();
+
+        await session.abortTransaction();
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
+      }
+    });
+
+    it('should abort unordered bulk operation writes using withTransaction', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+
+        await session.withTransaction(
+          async () => {
+            let bulk = undefined;
+
+            bulk = collection.initializeUnorderedBulkOp({ session });
+            bulk.insert({ answer: 42 });
+            await bulk.execute();
+            await session.abortTransaction();
+          },
+          { readConcern: { level: 'local' }, writeConcern: { w: 'majority' } }
+        );
+
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
+      }
+    });
+
+    it('should abort ordered bulk operation writes using withTransaction', {
+      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      async test() {
+        const session = client.startSession();
+
+        await session.withTransaction(
+          async () => {
+            let bulk = undefined;
+
+            bulk = collection.initializeOrderedBulkOp({ session });
+            bulk.insert({ answer: 42 });
+            await bulk.execute();
+            await session.abortTransaction();
+          },
+          { readConcern: { level: 'local' }, writeConcern: { w: 'majority' } }
+        );
+
+        await session.endSession();
+
+        const documents = await collection.find().toArray();
+
+        expect(documents).to.have.lengthOf(
+          0,
+          'bulk operation writes were made outside of transaction'
+        );
+      }
+    });
+  });
 });
