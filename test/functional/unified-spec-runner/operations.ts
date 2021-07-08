@@ -212,8 +212,11 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 
 operations.set('createCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const session = entities.getEntity('session', operation.arguments.session, false);
-  await db.createCollection(operation.arguments.collection, { session });
+  const { session, collection, ...opts } = operation.arguments;
+  await db.createCollection(collection, {
+    session: entities.getEntity('session', session, false),
+    ...opts
+  });
 });
 
 operations.set('createIndex', async ({ entities, operation }) => {

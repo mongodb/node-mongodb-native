@@ -244,7 +244,10 @@ export type {
 export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
-export type { CreateCollectionOptions } from './operations/create_collection';
+export type {
+  CreateCollectionOptions,
+  TimeSeriesCollectionOptions
+} from './operations/create_collection';
 export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';

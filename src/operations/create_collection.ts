@@ -30,6 +30,16 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'ignoreUndefined'
 ]);
 
+/** @public
+ * Configuration options for timeseries collections
+ * @see https://docs.mongodb.com/manual/core/timeseries-collections/
+ */
+export interface TimeSeriesCollectionOptions extends Document {
+  timeField: string;
+  metaField?: string;
+  granularity?: string;
+}
+
 /** @public */
 export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Returns an error if the collection does not exist */
@@ -60,6 +70,10 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pipeline?: Document[];
   /** A primary key factory function for generation of custom _id keys. */
   pkFactory?: PkFactory;
+  /** A document specifying configuration options for timeseries collections. */
+  timeseries?: TimeSeriesCollectionOptions;
+  /** The number of seconds after which a document in a timeseries collection expires. */
+  expireAfterSeconds?: number;
 }
 
 /** @internal */

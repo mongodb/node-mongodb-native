@@ -1,0 +1,255 @@
+{
+  "description": "timeseries-collection",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "5.0"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "ts-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "ts-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "createCollection with all options",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "expireAfterSeconds": 604800,
+            "timeseries": {
+              "timeField": "time",
+              "metaField": "meta",
+              "granularity": "minutes"
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "ts-tests",
+            "collectionName": "test"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ts-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "expireAfterSeconds": 604800,
+                  "timeseries": {
+                    "timeField": "time",
+                    "metaField": "meta",
+                    "granularity": "minutes"
+                  }
+                },
+                "databaseName": "ts-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "insertMany with duplicate ids",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "expireAfterSeconds": 604800,
+            "timeseries": {
+              "timeField": "time",
+              "metaField": "meta",
+              "granularity": "minutes"
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "ts-tests",
+            "collectionName": "test"
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "time": {
+                  "$date": {
+                    "$numberLong": "1552949630482"
+                  }
+                }
+              },
+              {
+                "_id": 1,
+                "time": {
+                  "$date": {
+                    "$numberLong": "1552949630483"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "time": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "time": {
+                "$date": {
+                  "$numberLong": "1552949630482"
+                }
+              }
+            },
+            {
+              "_id": 1,
+              "time": {
+                "$date": {
+                  "$numberLong": "1552949630483"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ts-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "expireAfterSeconds": 604800,
+                  "timeseries": {
+                    "timeField": "time",
+                    "metaField": "meta",
+                    "granularity": "minutes"
+                  }
+                },
+                "databaseName": "ts-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "time": {
+                        "$date": {
+                          "$numberLong": "1552949630482"
+                        }
+                      }
+                    },
+                    {
+                      "_id": 1,
+                      "time": {
+                        "$date": {
+                          "$numberLong": "1552949630483"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {},
+                  "sort": {
+                    "time": 1
+                  }
+                },
+                "databaseName": "ts-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
