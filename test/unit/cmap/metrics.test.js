@@ -1,11 +1,11 @@
 'use strict';
 
 const { expect } = require('chai');
-const { Metrics } = require('../../../src/cmap/metrics');
+const { ConnectionPoolMetrics } = require('../../../src/cmap/metrics');
 
-describe('Metrics', function () {
+describe('ConnectionPoolMetrics', function () {
   describe('#constructor', function () {
-    const metrics = new Metrics();
+    const metrics = new ConnectionPoolMetrics();
 
     it('defaults txnConnections to zero', function () {
       expect(metrics.txnConnections).to.equal(0);
@@ -21,7 +21,7 @@ describe('Metrics', function () {
   });
 
   describe('#info', function () {
-    const metrics = new Metrics();
+    const metrics = new ConnectionPoolMetrics();
 
     it('returns the metrics information', function () {
       expect(metrics.info()).to.equal(
@@ -33,11 +33,11 @@ describe('Metrics', function () {
   });
 
   describe('#markPinned', function () {
-    const metrics = new Metrics();
+    const metrics = new ConnectionPoolMetrics();
 
     context('when the type is TXN', function () {
       before(function () {
-        metrics.markPinned(Metrics.TXN);
+        metrics.markPinned(ConnectionPoolMetrics.TXN);
       });
 
       it('increments the txnConnections count', function () {
@@ -47,7 +47,7 @@ describe('Metrics', function () {
 
     context('when the type is CURSOR', function () {
       before(function () {
-        metrics.markPinned(Metrics.CURSOR);
+        metrics.markPinned(ConnectionPoolMetrics.CURSOR);
       });
 
       it('increments the cursorConnections count', function () {
@@ -57,7 +57,7 @@ describe('Metrics', function () {
 
     context('when the type is OTHER', function () {
       before(function () {
-        metrics.markPinned(Metrics.OTHER);
+        metrics.markPinned(ConnectionPoolMetrics.OTHER);
       });
 
       it('increments the otherConnections count', function () {
@@ -67,11 +67,11 @@ describe('Metrics', function () {
   });
 
   describe('#markUnpinned', function () {
-    const metrics = new Metrics();
+    const metrics = new ConnectionPoolMetrics();
 
     context('when the type is TXN', function () {
       before(function () {
-        metrics.markUnpinned(Metrics.TXN);
+        metrics.markUnpinned(ConnectionPoolMetrics.TXN);
       });
 
       it('increments the txnConnections count', function () {
@@ -81,7 +81,7 @@ describe('Metrics', function () {
 
     context('when the type is CURSOR', function () {
       before(function () {
-        metrics.markUnpinned(Metrics.CURSOR);
+        metrics.markUnpinned(ConnectionPoolMetrics.CURSOR);
       });
 
       it('increments the cursorConnections count', function () {
@@ -91,7 +91,7 @@ describe('Metrics', function () {
 
     context('when the type is OTHER', function () {
       before(function () {
-        metrics.markUnpinned(Metrics.OTHER);
+        metrics.markUnpinned(ConnectionPoolMetrics.OTHER);
       });
 
       it('increments the otherConnections count', function () {

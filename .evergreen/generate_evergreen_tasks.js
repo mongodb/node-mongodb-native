@@ -42,7 +42,8 @@ const OPERATING_SYSTEMS = [
 }));
 
 // TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth']);
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
+const MACOS_SKIP_TAGS = new Set(['load_balancer']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -105,6 +106,23 @@ TASKS.push(...[
       { func: 'install dependencies' },
       { func: 'bootstrap mongohoused' },
       { func: 'run data lake tests' }
+    ]
+  },
+  {
+    name: 'test-load-balancer',
+    tags: ['latest', 'sharded_cluster', 'load_balancer'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: 'latest',
+          TOPOLOGY: 'sharded_cluster'
+        }
+      },
+      { func: 'start-load-balancer' },
+      { func: 'run-lb-tests' },
+      { func: 'stop-load-balancer' }
     ]
   },
   {
@@ -429,11 +447,12 @@ const getTaskList = (() => {
       .filter(task => {
         if (task.name.match(/^aws/)) return false;
 
-        // skip unsupported tasks on windows
+        // skip unsupported tasks on windows or macos
         if (
-          os.match(/^windows/) &&
-          task.tags &&
-          task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length
+          task.tags && (
+            (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length) ||
+            (os.match(/^macos/) && task.tags.filter(tag => MACOS_SKIP_TAGS.has(tag)).length)
+          )
         ) {
           return false;
         }
