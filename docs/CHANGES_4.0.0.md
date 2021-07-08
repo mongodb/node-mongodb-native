@@ -82,7 +82,7 @@ Specifying username and password as options are supported in only these two form
 
 #### Check Server Identity Inconsistency
 
-Specifying `checkServerIdentity === false` (along with enabling tls) is different from it being leaving it `undefined`.
+Specifying `checkServerIdentity === false` (along with enabling tls) is different from leaving it `undefined`.
 The 3.x version intercepted `checkServerIdentity: false` and turned it into a no-op function which is the required way to skip checking the server identity by nodejs.
 Setting this option to `false` is only for testing anyway as it disables essential verification to TLS.
 So it made sense for our library to directly expose the option validation from nodejs.
