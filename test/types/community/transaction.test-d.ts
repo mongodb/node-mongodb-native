@@ -49,8 +49,7 @@ async function runTransactionWithRetry(
 async function updateEmployeeInfo(client: MongoClient, session: ClientSession) {
   session.startTransaction({
     readConcern: new ReadConcern('available'), // NODE-3297
-    writeConcern: { w: 'majority' },
-    loadBalanced: false
+    writeConcern: { w: 'majority' }
   });
 
   const employeesCollection = client.db('hr').collection('employees');

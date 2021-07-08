@@ -167,7 +167,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.owner = options.owner;
     this.loadBalanced = options.loadBalanced;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
-    this.transaction = new Transaction({ loadBalanced: options.loadBalanced });
+    this.transaction = new Transaction({});
   }
 
   /** The server id associated with this session */
@@ -191,19 +191,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
   /** @internal */
   get pinnedConnection(): Connection | undefined {
-    if (this.transaction.isConnectionPinned) {
-      return this.transaction.pinnedConnection;
-    }
     return this[kPinnedConnection];
   }
 
   /** @internal */
   pinConnection(conn: Connection): void {
-    if (this.inTransaction()) {
-      this.transaction.pinConnection(conn);
-    } else {
-      this[kPinnedConnection] = conn;
-    }
+    this[kPinnedConnection] = conn;
   }
 
   /** @internal */
@@ -347,8 +340,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         options?.readPreference ??
         this.defaultTransactionOptions.readPreference ??
         this.clientOptions?.readPreference,
-      maxCommitTimeMS: options?.maxCommitTimeMS ?? this.defaultTransactionOptions.maxCommitTimeMS,
-      loadBalanced: options?.loadBalanced ?? this.loadBalanced
+      maxCommitTimeMS: options?.maxCommitTimeMS ?? this.defaultTransactionOptions.maxCommitTimeMS
     });
 
     this.transaction.transition(TxnState.STARTING_TRANSACTION);
