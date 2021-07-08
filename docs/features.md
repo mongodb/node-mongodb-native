@@ -1,11 +1,13 @@
-# Versioned API
+# Feature Highlights
+
+## Versioned API
 
 Versioned API is a new feature in MongoDB 5.0 that allows user-selectable API versions, subsets of MongoDB server semantics, to be declared on a client.
 During communication with a server, clients with a declared API version will force the server to behave in a manner compatible with the API version.
 Declaring an API version on a client can be used to ensure consistent responses from a server, providing long term API stability for an application. The declared API version is applied to all commands run through the client, including those sent through the generic RunCommand helper.
 Specifying versioned API options in the command document AND declaring an API version on the client is not supported and will lead to undefined behavior.
 
-## Declare an API version on a client
+### Declare an API version on a client
 
 ```javascript
 // Declare API version "1" for the client
@@ -14,7 +16,7 @@ client = new MongoClient(uri, { serverApi: { version: '1' } });
 cursor = client.db('database').collection('coll').find(...);
 ```
 
-## Strict mode
+### Strict mode
 
 Declaring a `strict` API version will cause the MongoDB server to reject all commands that are not part of the declared API version. This includes command options and aggregation pipeline stages. For example, the following `find` call would fail because the `tailable` option is not part of version 1:
 
@@ -26,7 +28,7 @@ client = new MongoClient(uri, { serverApi: { version: '1', strict: true } });
 cursor = client.db('database').collection('coll').find({ ... }, { tailable: true });
 ```
 
-## Deprecation Errors
+### Deprecation Errors
 
 The `deprecationErrors` option can be used to enable command failures when using functionality that is deprecated from version 1. Note that at the time of this writing, no deprecations in version 1 exist.
 
@@ -36,3 +38,58 @@ client = new MongoClient(uri, { serverApi: { version: '1', deprecationErrors: tr
 
 // Note: since API version "1" is the initial version, there are no deprecated commands to provide as an example yet.
 ```
+
+## Features List
+
+* [`NODE-2751`](https://jira.mongodb.org/browse/NODE-2751): add arrayFilters builder to bulk FindOperators ([#2820](https://github.com/mongodb/node-mongodb-native/issues/2820)) ([d099622](https://github.com/mongodb/node-mongodb-native/commit/d099622cdd1ba60d108b1b6a1b323dff847f99b5))
+* [`NODE-3274`](https://jira.mongodb.org/browse/NODE-3274): add type hinting for UpdateFilter ([#2842](https://github.com/mongodb/node-mongodb-native/issues/2842)) ([05035eb](https://github.com/mongodb/node-mongodb-native/commit/05035eb2d7bdb0820181de5f86f0004cc77c1c00))
+* [`NODE-3325`](https://jira.mongodb.org/browse/NODE-3325): support 'let' option for aggregate command ([#2828](https://github.com/mongodb/node-mongodb-native/issues/2828)) ([e38838e](https://github.com/mongodb/node-mongodb-native/commit/e38838e28d075126c8702de18247230d05965e11))
+* [`NODE-3331`](https://jira.mongodb.org/browse/NODE-3331): offer downleveled types for legacy typescript versions ([#2859](https://github.com/mongodb/node-mongodb-native/issues/2859)) ([27cf1d2](https://github.com/mongodb/node-mongodb-native/commit/27cf1d241549c06fb69aee313176d87dcd13514a))
+* [`NODE-3333`](https://jira.mongodb.org/browse/NODE-3333): support 'let' option for CRUD commands ([#2829](https://github.com/mongodb/node-mongodb-native/issues/2829)) ([0d91da1](https://github.com/mongodb/node-mongodb-native/commit/0d91da1b1388e6946ec991fee82f92647a199ece))
+* [`NODE-3115`](https://jira.mongodb.org/browse/NODE-3115): add generic parameterization ([#2767](https://github.com/mongodb/node-mongodb-native/issues/2767)) ([4d12491](https://github.com/mongodb/node-mongodb-native/commit/4d12491a7ef12488bc9b4f0c5b8428d29d687132))
+* [`NODE-3132`](https://jira.mongodb.org/browse/NODE-3132): add TypedEventEmitter ([#2785](https://github.com/mongodb/node-mongodb-native/issues/2785)) ([f4d40a4](https://github.com/mongodb/node-mongodb-native/commit/f4d40a4c2bf1ace188e624f5c7d5852d5395e00a))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add fermium to evergreen test runs ([#2762](https://github.com/mongodb/node-mongodb-native/issues/2762)) ([2303b41](https://github.com/mongodb/node-mongodb-native/commit/2303b418b461b3c965f0c48f160d812153eba11e))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): versioned api ([#2736](https://github.com/mongodb/node-mongodb-native/issues/2736)) ([93f3ea5](https://github.com/mongodb/node-mongodb-native/commit/93f3ea5815bbd85b90745716f35849a59e8f8746))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add `withReadConcern` builder to AbstractCursor ([#2645](https://github.com/mongodb/node-mongodb-native/issues/2645)) ([0cca729](https://github.com/mongodb/node-mongodb-native/commit/0cca729eb94ee942b775e14d57c44d57beda3fce))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add an internal `tryNext` method ([#2638](https://github.com/mongodb/node-mongodb-native/issues/2638)) ([43c94b6](https://github.com/mongodb/node-mongodb-native/commit/43c94b6d40824c6cfa531d6ee9ac6b307e4cbcc6))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add commitQuorum option to createIndexes command ([168a952](https://github.com/mongodb/node-mongodb-native/commit/168a952f60787f325b202c539a664b9e14451b65))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add explain support for cursor commands  ([#2622](https://github.com/mongodb/node-mongodb-native/issues/2622)) ([bb1e081](https://github.com/mongodb/node-mongodb-native/commit/bb1e081e366612e0872d3c5ec0fadbb61e202ad6))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add explain support for non-cursor commands ([#2599](https://github.com/mongodb/node-mongodb-native/issues/2599)) ([4472308](https://github.com/mongodb/node-mongodb-native/commit/447230826cd764e2b766d3178d4fa369f8a4ebc4))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add MONGODB-AWS as a supported auth mechanism ([7f3cfba](https://github.com/mongodb/node-mongodb-native/commit/7f3cfbac15f537aa2ca9da145063f10c61390406))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add MongoOption builder logic ([#2623](https://github.com/mongodb/node-mongodb-native/issues/2623)) ([cb9ee9e](https://github.com/mongodb/node-mongodb-native/commit/cb9ee9e6175a6654c3c300801884e4a3c3a653ac))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add MongoOptions interface ([#2616](https://github.com/mongodb/node-mongodb-native/issues/2616)) ([54c456b](https://github.com/mongodb/node-mongodb-native/commit/54c456b4a4ff51c4f6734cff550d8aa53a47db15))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add types for the result of bulk initialize methods ([#2654](https://github.com/mongodb/node-mongodb-native/issues/2654)) ([3e5ff57](https://github.com/mongodb/node-mongodb-native/commit/3e5ff57d6438add80c1bad932114f3d086f1cc29))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): adds "hidden" option when creating indexes ([ee8ca1a](https://github.com/mongodb/node-mongodb-native/commit/ee8ca1aaddd1da33689a49c99dcc1c6f42b6f9dd))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): adds async iterator for custom promises ([16d6572](https://github.com/mongodb/node-mongodb-native/commit/16d65722a5b2318eee014511c94385e9d4f60ed7))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): allow hinting the delete command ([95fedf4](https://github.com/mongodb/node-mongodb-native/commit/95fedf4ecf2da73802a4146ab0c7df6a0850103c))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): bump wire protocol version for 4.4 ([6d3f313](https://github.com/mongodb/node-mongodb-native/commit/6d3f313a9defd12489b621896439b3f9ec8cb1ae))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): convert the entire codebase to TypeScript ([272bc18](https://github.com/mongodb/node-mongodb-native/commit/272bc18f51351a9f18d6d1bc68413c1a0c1f649f))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): deprecate `oplogReplay` for find commands ([24155e7](https://github.com/mongodb/node-mongodb-native/commit/24155e7905422460afc7e6abb120c596f40712c1))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): directConnection adds unify behavior for replica set discovery ([#2349](https://github.com/mongodb/node-mongodb-native/issues/2349)) ([34c9195](https://github.com/mongodb/node-mongodb-native/commit/34c9195251adeeb1c9e8bc4234c8afb076d1d60e))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): expand use of error labels for retryable writes ([c775a4a](https://github.com/mongodb/node-mongodb-native/commit/c775a4a1c53b8476eff6c9759b5647c9cbfa4e04))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): implements promise provider ([e5b762c](https://github.com/mongodb/node-mongodb-native/commit/e5b762c6d53afa967f24c26a1d1b6c921757c9c9))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): integrate MongoOptions parser into driver ([#2680](https://github.com/mongodb/node-mongodb-native/issues/2680)) ([b1bdb06](https://github.com/mongodb/node-mongodb-native/commit/b1bdb06cbe95fd320afff00ccb8fea666c79b444))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): introduce AbstractCursor and its concrete subclasses ([#2619](https://github.com/mongodb/node-mongodb-native/issues/2619)) ([a2d78b2](https://github.com/mongodb/node-mongodb-native/commit/a2d78b22b28ae649fa2c4e28294a3a03c446373e))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): introduce an interruptable async interval timer ([21cbabd](https://github.com/mongodb/node-mongodb-native/commit/21cbabdb1cf9ebee887bda547aa9116781cf03ae))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): introduce BufferPool to replace BufferList ([#2669](https://github.com/mongodb/node-mongodb-native/issues/2669)) ([3c56efc](https://github.com/mongodb/node-mongodb-native/commit/3c56efcf25a9ca8085a37f2ebac8cb3bff6d6d6c))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): introduce typescript migration pipeline ([f40cffc](https://github.com/mongodb/node-mongodb-native/commit/f40cffc6ccec032c7266a33b5e53728d9ae11294))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): options object precedence over URI options ([#2691](https://github.com/mongodb/node-mongodb-native/issues/2691)) ([85d8d09](https://github.com/mongodb/node-mongodb-native/commit/85d8d09713e2a80442dfbb38ecc887204306ba17))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): reintroduce clone and rewind for cursors ([#2647](https://github.com/mongodb/node-mongodb-native/issues/2647)) ([a5154fb](https://github.com/mongodb/node-mongodb-native/commit/a5154fb5977dddd88e57f9d20965e95fa7ddb80b))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove `parallelCollectionScan` helper ([9dee21f](https://github.com/mongodb/node-mongodb-native/commit/9dee21feefab9a8f20e289e6ff7abece40ef7d0b))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove Cursor#transformStream ([a54be7a](https://github.com/mongodb/node-mongodb-native/commit/a54be7afd665d92337a8ba2e206cc3e6ce5e5773))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove legacy topology types ([6aa2434](https://github.com/mongodb/node-mongodb-native/commit/6aa2434628e85ead8e5be620c27ebe8ab08a1c05))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove reIndex ([6b510a6](https://github.com/mongodb/node-mongodb-native/commit/6b510a689ab0dc44b3302ad21c171e75f9059716))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove the collection save method ([d5bb496](https://github.com/mongodb/node-mongodb-native/commit/d5bb49637853c841b47df020807edf9adb5ef804))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/issues/2642)) ([6914e87](https://github.com/mongodb/node-mongodb-native/commit/6914e875b37fb0ad444105ad24839d50c5c224d4))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support `allowDiskUse` for find commands ([dbc0b37](https://github.com/mongodb/node-mongodb-native/commit/dbc0b3722516a128c253bf85366a3432756ff92a))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support creating collections and indexes in transactions ([917f2b0](https://github.com/mongodb/node-mongodb-native/commit/917f2b088f22f4c6ed803f0349859d057389ac1e))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): add collation to FindOperators ([#2679](https://github.com/mongodb/node-mongodb-native/issues/2679)) ([a41d503](https://github.com/mongodb/node-mongodb-native/commit/a41d503ebd061977e712ac26dc7c757ab03cab14))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support hedged reads ([2b7b936](https://github.com/mongodb/node-mongodb-native/commit/2b7b936b532c1461dba59a4840978beea7b934fb))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support passing a hint to findOneAndReplace/findOneAndUpdate ([faee15b](https://github.com/mongodb/node-mongodb-native/commit/faee15b686b895b84fd0b52c1e69e0caec769732))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support shorter SCRAM conversations ([6b9ff05](https://github.com/mongodb/node-mongodb-native/commit/6b9ff0561d14818bf07f4946ade04fc54683d0b9))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove createCollection strict mode ([bb13764](https://github.com/mongodb/node-mongodb-native/commit/bb137643b2a95bd5898d2fef4d761de5f2e2cde0))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): fluent builder for allowDiskUse option ([#2678](https://github.com/mongodb/node-mongodb-native/issues/2678)) ([d442aac](https://github.com/mongodb/node-mongodb-native/commit/d442aac66e7a236decdfbeb5be0cc8a163486534))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): remove geoHaystackSearch ([5a1b61c](https://github.com/mongodb/node-mongodb-native/commit/5a1b61c9f2baf8f6f3cec4c34ce2db52272cd49d))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support speculative authentication in scram-sha and x509 ([f71f09b](https://github.com/mongodb/node-mongodb-native/commit/f71f09bd466f0630bbe6859d8ed074ecd5f4a51f))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): support the streaming protocol for topology updates ([7e9c5bc](https://github.com/mongodb/node-mongodb-native/commit/7e9c5bc5e8b10ae146d80535a44221ddb9ded069))
+* [`NODE-XXXX`](https://jira.mongodb.com/browse/NODE-XXXX): use error labels for retryable writes in legacy topologies ([fefc165](https://github.com/mongodb/node-mongodb-native/commit/fefc1651a885ec28758271c9e3c36104b05bdb75))
