@@ -30,6 +30,7 @@ import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { CommandOptions } from './cmap/connection';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
+import { ReadConcernLevel } from './read_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -51,6 +52,8 @@ function assertAlive(session: ClientSession, callback?: Callback): boolean {
 export interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
   causalConsistency?: boolean;
+  /** Whether all read operations should be read from the same snapshot for this session (NOTE: not compatible with `causalConsistency=true`) */
+  snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
 
@@ -88,6 +91,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   clientOptions?: MongoOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
+  snapshotTime?: Timestamp; // TODO: should this be more "private"?
   operationTime?: Timestamp;
   explicit: boolean;
   /** @internal */
@@ -96,6 +100,8 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   transaction: Transaction;
   /** @internal */
   [kServerSession]?: ServerSession;
+  /** @internal */
+  snapshot = false; // TODO: should this be more "private"?
 
   /**
    * Create a client session.
@@ -123,6 +129,15 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     options = options ?? {};
 
+    if (options.snapshot === true) {
+      this.snapshot = true;
+      if (options.causalConsistency === true) {
+        // TODO: throw validation error; MongoDriverError or more specific
+      }
+
+      // TODO(NODE-3394): also validate server version >= 5.0
+    }
+
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
@@ -130,8 +145,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this[kServerSession] = undefined;
 
     this.supports = {
-      causalConsistency:
-        typeof options.causalConsistency === 'boolean' ? options.causalConsistency : true
+      causalConsistency: options.snapshot !== true && options.causalConsistency !== false
     };
 
     this.clusterTime = options.initialClusterTime;
@@ -257,6 +271,11 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
+    if (this.snapshot) {
+      // TODO: should this be a different type?
+      throw new MongoDriverError('Transactions are not allowed with snapshot sessions');
+    }
+
     assertAlive(this);
     if (this.inTransaction()) {
       throw new MongoDriverError('Transaction already in progress');
@@ -801,27 +820,34 @@ function applySession(
   // first apply non-transaction-specific sessions data
   const inTransaction = session.inTransaction() || isTransactionCommand(command);
   const isRetryableWrite = options?.willRetryWrite || false;
-  const shouldApplyReadConcern = commandSupportsReadConcern(command, options);
 
   if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
     command.txnNumber = Long.fromNumber(serverSession.txnNumber);
   }
 
-  // now attempt to apply transaction-specific sessions data
   if (!inTransaction) {
     if (session.transaction.state !== TxnState.NO_TRANSACTION) {
       session.transaction.transition(TxnState.NO_TRANSACTION);
     }
 
-    // TODO: the following should only be applied to read operation per spec.
-    // for causal consistency
-    if (session.supports.causalConsistency && session.operationTime && shouldApplyReadConcern) {
+    if (
+      session.supports.causalConsistency &&
+      session.operationTime &&
+      commandSupportsReadConcern(command, options)
+    ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
+    } else if (session.snapshot) {
+      command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot }; // TODO: is there a better place to set this?
+      if (session.snapshotTime !== undefined) {
+        Object.assign(command.readConcern, { atClusterTime: session.snapshotTime });
+      }
     }
 
     return;
   }
+
+  // now attempt to apply transaction-specific sessions data
 
   // `autocommit` must always be false to differentiate from retryable writes
   command.autocommit = false;
@@ -854,6 +880,10 @@ function updateSessionFromResponse(session: ClientSession, document: Document): 
 
   if (document.recoveryToken && session && session.inTransaction()) {
     session.transaction._recoveryToken = document.recoveryToken;
+  }
+
+  if (document.cursor?.atClusterTime && session?.snapshot && session.snapshotTime === undefined) {
+    session.snapshotTime = document.cursor.atClusterTime;
   }
 }
 

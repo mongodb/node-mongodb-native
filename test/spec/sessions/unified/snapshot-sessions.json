@@ -813,7 +813,6 @@
           "name": "insertOne",
           "object": "collection0",
           "arguments": {
-            "session": "session0",
             "document": {
               "_id": 22,
               "x": 33
@@ -827,7 +826,6 @@
             "filter": {
               "_id": 1
             },
-            "session": "session0",
             "update": {
               "$inc": {
                 "x": 1

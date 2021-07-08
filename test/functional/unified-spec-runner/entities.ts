@@ -251,7 +251,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         }
 
         if (entity.session.sessionOptions?.snapshot) {
-          options.snapshot = entity.session.sessionOptions?.snapshot;
+          options.snapshot = entity.session.sessionOptions.snapshot;
         }
 
         if (entity.session.sessionOptions?.defaultTransactionOptions) {
