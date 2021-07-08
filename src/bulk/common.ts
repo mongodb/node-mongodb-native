@@ -1147,7 +1147,7 @@ export abstract class BulkOperationBase {
     }
 
     // otherwise an unknown operation was provided
-    throw new MongoDriverError(
+    throw new MongoInvalidArgumentError(
       'bulkWrite only supports insertOne, updateOne, updateMany, deleteOne, deleteMany'
     );
   }
@@ -1199,7 +1199,9 @@ export abstract class BulkOperationBase {
     }
     // If we have no operations in the bulk raise an error
     if (this.s.batches.length === 0) {
-      const emptyBatchError = new MongoDriverError('Invalid BulkOperation, Batch cannot be empty');
+      const emptyBatchError = new MongoInvalidArgumentError(
+        'Invalid BulkOperation, Batch cannot be empty'
+      );
       return handleEarlyError(emptyBatchError, callback);
     }
 
