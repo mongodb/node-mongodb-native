@@ -15,7 +15,7 @@ expectType<ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'> | Collect
 expectNotType<ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'>>>(db.listCollections());
 expectNotType<ListCollectionsCursor<CollectionInfo>>(db.listCollections());
 
-// Testings each argument variation
+// Testing each argument variation
 db.listCollections();
 db.listCollections({ a: 2 });
 db.listCollections({ a: 2 }, { batchSize: 2 });
