@@ -61,7 +61,7 @@ export interface TransactionOptions extends CommandOperationOptions {
 
   maxCommitTimeMS?: number;
 
-  loadBalanced: boolean;
+  loadBalanced?: boolean;
 }
 
 /**
@@ -82,7 +82,7 @@ export class Transaction {
   /** Create a transaction @internal */
   constructor(options: TransactionOptions) {
     this.state = TxnState.NO_TRANSACTION;
-    this.options = { loadBalanced: options.loadBalanced };
+    this.options = {};
 
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
@@ -104,6 +104,8 @@ export class Transaction {
     if (options.maxCommitTimeMS) {
       this.options.maxTimeMS = options.maxCommitTimeMS;
     }
+
+    this.options.loadBalanced = options.loadBalanced || false;
 
     // TODO: This isn't technically necessary
     this._pinnedServer = undefined;
