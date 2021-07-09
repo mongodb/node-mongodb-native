@@ -202,14 +202,23 @@ describe('Sessions - functional', function () {
       expect(sessionTests).to.be.an('object');
       context(String(sessionTests.description), function () {
         // TODO: NODE-3393 fix test runner to apply session to all operations
-        const testsToSkip =
-          sessionTests.description === 'snapshot-sessions'
-            ? [
-                'countDocuments operation with snapshot',
-                'Distinct operation with snapshot',
-                'Mixed operation with snapshot'
-              ]
-            : ['Server returns an error on distinct with snapshot'];
+        const skipTestMap = {
+          'snapshot-sessions': [
+            'countDocuments operation with snapshot',
+            'Distinct operation with snapshot',
+            'Mixed operation with snapshot'
+          ],
+          'snapshot-sessions-not-supported-server-error': [
+            'Server returns an error on distinct with snapshot'
+          ],
+          'snapshot-sessions-unsupported-ops': [
+            'Server returns an error on listCollections with snapshot',
+            'Server returns an error on listDatabases with snapshot',
+            'Server returns an error on listIndexes with snapshot',
+            'Server returns an error on runCommand with snapshot'
+          ]
+        };
+        const testsToSkip = skipTestMap[sessionTests.description] || [];
         for (const test of sessionTests.tests) {
           it(String(test.description), {
             metadata: { sessions: { skipLeakTests: true } },
