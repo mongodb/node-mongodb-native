@@ -108,7 +108,7 @@ const collections = (await db.listCollections({}, { nameOnly: true }).toArray())
   ({ name }) => name
 ); // map to get string[]
 if (!collections.includes(myNewCollectionName)) {
-  await db.createCollection(myNewCollectionName);
+  throw new Error(`${myNewCollectionName} doesn't exist`);
 }
 ```
 
