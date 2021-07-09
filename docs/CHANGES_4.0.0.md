@@ -227,7 +227,6 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 - [`NODE-2978`](https://jira.mongodb.org/browse/NODE-2978): remove deprecated bulk ops ([#2794](https://github.com/mongodb/node-mongodb-native/pull/2794))
 - [`NODE-1722`](https://jira.mongodb.org/browse/NODE-1722): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/pull/2642))
 - [`NODE-1487`](https://jira.mongodb.org/browse/NODE-1487): remove deprecated Collection.group helper ([#2609](https://github.com/mongodb/node-mongodb-native/pull/2609))
-- [`NODE-2324`](https://jira.mongodb.org/browse/NODE-2324): remove Cursor#transformStream ([#2574](https://github.com/mongodb/node-mongodb-native/pull/2574))
 - [`NODE-2816`](https://jira.mongodb.org/browse/NODE-2816): remove deprecated find options ([#2571](https://github.com/mongodb/node-mongodb-native/pull/2571))
 - [`NODE-2320`](https://jira.mongodb.org/browse/NODE-2320): remove deprecated GridFS API ([#2290](https://github.com/mongodb/node-mongodb-native/pull/2290))
 - [`NODE-2713`](https://jira.mongodb.com/browse/NODE-2713): remove `parallelCollectionScan` helper ([#2449](https://github.com/mongodb/node-mongodb-native/pull/2449)) ([9dee21f](https://github.com/mongodb/node-mongodb-native/commit/9dee21feefab9a8f20e289e6ff7abece40ef7d0b))
