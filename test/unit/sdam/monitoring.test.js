@@ -240,5 +240,4 @@ describe('monitoring', function () {
       });
     });
   });
-
 });
