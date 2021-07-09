@@ -198,6 +198,112 @@ export class MongoRuntimeError extends MongoDriverError {
   }
 }
 
+/**
+ * An error generated when a batch command is reexecuted after one of the commands in the batch
+ * has failed
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoBatchReExecutionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoBatchReExecutionError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to operate on a database or collection through a MongoClient
+ * that has not yet successfully called the "connect" method
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoNotConnectedError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoNotConnectedError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to operate on a cursor that is in a state which does not
+ * support the attempted operation.
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorError';
+  }
+}
+
+/**
+ * An error thrown when the user calls a function or method not supported on a tailable cursor
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoTailableCursorError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoTailableCursorError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to add options to a cursor that has already been
+ * initialized
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorInUseError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorInUseError';
+  }
+}
+
+/**
+ * An error thrown when an attempt is made to read from a cursor that has been exhausted
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorExhaustedError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorExhaustedError';
+  }
+}
+
 /** @internal */
 const kBeforeHandshake = Symbol('beforeHandshake');
 export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
