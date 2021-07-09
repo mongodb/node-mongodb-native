@@ -2,7 +2,6 @@
 
 const { Double } = require('bson');
 const stream = require('stream');
-const crypto = require('crypto');
 const { EJSON } = require('bson');
 const fs = require('fs');
 const { setupDatabase, withClient } = require('./shared');
