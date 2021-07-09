@@ -256,7 +256,7 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 - `Db.prototype.ensureIndex`
 - `Db.prototype.profilingInfo`
 - `MongoClient.prototype.logout`
-- `MongoClient.prototype.addUser: Creating a user without roles`
+- `MongoClient.prototype.addUser` - creating a user without roles
 - `MongoClient.prototype.connect`
 - `Remove MongoClient.isConnected` - calling connect is a no-op if already connected
 - `Remove MongoClient.logOut`
