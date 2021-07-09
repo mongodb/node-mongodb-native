@@ -6,8 +6,9 @@ import type { Sort } from '../sort';
 import type { Callback } from '../utils';
 import type { Collection } from '../collection';
 import type { ReadPreference } from '../read_preference';
-import type { GridFSBucketWriteStream, GridFSChunk } from './upload';
+import type { GridFSChunk } from './upload';
 import type { FindCursor } from '../cursor/find_cursor';
+import type { ObjectId } from 'bson';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {
@@ -29,14 +30,13 @@ export interface GridFSBucketReadStreamOptionsWithRevision extends GridFSBucketR
 
 /** @public */
 export interface GridFSFile {
-  _id: GridFSBucketWriteStream['id'];
-  length: GridFSBucketWriteStream['length'];
-  chunkSize: GridFSBucketWriteStream['chunkSizeBytes'];
-  md5?: string;
-  filename: GridFSBucketWriteStream['filename'];
-  contentType?: GridFSBucketWriteStream['options']['contentType'];
-  aliases?: GridFSBucketWriteStream['options']['aliases'];
-  metadata?: GridFSBucketWriteStream['options']['metadata'];
+  _id: ObjectId;
+  length: number;
+  chunkSize: number;
+  filename: string;
+  contentType?: string;
+  aliases?: string[];
+  metadata?: Document;
   uploadDate: Date;
 }
 

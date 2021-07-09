@@ -66,9 +66,7 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 expect(docs.length).to.equal(1);
 
-                const hash = crypto.createHash('md5');
-                hash.update(license);
-                expect(docs[0].md5).to.equal(hash.digest('hex'));
+                expect(docs[0]).to.not.have.property('md5');
 
                 // make sure we created indexes
                 filesColl.listIndexes().toArray(function (error, indexes) {
@@ -179,9 +177,7 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 expect(docs.length).to.equal(1);
 
-                const hash = crypto.createHash('md5');
-                hash.update(license);
-                expect(docs[0].md5).to.equal(hash.digest('hex'));
+                expect(docs[0]).to.not.have.property('md5');
 
                 // make sure we created indexes
                 filesColl.listIndexes().toArray(function (error, indexes) {
@@ -257,9 +253,7 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 expect(docs.length).to.equal(1);
 
-                const hash = crypto.createHash('md5');
-                hash.update(license);
-                expect(docs[0].md5).to.equal(hash.digest('hex'));
+                expect(docs[0]).to.not.have.property('md5');
                 client.close(done);
               });
             });
@@ -1232,7 +1226,9 @@ describe('GridFS Stream', function () {
   });
 
   function testResultDoc(specDoc, resDoc, result) {
-    const specKeys = Object.keys(specDoc).sort();
+    const specKeys = Object.keys(specDoc)
+      .filter(key => key !== 'md5')
+      .sort();
     const resKeys = Object.keys(resDoc).sort();
 
     expect(specKeys.length === resKeys.length);
