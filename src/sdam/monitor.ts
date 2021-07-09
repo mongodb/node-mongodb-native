@@ -227,14 +227,14 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
   const connection = monitor[kConnection];
   if (connection && !connection.closed) {
-    const { serverApi } = connection;
+    const { serverApi, helloOk } = connection;
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
     const maxAwaitTimeMS = monitor.options.heartbeatFrequencyMS;
     const topologyVersion = monitor[kServer].description.topologyVersion;
     const isAwaitable = topologyVersion != null;
 
     const cmd = {
-      [serverApi?.version ? 'hello' : 'ismaster']: true,
+      [serverApi?.version || helloOk ? 'hello' : 'ismaster']: true,
       ...(isAwaitable && topologyVersion
         ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
         : {})

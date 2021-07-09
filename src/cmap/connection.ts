@@ -164,6 +164,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   destroyed: boolean;
   lastIsMasterMS?: number;
   serverApi?: ServerApi;
+  helloOk?: boolean;
   /** @internal */
   [kDescription]: StreamDescription;
   /** @internal */
