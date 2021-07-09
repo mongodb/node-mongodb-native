@@ -22,7 +22,7 @@ Unfortunately we could not achieve a one to one match in types due to the detail
 
 We now require node 12.9 or greater for version 4 of the driver.
 If that's outside your support matrix at this time, that's okay!
-Bug fix support for our 3.x branch will not be ending until summer 2022!
+Bug fix support for our 3.x branch will not be ending until summer 2022, which has support going back as far as Node.js v4!
 
 ### Cursor changes
 
