@@ -113,7 +113,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** A map of generations to service ids
    * @internal
    */
-  [kServiceGenerations]: Map<ObjectId, number>;
+  [kServiceGenerations]: Map<string, number>;
   /** @internal */
   [kConnectionCounter]: Generator<number>;
   /** @internal */
@@ -245,7 +245,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return this.options.loadBalanced;
   }
 
-  get serviceGenerations(): Map<ObjectId, number> {
+  get serviceGenerations(): Map<string, number> {
     return this[kServiceGenerations];
   }
 
@@ -349,14 +349,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   clear(serviceId?: ObjectId): void {
     if (this.loadBalanced && serviceId) {
-      const generation = this.serviceGenerations.get(serviceId);
+      const sid = serviceId.toHexString();
+      const generation = this.serviceGenerations.get(sid);
       // Only need to worry if the generation exists, since it should
       // always be there but typescript needs the check.
       if (generation == null) {
         throw new MongoDriverError('Service generations are required in load balancer mode.');
       } else {
         // Increment the generation for the service id.
-        this.serviceGenerations.set(serviceId, generation + 1);
+        this.serviceGenerations.set(sid, generation + 1);
       }
     } else {
       this[kGeneration] += 1;
@@ -513,8 +514,10 @@ function ensureMinPoolSize(pool: ConnectionPool) {
 }
 
 function connectionIsStale(pool: ConnectionPool, connection: Connection) {
-  if (pool.loadBalanced && connection.serviceId) {
-    const generation = pool.serviceGenerations.get(connection.serviceId);
+  const serviceId = connection.serviceId;
+  if (pool.loadBalanced && serviceId) {
+    const sid = serviceId.toHexString();
+    const generation = pool.serviceGenerations.get(sid);
     return connection.generation !== generation;
   }
   return connection.generation !== pool[kGeneration];
@@ -561,11 +564,12 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
       const serviceId = connection.serviceId;
       if (serviceId) {
         let generation;
-        if (!pool.serviceGenerations.has(serviceId)) {
+        const sid = serviceId.toHexString();
+        if (!pool.serviceGenerations.has(sid)) {
           generation = 0;
-          pool.serviceGenerations.set(serviceId, generation);
+          pool.serviceGenerations.set(sid, generation);
         } else {
-          generation = pool.serviceGenerations.get(serviceId);
+          generation = pool.serviceGenerations.get(sid);
         }
         connection.generation = generation as number;
       }
