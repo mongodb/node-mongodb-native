@@ -130,12 +130,8 @@ export interface Test {
 }
 export interface ExpectedEventsForClient {
   client: string;
-}
-export interface ExpectedCommandEventsForClient {
-  events: ExpectedCommandEvent[];
-}
-export interface ExpectedCmapEventsForClient {
-  events: ExpectedCmapEvent[];
+  eventType?: string;
+  events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
 }
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
@@ -155,13 +151,14 @@ export interface ExpectedCmapEvent {
   poolCreatedEvent?: Record<string, never>;
   poolReadyEvent?: Record<string, never>;
   poolClearedEvent?: {
-    serviceId?: ObjectId;
+    hasServiceId?: ObjectId;
   };
   poolClosedEvent?: Record<string, never>;
   connectionCreatedEvent?: Record<string, never>;
   connectionReadyEvent?: Record<string, never>;
   connectionClosedEvent?: {
     reason?: string;
+    hasServiceId?: ObjectId;
   };
   connectionCheckOutStartedEvent?: Record<string, never>;
   connectionCheckOutFailedEvent?: Record<string, never>;

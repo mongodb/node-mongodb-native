@@ -18,7 +18,7 @@ import {
   ConnectionPoolClearedEvent
 } from '../../../src/cmap/connection_pool_events';
 import { CommandEvent, CmapEvent, EntitiesMap } from './entities';
-import { ExpectedError, ExpectedEvent } from './schema';
+import { ExpectedError, ExpectedCommandEvent, ExpectedCmapEvent } from './schema';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -259,7 +259,10 @@ const EMPTY_CMAP_EVENTS = {
   connectionCheckedInEvent: ConnectionCheckedInEvent
 };
 
-function validEmptyCmapEvent(expected: ExpectedEvent, actual: CommandEvent | CmapEvent) {
+function validEmptyCmapEvent(
+  expected: ExpectedCommandEvent | ExpectedCmapEvent,
+  actual: CommandEvent | CmapEvent
+) {
   return Object.keys(EMPTY_CMAP_EVENTS).some(key => {
     const eventType = EMPTY_CMAP_EVENTS[key];
     return actual instanceof eventType;
@@ -267,7 +270,7 @@ function validEmptyCmapEvent(expected: ExpectedEvent, actual: CommandEvent | Cma
 }
 
 export function matchesEvents(
-  expected: ExpectedEvent[],
+  expected: (ExpectedCommandEvent | ExpectedCmap)[],
   actual: (CommandEvent | CmapEvent)[],
   entities: EntitiesMap
 ): void {
