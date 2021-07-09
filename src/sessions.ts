@@ -103,6 +103,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   transaction: Transaction;
   /** @internal */
   [kServerSession]?: ServerSession;
+  /** @internal */
   [kSnapshotTime]?: Timestamp;
   /** @internal */
   [kSnapshotEnabled] = false;
@@ -140,13 +141,10 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
       this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
-        // TODO: throw validation error; MongoDriverError or more specific
         throw new MongoDriverError(
           'Properties "causalConsistency" and "snapshot" are mutually exclusive'
         );
       }
-
-      // TODO(NODE-3394): also validate server version >= 5.0
     }
 
     this.topology = topology;
@@ -283,7 +281,6 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   startTransaction(options?: TransactionOptions): void {
     if (this[kSnapshotEnabled]) {
-      // TODO: should this be a different type?
       throw new MongoDriverError('Transactions are not allowed with snapshot sessions');
     }
 
@@ -849,7 +846,7 @@ function applySession(
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     } else if (session[kSnapshotEnabled]) {
-      command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot }; // TODO: is there a better place to set this?
+      command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot };
       if (session[kSnapshotTime] !== undefined) {
         Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
       }
