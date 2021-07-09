@@ -75,6 +75,10 @@ export type ClientSessionEvents = {
 
 /** @internal */
 const kServerSession = Symbol('serverSession');
+/** @internal */
+const kSnapshotTime = Symbol('snapshotTime');
+/** @internal */
+const kSnapshotEnabled = Symbol('snapshotEnabled');
 
 /**
  * A class representing a client session on the server
@@ -91,7 +95,6 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   clientOptions?: MongoOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
-  snapshotTime?: Timestamp; // TODO: should this be more "private"?
   operationTime?: Timestamp;
   explicit: boolean;
   /** @internal */
@@ -100,8 +103,9 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   transaction: Transaction;
   /** @internal */
   [kServerSession]?: ServerSession;
+  [kSnapshotTime]?: Timestamp;
   /** @internal */
-  snapshot = false; // TODO: should this be more "private"?
+  [kSnapshotEnabled] = false;
 
   /**
    * Create a client session.
@@ -130,9 +134,16 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     options = options ?? {};
 
     if (options.snapshot === true) {
-      this.snapshot = true;
+      if (!topology.capabilities.supportsSnapshotReads) {
+        throw new MongoDriverError('Snapshot reads require MongoDB 5.0 or later');
+      }
+
+      this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
         // TODO: throw validation error; MongoDriverError or more specific
+        throw new MongoDriverError(
+          'Properties "causalConsistency" and "snapshot" are mutually exclusive'
+        );
       }
 
       // TODO(NODE-3394): also validate server version >= 5.0
@@ -271,7 +282,7 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
-    if (this.snapshot) {
+    if (this[kSnapshotEnabled]) {
       // TODO: should this be a different type?
       throw new MongoDriverError('Transactions are not allowed with snapshot sessions');
     }
@@ -837,10 +848,10 @@ function applySession(
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-    } else if (session.snapshot) {
+    } else if (session[kSnapshotEnabled]) {
       command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot }; // TODO: is there a better place to set this?
-      if (session.snapshotTime !== undefined) {
-        Object.assign(command.readConcern, { atClusterTime: session.snapshotTime });
+      if (session[kSnapshotTime] !== undefined) {
+        Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
       }
     }
 
@@ -882,8 +893,12 @@ function updateSessionFromResponse(session: ClientSession, document: Document): 
     session.transaction._recoveryToken = document.recoveryToken;
   }
 
-  if (document.cursor?.atClusterTime && session?.snapshot && session.snapshotTime === undefined) {
-    session.snapshotTime = document.cursor.atClusterTime;
+  if (
+    document.cursor?.atClusterTime &&
+    session?.[kSnapshotEnabled] &&
+    session[kSnapshotTime] === undefined
+  ) {
+    session[kSnapshotTime] = document.cursor.atClusterTime;
   }
 }
 

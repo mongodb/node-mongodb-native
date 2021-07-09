@@ -394,7 +394,7 @@ export function decorateWithCollation(
   target: MongoClient | Db | Collection,
   options: AnyOptions
 ): void {
-  const capabilities = getTopology(target).capabilities();
+  const capabilities = getTopology(target).capabilities;
   if (options.collation && typeof options.collation === 'object') {
     if (capabilities && capabilities.commandsTakeCollation) {
       command.collation = options.collation;
