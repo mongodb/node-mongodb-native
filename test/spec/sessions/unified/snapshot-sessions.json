@@ -656,6 +656,62 @@
       ]
     },
     {
+      "description": "countDocuments operation with snapshot",
+      "operations": [
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "session": "session0"
+          },
+          "expectResult": 2
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "session": "session0"
+          },
+          "expectResult": 2
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "readConcern": {
+                    "level": "snapshot",
+                    "atClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "readConcern": {
+                    "level": "snapshot",
+                    "atClusterTime": {
+                      "$$exists": true
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "Mixed operation with snapshot",
       "operations": [
         {
