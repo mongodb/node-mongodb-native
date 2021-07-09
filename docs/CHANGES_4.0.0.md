@@ -241,7 +241,7 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 
 ## Removed deprecations
 
-- `Collection.prototype.find / findOne options:`
+- `Collection.prototype.find / findOne` options:
   - `fields` - use `projection` instead
 - `Collection.prototype.save` - use `insertOne` instead
 - `Collection.prototype.dropAllIndexes`
