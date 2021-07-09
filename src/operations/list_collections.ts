@@ -2,7 +2,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { maxWireVersion, Callback, getTopology, MongoDBNamespace } from '../utils';
 import * as CONSTANTS from '../constants';
-import type { Document } from '../bson';
+import type { Binary, Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import { AbstractCursor } from '../cursor/abstract_cursor';
@@ -105,7 +105,21 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
 }
 
 /** @public */
-export class ListCollectionsCursor extends AbstractCursor {
+export interface CollectionInfo extends Document {
+  name: string;
+  type?: string;
+  options?: Document;
+  info?: {
+    readOnly?: false;
+    uuid?: Binary;
+  };
+  idIndex?: Document;
+}
+
+/** @public */
+export class ListCollectionsCursor<
+  T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo = CollectionInfo
+> extends AbstractCursor<T> {
   parent: Db;
   filter: Document;
   options?: ListCollectionsOptions;
@@ -117,7 +131,7 @@ export class ListCollectionsCursor extends AbstractCursor {
     this.options = options;
   }
 
-  clone(): ListCollectionsCursor {
+  clone(): ListCollectionsCursor<T> {
     return new ListCollectionsCursor(this.parent, this.filter, {
       ...this.options,
       ...this.cursorOptions

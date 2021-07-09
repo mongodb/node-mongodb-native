@@ -34,7 +34,11 @@ import {
   DropDatabaseOptions,
   DropCollectionOptions
 } from './operations/drop';
-import { ListCollectionsCursor, ListCollectionsOptions } from './operations/list_collections';
+import {
+  CollectionInfo,
+  ListCollectionsCursor,
+  ListCollectionsOptions
+} from './operations/list_collections';
 import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { RenameOperation, RenameOptions } from './operations/rename';
@@ -358,8 +362,25 @@ export class Db {
    * @param filter - Query to filter collections by
    * @param options - Optional settings for the command
    */
-  listCollections(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor {
-    return new ListCollectionsCursor(this, filter || {}, resolveOptions(this, options));
+  listCollections(
+    filter: Document,
+    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: true }
+  ): ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'>>;
+  listCollections(
+    filter: Document,
+    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: false }
+  ): ListCollectionsCursor<CollectionInfo>;
+  listCollections<
+    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
+      | Pick<CollectionInfo, 'name' | 'type'>
+      | CollectionInfo
+  >(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor<T>;
+  listCollections<
+    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
+      | Pick<CollectionInfo, 'name' | 'type'>
+      | CollectionInfo
+  >(filter: Document = {}, options: ListCollectionsOptions = {}): ListCollectionsCursor<T> {
+    return new ListCollectionsCursor<T>(this, filter, resolveOptions(this, options));
   }
 
   /**
