@@ -217,7 +217,7 @@ export class MongoBatchReExecutionError extends MongoRuntimeError {
 }
 
 /**
- * An Error thrown when the user attempts to operate on a database or collection through a MongoClient
+ * An error thrown when the user attempts to operate on a database or collection through a MongoClient
  * that has not yet successfully called the "connect" method
  *
  *
