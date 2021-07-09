@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
-const { MongoNetworkError } = require('../../src/error');
+const { MongoNetworkError, MongoDriverError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
@@ -1790,6 +1790,111 @@ describe('Change Streams', function () {
           err => finish(err)
         );
     }
+  });
+
+  // FIXME: NODE-1797
+  describe('should error when used as iterator and emitter concurrently', function () {
+    let client, coll, changeStream, repeatInsert, val;
+    val = 0;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      await client.connect().catch(() => expect.fail('Failed to connect to client'));
+
+      coll = client.db(this.configuration.db).collection('tester');
+      changeStream = coll.watch();
+
+      repeatInsert = setInterval(async function () {
+        await coll.insertOne({ c: val }).catch('Failed to insert document');
+        val++;
+      }, 75);
+    });
+
+    afterEach(async function () {
+      if (repeatInsert) {
+        clearInterval(repeatInsert);
+      }
+      if (changeStream) {
+        await changeStream.close();
+      }
+
+      await mock.cleanup();
+      if (client) {
+        await client.close();
+      }
+    });
+
+    it(
+      'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext"',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          await new Promise(resolve => changeStream.on('change', resolve));
+          try {
+            await changeStream.hasNext().catch(err => {
+              expect.fail(err.message);
+            });
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an iterator with "hasNext" and used as an emitter with "on"',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          await changeStream
+            .hasNext()
+            .catch(() => expect.fail('Failed to set changeStream to iterator'));
+          try {
+            await new Promise(resolve => changeStream.on('change', resolve));
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next"',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          await new Promise(resolve => changeStream.once('change', resolve));
+          try {
+            await changeStream.next().catch(err => {
+              expect.fail(err.message);
+            });
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
+
+    it(
+      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on"',
+      {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        test: async function () {
+          await changeStream
+            .tryNext()
+            .catch(() => expect.fail('Failed to set changeStream to iterator'));
+          try {
+            await new Promise(resolve => changeStream.on('change', resolve));
+          } catch (error) {
+            return expect(error).to.be.instanceof(MongoDriverError);
+          }
+          return expect.fail('Should not reach here');
+        }
+      }
+    );
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function () {

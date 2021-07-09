@@ -34,6 +34,8 @@ const kResumeQueue = Symbol('resumeQueue');
 const kCursorStream = Symbol('cursorStream');
 /** @internal */
 const kClosed = Symbol('closed');
+/** @internal */
+const kMode = Symbol('mode');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
 const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
@@ -206,6 +208,8 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   [kCursorStream]?: Readable;
   /** @internal */
   [kClosed]: boolean;
+  /** @internal */
+  [kMode]: false | 'iterator' | 'emitter';
 
   /** @event */
   static readonly RESPONSE = 'response' as const;
@@ -272,6 +276,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     this.cursor = createChangeStreamCursor(this, options);
 
     this[kClosed] = false;
+    this[kMode] = false;
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
@@ -299,6 +304,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
 
   /** Check if there is any document still available in the Change Stream */
   hasNext(callback?: Callback): Promise<void> | void {
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -313,6 +319,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   next(
     callback?: Callback<ChangeStreamDocument<TSchema>>
   ): Promise<ChangeStreamDocument<TSchema>> | void {
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -367,6 +374,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   tryNext(): Promise<Document | null>;
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
         if (err || !cursor) return cb(err); // failed to resume, raise an error
@@ -535,6 +543,23 @@ const CHANGE_STREAM_EVENTS = [
   ChangeStream.CLOSE
 ];
 
+function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
+  if (changeStream[kMode] === 'iterator') {
+    throw new MongoDriverError(
+      'Cannot use ChangeStream as an EventEmitter after using as an iterator'
+    );
+  }
+  changeStream[kMode] = 'emitter';
+}
+
+function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
+  if (changeStream[kMode] === 'emitter') {
+    throw new MongoDriverError(
+      'Cannot use ChangeStream as iterator after using as an EventEmitter'
+    );
+  }
+  changeStream[kMode] = 'iterator';
+}
 /**
  * Create a new change stream cursor based on self's configuration
  * @internal
@@ -630,6 +655,7 @@ function streamEvents<TSchema>(
   changeStream: ChangeStream<TSchema>,
   cursor: ChangeStreamCursor<TSchema>
 ): void {
+  setIsEmitter(changeStream);
   const stream = changeStream[kCursorStream] || cursor.stream();
   changeStream[kCursorStream] = stream;
   stream.on('data', change => processNewChange(changeStream, change));
