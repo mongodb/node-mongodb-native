@@ -53,9 +53,9 @@ Now, an error along the lines of: `Cursor is already initialized` is thrown.
 
 #### ChangeStream must be used as an iterator or an event emitter
 
-You cannot use ChangeStream as iterator after using as an EventEmitter nor visa versa.
-Previously the driver would permit this kind of usage but with undefined results of which type of usage would actually receive the change documents.
-It's unlikely this kind of usage was useful but to be sure we can now warn users about the risk.
+You cannot use ChangeStream as an iterator after using as an EventEmitter nor visa versa.
+Previously the driver would permit this kind of usage but it could lead to unpredictable behavior and obscure errors.
+It's unlikely this kind of usage was useful but to be sure we now prevent it by throwing a clear error.
 
 ```javascript
 const changeStream = db.watch();
