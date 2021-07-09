@@ -201,11 +201,20 @@ describe('Sessions - functional', function () {
     for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
       expect(sessionTests).to.be.an('object');
       context(String(sessionTests.description), function () {
+        // TODO: NODE-3393 fix test runner to apply session to all operations
+        const testsToSkip =
+          sessionTests.description === 'snapshot-sessions'
+            ? [
+                'countDocuments operation with snapshot',
+                'Distinct operation with snapshot',
+                'Mixed operation with snapshot'
+              ]
+            : ['Server returns an error on distinct with snapshot'];
         for (const test of sessionTests.tests) {
           it(String(test.description), {
             metadata: { sessions: { skipLeakTests: true } },
             test: async function () {
-              await runUnifiedTest(this, sessionTests, test);
+              await runUnifiedTest(this, sessionTests, test, testsToSkip);
             }
           });
         }
