@@ -10,8 +10,11 @@ Anyway, enjoy the guide, see you at the end!_
 
 ### Typescript
 
-We've migrated the driver to Typescript! Users can now harness the power of type hinting and intellisense in editors that support it to develop their MongoDB applications. Users don't even have to adopt Typescript to get the benefits. Along with the type hinting there's consistent docs formatting that editors should be able to display while developing.
-Recently we migrated our BSON library to TypeScript as well, this version of the driver pulls in those changes.
+We've migrated the driver to Typescript!
+Users can now harness the power of type hinting and intellisense in editors that support it to develop their MongoDB applications.
+Even pure JavaScript projects can benefit from the type definitions with the right linting setup.
+Along with the type hinting there's consistent and helpful docs formatting that editors should be able to display while developing.
+Recently we migrated our BSON library to TypeScript as well, this version of the driver pulls in that change.
 
 #### Community Types users (@types/mongodb)
 
@@ -45,7 +48,28 @@ for await (const doc of cursor) {
 }
 ```
 
-Prior to the this release there was inconsistency surrounding how the cursor would error if a setting like limit was applied after cursor execution had begun. Now, an error along the lines of: `Cursor is already initialized` is thrown.
+Prior to the this release there was inconsistency surrounding how the cursor would error if a setting like limit was applied after cursor execution had begun.
+Now, an error along the lines of: `Cursor is already initialized` is thrown.
+
+#### ChangeStream must be used as an iterator or an event emitter
+
+You cannot use ChangeStream as iterator after using as an EventEmitter nor visa versa.
+Previously the driver would permit this kind of usage but with undefined results of which type of usage would actually receive the change documents.
+It's unlikely this kind of usage was useful but to be sure we can now warn users about the risk.
+
+```javascript
+const changeStream = db.watch();
+changeStream.on('change', doc => console.log(doc));
+await changeStream.next(); // throws: Cannot use ChangeStream as iterator after using as an EventEmitter
+```
+
+Or the reverse:
+
+```javascript
+const changeStream = db.watch();
+await changeStream.next();
+changeStream.on('change', doc => console.log(doc)); // throws: Cannot use ChangeStream as an EventEmitter after using as an iterator
+```
 
 #### Stream API
 
@@ -98,7 +122,7 @@ Users should use authMechanismProperties.SERVICE_NAME like so:
 
 ### db.collection no longer accepts a callback
 
-The only option that required the use of the callback was strict mode. 
+The only option that required the use of the callback was strict mode.
 The strict option would return an error if the collection does not exist.
 Users who wish to ensure operations only execute against existing collections should use `db.listCollections` directly.
 
