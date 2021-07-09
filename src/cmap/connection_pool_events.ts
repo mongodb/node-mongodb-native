@@ -176,8 +176,4 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
     super(pool);
     this.serviceId = serviceId;
   }
-
-  get hasServiceId(): boolean {
-    return !!this.serviceId;
-  }
 }

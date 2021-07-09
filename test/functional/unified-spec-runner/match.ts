@@ -296,12 +296,16 @@ export function matchesEvents(
       expectedEvent.connectionClosedEvent &&
       actualEvent instanceof ConnectionClosedEvent
     ) {
-      expect(actualEvent.hasServiceId).to.equal(expectedEvent.connectionClosedEvent.hasServiceId);
+      if (expectedEvent.connectionClosedEvent.hasServiceId) {
+        expect(actualEvent.serviceId).to.exist;
+      }
     } else if (
       expectedEvent.poolClearedEvent &&
       actualEvent instanceof ConnectionPoolClearedEvent
     ) {
-      expect(actualEvent.hasServiceId).to.equal(expectedEvent.poolClearedEvent.hasServiceId);
+      if (expectedEvent.poolClearedEvent.hasServiceId) {
+        expect(actualEvent.serviceId).to.exist;
+      }
     } else {
       expect.fail(`Events must be one of the known types, got ${actualEvent}`);
     }
