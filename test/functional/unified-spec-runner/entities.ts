@@ -293,19 +293,25 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   }
 
   async cleanup(): Promise<void> {
+    console.log(' >  disableFailPoints');
     await this.failPoints.disableFailPoints();
+    console.log(' >  closeCursors');
     for (const [, cursor] of this.mapOf('cursor')) {
       await cursor.close();
     }
+    console.log(' >  closeStreams');
     for (const [, stream] of this.mapOf('stream')) {
       await stream.close();
     }
+    console.log(' >  endSessions');
     for (const [, session] of this.mapOf('session')) {
-      await session.endSession();
+      await session.endSession({ force: true });
     }
+    console.log(' >  closeClient');
     for (const [, client] of this.mapOf('client')) {
       await client.close();
     }
+    console.log(' >  clear');
     this.clear();
   }
 

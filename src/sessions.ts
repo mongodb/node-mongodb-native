@@ -88,6 +88,7 @@ const kPinnedConnection = Symbol('pinnedConnection');
 export interface EndSessionOptions {
   /** An optional error which caused the call to end this session */
   error?: AnyError;
+  force?: boolean;
 }
 
 /**
@@ -231,12 +232,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
-        maybeClearPinnedConnection(this, _options.error);
+        maybeClearPinnedConnection(this, _options);
         return done();
       }
 
       const completeEndSession = () => {
-        maybeClearPinnedConnection(this, _options.error);
+        maybeClearPinnedConnection(this, _options);
 
         // release the server session back to the pool
         this.sessionPool.release(this.serverSession);
@@ -431,13 +432,15 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
-function maybeClearPinnedConnection(session: ClientSession, error?: AnyError) {
+function maybeClearPinnedConnection(session: ClientSession, options: EndSessionOptions) {
   // unpin a connection if it has been pinned
   const conn = session[kPinnedConnection];
 
   // NOTE: the spec talks about what to do on a network error only, but the tests seem to
   //       to validate that we don't unpin on _all_ errors?
-  if (conn && error == null /* || !(error instanceof MongoNetworkError) */) {
+  if (conn && (options.error == null || options.force)) {
+    /* eslint no-console: 0 */
+    console.log(' >  unpinConnnection');
     const servers = Array.from(session.topology.s.servers.values());
     if (servers.length === 0) {
       // This can happen if the client is closed when the connection is still pinned
@@ -637,7 +640,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
       if (!session.loadBalanced) {
         session.transaction.transition(TxnState.TRANSACTION_ABORTED);
       } else {
-        maybeClearPinnedConnection(session);
+        maybeClearPinnedConnection(session, { force: false });
       }
 
       // The spec indicates that we should ignore all errors on `abortTransaction`
@@ -657,14 +660,14 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
 
           // per txns spec, must unpin session in this case
           if (session.loadBalanced) {
-            maybeClearPinnedConnection(session);
+            maybeClearPinnedConnection(session, { error: e });
           } else {
             session.transaction.unpinServer();
           }
         }
       } else if (e.hasErrorLabel('TransientTransactionError')) {
         if (session.loadBalanced) {
-          maybeClearPinnedConnection(session);
+          maybeClearPinnedConnection(session, { error: e });
         } else {
           session.transaction.unpinServer();
         }
@@ -692,7 +695,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
           if (session.loadBalanced) {
-            maybeClearPinnedConnection(session);
+            maybeClearPinnedConnection(session, { force: true });
           } else {
             session.transaction.unpinServer();
           }

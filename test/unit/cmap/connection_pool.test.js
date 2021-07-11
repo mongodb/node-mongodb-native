@@ -73,6 +73,7 @@ describe('Connection Pool', function () {
     });
 
     pool.withConnection(
+      undefined,
       (err, conn, cb) => {
         expect(err).to.not.exist;
         cb();
@@ -193,11 +194,15 @@ describe('Connection Pool', function () {
         pool.close(done);
       };
 
-      pool.withConnection((err, conn, cb) => {
-        expect(err).to.exist;
-        expect(err).to.match(/closed/);
-        cb(err);
-      }, callback);
+      pool.withConnection(
+        undefined,
+        (err, conn, cb) => {
+          expect(err).to.exist;
+          expect(err).to.match(/closed/);
+          cb(err);
+        },
+        callback
+      );
     });
 
     it('should return an error to the original callback', function (done) {
@@ -216,10 +221,14 @@ describe('Connection Pool', function () {
         pool.close(done);
       };
 
-      pool.withConnection((err, conn, cb) => {
-        expect(err).to.not.exist;
-        cb(new Error('my great error'));
-      }, callback);
+      pool.withConnection(
+        undefined,
+        (err, conn, cb) => {
+          expect(err).to.not.exist;
+          cb(new Error('my great error'));
+        },
+        callback
+      );
     });
 
     it('should still manage a connection if no callback is provided', function (done) {
@@ -243,7 +252,7 @@ describe('Connection Pool', function () {
         pool.close(done);
       });
 
-      pool.withConnection((err, conn, cb) => {
+      pool.withConnection(undefined, (err, conn, cb) => {
         expect(err).to.not.exist;
         cb();
       });
