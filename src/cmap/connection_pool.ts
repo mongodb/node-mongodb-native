@@ -356,6 +356,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         throw new MongoDriverError('Service generations are required in load balancer mode.');
       } else {
         // Increment the generation for the service id.
+        /* eslint no-console: 0 */
+        console.log(' > new generation', sid, generation + 1);
         this.serviceGenerations.set(sid, generation + 1);
       }
     } else {

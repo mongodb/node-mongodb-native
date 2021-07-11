@@ -775,7 +775,7 @@ function cleanupCursor(
   const session = cursor[kSession];
   if (session && session.owner === cursor) {
     /* eslint no-console: 0 */
-    console.log(' >  cleanupCursor', error);
+    console.log(' > cleanupCursor', error);
     session.endSession({ error }, callback);
   } else {
     callback();

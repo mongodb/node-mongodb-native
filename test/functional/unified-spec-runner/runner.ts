@@ -51,6 +51,7 @@ export async function runUnifiedTest(
 
   let entities;
   try {
+    console.log('\n\n\n starting test:');
     await utilClient.connect();
 
     // Must fetch parameters before checking runOnRequirements
@@ -63,6 +64,7 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
+    console.log(' > satisfiesRequirements');
     for (const requirement of allRequirements) {
       const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
       if (!met) {
@@ -75,15 +77,18 @@ export async function runUnifiedTest(
     // documents are specified, the test runner MUST create the collection with a "majority" write concern.
     // The test runner MUST use the internal MongoClient for these operations.
     if (unifiedSuite.initialData) {
+      console.log(' > initialData');
       for (const collData of unifiedSuite.initialData) {
         const db = utilClient.db(collData.databaseName);
         const collection = db.collection(collData.collectionName, {
           writeConcern: { w: 'majority' }
         });
+        console.log(' > listCollections');
         const collectionList = await db
           .listCollections({ name: collData.collectionName })
           .toArray();
         if (collectionList.length !== 0) {
+          console.log(' > drop');
           expect(await collection.drop()).to.be.true;
         }
       }
@@ -95,16 +100,19 @@ export async function runUnifiedTest(
         });
 
         if (!collData.documents?.length) {
+          console.log(' > createCollection');
           await db.createCollection(collData.collectionName, {
             writeConcern: { w: 'majority' }
           });
           continue;
         }
 
+        console.log(' > insertMany');
         await collection.insertMany(collData.documents);
       }
     }
 
+    console.log(' > createEntities');
     entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
 
     // Workaround for SERVER-39704:
@@ -124,7 +132,6 @@ export async function runUnifiedTest(
       }
     }
 
-    console.log('\n\n\n starting test:');
     for (const operation of test.operations) {
       console.log(' > ', operation.name);
       await executeOperationAndCheck(operation, entities, utilClient);
