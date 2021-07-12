@@ -1014,13 +1014,12 @@ describe('GridFS Stream', function () {
                       return;
                     }
 
-                    expect.fail('errorReported should be set'); // ??
-
                     // We need to abort in order to close the underlying cursor,
                     // and by extension the implicit session used for the cursor.
                     // This is only necessary if the cursor is not exhausted
                     download.abort();
                     client.close(done);
+                    expect.fail('errorReported should be set');
                   }
 
                   expect(res.toString('hex')).to.equal(result.$hex);
