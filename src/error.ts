@@ -431,7 +431,6 @@ export class MongoGridFSChunkError extends MongoStreamError {
 }
 
 /**
-<<<<<<< HEAD
  * An error thrown when the user attempts to add options to a cursor that has already been
  * initialized
  *
@@ -448,10 +447,8 @@ export class MongoCursorInUseError extends MongoCursorError {
   }
 }
 
-/** An error generated when an attempt to access a resource
-=======
+/**
  * An error generated when an attempt is made to access a resource
->>>>>>> f941c797b (docs(NODE-3419): fix typo in new error classes)
  * which has already been or will be closed/destroyed.
  *
  * @public
