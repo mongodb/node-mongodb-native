@@ -255,7 +255,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
-  _waitQueueErrorMetrics(): string {
+  private waitQueueErrorMetrics(): string {
     return `. maxPoolSize: ${this.options.maxPoolSize}, ${this[kMetrics].info()}`;
   }
 
@@ -292,7 +292,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
         waitQueueMember.callback(
           new WaitQueueTimeoutError(
-            this.loadBalanced ? this._waitQueueErrorMetrics() : '',
+            this.loadBalanced ? this.waitQueueErrorMetrics() : '',
             this.address
           )
         );
@@ -346,8 +346,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         throw new MongoDriverError('Service generations are required in load balancer mode.');
       } else {
         // Increment the generation for the service id.
-        /* eslint no-console: 0 */
-        console.log(' > new generation', sid, generation + 1);
         this.serviceGenerations.set(sid, generation + 1);
       }
     } else {
@@ -528,14 +526,12 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     pool.emit(ConnectionPool.CONNECTION_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     if (pool.loadBalanced) {
-      const onPin = (pinType: string) => {
+      connection.on('pinned', (pinType: string) => {
         pool[kMetrics].markPinned(pinType);
-      };
-      const onUnpin = (pinType: string) => {
+      });
+      connection.on('unpin', (pinType: string) => {
         pool[kMetrics].markUnpinned(pinType);
-      };
-      connection.on('pinned', onPin);
-      connection.on('unpin', onUnpin);
+      });
 
       const serviceId = connection.serviceId;
       if (serviceId) {

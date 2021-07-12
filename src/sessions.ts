@@ -28,7 +28,8 @@ import type { MongoOptions } from './mongo_client';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
-import type { CommandOptions, Connection } from './cmap/connection';
+import type { CommandOptions } from './cmap/connection';
+import { Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
@@ -210,9 +211,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       throw TypeError('Cant pin multiple connections to the same session');
     }
 
-    // console.trace('pinned connection');
     conn.emit(
-      'pinned',
+      Connection.PINNED,
       this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
     );
     this[kPinnedConnection] = conn;
@@ -444,8 +444,6 @@ function maybeClearPinnedConnection(session: ClientSession, options: EndSessionO
   // NOTE: the spec talks about what to do on a network error only, but the tests seem to
   //       to validate that we don't unpin on _all_ errors?
   if (conn && (options.error == null || options.force)) {
-    /* eslint no-console: 0 */
-    console.log(' >  unpinConnnection');
     const servers = Array.from(session.topology.s.servers.values());
     if (servers.length === 0) {
       // This can happen if the client is closed when the connection is still pinned
@@ -455,10 +453,10 @@ function maybeClearPinnedConnection(session: ClientSession, options: EndSessionO
       return;
     }
 
-    const loadBalancer: Server = servers[0];
+    const loadBalancer = servers[0];
     loadBalancer.s.pool.checkIn(conn);
     conn.emit(
-      'unpinned',
+      Connection.UNPINNED,
       session.transaction.state !== TxnState.NO_TRANSACTION
         ? ConnectionPoolMetrics.TXN
         : ConnectionPoolMetrics.CURSOR

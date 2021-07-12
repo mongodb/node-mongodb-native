@@ -180,9 +180,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
     const pool = server.s.pool;
     return count + pool.currentCheckedOutCount;
   }, 0);
-  process.nextTick(() => {
-    expect(checkedOutConnections).to.equal(operation.arguments.connections);
-  });
+  expect(checkedOutConnections).to.equal(operation.arguments.connections);
 });
 
 operations.set('bulkWrite', async ({ entities, operation }) => {
@@ -245,6 +243,9 @@ operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
   const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  // The spec dictates that we create the cursor and force the find command
+  // to execute, but don't move the cursor forward. hasNext() accomplishes
+  // this.
   await cursor.hasNext();
   return cursor;
 });
@@ -340,7 +341,7 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
 operations.set('listCollections', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { filter, batchSize } = operation.arguments;
-  return await db.listCollections(filter, { batchSize: batchSize }).toArray();
+  return db.listCollections(filter, { batchSize: batchSize }).toArray();
 });
 
 operations.set('listDatabases', async ({ entities, operation }) => {
@@ -351,7 +352,7 @@ operations.set('listDatabases', async ({ entities, operation }) => {
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { batchSize } = operation.arguments;
-  return await collection.listIndexes({ batchSize: batchSize }).toArray();
+  return collection.listIndexes({ batchSize: batchSize }).toArray();
 });
 
 operations.set('replaceOne', async ({ entities, operation }) => {
@@ -494,17 +495,19 @@ export async function executeOperationAndCheck(
   }
 
   // We check the positive outcome here so the try-catch above doesn't catch our chai assertions
-  if (!operation.ignoreResultAndError) {
-    if (operation.expectError) {
-      expect.fail(`Operation ${operation.name} succeeded but was not supposed to`);
-    }
+  if (operation.ignoreResultAndError) {
+    return;
+  }
 
-    if (operation.expectResult) {
-      resultCheck(result, operation.expectResult, entities);
-    }
+  if (operation.expectError) {
+    expect.fail(`Operation ${operation.name} succeeded but was not supposed to`);
+  }
 
-    if (operation.saveResultAsEntity) {
-      entities.set(operation.saveResultAsEntity, result);
-    }
+  if (operation.expectResult) {
+    resultCheck(result, operation.expectResult, entities);
+  }
+
+  if (operation.saveResultAsEntity) {
+    entities.set(operation.saveResultAsEntity, result);
   }
 }

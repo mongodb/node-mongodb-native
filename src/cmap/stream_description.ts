@@ -45,8 +45,8 @@ export class StreamDescription {
     this.maxBsonObjectSize = 16777216;
     this.maxMessageSizeBytes = 48000000;
     this.maxWriteBatchSize = 100000;
-    this.logicalSessionTimeoutMinutes = options ? options.logicalSessionTimeoutMinutes : undefined;
-    this.loadBalanced = options ? !!options.loadBalanced : false;
+    this.logicalSessionTimeoutMinutes = options?.logicalSessionTimeoutMinutes;
+    this.loadBalanced = !!options?.loadBalanced;
     this.compressors =
       options && options.compressors && Array.isArray(options.compressors)
         ? options.compressors

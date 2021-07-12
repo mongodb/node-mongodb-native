@@ -153,36 +153,33 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.clusterTime = clusterTime;
     });
 
-    if (!this.loadBalanced) {
-      // create the monitor
-      this[kMonitor] = new Monitor(this, this.s.options);
+    if (this.loadBalanced) return;
 
-      for (const event of HEARTBEAT_EVENTS) {
-        this[kMonitor].on(event, (e: any) => this.emit(event, e));
-      }
+    // create the monitor
+    this[kMonitor] = new Monitor(this, this.s.options);
 
-      this[kMonitor].on('resetConnectionPool', () => {
-        this.s.pool.clear();
-      });
-
-      this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
-      this[kMonitor].on(
-        Server.SERVER_HEARTBEAT_SUCCEEDED,
-        (event: ServerHeartbeatSucceededEvent) => {
-          this.emit(
-            Server.DESCRIPTION_RECEIVED,
-            new ServerDescription(this.description.hostAddress, event.reply, {
-              roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
-            })
-          );
-
-          if (this.s.state === STATE_CONNECTING) {
-            stateTransition(this, STATE_CONNECTED);
-            this.emit(Server.CONNECT, this);
-          }
-        }
-      );
+    for (const event of HEARTBEAT_EVENTS) {
+      this[kMonitor].on(event, (e: any) => this.emit(event, e));
     }
+
+    this[kMonitor].on('resetConnectionPool', () => {
+      this.s.pool.clear();
+    });
+
+    this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+    this[kMonitor].on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
+      this.emit(
+        Server.DESCRIPTION_RECEIVED,
+        new ServerDescription(this.description.hostAddress, event.reply, {
+          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
+        })
+      );
+
+      if (this.s.state === STATE_CONNECTING) {
+        stateTransition(this, STATE_CONNECTED);
+        this.emit(Server.CONNECT, this);
+      }
+    });
   }
 
   get description(): ServerDescription {

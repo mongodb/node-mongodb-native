@@ -372,7 +372,6 @@ export abstract class AbstractCursor<
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
 
-    // console.log('explicitly closing cursor');
     return maybePromise(callback, done => {
       const cursorId = this[kId];
       const cursorNs = this[kNamespace];
@@ -774,8 +773,6 @@ function cleanupCursor(
 
   const session = cursor[kSession];
   if (session && session.owner === cursor) {
-    /* eslint no-console: 0 */
-    console.log(' > cleanupCursor', error);
     session.endSession({ error }, callback);
   } else {
     callback();

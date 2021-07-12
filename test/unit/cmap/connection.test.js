@@ -3,7 +3,6 @@
 const mock = require('../../tools/mock');
 const { connect } = require('../../../src/cmap/connect');
 const { Connection, hasSessionSupport } = require('../../../src/cmap/connection');
-const { ConnectionPoolMetrics } = require('../../../src/cmap/metrics');
 const { expect } = require('chai');
 const { Socket } = require('net');
 const { ns } = require('../../../src/utils');

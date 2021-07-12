@@ -395,7 +395,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         }
 
         map.set(entity.bucket.id, new GridFSBucket(db, options));
-      } else if ('cursor' in entity) {
+      } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);

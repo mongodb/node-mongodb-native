@@ -196,6 +196,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   static readonly CLOSE = 'close' as const;
   /** @event */
   static readonly MESSAGE = 'message' as const;
+  /** @event */
+  static readonly PINNED = 'pinned' as const;
+  /** @event */
+  static readonly UNPINNED = 'unpinned' as const;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -320,8 +324,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options = { force: false };
     }
 
-    this.removeAllListeners('pinned');
-    this.removeAllListeners('unpinned');
+    this.removeAllListeners(Connection.PINNED);
+    this.removeAllListeners(Connection.UNPINNED);
 
     options = Object.assign({ force: false }, options);
     if (this[kStream] == null || this.destroyed) {
