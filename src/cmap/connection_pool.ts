@@ -255,7 +255,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
-  waitQueueErrorMetrics(): string {
+  _waitQueueErrorMetrics(): string {
     return `. maxPoolSize: ${this.options.maxPoolSize}, ${this[kMetrics].info()}`;
   }
 
@@ -292,7 +292,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
         waitQueueMember.callback(
           new WaitQueueTimeoutError(
-            this.loadBalanced ? this.waitQueueErrorMetrics() : '',
+            this.loadBalanced ? this._waitQueueErrorMetrics() : '',
             this.address
           )
         );
