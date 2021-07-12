@@ -64,13 +64,16 @@ describe('MongoClient Options', function () {
           const args = Array.prototype.slice.call(arguments);
           const ns = args[0];
           const command = args[1];
-          const options = args[2];
-          if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
-            stub.restore();
+          const options = args[2] || {};
+          if (
+            ns.toString() === 'admin.$cmd' &&
+            (command.ismaster || command.hello) &&
+            options.exhaustAllowed
+          ) {
             expect(options).property('socketTimeoutMS').to.equal(0);
+            stub.restore();
             client.close(done);
           }
-
           stub.wrappedMethod.apply(this, args);
         });
       });
@@ -90,13 +93,16 @@ describe('MongoClient Options', function () {
           const args = Array.prototype.slice.call(arguments);
           const ns = args[0];
           const command = args[1];
-          const options = args[2];
-          if (ns.toString() === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
-            stub.restore();
+          const options = args[2] || {};
+          if (
+            ns.toString() === 'admin.$cmd' &&
+            (command.ismaster || command.hello) &&
+            options.exhaustAllowed
+          ) {
             expect(options).property('socketTimeoutMS').to.equal(510);
+            stub.restore();
             client.close(done);
           }
-
           stub.wrappedMethod.apply(this, args);
         });
       });
