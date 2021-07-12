@@ -51,13 +51,13 @@ function maxStalenessReducer(
     (topologyDescription.heartbeatFrequencyMS + IDLE_WRITE_PERIOD) / 1000;
   if (maxStaleness < maxStalenessVariance) {
     throw new MongoInvalidArgumentError(
-      `maxStalenessSeconds must be at least ${maxStalenessVariance} seconds`
+      `Option "maxStalenessSeconds" must be at least ${maxStalenessVariance} seconds`
     );
   }
 
   if (maxStaleness < SMALLEST_MAX_STALENESS_SECONDS) {
     throw new MongoInvalidArgumentError(
-      `maxStalenessSeconds must be at least ${SMALLEST_MAX_STALENESS_SECONDS} seconds`
+      `Option "maxStalenessSeconds" must be at least ${SMALLEST_MAX_STALENESS_SECONDS} seconds`
     );
   }
 

@@ -390,7 +390,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options || { ordered: true };
 
     if (!Array.isArray(operations)) {
-      throw new MongoInvalidArgumentError('operations must be an array of documents');
+      throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
     return executeOperation(
@@ -737,7 +737,7 @@ export class Collection<TSchema extends Document = Document> {
       );
     }
     if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('`options` parameter must not be function');
+      throw new MongoInvalidArgumentError('Parameter `options` must not be function');
     }
 
     return new FindCursor<TSchema>(
@@ -1454,7 +1454,7 @@ export class Collection<TSchema extends Document = Document> {
     // TODO NODE-3339: Figure out if this is still necessary given we no longer officially support pre-1.8
     if (options?.out == null) {
       throw new MongoInvalidArgumentError(
-        'the out option parameter must be defined, see mongodb docs for possible values'
+        'The "out" option parameter must be defined, see mongodb docs for possible values'
       );
     }
 

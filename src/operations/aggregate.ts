@@ -76,12 +76,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (this.explain && this.writeConcern) {
       throw new MongoInvalidArgumentError(
-        '"explain" cannot be used on an aggregate call with writeConcern'
+        'Option "explain" cannot be used on an aggregate call with writeConcern'
       );
     }
 
     if (options?.cursor != null && typeof options.cursor !== 'object') {
-      throw new MongoInvalidArgumentError('cursor options must be an object');
+      throw new MongoInvalidArgumentError('Cursor options must be an object');
     }
   }
 

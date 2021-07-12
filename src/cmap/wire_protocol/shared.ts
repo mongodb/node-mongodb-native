@@ -28,7 +28,7 @@ export function getReadPreference(cmd: Document, options?: ReadPreferenceOption)
   }
 
   if (!(readPreference instanceof ReadPreference)) {
-    throw new MongoInvalidArgumentError('read preference must be a ReadPreference instance');
+    throw new MongoInvalidArgumentError('Read preference must be a ReadPreference instance');
   }
 
   return readPreference;

@@ -47,6 +47,6 @@ export class Explain {
       return new Explain(explain);
     }
 
-    throw new MongoInvalidArgumentError('explain must be a string or a boolean');
+    throw new MongoInvalidArgumentError('Field "explain" must be a string or a boolean');
   }
 }

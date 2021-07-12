@@ -240,7 +240,7 @@ export const LEGAL_TCP_SOCKET_OPTIONS = [
 
 function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   const hostAddress = options.hostAddress;
-  if (!hostAddress) throw new MongoInvalidArgumentError('HostAddress required');
+  if (!hostAddress) throw new MongoInvalidArgumentError('Option "hostAddress" is required');
 
   const result: Partial<net.TcpNetConnectOpts & net.IpcNetConnectOpts> = {};
   for (const name of LEGAL_TCP_SOCKET_OPTIONS) {

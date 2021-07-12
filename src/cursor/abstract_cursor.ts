@@ -462,11 +462,11 @@ export abstract class AbstractCursor<
   addCursorFlag(flag: CursorFlag, value: boolean): this {
     assertUninitialized(this);
     if (!CURSOR_FLAGS.includes(flag)) {
-      throw new MongoInvalidArgumentError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
 
     if (typeof value !== 'boolean') {
-      throw new MongoInvalidArgumentError(`flag ${flag} must be a boolean value`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} must be a boolean value`);
     }
 
     this[kOptions][flag] = value;
@@ -546,7 +546,7 @@ export abstract class AbstractCursor<
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
     this[kOptions].maxTimeMS = value;
@@ -565,7 +565,7 @@ export abstract class AbstractCursor<
     }
 
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('batchSize requires an integer');
+      throw new MongoInvalidArgumentError('Operation batchSize requires an integer');
     }
 
     this[kOptions].batchSize = value;

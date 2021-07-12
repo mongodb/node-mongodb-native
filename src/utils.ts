@@ -60,27 +60,27 @@ export function getSingleProperty(
  */
 export function checkCollectionName(collectionName: string): void {
   if ('string' !== typeof collectionName) {
-    throw new MongoInvalidArgumentError('collection name must be a String');
+    throw new MongoInvalidArgumentError('Collection name must be a String');
   }
 
   if (!collectionName || collectionName.indexOf('..') !== -1) {
-    throw new MongoInvalidArgumentError('collection names cannot be empty');
+    throw new MongoInvalidArgumentError('Collection names cannot be empty');
   }
 
   if (
     collectionName.indexOf('$') !== -1 &&
     collectionName.match(/((^\$cmd)|(oplog\.\$main))/) == null
   ) {
-    throw new MongoInvalidArgumentError("collection names must not contain '$'");
+    throw new MongoInvalidArgumentError("Collection names must not contain '$'");
   }
 
   if (collectionName.match(/^\.|\.$/) != null) {
-    throw new MongoInvalidArgumentError("collection names must not start or end with '.'");
+    throw new MongoInvalidArgumentError("Collection names must not start or end with '.'");
   }
 
   // Validate that we are not passing 0x00 in the collection name
   if (collectionName.indexOf('\x00') !== -1) {
-    throw new MongoInvalidArgumentError('collection names cannot contain a null character');
+    throw new MongoInvalidArgumentError('Collection names cannot contain a null character');
   }
 }
 
@@ -929,7 +929,7 @@ export function now(): number {
 /** @internal */
 export function calculateDurationInMs(started: number): number {
   if (typeof started !== 'number') {
-    throw new MongoInvalidArgumentError('numeric value required to calculate duration');
+    throw new MongoInvalidArgumentError('Numeric value required to calculate duration');
   }
 
   const elapsed = now() - started;
@@ -1230,7 +1230,7 @@ export class BufferPool {
   /** Reads the requested number of bytes, optionally consuming them */
   read(size: number, consume = true): Buffer {
     if (typeof size !== 'number' || size < 0) {
-      throw new MongoInvalidArgumentError('Parameter size must be a non-negative number');
+      throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
 
     if (size > this[kLength]) {
@@ -1392,4 +1392,8 @@ export function emitWarningOnce(message: string): void {
     emittedWarnings.add(message);
     return emitWarning(message);
   }
+}
+
+export function enumToString(en: Record<string, unknown>): string {
+  return Object.values(en).join(', ');
 }

@@ -290,7 +290,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
         break;
 
       default:
-        throw new MongoInvalidArgumentError(`invalid query modifier: ${name}`);
+        throw new MongoInvalidArgumentError(`Invalid query modifier: ${name}`);
     }
 
     return this;
@@ -315,7 +315,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   maxAwaitTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('maxAwaitTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxAwaitTimeMS must be a number');
     }
 
     this[kBuiltOptions].maxAwaitTimeMS = value;
@@ -330,7 +330,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
     this[kBuiltOptions].maxTimeMS = value;
@@ -387,7 +387,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   allowDiskUse(): this {
     assertUninitialized(this);
     if (!this[kBuiltOptions].sort) {
-      throw new MongoInvalidArgumentError('allowDiskUse requires a sort specification');
+      throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
     this[kBuiltOptions].allowDiskUse = true;
     return this;
@@ -416,7 +416,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     }
 
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('limit requires an integer');
+      throw new MongoInvalidArgumentError('Operation "limit" requires an integer');
     }
 
     this[kBuiltOptions].limit = value;
@@ -435,7 +435,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     }
 
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('skip requires an integer');
+      throw new MongoInvalidArgumentError('Operation "skip" requires an integer');
     }
 
     this[kBuiltOptions].skip = value;

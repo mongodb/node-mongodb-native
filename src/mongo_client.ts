@@ -403,7 +403,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
-      throw new MongoInvalidArgumentError('`connect` only accepts a callback');
+      throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
     }
 
     return maybePromise(callback, cb => {
