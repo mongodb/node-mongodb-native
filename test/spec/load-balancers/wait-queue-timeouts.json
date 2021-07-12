@@ -15,7 +15,7 @@
         "useMultipleMongoses": true,
         "uriOptions": {
           "maxPoolSize": 1,
-          "waitQueueTimeoutMS": 5
+          "waitQueueTimeoutMS": 50
         },
         "observeEvents": [
           "connectionCheckedOutEvent",
