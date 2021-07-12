@@ -361,7 +361,7 @@ export abstract class AbstractCursor<
     });
   }
 
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
