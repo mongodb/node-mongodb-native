@@ -116,7 +116,7 @@ If you need to test TLS connections without verifying server identity pass in `{
 #### Kerberos / GSSAPI
 
 `gssapiServiceName` has been removed.
-Users should use authMechanismProperties.SERVICE_NAME like so:
+Users should use `authMechanismProperties.SERVICE_NAME` like so:
 
 - In a URI query param: `?authMechanismProperties=SERVICE_NAME:alternateServiceName`
 - Or as an option: `{ authMechanismProperties: { SERVICE_NAME: 'alternateServiceName' } }`
