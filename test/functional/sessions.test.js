@@ -208,6 +208,9 @@ describe('Sessions - functional', function () {
             'Distinct operation with snapshot',
             'Mixed operation with snapshot'
           ],
+          'snapshot-sessions-not-supported-client-error': [
+            'Client error on distinct with snapshot'
+          ],
           'snapshot-sessions-not-supported-server-error': [
             'Server returns an error on distinct with snapshot'
           ],
