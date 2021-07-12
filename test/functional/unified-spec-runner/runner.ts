@@ -54,6 +54,9 @@ export async function runUnifiedTest(
     console.log('\n\n\n starting test:');
     await utilClient.connect();
 
+    // terminate all sessions before each test suite
+    await utilClient.db().admin().command({ killAllSessions: [] });
+
     // Must fetch parameters before checking runOnRequirements
     ctx.configuration.parameters = await utilClient.db().admin().command({ getParameter: '*' });
 
@@ -134,7 +137,14 @@ export async function runUnifiedTest(
 
     for (const operation of test.operations) {
       console.log(' > ', operation.name);
-      await executeOperationAndCheck(operation, entities, utilClient);
+      try {
+        await executeOperationAndCheck(operation, entities, utilClient);
+      } catch (err) {
+        // clean up all sessions on failed test, and rethrow
+        await utilClient.db().admin().command({ killAllSessions: [] });
+
+        throw err;
+      }
     }
 
     const clientCommandEvents = new Map<string, CommandEvent[]>();
