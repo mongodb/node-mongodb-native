@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { Writable } from 'stream';
 import { MongoError, AnyError, MONGODB_ERROR_CODES, MongoDriverError } from '../error';
 import { WriteConcern } from './../write_concern';
@@ -31,8 +30,6 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   contentType?: string;
   /** Array of strings to store in the file document's `aliases` field */
   aliases?: string[];
-  /** If true, disables adding an md5 field to file data */
-  disableMD5?: boolean;
 }
 
 /**
@@ -52,7 +49,6 @@ export class GridFSBucketWriteStream extends Writable {
   chunkSizeBytes: number;
   bufToStore: Buffer;
   length: number;
-  md5: false | crypto.Hash;
   n: number;
   pos: number;
   state: {
@@ -96,7 +92,6 @@ export class GridFSBucketWriteStream extends Writable {
     this.chunkSizeBytes = options.chunkSizeBytes || this.bucket.s.options.chunkSizeBytes;
     this.bufToStore = Buffer.alloc(this.chunkSizeBytes);
     this.length = 0;
-    this.md5 = !options.disableMD5 && crypto.createHash('md5');
     this.n = 0;
     this.pos = 0;
     this.state = {
@@ -307,7 +302,6 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       stream.id,
       stream.length,
       stream.chunkSizeBytes,
-      stream.md5 ? stream.md5.digest('hex') : undefined,
       stream.filename,
       stream.options.contentType,
       stream.options.aliases,
@@ -396,14 +390,13 @@ function checkIndexes(stream: GridFSBucketWriteStream, callback: Callback): void
 }
 
 function createFilesDoc(
-  _id: GridFSFile['_id'],
-  length: GridFSFile['length'],
-  chunkSize: GridFSFile['chunkSize'],
-  md5: GridFSFile['md5'],
-  filename: GridFSFile['filename'],
-  contentType: GridFSFile['contentType'],
-  aliases: GridFSFile['aliases'],
-  metadata: GridFSFile['metadata']
+  _id: ObjectId,
+  length: number,
+  chunkSize: number,
+  filename: string,
+  contentType?: string,
+  aliases?: string[],
+  metadata?: Document
 ): GridFSFile {
   const ret: GridFSFile = {
     _id,
@@ -412,10 +405,6 @@ function createFilesDoc(
     uploadDate: new Date(),
     filename
   };
-
-  if (md5) {
-    ret.md5 = md5;
-  }
 
   if (contentType) {
     ret.contentType = contentType;
@@ -472,9 +461,6 @@ function doWrite(
     spaceRemaining -= numToCopy;
     let doc: GridFSChunk;
     if (spaceRemaining === 0) {
-      if (stream.md5) {
-        stream.md5.update(stream.bufToStore);
-      }
       doc = createChunkDoc(stream.id, stream.n, Buffer.from(stream.bufToStore));
       ++stream.state.outstandingRequests;
       ++outstandingRequests;
@@ -550,9 +536,6 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
   // to be.
   const remnant = Buffer.alloc(stream.pos);
   stream.bufToStore.copy(remnant, 0, 0, stream.pos);
-  if (stream.md5) {
-    stream.md5.update(remnant);
-  }
   const doc = createChunkDoc(stream.id, stream.n, remnant);
 
   // If the stream was aborted, do not write remnant
