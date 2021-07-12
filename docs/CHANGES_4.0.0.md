@@ -149,7 +149,7 @@ The Db instance is no longer an EventEmitter, all events your application is con
 
 ### Collection.group() removed
 
-The collection `group()` helper has been deprecated in MongoDB since 3.4 and is now removed from the Driver.
+The collection `group()` helper has been deprecated in MongoDB since 3.4 and is now removed from the driver.
 The same functionality can be achieved using the aggregation pipeline's `$group` operator.
 
 ### GridStore removed
