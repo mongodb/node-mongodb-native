@@ -83,7 +83,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     if (options.explain !== undefined && maxWireVersion(server) < 3) {
       return callback
         ? callback(
-            new MongoCompatibilityError(`server ${server.name} does not support explain on delete`)
+            new MongoCompatibilityError(`Server ${server.name} does not support explain on delete`)
           )
         : undefined;
     }
@@ -91,14 +91,14 @@ export class DeleteOperation extends CommandOperation<Document> {
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`servers < 3.4 do not support hint on delete`));
+        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on delete`));
         return;
       }
     }
 
     const statementWithCollation = this.statements.find(statement => !!statement.collation);
     if (statementWithCollation && collationNotSupported(server, statementWithCollation)) {
-      callback(new MongoCompatibilityError(`server ${server.name} does not support collation`));
+      callback(new MongoCompatibilityError(`Server ${server.name} does not support collation`));
       return;
     }
 

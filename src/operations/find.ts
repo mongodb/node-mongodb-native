@@ -127,7 +127,7 @@ export class FindOperation extends CommandOperation<Document> {
       if (this.readConcern && this.readConcern.level !== 'local') {
         callback(
           new MongoCompatibilityError(
-            `server find command does not support a readConcern level of ${this.readConcern.level}`
+            `Server find command does not support a readConcern level of ${this.readConcern.level}`
           )
         );
 

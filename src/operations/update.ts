@@ -108,14 +108,14 @@ export class UpdateOperation extends CommandOperation<Document> {
       collationNotSupported(server, options) ||
       (statementWithCollation && collationNotSupported(server, statementWithCollation))
     ) {
-      callback(new MongoCompatibilityError(`server ${server.name} does not support collation`));
+      callback(new MongoCompatibilityError(`Server ${server.name} does not support collation`));
       return;
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`servers < 3.4 do not support hint on update`));
+        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on update`));
         return;
       }
     }

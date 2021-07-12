@@ -166,7 +166,7 @@ export class MapReduceOperation extends CommandOperation<Document | Document[]> 
 
     if (this.explain && maxWireVersion(server) < 9) {
       callback(
-        new MongoCompatibilityError(`server ${server.name} does not support explain on mapReduce`)
+        new MongoCompatibilityError(`Server ${server.name} does not support explain on mapReduce`)
       );
       return;
     }

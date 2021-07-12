@@ -241,7 +241,7 @@ export class CreateIndexesOperation<
       if (serverWireVersion < 9) {
         callback(
           new MongoCompatibilityError(
-            '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+            'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
           )
         );
         return;
