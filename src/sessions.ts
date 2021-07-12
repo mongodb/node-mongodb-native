@@ -108,6 +108,10 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /** @internal */
   [kSnapshotEnabled] = false;
 
+  get snapshotEnabled(): boolean {
+    return this[kSnapshotEnabled];
+  }
+
   /**
    * Create a client session.
    * @internal
@@ -135,10 +139,6 @@ class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     options = options ?? {};
 
     if (options.snapshot === true) {
-      if (!topology.capabilities.supportsSnapshotReads) {
-        throw new MongoDriverError('Snapshot reads require MongoDB 5.0 or later');
-      }
-
       this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
         throw new MongoDriverError(
