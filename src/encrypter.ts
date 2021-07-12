@@ -115,7 +115,7 @@ export class Encrypter {
     const mongodbClientEncryption = require('mongodb-client-encryption');
     if (typeof mongodbClientEncryption.extension !== 'function') {
       throw new MongoMissingDependencyError(
-        'loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
+        'Loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
           'Please make sure you are loading the correct version of `mongodb-client-encryption`'
       );
     }

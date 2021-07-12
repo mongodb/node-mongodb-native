@@ -69,7 +69,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
 
     if (this.explain && maxWireVersion(server) < 4) {
       callback(
-        new MongoCompatibilityError(`server ${server.name} does not support explain on distinct`)
+        new MongoCompatibilityError(`Server ${server.name} does not support explain on distinct`)
       );
       return;
     }
