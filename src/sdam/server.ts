@@ -51,7 +51,7 @@ import type {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent
 } from './events';
-import type { ClientSession } from '../sessions';
+import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import type { Document } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';
@@ -591,6 +591,14 @@ function makeOperationHandler(
               markServerUnknown(server, err);
               process.nextTick(() => server.requestCheck());
             }
+          }
+        }
+
+        if (session && session.inTransaction() && err.hasErrorLabel('TransientTransactionError')) {
+          if (session.loadBalanced) {
+            maybeClearPinnedConnection(session, { force: true });
+          } else {
+            session.transaction.unpinServer();
           }
         }
       }

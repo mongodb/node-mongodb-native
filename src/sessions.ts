@@ -439,7 +439,7 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
-function maybeClearPinnedConnection(session: ClientSession, options: EndSessionOptions) {
+export function maybeClearPinnedConnection(session: ClientSession, options: EndSessionOptions) {
   // unpin a connection if it has been pinned
   const conn = session[kPinnedConnection];
 
