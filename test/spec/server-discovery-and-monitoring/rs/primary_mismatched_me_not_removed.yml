@@ -10,12 +10,13 @@ phases: [
           "localhost:27017",
           "localhost:27018"
         ],
-        ismaster: true,
+        helloOk: true,
+        isWritablePrimary: true,
         setName: "rs",
         primary: "localhost:27017",
         # me does not match the primary responder's address, but the server
         # is still added because we don't me mismatch check the primary and all
-        # servers from a primary ismaster are added to the working server set
+        # servers from a primary isWritablePrimary are added to the working server set
         me: "a:27017",
         minWireVersion: 0,
         maxWireVersion: 7
@@ -45,7 +46,8 @@ phases: [
           "localhost:27017",
           "localhost:27018"
         ],
-        ismaster: false,
+        helloOk: true,
+        isWritablePrimary: false,
         secondary: true,
         setName: "rs",
         primary: "localhost:27017",

@@ -1,4 +1,4 @@
-description: "Handle a not-ok ismaster response"
+description: "Handle a not-ok isWritablePrimary response"
 
 uri: "mongodb://a"
 
@@ -10,7 +10,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     minWireVersion: 0,
                     maxWireVersion: 6
                 }],
@@ -18,7 +19,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 0,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     minWireVersion: 0,
                     maxWireVersion: 6
                 }]

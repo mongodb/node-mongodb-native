@@ -95,7 +95,7 @@ tests:
       - name: runOnThread
         object: testRunner
         arguments:
-          name: thread2
+          name: thread3
           operation:
             name: insertOne
             object: collection
@@ -105,7 +105,7 @@ tests:
       - name: runOnThread
         object: testRunner
         arguments:
-          name: thread1
+          name: thread4
           operation:
             name: insertOne
             object: collection
@@ -115,7 +115,7 @@ tests:
       - name: runOnThread
         object: testRunner
         arguments:
-          name: thread2
+          name: thread5
           operation:
             name: insertOne
             object: collection
@@ -125,7 +125,7 @@ tests:
       - name: runOnThread
         object: testRunner
         arguments:
-          name: thread2
+          name: thread6
           operation:
             name: insertOne
             object: collection

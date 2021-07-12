@@ -222,7 +222,7 @@ export function parseServerType(ismaster?: Document): ServerType {
   if (ismaster.setName) {
     if (ismaster.hidden) {
       return ServerType.RSOther;
-    } else if (ismaster.ismaster) {
+    } else if (ismaster.ismaster || ismaster.isWritablePrimary) {
       return ServerType.RSPrimary;
     } else if (ismaster.secondary) {
       return ServerType.RSSecondary;

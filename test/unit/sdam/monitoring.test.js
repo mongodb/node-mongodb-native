@@ -204,5 +204,40 @@ describe('monitoring', function () {
 
       monitor.connect();
     });
+
+    it('should upgrade to hello from legacy hello when initial handshake contains helloOk', function (done) {
+      const docs = [];
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        docs.push(doc);
+        if (docs.length === 2) {
+          expect(docs[0]).to.have.property('ismaster', true);
+          expect(docs[0]).to.have.property('helloOk', true);
+          expect(docs[1]).to.have.property('hello', true);
+          done();
+        } else if (doc.ismaster || doc.hello) {
+          setTimeout(
+            () => request.reply(Object.assign({ helloOk: true }, mock.DEFAULT_ISMASTER)),
+            250
+          );
+        }
+      });
+
+      const server = new MockServer(mockServer.address());
+      const monitor = new Monitor(server, {});
+      this.defer(() => monitor.close());
+      monitor.connect();
+      monitor.once('serverHeartbeatSucceeded', () => {
+        const minHeartbeatFrequencyMS = 500;
+        setTimeout(() => {
+          // wait for minHeartbeatFrequencyMS, then request a check and verify another check occurred
+          monitor.once('serverHeartbeatSucceeded', () => {
+            monitor.close();
+          });
+
+          monitor.requestCheck();
+        }, minHeartbeatFrequencyMS);
+      });
+    });
   });
 });

@@ -119,6 +119,10 @@ function performInitialHandshake(
         response.ismaster = response.isWritablePrimary;
       }
 
+      if (response.helloOk) {
+        conn.helloOk = true;
+      }
+
       const supportedServerErr = checkSupportedServer(response, options);
       if (supportedServerErr) {
         callback(supportedServerErr);
@@ -158,6 +162,7 @@ function performInitialHandshake(
 export interface HandshakeDocument extends Document {
   ismaster?: boolean;
   hello?: boolean;
+  helloOk?: boolean;
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
@@ -170,6 +175,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
 
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version ? 'hello' : 'ismaster']: true,
+    helloOk: true,
     client: options.metadata || makeClientMetadata(options),
     compression: compressors
   };

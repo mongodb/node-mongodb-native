@@ -1,5 +1,5 @@
 {
-  "description": "Repeated ismaster response must be processed",
+  "description": "Repeated isWritablePrimary response must be processed",
   "uri": "mongodb://a,b/?replicaSet=rs",
   "phases": [
     {
@@ -8,7 +8,8 @@
           "a:27017",
           {
             "ok": 1,
-            "ismaster": false,
+            "helloOk": true,
+            "isWritablePrimary": false,
             "secondary": true,
             "hidden": true,
             "hosts": [
@@ -45,7 +46,8 @@
           "c:27017",
           {
             "ok": 1,
-            "ismaster": true,
+            "helloOk": true,
+            "isWritablePrimary": true,
             "minWireVersion": 0,
             "maxWireVersion": 6
           }
@@ -72,7 +74,8 @@
           "a:27017",
           {
             "ok": 1,
-            "ismaster": false,
+            "helloOk": true,
+            "isWritablePrimary": false,
             "secondary": true,
             "hidden": true,
             "hosts": [
@@ -109,7 +112,8 @@
           "c:27017",
           {
             "ok": 1,
-            "ismaster": true,
+            "helloOk": true,
+            "isWritablePrimary": true,
             "hosts": [
               "a:27017",
               "c:27017"
