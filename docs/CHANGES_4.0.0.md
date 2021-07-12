@@ -2,7 +2,7 @@
 
 _Hello dear reader, **thank you** for adopting version 4.x of the MongoDB Node.js driver, from the bottom of our developer hearts we thank you so much for taking the time to upgrade to our latest and greatest offering of a stunning database experience.
 We hope you enjoy your upgrade experience and this guide gives you all the answers you are searching for.
-If anything, and we mean anything, hinders you upgrade experience please let us know via [JIRA](https://jira.mongodb.org/browse/NODE).
+If anything, and we mean anything, hinders your upgrade experience please let us know via [JIRA](https://jira.mongodb.org/browse/NODE).
 We know breaking changes are hard but they are sometimes for the best.
 Anyway, enjoy the guide, see you at the end!_
 
