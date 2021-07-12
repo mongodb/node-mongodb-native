@@ -108,10 +108,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /** @internal */
   [kSnapshotEnabled] = false;
 
-  get snapshotEnabled(): boolean {
-    return this[kSnapshotEnabled];
-  }
-
   /**
    * Create a client session.
    * @internal
@@ -178,6 +174,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this[kServerSession]!;
+  }
+
+  /** Whether or not this session is configured for snapshot reads */
+  get snapshotEnabled(): boolean {
+    return this[kSnapshotEnabled];
   }
 
   /**
