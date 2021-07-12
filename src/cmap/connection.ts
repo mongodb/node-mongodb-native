@@ -152,6 +152,8 @@ export type ConnectionEvents = {
   clusterTimeReceived(clusterTime: Document): void;
   close(): void;
   message(message: any): void;
+  pinned(pinType: string): void;
+  unpinned(pinType: string): void;
 };
 
 /** @internal */
@@ -279,27 +281,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  /**
-   * Mark the connection as pinned if it isn't already pinned. An example
-   * of this is if the connection is pinned to a transaction, and we've
-   * started a cursor inside the transaction, we want to keep the tracking
-   * for the metrics as the transaction.
-   */
-  markPinned(pinType: string): void {
-    if (!this.pinType) {
-      this.pinType = pinType;
-    }
-  }
-
-  /**
-   * Mark the connection as unpinned only if the pin type is the same.
-   */
-  markUnpinned(pinType: string): void {
-    if (pinType === this.pinType) {
-      this.pinType = undefined;
-    }
-  }
-
   handleIssue(issue: { isTimeout?: boolean; isClose?: boolean; destroy?: boolean | Error }): void {
     if (this.closed) {
       return;
@@ -338,6 +319,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       callback = options;
       options = { force: false };
     }
+
+    this.removeAllListeners('pinned');
+    this.removeAllListeners('unpinned');
 
     options = Object.assign({ force: false }, options);
     if (this[kStream] == null || this.destroyed) {

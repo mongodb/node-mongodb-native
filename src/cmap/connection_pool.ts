@@ -252,16 +252,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return this[kCheckedOut];
   }
 
-  markPinned(connection: Connection, pinType: string): void {
-    connection.markPinned(pinType);
-    this[kMetrics].markPinned(pinType);
-  }
-
-  markUnpinned(connection: Connection, pinType: string): void {
-    connection.markUnpinned(pinType);
-    this[kMetrics].markUnpinned(pinType);
-  }
-
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
@@ -538,6 +528,15 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     pool.emit(ConnectionPool.CONNECTION_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     if (pool.loadBalanced) {
+      const onPin = (pinType: string) => {
+        pool[kMetrics].markPinned(pinType);
+      };
+      const onUnpin = (pinType: string) => {
+        pool[kMetrics].markUnpinned(pinType);
+      };
+      connection.on('pinned', onPin);
+      connection.on('unpin', onUnpin);
+
       const serviceId = connection.serviceId;
       if (serviceId) {
         let generation;

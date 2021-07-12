@@ -29,6 +29,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { CommandOptions, Connection } from './cmap/connection';
+import { ConnectionPoolMetrics } from './cmap/metrics';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
 import { ReadConcernLevel } from './read_concern';
@@ -210,6 +211,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     }
 
     // console.trace('pinned connection');
+    conn.emit(
+      'pinned',
+      this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
+    );
     this[kPinnedConnection] = conn;
   }
 
@@ -452,6 +457,12 @@ function maybeClearPinnedConnection(session: ClientSession, options: EndSessionO
 
     const loadBalancer: Server = servers[0];
     loadBalancer.s.pool.checkIn(conn);
+    conn.emit(
+      'unpinned',
+      session.transaction.state !== TxnState.NO_TRANSACTION
+        ? ConnectionPoolMetrics.TXN
+        : ConnectionPoolMetrics.CURSOR
+    );
     session[kPinnedConnection] = undefined;
   }
 }
