@@ -188,6 +188,9 @@ operations.set('bulkWrite', async ({ entities, operation }) => {
   return collection.bulkWrite(operation.arguments.requests);
 });
 
+// The entity exists for the name but can potentially have the wrong
+// type (stream/cursor) which will also throw an exception even when
+// telling getEntity() to ignore checking existence.
 operations.set('close', async ({ entities, operation }) => {
   try {
     const cursor = entities.getEntity('cursor', operation.object);
