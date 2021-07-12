@@ -27,6 +27,17 @@ describe('Sessions - unit/core', function () {
       }
     });
 
+    it('should throw an error if snapshot and causalConsistency options are both set to true', {
+      metadata: { requires: { topology: 'single' } },
+      test: function () {
+        const client = new Topology('localhost:27017', {});
+        const sessionPool = client.s.sessionPool;
+        expect(
+          () => new ClientSession(client, sessionPool, { causalConsistency: true, snapshot: true })
+        ).not.to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
+      }
+    });
+
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
       test: function (done) {
