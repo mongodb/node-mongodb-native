@@ -34,7 +34,6 @@ import { ConnectionPoolMetrics } from './cmap/metrics';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
 import { ReadConcernLevel } from './read_concern';
-import type { Server } from './sdam/server';
 
 const minWireVersionForShardedTransactions = 8;
 
