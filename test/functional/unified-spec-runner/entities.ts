@@ -250,6 +250,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           options.causalConsistency = entity.session.sessionOptions?.causalConsistency;
         }
 
+        if (entity.session.sessionOptions?.snapshot) {
+          options.snapshot = entity.session.sessionOptions.snapshot;
+        }
+
         if (entity.session.sessionOptions?.defaultTransactionOptions) {
           options.defaultTransactionOptions = Object.create(null);
           const defaultOptions = entity.session.sessionOptions.defaultTransactionOptions;

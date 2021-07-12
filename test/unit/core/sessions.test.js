@@ -10,6 +10,17 @@ const { now } = require('../../../src/utils');
 let test = {};
 describe('Sessions - unit/core', function () {
   describe('ClientSession', function () {
+    let session;
+    let sessionPool;
+
+    afterEach(done => {
+      if (sessionPool) {
+        sessionCleanupHandler(session, sessionPool, done)();
+      } else {
+        done();
+      }
+    });
+
     it('should throw errors with invalid parameters', {
       metadata: { requires: { topology: 'single' } },
       test: function () {
@@ -27,31 +38,51 @@ describe('Sessions - unit/core', function () {
       }
     });
 
+    it('should throw an error if snapshot and causalConsistency options are both set to true', {
+      metadata: { requires: { topology: 'single' } },
+      test: function () {
+        const client = new Topology('localhost:27017', {});
+        sessionPool = client.s.sessionPool;
+        expect(
+          () => new ClientSession(client, sessionPool, { causalConsistency: true, snapshot: true })
+        ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
+      }
+    });
+
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
-      test: function (done) {
+      test: function () {
         const client = new Topology('localhost:27017', {});
-        const sessionPool = client.s.sessionPool;
-        const session = new ClientSession(client, sessionPool);
-        done = sessionCleanupHandler(session, sessionPool, done);
-
+        sessionPool = client.s.sessionPool;
+        session = new ClientSession(client, sessionPool);
         expect(session.clusterTime).to.not.exist;
-        done();
       }
     });
 
     it('should set the internal clusterTime to `initialClusterTime` if provided', {
       metadata: { requires: { topology: 'single' } },
-      test: function (done) {
+      test: function () {
         const clusterTime = genClusterTime(Date.now());
         const client = new Topology('localhost:27017');
-        const sessionPool = client.s.sessionPool;
-        const session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
-        done = sessionCleanupHandler(session, sessionPool, done);
-
+        sessionPool = client.s.sessionPool;
+        session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
         expect(session.clusterTime).to.eql(clusterTime);
-        done();
       }
+    });
+
+    describe('startTransaction()', () => {
+      it('should throw an error if the session is snapshot enabled', {
+        metadata: { requires: { topology: 'single' } },
+        test: function () {
+          const client = new Topology('localhost:27017', {});
+          sessionPool = client.s.sessionPool;
+          session = new ClientSession(client, sessionPool, { snapshot: true });
+          expect(session.snapshotEnabled).to.equal(true);
+          expect(() => session.startTransaction()).to.throw(
+            'Transactions are not allowed with snapshot sessions'
+          );
+        }
+      });
     });
   });
 

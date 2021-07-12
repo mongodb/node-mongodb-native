@@ -379,7 +379,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.description;
   }
 
-  capabilities(): ServerCapabilities {
+  get capabilities(): ServerCapabilities {
     return new ServerCapabilities(this.lastIsMaster());
   }
 
@@ -1062,6 +1062,10 @@ export class ServerCapabilities {
 
   get hasListIndexesCommand(): boolean {
     return this.maxWireVersion >= 3;
+  }
+
+  get supportsSnapshotReads(): boolean {
+    return this.maxWireVersion >= 13;
   }
 
   get commandsTakeWriteConcern(): boolean {
