@@ -262,15 +262,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (callback == null) {
-      throw new MongoInvalidArgumentError('callback must be provided');
+      throw new MongoInvalidArgumentError('Callback must be provided');
     }
 
     if (ns.db == null || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('ns must not be a string');
+      throw new MongoInvalidArgumentError('Namespace must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoInvalidArgumentError('server is closed'));
+      callback(new MongoInvalidArgumentError('Server is closed'));
       return;
     }
 

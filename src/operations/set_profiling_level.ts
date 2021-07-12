@@ -1,5 +1,6 @@
 import { CommandOperation, CommandOperationOptions } from './command';
 import type { Callback } from '../utils';
+import { enumToString } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
@@ -50,7 +51,11 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     const level = this.level;
 
     if (!levelValues.has(level)) {
-      return callback(new MongoInvalidArgumentError('Illegal profiling level value ' + level));
+      return callback(
+        new MongoInvalidArgumentError(
+          `Profiling level ust be one of ${enumToString(ProfilingLevel)}`
+        )
+      );
     }
 
     // TODO: Determine error to put here

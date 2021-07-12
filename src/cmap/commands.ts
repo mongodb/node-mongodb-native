@@ -77,12 +77,13 @@ export class Query {
 
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (ns == null) throw new MongoInvalidArgumentError('ns must be specified for query');
-    if (query == null) throw new MongoInvalidArgumentError('query must be specified for query');
+    if (ns == null) throw new MongoInvalidArgumentError('Namespace must be specified for query');
+    if (query == null)
+      throw new MongoInvalidArgumentError('A query document must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
-      throw new MongoInvalidArgumentError('namespace cannot contain a null character');
+      throw new MongoInvalidArgumentError('Namespace cannot contain a null character');
     }
 
     // Basic options
@@ -664,7 +665,8 @@ export class Msg {
 
   constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (command == null) throw new MongoInvalidArgumentError('query must be specified for query');
+    if (command == null)
+      throw new MongoInvalidArgumentError('Query document must be specified for query');
 
     // Basic options
     this.ns = ns;
@@ -852,6 +854,9 @@ export class BinMsg {
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
+
+        // TODO(NODE-3402): Replace with error to be determined as per conversation in
+        // https://github.com/mongodb/node-mongodb-native/pull/2891/files/217705feab16bf235e385b1a7b2381575dac0d76
         throw new MongoInvalidArgumentError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }

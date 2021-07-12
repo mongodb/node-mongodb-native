@@ -345,7 +345,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (typeof ns.db === 'undefined' || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('ns cannot be a string');
+      throw new MongoInvalidArgumentError('Namespace cannot be a string');
     }
 
     const readPreference = getReadPreference(cmd, options);

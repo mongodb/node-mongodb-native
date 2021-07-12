@@ -122,13 +122,15 @@ export class UpdateOperation extends CommandOperation<Document> {
 
     if (this.explain && maxWireVersion(server) < 3) {
       callback(
-        new MongoCompatibilityError(`server ${server.name} does not support explain on update`)
+        new MongoCompatibilityError(`Server ${server.name} does not support explain on update`)
       );
       return;
     }
 
     if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
-      callback(new MongoCompatibilityError('arrayFilters are only supported on MongoDB 3.6+'));
+      callback(
+        new MongoCompatibilityError('The "arrayFilters" option is only supported on MongoDB 3.6+')
+      );
       return;
     }
 
@@ -270,11 +272,11 @@ export function makeUpdateStatement(
   options: UpdateOptions & { multi?: boolean }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
-    throw new MongoInvalidArgumentError('selector must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('Selector must be a valid JavaScript object');
   }
 
   if (update == null || typeof update !== 'object') {
-    throw new MongoInvalidArgumentError('document must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('Document must be a valid JavaScript object');
   }
 
   const op: UpdateStatement = { q: filter, u: update };

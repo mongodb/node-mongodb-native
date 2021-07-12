@@ -22,7 +22,7 @@ export class GSSAPI extends AuthProvider {
     const { connection, credentials } = authContext;
     if (credentials == null)
       return callback(
-        new MongoMissingCredentialsError('credentials required for gssapi authentication')
+        new MongoMissingCredentialsError('Credentials required for GSSAPI authentication')
       );
     const { username } = credentials;
     function externalCommand(
@@ -33,7 +33,7 @@ export class GSSAPI extends AuthProvider {
     }
     makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);
-      if (client == null) return callback(new MongoMissingDependencyError('gssapi client missing'));
+      if (client == null) return callback(new MongoMissingDependencyError('GSSAPI client missing'));
       client.step('', (err, payload) => {
         if (err) return callback(err);
 

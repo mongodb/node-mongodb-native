@@ -419,7 +419,7 @@ function handleStartOption(
 
     return options.start - stream.s.bytesRead;
   }
-  throw new MongoInvalidArgumentError('No start option defined');
+  throw new MongoInvalidArgumentError('Start option must be defined');
 }
 
 function handleEndOption(
@@ -453,7 +453,7 @@ function handleEndOption(
 
     return Math.ceil(options.end / doc.chunkSize) * doc.chunkSize - options.end;
   }
-  throw new MongoInvalidArgumentError('No end option defined');
+  throw new MongoInvalidArgumentError('End option must be defined');
 }
 
 function __handleError(stream: GridFSBucketReadStream, error?: AnyError): void {

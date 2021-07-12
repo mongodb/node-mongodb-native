@@ -21,7 +21,7 @@ export function connect(
   callback: Callback<MongoClient>
 ): void {
   if (!callback) {
-    throw new MongoInvalidArgumentError('no callback function provided');
+    throw new MongoInvalidArgumentError('Callback function must be provided');
   }
 
   // If a connection already been established, we can terminate early

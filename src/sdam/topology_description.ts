@@ -3,7 +3,7 @@ import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import { MongoError, MongoInvalidArgumentError } from '../error';
+import { MongoError, MongoCompatibilityError } from '../error';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -431,7 +431,12 @@ function updateRsWithPrimaryFromMember(
   setName?: string
 ): TopologyType {
   if (setName == null) {
-    throw new MongoInvalidArgumentError('setName is required');
+    // FIXME(NODE-3402): Consider replacing with MongoCompatibilityError or making
+    // error message more verbose to indicate that the incompatibility is occuring
+    // with the topology rather than the current server version
+    throw new MongoCompatibilityError(
+      'Argument "setName" is required if connected to a replica set'
+    );
   }
 
   if (

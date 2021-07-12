@@ -294,10 +294,10 @@ export class Db {
       throw new MongoInvalidArgumentError('Third parameter to `db.aggregate()` must be undefined');
     }
     if (typeof pipeline === 'function') {
-      throw new MongoInvalidArgumentError('`pipeline` parameter must not be function');
+      throw new MongoInvalidArgumentError('Parameter `pipeline` must not be function');
     }
     if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('`options` parameter must not be function');
+      throw new MongoInvalidArgumentError('Parameter `options` must not be function');
     }
 
     return new AggregationCursor(
@@ -741,9 +741,9 @@ export class Db {
 // Validate the database name
 function validateDatabaseName(databaseName: string) {
   if (typeof databaseName !== 'string')
-    throw new MongoInvalidArgumentError('database name must be a string');
+    throw new MongoInvalidArgumentError('Database name must be a string');
   if (databaseName.length === 0)
-    throw new MongoInvalidArgumentError('database name cannot be the empty string');
+    throw new MongoInvalidArgumentError('Database name cannot be the empty string');
   if (databaseName === '$external') return;
 
   const invalidChars = [' ', '.', '$', '/', '\\'];

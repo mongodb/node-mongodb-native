@@ -248,15 +248,15 @@ function parsePayload(payload: string) {
 
 function passwordDigest(username: string, password: string) {
   if (typeof username !== 'string') {
-    throw new MongoInvalidArgumentError('username must be a string');
+    throw new MongoInvalidArgumentError('Username must be a string');
   }
 
   if (typeof password !== 'string') {
-    throw new MongoInvalidArgumentError('password must be a string');
+    throw new MongoInvalidArgumentError('Password must be a string');
   }
 
   if (password.length === 0) {
-    throw new MongoInvalidArgumentError('password cannot be empty');
+    throw new MongoInvalidArgumentError('Password cannot be empty');
   }
 
   const md5 = crypto.createHash('md5');
