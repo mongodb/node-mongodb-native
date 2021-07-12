@@ -640,7 +640,6 @@ export interface MongoOptions
         | 'heartbeatFrequencyMS'
         | 'keepAlive'
         | 'keepAliveInitialDelay'
-        | 'loadBalanced'
         | 'localThresholdMS'
         | 'logger'
         | 'maxIdleTimeMS'
@@ -669,6 +668,7 @@ export interface MongoOptions
   credentials?: MongoCredentials;
   readPreference: ReadPreference;
   readConcern: ReadConcern;
+  loadBalanced: boolean;
   serverApi: ServerApi;
   writeConcern: WriteConcern;
   dbName: string;
