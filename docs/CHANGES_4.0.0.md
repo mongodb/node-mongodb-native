@@ -82,6 +82,7 @@ stream.on('data', data => console.log(data));
 stream.on('end', () => client.close());
 ```
 
+`Cursor.transformStream()` has been removed. `Cursor.stream()` accepts a transform function, so that API was redundant.
 ### MongoClientOptions interface
 
 With type hinting users should find that the options passed to a MongoClient are completely enumerated and easily discoverable.
