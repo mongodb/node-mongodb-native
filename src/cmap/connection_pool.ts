@@ -526,10 +526,10 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     pool.emit(ConnectionPool.CONNECTION_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     if (pool.loadBalanced) {
-      connection.on('pinned', (pinType: string) => {
+      connection.on(Connection.PINNED, pinType => {
         pool[kMetrics].markPinned(pinType);
       });
-      connection.on('unpin', (pinType: string) => {
+      connection.on(Connection.UNPINNED, pinType => {
         pool[kMetrics].markUnpinned(pinType);
       });
 

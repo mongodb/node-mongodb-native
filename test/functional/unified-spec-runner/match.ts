@@ -275,14 +275,11 @@ export function matchesEvents(
   actual: (CommandEvent & CmapEvent)[],
   entities: EntitiesMap
 ): void {
-  // TODO: NodeJS Driver has extra events
-  // expect(actual).to.have.lengthOf(expected.length);
   if (actual.length !== expected.length) {
-    //const actualNames = actual.map(a => a.constructor.name);
-    const expectedNames = expected.map(e => Object.keys(e)[0]);
-    console.log(
-      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(actual)}`
-    );
+    // const actualNames = actual.map(a => a.constructor.name);
+    // const expectedNames = expected.map(e => Object.keys(e)[0]);
+    // TODO: NodeJS Driver has extra events
+    // expect(actual).to.have.lengthOf(expected.length, `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(actualNames)}`);
   }
 
   for (const [index, actualEvent] of actual.entries()) {

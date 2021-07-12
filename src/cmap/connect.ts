@@ -132,7 +132,7 @@ function performInitialHandshake(
       }
 
       if (options.loadBalanced) {
-        // TODO: Durran: Remove when server support exists.
+        // TODO: Durran: Remove when server support exists. (NODE-3431)
         if (FAKE_MONGODB_SERVICE_ID) {
           if (response.topologyVersion) {
             response.serviceId = response.topologyVersion.processId;

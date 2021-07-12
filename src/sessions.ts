@@ -88,7 +88,10 @@ const kPinnedConnection = Symbol('pinnedConnection');
 
 /** @public */
 export interface EndSessionOptions {
-  /** An optional error which caused the call to end this session */
+  /**
+   * An optional error which caused the call to end this session
+   * @internal
+   */
   error?: AnyError;
   force?: boolean;
 }
