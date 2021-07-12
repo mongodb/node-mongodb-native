@@ -83,6 +83,7 @@ stream.on('end', () => client.close());
 ```
 
 `Cursor.transformStream()` has been removed. `Cursor.stream()` accepts a transform function, so that API was redundant.
+
 ### MongoClientOptions interface
 
 With type hinting users should find that the options passed to a MongoClient are completely enumerated and easily discoverable.
@@ -227,6 +228,40 @@ File metadata that used to be accessible on the GridStore instance can be found 
 const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 ```
 
+#### Hashing an upload
+
+The automatic MD5 hashing has been removed from the upload family of functions.
+This makes the default Grid FS behavior compliant with systems that do not permit usage of MD5 hashing.
+The `disableMD5` option is no longer used and has no effect.
+
+If you still want to add an MD5 hash to your file upload here's a simple example that can be used with [any hashing algorithm](https://nodejs.org/dist/latest-v14.x/docs/api/crypto.html#crypto_crypto_createhash_algorithm_options) provided by Node.js:
+
+```javascript
+const bucket = new GridFSBucket(db);
+
+// can be whatever algorithm is supported by your local openssl
+const hash = crypto.createHash('md5');
+hash.setEncoding('hex'); // We want a hex string in the end
+
+const _id = new ObjectId(); // We could also use file name to do the update lookup
+
+const uploadStream = fs
+  .createReadStream('./test.txt')
+  .on('data', data => hash.update(data)) // keep the hash up to date with the file chunks
+  .pipe(bucket.openUploadStreamWithId(_id, 'test.txt'));
+
+const md5 = await new Promise((resolve, reject) => {
+  uploadStream
+    .once('error', error => reject(error))
+    .once('finish', () => {
+      hash.end(); // Must call hash.end() otherwise hash.read() will be `null`
+      resolve(hash.read());
+    });
+});
+
+await db.collection('fs.files').updateOne({ _id }, { $set: { md5 } });
+```
+
 ## Intentional Breaking Changes
 
 - [`NODE-3368`](https://jira.mongodb.org/browse/NODE-3368): make name prop on error classes read-only ([#2879](https://github.com/mongodb/node-mongodb-native/pull/2879))
@@ -262,6 +297,7 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 - [`NODE-1722`](https://jira.mongodb.com/browse/NODE-1722): remove top-level write concern options ([#2642](https://github.com/mongodb/node-mongodb-native/issues/2642)) ([6914e87](https://github.com/mongodb/node-mongodb-native/commit/6914e875b37fb0ad444105ad24839d50c5c224d4))
 - [`NODE-2506`](https://jira.mongodb.com/browse/NODE-2506): remove createCollection strict mode ([#2506](https://github.com/mongodb/node-mongodb-native/pull/2506)) ([bb13764](https://github.com/mongodb/node-mongodb-native/commit/bb137643b2a95bd5898d2fef4d761de5f2e2cde0))
 - [`NODE-2562`](https://jira.mongodb.com/browse/NODE-2562): remove geoHaystackSearch ([#2315](https://github.com/mongodb/node-mongodb-native/pull/2315)) ([5a1b61c](https://github.com/mongodb/node-mongodb-native/commit/5a1b61c9f2baf8f6f3cec4c34ce2db52272cd49d))
+- [`NODE-3427`](https://jira.mongodb.org/browse/NODE-3427): remove md5 hashing from GridFS API ([#2899](https://github.com/mongodb/node-mongodb-native/pull/2740)) ([a488d88](https://github.com/mongodb/node-mongodb-native/commit/a488d8838e0d046b0eae243504258a0896ffb383))
 - [`NODE-2317`](https://jira.mongodb.org/browse/NODE-2317): remove deprecated items ([#2740](https://github.com/mongodb/node-mongodb-native/pull/2740)) ([listed below](#removed-deprecations))
 
 ## Removed deprecations
