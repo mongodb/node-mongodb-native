@@ -62,6 +62,13 @@ before(function (_done) {
   // );
 
   const options = MONGODB_API_VERSION ? { serverApi: MONGODB_API_VERSION } : {};
+  if (process.env.SERVERLESS) {
+    options.auth = {
+      username: process.env.SERVERLESS_ATLAS_USER,
+      password: process.env.SERVERLESS_ATLAS_PASSWORD
+    };
+    console.log('set serverless auth in before hook', { auth: options.auth });
+  }
   const client = new MongoClient(MONGODB_URI, options);
   const done = err => client.close(err2 => _done(err || err2));
 

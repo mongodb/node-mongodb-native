@@ -58,6 +58,10 @@ class TestConfiguration {
         password: url.password
       };
     }
+    if (context.serverlessCredentials) {
+      const { username, password } = context.serverlessCredentials;
+      this.options.auth = { username, password };
+    }
   }
 
   writeConcern() {

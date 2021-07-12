@@ -110,7 +110,12 @@ function parseRunOn(runOn) {
     }
 
     const mongodb = version.join(' ');
-    return { topology, mongodb, authEnabled: !!config.authEnabled };
+    return {
+      topology,
+      mongodb,
+      authEnabled: !!config.authEnabled,
+      serverless: config.serverless
+    };
   });
 }
 
