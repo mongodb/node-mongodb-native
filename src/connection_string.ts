@@ -92,7 +92,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
       HostAddress.fromString(`${r.name}:${r.port ?? 27017}`)
     );
 
-    const lbError = checkLoadBalancerOptions(options, hostAddresses);
+    const lbError = validateLoadBalancedOptions(hostAddresses, options);
     if (lbError) {
       return callback(lbError);
     }
@@ -136,42 +136,15 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
           options.loadBalanced = true;
         }
 
-        const lbError = checkLoadBalancerOptions(options, hostAddresses);
+        const lbError = validateLoadBalancedOptions(hostAddresses, options);
         if (lbError) {
           return callback(lbError);
-        }
-
-        if (options.loadBalanced) {
-          if (options.replicaSet) {
-            return callback(new MongoParseError(LB_REPLICA_SET_ERROR));
-          }
-
-          if (hostAddresses.length > 1) {
-            return callback(new MongoParseError(LB_SINGLE_HOST_ERROR));
-          }
         }
       }
 
       callback(undefined, hostAddresses);
     });
   });
-}
-
-function checkLoadBalancerOptions(
-  options: MongoOptions,
-  addresses: HostAddress[]
-): MongoParseError | null {
-  if (options.loadBalanced) {
-    if (options.replicaSet) {
-      return new MongoParseError(LB_REPLICA_SET_ERROR);
-    }
-
-    if (addresses.length > 1) {
-      return new MongoParseError(LB_SINGLE_HOST_ERROR);
-    }
-    return null;
-  }
-  return null;
 }
 
 /**
@@ -427,7 +400,10 @@ export function parseOptions(
     throw new MongoParseError('directConnection not supported with SRV URI');
   }
 
-  validateLoadBalancedOptions(hosts, mongoOptions);
+  const lbError = validateLoadBalancedOptions(hosts, mongoOptions);
+  if (lbError) {
+    throw lbError;
+  }
 
   // Potential SRV Overrides
   mongoOptions.userSpecifiedAuthSource =
@@ -444,16 +420,19 @@ export function parseOptions(
   return mongoOptions;
 }
 
-function validateLoadBalancedOptions(hosts: HostAddress[] | string[], mongoOptions: MongoOptions) {
+function validateLoadBalancedOptions(
+  hosts: HostAddress[] | string[],
+  mongoOptions: MongoOptions
+): MongoParseError | undefined {
   if (mongoOptions.loadBalanced) {
     if (hosts.length > 1) {
-      throw new MongoParseError(LB_SINGLE_HOST_ERROR);
+      return new MongoParseError(LB_SINGLE_HOST_ERROR);
     }
     if (mongoOptions.replicaSet) {
-      throw new MongoParseError(LB_REPLICA_SET_ERROR);
+      return new MongoParseError(LB_REPLICA_SET_ERROR);
     }
     if (mongoOptions.directConnection) {
-      throw new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
+      return new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
     }
   }
 }
