@@ -86,7 +86,7 @@ const kSnapshotEnabled = Symbol('snapshotEnabled');
  * NOTE: not meant to be instantiated directly.
  * @public
  */
-class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
+export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /** @internal */
   topology: Topology;
   /** @internal */
@@ -650,7 +650,7 @@ export type ServerSessionId = { id: Binary };
  * WARNING: not meant to be instantiated directly. For internal use only.
  * @public
  */
-class ServerSession {
+export class ServerSession {
   id: ServerSessionId;
   lastUse: number;
   txnNumber: number;
@@ -685,7 +685,7 @@ class ServerSession {
  * For internal use only
  * @internal
  */
-class ServerSessionPool {
+export class ServerSessionPool {
   topology: Topology;
   sessions: ServerSession[];
 
@@ -773,7 +773,7 @@ class ServerSessionPool {
 
 // TODO: this should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-function commandSupportsReadConcern(command: Document, options?: Document): boolean {
+export function commandSupportsReadConcern(command: Document, options?: Document): boolean {
   if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
     return true;
   }
@@ -797,7 +797,7 @@ function commandSupportsReadConcern(command: Document, options?: Document): bool
  * @param command - the command to decorate
  * @param options - Optional settings passed to calling operation
  */
-function applySession(
+export function applySession(
   session: ClientSession,
   command: Document,
   options?: CommandOptions
@@ -877,7 +877,7 @@ function applySession(
   }
 }
 
-function updateSessionFromResponse(session: ClientSession, document: Document): void {
+export function updateSessionFromResponse(session: ClientSession, document: Document): void {
   if (document.$clusterTime) {
     resolveClusterTime(session, document.$clusterTime);
   }
@@ -898,13 +898,3 @@ function updateSessionFromResponse(session: ClientSession, document: Document): 
     session[kSnapshotTime] = document.cursor.atClusterTime;
   }
 }
-
-export {
-  ClientSession,
-  ServerSession,
-  ServerSessionPool,
-  TxnState,
-  applySession,
-  updateSessionFromResponse,
-  commandSupportsReadConcern
-};
