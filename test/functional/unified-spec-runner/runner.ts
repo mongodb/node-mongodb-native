@@ -7,6 +7,7 @@ import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
 import { matchesEvents } from './match';
 import { satisfies as semverSatisfies } from 'semver';
+import { MongoClient } from '../../../src/mongo_client';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
@@ -18,6 +19,19 @@ interface MongoDBMochaTestContext extends Mocha.Context {
 export function trace(message: string) {
   if (process.env.UTR_TRACE) {
     console.log(` > ${message}`);
+  }
+}
+
+async function terminateOpenTransactions(client: MongoClient) {
+  // TODO: on sharded clusters this has to be run on each mongos
+  try {
+    await client.db().admin().command({ killAllSessions: [] });
+  } catch (err) {
+    if (err.code === 11601 || err.code === 13 || err.code === 59) {
+      return;
+    }
+
+    throw err;
   }
 }
 
@@ -61,7 +75,7 @@ export async function runUnifiedTest(
     await utilClient.connect();
 
     // terminate all sessions before each test suite
-    await utilClient.db().admin().command({ killAllSessions: [] });
+    await terminateOpenTransactions(utilClient);
 
     // Must fetch parameters before checking runOnRequirements
     ctx.configuration.parameters = await utilClient.db().admin().command({ getParameter: '*' });
@@ -148,7 +162,7 @@ export async function runUnifiedTest(
         await executeOperationAndCheck(operation, entities, utilClient);
       } catch (err) {
         // clean up all sessions on failed test, and rethrow
-        await utilClient.db().admin().command({ killAllSessions: [] });
+        await terminateOpenTransactions(utilClient);
 
         throw err;
       }
