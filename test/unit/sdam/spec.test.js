@@ -282,7 +282,7 @@ function executeSDAMTest(testData, testDone) {
 }
 
 function withConnectionStubImpl(appError) {
-  return function (fn, callback) {
+  return function (conn, fn, callback) {
     const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
     const fakeConnection = {
       generation:
