@@ -7,7 +7,8 @@ const SKIP = [
   // Verified they use the same connection but the Node implementation executes
   // a getMore before the killCursors even though the stream is immediately
   // closed.
-  'change streams pin to a connection'
+  'change streams pin to a connection',
+  'errors during the initial connection hello are ignore'
 ];
 
 require('../functional/retryable_reads.test');
