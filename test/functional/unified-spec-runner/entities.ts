@@ -32,7 +32,7 @@ import type {
 } from '../../../src/cmap/command_monitoring_events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
-import { TestConfiguration } from './runner';
+import { TestConfiguration, trace } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -293,25 +293,29 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   }
 
   async cleanup(): Promise<void> {
-    console.log(' >  disableFailPoints');
     await this.failPoints.disableFailPoints();
-    console.log(' >  closeCursors');
+
+    trace('closeCursors');
     for (const [, cursor] of this.mapOf('cursor')) {
       await cursor.close();
     }
-    console.log(' >  closeStreams');
+
+    trace('closeStreams');
     for (const [, stream] of this.mapOf('stream')) {
       await stream.close();
     }
-    console.log(' >  endSessions');
+
+    trace('endSessions');
     for (const [, session] of this.mapOf('session')) {
       await session.endSession({ force: true });
     }
-    console.log(' >  closeClient');
+
+    trace('closeClient');
     for (const [, client] of this.mapOf('client')) {
       await client.close();
     }
-    console.log(' >  clear');
+
+    trace('clear');
     this.clear();
   }
 

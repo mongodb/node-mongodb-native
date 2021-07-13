@@ -15,6 +15,12 @@ interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
 }
 
+export function trace(message: string) {
+  if (process.env.UTR_TRACE) {
+    console.log(` > ${message}`);
+  }
+}
+
 export async function runUnifiedTest(
   ctx: MongoDBMochaTestContext,
   unifiedSuite: uni.UnifiedSuite,
@@ -51,7 +57,7 @@ export async function runUnifiedTest(
 
   let entities;
   try {
-    console.log('\n\n\n starting test:');
+    trace('\n starting test:');
     await utilClient.connect();
 
     // terminate all sessions before each test suite
@@ -67,7 +73,7 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
-    console.log(' > satisfiesRequirements');
+    trace('satisfiesRequirements');
     for (const requirement of allRequirements) {
       const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
       if (!met) {
@@ -80,18 +86,19 @@ export async function runUnifiedTest(
     // documents are specified, the test runner MUST create the collection with a "majority" write concern.
     // The test runner MUST use the internal MongoClient for these operations.
     if (unifiedSuite.initialData) {
-      console.log(' > initialData');
+      trace('initialData');
       for (const collData of unifiedSuite.initialData) {
         const db = utilClient.db(collData.databaseName);
         const collection = db.collection(collData.collectionName, {
           writeConcern: { w: 'majority' }
         });
-        console.log(' > listCollections');
+
+        trace('listCollections');
         const collectionList = await db
           .listCollections({ name: collData.collectionName })
           .toArray();
         if (collectionList.length !== 0) {
-          console.log(' > drop');
+          trace('drop');
           expect(await collection.drop()).to.be.true;
         }
       }
@@ -103,19 +110,19 @@ export async function runUnifiedTest(
         });
 
         if (!collData.documents?.length) {
-          console.log(' > createCollection');
+          trace('createCollection');
           await db.createCollection(collData.collectionName, {
             writeConcern: { w: 'majority' }
           });
           continue;
         }
 
-        console.log(' > insertMany');
+        trace('insertMany');
         await collection.insertMany(collData.documents);
       }
     }
 
-    console.log(' > createEntities');
+    trace('createEntities');
     entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
 
     // Workaround for SERVER-39704:
@@ -136,7 +143,7 @@ export async function runUnifiedTest(
     }
 
     for (const operation of test.operations) {
-      console.log(' > ', operation.name);
+      trace(operation.name);
       try {
         await executeOperationAndCheck(operation, entities, utilClient);
       } catch (err) {
