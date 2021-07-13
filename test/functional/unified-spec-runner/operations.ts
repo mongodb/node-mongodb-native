@@ -246,8 +246,9 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
+  const session = entities.getEntity('session', operation.arguments.session, false);
   const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
-  const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  const cursor = collection.find(filter, { session, sort, batchSize, limit, let: vars });
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
   // this.
