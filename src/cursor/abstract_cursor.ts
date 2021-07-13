@@ -676,7 +676,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
       cursor[kInitialized] = true;
 
       if (err || cursorIsDead(cursor)) {
-        return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
+        return cleanupCursor(cursor, undefined, () => callback(err, nextDocument(cursor)));
       }
 
       next(cursor, blocking, callback);
@@ -732,6 +732,12 @@ function cleanupCursor(
   const needsToEmitClosed =
     options?.needsToEmitClosed || (options?.needsToEmitClosed == null && cursor[kDocuments].length === 0);
 
+  if (error) {
+    if (cursor.loadBalanced && error instanceof MongoNetworkError) {
+      return completeCleanup();
+    }
+  }
+
   if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
     if (needsToEmitClosed) {
       cursor[kClosed] = true;
@@ -756,10 +762,6 @@ function cleanupCursor(
 
     cursor.emit(AbstractCursor.CLOSE);
     return callback();
-  }
-
-  if (cursor.loadBalanced && error && error instanceof MongoNetworkError) {
-    return completeCleanup();
   }
 
   cursor[kKilled] = true;
