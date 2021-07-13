@@ -87,7 +87,7 @@ export function executeOperation<
         owner = Symbol();
         session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
-        // TODO: Change this out for MongoExpiredSessionError
+        // TODO(3402): Change this out for MongoExpiredSessionError
         return cb(new MongoDriverError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
         return cb(new MongoDriverError('Snapshot reads require MongoDB 5.0 or later'));
