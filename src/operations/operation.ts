@@ -91,6 +91,10 @@ export abstract class AbstractOperation<TResult = any> {
   get canRetryWrite(): boolean {
     return true;
   }
+
+  get bypassPinningCheck(): boolean {
+    return false;
+  }
 }
 
 export function defineAspects(

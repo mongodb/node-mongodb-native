@@ -13,6 +13,7 @@ import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
+import { TxnState } from '../transactions';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -134,6 +135,10 @@ function executeWithServerSelection(
     );
 
     return;
+  }
+
+  if (session && session.isPinned && session.transaction.isCommitted && !operation.bypassPinningCheck) {
+    session.unpin();
   }
 
   const serverSelectionOptions = { session };
