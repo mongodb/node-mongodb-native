@@ -570,7 +570,7 @@ export abstract class AbstractCursor<
     }
 
     if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('Operation batchSize requires an integer');
+      throw new MongoInvalidArgumentError('Operation "batchSize" requires an integer');
     }
 
     this[kOptions].batchSize = value;
