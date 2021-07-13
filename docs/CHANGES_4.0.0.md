@@ -234,16 +234,16 @@ The automatic MD5 hashing has been removed from the upload family of functions.
 This makes the default Grid FS behavior compliant with systems that do not permit usage of MD5 hashing.
 The `disableMD5` option is no longer used and has no effect.
 
-If you still want to add an MD5 hash to your file upload here's a simple example that can be used with [any hashing algorithm](https://nodejs.org/dist/latest-v14.x/docs/api/crypto.html#crypto_crypto_createhash_algorithm_options) provided by Node.js:
+If you still want to add an MD5 hash to your file upload, here's a simple example that can be used with [any hashing algorithm](https://nodejs.org/dist/latest-v14.x/docs/api/crypto.html#crypto_crypto_createhash_algorithm_options) provided by Node.js:
 
 ```javascript
 const bucket = new GridFSBucket(db);
 
 // can be whatever algorithm is supported by your local openssl
 const hash = crypto.createHash('md5');
-hash.setEncoding('hex'); // We want a hex string in the end
+hash.setEncoding('hex'); // we want a hex string in the end
 
-const _id = new ObjectId(); // We could also use file name to do the update lookup
+const _id = new ObjectId(); // we could also use file name to do the update lookup
 
 const uploadStream = fs
   .createReadStream('./test.txt')
@@ -254,7 +254,7 @@ const md5 = await new Promise((resolve, reject) => {
   uploadStream
     .once('error', error => reject(error))
     .once('finish', () => {
-      hash.end(); // Must call hash.end() otherwise hash.read() will be `null`
+      hash.end(); // must call hash.end() otherwise hash.read() will be `null`
       resolve(hash.read());
     });
 });
