@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.6...v4.0.0) (2021-07-13)
+
+
+### Features
+
+* **NODE-3095:** add timeseries options to db.createCollection ([#2878](https://github.com/mongodb/node-mongodb-native/issues/2878)) ([c145c91](https://github.com/mongodb/node-mongodb-native/commit/c145c91dfa060d819406a599e21d573782291ad4))
+* **NODE-3392:** enable snapshot reads on secondaries ([#2897](https://github.com/mongodb/node-mongodb-native/issues/2897)) ([523e05c](https://github.com/mongodb/node-mongodb-native/commit/523e05c3684dcf98c8bbfa4f0631092debd8a85c))
+* **NODE-3403:** define MongoRuntimeError children ([#2894](https://github.com/mongodb/node-mongodb-native/issues/2894)) ([cb0db49](https://github.com/mongodb/node-mongodb-native/commit/cb0db494859db6d8f62152cf4bac5e256b9bc650))
+* **NODE-3410:** added MongoRuntimeError ([#2892](https://github.com/mongodb/node-mongodb-native/issues/2892)) ([ee903cb](https://github.com/mongodb/node-mongodb-native/commit/ee903cb79f341c6052f058f48a61b6ed2e566f50))
+
+
+### Bug Fixes
+
+* **NODE-1797:** error when ChangeStream used as iterator and emitter concurrently ([#2871](https://github.com/mongodb/node-mongodb-native/issues/2871)) ([e0b3afe](https://github.com/mongodb/node-mongodb-native/commit/e0b3afe8d2849a0e362a067e25f693d6a4353a12))
+* **NODE-1843:** bulk operations ignoring provided sessions ([#2868](https://github.com/mongodb/node-mongodb-native/issues/2868)) ([70810d1](https://github.com/mongodb/node-mongodb-native/commit/70810d191c625447eb2d5324f627c36009a762a7))
+* **NODE-3063:** fix custom csfle test script ([#2884](https://github.com/mongodb/node-mongodb-native/issues/2884)) ([d73c80c](https://github.com/mongodb/node-mongodb-native/commit/d73c80c3c69a8cd69af506e747eb54f98b76fe92))
+* **NODE-3279:** use "hello" for monitoring if supported ([#2895](https://github.com/mongodb/node-mongodb-native/issues/2895)) ([5a8842a](https://github.com/mongodb/node-mongodb-native/commit/5a8842ad9de2ce6a89ecba985ff6a2a005205afc))
+* **NODE-3386:** listCollections result type definition ([#2866](https://github.com/mongodb/node-mongodb-native/issues/2866)) ([c12979a](https://github.com/mongodb/node-mongodb-native/commit/c12979a9c0c1615a3808db41bac64a19449d42d4))
+* **NODE-3413:** accept tls=false in mongodb+srv connection strings ([#2886](https://github.com/mongodb/node-mongodb-native/issues/2886)) ([526c73f](https://github.com/mongodb/node-mongodb-native/commit/526c73f3bab5fae734f4870668083b253378a10a))
+* **NODE-3416:** make change stream generic default to Document ([#2882](https://github.com/mongodb/node-mongodb-native/issues/2882)) ([3d490dc](https://github.com/mongodb/node-mongodb-native/commit/3d490dcf854a18bb94a9bd94e9a72d155ea414f4))
+* **NODE-3430:** watch method types on MongoClient and Db ([#2900](https://github.com/mongodb/node-mongodb-native/issues/2900)) ([17cc291](https://github.com/mongodb/node-mongodb-native/commit/17cc2918767acd41eaec8b602d82fc0a909e5950))
+
 ## [4.0.0-beta.6](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2021-07-01)
 
 
