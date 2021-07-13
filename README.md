@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md)!**
+**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md)!**
 
 ## Quick Links
 
