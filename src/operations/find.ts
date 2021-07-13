@@ -92,7 +92,7 @@ export class FindOperation extends CommandOperation<Document> {
       const objectSize = filter[0] | (filter[1] << 8) | (filter[2] << 16) | (filter[3] << 24);
       if (objectSize !== filter.length) {
         throw new MongoInvalidArgumentError(
-          `query filter raw message size does not match message header size [${filter.length}] != [${objectSize}]`
+          `Query filter raw message size does not match message header size [${filter.length}] != [${objectSize}]`
         );
       }
     }
