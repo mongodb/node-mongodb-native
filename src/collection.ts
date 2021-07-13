@@ -1398,9 +1398,6 @@ export class Collection<TSchema extends Document = Document> {
     pipeline: Document[] = [],
     options: ChangeStreamOptions = {}
   ): ChangeStream<TLocal> {
-    pipeline = pipeline ?? [];
-    options = options ?? {};
-
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
