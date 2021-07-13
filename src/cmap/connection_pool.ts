@@ -45,6 +45,8 @@ const kCancelled = Symbol('cancelled');
 const kMetrics = Symbol('metrics');
 /** @internal */
 const kCheckedOut = Symbol('checkedOut');
+/** @internal */
+const kProcessingWaitQueue = Symbol('processingWaitQueue');
 
 /** @public */
 export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {
@@ -123,6 +125,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kMetrics]: ConnectionPoolMetrics;
   /** @internal */
   [kCheckedOut]: number;
+  /** @internal */
+  [kProcessingWaitQueue]: boolean;
 
   /**
    * Emitted when the connection pool is created.
@@ -209,6 +213,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kWaitQueue] = new Denque();
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kCheckedOut] = 0;
+    this[kProcessingWaitQueue] = false;
 
     process.nextTick(() => {
       this.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
@@ -573,10 +578,11 @@ function destroyConnection(pool: ConnectionPool, connection: Connection, reason:
 }
 
 function processWaitQueue(pool: ConnectionPool) {
-  if (pool.closed) {
+  if (pool.closed || pool[kProcessingWaitQueue]) {
     return;
   }
 
+  pool[kProcessingWaitQueue] = true;
   while (pool.waitQueueSize) {
     const waitQueueMember = pool[kWaitQueue].peekFront();
     if (!waitQueueMember) {
@@ -610,11 +616,11 @@ function processWaitQueue(pool: ConnectionPool) {
       }
 
       pool[kWaitQueue].shift();
-      return waitQueueMember.callback(undefined, connection);
+      waitQueueMember.callback(undefined, connection);
+    } else {
+      const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
+      destroyConnection(pool, connection, reason);
     }
-
-    const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
-    destroyConnection(pool, connection, reason);
   }
 
   const maxPoolSize = pool.options.maxPoolSize;
@@ -626,6 +632,7 @@ function processWaitQueue(pool: ConnectionPool) {
           pool[kConnections].push(connection);
         }
 
+        pool[kProcessingWaitQueue] = false;
         return;
       }
 
@@ -645,9 +652,11 @@ function processWaitQueue(pool: ConnectionPool) {
         clearTimeout(waitQueueMember.timer);
       }
       waitQueueMember.callback(err, connection);
+      pool[kProcessingWaitQueue] = false;
+      process.nextTick(() => processWaitQueue(pool));
     });
-
-    return;
+  } else {
+    pool[kProcessingWaitQueue] = false;
   }
 }
 
