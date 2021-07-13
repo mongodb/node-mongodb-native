@@ -43,6 +43,8 @@ class TestConfiguration {
     this.clientSideEncryption = context.clientSideEncryption;
     this.serverApi = context.serverApi;
     this.parameters = undefined;
+    this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
+    this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
     this.options = {
       hosts,
       hostAddresses,
@@ -62,6 +64,10 @@ class TestConfiguration {
 
   writeConcern() {
     return { writeConcern: { w: 1 } };
+  }
+
+  get isLoadBalanced() {
+    return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
   }
 
   get host() {
@@ -205,6 +211,10 @@ class TestConfiguration {
 
     if (options.username) url.username = options.username;
     if (options.password) url.password = options.password;
+
+    if (this.isLoadBalanced) {
+      url.searchParams.append('loadBalanced', true);
+    }
 
     if (options.username || options.password) {
       if (options.authMechanism) {
