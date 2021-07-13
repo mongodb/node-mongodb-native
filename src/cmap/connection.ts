@@ -115,7 +115,7 @@ export interface GetMoreOptions extends CommandOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions {
+  StreamDescriptionOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -390,18 +390,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      // We need to unpin any read or write commands that happen outside of a pinned
-      // transaction, so we check if we have a pinned transaction that is no longer
-      // active, and unpin for all except start or commit.
-      if (
-        !session.transaction.isActive &&
-        session.transaction.isPinned &&
-        !finalCmd.startTransaction &&
-        !finalCmd.commitTransaction
-      ) {
-        session.transaction.unpinServer();
-      }
-
       const err = applySession(session, finalCmd, options as CommandOptions);
       if (err) {
         return callback(err);
@@ -439,27 +427,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const commandResponseHandler = inTransaction
       ? (err?: AnyError, ...args: Document[]) => {
-          // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
-          if (
-            err &&
-            err instanceof MongoNetworkError &&
-            !err.hasErrorLabel('TransientTransactionError')
-          ) {
-            err.addErrorLabel('TransientTransactionError');
-          }
-
-          if (
-            session &&
-            !cmd.commitTransaction &&
-            err &&
-            err instanceof MongoError &&
-            err.hasErrorLabel('TransientTransactionError')
-          ) {
-            session.transaction.unpinServer();
-          }
-
-          return callback(err, ...args);
+        // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
+        if (
+          err &&
+          err instanceof MongoNetworkError &&
+          !err.hasErrorLabel('TransientTransactionError')
+        ) {
+          err.addErrorLabel('TransientTransactionError');
         }
+
+        return callback(err, ...args);
+      }
       : callback;
 
     try {

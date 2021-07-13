@@ -316,7 +316,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           return;
         }
 
-        session.pinConnection(checkedOut);
+        session.pin(checkedOut);
         this.command(ns, cmd, finalOptions, callback as Callback<Document>);
       });
 
@@ -593,14 +593,10 @@ function makeOperationHandler(
             }
           }
         }
+      }
 
-        if (session && session.inTransaction() && err.hasErrorLabel('TransientTransactionError')) {
-          if (session.loadBalanced) {
-            maybeClearPinnedConnection(session, { force: true });
-          } else {
-            session.transaction.unpinServer();
-          }
-        }
+      if (session && session.inTransaction() && err.hasErrorLabel('TransientTransactionError')) {
+        session.unpin({ force: true });
       }
     }
 

@@ -208,16 +208,29 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /** @internal */
-  pinConnection(conn: Connection): void {
+  pin(conn: Connection): void {
     if (this[kPinnedConnection]) {
       throw TypeError('Cant pin multiple connections to the same session');
     }
 
+    this[kPinnedConnection] = conn;
     conn.emit(
       Connection.PINNED,
       this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
     );
-    this[kPinnedConnection] = conn;
+  }
+
+  /** @internal */
+  unpin(options?: { force?: boolean, error?: AnyError }) {
+    if (this.loadBalanced) {
+      return maybeClearPinnedConnection(this, options);
+    }
+
+    this.transaction.unpinServer();
+  }
+
+  get isPinned(): boolean {
+    return this.loadBalanced ? !!this[kPinnedConnection] : (this.inTransaction() && this.transaction.isPinned);
   }
 
   /**
@@ -332,6 +345,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       throw new MongoDriverError('Transaction already in progress');
     }
 
+    if (this.isPinned && this.transaction.isCommitted) {
+      this.unpin();
+    }
+
     const topologyMaxWireVersion = maxWireVersion(this.topology);
     if (
       isSharded(this.topology) &&
@@ -384,6 +401,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   abortTransaction(): Promise<Document>;
   abortTransaction(callback: Callback<Document>): void;
   abortTransaction(callback?: Callback<Document>): Promise<Document> | void {
+    // if (this.isPinned) this.unpin();
     return maybePromise(callback, cb => endTransaction(this, 'abortTransaction', cb));
   }
 
@@ -439,18 +457,19 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
-export function maybeClearPinnedConnection(session: ClientSession, options: EndSessionOptions) {
+export function maybeClearPinnedConnection(session: ClientSession, options?: EndSessionOptions) {
   // unpin a connection if it has been pinned
   const conn = session[kPinnedConnection];
 
   // NOTE: the spec talks about what to do on a network error only, but the tests seem to
   //       to validate that we don't unpin on _all_ errors?
-  if (conn && (options.error == null || options.force)) {
+  if (conn && (options?.error == null || options?.force)) {
     const servers = Array.from(session.topology.s.servers.values());
     if (servers.length === 0) {
       // This can happen if the client is closed when the connection is still pinned
       // NOTE: we don't usually do this, we could instead throw an error?
       conn.destroy();
+
       session[kPinnedConnection] = undefined;
       return;
     }
@@ -463,6 +482,7 @@ export function maybeClearPinnedConnection(session: ClientSession, options: EndS
         ? ConnectionPoolMetrics.TXN
         : ConnectionPoolMetrics.CURSOR
     );
+
     session[kPinnedConnection] = undefined;
   }
 }
@@ -670,18 +690,10 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           e.addErrorLabel('UnknownTransactionCommitResult');
 
           // per txns spec, must unpin session in this case
-          if (session.loadBalanced) {
-            maybeClearPinnedConnection(session, { error: e });
-          } else {
-            session.transaction.unpinServer();
-          }
+          session.unpin({ error: e });
         }
       } else if (e.hasErrorLabel('TransientTransactionError')) {
-        if (session.loadBalanced) {
-          maybeClearPinnedConnection(session, { error: e });
-        } else {
-          session.transaction.unpinServer();
-        }
+        session.unpin({ error: e });
       }
     }
 
@@ -698,18 +710,20 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     session.topology,
     new RunAdminCommandOperation(undefined, command, {
       session,
-      readPreference: ReadPreference.primary
+      readPreference: ReadPreference.primary,
+      bypassPinningCheck: true
     }),
     (err, reply) => {
+      if (command.abortTransaction) {
+        // always unpin on abort regardless of command outcome
+        session.unpin();
+      }
+
       if (err && isRetryableError(err as MongoError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
-          if (session.loadBalanced) {
-            maybeClearPinnedConnection(session, { force: true });
-          } else {
-            session.transaction.unpinServer();
-          }
+          session.unpin({ force: true });
 
           command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
             w: 'majority'
@@ -720,7 +734,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           session.topology,
           new RunAdminCommandOperation(undefined, command, {
             session,
-            readPreference: ReadPreference.primary
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
           }),
           (_err, _reply) => commandHandler(_err as MongoError, _reply)
         );
