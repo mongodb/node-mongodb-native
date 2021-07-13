@@ -10,7 +10,15 @@ const SKIP = [
   'change streams pin to a connection'
 ];
 
-describe('Load Balancer Spec Unified Tests', function () {
+require('../functional/retryable_reads.test');
+require('../functional/retryable_writes.test');
+require('../functional/uri_options_spec.test');
+require('../functional/change_stream_spec.test');
+require('../functional/versioned-api.test');
+require('../unit/core/mongodb_srv.test');
+require('../unit/sdam/server_selection/spec.test');
+
+describe.skip('Load Balancer Spec Unified Tests', function () {
   this.timeout(10000);
   for (const loadBalancerTest of loadSpecTests('load-balancers')) {
     expect(loadBalancerTest).to.exist;
@@ -29,11 +37,3 @@ describe('Load Balancer Spec Unified Tests', function () {
     });
   }
 });
-
-// require('../functional/retryable_reads.test');
-// require('../functional/retryable_writes.test');
-// require('../functional/uri_options_spec.test');
-// require('../functional/change_stream_spec.test');
-// require('../functional/versioned-api.test');
-// require('../unit/core/mongodb_srv.test');
-// require('../unit/sdam/server_selection/spec.test');

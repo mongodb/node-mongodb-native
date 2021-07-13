@@ -193,10 +193,15 @@ function prepareDatabaseForSuite(suite, context) {
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
-      if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
+      if (
+        err.message.match(/no such (cmd|command)/) ||
+        err.message.match(/Failed to kill on some hosts/) ||
+        err.code === 11601
+      ) {
         return;
       }
 
+      console.log('err', err);
       throw err;
     });
 
