@@ -281,8 +281,6 @@ operations.set('insertOne', async ({ entities, operation }) => {
 
 operations.set('insertMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  // TODO: remove comment if all tests pass
-  // PREVIOUSLY:  ordered: operation.arguments.ordered ?? true
   const { documents, ...opts } = operation.arguments;
   return collection.insertMany(documents, opts);
 });
