@@ -19,7 +19,6 @@ import {
 import {
   AnyError,
   MongoDriverError,
-  MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError,
@@ -115,7 +114,7 @@ export interface GetMoreOptions extends CommandOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-  StreamDescriptionOptions {
+    StreamDescriptionOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -427,17 +426,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const commandResponseHandler = inTransaction
       ? (err?: AnyError, ...args: Document[]) => {
-        // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
-        if (
-          err &&
-          err instanceof MongoNetworkError &&
-          !err.hasErrorLabel('TransientTransactionError')
-        ) {
-          err.addErrorLabel('TransientTransactionError');
-        }
+          // We need to add a TransientTransactionError errorLabel, as stated in the transaction spec.
+          if (
+            err &&
+            err instanceof MongoNetworkError &&
+            !err.hasErrorLabel('TransientTransactionError')
+          ) {
+            err.addErrorLabel('TransientTransactionError');
+          }
 
-        return callback(err, ...args);
-      }
+          return callback(err, ...args);
+        }
       : callback;
 
     try {

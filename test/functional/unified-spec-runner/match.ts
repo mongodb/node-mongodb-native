@@ -279,7 +279,9 @@ export function matchesEvents(
     const actualNames = actual.map(a => a.constructor.name);
     const expectedNames = expected.map(e => Object.keys(e)[0]);
     expect.fail(
-      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(actualNames)}`
+      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+        actualNames
+      )}`
     );
   }
 

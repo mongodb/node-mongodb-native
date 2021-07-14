@@ -51,7 +51,7 @@ import type {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent
 } from './events';
-import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
 import type { AutoEncrypter } from '../deps';
 import type { ServerApi } from '../mongo_client';

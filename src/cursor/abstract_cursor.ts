@@ -92,7 +92,7 @@ export type AbstractCursorEvents = {
 export abstract class AbstractCursor<
   TSchema = any,
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  > extends TypedEventEmitter<CursorEvents> {
+> extends TypedEventEmitter<CursorEvents> {
   /** @internal */
   [kId]?: Long;
   /** @internal */
@@ -721,7 +721,7 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
 
 function cleanupCursor(
   cursor: AbstractCursor,
-  options: { error?: AnyError | undefined, needsToEmitClosed?: boolean } | undefined,
+  options: { error?: AnyError | undefined; needsToEmitClosed?: boolean } | undefined,
   callback: Callback
 ): void {
   const cursorId = cursor[kId];
@@ -730,7 +730,8 @@ function cleanupCursor(
   const session = cursor[kSession];
   const error = options?.error;
   const needsToEmitClosed =
-    options?.needsToEmitClosed || (options?.needsToEmitClosed == null && cursor[kDocuments].length === 0);
+    options?.needsToEmitClosed ||
+    (options?.needsToEmitClosed == null && cursor[kDocuments].length === 0);
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {

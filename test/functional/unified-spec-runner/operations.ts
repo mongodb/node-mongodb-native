@@ -181,7 +181,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
     return count + pool.currentCheckedOutCount;
   }, 0);
 
-  await Promise.resolve();  // wait one tick
+  await Promise.resolve(); // wait one tick
   expect(checkedOutConnections).to.equal(operation.arguments.connections);
 });
 

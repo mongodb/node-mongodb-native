@@ -16,7 +16,7 @@ interface MongoDBMochaTestContext extends Mocha.Context {
   configuration: TestConfiguration;
 }
 
-export function trace(message: string) {
+export function trace(message: string): void {
   if (process.env.UTR_TRACE) {
     console.log(` > ${message}`);
   }

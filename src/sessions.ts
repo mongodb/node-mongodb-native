@@ -221,7 +221,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /** @internal */
-  unpin(options?: { force?: boolean, error?: AnyError }) {
+  unpin(options?: { force?: boolean; error?: AnyError }): void {
     if (this.loadBalanced) {
       return maybeClearPinnedConnection(this, options);
     }
@@ -230,7 +230,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   get isPinned(): boolean {
-    return this.loadBalanced ? !!this[kPinnedConnection] : (this.inTransaction() && this.transaction.isPinned);
+    return this.loadBalanced
+      ? !!this[kPinnedConnection]
+      : this.inTransaction() && this.transaction.isPinned;
   }
 
   /**
@@ -457,7 +459,10 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
-export function maybeClearPinnedConnection(session: ClientSession, options?: EndSessionOptions) {
+export function maybeClearPinnedConnection(
+  session: ClientSession,
+  options?: EndSessionOptions
+): void {
   // unpin a connection if it has been pinned
   const conn = session[kPinnedConnection];
 
