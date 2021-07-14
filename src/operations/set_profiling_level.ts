@@ -53,7 +53,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     if (!levelValues.has(level)) {
       return callback(
         new MongoInvalidArgumentError(
-          `Profiling level ust be one of ${enumToString(ProfilingLevel)}`
+          `Profiling level must be one of "${enumToString(ProfilingLevel)}"`
         )
       );
     }
