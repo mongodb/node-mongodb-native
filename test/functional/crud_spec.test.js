@@ -6,10 +6,6 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const gatherTestSuites = require('./spec-runner').gatherTestSuites;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-
 const { loadSpecTests } = require('../spec/index');
 const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
