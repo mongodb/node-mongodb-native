@@ -1,12 +1,25 @@
 import { expect } from 'chai';
+import { inspect } from 'util';
 import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { CommandEvent, EntitiesMap } from './entities';
-import { ExpectedError, ExpectedEvent } from './schema';
+import {
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionReadyEvent,
+  ConnectionClosedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckedInEvent,
+  ConnectionPoolClearedEvent
+} from '../../../src/cmap/connection_pool_events';
+import { CommandEvent, CmapEvent, EntitiesMap } from './entities';
+import { ExpectedCmapEvent, ExpectedCommandEvent, ExpectedError } from './schema';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -235,32 +248,70 @@ export function specialCheck(
   }
 }
 
+// CMAP events where the payload does not matter.
+const EMPTY_CMAP_EVENTS = {
+  poolCreatedEvent: ConnectionPoolCreatedEvent,
+  poolClosedEvent: ConnectionPoolClosedEvent,
+  connectionCreatedEvent: ConnectionCreatedEvent,
+  connectionReadyEvent: ConnectionReadyEvent,
+  connectionCheckOutStartedEvent: ConnectionCheckOutStartedEvent,
+  connectionCheckOutFailedEvent: ConnectionCheckOutFailedEvent,
+  connectionCheckedOutEvent: ConnectionCheckedOutEvent,
+  connectionCheckedInEvent: ConnectionCheckedInEvent
+};
+
+function validEmptyCmapEvent(
+  expected: ExpectedCommandEvent | ExpectedCmapEvent,
+  actual: CommandEvent | CmapEvent
+) {
+  return Object.values(EMPTY_CMAP_EVENTS).some(value => {
+    return actual instanceof value;
+  });
+}
+
 export function matchesEvents(
-  expected: ExpectedEvent[],
-  actual: CommandEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+  actual: (CommandEvent & CmapEvent)[],
   entities: EntitiesMap
 ): void {
-  // TODO: NodeJS Driver has extra events
-  // expect(actual).to.have.lengthOf(expected.length);
+  if (actual.length !== expected.length) {
+    const actualNames = actual.map(a => a.constructor.name);
+    const expectedNames = expected.map(e => Object.keys(e)[0]);
+    expect.fail(
+      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+        actualNames
+      )}`
+    );
+  }
 
   for (const [index, actualEvent] of actual.entries()) {
     const expectedEvent = expected[index];
 
-    if (expectedEvent.commandStartedEvent && actualEvent instanceof CommandStartedEvent) {
+    if (expectedEvent.commandStartedEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandStartedEvent);
       resultCheck(actualEvent, expectedEvent.commandStartedEvent, entities, [
         `events[${index}].commandStartedEvent`
       ]);
-    } else if (
-      expectedEvent.commandSucceededEvent &&
-      actualEvent instanceof CommandSucceededEvent
-    ) {
+    } else if (expectedEvent.commandSucceededEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandSucceededEvent);
       resultCheck(actualEvent, expectedEvent.commandSucceededEvent, entities, [
         `events[${index}].commandSucceededEvent`
       ]);
-    } else if (expectedEvent.commandFailedEvent && actualEvent instanceof CommandFailedEvent) {
+    } else if (expectedEvent.commandFailedEvent) {
+      expect(actualEvent).to.be.instanceOf(CommandFailedEvent);
       expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
-    } else {
-      expect.fail(`Events must be one of the known types, got ${actualEvent}`);
+    } else if (expectedEvent.connectionClosedEvent) {
+      expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
+      if (expectedEvent.connectionClosedEvent.hasServiceId) {
+        expect(actualEvent).property('serviceId').to.exist;
+      }
+    } else if (expectedEvent.poolClearedEvent) {
+      expect(actualEvent).to.be.instanceOf(ConnectionPoolClearedEvent);
+      if (expectedEvent.poolClearedEvent.hasServiceId) {
+        expect(actualEvent).property('serviceId').to.exist;
+      }
+    } else if (!validEmptyCmapEvent(expectedEvent, actualEvent)) {
+      expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
     }
   }
 }

@@ -121,9 +121,9 @@ operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operat
 
 operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments.client);
-  expect(client.observedEvents.includes('commandStarted')).to.be.true;
+  expect(client.observedCommandEvents.includes('commandStarted')).to.be.true;
 
-  const startedEvents = client.events.filter(
+  const startedEvents = client.commandEvents.filter(
     ev => ev instanceof CommandStartedEvent
   ) as CommandStartedEvent[];
 
@@ -173,9 +173,32 @@ operations.set('assertSessionTransactionState', async ({ entities, operation }) 
   expect(session.transaction.state).to.equal(driverTransactionStateName);
 });
 
+operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.arguments.client);
+  const servers = Array.from(client.topology.s.servers.values());
+  const checkedOutConnections = servers.reduce((count, server) => {
+    const pool = server.s.pool;
+    return count + pool.currentCheckedOutCount;
+  }, 0);
+  expect(checkedOutConnections).to.equal(operation.arguments.connections);
+});
+
 operations.set('bulkWrite', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   return collection.bulkWrite(operation.arguments.requests);
+});
+
+// The entity exists for the name but can potentially have the wrong
+// type (stream/cursor) which will also throw an exception even when
+// telling getEntity() to ignore checking existence.
+operations.set('close', async ({ entities, operation }) => {
+  try {
+    const cursor = entities.getEntity('cursor', operation.object);
+    await cursor.close();
+  } catch (e) {
+    const changeStream = entities.getEntity('stream', operation.object);
+    await changeStream.close();
+  }
 });
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
@@ -217,6 +240,17 @@ operations.set('createCollection', async ({ entities, operation }) => {
     session: entities.getEntity('session', session, false),
     ...opts
   });
+});
+
+operations.set('createFindCursor', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
+  const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  // The spec dictates that we create the cursor and force the find command
+  // to execute, but don't move the cursor forward. hasNext() accomplishes
+  // this.
+  await cursor.hasNext();
+  return cursor;
 });
 
 operations.set('createIndex', async ({ entities, operation }) => {
@@ -294,17 +328,33 @@ operations.set('insertMany', async ({ entities, operation }) => {
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  const changeStream = entities.getEntity('stream', operation.object);
-  // Either change or error promise will finish
-  return Promise.race([
-    changeStream.eventCollector.waitAndShiftEvent('change'),
-    changeStream.eventCollector.waitAndShiftEvent('error')
-  ]);
+  try {
+    const changeStream = entities.getEntity('stream', operation.object);
+    // Either change or error promise will finish
+    return Promise.race([
+      changeStream.eventCollector.waitAndShiftEvent('change'),
+      changeStream.eventCollector.waitAndShiftEvent('error')
+    ]);
+  } catch (e) {
+    const findCursor = entities.getEntity('cursor', operation.object);
+    return await findCursor.next();
+  }
+});
+
+operations.set('listCollections', async ({ entities, operation }) => {
+  const db = entities.getEntity('db', operation.object);
+  const { filter, ...opts } = operation.arguments;
+  return db.listCollections(filter, opts).toArray();
 });
 
 operations.set('listDatabases', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.object);
   return client.db().admin().listDatabases();
+});
+
+operations.set('listIndexes', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.listIndexes(operation.arguments).toArray();
 });
 
 operations.set('replaceOne', async ({ entities, operation }) => {
@@ -441,12 +491,15 @@ export async function executeOperationAndCheck(
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
       return;
-    } else {
+    } else if (!operation.ignoreResultAndError) {
       throw error;
     }
   }
 
   // We check the positive outcome here so the try-catch above doesn't catch our chai assertions
+  if (operation.ignoreResultAndError) {
+    return;
+  }
 
   if (operation.expectError) {
     expect.fail(`Operation ${operation.name} succeeded but was not supposed to`);
