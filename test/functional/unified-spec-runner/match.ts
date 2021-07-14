@@ -264,9 +264,8 @@ function validEmptyCmapEvent(
   expected: ExpectedCommandEvent | ExpectedCmapEvent,
   actual: CommandEvent | CmapEvent
 ) {
-  return Object.keys(EMPTY_CMAP_EVENTS).some(key => {
-    const eventType = EMPTY_CMAP_EVENTS[key];
-    return actual instanceof eventType;
+  return Object.values(EMPTY_CMAP_EVENTS).some(value => {
+    return actual instanceof value;
   });
 }
 
@@ -298,8 +297,6 @@ export function matchesEvents(
     } else if (expectedEvent.commandFailedEvent) {
       expect(actualEvent).to.be.instanceOf(CommandFailedEvent);
       expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
-    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
-      // This should just always pass since the event must exist and match the type.
     } else if (expectedEvent.connectionClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
       if (expectedEvent.connectionClosedEvent.hasServiceId) {
@@ -310,6 +307,8 @@ export function matchesEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
+    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
+      // This should just always pass since the event must exist and match the type.
     } else {
       expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
     }
