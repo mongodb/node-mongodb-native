@@ -43,7 +43,7 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
       // TODO(NODE-3402): Decide on errors to put here
       // Would this justify a MongoValidationError?
       if (doc.ok === 0) return callback(new MongoDriverError('Error with validate command'));
-      if (doc.result != null && doc.result.constructor !== String)
+      if (doc.result != null && typeof doc.result !== 'string')
         return callback(new MongoDriverError('Error with validation data'));
       if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
         return callback(new MongoDriverError('Error: invalid collection ' + collectionName));

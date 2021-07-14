@@ -392,25 +392,15 @@ function handleStartOption(
   if (options && options.start != null) {
     if (options.start > doc.length) {
       throw new MongoInvalidArgumentError(
-        'Stream start (' +
-          options.start +
-          ') must not be ' +
-          'more than the length of the file (' +
-          doc.length +
-          ')'
+        `Stream start (${options.start}) must not be more than the length of the file (${doc.length})`
       );
     }
     if (options.start < 0) {
-      throw new MongoDriverError('Stream start (' + options.start + ') must not be ' + 'negative');
+      throw new MongoDriverError(`Stream start (${options.start}) must not be negative`);
     }
     if (options.end != null && options.end < options.start) {
       throw new MongoInvalidArgumentError(
-        'Stream start (' +
-          options.start +
-          ') must not be ' +
-          'greater than stream end (' +
-          options.end +
-          ')'
+        `Stream start (${options.start}) must not be greater than stream end (${options.end})`
       );
     }
 
@@ -431,18 +421,11 @@ function handleEndOption(
   if (options && options.end != null) {
     if (options.end > doc.length) {
       throw new MongoInvalidArgumentError(
-        'Stream end (' +
-          options.end +
-          ') must not be ' +
-          'more than the length of the file (' +
-          doc.length +
-          ')'
+        `Stream end (${options.end}) must not be more than the length of the file (${doc.length})`
       );
     }
     if (options.start == null || options.start < 0) {
-      throw new MongoInvalidArgumentError(
-        'Stream end (' + options.end + ') must not be ' + 'negative'
-      );
+      throw new MongoInvalidArgumentError(`Stream end (${options.end}) must not be negative`);
     }
 
     const start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;

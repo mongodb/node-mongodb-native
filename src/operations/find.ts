@@ -108,7 +108,7 @@ export class FindOperation extends CommandOperation<Document> {
     const options = this.options;
     if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
       callback(
-        new MongoCompatibilityError('The `allowDiskUse` option is not supported on MongoDB < 3.2')
+        new MongoCompatibilityError('Option "allowDiskUse" is not supported on MongoDB < 3.2')
       );
       return;
     }

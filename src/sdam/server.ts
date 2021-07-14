@@ -279,7 +279,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback(new MongoCompatibilityError(`server ${this.name} does not support collation`));
+      callback(new MongoCompatibilityError(`Server ${this.name} does not support collation`));
       return;
     }
 

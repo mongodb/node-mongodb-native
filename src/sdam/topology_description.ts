@@ -432,7 +432,7 @@ function updateRsWithPrimaryFromMember(
 ): TopologyType {
   if (setName == null) {
     // FIXME(NODE-3402): Consider replacing with MongoCompatibilityError or making
-    // error message more verbose to indicate that the incompatibility is occuring
+    // error message more verbose to indicate that the incompatibility is occurring
     // with the topology rather than the current server version
     throw new MongoCompatibilityError(
       'Argument "setName" is required if connected to a replica set'

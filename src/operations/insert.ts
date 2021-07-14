@@ -100,7 +100,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     super(options);
 
     if (!Array.isArray(docs)) {
-      throw new MongoInvalidArgumentError('Parameter "docs" must be an array of documents');
+      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
     }
 
     this.options = options;

@@ -266,7 +266,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
       throw new MongoInvalidArgumentError(
-        'parent provided to ChangeStream constructor should be an instance of Collection, Db, or MongoClient'
+        'Parent provided to ChangeStream constructor must an instance of Collection, Db, or MongoClient'
       );
     }
 
