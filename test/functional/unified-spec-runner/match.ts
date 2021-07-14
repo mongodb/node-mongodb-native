@@ -275,10 +275,13 @@ export function matchesEvents(
   entities: EntitiesMap
 ): void {
   if (actual.length !== expected.length) {
-    // const actualNames = actual.map(a => a.constructor.name);
-    // const expectedNames = expected.map(e => Object.keys(e)[0]);
-    // TODO: NodeJS Driver has extra events
-    // expect(actual).to.have.lengthOf(expected.length, `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(actualNames)}`);
+    const actualNames = actual.map(a => a.constructor.name);
+    const expectedNames = expected.map(e => Object.keys(e)[0]);
+    expect.fail(
+      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+        actualNames
+      )}`
+    );
   }
 
   for (const [index, actualEvent] of actual.entries()) {
