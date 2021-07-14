@@ -217,7 +217,8 @@ describe('Sessions - functional', function () {
             'Server returns an error on listCollections with snapshot',
             'Server returns an error on listDatabases with snapshot',
             'Server returns an error on listIndexes with snapshot',
-            'Server returns an error on runCommand with snapshot'
+            'Server returns an error on runCommand with snapshot',
+            'Server returns an error on findOneAndUpdate with snapshot'
           ]
         };
         const testsToSkip = skipTestMap[sessionTests.description] || [];

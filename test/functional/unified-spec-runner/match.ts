@@ -310,9 +310,7 @@ export function matchesEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
-    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
-      // This should just always pass since the event must exist and match the type.
-    } else {
+    } else if (!validEmptyCmapEvent(expectedEvent, actualEvent)) {
       expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
     }
   }
