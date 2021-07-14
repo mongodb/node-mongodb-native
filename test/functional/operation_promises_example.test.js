@@ -2,7 +2,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-const { enumFromString } = require('../../src/utils');
+const { enumToString } = require('../../src/utils');
 const { ProfilingLevel } = require('../../src/operations/set_profiling_level');
 const { Code, ReturnDocument } = require('../../src');
 const { expect } = require('chai');
@@ -3462,7 +3462,7 @@ describe('Operation (Promises)', function () {
           .catch(function (err) {
             test.ok(err instanceof Error);
             test.equal(
-              `Profiling level must be one of "${enumFromString(ProfilingLevel)}"`,
+              `Profiling level must be one of "${enumToString(ProfilingLevel)}"`,
               err.message
             );
             return client.close();
