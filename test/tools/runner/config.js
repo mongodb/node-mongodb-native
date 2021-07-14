@@ -62,7 +62,7 @@ class TestConfiguration {
     }
     if (context.serverlessCredentials) {
       const { username, password } = context.serverlessCredentials;
-      this.options.auth = { username, password };
+      this.options.auth = { username, password, authSource: 'admin' };
     }
   }
 

@@ -108,7 +108,8 @@ export class UnifiedMongoClient extends MongoClient {
     this.failPoints = [];
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
-      'configureFailPoint'
+      'configureFailPoint',
+      'ping'
     ];
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
@@ -314,7 +315,9 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = config.url({ useMultipleMongoses });
+        const uri = process.env.SERVERLESS
+          ? process.env.MONGODB_URI
+          : config.url({ useMultipleMongoses });
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);

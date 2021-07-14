@@ -201,6 +201,9 @@ function prepareDatabaseForSuite(suite, context) {
       if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
         return;
       }
+      if (process.env.SERVERLESS) {
+        return;
+      }
 
       throw err;
     });
