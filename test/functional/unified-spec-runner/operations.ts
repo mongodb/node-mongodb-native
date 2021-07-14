@@ -4,14 +4,13 @@ import { Collection, Db, GridFSFile, MongoClient, ObjectId, AbstractCursor } fro
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { Document, InsertOneOptions } from '../../../src';
+import { Document } from '../../../src';
 import { EventCollector } from '../../tools/utils';
 import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { translateOptions } from './unified-utils';
-import { getSymbolFrom } from '../../tools/utils';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -118,27 +117,27 @@ operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }
 });
 
 operations.set('assertSessionDirty', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
   expect(session.serverSession.isDirty).to.be.true;
 });
 
 operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
   expect(session.serverSession.isDirty).to.be.false;
 });
 
 operations.set('assertSessionPinned', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
   expect(session.transaction.isPinned).to.be.true;
 });
 
 operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
   expect(session.transaction.isPinned).to.be.false;
 });
 
 operations.set('assertSessionTransactionState', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
 
   const transactionStateTranslation = {
     none: 'NO_TRANSACTION',
@@ -214,11 +213,8 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 
 operations.set('createCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { session, collection, ...opts } = operation.arguments;
-  await db.createCollection(collection, {
-    session: entities.getEntity('session', session, false),
-    ...opts
-  });
+  const { collection, ...opts } = operation.arguments;
+  await db.createCollection(collection, opts);
 });
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
@@ -234,11 +230,8 @@ operations.set('createFindCursor', async ({ entities, operation }) => {
 
 operations.set('createIndex', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const session = entities.getEntity('session', operation.arguments.session, false);
-  await collection.createIndex(operation.arguments.keys, {
-    session,
-    name: operation.arguments.name
-  });
+  const { keys, ...opts } = operation.arguments;
+  await collection.createIndex(keys, opts);
 });
 
 operations.set('deleteOne', async ({ entities, operation }) => {
@@ -340,7 +333,7 @@ operations.set('startTransaction', async ({ entities, operation }) => {
 });
 
 operations.set('targetedFailPoint', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.arguments.session);
+  const session = operation.arguments.session;
   expect(session.transaction.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
   await entities.failPoints.enableFailPoint(
     session.transaction._pinnedServer.s.description.hostAddress,
