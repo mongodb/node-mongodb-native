@@ -324,7 +324,7 @@ export abstract class AbstractCursor<
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
-      throw new MongoInvalidArgumentError('Missing required parameter `iterator`');
+      throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
     return maybePromise(callback, done => {
       const transform = this[kTransform];

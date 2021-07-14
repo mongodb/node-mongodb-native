@@ -296,7 +296,7 @@ export function executeLegacyOperation(
   // Return a Promise
   if (args[args.length - 1] != null) {
     throw new MongoInvalidArgumentError(
-      'final argument to `executeLegacyOperation` must be a callback'
+      'Final argument to `executeLegacyOperation` must be a callback'
     );
   }
 
@@ -1394,6 +1394,9 @@ export function emitWarningOnce(message: string): void {
   }
 }
 
+/**
+ * Takes a JS object and joins the values into a string separated by ', '
+ */
 export function enumToString(en: Record<string, unknown>): string {
   return Object.values(en).join(', ');
 }

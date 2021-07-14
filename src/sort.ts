@@ -45,11 +45,7 @@ function prepareDirection(direction: any = 1): SortDirectionForCmd {
     case '-1':
       return -1;
     default:
-      throw new MongoInvalidArgumentError(
-        `Invalid sort direction: ${JSON.stringify(
-          direction
-        )}\nSort direction must be one of 'ascending', 'asc', '1', 'descending', 'desc', '-1'`
-      );
+      throw new MongoInvalidArgumentError(`Invalid sort direction: ${JSON.stringify(direction)}`);
   }
 }
 

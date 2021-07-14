@@ -229,8 +229,7 @@ function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): 
       if (!res?.deletedCount) {
         // TODO(NODE-3402): Replace with more appropriate error
         // Consider creating new error MongoGridFSFileNotFoundError
-        const errmsg = 'No file with id ' + id + ' found';
-        return callback(new MongoDriverError(errmsg));
+        return callback(new MongoDriverError(`File not found for id ${id}`));
       }
 
       return callback();

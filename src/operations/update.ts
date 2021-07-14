@@ -129,7 +129,7 @@ export class UpdateOperation extends CommandOperation<Document> {
 
     if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
       callback(
-        new MongoCompatibilityError('The "arrayFilters" option is only supported on MongoDB 3.6+')
+        new MongoCompatibilityError('Option "arrayFilters" is only supported on MongoDB 3.6+')
       );
       return;
     }

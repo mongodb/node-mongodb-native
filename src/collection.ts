@@ -1454,7 +1454,7 @@ export class Collection<TSchema extends Document = Document> {
     // TODO NODE-3339: Figure out if this is still necessary given we no longer officially support pre-1.8
     if (options?.out == null) {
       throw new MongoInvalidArgumentError(
-        'The "out" option parameter must be defined, see mongodb docs for possible values'
+        'Option "out" must be defined, see mongodb docs for possible values'
       );
     }
 
