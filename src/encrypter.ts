@@ -103,8 +103,9 @@ export class Encrypter {
   }
 
   static checkForMongoCrypt(): void {
+    let mongodbClientEncryption = undefined;
     try {
-      require.resolve('mongodb-client-encryption');
+      mongodbClientEncryption = require('mongodb-client-encryption');
     } catch (err) {
       throw new MongoDriverError(
         'Auto-encryption requested, but the module is not installed. ' +
@@ -112,8 +113,7 @@ export class Encrypter {
       );
     }
 
-    const mongodbClientEncryption = require('mongodb-client-encryption');
-    if (typeof mongodbClientEncryption.extension !== 'function') {
+    if (typeof mongodbClientEncryption?.extension !== 'function') {
       throw new MongoDriverError(
         'loaded version of `mongodb-client-encryption` does not have property `extension`. ' +
           'Please make sure you are loading the correct version of `mongodb-client-encryption`'

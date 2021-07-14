@@ -40,7 +40,7 @@
   "dependencies": {
     "bson": "^4.4.0",
     "denque": "^1.5.0",
-    "mongodb-connection-string-url": "^1.0.0"
+    "mongodb-connection-string-url": "^1.0.1"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
@@ -54,6 +54,7 @@
     "@types/node": "^15.3.1",
     "@types/saslprep": "^1.0.0",
     "@types/semver": "^7.3.4",
+    "@types/whatwg-url": "^8.2.1",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
     "chai": "^4.2.0",
