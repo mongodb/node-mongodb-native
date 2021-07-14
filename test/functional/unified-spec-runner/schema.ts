@@ -167,20 +167,6 @@ export interface ExpectedCmapEvent {
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
 }
-export interface ExpectedEvent {
-  commandStartedEvent?: {
-    command?: Document;
-    commandName?: string;
-    databaseName?: string;
-  };
-  commandSucceededEvent?: {
-    reply?: Document;
-    commandName?: string;
-  };
-  commandFailedEvent?: {
-    commandName?: string;
-  };
-}
 export interface ExpectedError {
   isError?: true;
   isClientError?: boolean;

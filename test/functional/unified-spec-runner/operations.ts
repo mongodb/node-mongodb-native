@@ -346,8 +346,8 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
 
 operations.set('listCollections', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { filter, batchSize } = operation.arguments;
-  return db.listCollections(filter, { batchSize: batchSize }).toArray();
+  const { filter, ...opts } = operation.arguments;
+  return db.listCollections(filter, opts).toArray();
 });
 
 operations.set('listDatabases', async ({ entities, operation }) => {
@@ -357,8 +357,7 @@ operations.set('listDatabases', async ({ entities, operation }) => {
 
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { batchSize } = operation.arguments;
-  return collection.listIndexes({ batchSize: batchSize }).toArray();
+  return collection.listIndexes(operation.arguments).toArray();
 });
 
 operations.set('replaceOne', async ({ entities, operation }) => {
