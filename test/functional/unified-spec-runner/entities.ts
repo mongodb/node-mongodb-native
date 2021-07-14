@@ -101,7 +101,8 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      ...getEnvironmentalOptions()
+      ...getEnvironmentalOptions(),
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
     this.commandEvents = [];
     this.cmapEvents = [];

@@ -63,6 +63,22 @@ export async function topologySatisfies(
       !!utilClient.options.authMechanism;
   }
 
+  if (r.serverless) {
+    switch (r.serverless) {
+      case 'forbid':
+        // return true if the configuration is NOT serverless
+        return !config.isServerless;
+      case 'allow':
+        // always return true
+        return true;
+      case 'require':
+        // only return true if the configuration is serverless
+        return config.isServerless;
+      default:
+        throw new Error(`Invalid serverless filter: ${r.serverless}`);
+    }
+  }
+
   return ok;
 }
 

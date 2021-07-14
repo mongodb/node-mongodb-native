@@ -45,6 +45,7 @@ class TestConfiguration {
     this.parameters = undefined;
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
+    this.isServerless = !!process.env.SERVERLESS;
     this.options = {
       hosts,
       hostAddresses,
