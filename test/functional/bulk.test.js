@@ -1747,13 +1747,13 @@ describe('Bulk', function() {
               .drop()
               .catch(() => {}) // do not care
         )
-        .then(
-          () =>
-            (collection = client
-              .db('bulk_operation_writes_test')
-              .collection('bulk_write_transaction_test'))
+        .then(() =>
+          client.db('bulk_operation_writes_test').createCollection('bulk_write_transaction_test')
         )
-        .then(collection => collection.deleteMany({}));
+        .then(collectionLcl => {
+          collection = collectionLcl;
+          return collection.deleteMany({});
+        });
     });
 
     afterEach(() => {
