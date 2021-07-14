@@ -1,9 +1,10 @@
 {
   "description": "redacted-commands",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.5",
   "runOnRequirements": [
     {
-      "minServerVersion": "5.0"
+      "minServerVersion": "5.0",
+      "auth": false
     }
   ],
   "createEntities": [
@@ -11,8 +12,10 @@
       "client": {
         "id": "client",
         "observeEvents": [
-          "commandStartedEvent"
-        ]
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ],
+        "observeSensitiveCommands": true
       }
     },
     {
@@ -33,7 +36,10 @@
           "arguments": {
             "commandName": "authenticate",
             "command": {
-              "authenticate": "private"
+              "authenticate": 1,
+              "mechanism": "MONGODB-X509",
+              "user": "CN=myName,OU=myOrgUnit,O=myOrg,L=myLocality,ST=myState,C=myCountry",
+              "db": "$external"
             }
           },
           "expectError": {
@@ -50,6 +56,15 @@
                 "commandName": "authenticate",
                 "command": {
                   "authenticate": {
+                    "$$exists": false
+                  },
+                  "mechanism": {
+                    "$$exists": false
+                  },
+                  "user": {
+                    "$$exists": false
+                  },
+                  "db": {
                     "$$exists": false
                   }
                 }
@@ -68,7 +83,9 @@
           "arguments": {
             "commandName": "saslStart",
             "command": {
-              "saslStart": "private"
+              "saslStart": 1,
+              "payload": "definitely-invalid-payload",
+              "db": "admin"
             }
           },
           "expectError": {
@@ -85,6 +102,12 @@
                 "commandName": "saslStart",
                 "command": {
                   "saslStart": {
+                    "$$exists": false
+                  },
+                  "payload": {
+                    "$$exists": false
+                  },
+                  "db": {
                     "$$exists": false
                   }
                 }
@@ -103,7 +126,9 @@
           "arguments": {
             "commandName": "saslContinue",
             "command": {
-              "saslContinue": "private"
+              "saslContinue": 1,
+              "conversationId": 0,
+              "payload": "definitely-invalid-payload"
             }
           },
           "expectError": {
@@ -120,6 +145,12 @@
                 "commandName": "saslContinue",
                 "command": {
                   "saslContinue": {
+                    "$$exists": false
+                  },
+                  "conversationId": {
+                    "$$exists": false
+                  },
+                  "payload": {
                     "$$exists": false
                   }
                 }
@@ -138,7 +169,7 @@
           "arguments": {
             "commandName": "getnonce",
             "command": {
-              "getnonce": "private"
+              "getnonce": 1
             }
           }
         }
@@ -152,6 +183,19 @@
                 "commandName": "getnonce",
                 "command": {
                   "getnonce": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "getnonce",
+                "reply": {
+                  "ok": {
+                    "$$exists": false
+                  },
+                  "nonce": {
                     "$$exists": false
                   }
                 }
@@ -170,7 +214,9 @@
           "arguments": {
             "commandName": "createUser",
             "command": {
-              "createUser": "private"
+              "createUser": "private",
+              "pwd": {},
+              "roles": []
             }
           },
           "expectError": {
@@ -187,6 +233,12 @@
                 "commandName": "createUser",
                 "command": {
                   "createUser": {
+                    "$$exists": false
+                  },
+                  "pwd": {
+                    "$$exists": false
+                  },
+                  "roles": {
                     "$$exists": false
                   }
                 }
@@ -205,7 +257,9 @@
           "arguments": {
             "commandName": "updateUser",
             "command": {
-              "updateUser": "private"
+              "updateUser": "private",
+              "pwd": {},
+              "roles": []
             }
           },
           "expectError": {
@@ -222,6 +276,12 @@
                 "commandName": "updateUser",
                 "command": {
                   "updateUser": {
+                    "$$exists": false
+                  },
+                  "pwd": {
+                    "$$exists": false
+                  },
+                  "roles": {
                     "$$exists": false
                   }
                 }
@@ -338,6 +398,11 @@
     },
     {
       "description": "hello with speculative authenticate",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -345,40 +410,11 @@
           "arguments": {
             "commandName": "hello",
             "command": {
-              "hello": "private",
-              "speculativeAuthenticate": "foo"
+              "hello": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
             }
-          },
-          "expectError": {
-            "isError": true
-          }
-        },
-        {
-          "name": "runCommand",
-          "object": "database",
-          "arguments": {
-            "commandName": "ismaster",
-            "command": {
-              "ismaster": "private",
-              "speculativeAuthenticate": "foo"
-            }
-          },
-          "expectError": {
-            "isError": true
-          }
-        },
-        {
-          "name": "runCommand",
-          "object": "database",
-          "arguments": {
-            "commandName": "isMaster",
-            "command": {
-              "isMaster": "private",
-              "speculativeAuthenticate": "foo"
-            }
-          },
-          "expectError": {
-            "isError": true
           }
         }
       ],
@@ -392,15 +428,85 @@
                 "command": {
                   "hello": {
                     "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
                   }
                 }
               }
             },
             {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "legacy hello with speculative authenticate",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
               "commandStartedEvent": {
                 "commandName": "ismaster",
                 "command": {
                   "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
                     "$$exists": false
                   }
                 }
@@ -412,6 +518,22 @@
                 "command": {
                   "isMaster": {
                     "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
                   }
                 }
               }
@@ -422,6 +544,11 @@
     },
     {
       "description": "hello without speculative authenticate is not redacted",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -429,27 +556,7 @@
           "arguments": {
             "commandName": "hello",
             "command": {
-              "hello": "public"
-            }
-          }
-        },
-        {
-          "name": "runCommand",
-          "object": "database",
-          "arguments": {
-            "commandName": "ismaster",
-            "command": {
-              "ismaster": "public"
-            }
-          }
-        },
-        {
-          "name": "runCommand",
-          "object": "database",
-          "arguments": {
-            "commandName": "isMaster",
-            "command": {
-              "isMaster": "public"
+              "hello": 1
             }
           }
         }
@@ -462,15 +569,67 @@
               "commandStartedEvent": {
                 "commandName": "hello",
                 "command": {
-                  "hello": "public"
+                  "hello": 1
                 }
               }
             },
             {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "legacy hello without speculative authenticate is not redacted",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
               "commandStartedEvent": {
                 "commandName": "ismaster",
                 "command": {
-                  "ismaster": "public"
+                  "ismaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
                 }
               }
             },
@@ -478,7 +637,17 @@
               "commandStartedEvent": {
                 "commandName": "isMaster",
                 "command": {
-                  "isMaster": "public"
+                  "isMaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
                 }
               }
             }
