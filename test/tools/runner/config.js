@@ -8,6 +8,7 @@ const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
 const { HostAddress } = require('../../../src/utils');
+const { getEnvironmentalOptions } = require('../utils');
 
 /**
  * @typedef {Object} UrlOptions
@@ -41,7 +42,6 @@ class TestConfiguration {
     this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
-    this.serverApi = context.serverApi;
     this.parameters = undefined;
     this.options = {
       hosts,
@@ -102,13 +102,13 @@ class TestConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
-    const defaultOptions = { minHeartbeatFrequencyMS: 100 };
-    if (this.serverApi) {
-      Object.assign(defaultOptions, { serverApi: this.serverApi });
-    }
+    const defaultOptions = Object.assign(
+      { minHeartbeatFrequencyMS: 100 },
+      getEnvironmentalOptions()
+    );
     // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new MongoClient(dbOptions, Object.assign(defaultOptions, serverOptions));
+      return new MongoClient(dbOptions, Object.assign({}, defaultOptions, serverOptions));
     }
 
     dbOptions = dbOptions || {};

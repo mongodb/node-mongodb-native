@@ -20,6 +20,8 @@ import type {
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration } from './runner';
+import { getEnvironmentalOptions } from '../../tools/utils';
+import { MongoClientOptions } from '../../../src/mongo_client';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -27,15 +29,8 @@ interface UnifiedChangeStream extends ChangeStream {
 
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 
-function serverApiConfig() {
-  if (process.env.MONGODB_API_VERSION) {
-    return { version: process.env.MONGODB_API_VERSION };
-  }
-}
-
 function getClient(address) {
-  const serverApi = serverApiConfig();
-  return new MongoClient(`mongodb://${address}`, serverApi ? { serverApi } : {});
+  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions() as MongoClientOptions);
 }
 
 export class UnifiedMongoClient extends MongoClient {
@@ -54,7 +49,7 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      serverApi: description.serverApi ? description.serverApi : serverApiConfig()
+      ...getEnvironmentalOptions()
     });
     this.events = [];
     this.failPoints = [];

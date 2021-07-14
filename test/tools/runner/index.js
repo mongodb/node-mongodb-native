@@ -4,12 +4,12 @@ const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../src');
 const { TestConfiguration } = require('./config');
+const { getEnvironmentalOptions } = require('../utils');
 const { eachAsync } = require('../../../src/utils');
 const mock = require('../mock');
 const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const filters = [];
 
 function initializeFilters(client, callback) {
@@ -61,15 +61,7 @@ before(function (_done) {
   //   )} topology`
   // );
 
-  const options = MONGODB_API_VERSION ? { serverApi: MONGODB_API_VERSION } : {};
-  if (process.env.SERVERLESS) {
-    options.auth = {
-      username: process.env.SERVERLESS_ATLAS_USER,
-      password: process.env.SERVERLESS_ATLAS_PASSWORD
-    };
-    console.log('set serverless auth in before hook', { auth: options.auth });
-  }
-  const client = new MongoClient(MONGODB_URI, options);
+  const client = new MongoClient(MONGODB_URI, getEnvironmentalOptions());
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
@@ -82,11 +74,6 @@ before(function (_done) {
       if (err) {
         done(err);
         return;
-      }
-
-      // Ensure test MongoClients set a serverApi parameter when required
-      if (MONGODB_API_VERSION) {
-        context.serverApi = MONGODB_API_VERSION;
       }
 
       // replace this when mocha supports dynamic skipping with `afterEach`
