@@ -44,6 +44,11 @@ class TestRunnerContext {
     this.user = opts.user;
     this.password = opts.password;
     this.authSource = opts.authSource;
+    if (process.env.SERVERLESS) {
+      this.user = process.env.SERVERLESS_ATLAS_USER;
+      this.password = process.env.SERVERLESS_ATLAS_PASSWORD;
+      this.authSource = 'admin';
+    }
     this.sharedClient = null;
     this.failPointClients = [];
     this.appliedFailPoints = [];
@@ -69,9 +74,7 @@ class TestRunnerContext {
 
   setup(config) {
     this.sharedClient = config.newClient(
-      process.env.SERVERLESS
-        ? process.env.MONGODB_URI
-        : resolveConnectionString(config, { useMultipleMongoses: true }, this)
+      resolveConnectionString(config, { useMultipleMongoses: true }, this)
     );
     if (config.topologyType === 'Sharded') {
       this.failPointClients = config.options.hostAddresses.map(proxy =>
