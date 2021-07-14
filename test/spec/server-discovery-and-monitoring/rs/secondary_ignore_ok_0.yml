@@ -1,4 +1,4 @@
-description: "New primary secondary ignore ok equal 0"
+description: "New primary"
 
 uri: "mongodb://a,b/?replicaSet=rs"
 
@@ -10,7 +10,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     setName: "rs",
                     hosts: ["a:27017", "b:27017"],
                     minWireVersion: 0,
@@ -19,7 +20,8 @@ phases: [
                 ["b:27017", {
 
                     ok: 1,
-                    ismaster: false,
+                    helloOk: true,
+                    isWritablePrimary: false,
                     secondary: true,
                     setName: "rs",
                     hosts: ["a:27017", "b:27017"],

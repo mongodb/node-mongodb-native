@@ -10,6 +10,11 @@ const mock = require('../mock');
 const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
+// Load balancer fronting 1 mongos.
+const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
+// Load balancer fronting 2 mongoses.
+const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
 const filters = [];
 
 function initializeFilters(client, callback) {
@@ -74,6 +79,16 @@ before(function (_done) {
       if (err) {
         done(err);
         return;
+      }
+
+      // Ensure test MongoClients set a serverApi parameter when required
+      if (MONGODB_API_VERSION) {
+        context.serverApi = MONGODB_API_VERSION;
+      }
+
+      if (SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI) {
+        context.singleMongosLoadBalancerUri = SINGLE_MONGOS_LB_URI;
+        context.multiMongosLoadBalancerUri = MULTI_MONGOS_LB_URI;
       }
 
       // replace this when mocha supports dynamic skipping with `afterEach`

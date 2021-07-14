@@ -1,4 +1,4 @@
-import type { Document } from '../../../src/bson';
+import type { Document, ObjectId } from '../../../src/bson';
 import type { ReadConcernLevel } from '../../../src/read_concern';
 import type { ReadPreferenceMode } from '../../../src/read_preference';
 import type { TagSet } from '../../../src/sdam/server_description';
@@ -27,7 +27,8 @@ export const TopologyType = Object.freeze({
   single: 'single',
   replicaset: 'replicaset',
   sharded: 'sharded',
-  shardedReplicaset: 'sharded-replicaset'
+  shardedReplicaset: 'sharded-replicaset',
+  loadBalanced: 'load-balanced'
 } as const);
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
@@ -36,16 +37,27 @@ export interface RunOnRequirement {
   topologies?: TopologyId[];
   serverParameters?: Document;
 }
-export type ObservableEventId =
+export type ObservableCommandEventId =
   | 'commandStartedEvent'
   | 'commandSucceededEvent'
   | 'commandFailedEvent';
+export type ObservableCmapEventId =
+  | 'connectionPoolCreatedEvent'
+  | 'connectionPoolClosedEvent'
+  | 'connectionPoolClearedEvent'
+  | 'connectionCreatedEvent'
+  | 'connectionReadyEvent'
+  | 'connectionClosedEvent'
+  | 'connectionCheckOutStartedEvent'
+  | 'connectionCheckOutFailedEvent'
+  | 'connectionCheckedOutEvent'
+  | 'connectionCheckedInEvent';
 
 export interface ClientEntity {
   id: string;
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
-  observeEvents?: ObservableEventId[];
+  observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
 }
@@ -118,9 +130,10 @@ export interface Test {
 }
 export interface ExpectedEventsForClient {
   client: string;
-  events: ExpectedEvent[];
+  eventType?: string;
+  events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
 }
-export interface ExpectedEvent {
+export interface ExpectedCommandEvent {
   commandStartedEvent?: {
     command?: Document;
     commandName?: string;
@@ -133,6 +146,25 @@ export interface ExpectedEvent {
   commandFailedEvent?: {
     commandName?: string;
   };
+}
+export interface ExpectedCmapEvent {
+  poolCreatedEvent?: Record<string, never>;
+  poolReadyEvent?: Record<string, never>;
+  poolClearedEvent?: {
+    serviceId?: ObjectId;
+    hasServiceId?: boolean;
+  };
+  poolClosedEvent?: Record<string, never>;
+  connectionCreatedEvent?: Record<string, never>;
+  connectionReadyEvent?: Record<string, never>;
+  connectionClosedEvent?: {
+    reason?: string;
+    hasServiceId?: boolean;
+  };
+  connectionCheckOutStartedEvent?: Record<string, never>;
+  connectionCheckOutFailedEvent?: Record<string, never>;
+  connectionCheckedOutEvent?: Record<string, never>;
+  connectionCheckedInEvent?: Record<string, never>;
 }
 export interface ExpectedError {
   isError?: true;

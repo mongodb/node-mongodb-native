@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "4.0.0-beta.6",
+  "version": "4.0.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -27,9 +27,9 @@
     "driver",
     "official"
   ],
-  "author": { 
-    "name" : "The MongoDB NodeJS Team", 
-    "email" : "dbx-node@mongodb.com"
+  "author": {
+    "name": "The MongoDB NodeJS Team",
+    "email": "dbx-node@mongodb.com"
   },
   "peerOptionalDependencies": {
     "kerberos": "^1.1.0",

@@ -1,0 +1,158 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.9"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "hello-command-error"
+
+data: []
+
+tests:
+  - description: Command error on Monitor handshake
+    # Configure the initial handshake to fail with a command error.
+    # Use times: 2 so that the RTT hello fails as well.
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { times: 2 }
+      data:
+          failCommands: ["hello", "isMaster"]
+          appName: commandErrorHandshakeTest
+          closeConnection: false
+          errorCode: 91 # ShutdownInProgress
+    clientOptions:
+      retryWrites: false
+      connectTimeoutMS: 250
+      heartbeatFrequencyMS: 500
+      appname: commandErrorHandshakeTest
+    operations:
+      # The command error on the initial handshake should mark the server
+      # Unknown (emitting a ServerDescriptionChangedEvent) and clear the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # We cannot assert the server was marked Unknown and pool was cleared an
+      # exact number of times because the RTT hello may or may not have
+      # triggered this failpoint as well.
+      # - name: assertEventCount
+      #   object: testRunner
+      #   arguments:
+      #     event: ServerMarkedUnknownEvent
+      #     count: 1
+      # - name: assertEventCount
+      #   object: testRunner
+      #   arguments:
+      #     event: PoolClearedEvent
+      #     count: 1
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+              - _id: 2
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+
+  - description: Command error on Monitor check
+    clientOptions:
+      retryWrites: false
+      connectTimeoutMS: 1000
+      heartbeatFrequencyMS: 500
+      appname: commandErrorCheckTest
+    operations:
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # Configure the next streaming hello check to fail with a command
+      # error.
+      # Use times: 2 so that the RTT hello is blocked as well.
+      - name: configureFailPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+                failCommands: ["hello", "isMaster"]
+                appName: commandErrorCheckTest
+                closeConnection: false
+                blockConnection: true
+                blockTimeMS: 750
+                errorCode: 91 # ShutdownInProgress
+      # The command error on the next check should mark the server Unknown and
+      # clear the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+      # Perform an operation to ensure the node is rediscovered.
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 1
+              - _id: 2
+          command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - _id: 3
+              - _id: 4
+          command_name: insert
+          database_name: *database_name
+
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 3}
+          - {_id: 4}

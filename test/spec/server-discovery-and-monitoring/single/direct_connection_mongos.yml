@@ -10,7 +10,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     msg: "isdbgrid",
                     minWireVersion: 0,
                     maxWireVersion: 6

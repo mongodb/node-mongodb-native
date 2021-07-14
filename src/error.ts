@@ -198,6 +198,339 @@ export class MongoRuntimeError extends MongoDriverError {
   }
 }
 
+/**
+ * An error generated when a batch command is reexecuted after one of the commands in the batch
+ * has failed
+ *
+ * @public
+ * @category Error
+ */
+export class MongoBatchReExecutionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoBatchReExecutionError';
+  }
+}
+
+/**
+ * An error generated when the user supplies an incorrect URI to the driver.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoURIError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoURIError';
+  }
+}
+
+/**
+ * An error generated when the driver fails to compress data
+ * before sending it to the server.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCompressionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCompressionError';
+  }
+}
+
+/**
+ * An error generated when the driver fails to decompress
+ * data received from the server.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoDecompressionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoDecompressionError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to operate on a database or collection through a MongoClient
+ * that has not yet successfully called the "connect" method
+ *
+ * @public
+ * @category Error
+ */
+export class MongoNotConnectedError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoNotConnectedError';
+  }
+}
+
+/**
+ * An error generated when the user makes a mistake in the usage of transactions.
+ * (e.g. attempting to commit a transaction with a readPreference other than primary)
+ *
+ * @public
+ * @category Error
+ */
+export class MongoTransactionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoTransactionError';
+  }
+}
+
+/**
+ * An error generated when the user attempts to operate
+ * on a session that has expired or has been closed.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoExpiredSessionError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoExpiredSessionError';
+  }
+}
+
+/**
+ * A error generated when the user attempts to authenticate
+ * via Kerberos, but fails to connect to the Kerberos client.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoKerberosError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoKerberosError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to operate on a cursor that is in a state which does not
+ * support the attempted operation.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorError';
+  }
+}
+
+/**
+ * An error generated when a stream operation fails to execute.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoStreamError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoStreamError';
+  }
+}
+
+/**
+ * An error generated when a ChangeStream operation fails to execute.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoChangeStreamError extends MongoStreamError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoChangeStreamError';
+  }
+}
+
+/**
+ * An error thrown when the user calls a function or method not supported on a tailable cursor
+ *
+ * @public
+ * @category Error
+ */
+export class MongoTailableCursorError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoTailableCursorError';
+  }
+}
+
+/** An error generated when a GridFSStream operation fails to execute.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoGridFSStreamError extends MongoStreamError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoGridFSStreamError';
+  }
+}
+
+/**
+ * An error generated when a malformed or invalid chunk is
+ * encountered when reading from a GridFSStream.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoGridFSChunkError extends MongoStreamError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoGridFSChunkError';
+  }
+}
+
+/**
+ * An error thrown when the user attempts to add options to a cursor that has already been
+ * initialized
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorInUseError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorInUseError';
+  }
+}
+
+/**
+ * An error generated when an attempt is made to access a resource
+ * which has already been or will be closed/destroyed.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoResourceClosedError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoResourceClosedError';
+  }
+}
+
+/**
+ * An error generated when an attempt is made to operate
+ * on a closed/closing server.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoServerClosedError extends MongoResourceClosedError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoServerClosedError';
+  }
+}
+
+/**
+ * An error thrown when an attempt is made to read from a cursor that has been exhausted
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCursorExhaustedError extends MongoCursorError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCursorExhaustedError';
+  }
+}
+
+/**
+ * An error generated when an attempt is made to operate
+ * on a closed/closing stream.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoStreamClosedError extends MongoResourceClosedError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoStreamClosedError';
+  }
+}
+
+/**
+ * An error generated when an attempt is made to operate on a
+ * dropped, or otherwise unavailable, database.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoTopologyClosedError extends MongoResourceClosedError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoTopologyClosedError';
+  }
+}
+
 /** @internal */
 const kBeforeHandshake = Symbol('beforeHandshake');
 export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {

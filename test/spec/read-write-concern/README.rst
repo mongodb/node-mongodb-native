@@ -1,6 +1,6 @@
-=======================
-Connection String Tests
-=======================
+============================
+Read and Write Concern Tests
+============================
 
 The YAML and JSON files in this directory tree are platform-independent tests
 that drivers can use to prove their conformance to the Read and Write Concern 

@@ -1,0 +1,113 @@
+{
+  "description": "snapshot-sessions-not-supported-client-error",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "maxServerVersion": "4.4.99"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0",
+        "sessionOptions": {
+          "snapshot": true
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Client error on find with snapshot",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {}
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorContains": "Snapshot reads require MongoDB 5.0 or later"
+          }
+        }
+      ],
+      "expectEvents": []
+    },
+    {
+      "description": "Client error on aggregate with snapshot",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "pipeline": []
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorContains": "Snapshot reads require MongoDB 5.0 or later"
+          }
+        }
+      ],
+      "expectEvents": []
+    },
+    {
+      "description": "Client error on distinct with snapshot",
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "session": "session0"
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorContains": "Snapshot reads require MongoDB 5.0 or later"
+          }
+        }
+      ],
+      "expectEvents": []
+    }
+  ]
+}

@@ -16,7 +16,7 @@ tests:
       configureFailPoint: failCommand
       mode: { skip: 3 }
       data:
-        failCommands: ["isMaster", "hello"]
+        failCommands: ["hello", "isMaster"]
         appName: SDAMminPoolSizeError
         closeConnection: true
     clientOptions:

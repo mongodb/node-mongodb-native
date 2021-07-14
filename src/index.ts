@@ -9,7 +9,7 @@ import { MongoClient } from './mongo_client';
 import { Db } from './db';
 import { Collection } from './collection';
 import { Logger } from './logger';
-import { GridFSBucket } from './gridfs-stream';
+import { GridFSBucket } from './gridfs';
 import { CancellationToken } from './mongo_types';
 
 export {
@@ -195,17 +195,13 @@ export type {
   GridFSBucketReadStreamOptionsWithRevision,
   GridFSBucketReadStreamPrivate,
   GridFSFile
-} from './gridfs-stream/download';
-export type {
-  GridFSBucketOptions,
-  GridFSBucketPrivate,
-  GridFSBucketEvents
-} from './gridfs-stream/index';
+} from './gridfs/download';
+export type { GridFSBucketOptions, GridFSBucketPrivate, GridFSBucketEvents } from './gridfs/index';
 export type {
   GridFSBucketWriteStreamOptions,
   GridFSBucketWriteStream,
   GridFSChunk
-} from './gridfs-stream/upload';
+} from './gridfs/upload';
 export type { LoggerOptions, LoggerFunction } from './logger';
 export type {
   MongoClientEvents,

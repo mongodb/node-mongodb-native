@@ -26,7 +26,8 @@
               "a:27017",
               "b:27017"
             ],
-            "ismaster": true,
+            "helloOk": true,
+            "isWritablePrimary": true,
             "ok": 1,
             "setName": "rs",
             "minWireVersion": 0,

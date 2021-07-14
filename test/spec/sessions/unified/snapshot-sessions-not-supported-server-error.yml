@@ -1,0 +1,102 @@
+description: snapshot-sessions-not-supported-server-error
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "5.0"
+    topologies: [ single ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent, commandFailedEvent ]
+  - database:
+      id: &database0Name database0
+      client: *client0
+      databaseName: *database0Name
+  - collection:
+      id: &collection0Name collection0
+      database: *database0Name
+      collectionName: *collection0Name
+  - session:
+      id: session0
+      client: client0
+      sessionOptions:
+        snapshot: true
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+- description: Server returns an error on find with snapshot
+  operations:
+  - name: find
+    object: collection0
+    arguments:
+      session: session0
+      filter: {}
+    expectError:
+      isError: true
+      isClientError: false
+  expectEvents:
+  - client: client0
+    events:
+    - commandStartedEvent:
+        command:
+          find: collection0
+          readConcern:
+            level: snapshot
+            atClusterTime:
+              "$$exists": false
+    - commandFailedEvent:
+        commandName: find
+
+- description: Server returns an error on aggregate with snapshot
+  operations:
+  - name: aggregate
+    object: collection0
+    arguments:
+      session: session0
+      pipeline: []
+    expectError:
+      isError: true
+      isClientError: false
+  expectEvents:
+  - client: client0
+    events:
+    - commandStartedEvent:
+        command:
+          aggregate: collection0
+          readConcern:
+            level: snapshot
+            atClusterTime:
+              "$$exists": false
+    - commandFailedEvent:
+        commandName: aggregate
+
+- description: Server returns an error on distinct with snapshot
+  operations:
+  - name: distinct
+    object: collection0
+    arguments:
+      fieldName: x
+      filter: {}
+      session: session0
+    expectError:
+      isError: true
+      isClientError: false
+  expectEvents:
+  - client: client0
+    events:
+    - commandStartedEvent:
+        command:
+          distinct: collection0
+          readConcern:
+            level: snapshot
+            atClusterTime:
+              "$$exists": false
+    - commandFailedEvent:
+        commandName: distinct

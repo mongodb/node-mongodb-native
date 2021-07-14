@@ -10,7 +10,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     setName: "rs",
                     me: "A:27017",
                     hosts: ["A:27017"],
@@ -56,7 +57,8 @@ phases: [
                 ["b:27017", {
 
                     ok: 1,
-                    ismaster: false,
+                    helloOk: true,
+                    isWritablePrimary: false,
                     secondary: true,
                     setName: "rs",
                     me: "B:27017",

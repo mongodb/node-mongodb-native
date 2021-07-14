@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ReadPreference } from '../../../src/read_preference';
 import * as uni from './schema';
 import { zip, topologySatisfies, patchVersion } from './unified-utils';
-import { CommandEvent, EntitiesMap } from './entities';
+import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { ns } from '../../../src/utils';
 import { executeOperationAndCheck } from './operations';
 import { matchesEvents } from './match';
@@ -41,7 +41,13 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  const utilClient = ctx.configuration.newClient();
+  let utilClient;
+  if (ctx.configuration.isLoadBalanced) {
+    // The util client can always point at the single mongos LB frontend.
+    utilClient = ctx.configuration.newClient(ctx.configuration.singleMongosLoadBalancerUri);
+  } else {
+    utilClient = ctx.configuration.newClient();
+  }
 
   let entities;
   try {
@@ -107,7 +113,8 @@ export async function runUnifiedTest(
     // To ease the implementation, test runners MAY execute distinct before every test.
     if (
       ctx.topologyType === uni.TopologyType.sharded ||
-      ctx.topologyType === uni.TopologyType.shardedReplicaset
+      ctx.topologyType === uni.TopologyType.shardedReplicaset ||
+      ctx.topologyType === uni.TopologyType.loadBalanced
     ) {
       for (const [, collection] of entities.mapOf('collection')) {
         await utilClient.db(ns(collection.namespace).db).command({
@@ -121,18 +128,27 @@ export async function runUnifiedTest(
       await executeOperationAndCheck(operation, entities, utilClient);
     }
 
-    const clientEvents = new Map<string, CommandEvent[]>();
+    const clientCommandEvents = new Map<string, CommandEvent[]>();
+    const clientCmapEvents = new Map<string, CmapEvent[]>();
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {
-      clientEvents.set(id, client.stopCapturingEvents());
+      clientCommandEvents.set(id, client.stopCapturingCommandEvents());
+      clientCmapEvents.set(id, client.stopCapturingCmapEvents());
     }
 
     if (test.expectEvents) {
       for (const expectedEventList of test.expectEvents) {
         const clientId = expectedEventList.client;
-        const actualEvents = clientEvents.get(clientId);
-
+        const eventType = expectedEventList.eventType;
+        let actualEvents;
+        // If no event type is provided it defaults to 'command', so just
+        // check for 'cmap' here for now.
+        if (eventType === 'cmap') {
+          actualEvents = clientCmapEvents.get(clientId);
+        } else {
+          actualEvents = clientCommandEvents.get(clientId);
+        }
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
         matchesEvents(expectedEventList.events, actualEvents, entities);
       }
