@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.10](https://github.com/mongodb/node-mongodb-native/compare/v3.6.9...v3.6.10) (2021-07-06)
+
+
+### Bug Fixes
+
+* **NODE-2035:** Exceptions thrown from awaited cursor forEach do not propagate ([#2852](https://github.com/mongodb/node-mongodb-native/issues/2852)) ([a917dfa](https://github.com/mongodb/node-mongodb-native/commit/a917dfada67859412344ed238796cf3bee243f5f))
+* **NODE-3150:** added bsonRegExp option for v3.6 ([#2843](https://github.com/mongodb/node-mongodb-native/issues/2843)) ([e4a9a57](https://github.com/mongodb/node-mongodb-native/commit/e4a9a572427666fd1a89576dadf50b9c452e1659))
+* **NODE-3358:** Command monitoring objects hold internal state references ([#2858](https://github.com/mongodb/node-mongodb-native/issues/2858)) ([750760c](https://github.com/mongodb/node-mongodb-native/commit/750760c324ddedb72491befde9f7aff1ceec009c))
+* **NODE-3380:** perform retryable write checks against server ([#2861](https://github.com/mongodb/node-mongodb-native/issues/2861)) ([621677a](https://github.com/mongodb/node-mongodb-native/commit/621677a42772e0b26aa13883f57d7e42f86df43f))
+* **NODE-3397:** report more helpful error with unsupported authMechanism in initial handshake ([#2876](https://github.com/mongodb/node-mongodb-native/issues/2876)) ([3ce148d](https://github.com/mongodb/node-mongodb-native/commit/3ce148d8fb37faea1ee056f6e9331e5282e65cd0))
+
 ### [3.6.9](https://github.com/mongodb/node-mongodb-native/compare/v3.6.8...v3.6.9) (2021-05-26)
 
 

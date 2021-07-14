@@ -16,6 +16,10 @@
     "driver",
     "official"
   ],
+  "author": { 
+    "name" : "The MongoDB NodeJS Team", 
+    "email" : "dbx-node@mongodb.com"
+  },
   "peerDependenciesMeta": {
     "kerberos": {
       "optional": true
@@ -83,7 +87,7 @@
     "node": ">=4"
   },
   "bugs": {
-    "url": "https://github.com/mongodb/node-mongodb-native/issues"
+    "url": "https://jira.mongodb.org/projects/NODE/issues/"
   },
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
