@@ -425,17 +425,6 @@ describe('CRUD spec', function () {
   }
 });
 
-describe('CRUD v2', function () {
-  const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/crud/v2'));
-  after(() => testContext.teardown());
-  before(function () {
-    return testContext.setup(this.configuration);
-  });
-
-  generateTopologyTests(testSuites, testContext);
-});
-
 describe('CRUD unified', function () {
   for (const crudSpecTest of loadSpecTests('crud/unified')) {
     expect(crudSpecTest).to.exist;
