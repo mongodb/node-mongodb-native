@@ -1257,7 +1257,7 @@ describe('Indexes', function () {
           testCommand(db, collection, (err, result) => {
             expect(err).to.exist;
             expect(err.message).to.equal(
-              '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+              'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
             );
             expect(result).to.not.exist;
             done();
