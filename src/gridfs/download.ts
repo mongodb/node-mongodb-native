@@ -1,5 +1,11 @@
 import { Readable } from 'stream';
-import { AnyError, MongoDriverError, MongoInvalidArgumentError } from '../error';
+import {
+  AnyError,
+  MongoDriverError,
+  MongoGridFSChunkError,
+  MongoGridFSStreamError,
+  MongoInvalidArgumentError
+} from '../error';
 import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
 import type { Sort } from '../sort';
@@ -195,7 +201,7 @@ export class GridFSBucketReadStream extends Readable {
 
 function throwIfInitialized(stream: GridFSBucketReadStream): void {
   if (stream.s.init) {
-    throw new MongoDriverError('Options cannot be changed after the stream is initialized');
+    throw new MongoGridFSStreamError('Options cannot be changed after the stream is initialized');
   }
 }
 
@@ -237,12 +243,12 @@ function doRead(stream: GridFSBucketReadStream): void {
     let errmsg: string;
     if (doc.n > expectedN) {
       errmsg = `ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
-      return __handleError(stream, new MongoDriverError(errmsg));
+      return __handleError(stream, new MongoGridFSChunkError(errmsg));
     }
 
     if (doc.n < expectedN) {
       errmsg = `ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
-      return __handleError(stream, new MongoDriverError(errmsg));
+      return __handleError(stream, new MongoGridFSChunkError(errmsg));
     }
 
     let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
@@ -250,15 +256,11 @@ function doRead(stream: GridFSBucketReadStream): void {
     if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {
         errmsg = `ExtraChunk: Got unexpected n: ${doc.n}`;
-        return __handleError(stream, new MongoDriverError(errmsg));
+        return __handleError(stream, new MongoGridFSChunkError(errmsg));
       }
 
-      errmsg =
-        'ChunkIsWrongSize: Got unexpected length: ' +
-        buf.byteLength +
-        ', expected: ' +
-        expectedLength;
-      return __handleError(stream, new MongoDriverError(errmsg));
+      errmsg = `ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`;
+      return __handleError(stream, new MongoGridFSChunkError(errmsg));
     }
 
     stream.s.bytesRead += buf.byteLength;
