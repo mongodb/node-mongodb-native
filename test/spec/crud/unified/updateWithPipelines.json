@@ -1,0 +1,494 @@
+{
+  "description": "updateWithPipelines",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.11"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 1,
+          "y": 1,
+          "t": {
+            "u": {
+              "v": 1
+            }
+          }
+        },
+        {
+          "_id": 2,
+          "x": 2,
+          "y": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateOne using pipelines",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$replaceRoot": {
+                  "newRoot": "$t"
+                }
+              },
+              {
+                "$addFields": {
+                  "foo": 1
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": [
+                        {
+                          "$replaceRoot": {
+                            "newRoot": "$t"
+                          }
+                        },
+                        {
+                          "$addFields": {
+                            "foo": 1
+                          }
+                        }
+                      ],
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                },
+                "commandName": "update",
+                "databaseName": "crud-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "u": {
+                "v": 1
+              },
+              "foo": 1
+            },
+            {
+              "_id": 2,
+              "x": 2,
+              "y": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "UpdateMany using pipelines",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateMany",
+          "arguments": {
+            "filter": {},
+            "update": [
+              {
+                "$project": {
+                  "x": 1
+                }
+              },
+              {
+                "$addFields": {
+                  "foo": 1
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {},
+                      "u": [
+                        {
+                          "$project": {
+                            "x": 1
+                          }
+                        },
+                        {
+                          "$addFields": {
+                            "foo": 1
+                          }
+                        }
+                      ],
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                },
+                "commandName": "update",
+                "databaseName": "crud-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 1,
+              "foo": 1
+            },
+            {
+              "_id": 2,
+              "x": 2,
+              "foo": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate using pipelines",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$project": {
+                  "x": 1
+                }
+              },
+              {
+                "$addFields": {
+                  "foo": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "update": [
+                    {
+                      "$project": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$addFields": {
+                        "foo": 1
+                      }
+                    }
+                  ]
+                },
+                "commandName": "findAndModify",
+                "databaseName": "crud-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 1,
+              "foo": 1
+            },
+            {
+              "_id": 2,
+              "x": 2,
+              "y": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "UpdateOne in bulk write using pipelines",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": [
+                    {
+                      "$replaceRoot": {
+                        "newRoot": "$t"
+                      }
+                    },
+                    {
+                      "$addFields": {
+                        "foo": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": [
+                        {
+                          "$replaceRoot": {
+                            "newRoot": "$t"
+                          }
+                        },
+                        {
+                          "$addFields": {
+                            "foo": 1
+                          }
+                        }
+                      ],
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                },
+                "commandName": "update",
+                "databaseName": "crud-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "u": {
+                "v": 1
+              },
+              "foo": 1
+            },
+            {
+              "_id": 2,
+              "x": 2,
+              "y": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "UpdateMany in bulk write using pipelines",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateMany": {
+                  "filter": {},
+                  "update": [
+                    {
+                      "$project": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$addFields": {
+                        "foo": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {},
+                      "u": [
+                        {
+                          "$project": {
+                            "x": 1
+                          }
+                        },
+                        {
+                          "$addFields": {
+                            "foo": 1
+                          }
+                        }
+                      ],
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                },
+                "commandName": "update",
+                "databaseName": "crud-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 1,
+              "foo": 1
+            },
+            {
+              "_id": 2,
+              "x": 2,
+              "foo": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

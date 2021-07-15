@@ -1,0 +1,79 @@
+{
+  "description": "find-allowdiskuse-clientError",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "maxServerVersion": "3.0.99"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test_find_allowdiskuse_clienterror"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "Find fails when allowDiskUse true is specified against pre 3.2 server",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "find",
+          "arguments": {
+            "filter": {},
+            "allowDiskUse": true
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "Find fails when allowDiskUse false is specified against pre 3.2 server",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "find",
+          "arguments": {
+            "filter": {},
+            "allowDiskUse": false
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    }
+  ]
+}

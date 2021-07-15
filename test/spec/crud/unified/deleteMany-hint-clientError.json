@@ -1,0 +1,149 @@
+{
+  "description": "deleteMany-hint-clientError",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "maxServerVersion": "3.3.99"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "DeleteMany_hint"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "DeleteMany_hint",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "DeleteMany with hint string unsupported (client-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "deleteMany",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "hint": "_id_"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "DeleteMany_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DeleteMany with hint document unsupported (client-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "deleteMany",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "DeleteMany_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

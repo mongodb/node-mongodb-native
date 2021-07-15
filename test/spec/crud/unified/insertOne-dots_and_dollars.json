@@ -63,8 +63,10 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
             }
           }
         }
@@ -165,8 +167,10 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
             }
           }
         }
@@ -219,8 +223,10 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
             }
           }
         }
@@ -277,8 +283,10 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
             }
           }
         }
@@ -386,9 +394,11 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": {
-                "a.b": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": {
+                  "a.b": 1
+                }
               }
             }
           }
@@ -496,8 +506,10 @@
             }
           },
           "expectResult": {
-            "insertedId": {
-              "$$unsetOrMatches": 1
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
             }
           }
         }
@@ -558,8 +570,10 @@
             }
           },
           "expectResult": {
-            "acknowledged": {
-              "$$unsetOrMatches": false
+            "$$unsetOrMatches": {
+              "acknowledged": {
+                "$$unsetOrMatches": false
+              }
             }
           }
         }

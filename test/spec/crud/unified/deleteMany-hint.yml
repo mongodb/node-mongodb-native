@@ -1,0 +1,99 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: deleteMany-hint
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 4.3.4
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name DeleteMany_hint
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+tests:
+  -
+    description: 'DeleteMany with hint string'
+    operations:
+      -
+        object: *collection0
+        name: deleteMany
+        arguments:
+          filter: &filter
+            _id:
+              $gt: 1
+          hint: _id_
+        expectResult: &result
+          deletedCount: 2
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: *filter
+                    hint: _id_
+                    limit: 0
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+  -
+    description: 'DeleteMany with hint document'
+    operations:
+      -
+        object: *collection0
+        name: deleteMany
+        arguments:
+          filter: *filter
+          hint:
+            _id: 1
+        expectResult: *result
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: *filter
+                    hint:
+                      _id: 1
+                    limit: 0
+    outcome: *outcome

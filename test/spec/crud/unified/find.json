@@ -1,0 +1,156 @@
+{
+  "description": "find",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": true,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "find-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "find-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        },
+        {
+          "_id": 5,
+          "x": 55
+        },
+        {
+          "_id": 6,
+          "x": 66
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "find with multiple batches works",
+      "operations": [
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "batchSize": 2
+          },
+          "object": "collection0",
+          "expectResult": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 5,
+              "x": 55
+            },
+            {
+              "_id": 6,
+              "x": 66
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll0",
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "batchSize": 2
+                },
+                "commandName": "find",
+                "databaseName": "find-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll0",
+                  "batchSize": 2
+                },
+                "commandName": "getMore",
+                "databaseName": "find-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll0",
+                  "batchSize": 2
+                },
+                "commandName": "getMore",
+                "databaseName": "find-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

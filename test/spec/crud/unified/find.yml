@@ -1,0 +1,68 @@
+description: "find"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true # ensure cursors pin to a single server
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name find-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+      - { _id: 4, x: 44 }
+      - { _id: 5, x: 55 }
+      - { _id: 6, x: 66 }
+
+tests:
+  - description: "find with multiple batches works"
+    operations:
+      - name: find
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          batchSize: 2
+        object: *collection0
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 44 }
+          - { _id: 5, x: 55 }
+          - { _id: 6, x: 66 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: { $gt: 1 } }
+                batchSize: 2
+              commandName: find
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+              commandName: getMore
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+              commandName: getMore
+              databaseName: *database0Name
+

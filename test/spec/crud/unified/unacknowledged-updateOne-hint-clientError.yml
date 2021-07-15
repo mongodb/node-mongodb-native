@@ -1,0 +1,84 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: unacknowledged-updateOne-hint-clientError
+schemaVersion: '1.0'
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name UpdateOne_hint
+      collectionOptions:
+        writeConcern: { w: 0 }
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+tests:
+  -
+    description: 'Unacknowledged updateOne with hint string fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: &filter
+            _id:
+              $gt: 1
+          update: &update
+            $inc:
+              x: 1
+          hint: _id_
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+  -
+    description: 'Unacknowledged updateOne with hint document fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: *filter
+          update: *update
+          hint:
+            _id: 1
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: *outcome

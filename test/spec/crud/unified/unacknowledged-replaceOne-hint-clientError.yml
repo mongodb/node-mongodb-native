@@ -1,0 +1,83 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: unacknowledged-replaceOne-hint-clientError
+schemaVersion: '1.0'
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name ReplaceOne_hint
+      collectionOptions:
+        writeConcern: { w: 0 }
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+tests:
+  -
+    description: 'Unacknowledged ReplaceOne with hint string fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: &filter
+            _id:
+              $gt: 1
+          replacement: &replacement
+            x: 111
+          hint: _id_
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+  -
+    description: 'Unacknowledged ReplaceOne with hint document fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: *filter
+          replacement: *replacement
+          hint:
+            _id: 1
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: *outcome
