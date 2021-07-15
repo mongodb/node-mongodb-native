@@ -1,0 +1,190 @@
+description: "poc-crud"
+
+schemaVersion: "1.4"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - database:
+      id: &database1 database1
+      client: *client0
+      databaseName: &database1Name admin
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+  - collection:
+      id: &collection1 collection1
+      database: *database0
+      collectionName: &collection1Name coll1
+  - collection:
+      id: &collection2 collection2
+      database: *database0
+      collectionName: &collection2Name coll2
+      collectionOptions:
+        readConcern: { level: majority }
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+  - collectionName: *collection1Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+  - collectionName: *collection2Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+  - collectionName: &out aggregate_out
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "BulkWrite with mixed ordered operations"
+    operations:
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 3, x: 33 }
+            - updateOne:
+                filter: { _id: 2 }
+                update: { $inc: { x: 1 } }
+            - updateMany:
+                filter: { _id: { $gt: 1 } }
+                update: { $inc: { x: 1 } }
+            - insertOne:
+                document: { _id: 4, x: 44 }
+            - deleteMany:
+                filter: { x: { $nin: [ 24, 34 ] } }
+            - replaceOne:
+                filter: { _id: 4 }
+                replacement: { _id: 4, x: 44 }
+                upsert: true
+          ordered: true
+        expectResult:
+          deletedCount: 2
+          insertedCount: 2
+          insertedIds: { $$unsetOrMatches: { 0: 3, 3: 4 } }
+          matchedCount: 3
+          modifiedCount: 3
+          upsertedCount: 1
+          upsertedIds: { 5: 4 }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - {_id: 2, x: 24 }
+          - {_id: 3, x: 34 }
+          - {_id: 4, x: 44 }
+
+  - description: "InsertMany continue-on-error behavior with unordered (duplicate key in requests)"
+    operations:
+      - name: insertMany
+        object: *collection1
+        arguments:
+          documents:
+            - { _id: 2, x: 22 }
+            - { _id: 2, x: 22 }
+            - { _id: 3, x: 33 }
+          ordered: false
+        expectError:
+          expectResult:
+            # insertMany throws BulkWriteException, which may optionally include
+            # an intermediary BulkWriteResult
+            $$unsetOrMatches:
+              deletedCount: 0
+              insertedCount: 2
+              # Since the map of insertedIds is generated before execution it
+              # could indicate inserts that did not actually succeed. We omit
+              # this field rather than expect drivers to provide an accurate
+              # map filtered by write errors.
+              matchedCount: 0
+              modifiedCount: 0
+              upsertedCount: 0
+              upsertedIds: { }
+    outcome:
+      - collectionName: *collection1Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+
+  - description: "ReplaceOne prohibits atomic modifiers"
+    operations:
+      - name: replaceOne
+        object: *collection1
+        arguments:
+          filter: { _id: 1 }
+          replacement: { $set: { x: 22 }}
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *client0
+        events: []
+    outcome:
+      - collectionName: *collection1Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+
+  - description: "readConcern majority with out stage"
+    runOnRequirements:
+      - minServerVersion: "4.1.0"
+        topologies: [ replicaset, sharded-replicaset ]
+        serverless: "forbid"
+    operations:
+      - name: aggregate
+        object: *collection2
+        arguments:
+          pipeline: &pipeline
+            - $sort: { x : 1 }
+            - $match: { _id: { $gt: 1 } }
+            - $out: *out
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection2Name
+                pipeline: *pipeline
+                readConcern: { level: majority }
+              # The following two assertions were not in the original test
+              commandName: aggregate
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *out
+        databaseName: *database0Name
+        documents:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+
+  - description: "Aggregate with $listLocalSessions"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        # serverless does not support either of the current database-level aggregation stages ($listLocalSessions and
+        # $currentOp)
+        serverless: forbid
+    operations:
+      - name: aggregate
+        object: *database1
+        arguments:
+          pipeline:
+            - $listLocalSessions: { }
+            - $limit: 1
+            - $addFields: { dummy: "dummy field"}
+            - $project: { _id: 0, dummy: 1}
+        expectResult:
+          - { dummy: "dummy field" }

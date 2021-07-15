@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-serverless-type",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "serverless": 1234
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}
