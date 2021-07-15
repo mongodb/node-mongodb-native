@@ -18,7 +18,6 @@ class ServerlessFilter {
 
   initializeFilter(client, context, callback) {
     if (this.serverless) {
-      console.log('saving serverless credentials in test filter');
       context.serverlessCredentials = {
         username: process.env.SERVERLESS_ATLAS_USER,
         password: process.env.SERVERLESS_ATLAS_PASSWORD
