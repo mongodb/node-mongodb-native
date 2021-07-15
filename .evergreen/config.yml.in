@@ -160,6 +160,7 @@ functions:
       type: test
       params:
         working_dir: "src"
+        timeout_secs: 1800
         script: |
           ${PREPARE_SHELL}
           set +o xtrace
@@ -628,6 +629,7 @@ tasks:
       tags: ["serverless"]
       commands:
         - func: "run serverless tests"
+        - func: "upload test results"
 
 task_groups:
   - name: serverless_task_group
