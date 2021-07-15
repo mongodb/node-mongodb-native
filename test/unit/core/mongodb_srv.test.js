@@ -25,7 +25,7 @@ describe('mongodb+srv', function () {
       }
 
       // TODO: Remove with NODE-3011
-      const maybeIt = test[1].comment.includes('loadBalanced') ? it.skip : it.only;
+      const maybeIt = test[1].comment.includes('loadBalanced') ? it.skip : it;
       maybeIt(test[1].comment, {
         metadata: { requires: { topology: ['single'] } },
         test: function (done) {
