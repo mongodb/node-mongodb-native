@@ -270,6 +270,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
+      // TODO(NODE-3405): Change this out for MongoServerClosedError
       callback(new MongoInvalidArgumentError('Server is closed'));
       return;
     }

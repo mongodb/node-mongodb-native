@@ -328,7 +328,7 @@ export class Db {
     if (!options) {
       options = {};
     } else if (typeof options === 'function') {
-      // TODO: Remove this error and refactor this function in driver 5.0
+      // TODO(NODE-3402): Remove this error and refactor this function in driver 5.0
       throw new MongoDriverError('The callback form of this helper has been removed.');
     }
     const finalOptions = resolveOptions(this, options);

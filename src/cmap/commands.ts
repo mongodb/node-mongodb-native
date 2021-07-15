@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoInvalidArgumentError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -857,7 +857,7 @@ export class BinMsg {
 
         // TODO(NODE-3402): Replace with error to be determined as per conversation in
         // https://github.com/mongodb/node-mongodb-native/pull/2891/files/217705feab16bf235e385b1a7b2381575dac0d76
-        throw new MongoInvalidArgumentError('OP_MSG Payload Type 1 detected unsupported protocol');
+        throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
 

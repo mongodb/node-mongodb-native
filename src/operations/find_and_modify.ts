@@ -205,7 +205,7 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
   constructor(collection: Collection, filter: Document, options: FindOneAndDeleteOptions) {
     // Basic validation
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoInvalidArgumentError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Argument "filter" must be an object');
     }
 
     super(collection, filter, options);
@@ -222,11 +222,11 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     options: FindOneAndReplaceOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoInvalidArgumentError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Argument "filter" must be an object');
     }
 
     if (replacement == null || typeof replacement !== 'object') {
-      throw new MongoInvalidArgumentError('Replacement parameter must be an object');
+      throw new MongoInvalidArgumentError('Argument "replacement" must be an object');
     }
 
     if (hasAtomicOperators(replacement)) {
@@ -248,11 +248,11 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     options: FindOneAndUpdateOptions
   ) {
     if (filter == null || typeof filter !== 'object') {
-      throw new MongoInvalidArgumentError('Filter parameter must be an object');
+      throw new MongoInvalidArgumentError('Argument "filter" must be an object');
     }
 
     if (update == null || typeof update !== 'object') {
-      throw new MongoInvalidArgumentError('Update parameter must be an object');
+      throw new MongoInvalidArgumentError('Argument "update" must be an object');
     }
 
     if (!hasAtomicOperators(update)) {
