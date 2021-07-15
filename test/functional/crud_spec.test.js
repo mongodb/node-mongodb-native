@@ -20,6 +20,9 @@ function enforceServerVersionLimits(requires, scenario) {
   if (versionLimits.length) {
     requires.mongodb = versionLimits.join(' ');
   }
+  if (scenario.serverless) {
+    requires.serverless = scenario.serverless;
+  }
 }
 
 function findScenarios() {
@@ -35,7 +38,7 @@ const readScenarios = findScenarios('v1', 'read');
 const writeScenarios = findScenarios('v1', 'write');
 
 const testContext = {};
-describe('CRUD spec', function () {
+describe('CRUD spec v1', function () {
   beforeEach(function () {
     const configuration = this.configuration;
     const client = configuration.newClient();

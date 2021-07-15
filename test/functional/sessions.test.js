@@ -64,7 +64,12 @@ describe('Sessions - functional', function () {
   });
 
   describe('withSession', {
-    metadata: { requires: { mongodb: '>=3.6.0' } },
+    metadata: {
+      requires: {
+        mongodb: '>=3.6.0',
+        serverless: 'forbid' // UnhandledPromiseRejectionWarning: MongoServerError: CMD_NOT_ALLOWED: dropAllUsersFromDatabase
+      }
+    },
     test: function () {
       beforeEach(function () {
         return test.setup(this.configuration);
