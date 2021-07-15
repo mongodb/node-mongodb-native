@@ -1,0 +1,43 @@
+description: ignoreResultAndError  
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: operation errors are not ignored if ignoreResultAndError is false
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &insertDocument { _id: 1 }
+      - name: insertOne
+        object: *collection0
+        arguments:
+          # Insert the same document to force a DuplicateKey error.
+          document: *insertDocument
+        ignoreResultAndError: false
+
+  - description: malformed operation fails if ignoreResultAndError is true
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          foo: bar
+        ignoreResultAndError: true

@@ -1,0 +1,1750 @@
+{
+  "collection_name": "test",
+  "database_name": "change-stream-tests",
+  "tests": [
+    {
+      "description": "change stream resumes after a network error",
+      "minServerVersion": "4.2",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "closeConnection": true
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after HostUnreachable",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 6,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after HostNotFound",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 7,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after NetworkTimeout",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 89,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after ShutdownInProgress",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 91,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after PrimarySteppedDown",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 189,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after ExceededTimeLimit",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 262,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after SocketException",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 9001,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after NotMaster",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 10107,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after InterruptedAtShutdown",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 11600,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after InterruptedDueToReplStateChange",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 11602,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after NotMasterNoSlaveOk",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 13435,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after NotMasterOrSecondary",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 13436,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after StaleShardVersion",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 63,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after StaleEpoch",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 150,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after RetryChangeStream",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 234,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after FailedToSatisfyReadPreference",
+      "minServerVersion": "4.2",
+      "maxServerVersion": "4.2.99",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 133,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "change stream resumes after CursorNotFound",
+      "minServerVersion": "4.2",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "getMore"
+          ],
+          "errorCode": 43,
+          "closeConnection": false
+        }
+      },
+      "target": "collection",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": 42,
+              "collection": "test"
+            },
+            "command_name": "getMore",
+            "database_name": "change-stream-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {}
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "_id": "42",
+            "documentKey": "42",
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

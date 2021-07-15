@@ -1,0 +1,14 @@
+topology_description:
+  type: LoadBalanced
+  servers:
+  - &1
+    address: g:27017
+    avg_rtt_ms: 0
+    type: LoadBalancer
+operation: read
+read_preference:
+  mode: Primary
+suitable_servers:
+- *1
+in_latency_window:
+- *1

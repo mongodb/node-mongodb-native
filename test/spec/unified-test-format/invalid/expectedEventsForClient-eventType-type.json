@@ -1,0 +1,24 @@
+{
+  "description": "expectedEventsForClient-eventType-type",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "invalid eventType type",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": 10,
+          "events": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+description: connection establishment if loadBalanced is specified for non-load balanced clusters
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  # Don't run on replica sets because the URI used to configure the clients will contain multiple hosts and the
+  # replicaSet option, which will cause an error when constructing the lbTrueClient entity.
+  - topologies: [ single, sharded ]
+
+createEntities:
+  - client:
+      id: &lbTrueClient lbTrueClient
+      # Restrict to a single mongos to ensure there are not multiple hosts in the URI, which would conflict with
+      # loadBalanced=true.
+      useMultipleMongoses: false
+      uriOptions:
+        loadBalanced: true
+  - database:
+      id: &lbTrueDatabase lbTrueDatabase
+      client: *lbTrueClient
+      databaseName: &lbTrueDatabaseName lbTrueDb
+  - client:
+      id: &lbFalseClient lbFalseClient
+      uriOptions:
+        loadBalanced: false
+  - database:
+      id: &lbFalseDatabase lbFalseDatabase
+      client: *lbFalseClient
+      databaseName: &lbFalseDatabaseName lbFalseDb
+
+_yamlAnchors:
+  runCommandArguments:
+    - &pingArguments
+      arguments:
+        commandName: ping
+        command: { ping: 1 }
+
+tests:
+  # These tests assert that drivers behave correctly if loadBalanced=true/false for non-load balanced clusters. Existing
+  # spec tests should cover the case where loadBalanced is unset.
+
+  # If the server is not configured to be behind a load balancer and the URI contains loadBalanced=true, the driver
+  # should error during the connection handshake because the server's hello response does not contain a serviceId field.
+  - description: operations against non-load balanced clusters fail if URI contains loadBalanced=true
+    operations:
+      - name: runCommand
+        object: *lbTrueDatabase
+        <<: *pingArguments
+        expectError:
+          errorContains: Driver attempted to initialize in load balancing mode, but the server does not support this mode
+
+  - description: operations against non-load balanced clusters succeed if URI contains loadBalanced=false
+    operations:
+      - name: runCommand
+        object: *lbFalseDatabase
+        <<: *pingArguments

@@ -1,0 +1,17 @@
+{
+  "description": "operation-ignoreResultAndError-conflicts_with_saveResultAsEntity",
+  "schemaVersion": "1.3",
+  "tests": [
+    {
+      "description": "ignoreResultAndError used with saveResultAsEntity",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "bar",
+          "ignoreResultAndError": true,
+          "saveResultAsEntity": "entity0"
+        }
+      ]
+    }
+  ]
+}

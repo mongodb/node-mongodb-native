@@ -1,0 +1,16 @@
+description: "entity-client-storeEventsAsEntities-conflict_with_client_id"
+
+schemaVersion: "1.2"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      storeEventsAsEntities:
+        # Using the client ID here will ensure that test runners also detect
+        # conflicts with the same entity being defined
+        - id: *client0
+          events: ["PoolCreatedEvent", "PoolReadyEvent", "PoolClearedEvent", "PoolClosedEvent"]
+
+tests:
+  - description: "foo"
+    operations: []

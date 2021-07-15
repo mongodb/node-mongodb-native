@@ -1,0 +1,508 @@
+{
+  "description": "state change errors are correctly handled",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "load-balanced"
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "observedEvents": [
+      "connectionCreatedEvent",
+      "connectionReadyEvent",
+      "connectionCheckedOutEvent",
+      "connectionCheckOutFailedEvent",
+      "connectionCheckedInEvent",
+      "connectionClosedEvent",
+      "poolClearedEvent"
+    ]
+  },
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "singleClient",
+        "useMultipleMongoses": false,
+        "uriOptions": {
+          "appname": "lbSDAMErrorTestClient",
+          "retryWrites": false
+        },
+        "observeEvents": [
+          "connectionCreatedEvent",
+          "connectionReadyEvent",
+          "connectionCheckedOutEvent",
+          "connectionCheckOutFailedEvent",
+          "connectionCheckedInEvent",
+          "connectionClosedEvent",
+          "poolClearedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "singleDB",
+        "client": "singleClient",
+        "databaseName": "singleDB"
+      }
+    },
+    {
+      "collection": {
+        "id": "singleColl",
+        "database": "singleDB",
+        "collectionName": "singleColl"
+      }
+    },
+    {
+      "client": {
+        "id": "multiClient",
+        "useMultipleMongoses": true,
+        "uriOptions": {
+          "retryWrites": false
+        },
+        "observeEvents": [
+          "connectionCreatedEvent",
+          "connectionReadyEvent",
+          "connectionCheckedOutEvent",
+          "connectionCheckOutFailedEvent",
+          "connectionCheckedInEvent",
+          "connectionClosedEvent",
+          "poolClearedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "multiDB",
+        "client": "multiClient",
+        "databaseName": "multiDB"
+      }
+    },
+    {
+      "collection": {
+        "id": "multiColl",
+        "database": "multiDB",
+        "collectionName": "multiColl"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "singleColl",
+      "databaseName": "singleDB",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        },
+        {
+          "_id": 3
+        }
+      ]
+    },
+    {
+      "collectionName": "multiColl",
+      "databaseName": "multiDB",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        },
+        {
+          "_id": 3
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "only connections for a specific serviceId are closed when pools are cleared",
+      "operations": [
+        {
+          "name": "createFindCursor",
+          "object": "multiColl",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2
+          },
+          "saveResultAsEntity": "cursor0"
+        },
+        {
+          "name": "createFindCursor",
+          "object": "multiColl",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2
+          },
+          "saveResultAsEntity": "cursor1"
+        },
+        {
+          "name": "close",
+          "object": "cursor0"
+        },
+        {
+          "name": "close",
+          "object": "cursor1"
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "multiClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "multiColl",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          },
+          "expectError": {
+            "errorCode": 11600
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "multiColl",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "multiClient",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "poolClearedEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "stale"
+              }
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "errors during the initial connection hello are ignore",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "isMaster"
+                ],
+                "closeConnection": true,
+                "appName": "lbSDAMErrorTestClient"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "singleColl",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "singleClient",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "error"
+              }
+            },
+            {
+              "connectionCheckOutFailedEvent": {
+                "reason": "connectionError"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "errors during authentication are processed",
+      "runOnRequirements": [
+        {
+          "auth": true
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "saslContinue"
+                ],
+                "closeConnection": true,
+                "appName": "lbSDAMErrorTestClient"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "singleColl",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "singleClient",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "poolClearedEvent": {}
+            },
+            {
+              "connectionClosedEvent": {
+                "reason": "error"
+              }
+            },
+            {
+              "connectionCheckOutFailedEvent": {
+                "reason": "connectionError"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "stale errors are ignored",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "singleColl",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2
+          },
+          "saveResultAsEntity": "cursor0"
+        },
+        {
+          "name": "createFindCursor",
+          "object": "singleColl",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2
+          },
+          "saveResultAsEntity": "cursor1"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor0"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor0"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor0",
+          "expectError": {
+            "isClientError": true
+          }
+        },
+        {
+          "name": "close",
+          "object": "cursor0"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor1"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor1"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor1",
+          "expectError": {
+            "isClientError": true
+          }
+        },
+        {
+          "name": "close",
+          "object": "cursor1"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "singleClient",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "connectionCreatedEvent": {}
+            },
+            {
+              "connectionReadyEvent": {}
+            },
+            {
+              "connectionCheckedOutEvent": {}
+            },
+            {
+              "poolClearedEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {}
+            },
+            {
+              "connectionCheckedInEvent": {}
+            },
+            {
+              "connectionClosedEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "description": "connection establishment for load-balanced clusters",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "uriOptions": {
+          "loadBalanced": false
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "operations against load balancers fail if URI contains loadBalanced=false",
+      "skipReason": "servers have not implemented LB support yet so they will not fail the connection handshake in this case",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    }
+  ]
+}
