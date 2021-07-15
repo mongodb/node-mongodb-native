@@ -200,16 +200,11 @@ describe('Sessions - functional', function () {
     for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
       expect(sessionTests).to.be.an('object');
       context(String(sessionTests.description), function () {
-        // TODO: NODE-3393 fix test runner to apply session to all operations
-        const skipTestMap = {
-          'snapshot-sessions': ['Distinct operation with snapshot']
-        };
-        const testsToSkip = skipTestMap[sessionTests.description] || [];
         for (const test of sessionTests.tests) {
           it(String(test.description), {
             metadata: { sessions: { skipLeakTests: true } },
             test: async function () {
-              await runUnifiedTest(this, sessionTests, test, testsToSkip);
+              await runUnifiedTest(this, sessionTests, test);
             }
           });
         }
