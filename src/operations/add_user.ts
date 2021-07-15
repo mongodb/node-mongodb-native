@@ -55,7 +55,7 @@ export class AddUserOperation extends CommandOperation<Document> {
     if (options.digestPassword != null) {
       return callback(
         new MongoInvalidArgumentError(
-          'Option "digestPassword" not supported via add_user, use db.command(\'createUser\', ...) instead'
+          'Option "digestPassword" not supported via addUser, use db.command(...) instead'
         )
       );
     }
