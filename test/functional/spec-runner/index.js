@@ -147,6 +147,25 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 this.skip();
               }
 
+              if (requires.serverless) {
+                console.log('applying serverless requirement in spec runner');
+                const isServerless = !!process.env.SERVERLESS;
+                switch (requires.serverless) {
+                  case 'forbid':
+                    // return true if the configuration is NOT serverless
+                    if (isServerless) this.skip();
+                    break;
+                  case 'allow':
+                    // always run
+                    break;
+                  case 'require':
+                    if (!isServerless) this.skip();
+                    break;
+                  default:
+                    throw new Error(`Invalid serverless filter: ${requires.serverless}`);
+                }
+              }
+
               if (
                 spec.operations.some(
                   op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'

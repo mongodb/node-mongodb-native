@@ -46,7 +46,7 @@ describe('Retryable Writes', function () {
 });
 
 function executeScenarioSetup(scenario, test, config, ctx) {
-  const url = process.env.SERVERLESS ? process.env.MONGODB_URI : config.url();
+  const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
     heartbeatFrequencyMS: 100,
     monitorCommands: true,

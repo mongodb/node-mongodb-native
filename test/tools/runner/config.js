@@ -202,6 +202,8 @@ class TestConfiguration {
    * @param {UrlOptions} [options] - overrides and settings for URI generation
    */
   url(options) {
+    // FIXME: hack to get tests passing, auth fails without this
+    if (this.isServerless) return process.env.MONGODB_URI;
     options = { db: this.options.db, replicaSet: this.options.replicaSet, ...options };
 
     const FILLER_HOST = 'fillerHost';

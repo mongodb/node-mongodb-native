@@ -135,10 +135,14 @@ functions:
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run serverless tests:
+    - command: timeout.update
+      params:
+        exec_timeout_secs: 1800
     - command: shell.exec
       type: test
       params:
         working_dir: src
+        continue_on_err: true
         script: |
           ${PREPARE_SHELL}
           set +o xtrace
@@ -588,6 +592,7 @@ tasks:
       - serverless
     commands:
       - func: run serverless tests
+      - func: upload test results
   - name: test-latest-server
     tags:
       - latest
