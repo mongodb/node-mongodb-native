@@ -219,8 +219,8 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, sort, batchSize, limit, let: vars } = operation.arguments;
-  const cursor = collection.find(filter, { sort, batchSize, limit, let: vars });
+  const { filter, ...opts } = operation.arguments;
+  const cursor = collection.find(filter, opts);
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
   // this.
@@ -242,7 +242,8 @@ operations.set('deleteOne', async ({ entities, operation }) => {
 
 operations.set('dropCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  return await db.dropCollection(operation.arguments.collection);
+  const { collection, ...opts } = operation.arguments;
+  return await db.dropCollection(collection, opts);
 });
 
 operations.set('endSession', async ({ entities, operation }) => {
@@ -317,12 +318,8 @@ operations.set('listIndexes', async ({ entities, operation }) => {
 
 operations.set('replaceOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.replaceOne(operation.arguments.filter, operation.arguments.replacement, {
-    bypassDocumentValidation: operation.arguments.bypassDocumentValidation,
-    collation: operation.arguments.collation,
-    hint: operation.arguments.hint,
-    upsert: operation.arguments.upsert
-  });
+  const { filter, replacement, ...opts } = operation.arguments;
+  return collection.replaceOne(filter, replacement, opts);
 });
 
 operations.set('startTransaction', async ({ entities, operation }) => {
@@ -396,7 +393,8 @@ operations.set('countDocuments', async ({ entities, operation }) => {
 
 operations.set('deleteMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.deleteMany(operation.arguments.filter);
+  const { filter, ...opts } = operation.arguments;
+  return collection.deleteMany(filter, opts);
 });
 
 operations.set('distinct', async ({ entities, operation }) => {
@@ -412,7 +410,8 @@ operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
 
 operations.set('findOneAndDelete', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.findOneAndDelete(operation.arguments.filter);
+  const { filter, ...opts } = operation.arguments;
+  return collection.findOneAndDelete(filter, opts);
 });
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
