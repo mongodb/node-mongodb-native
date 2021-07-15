@@ -9,7 +9,8 @@
     {
       "minServerVersion": "4.1.7",
       "topology": [
-        "sharded"
+        "sharded",
+        "load-balanced"
       ]
     }
   ],

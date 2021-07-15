@@ -1,0 +1,29 @@
+{
+  "description": "expectedCommandEvent-commandStartedEvent-commandName-type",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

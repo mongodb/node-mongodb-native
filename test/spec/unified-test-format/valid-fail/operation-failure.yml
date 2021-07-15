@@ -1,0 +1,31 @@
+description: "operation-failure"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: operation-failure
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: coll0
+
+tests:
+  - description: "Unsupported command"
+    operations:
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: unsupportedCommand
+          command: { unsupportedCommand: 1 }
+
+  - description: "Unsupported query operator"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: { $unsupportedQueryOperator: 1 }

@@ -1,0 +1,16 @@
+description: "entity-client-storeEventsAsEntities-conflict_within_same_array"
+
+schemaVersion: "1.2"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      storeEventsAsEntities:
+        - id: &events events
+          events: ["PoolCreatedEvent", "PoolReadyEvent", "PoolClearedEvent", "PoolClosedEvent"]
+        - id: *events
+          events: ["CommandStartedEvent", "CommandSucceededEvent", "CommandFailedEvent"]
+
+tests:
+  - description: "foo"
+    operations: []

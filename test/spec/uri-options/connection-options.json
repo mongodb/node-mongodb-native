@@ -167,6 +167,73 @@
       "hosts": null,
       "auth": null,
       "options": {}
+    },
+    {
+      "description": "loadBalanced=true",
+      "uri": "mongodb://example.com/?loadBalanced=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "loadBalanced": true
+      }
+    },
+    {
+      "description": "loadBalanced=false",
+      "uri": "mongodb://example.com/?loadBalanced=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "loadBalanced": false
+      }
+    },
+    {
+      "description": "Invalid loadBalanced value",
+      "uri": "mongodb://example.com/?loadBalanced=1",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "loadBalanced=true with multiple hosts causes an error",
+      "uri": "mongodb://example1,example2/?loadBalanced=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "loadBalanced=true with directConnection=true causes an error",
+      "uri": "mongodb://example.com/?loadBalanced=true&directConnection=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "loadBalanced=true with directConnection=false causes an error",
+      "uri": "mongodb://example.com/?loadBalanced=true&directConnection=false",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "loadBalanced=true with replicaSet causes an error",
+      "uri": "mongodb://example.com/?loadBalanced=true&replicaSet=replset",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
     }
   ]
 }

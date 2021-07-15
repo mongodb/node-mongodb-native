@@ -93,7 +93,7 @@ tests:
               closeConnection: true
       # Find options and expected result changed to use common initialData
       - name: find
-        object: collection0
+        object: *collection0
         arguments:
           filter: {}
           sort: { _id: 1 }
@@ -127,7 +127,7 @@ tests:
               failCommands: [ find ]
               closeConnection: true
       - name: find
-        object: collection1 # client uses retryReads=false
+        object: *collection1 # client uses retryReads=false
         arguments:
           filter: {}
           # Other arguments in the original test are not relevant
@@ -154,7 +154,7 @@ tests:
               failCommands: [ find ]
               closeConnection: true
       - name: find
-        object: collection0
+        object: *collection0
         arguments:
           filter: {}
           # Other arguments in the original test are not relevant

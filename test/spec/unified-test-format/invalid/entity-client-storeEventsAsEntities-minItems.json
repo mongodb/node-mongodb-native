@@ -1,0 +1,18 @@
+{
+  "description": "entity-client-storeEventsAsEntities-minItems",
+  "schemaVersion": "1.2",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "storeEventsAsEntities": []
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

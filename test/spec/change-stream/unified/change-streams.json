@@ -1,0 +1,116 @@
+{
+  "description": "change-streams",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Test array truncation",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.7",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1,
+              "array": [
+                "foo",
+                {
+                  "a": "bar"
+                },
+                1,
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": [
+              {
+                "$set": {
+                  "array": [
+                    "foo",
+                    {
+                      "a": "bar"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "updateDescription": {
+              "updatedFields": {},
+              "removedFields": [],
+              "truncatedArrays": [
+                {
+                  "field": "array",
+                  "newSize": 2
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

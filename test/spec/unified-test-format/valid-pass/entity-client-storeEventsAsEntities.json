@@ -1,0 +1,67 @@
+{
+  "description": "entity-client-storeEventsAsEntities",
+  "schemaVersion": "1.2",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "storeEventsAsEntities": [
+          {
+            "id": "client0_events",
+            "events": [
+              "CommandStartedEvent",
+              "CommandSucceededEvent",
+              "CommandFailedEvent"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "test",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "storeEventsAsEntities captures events",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": 11
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

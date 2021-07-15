@@ -11,16 +11,11 @@
   "tests": [
     {
       "description": "foo",
-      "operations": [
+      "operations": [],
+      "expectEvents": [
         {
-          "name": "foo",
-          "object": "client0",
-          "expectEvents": [
-            {
-              "client": 0,
-              "events": []
-            }
-          ]
+          "client": 0,
+          "events": []
         }
       ]
     }

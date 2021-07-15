@@ -1,0 +1,38 @@
+description: assertNumberConnectionsCheckedOut
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+
+tests:
+  - description: operation fails if client field is not specified
+    operations:
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          connections: 1
+
+  - description: operation fails if connections field is not specified
+    operations:
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+
+  - description: operation fails if client entity does not exist
+    operations:
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: client1
+
+  - description: operation fails if number of connections is incorrect
+    operations:
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 1

@@ -1,0 +1,503 @@
+description: cursors are correctly pinned to connections for load-balanced clusters
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+        - connectionReadyEvent
+        - connectionClosedEvent
+        - connectionCheckedOutEvent
+        - connectionCheckedInEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+  - collection:
+      id: &collection1 collection1
+      database: *database0
+      collectionName: &collection1Name coll1
+  - collection:
+      id: &collection2 collection2
+      database: *database0
+      collectionName: &collection2Name coll2
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2 }
+      - { _id: 3 }
+  - collectionName: *collection1Name
+    databaseName: *database0Name
+    documents: []
+  - collectionName: *collection2Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: no connection is pinned if all documents are returned in the initial batch
+    operations:
+      - name: createFindCursor
+        object: *collection0
+        arguments:
+          filter: {}
+        saveResultAsEntity: &cursor0 cursor0
+      - &assertConnectionNotPinned
+        name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: {}
+              commandName: find
+          - commandSucceededEvent:
+              reply:
+                cursor:
+                  id: 0
+                  firstBatch: { $$type: array }
+                  ns: { $$type: string }
+              commandName: find
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: pinned connections are returned when the cursor is drained
+    operations:
+      - &createAndSaveCursor
+        name: createFindCursor
+        object: *collection0
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor0 cursor0
+      - &assertConnectionPinned
+        name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 1
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 1 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 2 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 3 }
+      - *assertConnectionNotPinned
+      - &closeCursor
+        name: close
+        object: *cursor0
+    expectEvents:
+      - client: *client0
+        events:
+          - &findWithBatchSizeStarted
+            commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: {}
+                batchSize: 2
+              commandName: find
+          - &findWithBatchSizeSucceeded
+            commandSucceededEvent:
+              reply:
+                cursor:
+                  id: { $$type: long }
+                  firstBatch: { $$type: array }
+                  ns: { $$type: string }
+              commandName: find
+          - &getMoreStarted
+            commandStartedEvent:
+              command:
+                getMore: { $$type: long }
+                collection: *collection0Name
+              commandName: getMore
+          - &getMoreSucceeded
+            commandSucceededEvent:
+              reply:
+                cursor:
+                  id: 0
+                  ns: { $$type: string }
+                  nextBatch: { $$type: array }
+              commandName: getMore
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: pinned connections are returned to the pool when the cursor is closed
+    operations:
+      - *createAndSaveCursor
+      - *assertConnectionPinned
+      - *closeCursor
+      - *assertConnectionNotPinned
+    expectEvents:
+      - client: *client0
+        events:
+          - *findWithBatchSizeStarted
+          - *findWithBatchSizeSucceeded
+          - &killCursorsStarted
+            commandStartedEvent:
+              commandName: killCursors
+          - &killCursorsSucceeded
+            commandSucceededEvent:
+              commandName: killCursors
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  # If a network error occurs during a getMore request, the connection must remain pinned. and drivers must not
+  # attempt to send a killCursors command when the cursor is closed because the connection is no longer valid.
+  - description: pinned connections are not returned after an network error during getMore
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ getMore ]
+              closeConnection: true
+      - *createAndSaveCursor
+      - *assertConnectionPinned
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult:
+          _id: 1
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult:
+          _id: 2
+      # Third next() call should perform a getMore.
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectError:
+          # Network errors are considered client-side errors per the unified test format spec.
+          isClientError: true
+      - *assertConnectionPinned
+      - *closeCursor # Execute a close operation to actually release the connection.
+      - *assertConnectionNotPinned
+    expectEvents:
+      - client: *client0
+        events:
+          - *findWithBatchSizeStarted
+          - *findWithBatchSizeSucceeded
+          - *getMoreStarted
+          - &getMoreFailed
+            commandFailedEvent:
+              commandName: getMore
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events to set the failpoint.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # Events for the find command + getMore.
+          - connectionCheckedOutEvent: {}
+          # Events for the close() operation.
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent:
+              reason: error
+
+  - description: pinned connections are returned after a network error during a killCursors request
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ killCursors ]
+              closeConnection: true
+      - *createAndSaveCursor
+      - *assertConnectionPinned
+      - *closeCursor
+      - *assertConnectionNotPinned
+    expectEvents:
+      - client: *client0
+        events:
+          - *findWithBatchSizeStarted
+          - *findWithBatchSizeSucceeded
+          - *killCursorsStarted
+          - commandFailedEvent:
+              commandName: killCursors
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events to set the failpoint.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # Events for the find command + killCursors.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent:
+              reason: error
+
+  - description: pinned connections are not returned to the pool after a non-network error on getMore
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ getMore ]
+              errorCode: &hostNotFoundCode 7 # This is not a state change error code, so it should not cause SDAM changes.
+      - *createAndSaveCursor
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult:
+          _id: 1
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult:
+          _id: 2
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectError:
+          errorCode: *hostNotFoundCode
+      - *assertConnectionPinned
+      - *closeCursor
+      - *assertConnectionNotPinned
+    expectEvents:
+      - client: *client0
+        events:
+          - *findWithBatchSizeStarted
+          - *findWithBatchSizeSucceeded
+          - *getMoreStarted
+          - *getMoreFailed
+          - *killCursorsStarted
+          - *killCursorsSucceeded
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events to set the failpoint.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # Events for the find command + getMore + killCursors.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  # Basic tests for cursor-creating commands besides "find". We don't need to replicate the full set of tests defined
+  # above for each such command. Instead, only one test is needed per command to ensure that the pinned connection is
+  # correctly passed down to the server.
+  #
+  # Each test creates a cursor with a small batch size and fully iterates it. Because drivers do not publish CMAP
+  # events when using pinned connections, each test asserts that only one set of ready/checkout/checkin events are
+  # published.
+
+  - description: aggregate pins the cursor to a connection
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: []
+          batchSize: 2
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                cursor:
+                  batchSize: 2
+              commandName: aggregate
+          - commandSucceededEvent:
+              commandName: aggregate
+          - *getMoreStarted
+          - *getMoreSucceeded
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: listCollections pins the cursor to a connection
+    operations:
+      - name: listCollections
+        object: *database0
+        arguments:
+          filter: {}
+          batchSize: 2
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                cursor:
+                  batchSize: 2
+              commandName: listCollections
+              databaseName: *database0Name
+          - commandSucceededEvent:
+              commandName: listCollections
+          # Write out the event for getMore rather than using the getMoreStarted anchor because the "collection" field
+          # is not equal to *collection0Name as the command is not executed against a collection.
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: long }
+                collection: { $$type: string }
+              commandName: getMore
+          - *getMoreSucceeded
+      - client: *client0
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: listIndexes pins the cursor to a connection
+    operations:
+      # There is an automatic index on _id so we create two more indexes to force multiple batches with batchSize=2.
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: &x1IndexSpec { x: 1 }
+          name: &x1IndexName x_1
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: &y1IndexSpec { y: 1 }
+          name: &y1IndexName y_1
+      - name: listIndexes
+        object: *collection0
+        arguments:
+          batchSize: 2
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                createIndexes: *collection0Name
+                indexes:
+                  - name: *x1IndexName
+                    key: *x1IndexSpec
+              commandName: createIndexes
+          - commandSucceededEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              command:
+                createIndexes: *collection0Name
+                indexes:
+                  - name: *y1IndexName
+                    key: *y1IndexSpec
+              commandName: createIndexes
+          - commandSucceededEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              command:
+                listIndexes: *collection0Name
+                cursor:
+                  batchSize: 2
+              commandName: listIndexes
+              databaseName: *database0Name
+          - commandSucceededEvent:
+              commandName: listIndexes
+          - *getMoreStarted
+          - *getMoreSucceeded
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events for first createIndexes.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # Events for second createIndexes.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          # Events for listIndexes and getMore.
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: change streams pin to a connection
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 1
+      - name: close
+        object: *changeStream0
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client0
+          connections: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandSucceededEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: killCursors
+          - commandSucceededEvent:
+              commandName: killCursors
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events for creating the change stream.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          # Events for closing the change stream.
+          - connectionCheckedInEvent: {}
