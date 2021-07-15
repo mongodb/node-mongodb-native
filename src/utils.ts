@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
-import { AnyError, MongoParseError, MongoDriverError } from './error';
+import { AnyError, MongoParseError, MongoDriverError, MongoNotConnectedError } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
@@ -458,7 +458,7 @@ export function getTopology<T>(provider: MongoClient | Db | Collection<T>): Topo
     return provider.s.db.s.client.topology;
   }
 
-  throw new MongoDriverError('MongoClient must be connected to perform this operation');
+  throw new MongoNotConnectedError('MongoClient must be connected to perform this operation');
 }
 
 /**

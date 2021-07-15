@@ -1,7 +1,7 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { AnyError, MongoDriverError } from './error';
+import { AnyError, MongoDriverError, MongoNotConnectedError } from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
   maybePromise,
@@ -528,7 +528,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
-      throw new MongoDriverError('Must connect to a server before calling this method');
+      throw new MongoNotConnectedError('Must connect to a server before calling this method');
     }
 
     return this.topology.startSession(options, this.s.options);
