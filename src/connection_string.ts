@@ -6,7 +6,7 @@ import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
-import { MongoParseError } from './error';
+import { MongoParseError, MongoURIError } from './error';
 import {
   AnyOptions,
   Callback,
@@ -57,11 +57,11 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  */
 export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoParseError('Cannot resolve empty srv string'));
+    return callback(new MongoURIError("srvHost string in options can't be empty"));
   }
 
   if (options.srvHost.split('.').length < 3) {
-    return callback(new MongoParseError('URI does not have hostname, domain name and tld'));
+    return callback(new MongoURIError('URI must include hostname, domain name, and tld'));
   }
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
@@ -70,14 +70,12 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
     if (err) return callback(err);
 
     if (addresses.length === 0) {
-      return callback(new MongoParseError('No addresses found at host'));
+      return callback(new MongoURIError('No addresses found at host'));
     }
 
     for (const { name } of addresses) {
       if (!matchesParentDomain(name, lookupAddress)) {
-        return callback(
-          new MongoParseError('Server record does not share hostname with parent URI')
-        );
+        return callback(new MongoURIError('Server record does not share hostname with parent URI'));
       }
     }
 
@@ -264,7 +262,7 @@ export function parseOptions(
     const values = [...url.searchParams.getAll(key)];
 
     if (values.includes('')) {
-      throw new MongoParseError('URI cannot contain options with no value');
+      throw new MongoURIError('URI cannot contain options with no value');
     }
 
     if (key.toLowerCase() === 'serverapi') {
