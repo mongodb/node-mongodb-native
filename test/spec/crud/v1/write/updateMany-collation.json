@@ -14,6 +14,7 @@
     }
   ],
   "minServerVersion": "3.4",
+  "serverless": "forbid",
   "tests": [
     {
       "description": "UpdateMany when many documents match with collation",

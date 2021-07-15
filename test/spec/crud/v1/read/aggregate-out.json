@@ -14,6 +14,7 @@
     }
   ],
   "minServerVersion": "2.6",
+  "serverless": "forbid",
   "tests": [
     {
       "description": "Aggregate with $out",

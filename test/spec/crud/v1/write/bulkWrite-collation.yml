@@ -6,8 +6,9 @@ data:
     - {_id: 5, x: 'pONg'}
 
 minServerVersion: '3.4'
+serverless: 'forbid'
 
-# See: https://docs.mongodb.com/master/reference/collation/#collation-document
+# See: https://docs.mongodb.com/manual/reference/collation/#collation-document
 tests:
     -
         description: "BulkWrite with delete operations and collation"
