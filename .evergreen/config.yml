@@ -1672,12 +1672,11 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            #SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            #SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            #SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-            #SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
-            #  bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
-            echo "SKIPPING DELETE TO EASE TESTING"
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
+            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
+            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
+            SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
+              bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
     tasks:
       - .serverless
 pre:
