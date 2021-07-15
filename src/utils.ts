@@ -6,6 +6,7 @@ import {
   MongoParseError,
   MongoDriverError,
   MongoCompatibilityError,
+  MongoNotConnectedError,
   MongoInvalidArgumentError
 } from './error';
 import { WriteConcern, WriteConcernOptions, W } from './write_concern';
@@ -467,7 +468,7 @@ export function getTopology<T>(provider: MongoClient | Db | Collection<T>): Topo
     return provider.s.db.s.client.topology;
   }
 
-  throw new MongoDriverError('MongoClient must be connected to perform this operation');
+  throw new MongoNotConnectedError('MongoClient must be connected to perform this operation');
 }
 
 /**

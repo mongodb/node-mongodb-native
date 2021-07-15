@@ -1,7 +1,12 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import {
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoCursorExhaustedError,
+  MongoTailableCursorError
+} from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -289,7 +294,7 @@ export abstract class AbstractCursor<
   next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError('Cursor is exhausted'));
       }
 
       next(this, true, done);
@@ -304,7 +309,7 @@ export abstract class AbstractCursor<
   tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError('Cursor is exhausted'));
       }
 
       next(this, false, done);
@@ -566,7 +571,7 @@ export abstract class AbstractCursor<
   batchSize(value: number): this {
     assertUninitialized(this);
     if (this[kOptions].tailable) {
-      throw new MongoDriverError('Tailable cursors do not support batchSize');
+      throw new MongoTailableCursorError('Tailable cursors do not support batchSize');
     }
 
     if (typeof value !== 'number') {
