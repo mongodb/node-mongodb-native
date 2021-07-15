@@ -588,7 +588,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
-      throw new MongoInvalidArgumentError('Invalid list of cursor ids provided: ' + cursorIds);
+      throw new MongoInvalidArgumentError(`Invalid list of cursor ids provided: ${cursorIds}`);
     }
 
     if (maxWireVersion(this) < 4) {
