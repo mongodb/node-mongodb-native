@@ -213,13 +213,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Long<span class="tsd-signature-symbol">(</span>low<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, high<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, unsigned<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Long<span class="tsd-signature-symbol">(</span>low<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">bigint</span>, high<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span>, unsigned<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:502</li>
+									<li>Defined in node_modules/bson/bson.d.ts:505</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -227,17 +227,23 @@
 									<p>Constructs a 64 bit two&#39;s-complement integer, given its low and high 32 bit values as <em>signed</em> integers.
 									See the from* functions below for more convenient ways of constructing Longs.</p>
 								</div>
+								<p>Acceptable signatures are:</p>
+								<ul>
+									<li>Long(low, high, unsigned?)</li>
+									<li>Long(bigint, unsigned?)</li>
+									<li>Long(string, unsigned?)</li>
+								</ul>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> low: <span class="tsd-signature-type">number</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> low: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">bigint</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The low (signed) 32 bits of the long</p>
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> high: <span class="tsd-signature-type">number</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> high: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The high (signed) 32 bits of the long</p>
 									</div>
@@ -262,7 +268,7 @@
 					<div class="tsd-signature tsd-kind-icon">__is<wbr>Long__<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:490</li>
+							<li>Defined in node_modules/bson/bson.d.ts:493</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -277,7 +283,7 @@
 					<div class="tsd-signature tsd-kind-icon">_bsontype<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;Long&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:488</li>
+							<li>Defined in node_modules/bson/bson.d.ts:491</li>
 						</ul>
 					</aside>
 				</section>
@@ -287,7 +293,7 @@
 					<div class="tsd-signature tsd-kind-icon">high<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:494</li>
+							<li>Defined in node_modules/bson/bson.d.ts:497</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -302,7 +308,7 @@
 					<div class="tsd-signature tsd-kind-icon">low<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:498</li>
+							<li>Defined in node_modules/bson/bson.d.ts:501</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -317,7 +323,7 @@
 					<div class="tsd-signature tsd-kind-icon">unsigned<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:502</li>
+							<li>Defined in node_modules/bson/bson.d.ts:505</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -332,7 +338,7 @@
 					<div class="tsd-signature tsd-kind-icon">MAX_<wbr>UNSIGNED_<wbr>VALUE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:513</li>
+							<li>Defined in node_modules/bson/bson.d.ts:522</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -347,7 +353,7 @@
 					<div class="tsd-signature tsd-kind-icon">MAX_<wbr>VALUE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:525</li>
+							<li>Defined in node_modules/bson/bson.d.ts:534</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -362,7 +368,7 @@
 					<div class="tsd-signature tsd-kind-icon">MIN_<wbr>VALUE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:527</li>
+							<li>Defined in node_modules/bson/bson.d.ts:536</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -377,7 +383,7 @@
 					<div class="tsd-signature tsd-kind-icon">NEG_<wbr>ONE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:523</li>
+							<li>Defined in node_modules/bson/bson.d.ts:532</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -392,7 +398,7 @@
 					<div class="tsd-signature tsd-kind-icon">ONE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:519</li>
+							<li>Defined in node_modules/bson/bson.d.ts:528</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -407,7 +413,7 @@
 					<div class="tsd-signature tsd-kind-icon">TWO_<wbr>PWR_<wbr>24<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:511</li>
+							<li>Defined in node_modules/bson/bson.d.ts:520</li>
 						</ul>
 					</aside>
 				</section>
@@ -417,7 +423,7 @@
 					<div class="tsd-signature tsd-kind-icon">UONE<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:521</li>
+							<li>Defined in node_modules/bson/bson.d.ts:530</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -432,7 +438,7 @@
 					<div class="tsd-signature tsd-kind-icon">UZERO<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:517</li>
+							<li>Defined in node_modules/bson/bson.d.ts:526</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -447,7 +453,7 @@
 					<div class="tsd-signature tsd-kind-icon">ZERO<span class="tsd-signature-symbol">:</span> <a href="long.html" class="tsd-signature-type" data-tsd-kind="Class">Long</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in node_modules/bson/bson.d.ts:515</li>
+							<li>Defined in node_modules/bson/bson.d.ts:524</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -469,7 +475,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:602</li>
+									<li>Defined in node_modules/bson/bson.d.ts:611</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -497,7 +503,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:607</li>
+									<li>Defined in node_modules/bson/bson.d.ts:616</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -526,7 +532,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:614</li>
+									<li>Defined in node_modules/bson/bson.d.ts:623</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -554,7 +560,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:612</li>
+									<li>Defined in node_modules/bson/bson.d.ts:621</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -583,7 +589,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:621</li>
+									<li>Defined in node_modules/bson/bson.d.ts:630</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -611,7 +617,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:619</li>
+									<li>Defined in node_modules/bson/bson.d.ts:628</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -640,7 +646,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:628</li>
+									<li>Defined in node_modules/bson/bson.d.ts:637</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -668,7 +674,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:626</li>
+									<li>Defined in node_modules/bson/bson.d.ts:635</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -699,7 +705,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:768</li>
+									<li>Defined in node_modules/bson/bson.d.ts:777</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -721,7 +727,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:648</li>
+									<li>Defined in node_modules/bson/bson.d.ts:657</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -749,7 +755,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:630</li>
+									<li>Defined in node_modules/bson/bson.d.ts:639</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -771,7 +777,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:632</li>
+									<li>Defined in node_modules/bson/bson.d.ts:641</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -793,7 +799,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:634</li>
+									<li>Defined in node_modules/bson/bson.d.ts:643</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -815,7 +821,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:636</li>
+									<li>Defined in node_modules/bson/bson.d.ts:645</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -837,7 +843,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:638</li>
+									<li>Defined in node_modules/bson/bson.d.ts:647</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -859,7 +865,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:640</li>
+									<li>Defined in node_modules/bson/bson.d.ts:649</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -887,7 +893,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:644</li>
+									<li>Defined in node_modules/bson/bson.d.ts:653</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -915,7 +921,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:642</li>
+									<li>Defined in node_modules/bson/bson.d.ts:651</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -943,7 +949,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:646</li>
+									<li>Defined in node_modules/bson/bson.d.ts:655</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -971,7 +977,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:775</li>
+									<li>Defined in node_modules/bson/bson.d.ts:784</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -988,7 +994,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:650</li>
+									<li>Defined in node_modules/bson/bson.d.ts:659</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1010,7 +1016,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:652</li>
+									<li>Defined in node_modules/bson/bson.d.ts:661</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1032,7 +1038,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:654</li>
+									<li>Defined in node_modules/bson/bson.d.ts:663</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1054,7 +1060,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:656</li>
+									<li>Defined in node_modules/bson/bson.d.ts:665</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1076,7 +1082,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:658</li>
+									<li>Defined in node_modules/bson/bson.d.ts:667</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1098,7 +1104,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:770</li>
+									<li>Defined in node_modules/bson/bson.d.ts:779</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1126,7 +1132,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:660</li>
+									<li>Defined in node_modules/bson/bson.d.ts:669</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1154,7 +1160,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:664</li>
+									<li>Defined in node_modules/bson/bson.d.ts:673</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1182,7 +1188,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:662</li>
+									<li>Defined in node_modules/bson/bson.d.ts:671</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1210,7 +1216,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:666</li>
+									<li>Defined in node_modules/bson/bson.d.ts:675</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1238,7 +1244,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:670</li>
+									<li>Defined in node_modules/bson/bson.d.ts:679</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1266,7 +1272,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:668</li>
+									<li>Defined in node_modules/bson/bson.d.ts:677</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1294,7 +1300,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:680</li>
+									<li>Defined in node_modules/bson/bson.d.ts:689</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1322,7 +1328,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:678</li>
+									<li>Defined in node_modules/bson/bson.d.ts:687</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1354,7 +1360,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:692</li>
+									<li>Defined in node_modules/bson/bson.d.ts:701</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1382,7 +1388,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:684</li>
+									<li>Defined in node_modules/bson/bson.d.ts:693</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1404,7 +1410,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:682</li>
+									<li>Defined in node_modules/bson/bson.d.ts:691</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1426,7 +1432,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:690</li>
+									<li>Defined in node_modules/bson/bson.d.ts:699</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1454,7 +1460,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:686</li>
+									<li>Defined in node_modules/bson/bson.d.ts:695</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1476,7 +1482,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:688</li>
+									<li>Defined in node_modules/bson/bson.d.ts:697</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1504,7 +1510,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:696</li>
+									<li>Defined in node_modules/bson/bson.d.ts:705</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1532,7 +1538,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:672</li>
+									<li>Defined in node_modules/bson/bson.d.ts:681</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1560,7 +1566,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:702</li>
+									<li>Defined in node_modules/bson/bson.d.ts:711</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1592,7 +1598,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:710</li>
+									<li>Defined in node_modules/bson/bson.d.ts:719</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1624,7 +1630,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:718</li>
+									<li>Defined in node_modules/bson/bson.d.ts:727</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1656,7 +1662,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:704</li>
+									<li>Defined in node_modules/bson/bson.d.ts:713</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1684,7 +1690,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:712</li>
+									<li>Defined in node_modules/bson/bson.d.ts:721</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1712,7 +1718,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:720</li>
+									<li>Defined in node_modules/bson/bson.d.ts:729</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1740,7 +1746,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:722</li>
+									<li>Defined in node_modules/bson/bson.d.ts:731</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1768,7 +1774,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:730</li>
+									<li>Defined in node_modules/bson/bson.d.ts:739</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1796,7 +1802,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:728</li>
+									<li>Defined in node_modules/bson/bson.d.ts:737</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1828,7 +1834,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:736</li>
+									<li>Defined in node_modules/bson/bson.d.ts:745</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1850,7 +1856,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:742</li>
+									<li>Defined in node_modules/bson/bson.d.ts:751</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1882,7 +1888,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:752</li>
+									<li>Defined in node_modules/bson/bson.d.ts:761</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1905,7 +1911,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:747</li>
+									<li>Defined in node_modules/bson/bson.d.ts:756</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1928,7 +1934,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:771</li>
+									<li>Defined in node_modules/bson/bson.d.ts:780</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1951,7 +1957,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:732</li>
+									<li>Defined in node_modules/bson/bson.d.ts:741</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1973,7 +1979,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:734</li>
+									<li>Defined in node_modules/bson/bson.d.ts:743</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1995,7 +2001,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:756</li>
+									<li>Defined in node_modules/bson/bson.d.ts:765</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2017,7 +2023,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:762</li>
+									<li>Defined in node_modules/bson/bson.d.ts:771</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2053,7 +2059,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:764</li>
+									<li>Defined in node_modules/bson/bson.d.ts:773</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2075,7 +2081,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:766</li>
+									<li>Defined in node_modules/bson/bson.d.ts:775</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2103,7 +2109,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:557</li>
+									<li>Defined in node_modules/bson/bson.d.ts:566</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2141,7 +2147,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:536</li>
+									<li>Defined in node_modules/bson/bson.d.ts:545</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2186,7 +2192,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:573</li>
+									<li>Defined in node_modules/bson/bson.d.ts:582</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2230,7 +2236,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:587</li>
+									<li>Defined in node_modules/bson/bson.d.ts:596</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2268,7 +2274,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:580</li>
+									<li>Defined in node_modules/bson/bson.d.ts:589</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2306,7 +2312,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:772</li>
+									<li>Defined in node_modules/bson/bson.d.ts:781</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2337,7 +2343,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:543</li>
+									<li>Defined in node_modules/bson/bson.d.ts:552</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2375,7 +2381,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:550</li>
+									<li>Defined in node_modules/bson/bson.d.ts:559</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2413,7 +2419,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:565</li>
+									<li>Defined in node_modules/bson/bson.d.ts:574</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2457,7 +2463,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:596</li>
+									<li>Defined in node_modules/bson/bson.d.ts:605</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2491,7 +2497,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:591</li>
+									<li>Defined in node_modules/bson/bson.d.ts:600</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -2810,21 +2816,23 @@
 				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
 			</ul>
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
 			</ul>
 		</div>
 	</div>
