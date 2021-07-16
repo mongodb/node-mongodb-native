@@ -254,7 +254,8 @@ export function executeLegacyOperation(
       const optionsIndex = args.length - 2;
       args[optionsIndex] = Object.assign({}, args[optionsIndex], { session: session });
     } else if (opOptions.session && opOptions.session.hasEnded) {
-      throw new MongoInvalidArgumentError('Use of expired sessions is not permitted');
+      // TODO(3405): Replace this with MongoExpiredSessionError
+      throw new MongoDriverError('Use of expired sessions is not permitted');
     }
   }
 
