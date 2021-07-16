@@ -105,6 +105,7 @@ export class Encrypter {
   static checkForMongoCrypt(): void {
     let mongodbClientEncryption = undefined;
     try {
+      // Ensure you always wrap an optional require in the try block NODE-3199
       mongodbClientEncryption = require('mongodb-client-encryption');
     } catch (err) {
       throw new MongoDriverError(

@@ -7,6 +7,7 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 let BSON = require('bson');
 try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
   BSON = require('bson-ext');
 } catch {} // eslint-disable-line
 
