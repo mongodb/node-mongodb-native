@@ -370,6 +370,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
+    // TODO(NODE-3404): Replace this with MongoChangeStreamError
     if (!this.cursor) throw new MongoDriverError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
