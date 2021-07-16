@@ -1,6 +1,6 @@
 description: mongos-unpin
 
-schemaVersion: '1.1'
+schemaVersion: '1.4'
 
 runOnRequirements:
   - minServerVersion: '4.2'
@@ -34,6 +34,10 @@ _yamlAnchors:
 
 tests:
   - description: unpin after TransientTransctionError error on commit
+    runOnRequirements:
+        # serverless proxy doesn't append error labels to errors in transactions
+        # caused by failpoints (CLOUDP-88216)
+      - serverless: "forbid"
     operations:
       - &startTransaction
         name: startTransaction
@@ -77,6 +81,10 @@ tests:
       - *assertNoPinnedServer
 
   - description: unpin after TransientTransctionError error on abort
+    runOnRequirements:
+        # serverless proxy doesn't append error labels to errors in transactions
+        # caused by failpoints (CLOUDP-88216)
+      - serverless: "forbid"
     operations:
       - *startTransaction
       - *insertOne
