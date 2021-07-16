@@ -258,8 +258,7 @@ function doRead(stream: GridFSBucketReadStream): void {
         return __handleError(stream, new MongoGridFSChunkError(errmsg));
       }
 
-      errmsg =
-        'ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`;
+      errmsg = `ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`;
       return __handleError(stream, new MongoGridFSChunkError(errmsg));
     }
 
