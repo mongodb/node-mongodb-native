@@ -200,35 +200,11 @@ describe('Sessions - functional', function () {
     for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
       expect(sessionTests).to.be.an('object');
       context(String(sessionTests.description), function () {
-        // TODO: NODE-3393 fix test runner to apply session to all operations
-        const skipTestMap = {
-          'snapshot-sessions': [
-            'countDocuments operation with snapshot',
-            'Distinct operation with snapshot',
-            'Mixed operation with snapshot'
-          ],
-          'snapshot-sessions-not-supported-client-error': [
-            'Client error on distinct with snapshot'
-          ],
-          'snapshot-sessions-not-supported-server-error': [
-            'Server returns an error on distinct with snapshot'
-          ],
-          'snapshot-sessions-unsupported-ops': [
-            'Server returns an error on listCollections with snapshot',
-            'Server returns an error on listDatabases with snapshot',
-            'Server returns an error on listIndexes with snapshot',
-            'Server returns an error on runCommand with snapshot',
-            'Server returns an error on findOneAndUpdate with snapshot',
-            'Server returns an error on deleteOne with snapshot',
-            'Server returns an error on updateOne with snapshot'
-          ]
-        };
-        const testsToSkip = skipTestMap[sessionTests.description] || [];
         for (const test of sessionTests.tests) {
           it(String(test.description), {
             metadata: { sessions: { skipLeakTests: true } },
             test: async function () {
-              await runUnifiedTest(this, sessionTests, test, testsToSkip);
+              await runUnifiedTest(this, sessionTests, test);
             }
           });
         }
