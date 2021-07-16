@@ -4,7 +4,8 @@ import {
   Collection,
   GridFSBucket,
   Document,
-  HostAddress
+  HostAddress,
+  MongoAPIError
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { WriteConcern } from '../../../src/write_concern';

@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
-const { MongoNetworkError, MongoDriverError } = require('../../src/error');
+const { MongoNetworkError, MongoDriverError, MongoChangeStreamError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
@@ -72,12 +72,12 @@ function triggerResumableError(changeStream, delay, onClose) {
   function triggerError() {
     const cursorStream = changeStream.cursorStream;
     if (cursorStream) {
-      cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
+      cursorStream.emit('error', new MongoChangeStreamError('error triggered from test'));
       return;
     }
 
     const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
-      callback(new MongoNetworkError('error triggered from test'));
+      callback(new MongoChangeStreamError('error triggered from test'));
       nextStub.restore();
     });
 
@@ -100,7 +100,7 @@ function triggerResumableError(changeStream, delay, onClose) {
  */
 function waitForStarted(changeStream, callback) {
   const timeout = setTimeout(() => {
-    throw new Error('Change stream never started');
+    throw new MongoChangeStreamError('Change stream never started');
   }, 2000);
 
   changeStream.cursor.once('init', () => {
@@ -874,7 +874,7 @@ describe('Change Streams', function () {
           .next()
           .then(function () {
             // We should never execute this line because calling changeStream.next() should throw an error
-            throw new Error(
+            throw new MongoChangeStreamError(
               'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
             );
           })
@@ -2007,7 +2007,7 @@ describe('Change Streams', function () {
           if (counter === 2) {
             changeStream.close(close);
           } else if (counter >= 3) {
-            close(new Error('should not have received more than 2 events'));
+            close(new MongoChangeStreamError('should not have received more than 2 events'));
           }
         });
         changeStream.on('error', err => close(err));
