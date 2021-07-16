@@ -11,6 +11,7 @@ import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { translateOptions } from './unified-utils';
+import { MongoChangeStreamError } from '../../../src/error';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -202,7 +203,7 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      reject(new Error('Change stream never started'));
+      reject(new MongoChangeStreamError('Change stream never started'));
     }, 2000);
 
     changeStream.cursor.once('init', () => {

@@ -6,7 +6,7 @@ import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
-import { MongoParseError, MongoURIError } from './error';
+import { MongoCompressionError, MongoParseError, MongoURIError } from './error';
 import {
   AnyOptions,
   Callback,
@@ -57,7 +57,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  */
 export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoURIError("srvHost string in options can't be empty"));
+    return callback(new MongoURIError('srvHost string in options cannot be empty'));
   }
 
   if (options.srvHost.split('.').length < 3) {
@@ -373,7 +373,7 @@ export function parseOptions(
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
   if (mongoOptions.directConnection && typeof mongoOptions.srvHost === 'string') {
-    throw new MongoParseError('directConnection not supported with SRV URI');
+    throw new MongoURIError('SRV URI does not support directConnection');
   }
 
   // Potential SRV Overrides
@@ -567,7 +567,7 @@ export const OPTIONS = {
           if (['none', 'snappy', 'zlib'].includes(String(c))) {
             compressionList.add(String(c));
           } else {
-            throw new MongoParseError(`${c} is not a valid compression mechanism`);
+            throw new MongoCompressionError(`${c} is not a valid compression mechanism`);
           }
         }
       }
