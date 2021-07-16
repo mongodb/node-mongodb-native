@@ -1,6 +1,6 @@
 import { Duplex, DuplexOptions } from 'stream';
 import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
-import { MongoDecompressionError, MongoDriverError, MongoParseError } from '../error';
+import { MongoDecompressionError, MongoParseError } from '../error';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
   compress,

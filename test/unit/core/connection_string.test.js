@@ -1,6 +1,6 @@
 'use strict';
 
-const { MongoParseError, MongoDriverError } = require('../../../src/error');
+const { MongoParseError, MongoDriverError, MongoCompressionError } = require('../../../src/error');
 const { loadSpecTests } = require('../../spec');
 const chai = require('chai');
 const { parseOptions } = require('../../../src/connection_string');
@@ -110,7 +110,7 @@ describe('Connection String', function () {
   describe('validation', function () {
     it('should validate compressors options', function () {
       expect(() => parseOptions('mongodb://localhost/?compressors=bunnies')).to.throw(
-        MongoParseError,
+        MongoCompressionError,
         'bunnies is not a valid compression mechanism'
       );
     });
