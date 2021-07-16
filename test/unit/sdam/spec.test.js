@@ -61,13 +61,10 @@ describe('Server Discovery and Monitoring (spec)', function () {
   });
 
   // DRIVERS-1249 should add directConnection and then update spec, remove skip
-  // TODO: NODE-3011 remove LB test skips
   const shouldSkip = desc => {
     const descriptions = [
       'Monitoring a standalone connection',
-      'Monitoring a standalone connection - suppress update events for equal server descriptions',
-      'Load balancer can be discovered and only has the address property set',
-      'Monitoring a load balancer'
+      'Monitoring a standalone connection - suppress update events for equal server descriptions'
     ];
     return descriptions.includes(desc);
   };

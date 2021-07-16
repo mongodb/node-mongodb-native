@@ -68,9 +68,7 @@ describe('Server Selection (spec)', function () {
         describe(subType, function () {
           specTests[topologyType][subType].forEach(test => {
             // NOTE: node does not support PossiblePrimary
-            // TODO: Re-enable LoadBalanced in NODE-3011
-            const maybeIt =
-              test.name.match(/Possible/) || topologyType === 'LoadBalanced' ? it.skip : it;
+            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
             maybeIt(test.name, function (done) {
               executeServerSelectionTest(test, { checkLatencyWindow: false }, done);
@@ -81,9 +79,7 @@ describe('Server Selection (spec)', function () {
         describe(subType + ' (within latency window)', function () {
           specTests[topologyType][subType].forEach(test => {
             // NOTE: node does not support PossiblePrimary
-            // TODO: Re-enable LoadBalanced in NODE-3011
-            const maybeIt =
-              test.name.match(/Possible/) || topologyType === 'LoadBalanced' ? it.skip : it;
+            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
             maybeIt(test.name, function (done) {
               executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
