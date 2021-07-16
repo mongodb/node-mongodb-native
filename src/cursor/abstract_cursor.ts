@@ -517,7 +517,7 @@ export abstract class AbstractCursor<
     } else if (typeof readPreference === 'string') {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
-      throw new MongoInvalidArgumentError('Invalid read preference: ' + readPreference);
+      throw new MongoInvalidArgumentError(`Invalid read preference: ${readPreference}`);
     }
 
     return this;

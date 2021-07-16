@@ -236,12 +236,12 @@ function doRead(stream: GridFSBucketReadStream): void {
     const expectedLength = Math.min(stream.s.file.chunkSize, bytesRemaining);
     let errmsg: string;
     if (doc.n > expectedN) {
-      errmsg = 'ChunkIsMissing: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
+      errmsg = `ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
       return __handleError(stream, new MongoDriverError(errmsg));
     }
 
     if (doc.n < expectedN) {
-      errmsg = 'ExtraChunk: Got unexpected n: ' + doc.n + ', expected: ' + expectedN;
+      errmsg = `ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
       return __handleError(stream, new MongoDriverError(errmsg));
     }
 
@@ -249,7 +249,7 @@ function doRead(stream: GridFSBucketReadStream): void {
 
     if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {
-        errmsg = 'ExtraChunk: Got unexpected n: ' + doc.n;
+        errmsg = `ExtraChunk: Got unexpected n: ${doc.n}`;
         return __handleError(stream, new MongoDriverError(errmsg));
       }
 
@@ -312,7 +312,7 @@ function init(stream: GridFSBucketReadStream): void {
       const identifier = stream.s.filter._id
         ? stream.s.filter._id.toString()
         : stream.s.filter.filename;
-      const errmsg = 'FileNotFound: file ' + identifier + ' was not found';
+      const errmsg = `FileNotFound: file ${identifier} was not found`;
       const err = new MongoDriverError(errmsg);
       err.code = 'ENOENT'; // TODO: NODE-3338 set property as part of constructor
       return __handleError(stream, err);
