@@ -3,7 +3,7 @@ import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
 import { Snappy } from '../../deps';
-import { MongoCompressionError, MongoDecompressionError, MongoDriverError } from '../../error';
+import { MongoCompressionError, MongoDecompressionError } from '../../error';
 
 /** @public */
 export const Compressor = Object.freeze({
