@@ -11,7 +11,8 @@
       "topology": [
         "sharded",
         "load-balanced"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "database_name": "retryable-reads-tests",
@@ -142,7 +143,7 @@
       ]
     },
     {
-      "description": "client.watch succeeds after NotMaster",
+      "description": "client.watch succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -197,7 +198,7 @@
       ]
     },
     {
-      "description": "client.watch succeeds after NotMasterNoSlaveOk",
+      "description": "client.watch succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -252,7 +253,7 @@
       ]
     },
     {
-      "description": "client.watch succeeds after NotMasterOrSecondary",
+      "description": "client.watch succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -637,7 +638,7 @@
       ]
     },
     {
-      "description": "client.watch fails after two NotMaster errors",
+      "description": "client.watch fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -693,7 +694,7 @@
       ]
     },
     {
-      "description": "client.watch fails after NotMaster when retryReads is false",
+      "description": "client.watch fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

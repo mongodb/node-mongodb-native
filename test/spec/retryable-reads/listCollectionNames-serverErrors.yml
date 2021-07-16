@@ -38,7 +38,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionNames succeeds after NotMaster"
+        description: "ListCollectionNames succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 10107 }
@@ -47,7 +47,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionNames succeeds after NotMasterNoSlaveOk"
+        description: "ListCollectionNames succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 13435 }
@@ -56,7 +56,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionNames succeeds after NotMasterOrSecondary"
+        description: "ListCollectionNames succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 13436 }
@@ -119,7 +119,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionNames fails after two NotMaster errors"
+        description: "ListCollectionNames fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -132,7 +132,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionNames fails after NotMaster when retryReads is false"
+        description: "ListCollectionNames fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

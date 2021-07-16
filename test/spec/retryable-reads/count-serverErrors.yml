@@ -44,7 +44,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Count succeeds after NotMaster"
+        description: "Count succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [count], errorCode: 10107 }
@@ -53,7 +53,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Count succeeds after NotMasterNoSlaveOk"
+        description: "Count succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [count], errorCode: 13435 }
@@ -62,7 +62,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Count succeeds after NotMasterOrSecondary"
+        description: "Count succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [count], errorCode: 13436 }
@@ -125,7 +125,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Count fails after two NotMaster errors"
+        description: "Count fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -138,7 +138,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Count fails after NotMaster when retryReads is false"
+        description: "Count fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

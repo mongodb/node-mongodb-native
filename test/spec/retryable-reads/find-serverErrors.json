@@ -189,7 +189,7 @@
       ]
     },
     {
-      "description": "Find succeeds after NotMaster",
+      "description": "Find succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -263,7 +263,7 @@
       ]
     },
     {
-      "description": "Find succeeds after NotMasterNoSlaveOk",
+      "description": "Find succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -337,7 +337,7 @@
       ]
     },
     {
-      "description": "Find succeeds after NotMasterOrSecondary",
+      "description": "Find succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -855,7 +855,7 @@
       ]
     },
     {
-      "description": "Find fails after two NotMaster errors",
+      "description": "Find fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -912,7 +912,7 @@
       ]
     },
     {
-      "description": "Find fails after NotMaster when retryReads is false",
+      "description": "Find fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

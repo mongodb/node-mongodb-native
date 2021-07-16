@@ -39,7 +39,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListIndexNames succeeds after NotMaster"
+        description: "ListIndexNames succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listIndexes], errorCode: 10107 }
@@ -48,7 +48,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListIndexNames succeeds after NotMasterNoSlaveOk"
+        description: "ListIndexNames succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listIndexes], errorCode: 13435 }
@@ -57,7 +57,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListIndexNames succeeds after NotMasterOrSecondary"
+        description: "ListIndexNames succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listIndexes], errorCode: 13436 }
@@ -120,7 +120,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListIndexNames fails after two NotMaster errors"
+        description: "ListIndexNames fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -133,7 +133,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListIndexNames fails after NotMaster when retryReads is false"
+        description: "ListIndexNames fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

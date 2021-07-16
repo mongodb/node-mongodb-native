@@ -1,3 +1,7 @@
+# listDatabaseObjects returns an array of MongoDatabase objects.
+# Not all drivers support this functionality. For more details, see:
+# https://github.com/mongodb/specifications/blob/master/source/enumerate-databases.rst#enumerating-mongodatabase-objects
+
 runOn:
     -
         minServerVersion: "4.0"

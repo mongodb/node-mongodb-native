@@ -98,7 +98,7 @@
       ]
     },
     {
-      "description": "ListIndexes succeeds after NotMaster",
+      "description": "ListIndexes succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -137,7 +137,7 @@
       ]
     },
     {
-      "description": "ListIndexes succeeds after NotMasterNoSlaveOk",
+      "description": "ListIndexes succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -176,7 +176,7 @@
       ]
     },
     {
-      "description": "ListIndexes succeeds after NotMasterOrSecondary",
+      "description": "ListIndexes succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -449,7 +449,7 @@
       ]
     },
     {
-      "description": "ListIndexes fails after two NotMaster errors",
+      "description": "ListIndexes fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -489,7 +489,7 @@
       ]
     },
     {
-      "description": "ListIndexes fails after NotMaster when retryReads is false",
+      "description": "ListIndexes fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

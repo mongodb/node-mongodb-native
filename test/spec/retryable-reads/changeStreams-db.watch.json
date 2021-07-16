@@ -11,7 +11,8 @@
       "topology": [
         "sharded",
         "load-balanced"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "database_name": "retryable-reads-tests",

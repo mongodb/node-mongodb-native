@@ -52,7 +52,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Aggregate succeeds after NotMaster"
+        description: "Aggregate succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 10107 }
@@ -61,7 +61,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Aggregate succeeds after NotMasterNoSlaveOk"
+        description: "Aggregate succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 13435 }
@@ -70,7 +70,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Aggregate succeeds after NotMasterOrSecondary"
+        description: "Aggregate succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 13436 }
@@ -133,7 +133,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Aggregate fails after two NotMaster errors"
+        description: "Aggregate fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -146,7 +146,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Aggregate fails after NotMaster when retryReads is false"
+        description: "Aggregate fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

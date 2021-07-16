@@ -38,7 +38,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseNames succeeds after NotMaster"
+        description: "ListDatabaseNames succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 10107 }
@@ -47,7 +47,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseNames succeeds after NotMasterNoSlaveOk"
+        description: "ListDatabaseNames succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 13435 }
@@ -56,7 +56,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseNames succeeds after NotMasterOrSecondary"
+        description: "ListDatabaseNames succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 13436 }
@@ -119,7 +119,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseNames fails after two NotMaster errors"
+        description: "ListDatabaseNames fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -132,7 +132,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseNames fails after NotMaster when retryReads is false"
+        description: "ListDatabaseNames fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

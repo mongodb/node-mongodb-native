@@ -192,7 +192,7 @@
       ]
     },
     {
-      "description": "Download succeeds after NotMaster",
+      "description": "Download succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -262,7 +262,7 @@
       ]
     },
     {
-      "description": "Download succeeds after NotMasterNoSlaveOk",
+      "description": "Download succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -332,7 +332,7 @@
       ]
     },
     {
-      "description": "Download succeeds after NotMasterOrSecondary",
+      "description": "Download succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -822,7 +822,7 @@
       ]
     },
     {
-      "description": "Download fails after two NotMaster errors",
+      "description": "Download fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -877,7 +877,7 @@
       ]
     },
     {
-      "description": "Download fails after NotMaster when retryReads is false",
+      "description": "Download fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

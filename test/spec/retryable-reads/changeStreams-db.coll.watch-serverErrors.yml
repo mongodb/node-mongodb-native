@@ -5,6 +5,7 @@ runOn:
     -
         minServerVersion: "4.1.7"
         topology: ["sharded", "load-balanced"]
+        serverless: "forbid"
 
 database_name: &database_name "retryable-reads-tests"
 collection_name: &collection_name "coll"
@@ -44,7 +45,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "db.coll.watch succeeds after NotMaster"
+        description: "db.coll.watch succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 10107 }
@@ -53,7 +54,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "db.coll.watch succeeds after NotMasterNoSlaveOk"
+        description: "db.coll.watch succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 13435 }
@@ -62,7 +63,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "db.coll.watch succeeds after NotMasterOrSecondary"
+        description: "db.coll.watch succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [aggregate], errorCode: 13436 }
@@ -125,7 +126,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "db.coll.watch fails after two NotMaster errors"
+        description: "db.coll.watch fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -138,7 +139,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "db.coll.watch fails after NotMaster when retryReads is false"
+        description: "db.coll.watch fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:
