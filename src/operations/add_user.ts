@@ -82,7 +82,7 @@ export class AddUserOperation extends CommandOperation<Document> {
       // Use node md5 generator
       const md5 = crypto.createHash('md5');
       // Generate keys used for authentication
-      md5.update(username + ':mongo:' + password);
+      md5.update(`${username}:mongo:${password}`);
       userPassword = md5.digest('hex');
     }
 

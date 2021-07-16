@@ -46,9 +46,9 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
       if (doc.result != null && typeof doc.result !== 'string')
         return callback(new MongoDriverError('Error with validation data'));
       if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-        return callback(new MongoDriverError('Error: invalid collection ' + collectionName));
+        return callback(new MongoDriverError(`Invalid collection ${collectionName}`));
       if (doc.valid != null && !doc.valid)
-        return callback(new MongoDriverError('Error: invalid collection ' + collectionName));
+        return callback(new MongoDriverError(`Invalid collection ${collectionName}`));
 
       return callback(undefined, doc);
     });

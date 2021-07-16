@@ -24,7 +24,7 @@ export class MongoCR extends AuthProvider {
         let md5 = crypto.createHash('md5');
 
         // Generate keys used for authentication
-        md5.update(username + ':mongo:' + password, 'utf8');
+        md5.update(`${username}:mongo:${password}`, 'utf8');
         const hash_password = md5.digest('hex');
 
         // Final key

@@ -195,7 +195,7 @@ export class ReadPreference {
         });
       }
     } else if (!(r instanceof ReadPreference)) {
-      throw new MongoInvalidArgumentError('Invalid read preference: ' + r);
+      throw new MongoInvalidArgumentError(`Invalid read preference: ${r}`);
     }
 
     return options;
