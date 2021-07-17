@@ -265,8 +265,8 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
-      throw new MongoChangeStreamError(
-        'Argument "parent" provided to ChangeStream constructor must be an instance of Collection, Db, or MongoClient'
+      throw new MongoDriverError(
+        'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
       );
     }
 
