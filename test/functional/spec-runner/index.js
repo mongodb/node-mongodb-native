@@ -110,7 +110,12 @@ function parseRunOn(runOn) {
     }
 
     const mongodb = version.join(' ');
-    return { topology, mongodb, authEnabled: !!config.authEnabled };
+    return {
+      topology,
+      mongodb,
+      authEnabled: !!config.authEnabled,
+      serverless: config.serverless
+    };
   });
 }
 
@@ -140,6 +145,25 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
                 // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
                 this.skip();
+              }
+
+              if (requires.serverless) {
+                console.log('applying serverless requirement in spec runner');
+                const isServerless = !!process.env.SERVERLESS;
+                switch (requires.serverless) {
+                  case 'forbid':
+                    // return true if the configuration is NOT serverless
+                    if (isServerless) this.skip();
+                    break;
+                  case 'allow':
+                    // always run
+                    break;
+                  case 'require':
+                    if (!isServerless) this.skip();
+                    break;
+                  default:
+                    throw new Error(`Invalid serverless filter: ${requires.serverless}`);
+                }
               }
 
               if (
@@ -194,6 +218,9 @@ function prepareDatabaseForSuite(suite, context) {
     .command({ killAllSessions: [] })
     .catch(err => {
       if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
+        return;
+      }
+      if (process.env.SERVERLESS) {
         return;
       }
 

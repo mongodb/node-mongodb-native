@@ -258,6 +258,26 @@ function getSymbolFrom(target, symbolName, assertExists = true) {
   return symbol;
 }
 
+function getEnvironmentalOptions() {
+  const options = {};
+  if (process.env.MONGODB_API_VERSION) {
+    Object.assign(options, {
+      serverApi: { version: process.env.MONGODB_API_VERSION }
+    });
+  }
+  if (process.env.SERVERLESS) {
+    Object.assign(options, {
+      auth: {
+        username: process.env.SERVERLESS_ATLAS_USER,
+        password: process.env.SERVERLESS_ATLAS_PASSWORD
+      },
+      tls: true,
+      compressors: 'snappy,zlib'
+    });
+  }
+  return options;
+}
+
 module.exports = {
   EventCollector,
   makeTestFunction,
@@ -266,5 +286,6 @@ module.exports = {
   ClassWithoutLogger,
   ClassWithUndefinedLogger,
   visualizeMonitoringEvents,
-  getSymbolFrom
+  getSymbolFrom,
+  getEnvironmentalOptions
 };

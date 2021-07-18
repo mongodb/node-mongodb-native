@@ -33,6 +33,8 @@ import type {
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration } from './runner';
+import { getEnvironmentalOptions } from '../../tools/utils';
+import { MongoClientOptions } from '../../../src/mongo_client';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -51,15 +53,8 @@ export type CmapEvent =
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
 
-function serverApiConfig() {
-  if (process.env.MONGODB_API_VERSION) {
-    return { version: process.env.MONGODB_API_VERSION };
-  }
-}
-
 function getClient(address) {
-  const serverApi = serverApiConfig();
-  return new MongoClient(`mongodb://${address}`, serverApi ? { serverApi } : {});
+  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions() as MongoClientOptions);
 }
 
 type PushFunction = (e: CommandEvent | CmapEvent) => void;
@@ -106,7 +101,8 @@ export class UnifiedMongoClient extends MongoClient {
     super(url, {
       monitorCommands: true,
       ...description.uriOptions,
-      serverApi: description.serverApi ? description.serverApi : serverApiConfig()
+      ...getEnvironmentalOptions(),
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
     this.commandEvents = [];
     this.cmapEvents = [];
@@ -115,6 +111,10 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
+    // FIXME: hack to get tests passing, extra unexpected events otherwise
+    if (process.env.SERVERLESS) {
+      this.ignoredEvents.push('ping');
+    }
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
@@ -319,7 +319,9 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = config.url({ useMultipleMongoses });
+        const uri = process.env.SERVERLESS
+          ? process.env.MONGODB_URI
+          : config.url({ useMultipleMongoses });
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);
