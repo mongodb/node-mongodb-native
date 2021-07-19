@@ -5,7 +5,7 @@ import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
 import { TestConfiguration } from './runner';
-
+import { shouldRunServerlessTest } from '../../tools/utils';
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
@@ -64,19 +64,7 @@ export async function topologySatisfies(
   }
 
   if (r.serverless) {
-    switch (r.serverless) {
-      case 'forbid':
-        // return true if the configuration is NOT serverless
-        return !config.isServerless;
-      case 'allow':
-        // always return true
-        return true;
-      case 'require':
-        // only return true if the configuration is serverless
-        return config.isServerless;
-      default:
-        throw new Error(`Invalid serverless filter: ${r.serverless}`);
-    }
+    ok &&= shouldRunServerlessTest(r.serverless, config.isServerless);
   }
 
   return ok;

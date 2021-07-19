@@ -1,4 +1,5 @@
 'use strict';
+const { shouldRunServerlessTest } = require('../../utils');
 
 /**
  * Filter to allow to tests to run on serverless
@@ -29,21 +30,7 @@ class ServerlessFilter {
   filter(test) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
-    const serverless = test.metadata.requires.serverless;
-    if (!serverless) return true;
-    switch (serverless) {
-      case 'forbid':
-        // return true if the configuration is NOT serverless
-        return !this.serverless;
-      case 'allow':
-        // always return true
-        return true;
-      case 'require':
-        // only return true if the configuration is serverless
-        return this.serverless;
-      default:
-        throw new Error(`Invalid serverless filter: ${serverless}`);
-    }
+    return shouldRunServerlessTest(test.metadata.requires.serverless, this.serverless);
   }
 }
 

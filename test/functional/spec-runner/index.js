@@ -7,6 +7,7 @@ const { EJSON } = require('bson');
 const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
+const { shouldRunServerlessTest } = require('../../tools/utils');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -147,23 +148,12 @@ function generateTopologyTests(testSuites, testContext, filter) {
                 this.skip();
               }
 
-              if (requires.serverless) {
-                console.log('applying serverless requirement in spec runner');
-                const isServerless = !!process.env.SERVERLESS;
-                switch (requires.serverless) {
-                  case 'forbid':
-                    // return true if the configuration is NOT serverless
-                    if (isServerless) this.skip();
-                    break;
-                  case 'allow':
-                    // always run
-                    break;
-                  case 'require':
-                    if (!isServerless) this.skip();
-                    break;
-                  default:
-                    throw new Error(`Invalid serverless filter: ${requires.serverless}`);
-                }
+              if (
+                requires.serverless &&
+                !shouldRunServerlessTest(requires.serverless, !!process.env.SERVERLESS)
+              ) {
+                console.log('skipping serverless requirement in spec runner');
+                return this.skip();
               }
 
               if (
@@ -217,10 +207,11 @@ function prepareDatabaseForSuite(suite, context) {
     .admin()
     .command({ killAllSessions: [] })
     .catch(err => {
-      if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
-        return;
-      }
-      if (process.env.SERVERLESS) {
+      if (
+        err.message.match(/no such (cmd|command)/) ||
+        err.code === 11601 ||
+        process.env.SERVERLESS // killAllSessions is not supported on serverless
+      ) {
         return;
       }
 

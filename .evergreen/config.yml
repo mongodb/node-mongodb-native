@@ -142,10 +142,10 @@ functions:
       type: test
       params:
         working_dir: src
-        continue_on_err: true
         script: |
           ${PREPARE_SHELL}
-          set +o xtrace
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
           MONGODB_URI="${MONGODB_URI}" \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           AUTH="auth" SSL="ssl" SERVERLESS=1 \

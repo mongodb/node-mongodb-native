@@ -278,6 +278,23 @@ function getEnvironmentalOptions() {
   return options;
 }
 
+function shouldRunServerlessTest(testRequirement, isServerless) {
+  if (!testRequirement) return true;
+  switch (testRequirement) {
+    case 'forbid':
+      // return true if the configuration is NOT serverless
+      return !isServerless;
+    case 'allow':
+      // always return true
+      return true;
+    case 'require':
+      // only return true if the configuration is serverless
+      return isServerless;
+    default:
+      throw new Error(`Invalid serverless filter: ${testRequirement}`);
+  }
+}
+
 module.exports = {
   EventCollector,
   makeTestFunction,
@@ -287,5 +304,6 @@ module.exports = {
   ClassWithUndefinedLogger,
   visualizeMonitoringEvents,
   getSymbolFrom,
-  getEnvironmentalOptions
+  getEnvironmentalOptions,
+  shouldRunServerlessTest
 };
