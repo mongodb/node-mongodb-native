@@ -43,7 +43,14 @@ export {
   MongoSystemError,
   MongoServerSelectionError,
   MongoParseError,
-  MongoWriteConcernError
+  MongoWriteConcernError,
+  MongoURIError,
+  MongoStreamError,
+  MongoChangeStreamError,
+  MongoGridFSStreamError,
+  MongoGridFSChunkError,
+  MongoCompressionError,
+  MongoDecompressionError
 } from './error';
 export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {
