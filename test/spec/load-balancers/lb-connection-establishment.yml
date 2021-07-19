@@ -1,0 +1,36 @@
+description: connection establishment for load-balanced clusters
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      uriOptions:
+        # Explicitly set loadBalanced to false to override the option from the global URI.
+        loadBalanced: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0
+
+tests:
+  - description: operations against load balancers fail if URI contains loadBalanced=false
+    skipReason: servers have not implemented LB support yet so they will not fail the connection handshake in this case
+    operations:
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectError:
+          isClientError: false
+    expectEvents:
+      # No events should be published because the server fails the connection handshake, so the "ping" command is never
+      # sent.
+      - client: *client0
+        events: []

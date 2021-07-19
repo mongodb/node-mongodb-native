@@ -1,0 +1,28 @@
+{
+  "description": "entity-client-storeEventsAsEntities-conflict_with_client_id",
+  "schemaVersion": "1.2",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "storeEventsAsEntities": [
+          {
+            "id": "client0",
+            "events": [
+              "PoolCreatedEvent",
+              "PoolReadyEvent",
+              "PoolClearedEvent",
+              "PoolClosedEvent"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

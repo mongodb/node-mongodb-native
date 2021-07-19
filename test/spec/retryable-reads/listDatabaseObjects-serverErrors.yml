@@ -1,10 +1,14 @@
+# listDatabaseObjects returns an array of MongoDatabase objects.
+# Not all drivers support this functionality. For more details, see:
+# https://github.com/mongodb/specifications/blob/master/source/enumerate-databases.rst#enumerating-mongodatabase-objects
+
 runOn:
     -
         minServerVersion: "4.0"
         topology: ["single", "replicaset"]
     -
         minServerVersion: "4.1.7"
-        topology: ["sharded"]
+        topology: ["sharded", "load-balanced"]
 
 database_name: &database_name "retryable-reads-tests"
 collection_name: &collection_name "coll"
@@ -38,7 +42,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseObjects succeeds after NotMaster"
+        description: "ListDatabaseObjects succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 10107 }
@@ -47,7 +51,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseObjects succeeds after NotMasterNoSlaveOk"
+        description: "ListDatabaseObjects succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 13435 }
@@ -56,7 +60,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseObjects succeeds after NotMasterOrSecondary"
+        description: "ListDatabaseObjects succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listDatabases], errorCode: 13436 }
@@ -119,7 +123,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseObjects fails after two NotMaster errors"
+        description: "ListDatabaseObjects fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -132,7 +136,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListDatabaseObjects fails after NotMaster when retryReads is false"
+        description: "ListDatabaseObjects fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

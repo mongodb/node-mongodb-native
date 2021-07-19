@@ -10,7 +10,8 @@
     {
       "minServerVersion": "4.1.7",
       "topology": [
-        "sharded"
+        "sharded",
+        "load-balanced"
       ]
     }
   ],
@@ -93,7 +94,7 @@
       ]
     },
     {
-      "description": "ListDatabaseObjects succeeds after NotMaster",
+      "description": "ListDatabaseObjects succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -130,7 +131,7 @@
       ]
     },
     {
-      "description": "ListDatabaseObjects succeeds after NotMasterNoSlaveOk",
+      "description": "ListDatabaseObjects succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -167,7 +168,7 @@
       ]
     },
     {
-      "description": "ListDatabaseObjects succeeds after NotMasterOrSecondary",
+      "description": "ListDatabaseObjects succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -426,7 +427,7 @@
       ]
     },
     {
-      "description": "ListDatabaseObjects fails after two NotMaster errors",
+      "description": "ListDatabaseObjects fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -464,7 +465,7 @@
       ]
     },
     {
-      "description": "ListDatabaseObjects fails after NotMaster when retryReads is false",
+      "description": "ListDatabaseObjects fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

@@ -1,0 +1,13 @@
+{
+  "uri": "mongodb+srv://test20.test.build.10gen.cc/",
+  "seeds": [
+    "localhost.test.build.10gen.cc:27017"
+  ],
+  "hosts": [
+    "localhost.test.build.10gen.cc:27017"
+  ],
+  "options": {
+    "loadBalanced": true,
+    "ssl": true
+  }
+}

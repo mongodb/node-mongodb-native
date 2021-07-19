@@ -1,0 +1,252 @@
+{
+  "description": "bulkWrite-delete-hint-serverError",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4.0",
+      "maxServerVersion": "4.3.3"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "BulkWrite_delete_hint"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "BulkWrite_delete_hint",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite deleteOne with hints unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "BulkWrite_delete_hint",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "hint": "_id_",
+                      "limit": 1
+                    },
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "hint": {
+                        "_id": 1
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "ordered": true
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "BulkWrite_delete_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite deleteMany with hints unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteMany": {
+                  "filter": {
+                    "_id": {
+                      "$lt": 3
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              },
+              {
+                "deleteMany": {
+                  "filter": {
+                    "_id": {
+                      "$gte": 4
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "BulkWrite_delete_hint",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$lt": 3
+                        }
+                      },
+                      "hint": "_id_",
+                      "limit": 0
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$gte": 4
+                        }
+                      },
+                      "hint": {
+                        "_id": 1
+                      },
+                      "limit": 0
+                    }
+                  ],
+                  "ordered": true
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "BulkWrite_delete_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

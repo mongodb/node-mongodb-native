@@ -473,13 +473,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // Copy the options and add out internal override of the not shared flag
     const finalOptions = Object.assign({}, this[kOptions], options);
 
-    // If no topology throw an error message
-    if (!this.topology) {
-      throw new MongoDriverError(
-        'MongoClient must be connected before calling MongoClient.prototype.db'
-      );
-    }
-
     // Return the db object
     const db = new Db(this, dbName, finalOptions);
 

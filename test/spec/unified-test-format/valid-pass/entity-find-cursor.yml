@@ -1,0 +1,89 @@
+description: entity-find-cursor
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents:
+      - _id: 1
+      - _id: 2
+      - _id: 3
+      - _id: 4
+      - _id: 5
+
+tests:
+  - description: cursors can be created, iterated, and closed
+    operations:
+      - name: createFindCursor
+        object: *collection0
+        arguments:
+          filter: {}
+          batchSize: 2
+        saveResultAsEntity: &cursor0 cursor0
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 1 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 2 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor0
+        expectResult: { _id: 3 }
+      - name: close
+        object: *cursor0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: {}
+                batchSize: 2
+              commandName: find
+              databaseName: *database0Name
+          - commandSucceededEvent:
+              reply:
+                cursor:
+                  id: { $$type: long }
+                  ns: { $$type: string }
+                  firstBatch: { $$type: array } 
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: long }
+                collection: *collection0Name
+              commandName: getMore
+          - commandSucceededEvent:
+              reply:
+                cursor:
+                  id: { $$type: long }
+                  ns: { $$type: string }
+                  nextBatch: { $$type: array } 
+              commandName: getMore
+          - commandStartedEvent:
+              command:
+                killCursors: *collection0Name
+                cursors: { $$type: array }
+              commandName: killCursors
+          - commandSucceededEvent:
+              reply:
+                # No cursorsKilled field expected on pre-3.2 servers
+                cursorsKilled: { $$unsetOrMatches: { $$type: array } }
+              commandName: killCursors

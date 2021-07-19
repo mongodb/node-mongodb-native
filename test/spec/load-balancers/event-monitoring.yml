@@ -1,0 +1,99 @@
+description: monitoring events include correct fields
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - topologies: [ load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      uriOptions:
+        retryReads: false
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+        - poolClearedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents: []
+
+tests:
+  - description: command started and succeeded events include serviceId
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 1 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              hasServiceId: true
+          - commandSucceededEvent:
+              commandName: insert
+              hasServiceId: true
+
+  - description: command failed events include serviceId
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: find
+              hasServiceId: true
+          - commandFailedEvent:
+              commandName: find
+              hasServiceId: true
+
+  - description: poolClearedEvent events include serviceId
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [find]
+              closeConnection: true
+      - name: find
+        object: *collection0
+        arguments:
+          filter: {}
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: find
+              hasServiceId: true
+          - commandFailedEvent:
+              commandName: find
+              hasServiceId: true
+      - client: *client0
+        eventType: cmap
+        events:
+          - poolClearedEvent:
+              hasServiceId: true

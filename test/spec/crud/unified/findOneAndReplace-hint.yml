@@ -1,0 +1,98 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: findOneAndReplace-hint
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 4.3.1
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name findOneAndReplace_hint
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+tests:
+  -
+    description: 'FindOneAndReplace with hint string'
+    operations:
+      -
+        object: *collection0
+        name: findOneAndReplace
+        arguments:
+          filter: &filter
+            _id: 1
+          replacement: &replacement
+            x: 33
+          hint: _id_
+        expectResult: &result
+          _id: 1
+          x: 11
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query: *filter
+                update: *replacement
+                hint: _id_
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 33
+          -
+            _id: 2
+            x: 22
+  -
+    description: 'FindOneAndReplace with hint document'
+    operations:
+      -
+        object: *collection0
+        name: findOneAndReplace
+        arguments:
+          filter: *filter
+          replacement: *replacement
+          hint:
+            _id: 1
+        expectResult: *result
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query: *filter
+                update: *replacement
+                hint:
+                  _id: 1
+    outcome: *outcome

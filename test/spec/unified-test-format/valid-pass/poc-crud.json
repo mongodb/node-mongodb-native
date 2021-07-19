@@ -1,6 +1,6 @@
 {
   "description": "poc-crud",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.4",
   "createEntities": [
     {
       "client": {
@@ -242,12 +242,14 @@
           },
           "expectError": {
             "expectResult": {
-              "deletedCount": 0,
-              "insertedCount": 2,
-              "matchedCount": 0,
-              "modifiedCount": 0,
-              "upsertedCount": 0,
-              "upsertedIds": {}
+              "$$unsetOrMatches": {
+                "deletedCount": 0,
+                "insertedCount": 2,
+                "matchedCount": 0,
+                "modifiedCount": 0,
+                "upsertedCount": 0,
+                "upsertedIds": {}
+              }
             }
           }
         }
@@ -321,7 +323,8 @@
           "topologies": [
             "replicaset",
             "sharded-replicaset"
-          ]
+          ],
+          "serverless": "forbid"
         }
       ],
       "operations": [
@@ -406,7 +409,8 @@
       "description": "Aggregate with $listLocalSessions",
       "runOnRequirements": [
         {
-          "minServerVersion": "3.6.0"
+          "minServerVersion": "3.6.0",
+          "serverless": "forbid"
         }
       ],
       "operations": [

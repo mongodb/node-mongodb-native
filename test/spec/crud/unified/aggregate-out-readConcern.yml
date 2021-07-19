@@ -1,0 +1,171 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: aggregate-out-readConcern
+schemaVersion: '1.4'
+runOnRequirements:
+  -
+    minServerVersion: 4.1.0
+    topologies:
+      - replicaset
+      - sharded
+    serverless: "forbid"
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test_aggregate_out_readconcern
+  -
+    collection:
+      id: &collection_readConcern_majority collection_readConcern_majority
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "majority" }
+  -
+    collection:
+      id: &collection_readConcern_local collection_readConcern_local
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "local" }
+  -
+    collection:
+      id: &collection_readConcern_available collection_readConcern_available
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "available" }
+  -
+    collection:
+      id: &collection_readConcern_linearizable collection_readConcern_linearizable
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "linearizable" }
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+tests:
+  -
+    description: 'readConcern majority with out stage'
+    operations:
+      -
+        object: *collection_readConcern_majority
+        name: aggregate
+        arguments: &arguments
+          pipeline:
+            -
+              $sort:
+                x: 1
+            -
+              $match:
+                _id:
+                  $gt: 1
+            -
+              $out: &output_collection other_test_collection
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: &pipeline
+                  - { $sort: { x: 1 } }
+                  - { $match: { _id: { $gt: 1 } } }
+                  - { $out: other_test_collection }
+                readConcern:
+                  level: majority
+    outcome: &outcome
+      -
+        collectionName: *output_collection
+        databaseName: *database_name
+        documents:
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+  -
+    description: 'readConcern local with out stage'
+    operations:
+      -
+        object: *collection_readConcern_local
+        name: aggregate
+        arguments: *arguments
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: local
+    outcome: *outcome
+  -
+    description: 'readConcern available with out stage'
+    operations:
+      -
+        object: *collection_readConcern_available
+        name: aggregate
+        arguments: *arguments
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: available
+    outcome: *outcome
+  -
+    description: 'readConcern linearizable with out stage'
+    operations:
+      -
+        object: *collection_readConcern_linearizable
+        name: aggregate
+        arguments: *arguments
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: linearizable

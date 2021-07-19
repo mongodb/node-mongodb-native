@@ -1,0 +1,10 @@
+description: "runOnRequirement-serverless-enum"
+
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - serverless: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

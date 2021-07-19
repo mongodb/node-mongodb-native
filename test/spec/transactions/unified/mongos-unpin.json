@@ -1,6 +1,6 @@
 {
   "description": "mongos-unpin",
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.2",
@@ -50,6 +50,11 @@
   "tests": [
     {
       "description": "unpin after TransientTransctionError error on commit",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "startTransaction",
@@ -138,6 +143,11 @@
     },
     {
       "description": "unpin after TransientTransctionError error on abort",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "startTransaction",

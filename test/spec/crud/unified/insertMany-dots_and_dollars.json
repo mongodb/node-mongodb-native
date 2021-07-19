@@ -53,10 +53,11 @@
             ]
           },
           "expectResult": {
-            "insertedCount": 1,
-            "insertedIds": {
-              "$$unsetOrMatches": {
-                "0": 1
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1
+                }
               }
             }
           }
@@ -162,10 +163,11 @@
             ]
           },
           "expectResult": {
-            "insertedCount": 1,
-            "insertedIds": {
-              "$$unsetOrMatches": {
-                "0": 1
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1
+                }
               }
             }
           }
@@ -221,10 +223,11 @@
             ]
           },
           "expectResult": {
-            "insertedCount": 1,
-            "insertedIds": {
-              "$$unsetOrMatches": {
-                "0": 1
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1
+                }
               }
             }
           }
@@ -284,10 +287,11 @@
             ]
           },
           "expectResult": {
-            "insertedCount": 1,
-            "insertedIds": {
-              "$$unsetOrMatches": {
-                "0": 1
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1
+                }
               }
             }
           }

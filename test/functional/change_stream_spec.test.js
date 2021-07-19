@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const chai = require('chai');
 const loadSpecTests = require('../spec').loadSpecTests;
 const camelCase = require('lodash.camelcase');
@@ -28,7 +29,7 @@ describe('Change Stream Spec', function () {
     return new Promise(r => gc.close(() => r()));
   });
 
-  loadSpecTests('change-stream').forEach(suite => {
+  loadSpecTests(path.join('change-stream', 'legacy')).forEach(suite => {
     const ALL_DBS = [suite.database_name, suite.database2_name];
 
     describe(suite.name, () => {

@@ -1,0 +1,126 @@
+{
+  "description": "expectedEventsForClient-eventType",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": true,
+        "observeEvents": [
+          "commandStartedEvent",
+          "connectionReadyEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0Name"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "database0Name",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "eventType can be set to command and cmap",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "command",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ]
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "eventType defaults to command if unset",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ]
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionReadyEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "description": "findOneAndDelete-hint",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.3.4"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "findOneAndDelete_hint"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "findOneAndDelete_hint",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndDelete with hint string",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndDelete",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": "_id_"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "findOneAndDelete_hint",
+                  "query": {
+                    "_id": 1
+                  },
+                  "hint": "_id_",
+                  "remove": true
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "findOneAndDelete_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndDelete with hint document",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndDelete",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "findOneAndDelete_hint",
+                  "query": {
+                    "_id": 1
+                  },
+                  "hint": {
+                    "_id": 1
+                  },
+                  "remove": true
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "findOneAndDelete_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

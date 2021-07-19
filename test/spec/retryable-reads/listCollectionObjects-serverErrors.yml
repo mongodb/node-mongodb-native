@@ -1,10 +1,14 @@
+# listCollectionObjects returns an array of MongoCollection objects.
+# Not all drivers support this functionality. For more details, see:
+# https://github.com/mongodb/specifications/blob/master/source/enumerate-collections.rst#returning-a-list-of-collection-objects
+
 runOn:
     -
         minServerVersion: "4.0"
         topology: ["single", "replicaset"]
     -
         minServerVersion: "4.1.7"
-        topology: ["sharded"]
+        topology: ["sharded", "load-balanced"]
 
 database_name: &database_name "retryable-reads-tests"
 collection_name: &collection_name "coll"
@@ -38,7 +42,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionObjects succeeds after NotMaster"
+        description: "ListCollectionObjects succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 10107 }
@@ -47,7 +51,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionObjects succeeds after NotMasterNoSlaveOk"
+        description: "ListCollectionObjects succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 13435 }
@@ -56,7 +60,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionObjects succeeds after NotMasterOrSecondary"
+        description: "ListCollectionObjects succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [listCollections], errorCode: 13436 }
@@ -119,7 +123,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionObjects fails after two NotMaster errors"
+        description: "ListCollectionObjects fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -132,7 +136,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "ListCollectionObjects fails after NotMaster when retryReads is false"
+        description: "ListCollectionObjects fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

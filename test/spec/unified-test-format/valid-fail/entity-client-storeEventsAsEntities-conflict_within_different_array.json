@@ -1,0 +1,43 @@
+{
+  "description": "entity-client-storeEventsAsEntities-conflict_within_different_array",
+  "schemaVersion": "1.2",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "storeEventsAsEntities": [
+          {
+            "id": "events",
+            "events": [
+              "PoolCreatedEvent",
+              "PoolReadyEvent",
+              "PoolClearedEvent",
+              "PoolClosedEvent"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "storeEventsAsEntities": [
+          {
+            "id": "events",
+            "events": [
+              "CommandStartedEvent",
+              "CommandSucceededEvent",
+              "CommandFailedEvent"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

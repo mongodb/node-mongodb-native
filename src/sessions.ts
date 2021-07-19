@@ -891,11 +891,12 @@ export function updateSessionFromResponse(session: ClientSession, document: Docu
     session.transaction._recoveryToken = document.recoveryToken;
   }
 
-  if (
-    document.cursor?.atClusterTime &&
-    session?.[kSnapshotEnabled] &&
-    session[kSnapshotTime] === undefined
-  ) {
-    session[kSnapshotTime] = document.cursor.atClusterTime;
+  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] === undefined) {
+    // find and aggregate commands return atClusterTime on the cursor
+    // distinct includes it in the response body
+    const atClusterTime = document.cursor?.atClusterTime || document.atClusterTime;
+    if (atClusterTime) {
+      session[kSnapshotTime] = atClusterTime;
+    }
   }
 }

@@ -1,6 +1,6 @@
 description: "poc-crud"
 
-schemaVersion: "1.0"
+schemaVersion: "1.4"
 
 createEntities:
   - client:
@@ -101,16 +101,19 @@ tests:
           ordered: false
         expectError:
           expectResult:
-            deletedCount: 0
-            insertedCount: 2
-            # Since the map of insertedIds is generated before execution it
-            # could indicate inserts that did not actually succeed. We omit
-            # this field rather than expect drivers to provide an accurate
-            # map filtered by write errors.
-            matchedCount: 0
-            modifiedCount: 0
-            upsertedCount: 0
-            upsertedIds: { }
+            # insertMany throws BulkWriteException, which may optionally include
+            # an intermediary BulkWriteResult
+            $$unsetOrMatches:
+              deletedCount: 0
+              insertedCount: 2
+              # Since the map of insertedIds is generated before execution it
+              # could indicate inserts that did not actually succeed. We omit
+              # this field rather than expect drivers to provide an accurate
+              # map filtered by write errors.
+              matchedCount: 0
+              modifiedCount: 0
+              upsertedCount: 0
+              upsertedIds: { }
     outcome:
       - collectionName: *collection1Name
         databaseName: *database0Name
@@ -141,6 +144,7 @@ tests:
     runOnRequirements:
       - minServerVersion: "4.1.0"
         topologies: [ replicaset, sharded-replicaset ]
+        serverless: "forbid"
     operations:
       - name: aggregate
         object: *collection2
@@ -170,6 +174,9 @@ tests:
   - description: "Aggregate with $listLocalSessions"
     runOnRequirements:
       - minServerVersion: "3.6.0"
+        # serverless does not support either of the current database-level aggregation stages ($listLocalSessions and
+        # $currentOp)
+        serverless: forbid
     operations:
       - name: aggregate
         object: *database1

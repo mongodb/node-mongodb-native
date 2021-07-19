@@ -1,0 +1,23 @@
+{
+  "description": "expectedCmapEvent-connectionCreatedEvent-additionalProperties",
+  "schemaVersion": "1.3",
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {
+                "foo": "bar"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

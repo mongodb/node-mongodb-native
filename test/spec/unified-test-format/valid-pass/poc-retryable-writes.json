@@ -298,9 +298,6 @@
           },
           "expectResult": {
             "$$unsetOrMatches": {
-              "insertedCount": {
-                "$$unsetOrMatches": 2
-              },
               "insertedIds": {
                 "$$unsetOrMatches": {
                   "0": 3,

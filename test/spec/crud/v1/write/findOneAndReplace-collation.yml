@@ -2,6 +2,7 @@ data:
     - {_id: 1, x: 11}
     - {_id: 2, x: 'ping'}
 minServerVersion: '3.4'
+serverless: 'forbid'
 
 tests:
     -
@@ -14,7 +15,7 @@ tests:
                 projection: {x: 1, _id: 0}
                 returnDocument: After
                 sort: {x: 1}
-                collation: { locale: 'en_US', strength: 2 } # https://docs.mongodb.com/master/reference/collation/#collation-document
+                collation: { locale: 'en_US', strength: 2 } # https://docs.mongodb.com/manual/reference/collation/#collation-document
 
         outcome:
             result: {x: 'pong'}

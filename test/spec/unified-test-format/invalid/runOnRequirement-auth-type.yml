@@ -1,0 +1,10 @@
+description: runOnRequirement-auth-type
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - auth: foo
+
+tests:
+  - description: foo
+    operations: []

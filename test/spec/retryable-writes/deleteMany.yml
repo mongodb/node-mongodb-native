@@ -1,7 +1,7 @@
 runOn:
     -
         minServerVersion: "3.6"
-        topology: ["replicaset", "sharded"]
+        topology: ["replicaset", "sharded", "load-balanced"]
 
 data:
     - { _id: 1, x: 11 }

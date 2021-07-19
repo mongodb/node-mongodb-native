@@ -1,0 +1,19 @@
+{
+  "description": "operation-ignoreResultAndError-conflicts_with_expectError",
+  "schemaVersion": "1.3",
+  "tests": [
+    {
+      "description": "ignoreResultAndError used with expectError",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "bar",
+          "ignoreResultAndError": true,
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    }
+  ]
+}
