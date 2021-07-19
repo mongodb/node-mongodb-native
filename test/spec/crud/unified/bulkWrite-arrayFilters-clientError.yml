@@ -1,0 +1,98 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: bulkWrite-arrayFilters-clientError
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    maxServerVersion: 3.5.5
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name crud-v2
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        'y':
+          -
+            b: 3
+          -
+            b: 1
+      -
+        _id: 2
+        'y':
+          -
+            b: 0
+          -
+            b: 1
+tests:
+  -
+    description: 'BulkWrite on server that doesn''t support arrayFilters'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateOne:
+                filter: {  }
+                update:
+                  $set:
+                    y.0.b: 2
+                arrayFilters:
+                  -
+                    i.b: 1
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+  -
+    description: 'BulkWrite on server that doesn''t support arrayFilters with arrayFilters on second op'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateOne:
+                filter: {  }
+                update:
+                  $set:
+                    y.0.b: 2
+            -
+              updateMany:
+                filter: {  }
+                update:
+                  $set:
+                    'y.$[i].b': 2
+                arrayFilters:
+                  -
+                    i.b: 1
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []

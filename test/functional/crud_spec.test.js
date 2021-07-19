@@ -6,10 +6,6 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const gatherTestSuites = require('./spec-runner').gatherTestSuites;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-
 const { loadSpecTests } = require('../spec/index');
 const { runUnifiedTest } = require('./unified-spec-runner/runner');
 
@@ -423,17 +419,6 @@ describe('CRUD spec', function () {
         }
       );
   }
-});
-
-describe('CRUD v2', function () {
-  const testContext = new TestRunnerContext();
-  const testSuites = gatherTestSuites(path.resolve(__dirname, '../spec/crud/v2'));
-  after(() => testContext.teardown());
-  before(function () {
-    return testContext.setup(this.configuration);
-  });
-
-  generateTopologyTests(testSuites, testContext);
 });
 
 describe('CRUD unified', function () {

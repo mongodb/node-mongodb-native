@@ -1,6 +1,6 @@
 description: "aggregate-let"
 
-schemaVersion: "1.0"
+schemaVersion: "1.4"
 
 createEntities:
   - client:
@@ -14,12 +14,19 @@ createEntities:
       id: &collection0 collection0
       database: *database0
       collectionName: &collection0Name coll0
+  - collection:
+      id: &collection1 collection1
+      database: *database0
+      collectionName: &collection1Name coll1
 
 initialData: &initialData
   - collectionName: *collection0Name
     databaseName: *database0Name
     documents:
       - { _id: 1 }
+  - collectionName: *collection1Name
+    databaseName: *database0Name
+    documents: [ ]
 
 tests:
   # TODO: Once SERVER-57403 is resolved, this test can be removed in favor of
@@ -115,3 +122,53 @@ tests:
                 aggregate: *collection0Name
                 pipeline: *pipeline1
                 let: *let1
+
+  - description: "Aggregate to collection with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+        serverless: "forbid"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline2
+            - $match: { $expr: { $eq: ["$_id", "$$id"] } }
+            - $project: { _id: 1 }
+            - $out: *collection1Name
+          let: &let2
+            id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline2
+                let: *let2
+    outcome:
+      - collectionName: *collection1Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+
+  - description: "Aggregate to collection with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "2.6.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: *pipeline2
+          let: *let2
+        expectError:
+          errorContains: "unrecognized field 'let'"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline2
+                let: *let2

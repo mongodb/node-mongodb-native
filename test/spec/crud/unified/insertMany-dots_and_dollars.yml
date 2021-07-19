@@ -31,8 +31,8 @@ tests:
           documents:
             - &dollarPrefixedKey { _id: 1, $a: 1 }
         expectResult: &insertResult
-          insertedCount: 1
-          insertedIds: { $$unsetOrMatches: { 0: 1 } }
+          # InsertManyResult is optional because all of its fields are optional
+          $$unsetOrMatches: { insertedIds: { $$unsetOrMatches: { 0: 1 } } }
     expectEvents: &expectEventsDollarPrefixedKey
       - client: *client0
         events:

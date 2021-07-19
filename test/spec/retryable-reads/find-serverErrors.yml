@@ -54,7 +54,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Find succeeds after NotMaster"
+        description: "Find succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 10107 }
@@ -63,7 +63,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Find succeeds after NotMasterNoSlaveOk"
+        description: "Find succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 13435 }
@@ -72,7 +72,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Find succeeds after NotMasterOrSecondary"
+        description: "Find succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 13436 }
@@ -135,7 +135,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Find fails after two NotMaster errors"
+        description: "Find fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -148,7 +148,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Find fails after NotMaster when retryReads is false"
+        description: "Find fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

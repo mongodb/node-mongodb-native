@@ -1,0 +1,181 @@
+{
+  "description": "findOneAndUpdate-hint",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.3.1"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "findOneAndUpdate_hint"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "findOneAndUpdate_hint",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndUpdate with hint string",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": "_id_"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "findOneAndUpdate_hint",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "findOneAndUpdate_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate with hint document",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "findOneAndUpdate_hint",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "findOneAndUpdate_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

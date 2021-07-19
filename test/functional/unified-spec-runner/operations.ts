@@ -270,6 +270,12 @@ operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
 });
 
+operations.set('findOneAndDelete', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, ...opts } = operation.arguments;
+  return (await collection.findOneAndDelete(filter, opts)).value;
+});
+
 operations.set('failPoint', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments.client);
   return entities.failPoints.enableFailPoint(client, operation.arguments.failPoint);
@@ -407,12 +413,6 @@ operations.set('distinct', async ({ entities, operation }) => {
 operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   return collection.estimatedDocumentCount(operation.arguments);
-});
-
-operations.set('findOneAndDelete', async ({ entities, operation }) => {
-  const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
-  return collection.findOneAndDelete(filter, opts);
 });
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {

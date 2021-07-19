@@ -94,7 +94,7 @@
       ]
     },
     {
-      "description": "ListDatabaseNames succeeds after NotMaster",
+      "description": "ListDatabaseNames succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -131,7 +131,7 @@
       ]
     },
     {
-      "description": "ListDatabaseNames succeeds after NotMasterNoSlaveOk",
+      "description": "ListDatabaseNames succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -168,7 +168,7 @@
       ]
     },
     {
-      "description": "ListDatabaseNames succeeds after NotMasterOrSecondary",
+      "description": "ListDatabaseNames succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -427,7 +427,7 @@
       ]
     },
     {
-      "description": "ListDatabaseNames fails after two NotMaster errors",
+      "description": "ListDatabaseNames fails after two NotWritablePrimary errors",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -465,7 +465,7 @@
       ]
     },
     {
-      "description": "ListDatabaseNames fails after NotMaster when retryReads is false",
+      "description": "ListDatabaseNames fails after NotWritablePrimary when retryReads is false",
       "clientOptions": {
         "retryReads": false
       },

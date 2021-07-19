@@ -50,7 +50,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Distinct succeeds after NotMaster"
+        description: "Distinct succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [distinct], errorCode: 10107 }
@@ -59,7 +59,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Distinct succeeds after NotMasterNoSlaveOk"
+        description: "Distinct succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [distinct], errorCode: 13435 }
@@ -68,7 +68,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Distinct succeeds after NotMasterOrSecondary"
+        description: "Distinct succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [distinct], errorCode: 13436 }
@@ -131,7 +131,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Distinct fails after two NotMaster errors"
+        description: "Distinct fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -144,7 +144,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "Distinct fails after NotMaster when retryReads is false"
+        description: "Distinct fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

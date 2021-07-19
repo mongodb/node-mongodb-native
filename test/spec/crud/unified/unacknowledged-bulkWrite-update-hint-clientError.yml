@@ -1,0 +1,147 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: unacknowledged-bulkWrite-update-hint-clientError
+schemaVersion: '1.0'
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name Bulkwrite_update_hint
+      collectionOptions:
+        writeConcern: { w: 0 }
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+      -
+        _id: 4
+        x: 44
+tests:
+  -
+    description: 'Unacknowledged bulkWrite updateOne with hints fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateOne:
+                filter: &updateOne_filter
+                  _id: 1
+                update: &updateOne_update
+                  $inc:
+                    x: 1
+                hint: &hint_string _id_
+            -
+              updateOne:
+                filter: *updateOne_filter
+                update: *updateOne_update
+                hint: &hint_doc
+                  _id: 1
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44
+  -
+    description: 'Unacknowledged bulkWrite updateMany with hints fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateMany:
+                filter: &updateMany_filter
+                  _id:
+                    $lt: 3
+                update: &updateMany_update
+                  $inc:
+                    x: 1
+                hint: *hint_string
+            -
+              updateMany:
+                filter: *updateMany_filter
+                update: *updateMany_update
+                hint: *hint_doc
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: *outcome
+  -
+    description: 'Unacknowledged bulkWrite replaceOne with hints fails with client-side error'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              replaceOne:
+                filter:
+                  _id: 3
+                replacement:
+                  x: 333
+                hint: *hint_string
+            -
+              replaceOne:
+                filter:
+                  _id: 4
+                replacement:
+                  x: 444
+                hint: *hint_doc
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome: *outcome

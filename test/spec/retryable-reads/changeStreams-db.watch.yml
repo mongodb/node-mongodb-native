@@ -5,6 +5,7 @@ runOn:
     -
         minServerVersion: "4.1.7"
         topology: ["sharded", "load-balanced"]
+        serverless: "forbid"
 
 database_name: &database_name "retryable-reads-tests"
 collection_name: &collection_name "coll"

@@ -1,0 +1,185 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: aggregate-merge
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 4.1.11
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test_aggregate_merge
+  -
+    collection:
+      id: &collection_readConcern_majority collection_readConcern_majority
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "majority" }
+  -
+    collection:
+      id: &collection_readConcern_local collection_readConcern_local
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "local" }
+  -
+    collection:
+      id: &collection_readConcern_available collection_readConcern_available
+      database: database0
+      collectionName: *collection_name
+      collectionOptions:
+        readConcern: { level: "available" }
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+tests:
+  -
+    description: 'Aggregate with $merge'
+    operations:
+      -
+        object: *collection0
+        name: aggregate
+        arguments: &arguments
+          pipeline: &pipeline
+            -
+              $sort:
+                x: 1
+            -
+              $match:
+                _id:
+                  $gt: 1
+            -
+              $merge:
+                into: &output_collection other_test_collection
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+    outcome: &outcome
+      -
+        collectionName: *output_collection
+        databaseName: *database_name
+        documents:
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+  -
+    description: 'Aggregate with $merge and batch size of 0'
+    operations:
+      -
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline: &pipeline
+            -
+              $sort:
+                x: 1
+            -
+              $match:
+                _id:
+                  $gt: 1
+            -
+              $merge:
+                into: &output_collection other_test_collection
+          batchSize: 0
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                cursor: {  }
+    outcome: *outcome
+  -
+    description: 'Aggregate with $merge and majority readConcern'
+    operations:
+      -
+        object: *collection_readConcern_majority
+        name: aggregate
+        arguments: *arguments
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: majority
+    outcome: *outcome
+  -
+    description: 'Aggregate with $merge and local readConcern'
+    operations:
+      -
+        object: *collection_readConcern_local
+        name: aggregate
+        arguments: *arguments
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: local
+    outcome: *outcome
+  -
+    description: 'Aggregate with $merge and available readConcern'
+    operations:
+      -
+        object: *collection_readConcern_available
+        name: aggregate
+        arguments: *arguments
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+                readConcern:
+                  level: available
+    outcome: *outcome

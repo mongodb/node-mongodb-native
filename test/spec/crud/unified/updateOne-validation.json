@@ -1,0 +1,80 @@
+{
+  "description": "updateOne-validation",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateOne requires atomic modifiers",
+      "operations": [
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "x": 22
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

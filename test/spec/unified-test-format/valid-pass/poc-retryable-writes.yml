@@ -141,9 +141,8 @@ tests:
             - { _id: 4, x: 44 }
           ordered: true
         expectResult:
-          $$unsetOrMatches:
-            insertedCount: { $$unsetOrMatches: 2 }
-            insertedIds: { $$unsetOrMatches: { 0: 3, 1: 4 } }
+          # InsertManyResult is optional because all of its fields are optional
+          $$unsetOrMatches: { insertedIds: { $$unsetOrMatches: { 0: 3, 1: 4 } } }
     outcome:
       - collectionName: *collectionName
         databaseName: *databaseName

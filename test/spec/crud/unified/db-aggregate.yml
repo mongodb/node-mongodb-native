@@ -1,0 +1,73 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: db-aggregate
+schemaVersion: '1.4'
+runOnRequirements:
+  -
+    minServerVersion: 3.6.0
+    # serverless does not support either of the current database-level aggregation stages ($listLocalSessions and
+    # $currentOp)
+    serverless: forbid
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name admin
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name crud-v2
+tests:
+  -
+    description: 'Aggregate with $listLocalSessions'
+    operations:
+      -
+        object: *database0
+        name: aggregate
+        arguments:
+          pipeline:
+            -
+              $listLocalSessions: {  }
+            -
+              $limit: 1
+            -
+              $addFields:
+                dummy: 'dummy field'
+            -
+              $project:
+                _id: 0
+                dummy: 1
+        expectResult:
+          -
+            dummy: 'dummy field'
+  -
+    description: 'Aggregate with $listLocalSessions and allowDiskUse'
+    operations:
+      -
+        object: *database0
+        name: aggregate
+        arguments:
+          pipeline:
+            -
+              $listLocalSessions: {  }
+            -
+              $limit: 1
+            -
+              $addFields:
+                dummy: 'dummy field'
+            -
+              $project:
+                _id: 0
+                dummy: 1
+          allowDiskUse: true
+        expectResult:
+          -
+            dummy: 'dummy field'

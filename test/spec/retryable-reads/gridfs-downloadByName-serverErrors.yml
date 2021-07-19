@@ -60,7 +60,7 @@ tests:
              - *retryable_command_started_event
              - *find_chunks_command_started_event
     -
-        description: "DownloadByName succeeds after NotMaster"
+        description: "DownloadByName succeeds after NotWritablePrimary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 10107 }
@@ -70,7 +70,7 @@ tests:
              - *retryable_command_started_event
              - *find_chunks_command_started_event
     -
-        description: "DownloadByName succeeds after NotMasterNoSlaveOk"
+        description: "DownloadByName succeeds after NotPrimaryNoSecondaryOk"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 13435 }
@@ -80,7 +80,7 @@ tests:
              - *retryable_command_started_event
              - *find_chunks_command_started_event
     -
-        description: "DownloadByName succeeds after NotMasterOrSecondary"
+        description: "DownloadByName succeeds after NotPrimaryOrSecondary"
         failPoint:
             <<: *failCommand_failPoint
             data: { failCommands: [find], errorCode: 13436 }
@@ -150,7 +150,7 @@ tests:
              - *retryable_command_started_event
              - *find_chunks_command_started_event
     -
-        description: "DownloadByName fails after two NotMaster errors"
+        description: "DownloadByName fails after two NotWritablePrimary errors"
         failPoint:
             <<: *failCommand_failPoint
             mode: { times: 2 }
@@ -163,7 +163,7 @@ tests:
              - *retryable_command_started_event
              - *retryable_command_started_event
     -
-        description: "DownloadByName fails after NotMaster when retryReads is false"
+        description: "DownloadByName fails after NotWritablePrimary when retryReads is false"
         clientOptions:
             retryReads: false
         failPoint:

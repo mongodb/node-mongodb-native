@@ -1,0 +1,249 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: bulkWrite-update-hint-serverError
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 3.4.0
+    maxServerVersion: 4.1.9
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test_bulkwrite_update_hint
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+      -
+        _id: 4
+        x: 44
+tests:
+  -
+    description: 'BulkWrite updateOne with update hints unsupported (server-side error)'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateOne:
+                filter: &updateOne_filter
+                  _id: 1
+                update: &updateOne_update
+                  $inc:
+                    x: 1
+                hint: &hint_string _id_
+            -
+              updateOne:
+                filter: *updateOne_filter
+                update: *updateOne_update
+                hint: &hint_doc
+                  _id: 1
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: *updateOne_filter
+                    u: *updateOne_update
+                    hint: *hint_string
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                  -
+                    q: *updateOne_filter
+                    u: *updateOne_update
+                    hint: *hint_doc
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                ordered: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44
+  -
+    description: 'BulkWrite updateMany with update hints unsupported (server-side error)'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              updateMany:
+                filter: &updateMany_filter
+                  _id:
+                    $lt: 3
+                update: &updateMany_update
+                  $inc:
+                    x: 1
+                hint: *hint_string
+            -
+              updateMany:
+                filter: *updateMany_filter
+                update: *updateMany_update
+                hint: *hint_doc
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: *updateMany_filter
+                    u: *updateMany_update
+                    multi: true
+                    hint: *hint_string
+                    upsert:
+                      $$unsetOrMatches: false
+                  -
+                    q: *updateMany_filter
+                    u: *updateMany_update
+                    multi: true
+                    hint: *hint_doc
+                    upsert:
+                      $$unsetOrMatches: false
+                ordered: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44
+  -
+    description: 'BulkWrite replaceOne with update hints unsupported (server-side error)'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              replaceOne:
+                filter:
+                  _id: 3
+                replacement:
+                  x: 333
+                hint: *hint_string
+            -
+              replaceOne:
+                filter:
+                  _id: 4
+                replacement:
+                  x: 444
+                hint: *hint_doc
+          ordered: true
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q:
+                      _id: 3
+                    u:
+                      x: 333
+                    hint: *hint_string
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                  -
+                    q:
+                      _id: 4
+                    u:
+                      x: 444
+                    hint: *hint_doc
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                ordered: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44

@@ -1237,11 +1237,11 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
-  findOneAndDelete(filter: Filter<TSchema>, callback: Callback<ModifyResult<TSchema>>): void;
   findOneAndDelete(
     filter: Filter<TSchema>,
     options: FindOneAndDeleteOptions
   ): Promise<ModifyResult<TSchema>>;
+  findOneAndDelete(filter: Filter<TSchema>, callback: Callback<ModifyResult<TSchema>>): void;
   findOneAndDelete(
     filter: Filter<TSchema>,
     options: FindOneAndDeleteOptions,

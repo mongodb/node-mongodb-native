@@ -1,6 +1,6 @@
 {
   "description": "aggregate-let",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.4",
   "createEntities": [
     {
       "client": {
@@ -23,6 +23,13 @@
         "database": "database0",
         "collectionName": "coll0"
       }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database0",
+        "collectionName": "coll1"
+      }
     }
   ],
   "initialData": [
@@ -34,6 +41,11 @@
           "_id": 1
         }
       ]
+    },
+    {
+      "collectionName": "coll1",
+      "databaseName": "crud-tests",
+      "documents": []
     }
   ],
   "tests": [
@@ -286,6 +298,175 @@
                   ],
                   "let": {
                     "x": "foo"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate to collection with let option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0",
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "$expr": {
+                    "$eq": [
+                      "$_id",
+                      "$$id"
+                    ]
+                  }
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$out": "coll1"
+              }
+            ],
+            "let": {
+              "id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$out": "coll1"
+                    }
+                  ],
+                  "let": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll1",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate to collection with let option unsupported (server-side error)",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "2.6.0",
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "$expr": {
+                    "$eq": [
+                      "$_id",
+                      "$$id"
+                    ]
+                  }
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$out": "coll1"
+              }
+            ],
+            "let": {
+              "id": 1
+            }
+          },
+          "expectError": {
+            "errorContains": "unrecognized field 'let'",
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$out": "coll1"
+                    }
+                  ],
+                  "let": {
+                    "id": 1
                   }
                 }
               }

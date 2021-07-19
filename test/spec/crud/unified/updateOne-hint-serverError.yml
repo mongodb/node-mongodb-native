@@ -1,0 +1,113 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: updateOne-hint-serverError
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 3.4.0
+    maxServerVersion: 4.1.9
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test_updateone_hint
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+tests:
+  -
+    description: 'UpdateOne with hint string unsupported (server-side error)'
+    operations:
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: &filter
+            _id:
+              $gt: 1
+          update: &update
+            $inc:
+              x: 1
+          hint: _id_
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: *filter
+                    u: *update
+                    hint: _id_
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+  -
+    description: 'UpdateOne with hint document unsupported (server-side error)'
+    operations:
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: *filter
+          update: *update
+          hint:
+            _id: 1
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: *filter
+                    u: *update
+                    hint:
+                      _id: 1
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+    outcome: *outcome

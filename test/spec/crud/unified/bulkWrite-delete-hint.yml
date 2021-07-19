@@ -1,0 +1,154 @@
+# This file was created automatically using mongodb-spec-converter.
+# Please review the generated file, then remove this notice.
+
+description: bulkWrite-delete-hint
+schemaVersion: '1.0'
+runOnRequirements:
+  -
+    minServerVersion: 4.3.4
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name BulkWrite_delete_hint
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+      -
+        _id: 4
+        x: 44
+tests:
+  -
+    description: 'BulkWrite deleteOne with hints'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              deleteOne:
+                filter: &deleteOne_filter1
+                  _id: 1
+                hint: &hint_string _id_
+            -
+              deleteOne:
+                filter: &deleteOne_filter2
+                  _id: 2
+                hint: &hint_doc
+                  _id: 1
+          ordered: true
+        expectResult:
+          deletedCount: 2
+          insertedCount: 0
+          insertedIds: { $$unsetOrMatches: {} }
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {  }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: *deleteOne_filter1
+                    hint: *hint_string
+                    limit: 1
+                  -
+                    q: *deleteOne_filter2
+                    hint: *hint_doc
+                    limit: 1
+                ordered: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44
+  -
+    description: 'BulkWrite deleteMany with hints'
+    operations:
+      -
+        object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              deleteMany:
+                filter: &deleteMany_filter1
+                  _id:
+                    $lt: 3
+                hint: *hint_string
+            -
+              deleteMany:
+                filter: &deleteMany_filter2
+                  _id:
+                    $gte: 4
+                hint: *hint_doc
+          ordered: true
+        expectResult:
+          deletedCount: 3
+          insertedCount: 0
+          insertedIds: { $$unsetOrMatches: {} }
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {  }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: *deleteMany_filter1
+                    hint: *hint_string
+                    limit: 0
+                  -
+                    q: *deleteMany_filter2
+                    hint: *hint_doc
+                    limit: 0
+                ordered: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          -
+            _id: 3
+            x: 33

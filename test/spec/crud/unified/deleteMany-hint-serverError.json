@@ -1,0 +1,190 @@
+{
+  "description": "deleteMany-hint-serverError",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4.0",
+      "maxServerVersion": "4.3.3"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "DeleteMany_hint"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "DeleteMany_hint",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "DeleteMany with hint string unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "deleteMany",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "hint": "_id_"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "DeleteMany_hint",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "hint": "_id_",
+                      "limit": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "DeleteMany_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DeleteMany with hint document unsupported (server-side error)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "deleteMany",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "DeleteMany_hint",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "hint": {
+                        "_id": 1
+                      },
+                      "limit": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "DeleteMany_hint",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,8 @@ runOn:
     -
         minServerVersion: "4.1.8"
         topology: ["sharded"]
+        # serverless proxy doesn't use recovery tokens
+        serverless: "forbid"
 
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
