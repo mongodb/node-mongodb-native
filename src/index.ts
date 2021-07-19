@@ -39,6 +39,7 @@ export {
   MongoServerSelectionError,
   MongoParseError,
   MongoWriteConcernError,
+  MongoRuntimeError,
   MongoURIError,
   MongoStreamError,
   MongoChangeStreamError,
