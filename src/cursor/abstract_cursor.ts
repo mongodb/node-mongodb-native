@@ -5,7 +5,8 @@ import {
   MongoDriverError,
   MongoInvalidArgumentError,
   MongoCursorExhaustedError,
-  MongoTailableCursorError
+  MongoTailableCursorError,
+  MongoCursorInUseError
 } from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -784,7 +785,7 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
 /** @internal */
 export function assertUninitialized(cursor: AbstractCursor): void {
   if (cursor[kInitialized]) {
-    throw new MongoDriverError('Cursor is already initialized');
+    throw new MongoCursorInUseError('Cursor is already initialized');
   }
 }
 
