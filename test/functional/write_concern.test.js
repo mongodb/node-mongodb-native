@@ -8,7 +8,7 @@ const loadSpecTests = require('../spec').loadSpecTests;
 const { withMonitoredClient } = require('./shared');
 
 const mock = require('../tools/mock');
-const { MongoClient, MongoServerError } = require('../../src');
+const { MongoClient } = require('../../src');
 
 describe('Write Concern', function () {
   describe('spec tests', function () {
@@ -116,57 +116,5 @@ describe('Write Concern', function () {
       .then(() => {
         return client.close();
       });
-  });
-
-  describe('details property', () => {
-    let client;
-
-    beforeEach(async function () {
-      client = this.configuration.newClient({ monitorCommands: true });
-      await client.connect();
-    });
-
-    afterEach(async () => {
-      if (client) await client.close();
-    });
-
-    it('should provide details on why document validation failed', {
-      metadata: { requires: { mongodb: '>=5.0.0' } },
-      async test() {
-        try {
-          await client.db().collection('wc_details').drop();
-        } catch {
-          // don't care
-        }
-
-        const collection = await client
-          .db()
-          .createCollection('wc_details', { validator: { x: { $type: 'string' } } });
-
-        const evCapture = require('events').once(client, 'commandSucceeded');
-
-        let insertError;
-        try {
-          await collection.insertOne({ x: /not a string/ });
-          expect.fail('The insert should fail the validation that x must be a string');
-        } catch (error) {
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(error).to.have.property('code', 121);
-          expect(error).to.have.nested.property('errInfo.details').that.is.an('object');
-          insertError = error;
-        }
-        const detailsFromError = insertError.errInfo.details;
-
-        const commandSucceededEvents = await evCapture;
-        expect(commandSucceededEvents).to.have.lengthOf(1);
-        const ev = commandSucceededEvents[0];
-        expect(ev)
-          .to.have.nested.property('reply.writeErrors[0].errInfo.details')
-          .that.is.an('object');
-        const detailsFromEvent = ev.reply.writeErrors[0].errInfo.details;
-
-        expect(detailsFromError).to.deep.equal(detailsFromEvent);
-      }
-    });
   });
 });
