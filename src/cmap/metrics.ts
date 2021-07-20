@@ -4,17 +4,15 @@ export class ConnectionPoolMetrics {
   static readonly CURSOR = 'cursor' as const;
   static readonly OTHER = 'other' as const;
 
-  txnConnections: number;
-  cursorConnections: number;
-  otherConnections: number;
+  txnConnections!: number;
+  cursorConnections!: number;
+  otherConnections!: number;
 
   /**
    * Create the metrics object.
    */
   constructor() {
-    this.txnConnections = 0;
-    this.cursorConnections = 0;
-    this.otherConnections = 0;
+    this.reset();
   }
 
   /**
@@ -48,9 +46,19 @@ export class ConnectionPoolMetrics {
    */
   info(): string {
     return (
-      `connections in use by cursors: ${this.cursorConnections},` +
-      `connections in use by transactions: ${this.txnConnections},` +
+      'Timed out while checking out a connection from connection pool: ' +
+      `connections in use by cursors: ${this.cursorConnections}, ` +
+      `connections in use by transactions: ${this.txnConnections}, ` +
       `connections in use by other operations: ${this.otherConnections}`
     );
+  }
+
+  /**
+   * Reset the metrics to the initial values.
+   */
+  reset(): void {
+    this.txnConnections = 0;
+    this.cursorConnections = 0;
+    this.otherConnections = 0;
   }
 }

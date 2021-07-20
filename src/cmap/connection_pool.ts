@@ -297,7 +297,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
         waitQueueMember.callback(
           new WaitQueueTimeoutError(
-            this.loadBalanced ? this.waitQueueErrorMetrics() : '',
+            this.loadBalanced
+              ? this.waitQueueErrorMetrics()
+              : 'Timed out while checking out a connection from connection pool',
             this.address
           )
         );

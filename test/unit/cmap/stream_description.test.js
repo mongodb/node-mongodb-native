@@ -19,16 +19,27 @@ describe('StreamDescription - unit/cmap', function () {
         const description = new StreamDescription('a:27017', {});
 
         it('sets logicalSessionTimeoutMinutes to undefined', function () {
-          expect(description.logicalSessionTimeoutMinutes).to.not.exist;
+          expect(description).to.have.property('logicalSessionTimeoutMinutes', undefined);
         });
       });
 
       context('when loadBalanced is in the options', function () {
-        const options = { loadBalanced: true };
-        const description = new StreamDescription('a:27017', options);
+        context('when the value is true', function () {
+          const options = { loadBalanced: true };
+          const description = new StreamDescription('a:27017', options);
 
-        it('sets the property', function () {
-          expect(description.loadBalanced).to.be.true;
+          it('sets the property to true', function () {
+            expect(description.loadBalanced).to.be.true;
+          });
+        });
+
+        context('when the value is false', function () {
+          const options = { loadBalanced: false };
+          const description = new StreamDescription('a:27017', options);
+
+          it('sets the property to false', function () {
+            expect(description.loadBalanced).to.be.false;
+          });
         });
       });
 
@@ -36,7 +47,7 @@ describe('StreamDescription - unit/cmap', function () {
         const description = new StreamDescription('a:27017', {});
 
         it('sets loadBalanced to false', function () {
-          expect(description.loadBalanced).to.be.false;
+          expect(description).to.have.property('loadBalanced', undefined);
         });
       });
     });

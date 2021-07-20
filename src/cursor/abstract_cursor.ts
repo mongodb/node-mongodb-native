@@ -729,9 +729,7 @@ function cleanupCursor(
   const server = cursor[kServer];
   const session = cursor[kSession];
   const error = options?.error;
-  const needsToEmitClosed =
-    options?.needsToEmitClosed ||
-    (options?.needsToEmitClosed == null && cursor[kDocuments].length === 0);
+  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {

@@ -479,4 +479,20 @@ describe('MongoOptions', function () {
       expect(parse).to.throw(/directConnection/);
     });
   });
+
+  context('when loadBalanced is in the options object', function () {
+    it('errors when the option is true', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: true });
+      };
+      expect(parse).to.throw(/URI/);
+    });
+
+    it('errors when the option is false', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: false });
+      };
+      expect(parse).to.throw(/URI/);
+    });
+  });
 });

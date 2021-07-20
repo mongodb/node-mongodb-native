@@ -309,6 +309,10 @@ export function parseOptions(
     Object.entries(options).filter(([, v]) => (v ?? null) !== null)
   );
 
+  if (objectOptions.has('loadBalanced')) {
+    throw new MongoParseError('loadBalanced is only a valid option in the URI');
+  }
+
   const allOptions = new CaseInsensitiveMap();
 
   const allKeys = new Set<string>([

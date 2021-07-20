@@ -112,7 +112,7 @@ describe('Connection - unit/cmap', function () {
     let connection;
     const stream = new Socket();
 
-    context('when logicalSessionTimeoutMinutes is preset', function () {
+    context('when logicalSessionTimeoutMinutes is present', function () {
       beforeEach(function () {
         connection = new Connection(stream, {
           hostAddress: server.hostAddress(),

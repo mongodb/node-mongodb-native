@@ -25,8 +25,9 @@ describe('ConnectionPoolMetrics', function () {
 
     it('returns the metrics information', function () {
       expect(metrics.info()).to.equal(
-        'connections in use by cursors: 0,' +
-          'connections in use by transactions: 0,' +
+        'Timed out while checking out a connection from connection pool: ' +
+          'connections in use by cursors: 0, ' +
+          'connections in use by transactions: 0, ' +
           'connections in use by other operations: 0'
       );
     });
@@ -37,31 +38,46 @@ describe('ConnectionPoolMetrics', function () {
 
     context('when the type is TXN', function () {
       before(function () {
+        metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.TXN);
       });
 
       it('increments the txnConnections count', function () {
-        expect(metrics.txnConnections).to.equal(1);
+        expect(metrics).to.deep.equal({
+          txnConnections: 1,
+          cursorConnections: 0,
+          otherConnections: 0
+        });
       });
     });
 
     context('when the type is CURSOR', function () {
       before(function () {
+        metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.CURSOR);
       });
 
       it('increments the cursorConnections count', function () {
-        expect(metrics.cursorConnections).to.equal(1);
+        expect(metrics).to.deep.equal({
+          txnConnections: 0,
+          cursorConnections: 1,
+          otherConnections: 0
+        });
       });
     });
 
     context('when the type is OTHER', function () {
       before(function () {
+        metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.OTHER);
       });
 
       it('increments the otherConnections count', function () {
-        expect(metrics.otherConnections).to.equal(1);
+        expect(metrics).to.deep.equal({
+          txnConnections: 0,
+          cursorConnections: 0,
+          otherConnections: 1
+        });
       });
     });
   });
@@ -71,31 +87,46 @@ describe('ConnectionPoolMetrics', function () {
 
     context('when the type is TXN', function () {
       before(function () {
+        metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.TXN);
       });
 
-      it('increments the txnConnections count', function () {
-        expect(metrics.txnConnections).to.equal(-1);
+      it('decrements the txnConnections count', function () {
+        expect(metrics).to.deep.equal({
+          txnConnections: -1,
+          cursorConnections: 0,
+          otherConnections: 0
+        });
       });
     });
 
     context('when the type is CURSOR', function () {
       before(function () {
+        metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.CURSOR);
       });
 
-      it('increments the cursorConnections count', function () {
-        expect(metrics.cursorConnections).to.equal(-1);
+      it('decrements the cursorConnections count', function () {
+        expect(metrics).to.deep.equal({
+          txnConnections: 0,
+          cursorConnections: -1,
+          otherConnections: 0
+        });
       });
     });
 
     context('when the type is OTHER', function () {
       before(function () {
+        metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.OTHER);
       });
 
-      it('increments the otherConnections count', function () {
-        expect(metrics.otherConnections).to.equal(-1);
+      it('decrements the otherConnections count', function () {
+        expect(metrics).to.deep.equal({
+          txnConnections: 0,
+          cursorConnections: 0,
+          otherConnections: -1
+        });
       });
     });
   });
