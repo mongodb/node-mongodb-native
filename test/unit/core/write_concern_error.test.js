@@ -192,6 +192,7 @@ describe('WriteConcernError', function () {
 
         const evCapture = once(client, 'commandSucceeded');
 
+        let errInfoFromError;
         try {
           await collection.insertOne({ x: /not a string/ });
           expect.fail('The insert should fail the validation that x must be a string');
@@ -199,12 +200,16 @@ describe('WriteConcernError', function () {
           expect(error).to.be.instanceOf(MongoServerError);
           expect(error).to.have.property('code', 121);
           expect(error).to.have.property('errInfo').that.is.an('object');
+          errInfoFromError = error.errInfo;
         }
 
         const commandSucceededEvents = await evCapture;
         expect(commandSucceededEvents).to.have.lengthOf(1);
         const ev = commandSucceededEvents[0];
         expect(ev).to.have.nested.property('reply.writeErrors[0].errInfo').that.is.an('object');
+
+        const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
+        expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
       }
     });
   });
