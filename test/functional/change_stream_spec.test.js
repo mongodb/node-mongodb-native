@@ -2,13 +2,30 @@
 
 const path = require('path');
 const chai = require('chai');
-const loadSpecTests = require('../spec').loadSpecTests;
+const { loadSpecTests } = require('../spec');
+const { runUnifiedTest } = require('./unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
-const setupDatabase = require('./shared').setupDatabase;
-const delay = require('./shared').delay;
+const { setupDatabase } = require('./shared');
+const { delay } = require('./shared');
 const expect = chai.expect;
 
-describe('Change Stream Spec', function () {
+describe('Change Streams Spec - Unified', function () {
+  for (const changeStreamTest of loadSpecTests(path.join('change-stream', 'unified'))) {
+    expect(changeStreamTest).to.exist;
+    context(String(changeStreamTest.description), function () {
+      for (const test of changeStreamTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test: async function () {
+            await runUnifiedTest(this, changeStreamTest, test);
+          }
+        });
+      }
+    });
+  }
+});
+
+describe('Change Stream Spec - v1', function () {
   let globalClient;
   let ctx;
   let events;
