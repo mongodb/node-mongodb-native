@@ -5,7 +5,7 @@ import { Logger } from '../logger';
 import { ConnectionPoolMetrics } from './metrics';
 import { connect } from './connect';
 import { eachAsync, makeCounter, Callback } from '../utils';
-import { MongoDriverError, MongoError, MongoInvalidArgumentError } from '../error';
+import { MongoError, MongoInvalidArgumentError, MongoDriverError, MongoAPIError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
   ConnectionPoolCreatedEvent,
@@ -388,7 +388,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           clearTimeout(waitQueueMember.timer);
         }
         if (!waitQueueMember[kCancelled]) {
-          waitQueueMember.callback(new MongoDriverError('connection pool closed'));
+          // TODO(NODE-3485): Replace with MongoConnectionPoolClosedError
+          waitQueueMember.callback(new MongoAPIError('Connection pool closed'));
         }
       }
     }

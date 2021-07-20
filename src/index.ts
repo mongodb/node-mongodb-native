@@ -52,7 +52,12 @@ export {
   MongoBatchReExecutionError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
-  MongoNotConnectedError
+  MongoNotConnectedError,
+  MongoExpiredSessionError,
+  MongoTransactionError,
+  MongoKerberosError,
+  MongoServerClosedError,
+  MongoTopologyClosedError
 } from './error';
 export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {

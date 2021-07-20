@@ -33,9 +33,9 @@ import {
   isRetryableWriteError,
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake,
-  MongoDriverError,
   MongoCompatibilityError,
-  MongoInvalidArgumentError
+  MongoInvalidArgumentError,
+  MongoServerClosedError
 } from '../error';
 import {
   Connection,
@@ -64,6 +64,8 @@ const stateTransition = makeStateMachine({
   [STATE_CONNECTED]: [STATE_CONNECTED, STATE_CLOSING, STATE_CLOSED],
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
+
+const SERVER_CLOSED_ERROR = 'Server is closed';
 
 /** @internal */
 const kMonitor = Symbol('monitor');
@@ -292,8 +294,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      // TODO(NODE-3405): Change this out for MongoServerClosedError
-      callback(new MongoDriverError('Server is closed'));
+      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
       return;
     }
 
@@ -351,7 +352,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoDriverError('server is closed'));
+      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
       return;
     }
 
@@ -385,7 +386,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     callback: Callback<Document>
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoDriverError('server is closed'));
+      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
       return;
     }
 
@@ -420,7 +421,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
-        callback(new MongoDriverError('server is closed'));
+        callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
       }
 
       return;

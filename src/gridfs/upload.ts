@@ -4,6 +4,7 @@ import { ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import {
   AnyError,
+  MongoAPIError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
   MongoError,
@@ -565,8 +566,8 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
 function checkAborted(stream: GridFSBucketWriteStream, callback?: Callback<void>): boolean {
   if (stream.state.aborted) {
     if (typeof callback === 'function') {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      callback(new MongoDriverError('this stream has been aborted'));
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
+      callback(new MongoAPIError('Stream has been aborted'));
     }
     return true;
   }

@@ -683,15 +683,15 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
-    // TODO(NODE-3405): Replace with MongoStreamClosedError
-    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+    if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
-    // TODO(NODE-3405): Replace with MongoStreamClosedError
-    return closeWithError(changeStream, new MongoDriverError(CHANGESTREAM_CLOSED_ERROR), callback);
+    // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+    return closeWithError(changeStream, new MongoAPIError(CHANGESTREAM_CLOSED_ERROR), callback);
   }
 
   if (change && !change._id) {
@@ -723,8 +723,8 @@ function processError<TSchema>(
 
   // If the change stream has been closed explicitly, do not process error.
   if (changeStream[kClosed]) {
-    // TODO(NODE-3405): Replace with MongoStreamClosedError
-    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+    if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -784,8 +784,8 @@ function processError<TSchema>(
  */
 function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
-    // TODO(NODE-3405): Replace with MongoStreamClosedError
-    callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+    callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -810,8 +810,8 @@ function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: 
     const request = changeStream[kResumeQueue].pop();
     if (!err) {
       if (changeStream[kClosed]) {
-        // TODO(NODE-3405): Replace with MongoStreamClosedError
-        request(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+        // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+        request(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
         return;
       }
       if (!changeStream.cursor) {
