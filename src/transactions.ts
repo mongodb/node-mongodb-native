@@ -1,5 +1,5 @@
 import { ReadPreference } from './read_preference';
-import { MongoDriverError } from './error';
+import { MongoDriverError, MongoTransactionError } from './error';
 import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
@@ -84,7 +84,7 @@ export class Transaction {
     const writeConcern = WriteConcern.fromOptions(options);
     if (writeConcern) {
       if (writeConcern.w === 0) {
-        throw new MongoDriverError('Transactions do not support unacknowledged write concern');
+        throw new MongoTransactionError('Transactions do not support unacknowledged write concern');
       }
 
       this.options.writeConcern = writeConcern;

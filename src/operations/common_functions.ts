@@ -1,4 +1,4 @@
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoTopologyClosedError } from '../error';
 import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Db } from '../db';
@@ -42,7 +42,7 @@ export function indexInformation(
 
   // Did the user destroy the topology
   if (getTopology(db).isDestroyed())
-    return callback(new MongoDriverError('topology was destroyed'));
+    return callback(new MongoTopologyClosedError('Topology was destroyed'));
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information

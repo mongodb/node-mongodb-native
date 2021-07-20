@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import { MongoError, AnyError, MONGODB_ERROR_CODES, MongoDriverError } from '../error';
+import { MongoError, AnyError, MONGODB_ERROR_CODES, MongoDriverError, MongoStreamClosedError } from '../error';
 import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
@@ -556,7 +556,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
 function checkAborted(stream: GridFSBucketWriteStream, callback?: Callback<void>): boolean {
   if (stream.state.aborted) {
     if (typeof callback === 'function') {
-      callback(new MongoDriverError('this stream has been aborted'));
+      callback(new MongoStreamClosedError('Stream has been aborted'));
     }
     return true;
   }

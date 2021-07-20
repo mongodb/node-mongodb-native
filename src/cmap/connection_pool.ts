@@ -3,7 +3,7 @@ import { Logger } from '../logger';
 import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import { connect } from './connect';
 import { eachAsync, makeCounter, Callback } from '../utils';
-import { MongoDriverError, MongoError } from '../error';
+import { MongoDriverError, MongoError, MongoResourceClosedError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
   ConnectionPoolCreatedEvent,
@@ -320,7 +320,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           clearTimeout(waitQueueMember.timer);
         }
         if (!waitQueueMember[kCancelled]) {
-          waitQueueMember.callback(new MongoDriverError('connection pool closed'));
+          waitQueueMember.callback(new MongoResourceClosedError('Connection pool closed'));
         }
       }
     }

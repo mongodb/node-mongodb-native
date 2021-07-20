@@ -38,7 +38,14 @@ export {
   MongoSystemError,
   MongoServerSelectionError,
   MongoParseError,
-  MongoWriteConcernError
+  MongoWriteConcernError,
+  MongoExpiredSessionError,
+  MongoTransactionError,
+  MongoKerberosError,
+  MongoResourceClosedError,
+  MongoServerClosedError,
+  MongoStreamClosedError,
+  MongoTopologyClosedError
 } from './error';
 export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {
