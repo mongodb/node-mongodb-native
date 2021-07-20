@@ -10,7 +10,7 @@ const { delay } = require('./shared');
 const expect = chai.expect;
 
 describe('Change Streams Spec - Unified', function () {
-  for (const changeStreamTest of loadSpecTests(path.join('change-stream', 'unified'))) {
+  for (const changeStreamTest of loadSpecTests(path.join('change-streams', 'unified'))) {
     expect(changeStreamTest).to.exist;
     context(String(changeStreamTest.description), function () {
       for (const test of changeStreamTest.tests) {
@@ -46,7 +46,7 @@ describe('Change Stream Spec - v1', function () {
     return new Promise(r => gc.close(() => r()));
   });
 
-  loadSpecTests(path.join('change-stream', 'legacy')).forEach(suite => {
+  loadSpecTests(path.join('change-streams', 'legacy')).forEach(suite => {
     const ALL_DBS = [suite.database_name, suite.database2_name];
 
     describe(suite.name, () => {
