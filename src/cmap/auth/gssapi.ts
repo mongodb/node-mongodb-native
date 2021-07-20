@@ -1,6 +1,7 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import {
   MongoDriverError,
+  MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoError,
   MongoMissingDependencyError
@@ -74,7 +75,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
   const { credentials } = authContext;
   if (!hostAddress || typeof hostAddress.host !== 'string' || !credentials) {
     return callback(
-      new MongoDriverError('Connection must have host and port and credentials defined.')
+      new MongoInvalidArgumentError('Connection must have host and port and credentials defined.')
     );
   }
 

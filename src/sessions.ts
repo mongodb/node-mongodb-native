@@ -139,7 +139,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (options.snapshot === true) {
       this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
-        throw new MongoDriverError(
+        throw new MongoInvalidArgumentError(
           'Properties "causalConsistency" and "snapshot" are mutually exclusive'
         );
       }

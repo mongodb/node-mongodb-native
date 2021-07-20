@@ -147,7 +147,9 @@ function performInitialHandshake(
         const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
         if (!provider) {
           return callback(
-            new MongoDriverError(`No AuthProvider for ${resolvedCredentials.mechanism} defined.`)
+            new MongoInvalidArgumentError(
+              `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
+            )
           );
         }
         provider.auth(authContext, err => {
@@ -193,7 +195,9 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
       if (!provider) {
         // This auth mechanism is always present.
         return callback(
-          new MongoDriverError(`No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`)
+          new MongoInvalidArgumentError(
+            `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
+          )
         );
       }
       return provider.prepare(handshakeDoc, authContext, callback);
@@ -201,7 +205,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     const provider = AUTH_PROVIDERS.get(credentials.mechanism);
     if (!provider) {
       return callback(
-        new MongoDriverError(`No AuthProvider for ${credentials.mechanism} defined.`)
+        new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`)
       );
     }
     return provider.prepare(handshakeDoc, authContext, callback);

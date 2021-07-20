@@ -396,7 +396,7 @@ function handleStartOption(
       );
     }
     if (options.start < 0) {
-      throw new MongoDriverError(`Stream start (${options.start}) must not be negative`);
+      throw new MongoInvalidArgumentError(`Stream start (${options.start}) must not be negative`);
     }
     if (options.end != null && options.end < options.start) {
       throw new MongoInvalidArgumentError(
