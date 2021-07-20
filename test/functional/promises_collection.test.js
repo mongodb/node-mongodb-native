@@ -239,7 +239,7 @@ describe('Promises (Collection)', function () {
         const db = client.db(configuration.db);
         expect(() => {
           db.collection('insertMany_Promise_error').insertMany({ a: 1 });
-        }).to.throw(/docs parameter must be an array of documents/);
+        }).to.throw(/Argument "docs" must be an array of documents/);
 
         done();
       });

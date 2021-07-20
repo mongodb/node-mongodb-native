@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { Aspect, defineAspects } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { MongoDriverError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { Callback, emitWarningOnce, getTopology } from '../utils';
 import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
@@ -54,9 +54,8 @@ export class AddUserOperation extends CommandOperation<Document> {
     // Error out if digestPassword set
     if (options.digestPassword != null) {
       return callback(
-        new MongoDriverError(
-          'The digestPassword option is not supported via add_user. ' +
-            "Please use db.command('createUser', ...) instead for this option."
+        new MongoInvalidArgumentError(
+          'Option "digestPassword" not supported via addUser, use db.command(...) instead'
         )
       );
     }
@@ -83,7 +82,7 @@ export class AddUserOperation extends CommandOperation<Document> {
       // Use node md5 generator
       const md5 = crypto.createHash('md5');
       // Generate keys used for authentication
-      md5.update(username + ':mongo:' + password);
+      md5.update(`${username}:mongo:${password}`);
       userPassword = md5.digest('hex');
     }
 

@@ -12,7 +12,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Sort } from '../sort';
-import { MongoDriverError, MongoServerError } from '../error';
+import { MongoServerError, MongoCompatibilityError } from '../error';
 import type { ObjectId } from '../bson';
 import { Aspect, defineAspects } from './operation';
 import type { ClientSession } from '../sessions';
@@ -165,7 +165,9 @@ export class MapReduceOperation extends CommandOperation<Document | Document[]> 
     }
 
     if (this.explain && maxWireVersion(server) < 9) {
-      callback(new MongoDriverError(`server ${server.name} does not support explain on mapReduce`));
+      callback(
+        new MongoCompatibilityError(`Server ${server.name} does not support explain on mapReduce`)
+      );
       return;
     }
 

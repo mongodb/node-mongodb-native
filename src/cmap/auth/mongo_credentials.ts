@@ -1,7 +1,7 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
-import { MongoDriverError } from '../../error';
+import { MongoDriverError, MongoMissingCredentialsError } from '../../error';
 import { AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -122,7 +122,7 @@ export class MongoCredentials {
         this.mechanism === AuthMechanism.MONGODB_SCRAM_SHA256) &&
       !this.username
     ) {
-      throw new MongoDriverError(`Username required for mechanism '${this.mechanism}'`);
+      throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
     }
 
     if (

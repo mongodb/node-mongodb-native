@@ -602,7 +602,7 @@ describe('Cursor', function () {
             try {
               cursor.limit('not-an-integer');
             } catch (err) {
-              test.equal('limit requires an integer', err.message);
+              test.equal('Operation "limit" requires an integer', err.message);
             }
 
             done();
@@ -781,7 +781,7 @@ describe('Cursor', function () {
             try {
               collection.find().skip('not-an-integer');
             } catch (err) {
-              test.equal('skip requires an integer', err.message);
+              test.equal('Operation "skip" requires an integer', err.message);
             }
 
             const cursor = collection.find();
@@ -836,7 +836,7 @@ describe('Cursor', function () {
               cursor.batchSize('not-an-integer');
               test.ok(false);
             } catch (err) {
-              test.equal('batchSize requires an integer', err.message);
+              test.equal('Operation "batchSize" requires an integer', err.message);
             }
 
             cursor = collection.find();
@@ -4345,7 +4345,7 @@ describe('Cursor', function () {
         const db = client.db('test');
         const collection = db.collection('test_sort_allow_disk_use');
         expect(() => collection.find({}).allowDiskUse()).to.throw(
-          /allowDiskUse requires a sort specification/
+          /Option "allowDiskUse" requires a sort specification/
         );
         done();
       })

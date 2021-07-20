@@ -1,13 +1,13 @@
 import { Binary } from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoDriverError } from '../../error';
+import { MongoMissingCredentialsError } from '../../error';
 import { Callback, ns } from '../../utils';
 
 export class Plain extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     const username = credentials.username;
     const password = credentials.password;

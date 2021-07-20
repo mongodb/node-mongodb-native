@@ -6,7 +6,9 @@ import {
   MongoNetworkTimeoutError,
   AnyError,
   MongoDriverError,
-  MongoServerError
+  MongoCompatibilityError,
+  MongoServerError,
+  MongoInvalidArgumentError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -58,13 +60,13 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     const message = `Server at ${options.hostAddress} reports minimum wire version ${JSON.stringify(
       ismaster.minWireVersion
     )}, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
-    return new MongoDriverError(message);
+    return new MongoCompatibilityError(message);
   }
 
   const message = `Server at ${options.hostAddress} reports maximum wire version ${
     JSON.stringify(ismaster.maxWireVersion) ?? 0
   }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
-  return new MongoDriverError(message);
+  return new MongoCompatibilityError(message);
 }
 
 function performInitialHandshake(
@@ -85,7 +87,9 @@ function performInitialHandshake(
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
       !AUTH_PROVIDERS.get(credentials.mechanism)
     ) {
-      callback(new MongoDriverError(`authMechanism '${credentials.mechanism}' not supported`));
+      callback(
+        new MongoCompatibilityError(`AuthMechanism '${credentials.mechanism}' not supported`)
+      );
       return;
     }
   }
@@ -236,7 +240,7 @@ export const LEGAL_TCP_SOCKET_OPTIONS = [
 
 function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   const hostAddress = options.hostAddress;
-  if (!hostAddress) throw new MongoDriverError('HostAddress required');
+  if (!hostAddress) throw new MongoInvalidArgumentError('Option "hostAddress" is required');
 
   const result: Partial<net.TcpNetConnectOpts & net.IpcNetConnectOpts> = {};
   for (const name of LEGAL_TCP_SOCKET_OPTIONS) {

@@ -19,6 +19,9 @@ import {
 import {
   AnyError,
   MongoDriverError,
+  MongoMissingDependencyError,
+  MongoCompatibilityError,
+  MongoInvalidArgumentError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -342,7 +345,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (typeof ns.db === 'undefined' || typeof ns === 'string') {
-      throw new MongoDriverError('ns cannot be a string');
+      throw new MongoInvalidArgumentError('Namespace cannot be a string');
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -585,7 +588,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
-      throw new MongoDriverError('Invalid list of cursor ids provided: ' + cursorIds);
+      throw new MongoInvalidArgumentError(`Invalid list of cursor ids provided: ${cursorIds}`);
     }
 
     if (maxWireVersion(this) < 4) {
@@ -648,7 +651,7 @@ export class CryptoConnection extends Connection {
   command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions, callback: Callback): void {
     const autoEncrypter = this[kAutoEncrypter];
     if (!autoEncrypter) {
-      return callback(new MongoDriverError('No AutoEncrypter available for encryption'));
+      return callback(new MongoMissingDependencyError('No AutoEncrypter available for encryption'));
     }
 
     const serverWireVersion = maxWireVersion(this);
@@ -658,7 +661,9 @@ export class CryptoConnection extends Connection {
     }
 
     if (serverWireVersion < 8) {
-      callback(new MongoDriverError('Auto-encryption requires a minimum MongoDB version of 4.2'));
+      callback(
+        new MongoCompatibilityError('Auto-encryption requires a minimum MongoDB version of 4.2')
+      );
       return;
     }
 

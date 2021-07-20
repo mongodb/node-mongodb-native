@@ -1,5 +1,5 @@
 import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoDriverError } from '../../error';
+import { MongoMissingCredentialsError } from '../../error';
 import type { Document } from '../../bson';
 import { Callback, ns } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
@@ -9,7 +9,7 @@ export class X509 extends AuthProvider {
   prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback): void {
     const { credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     Object.assign(handshakeDoc, {
       speculativeAuthenticate: x509AuthenticateCommand(credentials)
@@ -22,7 +22,7 @@ export class X509 extends AuthProvider {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     const response = authContext.response;
 
