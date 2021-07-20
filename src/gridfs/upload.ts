@@ -1,5 +1,11 @@
 import { Writable } from 'stream';
-import { MongoError, AnyError, MONGODB_ERROR_CODES, MongoDriverError } from '../error';
+import {
+  MongoError,
+  AnyError,
+  MONGODB_ERROR_CODES,
+  MongoDriverError,
+  MongoGridFSStreamError
+} from '../error';
 import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
@@ -143,16 +149,16 @@ export class GridFSBucketWriteStream extends Writable {
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
     const Promise = PromiseProvider.get();
-    let error: MongoDriverError;
+    let error: MongoGridFSStreamError;
     if (this.state.streamEnd) {
-      error = new MongoDriverError('Cannot abort a stream that has already completed');
+      error = new MongoGridFSStreamError('Cannot abort a stream that has already completed');
       if (typeof callback === 'function') {
         return callback(error);
       }
       return Promise.reject(error);
     }
     if (this.state.aborted) {
-      error = new MongoDriverError('Cannot call abort() on a stream twice');
+      error = new MongoGridFSStreamError('Cannot call abort() on a stream twice');
       if (typeof callback === 'function') {
         return callback(error);
       }
@@ -556,6 +562,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
 function checkAborted(stream: GridFSBucketWriteStream, callback?: Callback<void>): boolean {
   if (stream.state.aborted) {
     if (typeof callback === 'function') {
+      // TODO(NODE-3405): Replace with MongoStreamClosedError
       callback(new MongoDriverError('this stream has been aborted'));
     }
     return true;
