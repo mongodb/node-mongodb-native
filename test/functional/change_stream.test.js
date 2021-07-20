@@ -72,12 +72,12 @@ function triggerResumableError(changeStream, delay, onClose) {
   function triggerError() {
     const cursorStream = changeStream.cursorStream;
     if (cursorStream) {
-      cursorStream.emit('error', new MongoChangeStreamError('error triggered from test'));
+      cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
       return;
     }
 
     const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
-      callback(new MongoChangeStreamError('error triggered from test'));
+      callback(new MongoNetworkError('error triggered from test'));
       nextStub.restore();
     });
 
