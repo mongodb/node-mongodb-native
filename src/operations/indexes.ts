@@ -70,7 +70,7 @@ export type IndexSpecification = OneOrMore<
 >;
 
 /** @public */
-export interface IndexDescription {
+export interface IndexDescription extends CreateIndexesOptions {
   collation?: CollationOptions;
   name?: string;
   key: Document;

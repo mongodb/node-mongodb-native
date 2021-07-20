@@ -1,4 +1,4 @@
-import { expectType, expectDeprecated } from 'tsd';
+import { expectType, expectDeprecated, expectError } from 'tsd';
 
 import { MongoClient } from '../../src/mongo_client';
 import { Collection } from '../../src/collection';
@@ -32,3 +32,8 @@ const composedMap = mappedAgg.map<string>(x => x.toString());
 expectType<AggregationCursor<string>>(composedMap);
 expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
+
+// test that VALID_INDEX_OPTIONS like expireAfterSeconds are allowed in IndexDefinitions
+coll.createIndexes([{ key: { event: 1 }, name: 'event', expireAfterSeconds: 2400 }]);
+// test that invalid options are not allowed
+expectError(coll.createIndexes([{ key: { event: 1 }, name: 'event', invalidOption: 2400 }]));
