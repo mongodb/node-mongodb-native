@@ -464,11 +464,11 @@ describe('GridFS Stream', function () {
                 expect(c).to.equal(0);
                 uploadStream.write('b', 'utf8', function (error) {
                   expect(error.toString()).to.equal(
-                    'MongoDriverError: this stream has been aborted'
+                    'MongoStreamClosedError: Stream has been aborted'
                   );
                   uploadStream.end('c', 'utf8', function (error) {
                     expect(error.toString()).to.equal(
-                      'MongoDriverError: this stream has been aborted'
+                      'MongoStreamClosedError: Stream has been aborted'
                     );
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
@@ -1173,12 +1173,12 @@ describe('GridFS Stream', function () {
 
                 uploadStream.write('b', 'utf8', function (error) {
                   expect(error.toString()).to.equal(
-                    'MongoDriverError: this stream has been aborted'
+                    'MongoStreamClosedError: Stream has been aborted'
                   );
 
                   uploadStream.end(function (error) {
                     expect(error.toString()).to.equal(
-                      'MongoDriverError: this stream has been aborted'
+                      'MongoStreamClosedError: Stream has been aborted'
                     );
 
                     // Fail if user tries to abort an aborted stream
