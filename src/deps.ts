@@ -27,6 +27,7 @@ export let Kerberos:
 );
 
 try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
   Kerberos = require('kerberos');
 } catch {} // eslint-disable-line
 
@@ -47,6 +48,7 @@ export let Snappy: typeof import('snappy') | { kModuleError: MongoDriverError } 
 );
 
 try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
   Snappy = require('snappy');
 } catch {} // eslint-disable-line
 
@@ -60,6 +62,7 @@ export let saslprep:
 );
 
 try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
   saslprep = require('saslprep');
 } catch {} // eslint-disable-line
 
@@ -70,6 +73,7 @@ export let aws4: typeof import('aws4') | { kModuleError: MongoDriverError } = ma
 );
 
 try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
   aws4 = require('aws4');
 } catch {} // eslint-disable-line
 
