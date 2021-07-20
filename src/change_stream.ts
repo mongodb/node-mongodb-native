@@ -1,32 +1,38 @@
 import Denque = require('denque');
-import { MongoError, AnyError, isResumableError, MongoDriverError } from './error';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import {
-  maxWireVersion,
-  calculateDurationInMs,
-  now,
-  maybePromise,
-  MongoDBNamespace,
-  Callback,
-  getTopology
-} from './utils';
-import type { ReadPreference } from './read_preference';
-import type { Timestamp, Document } from './bson';
-import type { Topology } from './sdam/topology';
-import type { OperationParent, CollationOptions } from './operations/command';
-import { MongoClient } from './mongo_client';
-import { Db } from './db';
-import { Collection } from './collection';
 import type { Readable } from 'stream';
+import type { Document, Timestamp } from './bson';
+import { Collection } from './collection';
 import {
   AbstractCursor,
   AbstractCursorEvents,
   AbstractCursorOptions,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
-import type { ClientSession } from './sessions';
-import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import { Db } from './db';
+import {
+  AnyError,
+  isResumableError,
+  MongoDriverError,
+  MongoError,
+  MongoStreamClosedError
+} from './error';
+import { MongoClient } from './mongo_client';
 import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import type { CollationOptions, OperationParent } from './operations/command';
+import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import type { ReadPreference } from './read_preference';
+import type { Topology } from './sdam/topology';
+import type { ClientSession } from './sessions';
+import {
+  calculateDurationInMs,
+  Callback,
+  getTopology,
+  maxWireVersion,
+  maybePromise,
+  MongoDBNamespace,
+  now
+} from './utils';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');
@@ -678,13 +684,17 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
-    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    if (callback) callback(new MongoStreamClosedError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
-    return closeWithError(changeStream, new MongoDriverError(CHANGESTREAM_CLOSED_ERROR), callback);
+    return closeWithError(
+      changeStream,
+      new MongoStreamClosedError(CHANGESTREAM_CLOSED_ERROR),
+      callback
+    );
   }
 
   if (change && !change._id) {
@@ -712,7 +722,7 @@ function processError<TSchema>(
 
   // If the change stream has been closed explicitly, do not process error.
   if (changeStream[kClosed]) {
-    if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    if (callback) callback(new MongoStreamClosedError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -772,7 +782,7 @@ function processError<TSchema>(
  */
 function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
-    callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+    callback(new MongoStreamClosedError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
@@ -797,7 +807,7 @@ function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: 
     const request = changeStream[kResumeQueue].pop();
     if (!err) {
       if (changeStream[kClosed]) {
-        request(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
+        request(new MongoStreamClosedError(CHANGESTREAM_CLOSED_ERROR));
         return;
       }
       if (!changeStream.cursor) {

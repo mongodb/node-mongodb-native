@@ -4,7 +4,9 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
-  MongoServerError
+  MongoServerError,
+  MongoExpiredSessionError,
+  MongoTransactionError
 } from '../error';
 import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
@@ -85,7 +87,7 @@ export function executeOperation<
         owner = Symbol();
         session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
-        return cb(new MongoDriverError('Use of expired sessions is not permitted'));
+        return cb(new MongoExpiredSessionError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
         return cb(new MongoDriverError('Snapshot reads require MongoDB 5.0 or later'));
       }
@@ -128,7 +130,7 @@ function executeWithServerSelection(
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     callback(
-      new MongoDriverError(
+      new MongoTransactionError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
     );
@@ -189,7 +191,7 @@ function executeWithServerSelection(
     session.inTransaction()
   ) {
     callback(
-      new MongoDriverError(
+      new MongoTransactionError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
     );

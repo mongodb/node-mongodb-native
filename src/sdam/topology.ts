@@ -11,7 +11,7 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { MongoServerSelectionError, MongoDriverError } from '../error';
+import { MongoServerSelectionError, MongoDriverError, MongoTopologyClosedError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
   makeStateMachine,
@@ -82,6 +82,8 @@ const stateTransition = makeStateMachine({
   [STATE_CONNECTED]: [STATE_CONNECTED, STATE_CLOSING, STATE_CLOSED],
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
+
+const TOPOLOGY_CLOSED_ERROR = 'Topology is closed';
 
 /** @internal */
 const kCancelled = Symbol('cancelled');
@@ -472,7 +474,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     stateTransition(this, STATE_CLOSING);
 
-    drainWaitQueue(this[kWaitQueue], new MongoDriverError('Topology closed'));
+    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError(TOPOLOGY_CLOSED_ERROR));
     drainTimerQueue(this.s.connectionTimers);
 
     if (this.s.srvPoller) {
@@ -956,7 +958,7 @@ function processWaitQueue(topology: Topology) {
   if (topology.s.state === STATE_CLOSED) {
     drainWaitQueue(
       topology[kWaitQueue],
-      new MongoDriverError('Topology is closed, please connect')
+      new MongoTopologyClosedError(TOPOLOGY_CLOSED_ERROR + ', please connect')
     );
     return;
   }
