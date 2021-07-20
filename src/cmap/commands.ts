@@ -855,8 +855,7 @@ export class BinMsg {
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
 
-        // TODO(NODE-3402): Replace with error to be determined as per conversation in
-        // https://github.com/mongodb/node-mongodb-native/pull/2891/files/217705feab16bf235e385b1a7b2381575dac0d76
+        // TODO(NODE-3402): Replace with MongoDeprecationError
         throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
