@@ -1976,7 +1976,7 @@ describe('Change Streams', function () {
               try {
                 expect(err)
                   .property('message')
-                  .to.match(/ChangeStream is closed/);
+                  .to.match(/ChangeStream has been closed/);
                 Promise.all(ops).then(() => done(), done);
               } catch (e) {
                 done(e);
