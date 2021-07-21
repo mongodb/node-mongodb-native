@@ -141,37 +141,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
           testSuite.tests.forEach(spec => {
-            it(spec.description, function () {
-              if (requires.authEnabled && process.env.AUTH !== 'auth') {
-                // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
-                // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
-                this.skip();
-              }
-
-              if (
-                requires.serverless &&
-                !shouldRunServerlessTest(requires.serverless, !!process.env.SERVERLESS)
-              ) {
-                console.log('skipping serverless requirement in spec runner');
-                return this.skip();
-              }
-
-              if (
-                spec.operations.some(
-                  op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
-                )
-              ) {
-                // TODO(NODE-2994): Connection storms work will add new events to connection pool
-                this.skip();
-              }
-
-              if (
-                spec.skipReason ||
-                (filter && typeof filter === 'function' && !filter(spec, this.configuration))
-              ) {
-                return this.skip();
-              }
-
+            const maybeIt = shouldRunSpecTest.call(this, requires, spec, filter) ? it : it.skip;
+            maybeIt(spec.description, function () {
               let testPromise = Promise.resolve();
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
@@ -194,6 +165,38 @@ function generateTopologyTests(testSuites, testContext, filter) {
   });
 }
 
+function shouldRunSpecTest(requires, spec, filter) {
+  if (requires.authEnabled && process.env.AUTH !== 'auth') {
+    // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
+    // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
+    return false;
+  }
+
+  if (
+    requires.serverless &&
+    !shouldRunServerlessTest(requires.serverless, !!process.env.SERVERLESS)
+  ) {
+    return false;
+  }
+
+  if (
+    spec.operations.some(
+      op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
+    )
+  ) {
+    // TODO(NODE-2994): Connection storms work will add new events to connection pool
+    return false;
+  }
+
+  if (
+    spec.skipReason ||
+    (filter && typeof filter === 'function' && !filter(spec, this.configuration))
+  ) {
+    return false;
+  }
+  return true;
+}
+
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
   context.dbName = suite.database_name || 'spec_db';
@@ -203,20 +206,19 @@ function prepareDatabaseForSuite(suite, context) {
 
   if (context.skipPrepareDatabase) return Promise.resolve();
 
-  const setupPromise = db
-    .admin()
-    .command({ killAllSessions: [] })
-    .catch(err => {
-      if (
-        err.message.match(/no such (cmd|command)/) ||
-        err.code === 11601 ||
-        process.env.SERVERLESS // killAllSessions is not supported on serverless
-      ) {
-        return;
-      }
+  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
+  const setupPromise = context.serverless
+    ? Promise.resolve()
+    : db
+        .admin()
+        .command({ killAllSessions: [] })
+        .catch(err => {
+          if (err.message.match(/no such (cmd|command)/) || err.code === 11601) {
+            return;
+          }
 
-      throw err;
-    });
+          throw err;
+        });
 
   if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;
