@@ -58,7 +58,7 @@ const CHANGE_DOMAIN_TYPES = {
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
-const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
+const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream has been closed';
 
 /** @public */
 export interface ResumeOptions {

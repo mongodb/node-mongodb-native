@@ -6,7 +6,6 @@ import {
   AnyError,
   MongoAPIError,
   MONGODB_ERROR_CODES,
-  MongoDriverError,
   MongoError,
   MongoGridFSStreamError
 } from '../error';
@@ -153,16 +152,16 @@ export class GridFSBucketWriteStream extends Writable {
     const Promise = PromiseProvider.get();
     let error: MongoGridFSStreamError;
     if (this.state.streamEnd) {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      error = new MongoDriverError('Cannot abort a stream that has already completed');
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
+      error = new MongoAPIError('Cannot abort a stream that has already completed');
       if (typeof callback === 'function') {
         return callback(error);
       }
       return Promise.reject(error);
     }
     if (this.state.aborted) {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      error = new MongoDriverError('Cannot call abort() on a stream twice');
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
+      error = new MongoAPIError('Cannot call abort() on a stream twice');
       if (typeof callback === 'function') {
         return callback(error);
       }
