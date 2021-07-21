@@ -1,38 +1,38 @@
 import Denque = require('denque');
-import {
-  MongoError,
-  AnyError,
-  isResumableError,
-  MongoDriverError,
-  MongoChangeStreamError
-} from './error';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import {
-  maxWireVersion,
-  calculateDurationInMs,
-  now,
-  maybePromise,
-  MongoDBNamespace,
-  Callback,
-  getTopology
-} from './utils';
-import type { ReadPreference } from './read_preference';
-import type { Timestamp, Document } from './bson';
-import type { Topology } from './sdam/topology';
-import type { OperationParent, CollationOptions } from './operations/command';
-import { MongoClient } from './mongo_client';
-import { Db } from './db';
-import { Collection } from './collection';
 import type { Readable } from 'stream';
+import type { Document, Timestamp } from './bson';
+import { Collection } from './collection';
 import {
   AbstractCursor,
   AbstractCursorEvents,
   AbstractCursorOptions,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
-import type { ClientSession } from './sessions';
-import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import { Db } from './db';
+import {
+  AnyError,
+  isResumableError,
+  MongoChangeStreamError,
+  MongoDriverError,
+  MongoError
+} from './error';
+import { MongoClient } from './mongo_client';
 import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import type { CollationOptions, OperationParent } from './operations/command';
+import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import type { ReadPreference } from './read_preference';
+import type { Topology } from './sdam/topology';
+import type { ClientSession } from './sessions';
+import {
+  calculateDurationInMs,
+  Callback,
+  getTopology,
+  maxWireVersion,
+  maybePromise,
+  MongoDBNamespace,
+  now
+} from './utils';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');
@@ -548,7 +548,7 @@ const CHANGE_STREAM_EVENTS = [
 function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'iterator') {
     throw new MongoChangeStreamError(
-      "ChangeStream can't be used as an EventEmitter after being used as an iterator"
+      'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
   changeStream[kMode] = 'emitter';
@@ -557,7 +557,7 @@ function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
 function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'emitter') {
     throw new MongoChangeStreamError(
-      "ChangeStream can't be used as an EventEmitter after being used as an iterator"
+      'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
   changeStream[kMode] = 'iterator';

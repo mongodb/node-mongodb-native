@@ -1,20 +1,20 @@
 import { Writable } from 'stream';
+import type { Document } from '../bson';
+import { ObjectId } from '../bson';
+import type { Collection } from '../collection';
 import {
-  MongoError,
   AnyError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoError,
   MongoGridFSStreamError
 } from '../error';
-import { WriteConcern } from './../write_concern';
 import { PromiseProvider } from '../promise_provider';
-import { ObjectId } from '../bson';
 import type { Callback } from '../utils';
-import type { Document } from '../bson';
-import type { GridFSBucket } from './index';
-import type { GridFSFile } from './download';
 import type { WriteConcernOptions } from '../write_concern';
-import type { Collection } from '../collection';
+import { WriteConcern } from './../write_concern';
+import type { GridFSFile } from './download';
+import type { GridFSBucket } from './index';
 
 /** @public */
 export interface GridFSChunk {
@@ -151,14 +151,16 @@ export class GridFSBucketWriteStream extends Writable {
     const Promise = PromiseProvider.get();
     let error: MongoGridFSStreamError;
     if (this.state.streamEnd) {
-      error = new MongoGridFSStreamError('Cannot abort a stream that has already completed');
+      // TODO(NODE-3405): Replace with MongoStreamClosedError
+      error = new MongoDriverError('Cannot abort a stream that has already completed');
       if (typeof callback === 'function') {
         return callback(error);
       }
       return Promise.reject(error);
     }
     if (this.state.aborted) {
-      error = new MongoGridFSStreamError('Cannot call abort() on a stream twice');
+      // TODO(NODE-3405): Replace with MongoStreamClosedError
+      error = new MongoDriverError('Cannot call abort() on a stream twice');
       if (typeof callback === 'function') {
         return callback(error);
       }

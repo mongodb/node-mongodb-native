@@ -1,4 +1,8 @@
+import type { ObjectId } from 'bson';
 import { Readable } from 'stream';
+import type { Document } from '../bson';
+import type { Collection } from '../collection';
+import type { FindCursor } from '../cursor/find_cursor';
 import {
   AnyError,
   MongoDriverError,
@@ -6,15 +10,11 @@ import {
   MongoGridFSStreamError,
   MongoInvalidArgumentError
 } from '../error';
-import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
+import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import type { Callback } from '../utils';
-import type { Collection } from '../collection';
-import type { ReadPreference } from '../read_preference';
 import type { GridFSChunk } from './upload';
-import type { FindCursor } from '../cursor/find_cursor';
-import type { ObjectId } from 'bson';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {

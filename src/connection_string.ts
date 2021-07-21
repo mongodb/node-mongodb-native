@@ -2,22 +2,12 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
-import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { ReadConcern, ReadConcernLevel } from './read_concern';
-import { W, WriteConcern } from './write_concern';
-import { MongoCompressionError, MongoParseError, MongoURIError } from './error';
-import {
-  AnyOptions,
-  Callback,
-  DEFAULT_PK_FACTORY,
-  isRecord,
-  makeClientMetadata,
-  setDifference,
-  HostAddress,
-  emitWarning
-} from './utils';
 import type { Document } from './bson';
+import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import { MongoCredentials } from './cmap/auth/mongo_credentials';
+import { Encrypter } from './encrypter';
+import { MongoCompressionError, MongoParseError, MongoURIError } from './error';
+import { Logger, LoggerLevel } from './logger';
 import {
   DriverInfo,
   MongoClient,
@@ -27,11 +17,21 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import { MongoCredentials } from './cmap/auth/mongo_credentials';
-import type { TagSet } from './sdam/server_description';
-import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
-import { Encrypter } from './encrypter';
+import { ReadConcern, ReadConcernLevel } from './read_concern';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import type { TagSet } from './sdam/server_description';
+import {
+  AnyOptions,
+  Callback,
+  DEFAULT_PK_FACTORY,
+  emitWarning,
+  HostAddress,
+  isRecord,
+  makeClientMetadata,
+  setDifference
+} from './utils';
+import { W, WriteConcern } from './write_concern';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
@@ -64,7 +64,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  */
 export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoURIError('srvHost string in options cannot be empty'));
+    return callback(new MongoURIError('Option "srvHost" must not be empty'));
   }
 
   if (options.srvHost.split('.').length < 3) {
