@@ -224,10 +224,11 @@ export abstract class AbstractCursor<
   [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
     return {
       next: () =>
-        this.next().then(value => {
-          if (value !== null && value !== undefined) return { value, done: false };
-          return { value: undefined, done: true };
-        })
+        this.next().then(value =>
+          value !== null && value !== undefined
+            ? { value, done: false }
+            : { value: undefined, done: true }
+        )
     };
   }
 
