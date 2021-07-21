@@ -94,7 +94,7 @@ expectType<{ name: string }[]>(
 
 void async function () {
   for await (const item of cursor) {
-    if (!item) break;
+    expectNotType<{ foo: number } | null>(item);
     expectType<number>(item.foo);
   }
 };
