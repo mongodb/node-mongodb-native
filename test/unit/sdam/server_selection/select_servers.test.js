@@ -57,7 +57,7 @@ describe('selectServer', function () {
     topology.close(() => {
       topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 }, err => {
         expect(err).to.exist;
-        expect(err).to.match(/Topology is closed/);
+        expect(err).to.match(/Topology has been closed/);
         done();
       });
     });

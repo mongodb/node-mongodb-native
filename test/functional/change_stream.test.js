@@ -2887,7 +2887,7 @@ context('NODE-2626 - handle null changes without error', function () {
       changeStream.next((err, doc) => {
         expect(err).to.exist;
         expect(doc).to.not.exist;
-        expect(err.message).to.equal('ChangeStream is closed');
+        expect(err.message).to.equal('ChangeStream has been closed');
         changeStream.close(() => client.close(done));
       });
     });
