@@ -1956,7 +1956,7 @@ describe('Change Streams', function () {
 
         return Promise.all([read(), write()]).then(
           () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed')
+          err => expect(err.message).to.equal('ChangeStream has been closed')
         );
       }
     });
