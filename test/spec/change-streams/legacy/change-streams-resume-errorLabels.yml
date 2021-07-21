@@ -451,7 +451,7 @@ tests:
             x:
               $numberInt: "1"
   -
-    description: "change stream resumes after NotMaster"
+    description: "change stream resumes after NotWritablePrimary"
     minServerVersion: "4.3.1"
     failPoint:
       configureFailPoint: failGetMoreAfterCursorCheckout
@@ -643,7 +643,7 @@ tests:
             x:
               $numberInt: "1"
   -
-    description: "change stream resumes after NotMasterNoSlaveOk"
+    description: "change stream resumes after NotPrimaryNoSecondaryOk"
     minServerVersion: "4.3.1"
     failPoint:
       configureFailPoint: failGetMoreAfterCursorCheckout
@@ -707,7 +707,7 @@ tests:
             x:
               $numberInt: "1"
   -
-    description: "change stream resumes after NotMasterOrSecondary"
+    description: "change stream resumes after NotPrimaryOrSecondary"
     minServerVersion: "4.3.1"
     failPoint:
       configureFailPoint: failGetMoreAfterCursorCheckout
@@ -1026,7 +1026,7 @@ tests:
           fullDocument:
             x:
               $numberInt: "1"
-  # The next two tests ensure that the driver only uses the error label, not the whitelist.
+  # The next two tests ensure that the driver only uses the error label, not the allow list.
   -
     description: "change stream resumes if error contains ResumableChangeStreamError"
     minServerVersion: "4.3.1"
@@ -1035,7 +1035,7 @@ tests:
       mode: { times: 1 }
       data:
           failCommands: ["getMore"]
-          errorCode: 50 # Use an error code that does not have the whitelist label by default
+          errorCode: 50 # Use an error code that does not have the allow list label by default
           closeConnection: false
           errorLabels: ["ResumableChangeStreamError"]
     target: collection
@@ -1097,11 +1097,11 @@ tests:
     description: "change stream does not resume if error does not contain ResumableChangeStreamError"
     minServerVersion: "4.3.1"
     failPoint:
-      configureFailPoint: failCommand # failCommand will not add the whitelist error label
+      configureFailPoint: failCommand # failCommand will not add the allow list error label
       mode: { times: 1 }
       data:
           failCommands: ["getMore"]
-          errorCode: 6 # Use an error code that is on the whitelist
+          errorCode: 6 # Use an error code that is on the allow list
           closeConnection: false
     target: collection
     topology:

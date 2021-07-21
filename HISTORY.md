@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0...v4.0.1) (2021-07-20)
+
+
+### Features
+
+* **NODE-3419:** define MongoRuntimeError children ([#2893](https://github.com/mongodb/node-mongodb-native/issues/2893)) ([eadeb01](https://github.com/mongodb/node-mongodb-native/commit/eadeb01ec689c72032a9c21e3e8486001a026945))
+
+
+### Bug Fixes
+
+* **NODE-3199:** unable to bundle driver due to uncaught require ([#2904](https://github.com/mongodb/node-mongodb-native/issues/2904)) ([9e48bbd](https://github.com/mongodb/node-mongodb-native/commit/9e48bbdc95149ca62fa21404624125b87c3c9d56))
+* **NODE-3393:** snapshot time not applied if distinct executed first ([#2908](https://github.com/mongodb/node-mongodb-native/issues/2908)) ([7aa3008](https://github.com/mongodb/node-mongodb-native/commit/7aa3008d58b9d9869c2ea4af7809fa6b5cfbf6f4))
+* **NODE-3417:** allow calling `db()` before MongoClient is connected ([#2889](https://github.com/mongodb/node-mongodb-native/issues/2889)) ([51ea86d](https://github.com/mongodb/node-mongodb-native/commit/51ea86d0abfbe18a3ae0a5e41a6b8c5b974f3c3b))
+
 ## [4.0.0](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0-beta.6...v4.0.0) (2021-07-13)
 
 

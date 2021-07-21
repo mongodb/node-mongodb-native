@@ -1,5 +1,4 @@
 import { expectType, expectDeprecated } from 'tsd';
-
 import { MongoClient } from '../../src/mongo_client';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';

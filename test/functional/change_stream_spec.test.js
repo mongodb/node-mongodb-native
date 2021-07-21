@@ -2,13 +2,18 @@
 
 const path = require('path');
 const chai = require('chai');
-const loadSpecTests = require('../spec').loadSpecTests;
+const { loadSpecTests } = require('../spec');
+const { runUnifiedSuite } = require('./unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
-const setupDatabase = require('./shared').setupDatabase;
-const delay = require('./shared').delay;
+const { setupDatabase } = require('./shared');
+const { delay } = require('./shared');
 const expect = chai.expect;
 
-describe('Change Stream Spec', function () {
+describe('Change Streams Spec - Unified', function () {
+  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
+});
+
+describe('Change Stream Spec - v1', function () {
   let globalClient;
   let ctx;
   let events;
@@ -29,7 +34,7 @@ describe('Change Stream Spec', function () {
     return new Promise(r => gc.close(() => r()));
   });
 
-  loadSpecTests(path.join('change-stream', 'legacy')).forEach(suite => {
+  loadSpecTests(path.join('change-streams', 'legacy')).forEach(suite => {
     const ALL_DBS = [suite.database_name, suite.database2_name];
 
     describe(suite.name, () => {
