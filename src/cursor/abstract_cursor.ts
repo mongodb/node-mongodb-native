@@ -221,9 +221,13 @@ export abstract class AbstractCursor<
     return this[kDocuments].splice(0, number ?? this[kDocuments].length);
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<TSchema | null> {
+  [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
     return {
-      next: () => this.next<TSchema>().then(value => ({ value, done: value === null }))
+      next: () =>
+        this.next().then(value => {
+          if (value !== null && value !== undefined) return { value, done: false };
+          return { value: undefined, done: true };
+        })
     };
   }
 
