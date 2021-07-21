@@ -28,9 +28,8 @@ describe('executeLegacyOperation', function () {
     expect(caughtError).to.equal(expectedError);
   });
 
-  it('should reject promise with errors on throw errors, and rethrow error', function (done) {
+  it('should reject promise with errors on throw errors, and rethrow error', function () {
     const expectedError = new Error('THIS IS AN ERROR');
-    let callbackError;
 
     const topology = {
       logicalSessionTimeoutMinutes: null
@@ -39,18 +38,10 @@ describe('executeLegacyOperation', function () {
       throw expectedError;
     };
 
-    const callback = err => (callbackError = err);
     const options = { skipSessions: true };
 
-    executeLegacyOperation(topology, operation, [{}, null], options).then(null, callback);
-
-    setTimeout(() => {
-      try {
-        expect(callbackError).to.equal(expectedError);
-        done();
-      } catch (e) {
-        done(e);
-      }
+    return executeLegacyOperation(topology, operation, [{}, null], options).then(null, err => {
+      expect(err).to.equal(expectedError);
     });
   });
 });
