@@ -528,7 +528,7 @@ describe('GridFS Stream', function () {
                     uploadStream.abort().then(null, function (error) {
                       expect(error.toString()).to.equal(
                         // TODO(NODE-3405): Replace with MongoStreamClosedError
-                        'MongoGridFSStreamError: Cannot call abort() on a stream twice'
+                        'MongoDriverError: Cannot call abort() on a stream twice'
                       );
                       client.close(done);
                     });
