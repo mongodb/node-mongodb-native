@@ -35,6 +35,7 @@ const VALID_INDEX_OPTIONS = new Set([
   'expireAfterSeconds',
   'storageEngine',
   'collation',
+  'version',
 
   // text indexes
   'weights',
@@ -70,7 +71,28 @@ export type IndexSpecification = OneOrMore<
 >;
 
 /** @public */
-export interface IndexDescription {
+export interface IndexDescription
+  extends Pick<
+    CreateIndexesOptions,
+    | 'background'
+    | 'unique'
+    | 'partialFilterExpression'
+    | 'sparse'
+    | 'hidden'
+    | 'expireAfterSeconds'
+    | 'storageEngine'
+    | 'version'
+    | 'weights'
+    | 'default_language'
+    | 'language_override'
+    | 'textIndexVersion'
+    | '2dsphereIndexVersion'
+    | 'bits'
+    | 'min'
+    | 'max'
+    | 'bucketSize'
+    | 'wildcardProjection'
+  > {
   collation?: CollationOptions;
   name?: string;
   key: Document;
@@ -90,9 +112,12 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   sparse?: boolean;
   /** Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher) */
   expireAfterSeconds?: number;
+  /** Allows users to configure the storage engine on a per-index basis when creating an index. (MongoDB 3.0 or higher) */
   storageEngine?: Document;
   /** (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
   commitQuorum?: number | string;
+  /** Specifies the index version number, either 0 or 1. */
+  version?: number;
   // text indexes
   weights?: Document;
   default_language?: string;
@@ -110,6 +135,8 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   bucketSize?: number;
   // wildcard indexes
   wildcardProjection?: Document;
+  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. (MongoDB 4.4 or higher) */
+  hidden?: boolean;
 }
 
 function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
