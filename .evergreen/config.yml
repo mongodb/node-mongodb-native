@@ -592,7 +592,6 @@ tasks:
       - serverless
     commands:
       - func: run serverless tests
-      - func: upload test results
   - name: test-latest-server
     tags:
       - latest
@@ -1672,6 +1671,7 @@ task_groups:
         params:
           file: serverless-expansion.yml
     teardown_group:
+      - func: upload test results
       - command: shell.exec
         params:
           script: |
