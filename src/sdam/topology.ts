@@ -274,7 +274,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       } else if (seed instanceof HostAddress) {
         seedlist.push(seed);
       } else {
-        // FIXME(NODE-3402): May need to be a MongoParseError
+        // FIXME(NODE-3484): May need to be a MongoParseError
         throw new MongoDriverError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
       }
     }

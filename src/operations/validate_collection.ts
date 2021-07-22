@@ -40,8 +40,7 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     super.executeCommand(server, session, this.command, (err, doc) => {
       if (err != null) return callback(err);
 
-      // TODO(NODE-3483): Decide on errors to put here
-      // Would this justify a MongoValidationError?
+      // TODO(NODE-3483): Replace these with MongoUnexpectedServerResponseError
       if (doc.ok === 0) return callback(new MongoDriverError('Error with validate command'));
       if (doc.result != null && typeof doc.result !== 'string')
         return callback(new MongoDriverError('Error with validation data'));
