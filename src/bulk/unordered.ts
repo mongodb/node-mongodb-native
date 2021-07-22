@@ -36,6 +36,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
 
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize) {
+      // TODO(NODE-3483): Change this to MongoBSONError
       throw new MongoInvalidArgumentError(
         `Document is larger than the maximum size ${this.s.maxBsonObjectSize}`
       );
