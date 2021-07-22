@@ -526,7 +526,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
-      throw new MongoNotConnectedError('Must connect to a server before calling this method');
+      throw new MongoNotConnectedError('MongoClient must be connected to start a session');
     }
 
     return this.topology.startSession(options, this.s.options);
