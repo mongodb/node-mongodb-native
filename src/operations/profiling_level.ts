@@ -17,7 +17,6 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     this.options = options;
   }
 
-  // TODO(NODE-3402): Determine errors to put here
   execute(server: Server, session: ClientSession, callback: Callback<string>): void {
     super.executeCommand(server, session, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
@@ -25,9 +24,10 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
         if (was === 0) return callback(undefined, 'off');
         if (was === 1) return callback(undefined, 'slow_only');
         if (was === 2) return callback(undefined, 'all');
+        // TODO(NODE-3483): Add MongoCommandOperationError here
         return callback(new MongoInvalidArgumentError(`Illegal profiling level value ${was}`));
       } else {
-        // TODO(NODE-3402): Consider adding some kind of MongoRuntimeError here
+        // TODO(NODE-3483): Add MongoCommandOperationError
         err != null ? callback(err) : callback(new MongoDriverError('Error with profile command'));
       }
     });

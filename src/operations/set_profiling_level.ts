@@ -58,7 +58,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
       );
     }
 
-    // TODO(NODE-3402): Determine error to put here
+    // TODO(NODE-3483): Determine error to put here
     super.executeCommand(server, session, { profile: this.profile }, (err, doc) => {
       if (err == null && doc.ok === 1) return callback(undefined, level);
       return err != null

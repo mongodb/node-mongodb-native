@@ -227,7 +227,7 @@ function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): 
 
       // Delete orphaned chunks before returning FileNotFound
       if (!res?.deletedCount) {
-        // TODO(NODE-3402): Replace with more appropriate error
+        // TODO(NODE-3483): Replace with more appropriate error
         // Consider creating new error MongoGridFSFileNotFoundError
         return callback(new MongoDriverError(`File not found for id ${id}`));
       }
