@@ -1182,7 +1182,9 @@ export abstract class BulkOperationBase {
 
     if (this.s.executed) {
       return handleEarlyError(
-        new MongoBatchReExecutionError('Batch cannot be re-executed'),
+        new MongoBatchReExecutionError(
+          'This batch has already been executed: Must create a new batch to execute'
+        ),
         callback
       );
     }
