@@ -599,7 +599,7 @@ export class MongoParseError extends MongoDriverError {
 }
 
 /**
- * An error generated when the user misuses the driver API
+ * An error generated when the driver API is used incorrectly
  *
  * @privateRemarks
  * Should **never** be directly instantiated
