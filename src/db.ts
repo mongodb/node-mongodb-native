@@ -291,13 +291,13 @@ export class Db {
    */
   aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
     if (arguments.length > 2) {
-      throw new MongoInvalidArgumentError('Third parameter to `db.aggregate()` must be undefined');
+      throw new MongoInvalidArgumentError('Method "db.aggregate()" accepts at most two arguments');
     }
     if (typeof pipeline === 'function') {
-      throw new MongoInvalidArgumentError('Parameter `pipeline` must not be function');
+      throw new MongoInvalidArgumentError('Argument "pipeline" must not be function');
     }
     if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('Parameter `options` must not be function');
+      throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
     return new AggregationCursor(

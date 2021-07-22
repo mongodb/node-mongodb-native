@@ -733,11 +733,11 @@ export class Collection<TSchema extends Document = Document> {
   find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
-        'Third parameter to `collection.find()` must be undefined'
+        'Method "collection.find()" accepts at most two arguments'
       );
     }
     if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('Parameter `options` must not be function');
+      throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
     return new FindCursor<TSchema>(
@@ -1374,16 +1374,16 @@ export class Collection<TSchema extends Document = Document> {
   ): AggregationCursor<T> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
-        'Third parameter to `collection.aggregate()` must be undefined'
+        'Method "collection.aggregate()" accepts at most two arguments'
       );
     }
     if (!Array.isArray(pipeline)) {
       throw new MongoInvalidArgumentError(
-        '`pipeline` parameter must be an array of aggregation stages'
+        'Argument "pipeline" must be an array of aggregation stages'
       );
     }
     if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('`options` parameter must not be function');
+      throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
     return new AggregationCursor(
