@@ -20,6 +20,11 @@ interface TestModel {
   readonlyFruitTags: readonly string[];
 }
 
+interface TestModelWithId {
+  stringField: string;
+  _id: string;
+}
+
 const collectionT = db.collection<TestModel>('testCollection');
 await collectionT.find({
   $and: [{ numberField: { $gt: 0 } }, { numberField: { $lt: 100 } }],
@@ -27,12 +32,30 @@ await collectionT.find({
 });
 expectType<FindCursor<TestModel>>(collectionT.find({}));
 
-await collectionT.findOne(
-  {},
-  {
-    projection: {},
-    sort: {}
-  }
+// findOne() without arguments
+expectType<TestModel | undefined>(await collectionT.findOne());
+expectType<TestModelWithId | undefined>(
+  await db.collection<TestModelWithId>('testCollection').findOne()
+);
+
+// findOne() with basic arguments
+expectType<TestModel | undefined>(
+  await collectionT.findOne(
+    {},
+    {
+      projection: {},
+      sort: {}
+    }
+  )
+);
+expectType<TestModelWithId | undefined>(
+  await db.collection<TestModelWithId>('testCollection').findOne(
+    {},
+    {
+      projection: {},
+      sort: {}
+    }
+  )
 );
 
 const optionsWithComplexProjection: FindOptions<TestModel> = {
@@ -44,7 +67,11 @@ const optionsWithComplexProjection: FindOptions<TestModel> = {
   sort: { stringField: -1, text: { $meta: 'textScore' }, notExistingField: -1 }
 };
 
-await collectionT.findOne({}, optionsWithComplexProjection);
+// findOne() with complex projection
+expectType<TestModel | undefined>(await collectionT.findOne({}, optionsWithComplexProjection));
+expectType<TestModelWithId | undefined>(
+  await db.collection<TestModelWithId>('testCollection').findOne({}, optionsWithComplexProjection)
+);
 
 // test with discriminated union type
 interface DUModelEmpty {
