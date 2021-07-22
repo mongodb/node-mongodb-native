@@ -26,7 +26,7 @@ export class Encrypter {
 
   constructor(client: MongoClient, uri: string, options: MongoClientOptions) {
     if (typeof options.autoEncryption !== 'object') {
-      throw new MongoInvalidArgumentError('Options autoEncryption must be specified');
+      throw new MongoInvalidArgumentError('Option "autoEncryption" must be specified');
     }
 
     this.bypassAutoEncryption = !!options.autoEncryption.bypassAutoEncryption;
