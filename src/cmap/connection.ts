@@ -21,7 +21,6 @@ import {
   MongoDriverError,
   MongoMissingDependencyError,
   MongoCompatibilityError,
-  MongoInvalidArgumentError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -591,7 +590,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoInvalidArgumentError(`Invalid list of cursor ids provided: ${cursorIds}`);
+      throw new MongoDriverError(`Invalid list of cursor ids provided: ${cursorIds}`);
     }
 
     if (maxWireVersion(this) < 4) {
