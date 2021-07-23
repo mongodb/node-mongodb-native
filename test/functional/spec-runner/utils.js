@@ -10,7 +10,7 @@ function resolveConnectionString(configuration, spec, context) {
     isShardedEnvironment && !useMultipleMongoses
       ? `mongodb://${configuration.host}:${configuration.port}/${
           configuration.db
-        }?directConnection=false${authSource ? '&authSource=${authSource}' : ''}`
+        }?directConnection=false${authSource ? `&authSource=${authSource}` : ''}`
       : configuration.url({ username, password, authSource });
   return connectionString;
 }

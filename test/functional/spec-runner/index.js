@@ -129,35 +129,15 @@ function generateTopologyTests(testSuites, testContext, filter) {
     environmentRequirementList.forEach(requires => {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
       describe(suiteName, {
-        // FIXME: calling this.skip() inside tests triggers the leak checker, disable until fixed
-        metadata: { requires, sessions: { skipLeakTests: true } },
+        metadata: { requires },
         test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
           testSuite.tests.forEach(spec => {
-            it(spec.description, function () {
-              if (requires.authEnabled && process.env.AUTH !== 'auth') {
-                // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
-                // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
-                this.skip();
-              }
-
-              if (
-                spec.operations.some(
-                  op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
-                )
-              ) {
-                // TODO(NODE-2994): Connection storms work will add new events to connection pool
-                this.skip();
-              }
-
-              if (
-                spec.skipReason ||
-                (filter && typeof filter === 'function' && !filter(spec, this.configuration))
-              ) {
-                return this.skip();
-              }
-
+            const maybeIt = shouldRunSpecTest(this.configuration, requires, spec, filter)
+              ? it
+              : it.skip;
+            maybeIt(spec.description, function () {
               let testPromise = Promise.resolve();
               if (spec.failPoint) {
                 testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
@@ -178,6 +158,28 @@ function generateTopologyTests(testSuites, testContext, filter) {
       });
     });
   });
+}
+
+function shouldRunSpecTest(configuration, requires, spec, filter) {
+  if (requires.authEnabled && process.env.AUTH !== 'auth') {
+    // TODO(NODE-3488): We do not have a way to determine if auth is enabled in our mocha metadata
+    // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
+    return false;
+  }
+
+  if (
+    spec.operations.some(
+      op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
+    )
+  ) {
+    // TODO(NODE-2994): Connection storms work will add new events to connection pool
+    return false;
+  }
+
+  if (spec.skipReason || (filter && typeof filter === 'function' && !filter(spec, configuration))) {
+    return false;
+  }
+  return true;
 }
 
 // Test runner helpers
