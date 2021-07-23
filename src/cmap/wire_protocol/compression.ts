@@ -54,7 +54,9 @@ export function compress(
       break;
     default:
       throw new MongoDriverError(
-        `Attempt to compress message using unknown compressor "${self.options.agreedCompressor}".`
+        'Attempt to compress message using unknown compressor "' +
+          self.options.agreedCompressor +
+          '".'
       );
   }
 }
