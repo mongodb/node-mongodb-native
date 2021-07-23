@@ -4,7 +4,6 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
-  MongoInvalidArgumentError,
   MongoCompatibilityError,
   MongoServerError
 } from '../error';
