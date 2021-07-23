@@ -295,7 +295,7 @@ export abstract class AbstractCursor<
   next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoCursorExhaustedError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, true, done);
@@ -310,7 +310,7 @@ export abstract class AbstractCursor<
   tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoCursorExhaustedError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, false, done);
@@ -572,7 +572,7 @@ export abstract class AbstractCursor<
   batchSize(value: number): this {
     assertUninitialized(this);
     if (this[kOptions].tailable) {
-      throw new MongoTailableCursorError('Tailable cursors do not support batchSize');
+      throw new MongoTailableCursorError('Tailable cursor does not support batchSize');
     }
 
     if (typeof value !== 'number') {
@@ -785,7 +785,7 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
 /** @internal */
 export function assertUninitialized(cursor: AbstractCursor): void {
   if (cursor[kInitialized]) {
-    throw new MongoCursorInUseError('Cursor is already initialized');
+    throw new MongoCursorInUseError();
   }
 }
 

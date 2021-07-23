@@ -1181,12 +1181,7 @@ export abstract class BulkOperationBase {
     options = options ?? {};
 
     if (this.s.executed) {
-      return handleEarlyError(
-        new MongoBatchReExecutionError(
-          'This batch has already been executed: Must create a new batch to execute'
-        ),
-        callback
-      );
+      return handleEarlyError(new MongoBatchReExecutionError(), callback);
     }
 
     const writeConcern = WriteConcern.fromOptions(options);

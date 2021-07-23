@@ -206,8 +206,12 @@ export class MongoRuntimeError extends MongoDriverError {
  * @category Error
  */
 export class MongoBatchReExecutionError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  constructor(message?: string) {
+    if (message !== undefined) {
+      super(message);
+    } else {
+      super('This batch has already been executed, create new batch to execute');
+    }
   }
 
   get name(): string {
@@ -389,8 +393,12 @@ export class MongoChangeStreamError extends MongoStreamError {
  * @category Error
  */
 export class MongoTailableCursorError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+  constructor(message?: string) {
+    if (message !== undefined) {
+      super(message);
+    } else {
+      super('Tailable cursor does not support this operation');
+    }
   }
 
   get name(): string {
@@ -438,8 +446,12 @@ export class MongoGridFSChunkError extends MongoStreamError {
  * @category Error
  */
 export class MongoCursorInUseError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+  constructor(message?: string) {
+    if (message !== undefined) {
+      super(message);
+    } else {
+      super('Cursor is already initialized');
+    }
   }
 
   get name(): string {
@@ -488,8 +500,12 @@ export class MongoServerClosedError extends MongoResourceClosedError {
  * @category Error
  */
 export class MongoCursorExhaustedError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+  constructor(message?: string) {
+    if (message !== undefined) {
+      super(message);
+    } else {
+      super('Cursor is exhausted');
+    }
   }
 
   get name(): string {
