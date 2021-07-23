@@ -129,13 +129,14 @@ function generateTopologyTests(testSuites, testContext, filter) {
     environmentRequirementList.forEach(requires => {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
       describe(suiteName, {
-        // FIXME: calling this.skip() inside tests triggers the leak checker, disable until fixed
-        metadata: { requires, sessions: { skipLeakTests: true } },
+        metadata: { requires },
         test: function () {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
           testSuite.tests.forEach(spec => {
-            const maybeIt = shouldRunSpecTest.call(this, requires, spec, filter) ? it : it.skip;
+            const maybeIt = shouldRunSpecTest(this.configuration, requires, spec, filter)
+              ? it
+              : it.skip;
             maybeIt(spec.description, function () {
               let testPromise = Promise.resolve();
               if (spec.failPoint) {
@@ -159,9 +160,9 @@ function generateTopologyTests(testSuites, testContext, filter) {
   });
 }
 
-function shouldRunSpecTest(requires, spec, filter) {
+function shouldRunSpecTest(configuration, requires, spec, filter) {
   if (requires.authEnabled && process.env.AUTH !== 'auth') {
-    // TODO: We do not have a way to determine if auth is enabled in our mocha metadata
+    // TODO(NODE-3488): We do not have a way to determine if auth is enabled in our mocha metadata
     // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
     return false;
   }
@@ -175,10 +176,7 @@ function shouldRunSpecTest(requires, spec, filter) {
     return false;
   }
 
-  if (
-    spec.skipReason ||
-    (filter && typeof filter === 'function' && !filter(spec, this.configuration))
-  ) {
+  if (spec.skipReason || (filter && typeof filter === 'function' && !filter(spec, configuration))) {
     return false;
   }
   return true;
