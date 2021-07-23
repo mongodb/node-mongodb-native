@@ -8,7 +8,7 @@ import {
   getTopology
 } from './utils';
 import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { MongoDriverError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
@@ -390,7 +390,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options || { ordered: true };
 
     if (!Array.isArray(operations)) {
-      throw new MongoDriverError('operations must be an array of documents');
+      throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
     return executeOperation(
@@ -700,7 +700,9 @@ export class Collection<TSchema extends Document = Document> {
     callback?: Callback<TSchema>
   ): Promise<TSchema | undefined> | void {
     if (callback !== undefined && typeof callback !== 'function') {
-      throw new MongoDriverError('Third parameter to `findOne()` must be a callback or undefined');
+      throw new MongoInvalidArgumentError(
+        'Third parameter to `findOne()` must be a callback or undefined'
+      );
     }
 
     if (typeof filter === 'function')
@@ -730,10 +732,12 @@ export class Collection<TSchema extends Document = Document> {
   find<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): FindCursor<T>;
   find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
     if (arguments.length > 2) {
-      throw new MongoDriverError('Third parameter to `collection.find()` must be undefined');
+      throw new MongoInvalidArgumentError(
+        'Method "collection.find()" accepts at most two arguments'
+      );
     }
     if (typeof options === 'function') {
-      throw new MongoDriverError('`options` parameter must not be function');
+      throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
     return new FindCursor<TSchema>(
@@ -1369,13 +1373,17 @@ export class Collection<TSchema extends Document = Document> {
     options?: AggregateOptions
   ): AggregationCursor<T> {
     if (arguments.length > 2) {
-      throw new MongoDriverError('Third parameter to `collection.aggregate()` must be undefined');
+      throw new MongoInvalidArgumentError(
+        'Method "collection.aggregate()" accepts at most two arguments'
+      );
     }
     if (!Array.isArray(pipeline)) {
-      throw new MongoDriverError('`pipeline` parameter must be an array of aggregation stages');
+      throw new MongoInvalidArgumentError(
+        'Argument "pipeline" must be an array of aggregation stages'
+      );
     }
     if (typeof options === 'function') {
-      throw new MongoDriverError('`options` parameter must not be function');
+      throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
     return new AggregationCursor(
@@ -1445,8 +1453,8 @@ export class Collection<TSchema extends Document = Document> {
     // Out must always be defined (make sure we don't break weirdly on pre 1.8+ servers)
     // TODO NODE-3339: Figure out if this is still necessary given we no longer officially support pre-1.8
     if (options?.out == null) {
-      throw new MongoDriverError(
-        'the out option parameter must be defined, see mongodb docs for possible values'
+      throw new MongoInvalidArgumentError(
+        'Option "out" must be defined, see mongodb docs for possible values'
       );
     }
 

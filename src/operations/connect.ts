@@ -1,4 +1,4 @@
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
@@ -21,7 +21,7 @@ export function connect(
   callback: Callback<MongoClient>
 ): void {
   if (!callback) {
-    throw new MongoDriverError('no callback function provided');
+    throw new MongoInvalidArgumentError('Callback function must be provided');
   }
 
   // If a connection already been established, we can terminate early

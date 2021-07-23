@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -77,12 +77,15 @@ export class Query {
 
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (ns == null) throw new MongoDriverError('ns must be specified for query');
-    if (query == null) throw new MongoDriverError('query must be specified for query');
+    // TODO(NODE-3483): Replace with MongoCommandError
+    if (ns == null) throw new MongoDriverError('Namespace must be specified for query');
+    // TODO(NODE-3483): Replace with MongoCommandError
+    if (query == null) throw new MongoDriverError('A query document must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
-      throw new MongoDriverError('namespace cannot contain a null character');
+      // TODO(NODE-3483): Replace with MongoCommandError
+      throw new MongoDriverError('Namespace cannot contain a null character');
     }
 
     // Basic options
@@ -664,7 +667,8 @@ export class Msg {
 
   constructor(ns: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
-    if (command == null) throw new MongoDriverError('query must be specified for query');
+    if (command == null)
+      throw new MongoInvalidArgumentError('Query document must be specified for query');
 
     // Basic options
     this.ns = ns;
@@ -852,6 +856,8 @@ export class BinMsg {
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
+
+        // TODO(NODE-3483): Replace with MongoDeprecationError
         throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }

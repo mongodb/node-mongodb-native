@@ -3,7 +3,7 @@ import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import { MongoDriverError, MongoError } from '../error';
+import { MongoError, MongoDriverError } from '../error';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -431,7 +431,8 @@ function updateRsWithPrimaryFromMember(
   setName?: string
 ): TopologyType {
   if (setName == null) {
-    throw new MongoDriverError('setName is required');
+    // TODO(NODE-3483): should be an appropriate runtime error
+    throw new MongoDriverError('Argument "setName" is required if connected to a replica set');
   }
 
   if (

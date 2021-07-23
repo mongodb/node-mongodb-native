@@ -33,7 +33,9 @@ import {
   isRetryableWriteError,
   isNodeShuttingDownError,
   isNetworkErrorBeforeHandshake,
-  MongoDriverError
+  MongoDriverError,
+  MongoCompatibilityError,
+  MongoInvalidArgumentError
 } from '../error';
 import {
   Connection,
@@ -260,15 +262,16 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (callback == null) {
-      throw new MongoDriverError('callback must be provided');
+      throw new MongoInvalidArgumentError('Callback must be provided');
     }
 
     if (ns.db == null || typeof ns === 'string') {
-      throw new MongoDriverError('ns must not be a string');
+      throw new MongoInvalidArgumentError('Namespace must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoDriverError('server is closed'));
+      // TODO(NODE-3405): Change this out for MongoServerClosedError
+      callback(new MongoDriverError('Server is closed'));
       return;
     }
 
@@ -277,7 +280,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
-      callback(new MongoDriverError(`server ${this.name} does not support collation`));
+      callback(new MongoCompatibilityError(`Server ${this.name} does not support collation`));
       return;
     }
 

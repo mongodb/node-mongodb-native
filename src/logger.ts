@@ -1,5 +1,6 @@
 import { format } from 'util';
-import { MongoDriverError } from './error';
+import { enumToString } from './utils';
+import { MongoInvalidArgumentError } from './error';
 
 // Filters for classes
 const classFilters: any = {};
@@ -222,7 +223,7 @@ export class Logger {
    */
   static setCurrentLogger(logger: LoggerFunction): void {
     if (typeof logger !== 'function') {
-      throw new MongoDriverError('current logger must be a function');
+      throw new MongoInvalidArgumentError('Current logger must be a function');
     }
 
     currentLogger = logger;
@@ -253,7 +254,9 @@ export class Logger {
       newLevel !== LoggerLevel.DEBUG &&
       newLevel !== LoggerLevel.WARN
     ) {
-      throw new MongoDriverError(`${newLevel} is an illegal logging level`);
+      throw new MongoInvalidArgumentError(
+        `Argument "newLevel" should be one of ${enumToString(LoggerLevel)}`
+      );
     }
 
     level = newLevel;

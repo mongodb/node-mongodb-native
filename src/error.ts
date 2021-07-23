@@ -599,6 +599,95 @@ export class MongoParseError extends MongoDriverError {
 }
 
 /**
+ * An error generated when the driver API is used incorrectly
+ *
+ * @privateRemarks
+ * Should **never** be directly instantiated
+ *
+ * @public
+ * @category Error
+ */
+
+export class MongoAPIError extends MongoDriverError {
+  protected constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoAPIError';
+  }
+}
+
+/**
+ * An error generated when the user supplies malformed or unexpected arguments
+ * or when a required argument or field is not provided.
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoInvalidArgumentError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoInvalidArgumentError';
+  }
+}
+
+/**
+ * An error generated when a feature that is not enabled or allowed for the current server
+ * configuration is used
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoCompatibilityError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoCompatibilityError';
+  }
+}
+
+/**
+ * An error generated when the user fails to provide authentication credentials before attempting
+ * to connect to a mongo server instance.
+ *
+ *
+ * @public
+ * @category Error
+ */
+export class MongoMissingCredentialsError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoMissingCredentialsError';
+  }
+}
+
+/**
+ * An error generated when a required module or dependency is not present in the local environment
+ *
+ * @public
+ * @category Error
+ */
+export class MongoMissingDependencyError extends MongoAPIError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoMissingDependencyError';
+  }
+}
+/**
  * An error signifying a general system issue
  * @public
  * @category Error

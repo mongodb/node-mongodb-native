@@ -1,5 +1,5 @@
 import type { Document } from '../bson';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
@@ -129,7 +129,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     callback?: Callback<number>
   ): Promise<number> | void {
     if (typeof options === 'boolean') {
-      throw new MongoDriverError('Invalid first parameter to count');
+      throw new MongoInvalidArgumentError('Invalid first parameter to count');
     }
 
     if (typeof options === 'function') (callback = options), (options = {});
@@ -241,7 +241,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   addQueryModifier(name: string, value: string | boolean | number | Document): this {
     assertUninitialized(this);
     if (name[0] !== '$') {
-      throw new MongoDriverError(`${name} is not a valid query modifier`);
+      throw new MongoInvalidArgumentError(`${name} is not a valid query modifier`);
     }
 
     // Strip of the $
@@ -290,7 +290,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
         break;
 
       default:
-        throw new MongoDriverError(`invalid query modifier: ${name}`);
+        throw new MongoInvalidArgumentError(`Invalid query modifier: ${name}`);
     }
 
     return this;
@@ -315,7 +315,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   maxAwaitTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoDriverError('maxAwaitTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxAwaitTimeMS must be a number');
     }
 
     this[kBuiltOptions].maxAwaitTimeMS = value;
@@ -330,7 +330,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoDriverError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
     this[kBuiltOptions].maxTimeMS = value;
@@ -387,7 +387,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   allowDiskUse(): this {
     assertUninitialized(this);
     if (!this[kBuiltOptions].sort) {
-      throw new MongoDriverError('allowDiskUse requires a sort specification');
+      throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
     this[kBuiltOptions].allowDiskUse = true;
     return this;
@@ -416,7 +416,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     }
 
     if (typeof value !== 'number') {
-      throw new MongoDriverError('limit requires an integer');
+      throw new MongoInvalidArgumentError('Operation "limit" requires an integer');
     }
 
     this[kBuiltOptions].limit = value;
@@ -435,7 +435,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     }
 
     if (typeof value !== 'number') {
-      throw new MongoDriverError('skip requires an integer');
+      throw new MongoInvalidArgumentError('Operation "skip" requires an integer');
     }
 
     this[kBuiltOptions].skip = value;

@@ -5,7 +5,7 @@ import {
   CollationOptions
 } from './command';
 import { ReadPreference } from '../read_preference';
-import { MongoDriverError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { maxWireVersion } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
@@ -75,11 +75,13 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
 
     if (this.explain && this.writeConcern) {
-      throw new MongoDriverError('"explain" cannot be used on an aggregate call with writeConcern');
+      throw new MongoInvalidArgumentError(
+        'Option "explain" cannot be used on an aggregate call with writeConcern'
+      );
     }
 
     if (options?.cursor != null && typeof options.cursor !== 'object') {
-      throw new MongoDriverError('cursor options must be an object');
+      throw new MongoInvalidArgumentError('Cursor options must be an object');
     }
   }
 

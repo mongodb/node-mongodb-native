@@ -2,6 +2,8 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const { enumToString } = require('../../src/utils');
+const { ProfilingLevel } = require('../../src/operations/set_profiling_level');
 const { Code, ReturnDocument } = require('../../src');
 const { expect } = require('chai');
 
@@ -1097,7 +1099,7 @@ describe('Operation (Promises)', function () {
 
         // Insert some documents to perform map reduce over
         return collection
-          .insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 }})
+          .insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } })
           .then(function () {
             // Map function
             var map = function () {
@@ -2092,7 +2094,7 @@ describe('Operation (Promises)', function () {
               collection1.rename(5, function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal('collection name must be a String', err.message);
+              test.equal('Collection name must be a String', err.message);
             }
 
             // Attemp to rename a collection to an empty string
@@ -2100,7 +2102,7 @@ describe('Operation (Promises)', function () {
               collection1.rename('', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal('collection names cannot be empty', err.message);
+              test.equal('Collection names cannot be empty', err.message);
             }
 
             // Attemp to rename a collection to an illegal name including the character $
@@ -2108,7 +2110,7 @@ describe('Operation (Promises)', function () {
               collection1.rename('te$t', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not contain '$'", err.message);
+              test.equal("Collection names must not contain '$'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name starting with the character .
@@ -2116,7 +2118,7 @@ describe('Operation (Promises)', function () {
               collection1.rename('.test', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not start or end with '.'", err.message);
+              test.equal("Collection names must not start or end with '.'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name ending with the character .
@@ -2124,14 +2126,14 @@ describe('Operation (Promises)', function () {
               collection1.rename('test.', function (err, collection) {});
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not start or end with '.'", err.message);
+              test.equal("Collection names must not start or end with '.'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name with an empty middle name
             try {
               collection1.rename('tes..t', function (err, collection) {});
             } catch (err) {
-              test.equal('collection names cannot be empty', err.message);
+              test.equal('Collection names cannot be empty', err.message);
             }
 
             // Insert a couple of documents
@@ -3459,7 +3461,10 @@ describe('Operation (Promises)', function () {
           })
           .catch(function (err) {
             test.ok(err instanceof Error);
-            test.equal('Error: illegal profiling level value medium', err.message);
+            test.equal(
+              `Profiling level must be one of "${enumToString(ProfilingLevel)}"`,
+              err.message
+            );
             return client.close();
           });
       });

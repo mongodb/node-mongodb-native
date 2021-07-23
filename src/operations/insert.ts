@@ -1,4 +1,4 @@
-import { MongoDriverError, MongoServerError } from '../error';
+import { MongoServerError, MongoInvalidArgumentError } from '../error';
 import { defineAspects, Aspect, AbstractOperation } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
@@ -100,7 +100,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     super(options);
 
     if (!Array.isArray(docs)) {
-      throw new MongoDriverError('docs parameter must be an array of documents');
+      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
     }
 
     this.options = options;

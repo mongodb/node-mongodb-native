@@ -11,7 +11,7 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { MongoServerSelectionError, MongoDriverError } from '../error';
+import { MongoServerSelectionError, MongoCompatibilityError, MongoDriverError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
   makeStateMachine,
@@ -274,6 +274,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       } else if (seed instanceof HostAddress) {
         seedlist.push(seed);
       } else {
+        // FIXME(NODE-3484): May need to be a MongoParseError
         throw new MongoDriverError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
       }
     }
@@ -692,7 +693,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // first update the TopologyDescription
     this.s.description = this.s.description.update(serverDescription);
     if (this.s.description.compatibilityError) {
-      this.emit(Topology.ERROR, new MongoDriverError(this.s.description.compatibilityError));
+      this.emit(Topology.ERROR, new MongoCompatibilityError(this.s.description.compatibilityError));
       return;
     }
 

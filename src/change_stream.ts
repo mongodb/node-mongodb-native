@@ -259,8 +259,9 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
+      // TODO(NODE-3404): Replace this with MongoChangeStreamError
       throw new MongoDriverError(
-        'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
+        'Parent provided to ChangeStream constructor must an instance of Collection, Db, or MongoClient'
       );
     }
 
@@ -364,6 +365,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
+    // TODO(NODE-3404): Replace this with MongoChangeStreamError
     if (!this.cursor) throw new MongoDriverError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }

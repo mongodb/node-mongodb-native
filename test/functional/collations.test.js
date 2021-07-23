@@ -455,7 +455,7 @@ describe('Collation', function () {
           .catch(err => {
             expect(err).to.exist;
             expect(err.message).to.equal(
-              `server ${testContext.server.uri()} does not support collation`
+              `Server ${testContext.server.uri()} does not support collation`
             );
 
             return client.close();

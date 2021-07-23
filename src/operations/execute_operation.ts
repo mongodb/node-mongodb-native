@@ -4,6 +4,7 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoCompatibilityError,
   MongoServerError
 } from '../error';
 import { Aspect, AbstractOperation } from './operation';
@@ -64,6 +65,7 @@ export function executeOperation<
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
+    // TODO(NODE-3483)
     throw new MongoDriverError('This method requires a valid operation instance');
   }
 
@@ -85,6 +87,7 @@ export function executeOperation<
         owner = Symbol();
         session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
+        // TODO(NODE-3405): Change this out for MongoExpiredSessionError
         return cb(new MongoDriverError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
         return cb(new MongoDriverError('Snapshot reads require MongoDB 5.0 or later'));
@@ -92,7 +95,7 @@ export function executeOperation<
     } else if (session) {
       // If the user passed an explicit session and we are still, after server selection,
       // trying to run against a topology that doesn't support sessions we error out.
-      return cb(new MongoDriverError('Current topology does not support sessions'));
+      return cb(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     try {
@@ -128,6 +131,7 @@ function executeWithServerSelection(
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     callback(
+      // TODO(NODE-3405): Change this out for MongoTransactionError
       new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
@@ -189,6 +193,7 @@ function executeWithServerSelection(
     session.inTransaction()
   ) {
     callback(
+      // TODO(NODE-3405): Change this out for MongoTransactionError
       new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )

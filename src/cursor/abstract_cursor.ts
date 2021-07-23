@@ -1,7 +1,7 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoInvalidArgumentError } from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -324,7 +324,7 @@ export abstract class AbstractCursor<
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
-      throw new MongoDriverError('Missing required parameter `iterator`');
+      throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
     return maybePromise(callback, done => {
       const transform = this[kTransform];
@@ -467,11 +467,11 @@ export abstract class AbstractCursor<
   addCursorFlag(flag: CursorFlag, value: boolean): this {
     assertUninitialized(this);
     if (!CURSOR_FLAGS.includes(flag)) {
-      throw new MongoDriverError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
 
     if (typeof value !== 'boolean') {
-      throw new MongoDriverError(`flag ${flag} must be a boolean value`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} must be a boolean value`);
     }
 
     this[kOptions][flag] = value;
@@ -522,7 +522,7 @@ export abstract class AbstractCursor<
     } else if (typeof readPreference === 'string') {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
-      throw new MongoDriverError('Invalid read preference: ' + readPreference);
+      throw new MongoInvalidArgumentError(`Invalid read preference: ${readPreference}`);
     }
 
     return this;
@@ -551,7 +551,7 @@ export abstract class AbstractCursor<
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoDriverError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
     this[kOptions].maxTimeMS = value;
@@ -570,7 +570,7 @@ export abstract class AbstractCursor<
     }
 
     if (typeof value !== 'number') {
-      throw new MongoDriverError('batchSize requires an integer');
+      throw new MongoInvalidArgumentError('Operation "batchSize" requires an integer');
     }
 
     this[kOptions].batchSize = value;

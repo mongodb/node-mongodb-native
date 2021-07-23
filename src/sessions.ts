@@ -6,7 +6,9 @@ import { resolveClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
+  MongoInvalidArgumentError,
   isRetryableError,
+  MongoCompatibilityError,
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
@@ -125,10 +127,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     super();
 
     if (topology == null) {
+      // TODO(NODE-3483)
       throw new MongoDriverError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
+      // TODO(NODE-3483)
       throw new MongoDriverError('ClientSession requires a ServerSessionPool');
     }
 
@@ -137,7 +141,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (options.snapshot === true) {
       this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
-        throw new MongoDriverError(
+        throw new MongoInvalidArgumentError(
           'Properties "causalConsistency" and "snapshot" are mutually exclusive'
         );
       }
@@ -296,7 +300,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
-      throw new MongoDriverError(
+      throw new MongoCompatibilityError(
         'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
       );
     }
@@ -461,7 +465,9 @@ function attemptTransaction<TSchema>(
 
   if (!isPromiseLike(promise)) {
     session.abortTransaction();
-    throw new MongoDriverError('Function provided to `withTransaction` must return a Promise');
+    throw new MongoInvalidArgumentError(
+      'Function provided to `withTransaction` must return a Promise'
+    );
   }
 
   return promise.then(
