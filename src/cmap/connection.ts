@@ -345,7 +345,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (typeof ns.db === 'undefined' || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('Namespace cannot be a string');
+      // TODO(NODE-3483): Replace this with a MongoCommandError
+      throw new MongoDriverError('Namespace cannot be a string');
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -534,6 +535,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
     const wireVersion = maxWireVersion(this);
     if (!cursorId) {
+      // TODO(NODE-3483): Replace this with a MongoCommandError
       callback(new MongoDriverError('Invalid internal cursor state, no known cursor id'));
       return;
     }
@@ -588,6 +590,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback: Callback
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
+      // TODO(NODE-3483): Replace this with a MongoCommandError
       throw new MongoInvalidArgumentError(`Invalid list of cursor ids provided: ${cursorIds}`);
     }
 

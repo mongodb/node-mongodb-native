@@ -66,7 +66,8 @@ export function executeOperation<
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
-    throw new MongoInvalidArgumentError('This method requires a valid operation instance');
+    // TODO(NODE-3483)
+    throw new MongoDriverError('This method requires a valid operation instance');
   }
 
   return maybePromise(callback, cb => {

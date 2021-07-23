@@ -234,7 +234,8 @@ export function executeLegacyOperation(
   const Promise = PromiseProvider.get();
 
   if (!Array.isArray(args)) {
-    throw new MongoInvalidArgumentError('This method requires an array of arguments to apply');
+    // TODO(NODE-3483)
+    throw new MongoDriverError('This method requires an array of arguments to apply');
   }
 
   options = options ?? {};
@@ -296,9 +297,8 @@ export function executeLegacyOperation(
 
   // Return a Promise
   if (args[args.length - 1] != null) {
-    throw new MongoInvalidArgumentError(
-      'Final argument to `executeLegacyOperation` must be a callback'
-    );
+    // TODO(NODE-3483)
+    throw new MongoDriverError('Final argument to `executeLegacyOperation` must be a callback');
   }
 
   return new Promise<any>((resolve, reject) => {
@@ -583,7 +583,8 @@ export class MongoDBNamespace {
 
   static fromString(namespace?: string): MongoDBNamespace {
     if (!namespace) {
-      throw new MongoInvalidArgumentError(`Cannot parse namespace from "${namespace}"`);
+      // TODO(NODE-3483): Replace with MongoNamespaceError
+      throw new MongoDriverError(`Cannot parse namespace from "${namespace}"`);
     }
 
     const [db, ...collection] = namespace.split('.');

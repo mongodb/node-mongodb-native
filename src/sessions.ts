@@ -127,10 +127,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     super();
 
     if (topology == null) {
+      // TODO(NODE-3483)
       throw new MongoInvalidArgumentError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
+      // TODO(NODE-3483)
       throw new MongoInvalidArgumentError('ClientSession requires a ServerSessionPool');
     }
 

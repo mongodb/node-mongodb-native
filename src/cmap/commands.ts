@@ -77,7 +77,9 @@ export class Query {
 
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
+    // TODO(NODE-3483): Replace with MongoCommandError
     if (ns == null) throw new MongoInvalidArgumentError('Namespace must be specified for query');
+    // TODO(NODE-3483): Replace with MongoCommandError
     if (query == null)
       throw new MongoInvalidArgumentError('A query document must be specified for query');
 
