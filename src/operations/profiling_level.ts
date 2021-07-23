@@ -3,7 +3,7 @@ import type { Callback } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoDriverError } from '../error';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
@@ -24,10 +24,10 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
         if (was === 0) return callback(undefined, 'off');
         if (was === 1) return callback(undefined, 'slow_only');
         if (was === 2) return callback(undefined, 'all');
-        // TODO(NODE-3483): Add MongoCommandOperationError here
+        // TODO(NODE-3483)
         return callback(new MongoDriverError(`Illegal profiling level value ${was}`));
       } else {
-        // TODO(NODE-3483): Add MongoCommandOperationError
+        // TODO(NODE-3483): Consider MongoUnexpectedServerResponseError
         err != null ? callback(err) : callback(new MongoDriverError('Error with profile command'));
       }
     });
