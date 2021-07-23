@@ -78,14 +78,14 @@ export class Query {
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
-    if (ns == null) throw new MongoInvalidArgumentError('Namespace must be specified for query');
+    if (ns == null) throw new MongoDriverError('Namespace must be specified for query');
     // TODO(NODE-3483): Replace with MongoCommandError
-    if (query == null)
-      throw new MongoInvalidArgumentError('A query document must be specified for query');
+    if (query == null) throw new MongoDriverError('A query document must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
-      throw new MongoInvalidArgumentError('Namespace cannot contain a null character');
+      // TODO(NODE-3483): Replace with MongoCommandError
+      throw new MongoDriverError('Namespace cannot contain a null character');
     }
 
     // Basic options
