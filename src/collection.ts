@@ -1387,7 +1387,6 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new AggregationCursor(
-      this as TODO_NODE_3286,
       getTopology(this),
       this.s.namespace,
       pipeline,
