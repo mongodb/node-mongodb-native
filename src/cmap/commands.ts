@@ -1,15 +1,11 @@
-import type { BSONSerializeOptions, Document, Long } from '../bson';
-import * as BSON from '../bson';
-import { MongoDriverError } from '../error';
 import { ReadPreference } from '../read_preference';
-import type { ClientSession } from '../sessions';
+import * as BSON from '../bson';
 import { databaseNamespace } from '../utils';
+import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
+import type { Long, Document, BSONSerializeOptions } from '../bson';
+import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-<<<<<<< HEAD
 import { MongoDriverError, MongoInvalidArgumentError } from '../error';
-=======
-import { OP_GETMORE, OP_KILL_CURSORS, OP_MSG, OP_QUERY } from './wire_protocol/constants';
->>>>>>> 2f59b41fb (style(NODE-3405): update TODO comments to point to correct tix)
 
 // Incrementing request id
 let _requestId = 0;
