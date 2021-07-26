@@ -85,7 +85,7 @@ export class Query {
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
       // TODO(NODE-3483): Use MongoNamespace static method
-      throw new MongoDriverError('namespace cannot contain a null character');
+      throw new MongoDriverError('Namespace cannot contain a null character');
     }
 
     // Basic options
