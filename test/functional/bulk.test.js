@@ -1892,7 +1892,7 @@ describe('Bulk', function () {
         expect(result).to.exist;
 
         bulk.execute(err => {
-          expect(err).to.match(/Batch cannot be re-executed/);
+          expect(err).to.match(/This batch has already been executed, create new batch to execute/);
           done();
         });
       });
