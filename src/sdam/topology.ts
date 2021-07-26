@@ -88,7 +88,7 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
-const TOPOLOGY_CLOSED_ERROR = 'Topology is closed';
+const TOPOLOGY_CLOSED_ERROR = 'Topology has been closed';
 
 /** @internal */
 const kCancelled = Symbol('cancelled');
@@ -988,7 +988,7 @@ function processWaitQueue(topology: Topology) {
   if (topology.s.state === STATE_CLOSED) {
     drainWaitQueue(
       topology[kWaitQueue],
-      new MongoTopologyClosedError(TOPOLOGY_CLOSED_ERROR + ', please connect')
+      new MongoTopologyClosedError(`${TOPOLOGY_CLOSED_ERROR}, please connect`)
     );
     return;
   }

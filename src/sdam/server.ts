@@ -65,7 +65,7 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
-const SERVER_CLOSED_ERROR = 'Server is closed';
+const SERVER_CLOSED_ERROR = 'Server has been closed';
 
 /** @internal */
 const kMonitor = Symbol('monitor');
