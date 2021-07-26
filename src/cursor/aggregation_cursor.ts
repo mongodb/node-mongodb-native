@@ -41,7 +41,6 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   ) {
     super(topology, namespace, options);
 
-    //this[kParent] = parent;
     this[kPipeline] = pipeline;
     this[kOptions] = options;
   }
