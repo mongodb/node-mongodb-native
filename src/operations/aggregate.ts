@@ -42,11 +42,11 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(pipeline: Document[], ns?: MongoDBNamespace, options?: AggregateOptions) {
-    super(undefined, Object.assign({ dbName: ns?.db }, options));
+  constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
+    super(undefined, { dbName: ns?.db, ...options });
 
     this.options = options ?? {};
-    this.target = ns && ns.collection ? ns.collection : DB_AGGREGATE_COLLECTION;
+    this.target = ns?.collection ?? DB_AGGREGATE_COLLECTION;
 
     this.pipeline = pipeline;
 

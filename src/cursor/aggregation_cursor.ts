@@ -34,7 +34,6 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
 
   /** @internal */
   constructor(
-    //parent: OperationParent,
     topology: Topology,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
@@ -65,7 +64,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
 
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
-    const aggregateOperation = new AggregateOperation(this[kPipeline], this.namespace, {
+    const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
       ...this[kOptions],
       ...this.cursorOptions,
       session
@@ -92,7 +91,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
 
     return executeOperation(
       this.topology,
-      new AggregateOperation(this[kPipeline], this.namespace, {
+      new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         explain: verbosity
