@@ -46,7 +46,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     super(undefined, { ...options, dbName: ns.db });
 
     this.options = options ?? {};
-    this.target = ns.collection || DB_AGGREGATE_COLLECTION;
+
+    if (ns.collection === undefined || ns.collection === '') {
+      this.target = DB_AGGREGATE_COLLECTION;
+    } else {
+      this.target = ns.collection;
+    }
 
     this.pipeline = pipeline;
 
