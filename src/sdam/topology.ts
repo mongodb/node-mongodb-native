@@ -498,7 +498,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     stateTransition(this, STATE_CLOSING);
 
-    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError(TOPOLOGY_CLOSED_ERROR));
+    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
     drainTimerQueue(this.s.connectionTimers);
 
     if (this.s.srvPoller) {

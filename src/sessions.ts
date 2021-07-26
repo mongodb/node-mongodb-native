@@ -960,7 +960,7 @@ export function applySession(
 ): MongoDriverError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
-    return new MongoExpiredSessionError('Attempted to use a session that has ended');
+    return new MongoExpiredSessionError('Cannot use a session that has ended');
   }
 
   const serverSession = session.serverSession;

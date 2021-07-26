@@ -65,8 +65,6 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
-const SERVER_CLOSED_ERROR = 'Server has been closed';
-
 /** @internal */
 const kMonitor = Symbol('monitor');
 
@@ -294,7 +292,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
+      callback(new MongoServerClosedError());
       return;
     }
 
@@ -352,7 +350,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
+      callback(new MongoServerClosedError());
       return;
     }
 
@@ -386,7 +384,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     callback: Callback<Document>
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
+      callback(new MongoServerClosedError());
       return;
     }
 
@@ -421,7 +419,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   ): void {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       if (typeof callback === 'function') {
-        callback(new MongoServerClosedError(SERVER_CLOSED_ERROR));
+        callback(new MongoServerClosedError());
       }
 
       return;
