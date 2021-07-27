@@ -28,7 +28,7 @@ import {
   ServerType,
   ClusterTime,
   TimerQueue,
-  resolveClusterTime,
+  _advanceClusterTime,
   drainTimerQueue,
   clearAndRemoveTimerFrom,
   STATE_CLOSED,
@@ -681,7 +681,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // value of the clusterTime embedded field."
     const clusterTime = serverDescription.$clusterTime;
     if (clusterTime) {
-      resolveClusterTime(this, clusterTime);
+      _advanceClusterTime(this, clusterTime);
     }
 
     // If we already know all the information contained in this updated description, then
