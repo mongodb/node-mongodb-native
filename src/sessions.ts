@@ -16,7 +16,8 @@ import {
   MongoServerError,
   AnyError,
   MongoExpiredSessionError,
-  MongoTransactionError
+  MongoTransactionError,
+  MongoAPIError
 } from './error';
 import {
   now,
@@ -372,12 +373,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   startTransaction(options?: TransactionOptions): void {
     if (this[kSnapshotEnabled]) {
-      throw new MongoTransactionError('Transactions are not allowed with snapshot sessions');
+      throw new MongoCompatibilityError('Transactions are not allowed with snapshot sessions');
     }
 
     assertAlive(this);
     if (this.inTransaction()) {
-      throw new MongoTransactionError('Transaction already in progress');
+      throw new MongoAPIError('Transaction already in progress');
     }
 
     if (this.isPinned && this.transaction.isCommitted) {

@@ -92,7 +92,7 @@ export function executeOperation<
       } else if (session.hasEnded) {
         return cb(new MongoExpiredSessionError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
-        return cb(new MongoDriverError('Snapshot reads require MongoDB 5.0 or later'));
+        return cb(new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later'));
       }
     } else if (session) {
       // If the user passed an explicit session and we are still, after server selection,
