@@ -47,11 +47,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     this.options = options ?? {};
 
-    if (ns.collection === undefined || ns.collection === '') {
-      this.target = DB_AGGREGATE_COLLECTION;
-    } else {
-      this.target = ns.collection;
-    }
+    // Covers when ns.collection is null, undefined or the empty string, use DB_AGGREGATE_COLLECTION
+    this.target = ns.collection || DB_AGGREGATE_COLLECTION;
 
     this.pipeline = pipeline;
 
