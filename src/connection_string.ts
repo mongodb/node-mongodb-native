@@ -177,7 +177,7 @@ function toRecord(value: string): Record<string, any> {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
-    if (typeof value === 'undefined') {
+    if (value == null) {
       throw new MongoParseError('Cannot have undefined values in key value pairs');
     }
     try {
@@ -219,7 +219,7 @@ export function parseOptions(
   mongoClient: MongoClient | MongoClientOptions | undefined = undefined,
   options: MongoClientOptions = {}
 ): MongoOptions {
-  if (typeof mongoClient !== 'undefined' && !(mongoClient instanceof MongoClient)) {
+  if (mongoClient != null && !(mongoClient instanceof MongoClient)) {
     options = mongoClient;
     mongoClient = undefined;
   }
@@ -284,7 +284,7 @@ export function parseOptions(
   }
 
   const objectOptions = new CaseInsensitiveMap(
-    Object.entries(options).filter(([, v]) => (v ?? null) !== null)
+    Object.entries(options).filter(([, v]) => v != null)
   );
 
   const allOptions = new CaseInsensitiveMap();
@@ -418,7 +418,7 @@ function setOption(
       mongoOptions[name] = getUint(name, values[0]);
       break;
     case 'string':
-      if (values[0] === undefined) {
+      if (values[0] == null) {
         break;
       }
       mongoOptions[name] = String(values[0]);
@@ -1051,6 +1051,6 @@ export const OPTIONS = {
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
   Object.entries(OPTIONS)
-    .filter(([, descriptor]) => typeof descriptor.default !== 'undefined')
+    .filter(([, descriptor]) => descriptor.default != null)
     .map(([k, d]) => [k, d.default])
 );

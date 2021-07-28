@@ -97,14 +97,14 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
-    } else if (options?.explain !== undefined) {
+    } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }
   }
 
   get canRetryWrite(): boolean {
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
-      return this.explain === undefined;
+      return this.explain == null;
     }
     return true;
   }

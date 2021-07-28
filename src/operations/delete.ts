@@ -64,7 +64,7 @@ export class DeleteOperation extends CommandOperation<Document> {
       return false;
     }
 
-    return this.statements.every(op => (typeof op.limit !== 'undefined' ? op.limit > 0 : true));
+    return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
   execute(server: Server, session: ClientSession, callback: Callback): void {
@@ -80,7 +80,7 @@ export class DeleteOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
-    if (options.explain !== undefined && maxWireVersion(server) < 3) {
+    if (options.explain != null && maxWireVersion(server) < 3) {
       return callback
         ? callback(
             new MongoCompatibilityError(`Server ${server.name} does not support explain on delete`)

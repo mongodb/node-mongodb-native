@@ -47,7 +47,7 @@ export class CountOperation extends CommandOperation<number> {
       cmd.skip = options.skip;
     }
 
-    if (typeof options.hint !== 'undefined') {
+    if (options.hint != null) {
       cmd.hint = options.hint;
     }
 

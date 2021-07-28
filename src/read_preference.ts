@@ -86,7 +86,7 @@ export class ReadPreference {
     if (!ReadPreference.isValid(mode)) {
       throw new MongoInvalidArgumentError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
-    if (options === undefined && typeof tags === 'object' && !Array.isArray(tags)) {
+    if (options == null && typeof tags === 'object' && !Array.isArray(tags)) {
       options = tags;
       tags = undefined;
     } else if (tags && !Array.isArray(tags)) {

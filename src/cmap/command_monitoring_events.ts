@@ -212,7 +212,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       // up-convert legacy find command
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (typeof command.query[key] !== 'undefined') {
+        if (command.query[key] != null) {
           result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
         }
       });
@@ -220,7 +220,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
-      if (typeof command[legacyKey] !== 'undefined') {
+      if (command[legacyKey] != null) {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
       }
     });
@@ -232,7 +232,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       }
     });
 
-    if (typeof command.pre32Limit !== 'undefined') {
+    if (command.pre32Limit != null) {
       result.limit = command.pre32Limit;
     }
 
@@ -286,7 +286,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   }
 
   // is this a legacy find command?
-  if (command.query && typeof command.query.$query !== 'undefined') {
+  if (command.query && command.query.$query != null) {
     return {
       ok: 1,
       cursor: {

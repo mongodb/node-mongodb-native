@@ -159,7 +159,7 @@ export class UpdateOneOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
@@ -196,7 +196,7 @@ export class UpdateManyOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
@@ -250,7 +250,7 @@ export class ReplaceOneOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 

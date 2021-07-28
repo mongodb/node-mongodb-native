@@ -113,7 +113,7 @@ export class TopologyDescription {
           break;
         }
 
-        if (this.logicalSessionTimeoutMinutes === undefined) {
+        if (this.logicalSessionTimeoutMinutes == null) {
           // First server with a non null logicalSessionsTimeout
           this.logicalSessionTimeoutMinutes = server.logicalSessionTimeoutMinutes;
           continue;

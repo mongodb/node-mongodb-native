@@ -898,7 +898,7 @@ export function isResumableError(error?: MongoError, wireVersion?: number): bool
     return true;
   }
 
-  if (typeof wireVersion !== 'undefined' && wireVersion >= 9) {
+  if (wireVersion != null && wireVersion >= 9) {
     // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
     if (error && error instanceof MongoError && error.code === 43) {
       return true;

@@ -37,7 +37,7 @@ export class InsertOperation extends CommandOperation<Document> {
       command.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
-    if (typeof options.comment !== 'undefined') {
+    if (options.comment != null) {
       command.comment = options.comment;
     }
 

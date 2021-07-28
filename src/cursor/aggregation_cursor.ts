@@ -93,7 +93,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof verbosity === 'function') (callback = verbosity), (verbosity = true);
-    if (verbosity === undefined) verbosity = true;
+    if (verbosity == null) verbosity = true;
 
     return executeOperation(
       this.topology,
