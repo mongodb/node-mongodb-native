@@ -699,7 +699,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: FindOptions<TSchema> | Callback<TSchema | undefined>,
     callback?: Callback<TSchema>
   ): Promise<TSchema | undefined> | void {
-    if (callback == null && typeof callback !== 'function') {
+    if (callback != null && typeof callback !== 'function') {
       throw new MongoInvalidArgumentError(
         'Third parameter to `findOne()` must be a callback or undefined'
       );
