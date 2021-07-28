@@ -265,8 +265,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     }
     if (
       !clusterTime.signature ||
-      clusterTime.signature.hash._bsontype !== 'Binary' ||
-      clusterTime.signature.keyId._bsontype !== 'Long'
+      clusterTime.signature.hash?._bsontype !== 'Binary' ||
+      clusterTime.signature.keyId?._bsontype !== 'Long'
     ) {
       throw new MongoInvalidArgumentError(
         'input cluster time must have a valid "signature" property with BSON Binary hash and BSON Long keyId'
