@@ -44,7 +44,7 @@
     "bl": "^2.2.1",
     "bson": "^1.1.4",
     "denque": "^1.4.1",
-    "optional-require": "^1.0.3",
+    "optional-require": "~1.0.3",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
