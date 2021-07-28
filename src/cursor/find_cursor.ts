@@ -1,5 +1,5 @@
 import type { Document } from '../bson';
-import { MongoDriverError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
+import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
