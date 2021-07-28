@@ -854,7 +854,7 @@ export function applySession(
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     } else if (session[kSnapshotEnabled]) {
       command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot };
-      if (session[kSnapshotTime] == null) {
+      if (session[kSnapshotTime] != null) {
         Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
       }
     }

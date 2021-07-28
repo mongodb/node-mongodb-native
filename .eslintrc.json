@@ -36,7 +36,7 @@
       "error",
       {
         "selector": "TSEnumDeclaration",
-        "message": "Don't declare enums"
+        "message": "Do not declare enums"
       },
       {
         "selector": "BinaryExpression[operator=/[=!]==/] Identifier[name='undefined']",
@@ -56,7 +56,10 @@
     "files": ["*.d.ts"],
     "rules": {
       "prettier/prettier": "off",
-      "@typescript-eslint/no-empty-interface": "off"
+      "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-misused-new": "off",
+      "@typescript-eslint/ban-types": "off",
+      "@typescript-eslint/no-unused-vars": "off"
     }
   },
   {
