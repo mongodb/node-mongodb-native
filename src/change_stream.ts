@@ -489,15 +489,11 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
   }
 
   _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
-    const aggregateOperation = new AggregateOperation(
-      { s: { namespace: this.namespace } },
-      this.pipeline,
-      {
-        ...this.cursorOptions,
-        ...this.options,
-        session
-      }
-    );
+    const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
+      ...this.cursorOptions,
+      ...this.options,
+      session
+    });
 
     executeOperation(this.topology, aggregateOperation, (err, response) => {
       if (err || response == null) {

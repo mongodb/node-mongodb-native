@@ -29,7 +29,7 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
 
     pipeline.push({ $group: { _id: 1, n: { $sum: 1 } } });
 
-    super(collection, pipeline, options);
+    super(collection.s.namespace, pipeline, options);
   }
 
   execute(server: Server, session: ClientSession, callback: Callback<number>): void {

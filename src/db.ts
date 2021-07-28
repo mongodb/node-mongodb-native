@@ -301,7 +301,6 @@ export class Db {
     }
 
     return new AggregationCursor(
-      this,
       getTopology(this),
       this.s.namespace,
       pipeline,

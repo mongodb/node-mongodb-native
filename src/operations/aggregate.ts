@@ -1,12 +1,7 @@
-import {
-  CommandOperation,
-  CommandOperationOptions,
-  OperationParent,
-  CollationOptions
-} from './command';
+import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
 import { ReadPreference } from '../read_preference';
 import { MongoInvalidArgumentError } from '../error';
-import { maxWireVersion } from '../utils';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
@@ -47,14 +42,13 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
-    super(parent, options);
+  constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
+    super(undefined, { ...options, dbName: ns.db });
 
     this.options = options ?? {};
-    this.target =
-      parent.s.namespace && parent.s.namespace.collection
-        ? parent.s.namespace.collection
-        : DB_AGGREGATE_COLLECTION;
+
+    // Covers when ns.collection is null, undefined or the empty string, use DB_AGGREGATE_COLLECTION
+    this.target = ns.collection || DB_AGGREGATE_COLLECTION;
 
     this.pipeline = pipeline;
 
