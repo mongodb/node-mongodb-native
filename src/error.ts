@@ -435,23 +435,6 @@ export class MongoCursorInUseError extends MongoAPIError {
 }
 
 /**
- * An error generated when an attempt is made to access a resource
- * which has already been or will be closed/destroyed.
- *
- * @public
- * @category Error
- */
-export class MongoResourceClosedError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoResourceClosedError';
-  }
-}
-
-/**
  * An error generated when an attempt is made to operate
  * on a closed/closing server.
  *
