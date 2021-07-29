@@ -1,7 +1,7 @@
 'use strict';
 
 const mock = require('../../tools/mock');
-const BSON = require('bson');
+const BSON = require('../../../src/bson');
 const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('./common');
 const { Topology } = require('../../../src/sdam/topology');
