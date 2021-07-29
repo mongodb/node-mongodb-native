@@ -343,9 +343,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
-    if (ns.db == null || typeof ns === 'string') {
+    if (!(ns instanceof MongoDBNamespace)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoDriverError('Namespace cannot be a string');
+      throw new MongoDriverError('Must provide a MongoDBNamespace instance');
     }
 
     const readPreference = getReadPreference(cmd, options);

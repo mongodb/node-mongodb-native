@@ -27,7 +27,7 @@
     "tsdoc/syntax": "warn",
 
     "no-console": "error",
-    "eqeqeq": ["error", "allow-null"],
+    "eqeqeq": ["error", "always", {"null": "ignore"}],
     "strict": ["error", "global"],
 
     "@typescript-eslint/no-explicit-any": "off",
