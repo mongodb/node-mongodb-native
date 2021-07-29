@@ -309,9 +309,7 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError(
-        new MongoServerError({ errmsg: errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed })
-      );
+      return new WriteConcernError(errmsg, MONGODB_ERROR_CODES.WriteConcernFailed);
     }
   }
 
@@ -333,29 +331,58 @@ export class BulkWriteResult {
  * @public
  * @category Error
  */
-export class WriteConcernError {
-  err: MongoServerError;
+// export class WriteConcernError {
+//   err: MongoServerError;
+//   code: number;
 
-  constructor(err: MongoServerError) {
-    this.err = err;
+//   constructor(err: MongoServerError) {
+//     this.err = err;
+//   }
+
+//   /** Write concern error code. */
+//   get code(): number | undefined {
+//     return this.err.code;
+//   }
+
+//   /** Write concern error message. */
+//   get errmsg(): string {
+//     return this.err.errmsg;
+//   }
+
+//   toJSON(): { code?: number; errmsg: string } {
+//     return { code: this.err.code, errmsg: this.err.errmsg };
+//   }
+
+//   toString(): string {
+//     return `WriteConcernError(${this.err.errmsg})`;
+//   }
+// }
+
+export class WriteConcernError {
+  _errmsg: string;
+  _code: number;
+
+  constructor(errmsg: string, code: number) {
+    this._errmsg = errmsg;
+    this._code = code;
   }
 
   /** Write concern error code. */
-  get code(): number | undefined {
-    return this.err.code;
+  get code(): number {
+    return this._code;
   }
 
   /** Write concern error message. */
   get errmsg(): string {
-    return this.err.errmsg;
+    return this._errmsg;
   }
 
-  toJSON(): { code?: number; errmsg: string } {
-    return { code: this.err.code, errmsg: this.err.errmsg };
+  toJSON(): { code: number; errmsg: string } {
+    return { code: this.code, errmsg: this.errmsg };
   }
 
   toString(): string {
-    return `WriteConcernError(${this.err.errmsg})`;
+    return `WriteConcernError(${this._errmsg})`;
   }
 }
 
@@ -657,16 +684,12 @@ function handleMongoWriteConcernError(
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
   // TODO: Remove multiple levels of wrapping (NODE-3337)
-  const wrappedWriteConcernError = new WriteConcernError(
-    new MongoServerError({
-      errmsg: err.result?.writeConcernError.errmsg,
-      code: err.result?.writeConcernError.result
-    })
-  );
-
   callback(
     new MongoBulkWriteError(
-      new MongoServerError(wrappedWriteConcernError),
+      new WriteConcernError(
+        err.result?.writeConcernError.errmsg,
+        err.result?.writeConcernError.result
+      ),
       new BulkWriteResult(bulkResult)
     )
   );
@@ -681,7 +704,7 @@ export class MongoBulkWriteError extends MongoServerError {
   result: BulkWriteResult;
 
   /** Creates a new MongoBulkWriteError */
-  constructor(error: AnyError, result: BulkWriteResult) {
+  constructor(error: AnyError | WriteConcernError, result: BulkWriteResult) {
     super(error as Error);
     Object.assign(this, error);
 
