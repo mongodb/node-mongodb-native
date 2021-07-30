@@ -1,5 +1,5 @@
 import type { Document } from '../bson';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
@@ -371,7 +371,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   sort(sort: Sort | string, direction?: SortDirection): this {
     assertUninitialized(this);
     if (this[kBuiltOptions].tailable) {
-      throw new MongoDriverError('Tailable cursor does not support sorting');
+      throw new MongoTailableCursorError('Tailable cursor does not support sorting');
     }
 
     this[kBuiltOptions].sort = formatSort(sort, direction);
@@ -412,7 +412,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   limit(value: number): this {
     assertUninitialized(this);
     if (this[kBuiltOptions].tailable) {
-      throw new MongoDriverError('Tailable cursor does not support limit');
+      throw new MongoTailableCursorError('Tailable cursor does not support limit');
     }
 
     if (typeof value !== 'number') {
@@ -431,7 +431,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   skip(value: number): this {
     assertUninitialized(this);
     if (this[kBuiltOptions].tailable) {
-      throw new MongoDriverError('Tailable cursor does not support skip');
+      throw new MongoTailableCursorError('Tailable cursor does not support skip');
     }
 
     if (typeof value !== 'number') {

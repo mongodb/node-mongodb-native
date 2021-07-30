@@ -179,6 +179,26 @@ export class MongoDriverError extends MongoError {
 }
 
 /**
+ * An error generated when the driver API is used incorrectly
+ *
+ * @privateRemarks
+ * Should **never** be directly instantiated
+ *
+ * @public
+ * @category Error
+ */
+
+export class MongoAPIError extends MongoDriverError {
+  protected constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoAPIError';
+  }
+}
+
+/**
  * An error generated when the driver encounters unexpected input
  * or reaches an unexpected/invalid internal state
  *
@@ -205,9 +225,9 @@ export class MongoRuntimeError extends MongoDriverError {
  * @public
  * @category Error
  */
-export class MongoBatchReExecutionError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+export class MongoBatchReExecutionError extends MongoAPIError {
+  constructor(message?: string) {
+    super(message || 'This batch has already been executed, create new batch to execute');
   }
 
   get name(): string {
@@ -272,7 +292,7 @@ export class MongoDecompressionError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoNotConnectedError extends MongoRuntimeError {
+export class MongoNotConnectedError extends MongoAPIError {
   constructor(message: string) {
     super(message);
   }
@@ -289,7 +309,7 @@ export class MongoNotConnectedError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoTransactionError extends MongoRuntimeError {
+export class MongoTransactionError extends MongoAPIError {
   constructor(message: string) {
     super(message);
   }
@@ -306,7 +326,7 @@ export class MongoTransactionError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoExpiredSessionError extends MongoRuntimeError {
+export class MongoExpiredSessionError extends MongoAPIError {
   constructor(message: string) {
     super(message);
   }
@@ -334,45 +354,12 @@ export class MongoKerberosError extends MongoRuntimeError {
 }
 
 /**
- * An error thrown when the user attempts to operate on a cursor that is in a state which does not
- * support the attempted operation.
- *
- * @public
- * @category Error
- */
-export class MongoCursorError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoCursorError';
-  }
-}
-
-/**
- * An error generated when a stream operation fails to execute.
- *
- * @public
- * @category Error
- */
-export class MongoStreamError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoStreamError';
-  }
-}
-
-/**
  * An error generated when a ChangeStream operation fails to execute.
  *
  * @public
  * @category Error
  */
-export class MongoChangeStreamError extends MongoStreamError {
+export class MongoChangeStreamError extends MongoRuntimeError {
   constructor(message: string) {
     super(message);
   }
@@ -388,9 +375,9 @@ export class MongoChangeStreamError extends MongoStreamError {
  * @public
  * @category Error
  */
-export class MongoTailableCursorError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+export class MongoTailableCursorError extends MongoAPIError {
+  constructor(message?: string) {
+    super(message || 'Tailable cursor does not support this operation');
   }
 
   get name(): string {
@@ -403,7 +390,7 @@ export class MongoTailableCursorError extends MongoCursorError {
  * @public
  * @category Error
  */
-export class MongoGridFSStreamError extends MongoStreamError {
+export class MongoGridFSStreamError extends MongoRuntimeError {
   constructor(message: string) {
     super(message);
   }
@@ -420,7 +407,7 @@ export class MongoGridFSStreamError extends MongoStreamError {
  * @public
  * @category Error
  */
-export class MongoGridFSChunkError extends MongoStreamError {
+export class MongoGridFSChunkError extends MongoRuntimeError {
   constructor(message: string) {
     super(message);
   }
@@ -437,30 +424,13 @@ export class MongoGridFSChunkError extends MongoStreamError {
  * @public
  * @category Error
  */
-export class MongoCursorInUseError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+export class MongoCursorInUseError extends MongoAPIError {
+  constructor(message?: string) {
+    super(message || 'Cursor is already initialized');
   }
 
   get name(): string {
     return 'MongoCursorInUseError';
-  }
-}
-
-/**
- * An error generated when an attempt is made to access a resource
- * which has already been or will be closed/destroyed.
- *
- * @public
- * @category Error
- */
-export class MongoResourceClosedError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoResourceClosedError';
   }
 }
 
@@ -471,7 +441,7 @@ export class MongoResourceClosedError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoServerClosedError extends MongoResourceClosedError {
+export class MongoServerClosedError extends MongoAPIError {
   constructor(message: string) {
     super(message);
   }
@@ -487,30 +457,13 @@ export class MongoServerClosedError extends MongoResourceClosedError {
  * @public
  * @category Error
  */
-export class MongoCursorExhaustedError extends MongoCursorError {
-  constructor(message: string) {
-    super(message);
+export class MongoCursorExhaustedError extends MongoAPIError {
+  constructor(message?: string) {
+    super(message || 'Cursor is exhausted');
   }
 
   get name(): string {
     return 'MongoCursorExhaustedError';
-  }
-}
-
-/**
- * An error generated when an attempt is made to operate
- * on a closed/closing stream.
- *
- * @public
- * @category Error
- */
-export class MongoStreamClosedError extends MongoResourceClosedError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoStreamClosedError';
   }
 }
 
@@ -521,7 +474,7 @@ export class MongoStreamClosedError extends MongoResourceClosedError {
  * @public
  * @category Error
  */
-export class MongoTopologyClosedError extends MongoResourceClosedError {
+export class MongoTopologyClosedError extends MongoAPIError {
   constructor(message: string) {
     super(message);
   }
@@ -595,26 +548,6 @@ export class MongoParseError extends MongoDriverError {
 
   get name(): string {
     return 'MongoParseError';
-  }
-}
-
-/**
- * An error generated when the driver API is used incorrectly
- *
- * @privateRemarks
- * Should **never** be directly instantiated
- *
- * @public
- * @category Error
- */
-
-export class MongoAPIError extends MongoDriverError {
-  protected constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoAPIError';
   }
 }
 

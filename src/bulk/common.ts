@@ -5,8 +5,8 @@ import {
   AnyError,
   MONGODB_ERROR_CODES,
   MongoServerError,
-  MongoDriverError,
-  MongoInvalidArgumentError
+  MongoInvalidArgumentError,
+  MongoBatchReExecutionError
 } from '../error';
 import {
   applyRetryableWrites,
@@ -1181,7 +1181,7 @@ export abstract class BulkOperationBase {
     options = options ?? {};
 
     if (this.s.executed) {
-      return handleEarlyError(new MongoDriverError('Batch cannot be re-executed'), callback);
+      return handleEarlyError(new MongoBatchReExecutionError(), callback);
     }
 
     const writeConcern = WriteConcern.fromOptions(options);

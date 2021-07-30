@@ -1,7 +1,13 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
 import { ClientSession } from '../sessions';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import {
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoCursorExhaustedError,
+  MongoTailableCursorError,
+  MongoCursorInUseError
+} from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -287,7 +293,7 @@ export abstract class AbstractCursor<
   next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, true, done);
@@ -302,7 +308,7 @@ export abstract class AbstractCursor<
   tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, false, done);
@@ -564,7 +570,7 @@ export abstract class AbstractCursor<
   batchSize(value: number): this {
     assertUninitialized(this);
     if (this[kOptions].tailable) {
-      throw new MongoDriverError('Tailable cursors do not support batchSize');
+      throw new MongoTailableCursorError('Tailable cursor does not support batchSize');
     }
 
     if (typeof value !== 'number') {
@@ -777,7 +783,7 @@ function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
 /** @internal */
 export function assertUninitialized(cursor: AbstractCursor): void {
   if (cursor[kInitialized]) {
-    throw new MongoDriverError('Cursor is already initialized');
+    throw new MongoCursorInUseError();
   }
 }
 
