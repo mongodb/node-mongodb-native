@@ -51,8 +51,9 @@ export const CURSOR_FLAGS = [
   'partial'
 ] as const;
 
-/** @public */
-// TODO: Remove this as the option is never used. (NODE-3489)
+/** @public
+ *  @deprecated Not used
+ * */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
@@ -373,7 +374,11 @@ export abstract class AbstractCursor<
     });
   }
 
-  close(): Promise<void>;
+  /**
+   * @remarks
+   * The `options` argument is deprecated
+   */
+  close(): void;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
