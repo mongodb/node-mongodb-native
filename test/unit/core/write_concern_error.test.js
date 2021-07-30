@@ -194,7 +194,7 @@ describe('WriteConcernError', function () {
 
         let errInfoFromError;
         try {
-          await collection.insertOne({ x: /not a string/ });
+          await collection.insertMany([{ x: /not a string/ }]);
           expect.fail('The insert should fail the validation that x must be a string');
         } catch (error) {
           expect(error).to.be.instanceOf(MongoServerError);
