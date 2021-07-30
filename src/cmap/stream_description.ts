@@ -51,7 +51,7 @@ export class StreamDescription {
   receiveResponse(response: Document): void {
     this.type = parseServerType(response);
     RESPONSE_FIELDS.forEach(field => {
-      if (typeof response[field] !== 'undefined') {
+      if (typeof response[field] != null) {
         this[field] = response[field];
       }
 

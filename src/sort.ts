@@ -51,7 +51,7 @@ function prepareDirection(direction: any = 1): SortDirectionForCmd {
 
 /** @internal */
 function isMeta(t: SortDirection): t is { $meta: string } {
-  return typeof t === 'object' && t !== null && '$meta' in t && typeof t.$meta === 'string';
+  return typeof t === 'object' && t != null && '$meta' in t && typeof t.$meta === 'string';
 }
 
 /** @internal */

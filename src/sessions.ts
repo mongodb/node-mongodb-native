@@ -854,7 +854,7 @@ export function applySession(
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     } else if (session[kSnapshotEnabled]) {
       command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot };
-      if (session[kSnapshotTime] !== undefined) {
+      if (session[kSnapshotTime] != null) {
         Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
       }
     }
@@ -897,7 +897,7 @@ export function updateSessionFromResponse(session: ClientSession, document: Docu
     session.transaction._recoveryToken = document.recoveryToken;
   }
 
-  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] === undefined) {
+  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] == null) {
     // find and aggregate commands return atClusterTime on the cursor
     // distinct includes it in the response body
     const atClusterTime = document.cursor?.atClusterTime || document.atClusterTime;

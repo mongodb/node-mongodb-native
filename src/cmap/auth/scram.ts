@@ -311,7 +311,7 @@ const hiLengthMap = {
 function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: CryptoMethod) {
   // omit the work if already generated
   const key = [data, salt.toString('base64'), iterations].join('_');
-  if (_hiCache[key] !== undefined) {
+  if (_hiCache[key] != null) {
     return _hiCache[key];
   }
 

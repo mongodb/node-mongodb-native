@@ -40,7 +40,7 @@ export class Explain {
   }
 
   static fromOptions(options?: ExplainOptions): Explain | undefined {
-    if (options?.explain === undefined) return;
+    if (options?.explain == null) return;
 
     const explain = options.explain;
     if (typeof explain === 'boolean' || typeof explain === 'string') {

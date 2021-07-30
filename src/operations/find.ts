@@ -106,7 +106,7 @@ export class FindOperation extends CommandOperation<Document> {
 
     const serverWireVersion = maxWireVersion(server);
     const options = this.options;
-    if (typeof options.allowDiskUse !== 'undefined' && serverWireVersion < 4) {
+    if (options.allowDiskUse != null && serverWireVersion < 4) {
       callback(
         new MongoCompatibilityError('Option "allowDiskUse" is not supported on MongoDB < 3.2')
       );
@@ -338,7 +338,7 @@ function makeLegacyFindCommand(
     findCommand.$maxTimeMS = options.maxTimeMS;
   }
 
-  if (typeof options.explain !== 'undefined') {
+  if (options.explain != null) {
     findCommand.$explain = true;
   }
 

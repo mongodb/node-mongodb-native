@@ -687,7 +687,7 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
     if (
       topologyOrServer.description &&
       'maxWireVersion' in topologyOrServer.description &&
-      'undefined' !== typeof topologyOrServer.description.maxWireVersion
+      topologyOrServer.description.maxWireVersion != null
     ) {
       return topologyOrServer.description.maxWireVersion;
     }

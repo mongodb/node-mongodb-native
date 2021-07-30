@@ -52,7 +52,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     this[kFilter] = filter || {};
     this[kBuiltOptions] = options;
 
-    if (typeof options.sort !== 'undefined') {
+    if (options.sort != null) {
       this[kBuiltOptions].sort = formatSort(options.sort);
     }
   }
@@ -155,7 +155,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof verbosity === 'function') (callback = verbosity), (verbosity = true);
-    if (verbosity === undefined) verbosity = true;
+    if (verbosity == null) verbosity = true;
 
     return executeOperation(
       this.topology,

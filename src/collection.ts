@@ -699,7 +699,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: FindOptions<TSchema> | Callback<TSchema | undefined>,
     callback?: Callback<TSchema>
   ): Promise<TSchema | undefined> | void {
-    if (callback !== undefined && typeof callback !== 'function') {
+    if (callback != null && typeof callback !== 'function') {
       throw new MongoInvalidArgumentError(
         'Third parameter to `findOne()` must be a callback or undefined'
       );
@@ -1088,7 +1088,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: CountDocumentsOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
-    if (typeof filter === 'undefined') {
+    if (filter == null) {
       (filter = {}), (options = {}), (callback = undefined);
     } else if (typeof filter === 'function') {
       (callback = filter as Callback<number>), (filter = {}), (options = {});

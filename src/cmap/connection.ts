@@ -343,9 +343,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
-    if (typeof ns.db === 'undefined' || typeof ns === 'string') {
+    if (!(ns instanceof MongoDBNamespace)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoDriverError('Namespace cannot be a string');
+      throw new MongoDriverError('Must provide a MongoDBNamespace instance');
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -453,7 +453,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   /** @internal */
   query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
-    const isExplain = typeof cmd.$explain !== 'undefined';
+    const isExplain = cmd.$explain != null;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const batchSize = options.batchSize || 0;
     const limit = options.limit;

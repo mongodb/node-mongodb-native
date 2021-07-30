@@ -150,7 +150,7 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    if (typeof options.comment !== 'undefined') {
+    if (options.comment != null) {
       this[kOptions].comment = options.comment;
     }
 
@@ -225,9 +225,7 @@ export abstract class AbstractCursor<
     return {
       next: () =>
         this.next().then(value =>
-          value !== null && value !== undefined
-            ? { value, done: false }
-            : { value: undefined, done: true }
+          value != null ? { value, done: false } : { value: undefined, done: true }
         )
     };
   }
@@ -817,7 +815,7 @@ function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSche
   function readNext() {
     needToClose = false;
     next(cursor, true, (err, result) => {
-      needToClose = err ? !cursor.closed : result !== null;
+      needToClose = err ? !cursor.closed : result != null;
 
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
@@ -839,7 +837,7 @@ function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSche
         return readable.destroy(err);
       }
 
-      if (result === null) {
+      if (result == null) {
         readable.push(null);
       } else if (readable.destroyed) {
         cursor.close();
