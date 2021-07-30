@@ -95,14 +95,12 @@ describe('Sessions - unit/core', function () {
     });
 
     describe('advanceClusterTime()', () => {
-      // TODO: add functional tests to make sure:
-      // 1) using the method to update session clusterTime results in usable session
-      // 2) using the method to update session to invalid time results in unusable session but still usable client
       beforeEach(() => {
         const client = new Topology('localhost:27017', {});
         sessionPool = client.s.sessionPool;
         session = new ClientSession(client, sessionPool, {});
       });
+
       it('should throw an error if the input cluster time is not an object', {
         metadata: { requires: { topology: 'single' } },
         test: function () {
@@ -156,7 +154,9 @@ describe('Sessions - unit/core', function () {
           invalidInputs[3].signature.hash = null;
           invalidInputs[4].signature.keyId = null;
           // invalid non-null types
-          invalidInputs[5].signature.keyId = 1;
+          // keyId must be number or BSON long
+          // hash must be BSON binary
+          invalidInputs[5].signature.keyId = {};
           invalidInputs[6].signature.keyId = 'not BSON Long';
           invalidInputs[7].signature.hash = 123;
           invalidInputs[8].signature.hash = 'not BSON Binary';
@@ -182,6 +182,14 @@ describe('Sessions - unit/core', function () {
         expect(session).property('clusterTime').to.be.null;
         session.advanceClusterTime(validTime);
         expect(session).property('clusterTime').to.equal(validTime);
+
+        // extra test case for valid alternative keyId type in signature
+        const alsoValidTime = generateClusterTime(200);
+        alsoValidTime.signature.keyId = 10;
+        session.clusterTime = null;
+        expect(session).property('clusterTime').to.be.null;
+        session.advanceClusterTime(alsoValidTime);
+        expect(session).property('clusterTime').to.equal(alsoValidTime);
       });
 
       it('should set the session clusterTime to the one provided if it is greater than the the existing session clusterTime', () => {

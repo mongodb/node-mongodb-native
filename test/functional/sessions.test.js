@@ -2,7 +2,6 @@
 
 const path = require('path');
 const expect = require('chai').expect;
-const BSON = require('../../src/bson');
 const { MongoServerError } = require('../../src');
 const { setupDatabase, withMonitoredClient } = require('./shared');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
