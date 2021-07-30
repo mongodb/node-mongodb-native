@@ -333,7 +333,6 @@ export class BulkWriteResult {
  */
 // export class WriteConcernError {
 //   err: MongoServerError;
-//   code: number;
 
 //   constructor(err: MongoServerError) {
 //     this.err = err;
@@ -359,8 +358,9 @@ export class BulkWriteResult {
 // }
 
 export class WriteConcernError {
-  _errmsg: string;
-  _code: number;
+  _errmsg?: string;
+  _code?: number;
+  _errInfo?: Document;
 
   constructor(errmsg: string, code: number) {
     this._errmsg = errmsg;
@@ -704,8 +704,11 @@ export class MongoBulkWriteError extends MongoServerError {
   result: BulkWriteResult;
 
   /** Creates a new MongoBulkWriteError */
-  constructor(error: AnyError | WriteConcernError, result: BulkWriteResult) {
+  constructor(error: AnyError | WriteConcernError | any, result: BulkWriteResult) {
     super(error as Error);
+    // for (const name in error) {
+    //   (this as any)[name] = error[name];
+    // }
     Object.assign(this, error);
 
     this.result = result;
@@ -1248,11 +1251,11 @@ export abstract class BulkOperationBase {
 
       callback(
         new MongoBulkWriteError(
-          new MongoServerError({
+          {
             message: msg,
             code: this.s.bulkResult.writeErrors[0].code,
             writeErrors: this.s.bulkResult.writeErrors
-          }),
+          },
           writeResult
         )
       );
@@ -1262,7 +1265,7 @@ export abstract class BulkOperationBase {
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new MongoBulkWriteError(new MongoServerError(writeConcernError), writeResult));
+      callback(new MongoBulkWriteError(writeConcernError, writeResult));
       return true;
     }
   }
