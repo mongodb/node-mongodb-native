@@ -35,7 +35,7 @@ await collectionT.findOne(
   }
 );
 
-const optionsWithComplexProjection: FindOptions<TestModel> = {
+const optionsWithComplexProjection: FindOptions = {
   projection: {
     stringField: { $meta: 'textScore' },
     fruitTags: { $min: 'fruitTags' },
@@ -120,14 +120,14 @@ function printCar(car: Car | undefined) {
   console.log(car ? `A car of ${car.make} make` : 'No car');
 }
 
-const options: FindOptions<Car> = {};
-const optionsWithProjection: FindOptions<Car> = {
+const options: FindOptions = {};
+const optionsWithProjection: FindOptions = {
   projection: {
     make: 1
   }
 };
 
-expectNotType<FindOptions<Car>>({
+expectNotType<FindOptions>({
   projection: {
     make: 'invalid'
   }

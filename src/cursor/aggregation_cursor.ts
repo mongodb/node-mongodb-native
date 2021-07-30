@@ -9,7 +9,6 @@ import type { Callback, MongoDBNamespace } from '../utils';
 import type { ClientSession } from '../sessions';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
-import type { Projection } from '../mongo_types';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -144,9 +143,16 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
    * const cursor: AggregationCursor<{ a: number; b: string }> = coll.aggregate([]);
    * const projectCursor = cursor.project<{ a: number }>({ a: true });
    * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   *
+   * // or always use chaining and save the final cursor
+   *
+   * const cursor = coll.aggregate<{ a: number }>()
+   *   .project<{ a: string }>(
+   *     { a: { $convert: { input: '$a' to: 'string' } }}
+   *   );
    * ```
    */
-  project<T = TSchema>($project: Projection<T>): AggregationCursor<T>;
+  project<T = TSchema>($project: Document): AggregationCursor<T>;
   project($project: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $project });

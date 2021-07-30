@@ -170,21 +170,6 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 export type BSONTypeAlias = keyof typeof BSONType;
 
 /** @public */
-export interface ProjectionOperators extends Document {
-  $elemMatch?: Document;
-  $slice?: number | [number, number];
-  $meta?: string;
-  /** @deprecated Since MongoDB 3.2, Use FindCursor#max */
-  $max?: any;
-}
-
-/** @public */
-export type Projection<TSchema> = {
-  [Key in keyof TSchema]?: ProjectionOperators | 0 | 1 | boolean;
-} &
-  Partial<Record<string, ProjectionOperators | 0 | 1 | boolean>>;
-
-/** @public */
 export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
   ? ResultIfAny
   : ResultIfNotAny;
