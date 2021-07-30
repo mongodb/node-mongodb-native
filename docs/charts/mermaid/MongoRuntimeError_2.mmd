@@ -1,9 +1,0 @@
-graph TD
-  MongoRuntimeError --> MongoTransactionError
-  MongoRuntimeError --> MongoExpiredSessionError
-  MongoRuntimeError --> MongoKerberosError
-  MongoRuntimeError --> MongoResourceClosedError
-
-  MongoResourceClosedError --> MongoServerClosedError
-  MongoResourceClosedError --> MongoStreamClosedError
-  MongoResourceClosedError --> MongoTopologyClosedError
