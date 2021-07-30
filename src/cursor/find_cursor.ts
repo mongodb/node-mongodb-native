@@ -12,7 +12,6 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
-import type { Projection } from '../mongo_types';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -353,10 +352,17 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
    * const cursor: FindCursor<{ a: number; b: string }> = coll.find();
    * const projectCursor = cursor.project<{ a: number }>({ a: true });
    * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   *
+   * // or always use chaining and save the final cursor
+   *
+   * const cursor = coll.find()
+   *   .project<{ a: string }>(
+   *     { a: { $convert: { input: '$a' to: 'string' } }}
+   *   );
    * ```
    */
-  project<T = TSchema>(value: Projection<T>): FindCursor<T>;
-  project(value: Projection<TSchema>): this {
+  project<T = TSchema>(value: Document): FindCursor<T>;
+  project(value: Document): this {
     assertUninitialized(this);
     this[kBuiltOptions].projection = value;
     return this;

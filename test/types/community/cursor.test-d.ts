@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 import { expectNotType, expectType } from 'tsd';
-import { FindCursor, MongoClient } from '../../../src/index';
+import { FindCursor, MongoClient, Db } from '../../../src/index';
 
 // TODO(NODE-3346): Improve these tests to use expect assertions more
 
@@ -74,13 +74,13 @@ expectNotType<{ age: number }[]>(await typedCollection.find().project({ name: 1 
 expectType<{ notExistingField: unknown }[]>(
   await typedCollection.find().project({ notExistingField: 1 }).toArray()
 );
-expectNotType<TypedDoc[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
+expectType<TypedDoc[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
 
 // Projection operator
 expectType<{ listOfNumbers: number[] }[]>(
   await typedCollection
     .find()
-    .project({ listOfNumbers: { $slice: [0, 4] } })
+    .project<{ listOfNumbers: number[] }>({ listOfNumbers: { $slice: [0, 4] } })
     .toArray()
 );
 
@@ -98,3 +98,42 @@ void async function () {
     expectType<number>(item.foo);
   }
 };
+
+interface InternalMeme {
+  _id: string;
+  owner: string;
+  receiver: string;
+  createdAt: Date;
+  expiredAt: Date;
+  description: string;
+  likes: string;
+  private: string;
+  replyTo: string;
+  imageUrl: string;
+}
+
+interface PublicMeme {
+  myId: string;
+  owner: string;
+  likes: number;
+  someRandomProp: boolean; // Projection makes no enforcement on anything
+  // the convenience parameter project<X>() allows you to define a return type,
+  // otherwise projections returns a generic Document
+}
+
+const publicMemeProjection = {
+  myId: { $toString: '$_id' },
+  owner: { $toString: '$owner' },
+  receiver: { $toString: '$receiver' },
+  likes: '$totalLikes' // <== cause of TS2345 error
+};
+
+expectType<PublicMeme[]>(
+  await new Db(new MongoClient(''), '')
+    .collection<InternalMeme>('memes')
+    .find({ _id: { $in: [] } })
+    .sort({ _id: -1 })
+    .limit(3)
+    .project<PublicMeme>(publicMemeProjection) // <== location of TS2345 error
+    .toArray()
+);
