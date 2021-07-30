@@ -89,6 +89,10 @@ export abstract class AbstractOperation<TResult = any> {
     return this[kSession];
   }
 
+  get isCursorCreating(): boolean {
+    return false;
+  }
+
   get canRetryRead(): boolean {
     return true;
   }

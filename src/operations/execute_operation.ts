@@ -4,6 +4,7 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoNetworkError,
   MongoCompatibilityError,
   MongoServerError
 } from '../error';
@@ -181,14 +182,29 @@ function executeWithServerSelection(
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
+    topology.selectServer(readPreference, serverSelectionOptions, (e?: any, server?: any) => {
       if (
-        err ||
+        e ||
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
         (operation.hasAspect(Aspect.WRITE_OPERATION) && !supportsRetryableWrites(server))
       ) {
-        callback(err);
+        callback(e);
         return;
+      }
+
+      // If we have a cursor and the initial command fails with a network error,
+      // we can retry it on another connection. So we need to check it back in, clear the
+      // pool for the service id, and retry again.
+      if (
+        err &&
+        err instanceof MongoNetworkError &&
+        server.loadBalanced &&
+        session &&
+        session.isPinned &&
+        !session.inTransaction() &&
+        operation.isCursorCreating
+      ) {
+        session.unpin({ force: true, forceClear: true });
       }
 
       operation.execute(server, session, callback);

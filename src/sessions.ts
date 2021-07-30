@@ -95,6 +95,7 @@ export interface EndSessionOptions {
    */
   error?: AnyError;
   force?: boolean;
+  forceClear?: boolean;
 }
 
 /**
@@ -225,7 +226,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /** @internal */
-  unpin(options?: { force?: boolean; error?: AnyError }): void {
+  unpin(options?: { force?: boolean; forceClear?: boolean; error?: AnyError }): void {
     if (this.loadBalanced) {
       return maybeClearPinnedConnection(this, options);
     }
@@ -507,16 +508,23 @@ export function maybeClearPinnedConnection(
 
   // NOTE: the spec talks about what to do on a network error only, but the tests seem to
   //       to validate that we don't unpin on _all_ errors?
-  if (conn && (options?.error == null || options?.force)) {
+  if (conn) {
     const servers = Array.from(session.topology.s.servers.values());
     const loadBalancer = servers[0];
-    loadBalancer.s.pool.checkIn(conn);
-    conn.emit(
-      Connection.UNPINNED,
-      session.transaction.state !== TxnState.NO_TRANSACTION
-        ? ConnectionPoolMetrics.TXN
-        : ConnectionPoolMetrics.CURSOR
-    );
+
+    if (options?.error == null || options?.force) {
+      loadBalancer.s.pool.checkIn(conn);
+      conn.emit(
+        Connection.UNPINNED,
+        session.transaction.state !== TxnState.NO_TRANSACTION
+          ? ConnectionPoolMetrics.TXN
+          : ConnectionPoolMetrics.CURSOR
+      );
+
+      if (options?.forceClear) {
+        loadBalancer.s.pool.clear(conn.serviceId);
+      }
+    }
 
     session[kPinnedConnection] = undefined;
   }

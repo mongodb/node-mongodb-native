@@ -383,6 +383,10 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
+  get isCursorCreating(): boolean {
+    return true;
+  }
+
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {

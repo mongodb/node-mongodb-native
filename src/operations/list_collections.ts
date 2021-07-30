@@ -40,6 +40,10 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
+  get isCursorCreating(): boolean {
+    return true;
+  }
+
   execute(server: Server, session: ClientSession, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;

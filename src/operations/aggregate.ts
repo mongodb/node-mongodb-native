@@ -79,6 +79,10 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
   }
 
+  get isCursorCreating(): boolean {
+    return true;
+  }
+
   get canRetryRead(): boolean {
     return !this.hasWriteStage;
   }

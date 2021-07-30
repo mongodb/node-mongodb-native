@@ -28,6 +28,10 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     this.collectionName = collection.collectionName;
   }
 
+  get isCursorCreating(): boolean {
+    return true;
+  }
+
   execute(server: Server, session: ClientSession, callback: Callback<number>): void {
     if (maxWireVersion(server) < 12) {
       return this.executeLegacy(server, session, callback);

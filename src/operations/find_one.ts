@@ -21,6 +21,10 @@ export class FindOneOperation extends CommandOperation<Document> {
     this.query = query;
   }
 
+  get isCursorCreating(): boolean {
+    return true;
+  }
+
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const coll = this.collection;
     const query = this.query;
