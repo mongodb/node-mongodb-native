@@ -169,6 +169,11 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 /** @public */
 export type BSONTypeAlias = keyof typeof BSONType;
 
+/** @public Projection is flexible to permit the wide array of aggregation operators */
+export type Projection<TSchema extends Document = Document> = Document;
+/** @public */
+export type ProjectionOperators = Document;
+
 /** @public */
 export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
   ? ResultIfAny

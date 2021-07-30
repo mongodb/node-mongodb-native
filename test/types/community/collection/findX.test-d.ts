@@ -1,5 +1,6 @@
-import { expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document } from '../../../../src';
+import { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests
@@ -190,3 +191,9 @@ expectType<FindCursor<{ color: { $in: number } }>>(colorCollection.find({ color:
 // When you use the override, $in doesn't permit readonly
 colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
 colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+// This is a regression test that we don't remove the unused generic in FindOptions
+const findOptions: FindOptions<{ a: number }> = {};
+expectType<FindOptions>(findOptions);
+// This is just to check that we still export these type symbols
+expectAssignable<Projection>({});
+expectAssignable<ProjectionOperators>({});
