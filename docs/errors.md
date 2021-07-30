@@ -6,7 +6,7 @@
 
 **Advisory Group**: Daria Purdue, Eric Adum, Neal Beeken
 
-### Contents
+## Contents
 
 - [Introduction](#Introduction)
 - [Errors](#errors)
@@ -30,12 +30,13 @@
   - [`MongoNetworkError`](#MongoNetworkError-1)
     - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
 
-# Errors
+## Errors
 
 All errors are derived from the `MongoError` class which should **never** be instantiated.
-There are four main error classes which stem from `MongoError`: `MongoDriverError`, `MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
+There are four main error classes which stem from `MongoError`: `MongoDriverError`,
+`MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
 
-## `MongoError`
+### `MongoError`
 
 The base class from which all errors in the Node driver subclass.
 `MongoError` should **never** be be directly instantiated.
@@ -48,10 +49,9 @@ Children of `MongoError` include:
 - [`MongoServerError`](#MongoServerError)
 - [`MongoSystemError`](#MongoSystemError)
 
-## `MongoDriverError`
+### `MongoDriverError`
 
-This class represents errors which originate in the driver itself or in the user's use of the driver.
-This class should **never** be directly instantiated.
+This class represents errors which originate in the driver itself or in the user's use of the driver. This class should **never** be directly instantiated.
 Its children are the main classes of errors that most users will interact with: [**`MongoAPIError`**](#MongoAPIError) and [**`MongoRuntimeError`**](#MongoRuntimeError).
 
 ### `MongoAPIError`
@@ -74,7 +74,44 @@ Children of `MongoAPIError` include:
   - Thrown when a user fails to provide authentication credentials before attempting to connect to the mongo server.
 
 - #### `MongoMissingDependencyError`
+
   - Thrown when a required module or dependency is not present.
+
+- #### `MongoTransactionError`
+
+  - Thrown when the user makes a mistake in the usage of transactions (e.g.: attempting to commit a transaction with a readPreference other than primary).
+
+- #### `MongoNotConnectedError`
+
+  - Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.
+
+- #### `MongoExpiredSessionError`
+
+  - Thrown when the user attempts to operate on a session that has expired or has been closed.
+
+- #### `MongoServerClosedError`
+
+  - Thrown when an attempt is made to operate on a closed server.
+
+- #### `MongoTopologyClosedError`
+
+  - Thrown when an attempt is made to operate on a dropped, or otherwise unavailable, database.
+
+- #### `MongoTailableCursorError`
+
+  - Thrown when the user calls a function or method that is not supported on a tailable cursor.
+
+- #### `MongoCursorInUseError`
+
+  - Thrown when the user attempts to add options to an already initialized cursor.
+
+- #### `MongoCursorExhaustedError`
+
+  - Thrown when an attempt is made to read from a cursor that has been exhausted.
+
+- #### `MongoBatchReExecutionError`
+
+  - Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.
 
 ### `MongoRuntimeError`
 
@@ -92,18 +129,6 @@ _MongoRuntimeError children (pt 3)_
 
 Children of `MongoRuntimeError` include:
 
-- #### `MongoTransactionError`
-
-  - Thrown when the user makes a mistake in the usage of transactions (e.g.: attempting to commit a transaction with a readPreference other than primary).
-
-- #### `MongoNotConnectedError`
-
-  - Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.
-
-- #### `MongoKerberosError`
-
-  - Thrown when the user attempts to authenticate via Kerberos, but fails to connect to the Kerberos client.
-
 - #### `MongoCompressionError`
 
   - Thrown when the driver fails to compress data before sending it to the server.
@@ -112,47 +137,27 @@ Children of `MongoRuntimeError` include:
 
   - Thrown when the driver fails to decompress data received from the server
 
-- #### `MongoExpiredSessionError`
-
-  - Thrown when the user attempts to operate on a session that has expired or has been closed.
-
 - #### `MongoURIError`
 
   - Thrown when a user supplies an incorrect URI to the driver.
 
-- #### `MongoResourceClosedError`
+- #### `MongoChangeStreamError`
 
-  - Thrown when there is an attempt to access a resource which has already been or will be closed/destroyed.
-    - Children of this error class include:
-      - **`MongoServerClosedError`**: Thrown when an attempt is made to operate on a closed server.
-      - **`MongoStreamClosedError`**: Thrown when an attempt is made to operate on a closed stream.
-      - **`MongoTopologyClosedError`**: Thrown when an attempt is made to operate on a dropped, or otherwise unavailable, database.
+  - Thrown when an error is encountered when operating on a ChangeStream.
 
-- #### `MongoCursorError`
+- #### `MongoGridFSStreamError`
 
-  - Thrown when the user incorrectly uses a cursor object.
-    - Children of this error class include:
-      - **`MongoTailableCursorError`**: Thrown when the user calls a function or method that is not supported on a tailable cursor.
-      - **`MongoCursorInUseError`**: Thrown when the user attempts to add options to an already initialized cursor.
-      - **`MongoCursorExhaustedError`**: Thrown when an attempt is made to read from a cursor that has been exhausted.
+  - Thrown when an unexpected state is reached when operating on a GridFSStream.
 
-- #### `MongoStreamError`
+- #### `MongoGridFSChunkError`
 
-  - Thrown when a stream operation fails to execute.
-  - Children of this error class include:
-    - **`MongoChangeStreamError`**: Thrown when an error is encountered when operating on a ChangeStream.
-    - **`MongoGridFSStreamError`**: Thrown when an unexpected state is reached when operating on a GridFSStream.
-    - **`MongoGridFSChunkError`**: Thrown when a malformed or invalid chunk is encountered when reading from a GridFSStream.
-
-- #### `MongoBatchReExecutionError`
-
-  - Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.
+  - Thrown when a malformed or invalid chunk is encountered when reading from a GridFSStream.
 
 - #### `MongoServerSelectionError`
 
   - Thrown when the driver fails to select a server to complete an operation.
 
-## `MongoNetworkError`
+### `MongoNetworkError`
 
 These are errors which prevent the driver from connecting to a mongo server instance. Children of this class include:
 
@@ -160,15 +165,15 @@ These are errors which prevent the driver from connecting to a mongo server inst
 
   - Thrown when a timeout expires while attempting to connect to the mongo server
 
-## `MongoServerError`
+### `MongoServerError`
 
 These are errors which wrap error responses received from the server.
 
-## `MongoSystemError`
+### `MongoSystemError`
 
 These are errors which originate from faulty environment setup.
 
-# Test Plan
+## Test Plan
 
 The test plan consists of a series of prose tests.
 As numerous errors are being introduced, select classes will be tested.
@@ -178,7 +183,7 @@ The classes to be tested will be selected based on two characteristics:
 2. The **scope** of the error. Errors that tackle a large subset of issues, including but not limited to `MongoServerError` and `MongoSystemError`, will _not_ be a part of the test plan.
 3. The **existing coverage** of the error. Errors that are already covered in existing tests will _not_ be a part of the test plan to avoid redundancy.
 
-## `MongoAPIError`
+### `MongoAPIError`
 
 #### `MongoInvalidArgumentError`
 
@@ -190,7 +195,7 @@ The classes to be tested will be selected based on two characteristics:
 - Fail to provide credentials when authenticating with the x509 mechanism.
   - Assert that `MongoMissingCredentialsError` is thrown.
 
-## `MongoRuntimeError`
+### `MongoRuntimeError`
 
 #### `MongoNotConnectedError`
 
@@ -217,7 +222,7 @@ The classes to be tested will be selected based on two characteristics:
 - Attempt to continue reading a cursor after it has reached the end of the batch.
   - Assert that `MongoCursorExhaustedError` is thrown.
 
-## `MongoNetworkError`
+### `MongoNetworkError`
 
 #### `MongoNetworkTimeoutError`
 
