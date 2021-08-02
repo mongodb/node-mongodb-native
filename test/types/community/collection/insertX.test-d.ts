@@ -227,7 +227,7 @@ expectType<{ [key: number]: number }>(indexTypeResultMany2.insertedIds);
 // Readonly Tests -- NODE-3452
 const rdOnlyColl = client.db('test').collection<{ colors: string[] }>('readonlyColors');
 const colorsFreeze: ReadonlyArray<string> = Object.freeze(['blue', 'red']);
-// Users must defined their properties as readonly if they want to be able to insert readonly
+// Users must define their properties as readonly if they want to be able to insert readonly
 type InsertOneParam = Parameters<typeof rdOnlyColl.insertOne>[0];
 expectNotAssignable<InsertOneParam>({ colors: colorsFreeze });
 // Correct usage:
