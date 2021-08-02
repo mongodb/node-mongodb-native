@@ -515,5 +515,23 @@ describe('MongoOptions', function () {
       const optionsSym = getSymbolFrom(client, 'options');
       expect(client[optionsSym]).to.have.property('monitorCommands', false);
     });
+
+    it('respects monitorCommands option passed in', function () {
+      const clientViaOpt = new MongoClient('mongodb://localhost', { monitorCommands: true });
+      const clientViaUri = new MongoClient('mongodb://localhost?monitorCommands=true');
+
+      const testTable = [
+        [clientViaOpt, clientViaOpt.options],
+        [clientViaUri, clientViaUri.options]
+      ];
+
+      for (const [client, clientOptions] of testTable) {
+        expect(clientOptions).to.have.property('monitorCommands', true);
+        expect(client.s.options).to.have.property('monitorCommands', true);
+        expect(client).to.have.property('monitorCommands', true);
+        const optionsSym = getSymbolFrom(client, 'options');
+        expect(client[optionsSym]).to.have.property('monitorCommands', true);
+      }
+    });
   });
 });
