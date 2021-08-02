@@ -143,7 +143,7 @@ const colorsFreeze: ReadonlyArray<string> = Object.freeze(['blue', 'red']);
 // Permitted Readonly fields
 expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: colorsFreeze } }));
 expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $nin: colorsFreeze } }));
-// $all and $elemMatch works against single fields (its just redundant)
+// $all and $elemMatch works against single fields (it's just redundant)
 expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $all: colorsFreeze } }));
 expectType<FindCursor<{ color: string }>>(
   colorCollection.find({ color: { $elemMatch: colorsFreeze } })
