@@ -202,7 +202,7 @@ function executeWithServerSelection(
         session &&
         session.isPinned &&
         !session.inTransaction() &&
-        operation.isCursorCreating
+        operation.hasAspect(Aspect.CURSOR_CREATING)
       ) {
         session.unpin({ force: true, forceClear: true });
       }

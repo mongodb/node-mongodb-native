@@ -40,10 +40,6 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
-  get isCursorCreating(): boolean {
-    return true;
-  }
-
   execute(server: Server, session: ClientSession, callback: Callback<string[]>): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
@@ -156,4 +152,8 @@ export class ListCollectionsCursor<
   }
 }
 
-defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(ListCollectionsOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);

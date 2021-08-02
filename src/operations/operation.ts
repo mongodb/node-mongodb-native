@@ -9,7 +9,8 @@ export const Aspect = {
   WRITE_OPERATION: Symbol('WRITE_OPERATION'),
   RETRYABLE: Symbol('RETRYABLE'),
   EXPLAINABLE: Symbol('EXPLAINABLE'),
-  SKIP_COLLATION: Symbol('SKIP_COLLATION')
+  SKIP_COLLATION: Symbol('SKIP_COLLATION'),
+  CURSOR_CREATING: Symbol('CURSOR_CREATING')
 } as const;
 
 /** @public */
@@ -87,10 +88,6 @@ export abstract class AbstractOperation<TResult = any> {
 
   get session(): ClientSession {
     return this[kSession];
-  }
-
-  get isCursorCreating(): boolean {
-    return false;
   }
 
   get canRetryRead(): boolean {

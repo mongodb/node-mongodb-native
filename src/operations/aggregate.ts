@@ -79,10 +79,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
   }
 
-  get isCursorCreating(): boolean {
-    return true;
-  }
-
   get canRetryRead(): boolean {
     return !this.hasWriteStage;
   }
@@ -131,4 +127,9 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   }
 }
 
-defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(AggregateOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.CURSOR_CREATING
+]);

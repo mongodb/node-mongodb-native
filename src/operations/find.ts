@@ -101,10 +101,6 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectID' ? { _id: filter } : filter;
   }
 
-  get isCursorCreating(): boolean {
-    return true;
-  }
-
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     this.server = server;
 
@@ -349,4 +345,9 @@ function makeLegacyFindCommand(
   return findCommand;
 }
 
-defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(FindOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.CURSOR_CREATING
+]);

@@ -383,10 +383,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  get isCursorCreating(): boolean {
-    return true;
-  }
-
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
@@ -517,7 +513,11 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
   }
 }
 
-defineAspects(ListIndexesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(ListIndexesOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);
 defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
