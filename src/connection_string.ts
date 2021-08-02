@@ -724,7 +724,7 @@ export const OPTIONS = {
     type: 'uint'
   },
   monitorCommands: {
-    default: true,
+    default: false,
     type: 'boolean'
   },
   name: {

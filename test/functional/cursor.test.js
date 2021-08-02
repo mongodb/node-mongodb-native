@@ -3564,7 +3564,10 @@ describe('Cursor', function () {
     test: function (done) {
       var started = [];
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
       client.on('commandStarted', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
