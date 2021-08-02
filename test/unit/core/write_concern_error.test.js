@@ -6,7 +6,6 @@ const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
 const { ns } = require('../../../src/utils');
 const { once } = require('events');
-const { MongoServerError } = require('../../../src');
 
 describe('WriteConcernError', function () {
   let test;
@@ -194,10 +193,10 @@ describe('WriteConcernError', function () {
 
         let errInfoFromError;
         try {
-          await collection.insertMany([{ x: /not a string/ }]);
+          await collection.insertOne({ x: /not a string/ });
           expect.fail('The insert should fail the validation that x must be a string');
         } catch (error) {
-          expect(error).to.be.instanceOf(MongoServerError);
+          expect(error).to.be.instanceOf(MongoWriteConcernError);
           expect(error).to.have.property('code', 121);
           expect(error).to.have.property('errInfo').that.is.an('object');
           errInfoFromError = error.errInfo;
