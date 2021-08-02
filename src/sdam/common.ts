@@ -66,16 +66,16 @@ export interface ClusterTime {
   };
 }
 
-/** Shared function to determine clusterTime for a given topology */
-export function resolveClusterTime(
-  topology: Topology | ClientSession,
+/** Shared function to determine clusterTime for a given topology or session */
+export function _advanceClusterTime(
+  entity: Topology | ClientSession,
   $clusterTime: ClusterTime
 ): void {
-  if (topology.clusterTime == null) {
-    topology.clusterTime = $clusterTime;
+  if (entity.clusterTime == null) {
+    entity.clusterTime = $clusterTime;
   } else {
-    if ($clusterTime.clusterTime.greaterThan(topology.clusterTime.clusterTime)) {
-      topology.clusterTime = $clusterTime;
+    if ($clusterTime.clusterTime.greaterThan(entity.clusterTime.clusterTime)) {
+      entity.clusterTime = $clusterTime;
     }
   }
 }

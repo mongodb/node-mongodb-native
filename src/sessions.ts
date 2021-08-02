@@ -2,7 +2,7 @@ import { PromiseProvider } from './promise_provider';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { resolveClusterTime, ClusterTime } from './sdam/common';
+import { _advanceClusterTime, ClusterTime } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
@@ -247,6 +247,34 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (operationTime.greaterThan(this.operationTime)) {
       this.operationTime = operationTime;
     }
+  }
+
+  /**
+   * Advances the clusterTime for a ClientSession to the provided clusterTime of another ClientSession
+   *
+   * @param clusterTime - the $clusterTime returned by the server from another session in the form of a document containing the `BSON.Timestamp` clusterTime and signature
+   */
+  advanceClusterTime(clusterTime: ClusterTime): void {
+    if (!clusterTime || typeof clusterTime !== 'object') {
+      throw new MongoInvalidArgumentError('input cluster time must be an object');
+    }
+    if (!clusterTime.clusterTime || clusterTime.clusterTime._bsontype !== 'Timestamp') {
+      throw new MongoInvalidArgumentError(
+        'input cluster time "clusterTime" property must be a valid BSON Timestamp'
+      );
+    }
+    if (
+      !clusterTime.signature ||
+      clusterTime.signature.hash?._bsontype !== 'Binary' ||
+      (typeof clusterTime.signature.keyId !== 'number' &&
+        clusterTime.signature.keyId?._bsontype !== 'Long') // apparently we decode the key to number?
+    ) {
+      throw new MongoInvalidArgumentError(
+        'input cluster time must have a valid "signature" property with BSON Binary hash and BSON Long keyId'
+      );
+    }
+
+    _advanceClusterTime(this, clusterTime);
   }
 
   /**
@@ -886,7 +914,7 @@ export function applySession(
 
 export function updateSessionFromResponse(session: ClientSession, document: Document): void {
   if (document.$clusterTime) {
-    resolveClusterTime(session, document.$clusterTime);
+    _advanceClusterTime(session, document.$clusterTime);
   }
 
   if (document.operationTime && session && session.supports.causalConsistency) {

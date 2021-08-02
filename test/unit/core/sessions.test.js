@@ -1,6 +1,7 @@
 'use strict';
 
 const mock = require('../../tools/mock');
+const BSON = require('../../../src/bson');
 const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('./common');
 const { Topology } = require('../../../src/sdam/topology');
@@ -8,6 +9,14 @@ const { ServerSessionPool, ServerSession, ClientSession } = require('../../../sr
 const { now } = require('../../../src/utils');
 
 let test = {};
+
+const generateClusterTime = time => {
+  return {
+    clusterTime: new BSON.Timestamp(time),
+    signature: { hash: new BSON.Binary('test'), keyId: new BSON.Long(1) }
+  };
+};
+
 describe('Sessions - unit/core', function () {
   describe('ClientSession', function () {
     let session;
@@ -82,6 +91,131 @@ describe('Sessions - unit/core', function () {
             'Transactions are not allowed with snapshot sessions'
           );
         }
+      });
+    });
+
+    describe('advanceClusterTime()', () => {
+      beforeEach(() => {
+        const client = new Topology('localhost:27017', {});
+        sessionPool = client.s.sessionPool;
+        session = new ClientSession(client, sessionPool, {});
+      });
+
+      it('should throw an error if the input cluster time is not an object', {
+        metadata: { requires: { topology: 'single' } },
+        test: function () {
+          const invalidInputs = [undefined, null, 3, 'a'];
+          for (const input of invalidInputs) {
+            expect(() => session.advanceClusterTime(input)).to.throw(
+              'input cluster time must be an object'
+            );
+          }
+        }
+      });
+
+      it(
+        'should throw an error if the input cluster time is missing a valid clusterTime property',
+        {
+          metadata: { requires: { topology: 'single' } },
+          test: function () {
+            const invalidInputs = Array(5)
+              .fill(1)
+              .map(time => generateClusterTime(time));
+
+            delete invalidInputs[0].clusterTime;
+            invalidInputs[1].clusterTime = null;
+            invalidInputs[2].clusterTime = 5;
+            invalidInputs[3].clusterTime = 'not a timestamp';
+            invalidInputs[4].clusterTime = new Date('1');
+
+            for (const input of invalidInputs) {
+              expect(
+                () => session.advanceClusterTime(input),
+                `expected to fail on input: ${JSON.stringify(input)}`
+              ).to.throw(
+                'input cluster time "clusterTime" property must be a valid BSON Timestamp'
+              );
+            }
+          }
+        }
+      );
+
+      it('should throw an error if the input cluster time is missing a valid signature property', {
+        metadata: { requires: { topology: 'single' } },
+        test: function () {
+          const invalidInputs = Array(9)
+            .fill(1)
+            .map(time => generateClusterTime(time));
+
+          // null types
+          delete invalidInputs[0].signature;
+          delete invalidInputs[1].signature.hash;
+          delete invalidInputs[2].signature.keyId;
+          invalidInputs[3].signature.hash = null;
+          invalidInputs[4].signature.keyId = null;
+          // invalid non-null types
+          // keyId must be number or BSON long
+          // hash must be BSON binary
+          invalidInputs[5].signature.keyId = {};
+          invalidInputs[6].signature.keyId = 'not BSON Long';
+          invalidInputs[7].signature.hash = 123;
+          invalidInputs[8].signature.hash = 'not BSON Binary';
+
+          for (const input of invalidInputs) {
+            expect(
+              () => session.advanceClusterTime(input),
+              `expected to fail on input: ${JSON.stringify(input)}`
+            ).to.throw(
+              'input cluster time must have a valid "signature" property with BSON Binary hash and BSON Long keyId'
+            );
+          }
+        }
+      });
+
+      it('should set the session clusterTime to the one provided if the existing session clusterTime is null', () => {
+        expect(session).property('clusterTime').to.be.undefined;
+        const validTime = generateClusterTime(100);
+        session.advanceClusterTime(validTime);
+        expect(session).property('clusterTime').to.equal(validTime);
+
+        session.clusterTime = null;
+        expect(session).property('clusterTime').to.be.null;
+        session.advanceClusterTime(validTime);
+        expect(session).property('clusterTime').to.equal(validTime);
+
+        // extra test case for valid alternative keyId type in signature
+        const alsoValidTime = generateClusterTime(200);
+        alsoValidTime.signature.keyId = 10;
+        session.clusterTime = null;
+        expect(session).property('clusterTime').to.be.null;
+        session.advanceClusterTime(alsoValidTime);
+        expect(session).property('clusterTime').to.equal(alsoValidTime);
+      });
+
+      it('should set the session clusterTime to the one provided if it is greater than the the existing session clusterTime', () => {
+        const validInitialTime = generateClusterTime(100);
+        const validGreaterTime = generateClusterTime(200);
+
+        session.advanceClusterTime(validInitialTime);
+        expect(session).property('clusterTime').to.equal(validInitialTime);
+
+        session.advanceClusterTime(validGreaterTime);
+        expect(session).property('clusterTime').to.equal(validGreaterTime);
+      });
+
+      it('should leave the session clusterTime unchanged if it is less than or equal to the the existing session clusterTime', () => {
+        const validInitialTime = generateClusterTime(100);
+        const validEqualTime = generateClusterTime(100);
+        const validLesserTime = generateClusterTime(50);
+
+        session.advanceClusterTime(validInitialTime);
+        expect(session).property('clusterTime').to.equal(validInitialTime);
+
+        session.advanceClusterTime(validEqualTime);
+        expect(session).property('clusterTime').to.equal(validInitialTime); // the reference check ensures no update happened
+
+        session.advanceClusterTime(validLesserTime);
+        expect(session).property('clusterTime').to.equal(validInitialTime);
       });
     });
   });
