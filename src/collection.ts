@@ -621,7 +621,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   rename(newName: string): Promise<Collection>;
   rename(newName: string, callback: Callback<Collection>): void;
-  rename(newName: string, options: RenameOptions): Promise<Collection> | void;
+  rename(newName: string, options: RenameOptions): Promise<Collection>;
   rename(newName: string, options: RenameOptions, callback: Callback<Collection>): void;
   rename(
     newName: string,
