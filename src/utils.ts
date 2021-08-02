@@ -157,8 +157,8 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
     // {location:'2d', type:1}
     keys = Object.keys(indexSpec);
     keys.forEach(key => {
-      indexes.push(key + '_' + indexSpec[key]);
-      fieldHash[key] = indexSpec[key];
+      indexes.push(key + '_' + (indexSpec as any)[key]);
+      fieldHash[key] = (indexSpec as any)[key];
     });
   }
 

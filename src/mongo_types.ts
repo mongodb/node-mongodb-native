@@ -95,11 +95,11 @@ export interface FilterOperators<TValue> extends Document {
   $eq?: TValue;
   $gt?: TValue;
   $gte?: TValue;
-  $in?: TValue[];
+  $in?: ReadonlyArray<TValue>;
   $lt?: TValue;
   $lte?: TValue;
   $ne?: TValue;
-  $nin?: TValue[];
+  $nin?: ReadonlyArray<TValue>;
   // Logical
   $not?: TValue extends string ? FilterOperators<TValue> | RegExp : FilterOperators<TValue>;
   // Element
@@ -122,8 +122,8 @@ export interface FilterOperators<TValue> extends Document {
   $nearSphere?: Document;
   $maxDistance?: number;
   // Array
-  $all?: TValue extends ReadonlyArray<any> ? any[] : never;
-  $elemMatch?: TValue extends ReadonlyArray<any> ? Document : never;
+  $all?: ReadonlyArray<any>;
+  $elemMatch?: Document;
   $size?: TValue extends ReadonlyArray<any> ? number : never;
   // Bitwise
   $bitsAllClear?: BitwiseFilter;
@@ -137,7 +137,7 @@ export interface FilterOperators<TValue> extends Document {
 export type BitwiseFilter =
   | number /** numeric bit mask */
   | Binary /** BinData bit mask */
-  | number[]; /** `[ <position1>, <position2>, ... ]` */
+  | ReadonlyArray<number>; /** `[ <position1>, <position2>, ... ]` */
 
 /** @public */
 export const BSONType = Object.freeze({
@@ -286,7 +286,7 @@ export type PullAllOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?: TSchema[key];
 } &
   NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
-  readonly [key: string]: any[];
+  readonly [key: string]: ReadonlyArray<any>;
 };
 
 /** @public */
@@ -320,7 +320,7 @@ export type UpdateFilter<TSchema> = {
 export type Nullable<AnyType> = AnyType | null | undefined;
 
 /** @public */
-export type OneOrMore<T> = T | T[];
+export type OneOrMore<T> = T | ReadonlyArray<T>;
 
 /** @public */
 export type GenericListener = (...args: any[]) => void;
