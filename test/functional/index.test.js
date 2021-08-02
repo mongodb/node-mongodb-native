@@ -947,7 +947,10 @@ describe('Indexes', function () {
       var configuration = this.configuration;
       var started = [];
       var succeeded = [];
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
 
       client.on('commandStarted', function (event) {
         if (event.commandName === 'createIndexes') started.push(event);

@@ -2377,7 +2377,10 @@ describe('Insert', function () {
       var succeeded = [];
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
       client.on('commandStarted', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
@@ -2409,39 +2412,10 @@ describe('Insert', function () {
       var succeeded = [];
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.on('commandStarted', function (event) {
-        if (event.commandName === 'insert') started.push(event);
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
       });
-
-      client.on('commandSucceeded', function (event) {
-        if (event.commandName === 'insert') succeeded.push(event);
-      });
-
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        expect(err).to.not.exist;
-
-        db.collection('apm_test')
-          .insertMany([{ a: 1 }], { forceServerObjectId: true })
-          .then(function () {
-            expect(started[0].command.documents[0]._id).to.not.exist;
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('Correctly allow forceServerObjectId for insertMany', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
-      var started = [];
-      var succeeded = [];
-
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.on('commandStarted', function (event) {
         if (event.commandName === 'insert') started.push(event);
       });
