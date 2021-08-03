@@ -551,7 +551,13 @@ function mergeBatchResults(
   }
 
   if (result.writeConcernError) {
-    bulkResult.writeConcernErrors.push(new WriteConcernError({ ...result.writeConcernError }));
+    bulkResult.writeConcernErrors.push(
+      new WriteConcernError(
+        result.writeConcernError.code,
+        result.writeConcernError.errmsg,
+        result.writeConcernError.errInfo
+      )
+    );
   }
 }
 
@@ -687,7 +693,7 @@ export class MongoBulkWriteError extends MongoServerError {
   /** Creates a new MongoBulkWriteError */
   constructor(error: WriteConcernError | AnyError | any, result: BulkWriteResult) {
     super(error as Error);
-    this.err = error;
+    Object.assign(this, error);
     this.result = result;
   }
 
@@ -1228,11 +1234,11 @@ export abstract class BulkOperationBase {
 
       callback(
         new MongoBulkWriteError(
-          new MongoServerError({
-            message: msg,
-            code: this.s.bulkResult.writeErrors[0].code,
-            writeErrors: this.s.bulkResult.writeErrors
-          }),
+          new WriteConcernError(
+            this.s.bulkResult.writeErrors[0].code,
+            msg,
+            this.s.bulkResult.writeErrors
+          ),
           writeResult
         )
       );
