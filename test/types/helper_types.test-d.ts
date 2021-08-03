@@ -8,7 +8,8 @@ import type {
   FilterOperations,
   OnlyFieldsOfType,
   IntegerType,
-  IsAny
+  IsAny,
+  OneOrMore
 } from '../../src/mongo_types';
 import { Decimal128, Double, Int32, Long, Document } from '../../src/index';
 
@@ -97,3 +98,8 @@ interface IndexedSchema {
 // This means we can't properly enforce the subtype and there doesn't seem to be a way to detect it
 // and reduce strictness like we can with any, users with indexed schemas will have to use `as any`
 expectNotAssignable<OnlyFieldsOfType<IndexedSchema, NumericType>>({ a: 2 });
+
+// OneOrMore should accept readonly arrays
+expectAssignable<OneOrMore<number>>(1);
+expectAssignable<OneOrMore<number>>([1, 2]);
+expectAssignable<OneOrMore<number>>(Object.freeze([1, 2]));

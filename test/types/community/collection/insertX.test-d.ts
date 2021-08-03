@@ -1,4 +1,4 @@
-import { expectError, expectNotType, expectType } from 'tsd';
+import { expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 import { MongoClient, ObjectId, OptionalId } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
@@ -223,3 +223,17 @@ expectType<PropExists<typeof indexTypeResultMany2, 'ops'>>(false);
 
 expectType<number>(indexTypeResult2.insertedId);
 expectType<{ [key: number]: number }>(indexTypeResultMany2.insertedIds);
+
+// Readonly Tests -- NODE-3452
+const colorsColl = client.db('test').collection<{ colors: string[] }>('writableColors');
+const colorsFreeze: ReadonlyArray<string> = Object.freeze(['blue', 'red']);
+// Users must define their properties as readonly if they want to be able to insert readonly
+type InsertOneParam = Parameters<typeof colorsColl.insertOne>[0];
+expectNotAssignable<InsertOneParam>({ colors: colorsFreeze });
+// Correct usage:
+const rdOnlyColl = client
+  .db('test')
+  .collection<{ colors: ReadonlyArray<string> }>('readonlyColors');
+rdOnlyColl.insertOne({ colors: colorsFreeze });
+const colorsWritable = ['a', 'b'];
+rdOnlyColl.insertOne({ colors: colorsWritable });

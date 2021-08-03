@@ -135,3 +135,58 @@ expectNotType<FindOptions<Car>>({
 
 printCar(await car.findOne({}, options));
 printCar(await car.findOne({}, optionsWithProjection));
+
+// Readonly tests -- NODE-3452
+const colorCollection = client.db('test_db').collection<{ color: string }>('test_collection');
+const colorsFreeze: ReadonlyArray<string> = Object.freeze(['blue', 'red']);
+const colorsWritable: Array<string> = ['blue', 'red'];
+
+// Permitted Readonly fields
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: colorsFreeze } }));
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: colorsWritable } }));
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $nin: colorsFreeze } }));
+expectType<FindCursor<{ color: string }>>(
+  colorCollection.find({ color: { $nin: colorsWritable } })
+);
+// $all and $elemMatch works against single fields (it's just redundant)
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $all: colorsFreeze } }));
+expectType<FindCursor<{ color: string }>>(
+  colorCollection.find({ color: { $all: colorsWritable } })
+);
+expectType<FindCursor<{ color: string }>>(
+  colorCollection.find({ color: { $elemMatch: colorsFreeze } })
+);
+expectType<FindCursor<{ color: string }>>(
+  colorCollection.find({ color: { $elemMatch: colorsWritable } })
+);
+
+const countCollection = client.db('test_db').collection<{ count: number }>('test_collection');
+expectType<FindCursor<{ count: number }>>(
+  countCollection.find({ count: { $bitsAnySet: Object.freeze([1, 0, 1]) } })
+);
+expectType<FindCursor<{ count: number }>>(
+  countCollection.find({ count: { $bitsAnySet: [1, 0, 1] as number[] } })
+);
+
+const listsCollection = client.db('test_db').collection<{ lists: string[] }>('test_collection');
+await listsCollection.updateOne({}, { list: { $pullAll: Object.freeze(['one', 'two']) } });
+expectType<FindCursor<{ lists: string[] }>>(listsCollection.find({ lists: { $size: 1 } }));
+
+const rdOnlyListsCollection = client
+  .db('test_db')
+  .collection<{ lists: ReadonlyArray<string> }>('test_collection');
+expectType<FindCursor<{ lists: ReadonlyArray<string> }>>(
+  rdOnlyListsCollection.find({ lists: { $size: 1 } })
+);
+
+// Before NODE-3452's fix we would get this strange result that included the filter shape joined with the actual schema
+expectNotType<FindCursor<{ color: string | { $in: ReadonlyArray<string> } }>>(
+  colorCollection.find({ color: { $in: colorsFreeze } })
+);
+
+// This is related to another bug that will be fixed in NODE-3454
+expectType<FindCursor<{ color: { $in: number } }>>(colorCollection.find({ color: { $in: 3 } }));
+
+// When you use the override, $in doesn't permit readonly
+colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
+colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
