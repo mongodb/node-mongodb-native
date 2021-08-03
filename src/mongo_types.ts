@@ -170,6 +170,7 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 export type BSONTypeAlias = keyof typeof BSONType;
 
 /** @public Projection is flexible to permit the wide array of aggregation operators */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type Projection<TSchema extends Document = Document> = Document;
 /** @public */
 export type ProjectionOperators = Document;

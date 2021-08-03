@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 import { expectNotType, expectType } from 'tsd';
-import { FindCursor, MongoClient, Db } from '../../../src/index';
+import { FindCursor, MongoClient, Db, Document } from '../../../src/index';
 
 // TODO(NODE-3346): Improve these tests to use expect assertions more
 
@@ -118,7 +118,7 @@ interface PublicMeme {
   likes: number;
   someRandomProp: boolean; // Projection makes no enforcement on anything
   // the convenience parameter project<X>() allows you to define a return type,
-  // otherwise projections returns a generic Document
+  // otherwise projections returns your schema
 }
 
 const publicMemeProjection = {
@@ -127,13 +127,34 @@ const publicMemeProjection = {
   receiver: { $toString: '$receiver' },
   likes: '$totalLikes' // <== cause of TS2345 error
 };
+const memeCollection = new Db(new MongoClient(''), '').collection<InternalMeme>('memes');
 
 expectType<PublicMeme[]>(
-  await new Db(new MongoClient(''), '')
-    .collection<InternalMeme>('memes')
+  await memeCollection
     .find({ _id: { $in: [] } })
     .sort({ _id: -1 })
     .limit(3)
-    .project<PublicMeme>(publicMemeProjection) // <== location of TS2345 error
+    .project<PublicMeme>(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
+    .toArray()
+);
+
+// Returns you're untouched schema when no override given
+expectType<InternalMeme[]>(
+  await memeCollection
+    .find({ _id: { $in: [] } })
+    .sort({ _id: -1 })
+    .limit(3)
+    .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
+    .toArray()
+);
+
+// Returns generic document when there is no schema
+expectType<Document[]>(
+  await new Db(new MongoClient(''), '')
+    .collection('memes')
+    .find({ _id: { $in: [] } })
+    .sort({ _id: -1 })
+    .limit(3)
+    .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
     .toArray()
 );
