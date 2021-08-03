@@ -18,6 +18,7 @@ import type { ClientSession } from '../sessions';
 import type { Projection } from '../mongo_types';
 
 /** @public */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document> extends CommandOperationOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
