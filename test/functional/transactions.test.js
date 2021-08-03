@@ -70,14 +70,14 @@ class TransactionsRunnerContext extends TestRunnerContext {
     expect(options).to.have.property('session');
 
     const session = options.session;
-    expect(session.transaction.isPinned).to.be.true;
+    expect(session.isPinned).to.be.true;
   }
 
   assertSessionUnpinned(options) {
     expect(options).to.have.property('session');
 
     const session = options.session;
-    expect(session.transaction.isPinned).to.be.false;
+    expect(session.isPinned).to.be.false;
   }
 }
 

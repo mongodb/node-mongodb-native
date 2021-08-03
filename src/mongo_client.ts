@@ -179,6 +179,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   retryWrites?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
+  /** Instruct the driver it is connecting to a load balancer fronting a mongos like service */
+  loadBalanced?: boolean;
 
   /** The write concern w value */
   w?: W;
@@ -659,6 +661,7 @@ export interface MongoOptions
   credentials?: MongoCredentials;
   readPreference: ReadPreference;
   readConcern: ReadConcern;
+  loadBalanced: boolean;
   serverApi: ServerApi;
   writeConcern: WriteConcern;
   dbName: string;

@@ -32,7 +32,7 @@ import type {
 } from '../../../src/cmap/command_monitoring_events';
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
-import { TestConfiguration } from './runner';
+import { TestConfiguration, trace } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -166,7 +166,7 @@ export class UnifiedMongoClient extends MongoClient {
 
 export class FailPointMap extends Map<string, Document> {
   async enableFailPoint(
-    addressOrClient: HostAddress | UnifiedMongoClient,
+    addressOrClient: string | HostAddress | UnifiedMongoClient,
     failPoint: Document
   ): Promise<Document> {
     let client: MongoClient;
@@ -294,18 +294,28 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
   async cleanup(): Promise<void> {
     await this.failPoints.disableFailPoints();
+
+    trace('closeCursors');
     for (const [, cursor] of this.mapOf('cursor')) {
       await cursor.close();
     }
+
+    trace('closeStreams');
     for (const [, stream] of this.mapOf('stream')) {
       await stream.close();
     }
+
+    trace('endSessions');
     for (const [, session] of this.mapOf('session')) {
       await session.endSession({ force: true });
     }
+
+    trace('closeClient');
     for (const [, client] of this.mapOf('client')) {
       await client.close();
     }
+
+    trace('clear');
     this.clear();
   }
 

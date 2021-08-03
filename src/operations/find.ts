@@ -345,4 +345,9 @@ function makeLegacyFindCommand(
   return findCommand;
 }
 
-defineAspects(FindOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(FindOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.CURSOR_CREATING
+]);

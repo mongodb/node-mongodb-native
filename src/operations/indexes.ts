@@ -513,7 +513,11 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
   }
 }
 
-defineAspects(ListIndexesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(ListIndexesOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);
 defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);

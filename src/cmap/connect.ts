@@ -20,10 +20,14 @@ import {
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
 import type { Document } from '../bson';
+import { Int32 } from '../bson';
 
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
-import { Int32 } from '../bson';
+
+const FAKE_MONGODB_SERVICE_ID =
+  typeof process.env.FAKE_MONGODB_SERVICE_ID === 'string' &&
+  process.env.FAKE_MONGODB_SERVICE_ID.toLowerCase() === 'true';
 
 /** @public */
 export type Stream = Socket | TLSSocket;
@@ -133,6 +137,21 @@ function performInitialHandshake(
         return;
       }
 
+      if (options.loadBalanced) {
+        // TODO: Durran: Remove when server support exists. (NODE-3431)
+        if (FAKE_MONGODB_SERVICE_ID) {
+          response.serviceId = response.topologyVersion.processId;
+        }
+        if (!response.serviceId) {
+          return callback(
+            new MongoDriverError(
+              'Driver attempted to initialize in load balancing mode, ' +
+                'but the server does not support this mode.'
+            )
+          );
+        }
+      }
+
       // NOTE: This is metadata attached to the connection while porting away from
       //       handshake being done in the `Server` class. Likely, it should be
       //       relocated, or at very least restructured.
@@ -172,6 +191,7 @@ export interface HandshakeDocument extends Document {
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
+  loadBalanced: boolean;
 }
 
 function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
@@ -183,7 +203,8 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     [serverApi?.version ? 'hello' : 'ismaster']: true,
     helloOk: true,
     client: options.metadata || makeClientMetadata(options),
-    compression: compressors
+    compression: compressors,
+    loadBalanced: options.loadBalanced
   };
 
   const credentials = authContext.credentials;

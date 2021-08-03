@@ -121,6 +121,7 @@
     "check:ts": "tsc -v && tsc --noEmit",
     "check:atlas": "mocha --config \"test/manual/mocharc.json\" test/manual/atlas_connectivity.test.js",
     "check:adl": "mocha test/manual/data_lake.test.js",
+    "check:load-balancer": "mocha test/manual/load-balancer.test.js",
     "check:ocsp": "mocha --config \"test/manual/mocharc.json\" test/manual/ocsp_support.test.js",
     "check:kerberos": "mocha --config \"test/manual/mocharc.json\" test/manual/kerberos.test.js",
     "check:tls": "mocha --config \"test/manual/mocharc.json\" test/manual/tls_support.test.js",

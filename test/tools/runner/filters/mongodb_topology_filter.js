@@ -49,6 +49,8 @@ function topologyTypeToString(topologyType) {
     return 'replicaset';
   } else if (topologyType === TopologyType.Sharded) {
     return 'sharded';
+  } else if (topologyType === TopologyType.LoadBalanced) {
+    return 'load-balanced';
   }
 
   return 'single';

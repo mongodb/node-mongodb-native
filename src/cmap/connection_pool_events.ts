@@ -1,3 +1,4 @@
+import type { ObjectId } from '../bson';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 import type { AnyError } from '../error';
@@ -90,12 +91,14 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   connectionId: number | '<monitor>';
   /** The reason the connection was closed */
   reason: string;
+  serviceId?: ObjectId;
 
   /** @internal */
   constructor(pool: ConnectionPool, connection: Connection, reason: string) {
     super(pool);
     this.connectionId = connection.id;
     this.reason = reason || 'unknown';
+    this.serviceId = connection.serviceId;
   }
 }
 
@@ -166,7 +169,11 @@ export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
  */
 export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
-  constructor(pool: ConnectionPool) {
+  serviceId?: ObjectId;
+
+  /** @internal */
+  constructor(pool: ConnectionPool, serviceId?: ObjectId) {
     super(pool);
+    this.serviceId = serviceId;
   }
 }

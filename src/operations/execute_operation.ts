@@ -4,16 +4,17 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoNetworkError,
   MongoCompatibilityError,
   MongoServerError
 } from '../error';
 import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
-import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
+import { supportsRetryableWrites } from '../utils';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -140,6 +141,15 @@ function executeWithServerSelection(
     return;
   }
 
+  if (
+    session &&
+    session.isPinned &&
+    session.transaction.isCommitted &&
+    !operation.bypassPinningCheck
+  ) {
+    session.unpin();
+  }
+
   const serverSelectionOptions = { session };
   function callbackWithRetry(err?: any, result?: any) {
     if (err == null) {
@@ -172,14 +182,29 @@ function executeWithServerSelection(
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
+    topology.selectServer(readPreference, serverSelectionOptions, (e?: any, server?: any) => {
       if (
-        err ||
+        e ||
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
         (operation.hasAspect(Aspect.WRITE_OPERATION) && !supportsRetryableWrites(server))
       ) {
-        callback(err);
+        callback(e);
         return;
+      }
+
+      // If we have a cursor and the initial command fails with a network error,
+      // we can retry it on another connection. So we need to check it back in, clear the
+      // pool for the service id, and retry again.
+      if (
+        err &&
+        err instanceof MongoNetworkError &&
+        server.loadBalanced &&
+        session &&
+        session.isPinned &&
+        !session.inTransaction() &&
+        operation.hasAspect(Aspect.CURSOR_CREATING)
+      ) {
+        session.unpin({ force: true, forceClear: true });
       }
 
       operation.execute(server, session, callback);
@@ -242,12 +267,4 @@ function executeWithServerSelection(
 
 function shouldRetryWrite(err: any) {
   return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
-}
-
-function supportsRetryableWrites(server: Server) {
-  return (
-    server.description.maxWireVersion >= 6 &&
-    server.description.logicalSessionTimeoutMinutes &&
-    server.description.type !== ServerType.Standalone
-  );
 }

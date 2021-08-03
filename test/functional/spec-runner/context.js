@@ -124,11 +124,14 @@ class TestRunnerContext {
   targetedFailPoint(options) {
     const session = options.session;
     const failPoint = options.failPoint;
-    expect(session.transaction.isPinned).to.be.true;
+    expect(session.isPinned).to.be.true;
 
     return new Promise((resolve, reject) => {
-      const server = session.transaction.server;
-      server.command(ns('admin.$cmd'), failPoint, undefined, err => {
+      const serverOrConnection = session.loadBalanced
+        ? session.pinnedConnection
+        : session.transaction.server;
+
+      serverOrConnection.command(ns('admin.$cmd'), failPoint, undefined, err => {
         if (err) return reject(err);
 
         this.appliedFailPoints.push(failPoint);

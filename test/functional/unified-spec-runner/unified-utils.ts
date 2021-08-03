@@ -35,10 +35,7 @@ export async function topologySatisfies(
       LoadBalanced: 'load-balanced'
     }[config.topologyType];
 
-    if (
-      r.topologies.includes('sharded-replicaset') &&
-      (topologyType === 'sharded' || topologyType === 'load-balanced')
-    ) {
+    if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
       const shards = await utilClient.db('config').collection('shards').find({}).toArray();
       ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
     } else {

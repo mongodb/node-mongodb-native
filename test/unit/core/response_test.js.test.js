@@ -45,6 +45,8 @@ describe('Response', function () {
           });
         } else if (doc.getMore) {
           request.reply(errdoc);
+        } else if (doc.killCursors) {
+          request.reply({ ok: 1 });
         }
       });
 

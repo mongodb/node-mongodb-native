@@ -40,4 +40,4 @@ export class FindOneOperation extends CommandOperation<Document> {
   }
 }
 
-defineAspects(FindOneOperation, [Aspect.EXPLAINABLE]);
+defineAspects(FindOneOperation, [Aspect.EXPLAINABLE, Aspect.CURSOR_CREATING]);

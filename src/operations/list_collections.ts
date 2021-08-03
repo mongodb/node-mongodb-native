@@ -152,4 +152,8 @@ export class ListCollectionsCursor<
   }
 }
 
-defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(ListCollectionsOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);
