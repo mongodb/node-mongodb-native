@@ -58,104 +58,46 @@ Its children are the main classes of errors that most users will interact with: 
 
 This class represents errors which originate from misuse of the driver API and will generally be thrown before making contact with the server.
 This class should **never** be directly instantiated.
-![(MongoAPIError hierarchy tree)](charts/imgs/MongoAPIError.svg)
-Children of `MongoAPIError` include:
 
-- #### `MongoInvalidArgumentError`
+**Children of MongoAPIError**
 
-  - Thrown when the user supplies malformed, unexpected arguments or failed to provide a required argument or field.
-
-- #### `MongoCompatibilityError`
-
-  - Thrown when a feature that is not enabled or allowed for the current server configuration is used.
-
-- #### `MongoMissingCredentialsError`
-
-  - Thrown when a user fails to provide authentication credentials before attempting to connect to the mongo server.
-
-- #### `MongoMissingDependencyError`
-
-  - Thrown when a required module or dependency is not present.
-
-- #### `MongoTransactionError`
-
-  - Thrown when the user makes a mistake in the usage of transactions (e.g.: attempting to commit a transaction with a readPreference other than primary).
-
-- #### `MongoNotConnectedError`
-
-  - Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.
-
-- #### `MongoExpiredSessionError`
-
-  - Thrown when the user attempts to operate on a session that has expired or has been closed.
-
-- #### `MongoServerClosedError`
-
-  - Thrown when an attempt is made to operate on a closed server.
-
-- #### `MongoTopologyClosedError`
-
-  - Thrown when an attempt is made to operate on a dropped, or otherwise unavailable, database.
-
-- #### `MongoTailableCursorError`
-
-  - Thrown when the user calls a function or method that is not supported on a tailable cursor.
-
-- #### `MongoCursorInUseError`
-
-  - Thrown when the user attempts to add options to an already initialized cursor.
-
-- #### `MongoCursorExhaustedError`
-
-  - Thrown when an attempt is made to read from a cursor that has been exhausted.
-
-- #### `MongoBatchReExecutionError`
-
-  - Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.
+| Error Name                         | Description                                                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **MongoInvalidArgumentError**      | Thrown when the user supplies malformed, unexpected arguments or failed to provide a required argument or field.                                       |
+| **MongoCompatibilityError**        | Thrown when a feature that is not enabled or allowed for the current server configuration is used.                                                     |
+| **MongoMissingCredentialsError**   | Thrown when a user fails to provide authentication credentials before attempting to connect to the mongo server.                                       |
+| **MongoMissingDependencyError**    | Thrown when a required module or dependency is not present.                                                                                            |
+| **MongoExpiredSessionError**       | Thrown when the user attempts to operate on a session that has expired or has been closed.                                                             |
+| **MongoTransactionError**          | Thrown when the user makes a mistake in the usage of transactions (e.g.: attempting to commit a transaction with a readPreference other than primary). |
+| **MongoTailableCursorError**       | Thrown when the user calls a function or method that is not supported on a tailable cursor.                                                            |
+| **MongoCursorExhaustedError**      | Thrown when an attempt is made to read from a cursor that has been exhausted.                                                                          |
+| **MongoCursorInUseError**          | Thrown when the user attempts to add options to an already initialized cursor.                                                                         |
+| **MongoServerClosedError**         | Thrown when an attempt is made to operate on a closed server.                                                                                          |
+| **MongoTopologyClosedError**       | Thrown when an attempt is made to operate on a dropped, or otherwise unavailable, database.                                                            |
+| **MongoNotConnectedError**         | Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.                           |
+| **MongoBatchReExecutionError**     | Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.                                              |
+| **MongoConnectionStringError**     | Thrown when a user supplies an incorrect URI to the driver.                                                                                            |
+| **MongoConnectionPoolClosedError** |                                                                                                                                                        |
+| **MongoMessageStreamParseError**   |                                                                                                                                                        |
+| **MongoGridFSStreamClosedError**   |                                                                                                                                                        |
+| **MongoChangeStreamClosedError**   |                                                                                                                                                        |
 
 ### `MongoRuntimeError`
 
 This class represents errors which occur when the driver encounters unexpected input or reaches an unexpected/invalid internal state.
 This class should **never** be directly instantiated.
 
-_MongoRuntimeError children (pt 1)_
-![(MongoRuntimeError hierarchy tree part 1)](charts/imgs/MongoRuntimeError_0.svg)
+**Children of MongoRuntimeError**
 
-_MongoRuntimeError children (pt 2)_
-![(MongoRuntimeError hierarchy tree part 2)](charts/imgs/MongoRuntimeError_1.svg)
-
-_MongoRuntimeError children (pt 3)_
-![(MongoRuntimeError hierarchy tree part 3)](charts/imgs/MongoRuntimeError_2.svg)
-
-Children of `MongoRuntimeError` include:
-
-- #### `MongoCompressionError`
-
-  - Thrown when the driver fails to compress data before sending it to the server.
-
-- #### `MongoDecompressionError`
-
-  - Thrown when the driver fails to decompress data received from the server
-
-- #### `MongoURIError`
-
-  - Thrown when a user supplies an incorrect URI to the driver.
-
-- #### `MongoChangeStreamError`
-
-  - Thrown when an error is encountered when operating on a ChangeStream.
-
-- #### `MongoGridFSStreamError`
-
-  - Thrown when an unexpected state is reached when operating on a GridFSStream.
-
-- #### `MongoGridFSChunkError`
-
-  - Thrown when a malformed or invalid chunk is encountered when reading from a GridFSStream.
-
-- #### `MongoServerSelectionError`
-
-  - Thrown when the driver fails to select a server to complete an operation.
+| Error Name                    | Description                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| **MongoCompressionError**     | Thrown when the driver fails to compress data before sending it to the server             |
+| **MongoDecompressionError**   | Thrown when the driver fails to decompress data received from the server                  |
+| **MongoChangeStreamError**    | Thrown when an error is encountered when operating on a ChangeStream                      |
+| **MongoGridFSStreamError**    | Thrown when an unexpected state is reached when operating on a GridFS Stream              |
+| **MongoGridFSChunkError**     | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream |
+| **MongoServerSelectionError** | Thrown when the driver fails to select a server to complete an operation                  |
+| **MongoURIError**             | Thrown when a user supplies an incorrect URI to the driver                                |
 
 ### `MongoNetworkError`
 
