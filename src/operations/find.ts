@@ -15,7 +15,6 @@ import { Sort, formatSort } from '../sort';
 import { isSharded } from '../cmap/wire_protocol/shared';
 import { ReadConcern } from '../read_concern';
 import type { ClientSession } from '../sessions';
-import type { Projection } from '../mongo_types';
 
 /** @public */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,7 +24,7 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
   sort?: Sort;
   /** The fields to return in the query. Object of fields to either include or exclude (one of, not both), `{'a':1, 'b': 1}` **or** `{'a': 0, 'b': 0}` */
-  projection?: Projection;
+  projection?: Document;
   /** Set to skip N documents ahead in your query (useful for pagination). */
   skip?: number;
   /** Tell the query to use specific indexes in the query. Object of indexes to use, `{'_id':1}` */
