@@ -134,7 +134,6 @@ export class MongoError extends Error {
 export class MongoServerError extends MongoError {
   code?: number;
   codeName?: string;
-  writeConcernError?: Document;
 
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
