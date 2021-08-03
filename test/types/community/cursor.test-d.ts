@@ -22,7 +22,7 @@ const cursor = collection
   .min({ age: 18 })
   .maxAwaitTimeMS(1)
   .maxTimeMS(1)
-  .project({})
+  // .project({}) -> projections removes the types from the returned documents
   .returnKey(true)
   .showRecordId(true)
   .skip(1)
@@ -31,6 +31,7 @@ const cursor = collection
 
 expectType<FindCursor<{ foo: number }>>(cursor);
 expectType<Readable>(cursor.stream());
+expectType<FindCursor<Document>>(cursor.project({}));
 
 collection.find().project({});
 collection.find().project({ notExistingField: 1 });
@@ -118,7 +119,7 @@ interface PublicMeme {
   likes: number;
   someRandomProp: boolean; // Projection makes no enforcement on anything
   // the convenience parameter project<X>() allows you to define a return type,
-  // otherwise projections returns your schema
+  // otherwise projections returns generic document
 }
 
 const publicMemeProjection = {
@@ -132,18 +133,14 @@ const memeCollection = new Db(new MongoClient(''), '').collection<InternalMeme>(
 expectType<PublicMeme[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
-    .sort({ _id: -1 })
-    .limit(3)
     .project<PublicMeme>(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
     .toArray()
 );
 
-// Returns you're untouched schema when no override given
-expectType<InternalMeme[]>(
+// Returns generic document when no override given
+expectNotType<InternalMeme[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
-    .sort({ _id: -1 })
-    .limit(3)
     .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
     .toArray()
 );
@@ -153,8 +150,6 @@ expectType<Document[]>(
   await new Db(new MongoClient(''), '')
     .collection('memes')
     .find({ _id: { $in: [] } })
-    .sort({ _id: -1 })
-    .limit(3)
     .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
     .toArray()
 );

@@ -16,7 +16,10 @@ import { isSharded } from '../cmap/wire_protocol/shared';
 import { ReadConcern } from '../read_concern';
 import type { ClientSession } from '../sessions';
 
-/** @public */
+/**
+ * @public
+ * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document> extends CommandOperationOptions {
   /** Sets the limit of documents returned in the query. */

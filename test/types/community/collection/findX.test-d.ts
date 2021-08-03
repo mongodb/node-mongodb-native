@@ -128,7 +128,8 @@ const optionsWithProjection: FindOptions = {
   }
 };
 
-expectNotType<FindOptions>({
+// this is changed in NODE-3454 to be the opposite test since Projection is flexible now
+expectAssignable<FindOptions>({
   projection: {
     make: 'invalid'
   }

@@ -152,7 +152,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
    *   );
    * ```
    */
-  project<T = TSchema>($project: Document): AggregationCursor<T>;
+  project<T = Document>($project: Document): AggregationCursor<T>;
   project($project: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $project });
