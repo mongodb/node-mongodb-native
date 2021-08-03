@@ -154,6 +154,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.clusterTime = clusterTime;
     });
 
+    // monitoring is disabled in load balancing mode
     if (this.loadBalanced) return;
 
     // create the monitor
