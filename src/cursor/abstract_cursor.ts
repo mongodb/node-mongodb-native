@@ -51,9 +51,7 @@ export const CURSOR_FLAGS = [
   'partial'
 ] as const;
 
-/** @public
- *  @deprecated Not used
- * */
+/** @public */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
@@ -374,13 +372,15 @@ export abstract class AbstractCursor<
     });
   }
 
-  /**
-   * @remarks
-   * The `options` argument is deprecated
-   */
   close(): void;
   close(callback: Callback): void;
+  /**
+   * @deprecated options argument is deprecated
+   */
   close(options: CursorCloseOptions): Promise<void>;
+  /**
+   * @deprecated options argument is deprecated
+   */
   close(options: CursorCloseOptions, callback: Callback): void;
   close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
     if (typeof options === 'function') (callback = options), (options = {});
