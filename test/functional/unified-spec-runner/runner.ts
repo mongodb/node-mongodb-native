@@ -23,7 +23,7 @@ export function trace(message: string): void {
 }
 
 async function terminateOpenTransactions(client: MongoClient) {
-  // TODO: on sharded clusters this has to be run on each mongos
+  // TODO(NODE-3491): on sharded clusters this has to be run on each mongos
   try {
     await client.db().admin().command({ killAllSessions: [] });
   } catch (err) {
