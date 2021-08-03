@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
+import { expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 import { MongoClient, ObjectId, OptionalId } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
