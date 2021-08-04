@@ -169,20 +169,19 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 /** @public */
 export type BSONTypeAlias = keyof typeof BSONType;
 
-/** @public */
-export interface ProjectionOperators extends Document {
-  $elemMatch?: Document;
-  $slice?: number | [number, number];
-  $meta?: string;
-  /** @deprecated Since MongoDB 3.2, Use FindCursor#max */
-  $max?: any;
-}
+/**
+ * @public
+ * Projection is flexible to permit the wide array of aggregation operators
+ * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type Projection<TSchema extends Document = Document> = Document;
 
-/** @public */
-export type Projection<TSchema> = {
-  [Key in keyof TSchema]?: ProjectionOperators | 0 | 1 | boolean;
-} &
-  Partial<Record<string, ProjectionOperators | 0 | 1 | boolean>>;
+/**
+ * @public
+ * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
+ */
+export type ProjectionOperators = Document;
 
 /** @public */
 export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
