@@ -26,7 +26,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter, OptionalId, UpdateFilter } from '../mongo_types';
+import type { Filter, OneOrMore, OptionalId, UpdateFilter } from '../mongo_types';
 
 /** @public */
 export const BatchType = Object.freeze({
@@ -309,7 +309,7 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError(MONGODB_ERROR_CODES.WriteConcernFailed, errmsg);
+      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed });
     }
   }
 
@@ -672,10 +672,10 @@ function handleMongoWriteConcernError(
   // TODO: Remove multiple levels of wrapping (NODE-3337)
   callback(
     new MongoBulkWriteError(
-      new WriteConcernError(
-        err.result?.writeConcernError.errmsg,
-        err.result?.writeConcernError.result
-      ),
+      {
+        message: err.result?.writeConcernError.errmsg,
+        code: err.result?.writeConcernError.result
+      },
       new BulkWriteResult(bulkResult)
     )
   );
@@ -688,12 +688,22 @@ function handleMongoWriteConcernError(
  */
 export class MongoBulkWriteError extends MongoServerError {
   result: BulkWriteResult;
-  err: WriteConcernError | AnyError | any;
+  writeErrors: OneOrMore<WriteError> = [];
 
   /** Creates a new MongoBulkWriteError */
-  constructor(error: WriteConcernError | AnyError | any, result: BulkWriteResult) {
-    super(error as Error);
-    Object.assign(this, error);
+  constructor(
+    x: { message: string; code: number; writeErrors?: WriteError[] } | AnyError | WriteConcernError,
+    result: BulkWriteResult
+  ) {
+    super(x);
+    if (x instanceof Error) Object.assign(this, x);
+    else if (x instanceof WriteConcernError) this.err = x.err;
+    else {
+      this.message = x.message;
+      this.code = x.code;
+      this.writeErrors = x.writeErrors ?? [];
+    }
+
     this.result = result;
   }
 
@@ -1234,11 +1244,11 @@ export abstract class BulkOperationBase {
 
       callback(
         new MongoBulkWriteError(
-          new WriteConcernError(
-            this.s.bulkResult.writeErrors[0].code,
-            msg,
-            this.s.bulkResult.writeErrors
-          ),
+          {
+            message: msg,
+            code: this.s.bulkResult.writeErrors[0].code,
+            writeErrors: this.s.bulkResult.writeErrors
+          },
           writeResult
         )
       );
