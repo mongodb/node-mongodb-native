@@ -126,14 +126,14 @@ const publicMemeProjection = {
   myId: { $toString: '$_id' },
   owner: { $toString: '$owner' },
   receiver: { $toString: '$receiver' },
-  likes: '$totalLikes' // <== cause of TS2345 error
+  likes: '$totalLikes' // <== (NODE-3454) cause of TS2345 error: Argument of type T is not assignable to parameter of type U
 };
 const memeCollection = new Db(new MongoClient(''), '').collection<InternalMeme>('memes');
 
 expectType<PublicMeme[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
-    .project<PublicMeme>(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
+    .project<PublicMeme>(publicMemeProjection) // <==
     .toArray()
 );
 
@@ -141,7 +141,7 @@ expectType<PublicMeme[]>(
 expectNotType<InternalMeme[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
-    .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
+    .project(publicMemeProjection)
     .toArray()
 );
 
@@ -150,6 +150,6 @@ expectType<Document[]>(
   await new Db(new MongoClient(''), '')
     .collection('memes')
     .find({ _id: { $in: [] } })
-    .project(publicMemeProjection) // <== Argument of type T is not assignable to parameter of type U
+    .project(publicMemeProjection)
     .toArray()
 );
