@@ -332,29 +332,25 @@ export class BulkWriteResult {
  * @category Error
  */
 export class WriteConcernError {
-  errCode?: number;
-  errMsg?: string;
-  errDetails?: Document;
+  err: { code: number; errmsg: string; errInfo?: Document };
 
-  constructor(code?: number, errmsg?: string, errInfo?: Document) {
-    this.errMsg = errmsg;
-    this.errCode = code;
-    this.errDetails = errInfo;
+  constructor(err: { code: number; errmsg: string; errInfo?: Document }) {
+    this.err = err;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this.errCode;
+    return this.err.code;
   }
 
   /** Write concern error message. */
   get errmsg(): string | undefined {
-    return this.errMsg;
+    return this.err.errmsg;
   }
 
   /** Write concern error info. */
   get errInfo(): Document | undefined {
-    return this.errDetails;
+    return this.err.errInfo;
   }
 
   toJSON(): { code?: number; errmsg?: string; errInfo?: Document } {
@@ -551,13 +547,8 @@ function mergeBatchResults(
   }
 
   if (result.writeConcernError) {
-    bulkResult.writeConcernErrors.push(
-      new WriteConcernError(
-        result.writeConcernError.code,
-        result.writeConcernError.errmsg,
-        result.writeConcernError.errInfo
-      )
-    );
+    const { code, errmsg, errInfo } = result.writeConcernError;
+    bulkResult.writeConcernErrors.push(new WriteConcernError({ code, errmsg, errInfo }));
   }
 }
 
@@ -689,10 +680,11 @@ function handleMongoWriteConcernError(
 export class MongoBulkWriteError extends MongoServerError {
   result: BulkWriteResult;
   writeErrors: OneOrMore<WriteError> = [];
+  err?: WriteConcernError;
 
   /** Creates a new MongoBulkWriteError */
   constructor(
-    x: { message: string; code: number; writeErrors?: WriteError[] } | AnyError | WriteConcernError,
+    x: { message: string; code: number; writeErrors?: WriteError[] } | WriteConcernError | AnyError,
     result: BulkWriteResult
   ) {
     super(x);
