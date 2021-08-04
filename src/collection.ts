@@ -40,7 +40,6 @@ import {
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import type { FindOptions } from './operations/find';
-import { FindOneOperation } from './operations/find_one';
 import {
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
@@ -710,16 +709,10 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     filter ??= {};
-
-    return executeOperation(
-      getTopology(this),
-      new FindOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286,
-      callback as TODO_NODE_3286
-    );
+    return this.find(filter, options)
+      .limit(-1)
+      .batchSize(1)
+      .next(callback as TODO_NODE_3286);
   }
 
   /**
