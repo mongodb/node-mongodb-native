@@ -762,7 +762,7 @@ function cleanupCursor(
       }
 
       if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error, force: true });
+        maybeClearPinnedConnection(session, { error });
       }
     }
 
