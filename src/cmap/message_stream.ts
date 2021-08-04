@@ -191,9 +191,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
     if (messageBody.length !== messageHeader.length) {
       callback(
-        new MongoDecompressionError(
-          'Decompressing a compressed message from the server failed. The message is corrupt.'
-        )
+        new MongoDecompressionError('Message body and message header must be the same length')
       );
 
       return;

@@ -1,38 +1,39 @@
 import Denque = require('denque');
-import type { Readable } from 'stream';
-import type { Document, Timestamp } from './bson';
+import {
+  MongoError,
+  AnyError,
+  isResumableError,
+  MongoDriverError,
+  MongoAPIError,
+  MongoChangeStreamError
+} from './error';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import {
+  maxWireVersion,
+  calculateDurationInMs,
+  now,
+  maybePromise,
+  MongoDBNamespace,
+  Callback,
+  getTopology
+} from './utils';
+import type { ReadPreference } from './read_preference';
+import type { Timestamp, Document } from './bson';
+import type { Topology } from './sdam/topology';
+import type { OperationParent, CollationOptions } from './operations/command';
+import { MongoClient } from './mongo_client';
+import { Db } from './db';
 import { Collection } from './collection';
+import type { Readable } from 'stream';
 import {
   AbstractCursor,
   AbstractCursorEvents,
   AbstractCursorOptions,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
-import { Db } from './db';
-import {
-  AnyError,
-  isResumableError,
-  MongoChangeStreamError,
-  MongoDriverError,
-  MongoError
-} from './error';
-import { MongoClient } from './mongo_client';
-import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import type { CollationOptions, OperationParent } from './operations/command';
-import { executeOperation, ExecutionResult } from './operations/execute_operation';
-import type { ReadPreference } from './read_preference';
-import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
-import {
-  calculateDurationInMs,
-  Callback,
-  getTopology,
-  maxWireVersion,
-  maybePromise,
-  MongoDBNamespace,
-  now
-} from './utils';
+import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');
@@ -265,8 +266,8 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
-      throw new MongoDriverError(
-        'parent provided to ChangeStream constructor is not an instance of Collection, Db, or MongoClient'
+      throw new MongoChangeStreamError(
+        'Parent provided to ChangeStream constructor must be an instance of Collection, Db, or MongoClient'
       );
     }
 
@@ -547,7 +548,8 @@ const CHANGE_STREAM_EVENTS = [
 
 function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'iterator') {
-    throw new MongoChangeStreamError(
+    // TODO(NODE-3484): Replace with MongoChangeStreamModeError
+    throw new MongoAPIError(
       'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
@@ -556,7 +558,7 @@ function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
 
 function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'emitter') {
-    throw new MongoChangeStreamError(
+    throw new MongoAPIError(
       'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
@@ -634,7 +636,7 @@ function waitForTopologyConnected(
     }
 
     if (calculateDurationInMs(start) > timeout) {
-      // TODO: Replace with MongoNetworkTimeoutError
+      // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
       return callback(new MongoDriverError('Timed out waiting for connection'));
     }
 

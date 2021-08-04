@@ -46,7 +46,6 @@ export {
   MongoWriteConcernError,
   MongoRuntimeError,
   MongoURIError,
-  MongoStreamError,
   MongoChangeStreamError,
   MongoGridFSStreamError,
   MongoGridFSChunkError,

@@ -2,12 +2,22 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
-import type { Document } from './bson';
 import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
-import { MongoCredentials } from './cmap/auth/mongo_credentials';
-import { Encrypter } from './encrypter';
-import { MongoCompressionError, MongoParseError, MongoURIError } from './error';
-import { Logger, LoggerLevel } from './logger';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadConcern, ReadConcernLevel } from './read_concern';
+import { W, WriteConcern } from './write_concern';
+import { MongoAPIError, MongoInvalidArgumentError, MongoParseError, MongoURIError } from './error';
+import {
+  AnyOptions,
+  Callback,
+  DEFAULT_PK_FACTORY,
+  isRecord,
+  makeClientMetadata,
+  setDifference,
+  HostAddress,
+  emitWarning
+} from './utils';
+import type { Document } from './bson';
 import {
   DriverInfo,
   MongoClient,
@@ -17,21 +27,11 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import { PromiseProvider } from './promise_provider';
-import { ReadConcern, ReadConcernLevel } from './read_concern';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { TagSet } from './sdam/server_description';
-import {
-  AnyOptions,
-  Callback,
-  DEFAULT_PK_FACTORY,
-  emitWarning,
-  HostAddress,
-  isRecord,
-  makeClientMetadata,
-  setDifference
-} from './utils';
-import { W, WriteConcern } from './write_concern';
+import { Logger, LoggerLevel } from './logger';
+import { PromiseProvider } from './promise_provider';
+import { Encrypter } from './encrypter';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
@@ -64,11 +64,12 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  */
 export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoURIError('Option "srvHost" must not be empty'));
+    return callback(new MongoAPIError('Option "srvHost" must not be empty'));
   }
 
   if (options.srvHost.split('.').length < 3) {
-    return callback(new MongoURIError('URI must include hostname, domain name, and tld'));
+    // TODO(NODE-3484): Replace with MongoConnectionStringError
+    return callback(new MongoAPIError('URI must include hostname, domain name, and tld'));
   }
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
@@ -615,7 +616,9 @@ export const OPTIONS = {
           if (['none', 'snappy', 'zlib'].includes(String(c))) {
             compressionList.add(String(c));
           } else {
-            throw new MongoCompressionError(`${c} is not a valid compression mechanism`);
+            throw new MongoInvalidArgumentError(
+              `${c} is not a valid compression mechanism. Must be 'none', 'snappy', or 'zlib'. `
+            );
           }
         }
       }

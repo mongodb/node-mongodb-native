@@ -5,11 +5,11 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   AnyError,
-  MongoDriverError,
   MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoServerError,
-  MongoURIError
+  MongoRuntimeError,
+  MongoDriverError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -285,7 +285,8 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   } else {
     // This should never happen since we set up HostAddresses
     // But if we don't throw here the socket could hang until timeout
-    throw new MongoURIError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
+    // TODO(NODE-3484): Replace with a child of MongoParseError
+    throw new MongoRuntimeError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
   }
 }
 

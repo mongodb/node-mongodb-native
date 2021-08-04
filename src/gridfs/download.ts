@@ -1,20 +1,19 @@
-import type { ObjectId } from 'bson';
 import { Readable } from 'stream';
-import type { Document } from '../bson';
-import type { Collection } from '../collection';
-import type { FindCursor } from '../cursor/find_cursor';
 import {
-  AnyError,
   MongoDriverError,
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError
 } from '../error';
+import type { Document } from '../bson';
 import type { FindOptions } from '../operations/find';
-import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import type { Callback } from '../utils';
+import type { Collection } from '../collection';
+import type { ReadPreference } from '../read_preference';
 import type { GridFSChunk } from './upload';
+import type { FindCursor } from '../cursor/find_cursor';
+import type { ObjectId } from 'bson';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {
@@ -215,7 +214,8 @@ function doRead(stream: GridFSBucketReadStream): void {
       return;
     }
     if (error) {
-      return __handleError(stream, error);
+      stream.emit(GridFSBucketReadStream.ERROR, error);
+      return;
     }
     if (!doc) {
       stream.push(null);
@@ -224,7 +224,7 @@ function doRead(stream: GridFSBucketReadStream): void {
         if (!stream.s.cursor) return;
         stream.s.cursor.close(error => {
           if (error) {
-            __handleError(stream, error);
+            stream.emit(GridFSBucketReadStream.ERROR, error);
             return;
           }
 
@@ -240,27 +240,38 @@ function doRead(stream: GridFSBucketReadStream): void {
     const bytesRemaining = stream.s.file.length - stream.s.bytesRead;
     const expectedN = stream.s.expected++;
     const expectedLength = Math.min(stream.s.file.chunkSize, bytesRemaining);
-    let errmsg: string;
     if (doc.n > expectedN) {
-      errmsg = `ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
-      return __handleError(stream, new MongoGridFSChunkError(errmsg));
+      return stream.emit(
+        GridFSBucketReadStream.ERROR,
+        new MongoGridFSChunkError(
+          `ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`
+        )
+      );
     }
 
     if (doc.n < expectedN) {
-      errmsg = `ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`;
-      return __handleError(stream, new MongoGridFSChunkError(errmsg));
+      return stream.emit(
+        GridFSBucketReadStream.ERROR,
+        new MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`)
+      );
     }
 
     let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
 
     if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {
-        errmsg = `ExtraChunk: Got unexpected n: ${doc.n}`;
-        return __handleError(stream, new MongoGridFSChunkError(errmsg));
+        return stream.emit(
+          GridFSBucketReadStream.ERROR,
+          new MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}`)
+        );
       }
 
-      errmsg = `ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`;
-      return __handleError(stream, new MongoGridFSChunkError(errmsg));
+      return stream.emit(
+        GridFSBucketReadStream.ERROR,
+        new MongoGridFSChunkError(
+          `ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`
+        )
+      );
     }
 
     stream.s.bytesRead += buf.byteLength;
@@ -307,7 +318,7 @@ function init(stream: GridFSBucketReadStream): void {
 
   stream.s.files.findOne(stream.s.filter, findOneOptions, (error, doc) => {
     if (error) {
-      return __handleError(stream, error);
+      return stream.emit(GridFSBucketReadStream.ERROR, error);
     }
 
     if (!doc) {
@@ -317,7 +328,7 @@ function init(stream: GridFSBucketReadStream): void {
       const errmsg = `FileNotFound: file ${identifier} was not found`;
       const err = new MongoDriverError(errmsg);
       err.code = 'ENOENT'; // TODO: NODE-3338 set property as part of constructor
-      return __handleError(stream, err);
+      return stream.emit(GridFSBucketReadStream.ERROR, err);
     }
 
     // If document is empty, kill the stream immediately and don't
@@ -338,7 +349,7 @@ function init(stream: GridFSBucketReadStream): void {
     try {
       stream.s.bytesToSkip = handleStartOption(stream, doc, stream.s.options);
     } catch (error) {
-      return __handleError(stream, error);
+      return stream.emit(GridFSBucketReadStream.ERROR, error);
     }
 
     const filter: Document = { files_id: doc._id };
@@ -364,7 +375,7 @@ function init(stream: GridFSBucketReadStream): void {
     try {
       stream.s.bytesToTrim = handleEndOption(stream, doc, stream.s.cursor, stream.s.options);
     } catch (error) {
-      return __handleError(stream, error);
+      return stream.emit(GridFSBucketReadStream.ERROR, error);
     }
 
     stream.emit(GridFSBucketReadStream.FILE, doc);
@@ -439,8 +450,4 @@ function handleEndOption(
     return Math.ceil(options.end / doc.chunkSize) * doc.chunkSize - options.end;
   }
   throw new MongoInvalidArgumentError('End option must be defined');
-}
-
-function __handleError(stream: GridFSBucketReadStream, error?: AnyError): void {
-  stream.emit(GridFSBucketReadStream.ERROR, error);
 }
