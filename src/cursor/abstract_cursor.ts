@@ -54,6 +54,7 @@ export const CURSOR_FLAGS = [
 /** @public */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
+  /** @deprecated  the skipKillCursors option is deprecated*/
   skipKillCursors?: boolean;
 }
 
