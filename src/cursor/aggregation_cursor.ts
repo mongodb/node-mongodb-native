@@ -7,7 +7,6 @@ import type { Sort } from '../sort';
 import type { Topology } from '../sdam/topology';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { ClientSession } from '../sessions';
-import type { OperationParent } from '../operations/command';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
 import type { Projection } from '../mongo_types';
@@ -15,8 +14,6 @@ import type { Projection } from '../mongo_types';
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
 
-/** @internal */
-const kParent = Symbol('parent');
 /** @internal */
 const kPipeline = Symbol('pipeline');
 /** @internal */
@@ -31,15 +28,12 @@ const kOptions = Symbol('options');
  */
 export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   /** @internal */
-  [kParent]: OperationParent; // TODO: NODE-2883
-  /** @internal */
   [kPipeline]: Document[];
   /** @internal */
   [kOptions]: AggregateOptions;
 
   /** @internal */
   constructor(
-    parent: OperationParent,
     topology: Topology,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
@@ -47,7 +41,6 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   ) {
     super(topology, namespace, options);
 
-    this[kParent] = parent;
     this[kPipeline] = pipeline;
     this[kOptions] = options;
   }
@@ -59,7 +52,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   clone(): AggregationCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kOptions]);
     delete clonedOptions.session;
-    return new AggregationCursor(this[kParent], this.topology, this.namespace, this[kPipeline], {
+    return new AggregationCursor(this.topology, this.namespace, this[kPipeline], {
       ...clonedOptions
     });
   }
@@ -70,7 +63,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
 
   /** @internal */
   _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
-    const aggregateOperation = new AggregateOperation(this[kParent], this[kPipeline], {
+    const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
       ...this[kOptions],
       ...this.cursorOptions,
       session
@@ -93,11 +86,11 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     callback?: Callback<Document>
   ): Promise<Document> | void {
     if (typeof verbosity === 'function') (callback = verbosity), (verbosity = true);
-    if (verbosity === undefined) verbosity = true;
+    if (verbosity == null) verbosity = true;
 
     return executeOperation(
       this.topology,
-      new AggregateOperation(this[kParent], this[kPipeline], {
+      new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         explain: verbosity

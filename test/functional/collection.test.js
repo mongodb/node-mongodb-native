@@ -174,16 +174,16 @@ describe('Collection', function () {
     });
 
     it('should fail due to illegal listCollections', function (done) {
-      expect(() => db.collection(5)).to.throw('collection name must be a String');
-      expect(() => db.collection('')).to.throw('collection names cannot be empty');
-      expect(() => db.collection('te$t')).to.throw("collection names must not contain '$'");
+      expect(() => db.collection(5)).to.throw('Collection name must be a String');
+      expect(() => db.collection('')).to.throw('Collection names cannot be empty');
+      expect(() => db.collection('te$t')).to.throw("Collection names must not contain '$'");
       expect(() => db.collection('.test')).to.throw(
-        "collection names must not start or end with '.'"
+        "Collection names must not start or end with '.'"
       );
       expect(() => db.collection('test.')).to.throw(
-        "collection names must not start or end with '.'"
+        "Collection names must not start or end with '.'"
       );
-      expect(() => db.collection('test..t')).to.throw('collection names cannot be empty');
+      expect(() => db.collection('test..t')).to.throw('Collection names cannot be empty');
       done();
     });
 
@@ -269,9 +269,9 @@ describe('Collection', function () {
 
     it('should throw error due to illegal update', function (done) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
-        expect(() => coll.update({}, null)).to.throw(/document must be a valid JavaScript object/);
+        expect(() => coll.update({}, null)).to.throw(/Document must be a valid JavaScript object/);
         expect(() => coll.update(null, null)).to.throw(
-          /selector must be a valid JavaScript object/
+          /Selector must be a valid JavaScript object/
         );
 
         done();

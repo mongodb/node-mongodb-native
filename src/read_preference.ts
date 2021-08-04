@@ -1,7 +1,7 @@
 import type { TagSet } from './sdam/server_description';
 import type { Document } from './bson';
 import type { ClientSession } from './sessions';
-import { MongoDriverError } from './error';
+import { MongoInvalidArgumentError } from './error';
 
 /** @public */
 export type ReadPreferenceLike = ReadPreference | ReadPreferenceMode;
@@ -84,13 +84,13 @@ export class ReadPreference {
    */
   constructor(mode: ReadPreferenceMode, tags?: TagSet[], options?: ReadPreferenceOptions) {
     if (!ReadPreference.isValid(mode)) {
-      throw new MongoDriverError(`Invalid read preference mode ${JSON.stringify(mode)}`);
+      throw new MongoInvalidArgumentError(`Invalid read preference mode ${JSON.stringify(mode)}`);
     }
-    if (options === undefined && typeof tags === 'object' && !Array.isArray(tags)) {
+    if (options == null && typeof tags === 'object' && !Array.isArray(tags)) {
       options = tags;
       tags = undefined;
     } else if (tags && !Array.isArray(tags)) {
-      throw new MongoDriverError('ReadPreference tags must be an array');
+      throw new MongoInvalidArgumentError('ReadPreference tags must be an array');
     }
 
     this.mode = mode;
@@ -102,7 +102,7 @@ export class ReadPreference {
     options = options ?? {};
     if (options.maxStalenessSeconds != null) {
       if (options.maxStalenessSeconds <= 0) {
-        throw new MongoDriverError('maxStalenessSeconds must be a positive integer');
+        throw new MongoInvalidArgumentError('maxStalenessSeconds must be a positive integer');
       }
 
       this.maxStalenessSeconds = options.maxStalenessSeconds;
@@ -114,17 +114,19 @@ export class ReadPreference {
 
     if (this.mode === ReadPreference.PRIMARY) {
       if (this.tags && Array.isArray(this.tags) && this.tags.length > 0) {
-        throw new MongoDriverError('Primary read preference cannot be combined with tags');
+        throw new MongoInvalidArgumentError('Primary read preference cannot be combined with tags');
       }
 
       if (this.maxStalenessSeconds) {
-        throw new MongoDriverError(
+        throw new MongoInvalidArgumentError(
           'Primary read preference cannot be combined with maxStalenessSeconds'
         );
       }
 
       if (this.hedge) {
-        throw new MongoDriverError('Primary read preference cannot be combined with hedge');
+        throw new MongoInvalidArgumentError(
+          'Primary read preference cannot be combined with hedge'
+        );
       }
     }
   }
@@ -193,7 +195,7 @@ export class ReadPreference {
         });
       }
     } else if (!(r instanceof ReadPreference)) {
-      throw new MongoDriverError('Invalid read preference: ' + r);
+      throw new MongoInvalidArgumentError(`Invalid read preference: ${r}`);
     }
 
     return options;

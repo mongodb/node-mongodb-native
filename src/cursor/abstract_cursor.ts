@@ -1,7 +1,15 @@
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
-import { ClientSession } from '../sessions';
-import { MongoDriverError } from '../error';
+import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import {
+  AnyError,
+  MongoDriverError,
+  MongoNetworkError,
+  MongoInvalidArgumentError,
+  MongoCursorExhaustedError,
+  MongoTailableCursorError,
+  MongoCursorInUseError
+} from '../error';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -44,6 +52,7 @@ export const CURSOR_FLAGS = [
 ] as const;
 
 /** @public */
+// TODO: Remove this as the option is never used. (NODE-3489)
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   skipKillCursors?: boolean;
@@ -150,7 +159,7 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    if (typeof options.comment !== 'undefined') {
+    if (options.comment != null) {
       this[kOptions].comment = options.comment;
     }
 
@@ -211,6 +220,10 @@ export abstract class AbstractCursor<
     return this[kKilled];
   }
 
+  get loadBalanced(): boolean {
+    return this[kTopology].loadBalanced;
+  }
+
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this[kDocuments].length;
@@ -225,9 +238,7 @@ export abstract class AbstractCursor<
     return {
       next: () =>
         this.next().then(value =>
-          value !== null && value !== undefined
-            ? { value, done: false }
-            : { value: undefined, done: true }
+          value != null ? { value, done: false } : { value: undefined, done: true }
         )
     };
   }
@@ -289,7 +300,7 @@ export abstract class AbstractCursor<
   next<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, true, done);
@@ -304,7 +315,7 @@ export abstract class AbstractCursor<
   tryNext<T = TSchema>(callback?: Callback<T | null>): Promise<T | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoDriverError('Cursor is exhausted'));
+        return done(new MongoCursorExhaustedError());
       }
 
       next(this, false, done);
@@ -324,7 +335,7 @@ export abstract class AbstractCursor<
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
-      throw new MongoDriverError('Missing required parameter `iterator`');
+      throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
     return maybePromise(callback, done => {
       const transform = this[kTransform];
@@ -362,7 +373,7 @@ export abstract class AbstractCursor<
     });
   }
 
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   close(options: CursorCloseOptions): Promise<void>;
   close(options: CursorCloseOptions, callback: Callback): void;
@@ -373,49 +384,7 @@ export abstract class AbstractCursor<
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
 
-    return maybePromise(callback, done => {
-      const cursorId = this[kId];
-      const cursorNs = this[kNamespace];
-      const server = this[kServer];
-      const session = this[kSession];
-
-      if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
-        if (needsToEmitClosed) {
-          this[kId] = Long.ZERO;
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          this.emit(AbstractCursor.CLOSE);
-        }
-
-        if (session && session.owner === this) {
-          return session.endSession(done);
-        }
-
-        return done();
-      }
-
-      this[kKilled] = true;
-      server.killCursors(
-        cursorNs,
-        [cursorId],
-        { ...pluckBSONSerializeOptions(this[kOptions]), session },
-        () => {
-          if (session && session.owner === this) {
-            return session.endSession(() => {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              this.emit(AbstractCursor.CLOSE);
-              done();
-            });
-          }
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          this.emit(AbstractCursor.CLOSE);
-          done();
-        }
-      );
-    });
+    return maybePromise(callback, done => cleanupCursor(this, { needsToEmitClosed }, done));
   }
 
   /**
@@ -467,11 +436,11 @@ export abstract class AbstractCursor<
   addCursorFlag(flag: CursorFlag, value: boolean): this {
     assertUninitialized(this);
     if (!CURSOR_FLAGS.includes(flag)) {
-      throw new MongoDriverError(`flag ${flag} is not one of ${CURSOR_FLAGS}`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
 
     if (typeof value !== 'boolean') {
-      throw new MongoDriverError(`flag ${flag} must be a boolean value`);
+      throw new MongoInvalidArgumentError(`Flag ${flag} must be a boolean value`);
     }
 
     this[kOptions][flag] = value;
@@ -522,7 +491,7 @@ export abstract class AbstractCursor<
     } else if (typeof readPreference === 'string') {
       this[kOptions].readPreference = ReadPreference.fromString(readPreference);
     } else {
-      throw new MongoDriverError('Invalid read preference: ' + readPreference);
+      throw new MongoInvalidArgumentError(`Invalid read preference: ${readPreference}`);
     }
 
     return this;
@@ -551,7 +520,7 @@ export abstract class AbstractCursor<
   maxTimeMS(value: number): this {
     assertUninitialized(this);
     if (typeof value !== 'number') {
-      throw new MongoDriverError('maxTimeMS must be a number');
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
     this[kOptions].maxTimeMS = value;
@@ -566,11 +535,11 @@ export abstract class AbstractCursor<
   batchSize(value: number): this {
     assertUninitialized(this);
     if (this[kOptions].tailable) {
-      throw new MongoDriverError('Tailable cursors do not support batchSize');
+      throw new MongoTailableCursorError('Tailable cursor does not support batchSize');
     }
 
     if (typeof value !== 'number') {
-      throw new MongoDriverError('batchSize requires an integer');
+      throw new MongoInvalidArgumentError('Operation "batchSize" requires an integer');
     }
 
     this[kOptions].batchSize = value;
@@ -719,7 +688,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
       cursor[kInitialized] = true;
 
       if (err || cursorIsDead(cursor)) {
-        return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+        return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
       }
 
       next(cursor, blocking, callback);
@@ -729,7 +698,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
   }
 
   if (cursorIsDead(cursor)) {
-    return cleanupCursor(cursor, () => callback(undefined, null));
+    return cleanupCursor(cursor, undefined, () => callback(undefined, null));
   }
 
   // otherwise need to call getMore
@@ -746,7 +715,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     }
 
     if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, () => callback(err, nextDocument(cursor)));
+      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
@@ -762,24 +731,75 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   return !!cursorId && cursorId.isZero();
 }
 
-function cleanupCursor(cursor: AbstractCursor, callback: Callback): void {
-  if (cursor[kDocuments].length === 0) {
-    cursor[kClosed] = true;
-    cursor.emit(AbstractCursor.CLOSE);
+function cleanupCursor(
+  cursor: AbstractCursor,
+  options: { error?: AnyError | undefined; needsToEmitClosed?: boolean } | undefined,
+  callback: Callback
+): void {
+  const cursorId = cursor[kId];
+  const cursorNs = cursor[kNamespace];
+  const server = cursor[kServer];
+  const session = cursor[kSession];
+  const error = options?.error;
+  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
+
+  if (error) {
+    if (cursor.loadBalanced && error instanceof MongoNetworkError) {
+      return completeCleanup();
+    }
   }
 
-  const session = cursor[kSession];
-  if (session && session.owner === cursor) {
-    session.endSession(callback);
-  } else {
-    callback();
+  if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
+    if (needsToEmitClosed) {
+      cursor[kClosed] = true;
+      cursor[kId] = Long.ZERO;
+      cursor.emit(AbstractCursor.CLOSE);
+    }
+
+    if (session) {
+      if (session.owner === cursor) {
+        return session.endSession({ error }, callback);
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error, force: true });
+      }
+    }
+
+    return callback();
   }
+
+  function completeCleanup() {
+    if (session) {
+      if (session.owner === cursor) {
+        return session.endSession({ error }, () => {
+          cursor.emit(AbstractCursor.CLOSE);
+          callback();
+        });
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error, force: true });
+      }
+    }
+
+    cursor.emit(AbstractCursor.CLOSE);
+    return callback();
+  }
+
+  cursor[kKilled] = true;
+  server.killCursors(
+    cursorNs,
+    [cursorId],
+    { ...pluckBSONSerializeOptions(cursor[kOptions]), session },
+    () => completeCleanup()
+  );
 }
 
 /** @internal */
 export function assertUninitialized(cursor: AbstractCursor): void {
   if (cursor[kInitialized]) {
-    throw new MongoDriverError('Cursor is already initialized');
+    throw new MongoCursorInUseError();
   }
 }
 
@@ -817,7 +837,7 @@ function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSche
   function readNext() {
     needToClose = false;
     next(cursor, true, (err, result) => {
-      needToClose = err ? !cursor.closed : result !== null;
+      needToClose = err ? !cursor.closed : result != null;
 
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
@@ -831,15 +851,17 @@ function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSche
 
         // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
         //       to be "operation interrupted", where a cursor has been closed but there is an
-        //       active getMore in-flight.
-        if (cursor.killed) {
+        //       active getMore in-flight. This used to check if the cursor was killed but once
+        //       that changed to happen in cleanup legitimate errors would not destroy the
+        //       stream. There are change streams test specifically test these cases.
+        if (err.message.match(/interrupted/)) {
           return readable.push(null);
         }
 
         return readable.destroy(err);
       }
 
-      if (result === null) {
+      if (result == null) {
         readable.push(null);
       } else if (readable.destroyed) {
         cursor.close();

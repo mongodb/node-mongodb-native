@@ -1,8 +1,7 @@
 import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import type { ConnectionPool } from './connection_pool';
 import type { Connection } from './connection';
-import type { Document } from '../bson';
+import type { Document, ObjectId } from '../bson';
 
 /**
  * An event indicating the start of a given
@@ -17,6 +16,7 @@ export class CommandStartedEvent {
   command: Document;
   address: string;
   connectionId?: string | number;
+  serviceId?: ObjectId;
 
   /**
    * Create a started event
@@ -25,10 +25,10 @@ export class CommandStartedEvent {
    * @param pool - the pool that originated the command
    * @param command - the command
    */
-  constructor(pool: Connection | ConnectionPool, command: WriteProtocolMessageType) {
+  constructor(connection: Connection, command: WriteProtocolMessageType) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     // TODO: remove in major revision, this is not spec behavior
     if (SENSITIVE_COMMANDS.has(commandName)) {
@@ -38,10 +38,16 @@ export class CommandStartedEvent {
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
     this.requestId = command.requestId;
     this.databaseName = databaseName(command);
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
+  }
+
+  /* @internal */
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 
@@ -57,6 +63,7 @@ export class CommandSucceededEvent {
   duration: number;
   commandName: string;
   reply: unknown;
+  serviceId?: ObjectId;
 
   /**
    * Create a succeeded event
@@ -68,21 +75,27 @@ export class CommandSucceededEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    pool: Connection | ConnectionPool,
+    connection: Connection,
     command: WriteProtocolMessageType,
     reply: Document | undefined,
     started: number
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
+  }
+
+  /* @internal */
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 
@@ -98,6 +111,8 @@ export class CommandFailedEvent {
   duration: number;
   commandName: string;
   failure: Error;
+  serviceId?: ObjectId;
+
   /**
    * Create a failure event
    *
@@ -108,22 +123,28 @@ export class CommandFailedEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    pool: Connection | ConnectionPool,
+    connection: Connection,
     command: WriteProtocolMessageType,
     error: Error | Document,
     started: number
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
-    const { address, connectionId } = extractConnectionDetails(pool);
+    const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
     this.connectionId = connectionId;
+    this.serviceId = serviceId;
 
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
+  }
+
+  /* @internal */
+  get hasServiceId(): boolean {
+    return !!this.serviceId;
   }
 }
 
@@ -212,7 +233,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       // up-convert legacy find command
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (typeof command.query[key] !== 'undefined') {
+        if (command.query[key] != null) {
           result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
         }
       });
@@ -220,7 +241,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
-      if (typeof command[legacyKey] !== 'undefined') {
+      if (command[legacyKey] != null) {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
       }
     });
@@ -232,7 +253,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       }
     });
 
-    if (typeof command.pre32Limit !== 'undefined') {
+    if (command.pre32Limit != null) {
       result.limit = command.pre32Limit;
     }
 
@@ -286,7 +307,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   }
 
   // is this a legacy find command?
-  if (command.query && typeof command.query.$query !== 'undefined') {
+  if (command.query && command.query.$query != null) {
     return {
       ok: 1,
       cursor: {
@@ -300,13 +321,14 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   return deepCopy(reply.result ? reply.result : reply);
 }
 
-function extractConnectionDetails(connection: Connection | ConnectionPool) {
+function extractConnectionDetails(connection: Connection) {
   let connectionId;
   if ('id' in connection) {
     connectionId = connection.id;
   }
   return {
     address: connection.address,
+    serviceId: connection.serviceId,
     connectionId
   };
 }

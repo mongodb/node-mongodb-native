@@ -2,16 +2,19 @@ import { PromiseProvider } from './promise_provider';
 import { Binary, Long, Timestamp, Document } from './bson';
 import { ReadPreference } from './read_preference';
 import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { resolveClusterTime, ClusterTime } from './sdam/common';
+import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
 import { isSharded } from './cmap/wire_protocol/shared';
 import {
   MongoError,
+  MongoInvalidArgumentError,
   isRetryableError,
+  MongoCompatibilityError,
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
-  MongoServerError
+  MongoServerError,
+  AnyError
 } from './error';
 import {
   now,
@@ -28,6 +31,8 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { CommandOptions } from './cmap/connection';
+import { Connection } from './cmap/connection';
+import { ConnectionPoolMetrics } from './cmap/metrics';
 import type { WriteConcern } from './write_concern';
 import { TypedEventEmitter } from './mongo_types';
 import { ReadConcernLevel } from './read_concern';
@@ -79,6 +84,19 @@ const kServerSession = Symbol('serverSession');
 const kSnapshotTime = Symbol('snapshotTime');
 /** @internal */
 const kSnapshotEnabled = Symbol('snapshotEnabled');
+/** @internal */
+const kPinnedConnection = Symbol('pinnedConnection');
+
+/** @public */
+export interface EndSessionOptions {
+  /**
+   * An optional error which caused the call to end this session
+   * @internal
+   */
+  error?: AnyError;
+  force?: boolean;
+  forceClear?: boolean;
+}
 
 /**
  * A class representing a client session on the server
@@ -107,6 +125,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   [kSnapshotTime]?: Timestamp;
   /** @internal */
   [kSnapshotEnabled] = false;
+  /** @internal */
+  [kPinnedConnection]?: Connection;
 
   /**
    * Create a client session.
@@ -125,10 +145,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     super();
 
     if (topology == null) {
+      // TODO(NODE-3483)
       throw new MongoDriverError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
+      // TODO(NODE-3483)
       throw new MongoDriverError('ClientSession requires a ServerSessionPool');
     }
 
@@ -137,7 +159,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (options.snapshot === true) {
       this[kSnapshotEnabled] = true;
       if (options.causalConsistency === true) {
-        throw new MongoDriverError(
+        throw new MongoInvalidArgumentError(
           'Properties "causalConsistency" and "snapshot" are mutually exclusive'
         );
       }
@@ -181,6 +203,41 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return this[kSnapshotEnabled];
   }
 
+  get loadBalanced(): boolean {
+    return this.topology.description.type === TopologyType.LoadBalanced;
+  }
+
+  /** @internal */
+  get pinnedConnection(): Connection | undefined {
+    return this[kPinnedConnection];
+  }
+
+  /** @internal */
+  pin(conn: Connection): void {
+    if (this[kPinnedConnection]) {
+      throw TypeError('Cannot pin multiple connections to the same session');
+    }
+
+    this[kPinnedConnection] = conn;
+    conn.emit(
+      Connection.PINNED,
+      this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
+    );
+  }
+
+  /** @internal */
+  unpin(options?: { force?: boolean; forceClear?: boolean; error?: AnyError }): void {
+    if (this.loadBalanced) {
+      return maybeClearPinnedConnection(this, options);
+    }
+
+    this.transaction.unpinServer();
+  }
+
+  get isPinned(): boolean {
+    return this.loadBalanced ? !!this[kPinnedConnection] : this.transaction.isPinned;
+  }
+
   /**
    * Ends this session on the server
    *
@@ -189,21 +246,24 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   endSession(): Promise<void>;
   endSession(callback: Callback<void>): void;
-  endSession(options: Record<string, unknown>): Promise<void>;
-  endSession(options: Record<string, unknown>, callback: Callback<void>): void;
+  endSession(options: EndSessionOptions): Promise<void>;
+  endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
-    options?: Record<string, unknown> | Callback<void>,
+    options?: EndSessionOptions | Callback<void>,
     callback?: Callback<void>
   ): void | Promise<void> {
     if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    const finalOptions = { force: true, ...options };
 
     return maybePromise(callback, done => {
       if (this.hasEnded) {
+        maybeClearPinnedConnection(this, finalOptions);
         return done();
       }
 
       const completeEndSession = () => {
+        maybeClearPinnedConnection(this, finalOptions);
+
         // release the server session back to the pool
         this.sessionPool.release(this.serverSession);
         this[kServerSession] = undefined;
@@ -243,6 +303,34 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (operationTime.greaterThan(this.operationTime)) {
       this.operationTime = operationTime;
     }
+  }
+
+  /**
+   * Advances the clusterTime for a ClientSession to the provided clusterTime of another ClientSession
+   *
+   * @param clusterTime - the $clusterTime returned by the server from another session in the form of a document containing the `BSON.Timestamp` clusterTime and signature
+   */
+  advanceClusterTime(clusterTime: ClusterTime): void {
+    if (!clusterTime || typeof clusterTime !== 'object') {
+      throw new MongoInvalidArgumentError('input cluster time must be an object');
+    }
+    if (!clusterTime.clusterTime || clusterTime.clusterTime._bsontype !== 'Timestamp') {
+      throw new MongoInvalidArgumentError(
+        'input cluster time "clusterTime" property must be a valid BSON Timestamp'
+      );
+    }
+    if (
+      !clusterTime.signature ||
+      clusterTime.signature.hash?._bsontype !== 'Binary' ||
+      (typeof clusterTime.signature.keyId !== 'number' &&
+        clusterTime.signature.keyId?._bsontype !== 'Long') // apparently we decode the key to number?
+    ) {
+      throw new MongoInvalidArgumentError(
+        'input cluster time must have a valid "signature" property with BSON Binary hash and BSON Long keyId'
+      );
+    }
+
+    _advanceClusterTime(this, clusterTime);
   }
 
   /**
@@ -290,13 +378,17 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       throw new MongoDriverError('Transaction already in progress');
     }
 
+    if (this.isPinned && this.transaction.isCommitted) {
+      this.unpin();
+    }
+
     const topologyMaxWireVersion = maxWireVersion(this.topology);
     if (
       isSharded(this.topology) &&
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
-      throw new MongoDriverError(
+      throw new MongoCompatibilityError(
         'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
       );
     }
@@ -397,6 +489,47 @@ function isUnknownTransactionCommitResult(err: MongoError) {
   );
 }
 
+export function maybeClearPinnedConnection(
+  session: ClientSession,
+  options?: EndSessionOptions
+): void {
+  // unpin a connection if it has been pinned
+  const conn = session[kPinnedConnection];
+  const error = options?.error;
+
+  if (
+    session.inTransaction() &&
+    error &&
+    error instanceof MongoError &&
+    error.hasErrorLabel('TransientTransactionError')
+  ) {
+    return;
+  }
+
+  // NOTE: the spec talks about what to do on a network error only, but the tests seem to
+  //       to validate that we don't unpin on _all_ errors?
+  if (conn) {
+    const servers = Array.from(session.topology.s.servers.values());
+    const loadBalancer = servers[0];
+
+    if (options?.error == null || options?.force) {
+      loadBalancer.s.pool.checkIn(conn);
+      conn.emit(
+        Connection.UNPINNED,
+        session.transaction.state !== TxnState.NO_TRANSACTION
+          ? ConnectionPoolMetrics.TXN
+          : ConnectionPoolMetrics.CURSOR
+      );
+
+      if (options?.forceClear) {
+        loadBalancer.s.pool.clear(conn.serviceId);
+      }
+    }
+
+    session[kPinnedConnection] = undefined;
+  }
+}
+
 function isMaxTimeMSExpiredError(err: MongoError) {
   if (err == null || !(err instanceof MongoServerError)) {
     return false;
@@ -461,7 +594,9 @@ function attemptTransaction<TSchema>(
 
   if (!isPromiseLike(promise)) {
     session.abortTransaction();
-    throw new MongoDriverError('Function provided to `withTransaction` must return a Promise');
+    throw new MongoInvalidArgumentError(
+      'Function provided to `withTransaction` must return a Promise'
+    );
   }
 
   return promise.then(
@@ -579,6 +714,10 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
   function commandHandler(e?: MongoError, r?: Document) {
     if (commandName !== 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      if (session.loadBalanced) {
+        maybeClearPinnedConnection(session, { force: false });
+      }
+
       // The spec indicates that we should ignore all errors on `abortTransaction`
       return callback();
     }
@@ -595,12 +734,13 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           e.addErrorLabel('UnknownTransactionCommitResult');
 
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          session.unpin({ error: e });
         }
       } else if (e.hasErrorLabel('TransientTransactionError')) {
-        session.transaction.unpinServer();
+        session.unpin({ error: e });
       }
     }
+
     callback(e, r);
   }
 
@@ -614,14 +754,20 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     session.topology,
     new RunAdminCommandOperation(undefined, command, {
       session,
-      readPreference: ReadPreference.primary
+      readPreference: ReadPreference.primary,
+      bypassPinningCheck: true
     }),
     (err, reply) => {
+      if (command.abortTransaction) {
+        // always unpin on abort regardless of command outcome
+        session.unpin();
+      }
+
       if (err && isRetryableError(err as MongoError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
-          session.transaction.unpinServer();
+          session.unpin({ force: true });
 
           command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
             w: 'majority'
@@ -632,7 +778,8 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
           session.topology,
           new RunAdminCommandOperation(undefined, command, {
             session,
-            readPreference: ReadPreference.primary
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
           }),
           (_err, _reply) => commandHandler(_err as MongoError, _reply)
         );
@@ -731,7 +878,7 @@ export class ServerSessionPool {
 
     while (this.sessions.length) {
       const session = this.sessions.shift();
-      if (session && !session.hasTimedOut(sessionTimeoutMinutes)) {
+      if (session && (this.topology.loadBalanced || !session.hasTimedOut(sessionTimeoutMinutes))) {
         return session;
       }
     }
@@ -748,6 +895,11 @@ export class ServerSessionPool {
    */
   release(session: ServerSession): void {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
+
+    if (this.topology.loadBalanced && !sessionTimeoutMinutes) {
+      this.sessions.unshift(session);
+    }
+
     if (!sessionTimeoutMinutes) {
       return;
     }
@@ -848,7 +1000,7 @@ export function applySession(
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     } else if (session[kSnapshotEnabled]) {
       command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot };
-      if (session[kSnapshotTime] !== undefined) {
+      if (session[kSnapshotTime] != null) {
         Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
       }
     }
@@ -880,7 +1032,7 @@ export function applySession(
 
 export function updateSessionFromResponse(session: ClientSession, document: Document): void {
   if (document.$clusterTime) {
-    resolveClusterTime(session, document.$clusterTime);
+    _advanceClusterTime(session, document.$clusterTime);
   }
 
   if (document.operationTime && session && session.supports.causalConsistency) {
@@ -891,7 +1043,7 @@ export function updateSessionFromResponse(session: ClientSession, document: Docu
     session.transaction._recoveryToken = document.recoveryToken;
   }
 
-  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] === undefined) {
+  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] == null) {
     // find and aggregate commands return atClusterTime on the cursor
     // distinct includes it in the response body
     const atClusterTime = document.cursor?.atClusterTime || document.atClusterTime;

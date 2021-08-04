@@ -21,7 +21,11 @@ describe('Find and Modify', function () {
       var succeeded = [];
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+
       client.on('commandStarted', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
@@ -85,7 +89,11 @@ describe('Find and Modify', function () {
       var succeeded = [];
 
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+
       client.on('commandStarted', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });
@@ -146,7 +154,8 @@ describe('Find and Modify', function () {
       url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
-      const client = configuration.newClient(url, { sslValidate: false });
+      const client = configuration.newClient(url, { sslValidate: false, monitorCommands: true });
+
       client.on('commandStarted', function (event) {
         if (event.commandName === 'findAndModify') started.push(event);
       });

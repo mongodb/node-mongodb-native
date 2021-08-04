@@ -15,6 +15,8 @@ const RESPONSE_FIELDS = [
 /** @public */
 export interface StreamDescriptionOptions {
   compressors?: CompressorName[];
+  logicalSessionTimeoutMinutes?: number;
+  loadBalanced: boolean;
 }
 
 /** @public */
@@ -29,6 +31,7 @@ export class StreamDescription {
   compressors: CompressorName[];
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
+  loadBalanced: boolean;
 
   __nodejs_mock_server__?: boolean;
 
@@ -42,6 +45,8 @@ export class StreamDescription {
     this.maxBsonObjectSize = 16777216;
     this.maxMessageSizeBytes = 48000000;
     this.maxWriteBatchSize = 100000;
+    this.logicalSessionTimeoutMinutes = options?.logicalSessionTimeoutMinutes;
+    this.loadBalanced = !!options?.loadBalanced;
     this.compressors =
       options && options.compressors && Array.isArray(options.compressors)
         ? options.compressors
@@ -51,7 +56,7 @@ export class StreamDescription {
   receiveResponse(response: Document): void {
     this.type = parseServerType(response);
     RESPONSE_FIELDS.forEach(field => {
-      if (typeof response[field] !== 'undefined') {
+      if (typeof response[field] != null) {
         this[field] = response[field];
       }
 

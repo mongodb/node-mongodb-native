@@ -6,7 +6,9 @@ import {
   MongoNetworkTimeoutError,
   AnyError,
   MongoDriverError,
-  MongoServerError
+  MongoCompatibilityError,
+  MongoServerError,
+  MongoInvalidArgumentError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -18,10 +20,14 @@ import {
   MIN_SUPPORTED_SERVER_VERSION
 } from './wire_protocol/constants';
 import type { Document } from '../bson';
+import { Int32 } from '../bson';
 
 import type { Socket, SocketConnectOpts } from 'net';
 import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
-import { Int32 } from '../bson';
+
+const FAKE_MONGODB_SERVICE_ID =
+  typeof process.env.FAKE_MONGODB_SERVICE_ID === 'string' &&
+  process.env.FAKE_MONGODB_SERVICE_ID.toLowerCase() === 'true';
 
 /** @public */
 export type Stream = Socket | TLSSocket;
@@ -58,13 +64,13 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     const message = `Server at ${options.hostAddress} reports minimum wire version ${JSON.stringify(
       ismaster.minWireVersion
     )}, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
-    return new MongoDriverError(message);
+    return new MongoCompatibilityError(message);
   }
 
   const message = `Server at ${options.hostAddress} reports maximum wire version ${
     JSON.stringify(ismaster.maxWireVersion) ?? 0
   }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
-  return new MongoDriverError(message);
+  return new MongoCompatibilityError(message);
 }
 
 function performInitialHandshake(
@@ -85,7 +91,9 @@ function performInitialHandshake(
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
       !AUTH_PROVIDERS.get(credentials.mechanism)
     ) {
-      callback(new MongoDriverError(`authMechanism '${credentials.mechanism}' not supported`));
+      callback(
+        new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`)
+      );
       return;
     }
   }
@@ -129,6 +137,21 @@ function performInitialHandshake(
         return;
       }
 
+      if (options.loadBalanced) {
+        // TODO: Durran: Remove when server support exists. (NODE-3431)
+        if (FAKE_MONGODB_SERVICE_ID) {
+          response.serviceId = response.topologyVersion.processId;
+        }
+        if (!response.serviceId) {
+          return callback(
+            new MongoDriverError(
+              'Driver attempted to initialize in load balancing mode, ' +
+                'but the server does not support this mode.'
+            )
+          );
+        }
+      }
+
       // NOTE: This is metadata attached to the connection while porting away from
       //       handshake being done in the `Server` class. Likely, it should be
       //       relocated, or at very least restructured.
@@ -143,7 +166,9 @@ function performInitialHandshake(
         const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
         if (!provider) {
           return callback(
-            new MongoDriverError(`No AuthProvider for ${resolvedCredentials.mechanism} defined.`)
+            new MongoInvalidArgumentError(
+              `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
+            )
           );
         }
         provider.auth(authContext, err => {
@@ -166,6 +191,7 @@ export interface HandshakeDocument extends Document {
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
+  loadBalanced: boolean;
 }
 
 function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
@@ -177,7 +203,8 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     [serverApi?.version ? 'hello' : 'ismaster']: true,
     helloOk: true,
     client: options.metadata || makeClientMetadata(options),
-    compression: compressors
+    compression: compressors,
+    loadBalanced: options.loadBalanced
   };
 
   const credentials = authContext.credentials;
@@ -189,7 +216,9 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
       if (!provider) {
         // This auth mechanism is always present.
         return callback(
-          new MongoDriverError(`No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`)
+          new MongoInvalidArgumentError(
+            `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
+          )
         );
       }
       return provider.prepare(handshakeDoc, authContext, callback);
@@ -197,7 +226,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     const provider = AUTH_PROVIDERS.get(credentials.mechanism);
     if (!provider) {
       return callback(
-        new MongoDriverError(`No AuthProvider for ${credentials.mechanism} defined.`)
+        new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`)
       );
     }
     return provider.prepare(handshakeDoc, authContext, callback);
@@ -236,7 +265,7 @@ export const LEGAL_TCP_SOCKET_OPTIONS = [
 
 function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   const hostAddress = options.hostAddress;
-  if (!hostAddress) throw new MongoDriverError('HostAddress required');
+  if (!hostAddress) throw new MongoInvalidArgumentError('Option "hostAddress" is required');
 
   const result: Partial<net.TcpNetConnectOpts & net.IpcNetConnectOpts> = {};
   for (const name of LEGAL_TCP_SOCKET_OPTIONS) {

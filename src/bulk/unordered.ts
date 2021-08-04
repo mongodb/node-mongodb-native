@@ -5,7 +5,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { UpdateStatement } from '../operations/update';
 import type { DeleteStatement } from '../operations/delete';
-import { MongoDriverError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 
 /** @public */
 export class UnorderedBulkOperation extends BulkOperationBase {
@@ -36,7 +36,8 @@ export class UnorderedBulkOperation extends BulkOperationBase {
 
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize) {
-      throw new MongoDriverError(
+      // TODO(NODE-3483): Change this to MongoBSONError
+      throw new MongoInvalidArgumentError(
         `Document is larger than the maximum size ${this.s.maxBsonObjectSize}`
       );
     }
@@ -79,7 +80,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
 
     // We have an array of documents
     if (Array.isArray(document)) {
-      throw new MongoDriverError('Operation passed in cannot be an Array');
+      throw new MongoInvalidArgumentError('Operation passed in cannot be an Array');
     }
 
     this.s.currentBatch.operations.push(document);

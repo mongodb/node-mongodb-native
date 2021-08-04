@@ -4,15 +4,17 @@ import {
   isRetryableError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
+  MongoNetworkError,
+  MongoCompatibilityError,
   MongoServerError
 } from '../error';
 import { Aspect, AbstractOperation } from './operation';
 import { maxWireVersion, maybePromise, Callback } from '../utils';
-import { ServerType } from '../sdam/common';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
+import { supportsRetryableWrites } from '../utils';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -64,6 +66,7 @@ export function executeOperation<
   TResult = ResultTypeFromOperation<T>
 >(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
+    // TODO(NODE-3483)
     throw new MongoDriverError('This method requires a valid operation instance');
   }
 
@@ -85,6 +88,7 @@ export function executeOperation<
         owner = Symbol();
         session = topology.startSession({ owner, explicit: false });
       } else if (session.hasEnded) {
+        // TODO(NODE-3405): Change this out for MongoExpiredSessionError
         return cb(new MongoDriverError('Use of expired sessions is not permitted'));
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
         return cb(new MongoDriverError('Snapshot reads require MongoDB 5.0 or later'));
@@ -92,7 +96,7 @@ export function executeOperation<
     } else if (session) {
       // If the user passed an explicit session and we are still, after server selection,
       // trying to run against a topology that doesn't support sessions we error out.
-      return cb(new MongoDriverError('Current topology does not support sessions'));
+      return cb(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     try {
@@ -128,12 +132,22 @@ function executeWithServerSelection(
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     callback(
+      // TODO(NODE-3405): Change this out for MongoTransactionError
       new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
     );
 
     return;
+  }
+
+  if (
+    session &&
+    session.isPinned &&
+    session.transaction.isCommitted &&
+    !operation.bypassPinningCheck
+  ) {
+    session.unpin();
   }
 
   const serverSelectionOptions = { session };
@@ -168,14 +182,29 @@ function executeWithServerSelection(
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(readPreference, serverSelectionOptions, (err?: any, server?: any) => {
+    topology.selectServer(readPreference, serverSelectionOptions, (e?: any, server?: any) => {
       if (
-        err ||
+        e ||
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||
         (operation.hasAspect(Aspect.WRITE_OPERATION) && !supportsRetryableWrites(server))
       ) {
-        callback(err);
+        callback(e);
         return;
+      }
+
+      // If we have a cursor and the initial command fails with a network error,
+      // we can retry it on another connection. So we need to check it back in, clear the
+      // pool for the service id, and retry again.
+      if (
+        err &&
+        err instanceof MongoNetworkError &&
+        server.loadBalanced &&
+        session &&
+        session.isPinned &&
+        !session.inTransaction() &&
+        operation.hasAspect(Aspect.CURSOR_CREATING)
+      ) {
+        session.unpin({ force: true, forceClear: true });
       }
 
       operation.execute(server, session, callback);
@@ -189,6 +218,7 @@ function executeWithServerSelection(
     session.inTransaction()
   ) {
     callback(
+      // TODO(NODE-3405): Change this out for MongoTransactionError
       new MongoDriverError(
         `Read preference in a transaction must be primary, not: ${readPreference.mode}`
       )
@@ -237,12 +267,4 @@ function executeWithServerSelection(
 
 function shouldRetryWrite(err: any) {
   return err instanceof MongoError && err.hasErrorLabel('RetryableWriteError');
-}
-
-function supportsRetryableWrites(server: Server) {
-  return (
-    server.description.maxWireVersion >= 6 &&
-    server.description.logicalSessionTimeoutMinutes &&
-    server.description.type !== ServerType.Standalone
-  );
 }

@@ -1,4 +1,4 @@
-import { MongoDriverError } from './error';
+import { MongoInvalidArgumentError } from './error';
 
 /** @public */
 export type SortDirection =
@@ -45,13 +45,13 @@ function prepareDirection(direction: any = 1): SortDirectionForCmd {
     case '-1':
       return -1;
     default:
-      throw new MongoDriverError(`Invalid sort direction: ${JSON.stringify(direction)}`);
+      throw new MongoInvalidArgumentError(`Invalid sort direction: ${JSON.stringify(direction)}`);
   }
 }
 
 /** @internal */
 function isMeta(t: SortDirection): t is { $meta: string } {
-  return typeof t === 'object' && t !== null && '$meta' in t && typeof t.$meta === 'string';
+  return typeof t === 'object' && t != null && '$meta' in t && typeof t.$meta === 'string';
 }
 
 /** @internal */
@@ -118,7 +118,9 @@ export function formatSort(
   if (sort == null) return undefined;
   if (typeof sort === 'string') return new Map([[sort, prepareDirection(direction)]]);
   if (typeof sort !== 'object') {
-    throw new MongoDriverError(`Invalid sort format: ${JSON.stringify(sort)}`);
+    throw new MongoInvalidArgumentError(
+      `Invalid sort format: ${JSON.stringify(sort)} Sort must be a valid object`
+    );
   }
   if (!Array.isArray(sort)) {
     return isMap(sort) ? mapToMap(sort) : Object.keys(sort).length ? objectToMap(sort) : undefined;

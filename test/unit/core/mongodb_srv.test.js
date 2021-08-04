@@ -24,9 +24,7 @@ describe('mongodb+srv', function () {
         test[1].comment = test[0];
       }
 
-      // TODO: Remove with NODE-3011
-      const maybeIt = test[1].comment.includes('loadBalanced') ? it.skip : it;
-      maybeIt(test[1].comment, {
+      it(test[1].comment, {
         metadata: { requires: { topology: ['single'] } },
         test: function (done) {
           try {
@@ -54,6 +52,9 @@ describe('mongodb+srv', function () {
                 if (testOptions && testOptions.authSource) {
                   expect(options).to.have.property('credentials');
                   expect(options.credentials.source).to.equal(testOptions.authSource);
+                }
+                if (testOptions && testOptions.loadBalanced) {
+                  expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
                 }
                 if (
                   test[1].parsed_options &&

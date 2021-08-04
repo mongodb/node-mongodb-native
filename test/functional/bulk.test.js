@@ -7,7 +7,7 @@ const {
   ignoreNsNotFound
 } = require('./shared');
 const test = require('./shared').assert;
-const { MongoDriverError } = require('../../src/error');
+const { MongoDriverError, MongoBatchReExecutionError } = require('../../src/error');
 const { Long } = require('../../src');
 const crypto = require('crypto');
 const chai = require('chai');
@@ -1892,7 +1892,7 @@ describe('Bulk', function () {
         expect(result).to.exist;
 
         bulk.execute(err => {
-          expect(err).to.match(/Batch cannot be re-executed/);
+          expect(err).to.be.instanceof(MongoBatchReExecutionError);
           done();
         });
       });

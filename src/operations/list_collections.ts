@@ -46,10 +46,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
       const databaseName = this.db.s.namespace.db;
 
       // If we have legacy mode and have not provided a full db name filter it
-      if (
-        typeof filter.name === 'string' &&
-        !new RegExp('^' + databaseName + '\\.').test(filter.name)
-      ) {
+      if (typeof filter.name === 'string' && !new RegExp(`^${databaseName}\\.`).test(filter.name)) {
         filter = Object.assign({}, filter);
         filter.name = this.db.s.namespace.withCollection(filter.name).toString();
       }
@@ -155,4 +152,8 @@ export class ListCollectionsCursor<
   }
 }
 
-defineAspects(ListCollectionsOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(ListCollectionsOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);

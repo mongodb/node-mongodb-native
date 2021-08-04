@@ -1,4 +1,4 @@
-import { MongoDriverError } from './error';
+import { MongoInvalidArgumentError } from './error';
 
 /** @public */
 export const ExplainVerbosity = Object.freeze({
@@ -40,13 +40,13 @@ export class Explain {
   }
 
   static fromOptions(options?: ExplainOptions): Explain | undefined {
-    if (options?.explain === undefined) return;
+    if (options?.explain == null) return;
 
     const explain = options.explain;
     if (typeof explain === 'boolean' || typeof explain === 'string') {
       return new Explain(explain);
     }
 
-    throw new MongoDriverError('explain must be a string or a boolean');
+    throw new MongoInvalidArgumentError('Field "explain" must be a string or a boolean');
   }
 }

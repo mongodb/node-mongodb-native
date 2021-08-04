@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.1.0](https://github.com/mongodb/node-mongodb-native/compare/v4.0.1...v4.1.0) (2021-08-03)
+
+
+### Features
+
+* **NODE-2843:** implement sessions advanceClusterTime method ([#2920](https://github.com/mongodb/node-mongodb-native/issues/2920)) ([1fd0244](https://github.com/mongodb/node-mongodb-native/commit/1fd0244d77a304460948666b8dedcd62901808b3))
+* **NODE-3011:** Load Balancer Support ([#2909](https://github.com/mongodb/node-mongodb-native/issues/2909)) ([c554a7a](https://github.com/mongodb/node-mongodb-native/commit/c554a7a0d132437078a4c9d5e9ed828cce982455))
+
+
+### Bug Fixes
+
+* **NODE-2883:** Aggregate Operation should not require parent parameter ([#2918](https://github.com/mongodb/node-mongodb-native/issues/2918)) ([dc6e2d6](https://github.com/mongodb/node-mongodb-native/commit/dc6e2d6c5762ec62d1096a52d670b76b02aa2bf3))
+* **NODE-3058:** accept null or undefined anywhere we permit nullish values ([#2921](https://github.com/mongodb/node-mongodb-native/issues/2921)) ([b42a1b4](https://github.com/mongodb/node-mongodb-native/commit/b42a1b417e8a4e222000336b0fe9e94053d30d98))
+* **NODE-3441:** fix typings for createIndexes ([#2915](https://github.com/mongodb/node-mongodb-native/issues/2915)) ([f87f376](https://github.com/mongodb/node-mongodb-native/commit/f87f37662f4a90f762cc2133d109794dd79e9da8))
+* **NODE-3442:** AsyncIterator has incorrect return type ([#2916](https://github.com/mongodb/node-mongodb-native/issues/2916)) ([4a10389](https://github.com/mongodb/node-mongodb-native/commit/4a103890d3db68328163a152e37dbcd2a416e97b))
+* **NODE-3452:** readonly filters not permitted by typings ([#2927](https://github.com/mongodb/node-mongodb-native/issues/2927)) ([ce51e78](https://github.com/mongodb/node-mongodb-native/commit/ce51e784c25e6342dc2fb711b647ccc2c8cc4a92))
+* **NODE-3510:** omit incorrect `| void` in declaration of Promise overload of `rename()` ([#2922](https://github.com/mongodb/node-mongodb-native/issues/2922)) ([58c1e84](https://github.com/mongodb/node-mongodb-native/commit/58c1e846482575a90d23a39e35711fa1a51e3c33))
+* **NODE-3513:** default command monitoring to off ([#2926](https://github.com/mongodb/node-mongodb-native/issues/2926)) ([3c60245](https://github.com/mongodb/node-mongodb-native/commit/3c60245a65e45ce2b944cbd70daafb4c1a44ab81))
+
 ### [4.0.1](https://github.com/mongodb/node-mongodb-native/compare/v4.0.0...v4.0.1) (2021-07-20)
 
 

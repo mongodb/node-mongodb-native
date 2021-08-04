@@ -2771,7 +2771,7 @@ describe('Operation Examples', function () {
               collection1.rename(5, function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal('collection name must be a String', err.message);
+              test.equal('Collection name must be a String', err.message);
             }
 
             // Attemp to rename a collection to an empty string
@@ -2779,7 +2779,7 @@ describe('Operation Examples', function () {
               collection1.rename('', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal('collection names cannot be empty', err.message);
+              test.equal('Collection names cannot be empty', err.message);
             }
 
             // Attemp to rename a collection to an illegal name including the character $
@@ -2787,7 +2787,7 @@ describe('Operation Examples', function () {
               collection1.rename('te$t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not contain '$'", err.message);
+              test.equal("Collection names must not contain '$'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name starting with the character .
@@ -2795,7 +2795,7 @@ describe('Operation Examples', function () {
               collection1.rename('.test', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not start or end with '.'", err.message);
+              test.equal("Collection names must not start or end with '.'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name ending with the character .
@@ -2803,14 +2803,14 @@ describe('Operation Examples', function () {
               collection1.rename('test.', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
               test.ok(err instanceof Error);
-              test.equal("collection names must not start or end with '.'", err.message);
+              test.equal("Collection names must not start or end with '.'", err.message);
             }
 
             // Attemp to rename a collection to an illegal name with an empty middle name
             try {
               collection1.rename('tes..t', function (err, collection) {}); // eslint-disable-line
             } catch (err) {
-              test.equal('collection names cannot be empty', err.message);
+              test.equal('Collection names cannot be empty', err.message);
             }
 
             // Insert a couple of documents

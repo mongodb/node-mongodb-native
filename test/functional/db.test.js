@@ -15,8 +15,8 @@ describe('Db', function () {
     },
 
     test: withClient((client, done) => {
-      expect(() => new Db(client, 5)).to.throw('database name must be a string');
-      expect(() => new Db(client, '')).to.throw('database name cannot be the empty string');
+      expect(() => new Db(client, 5)).to.throw('Database name must be a string');
+      expect(() => new Db(client, '')).to.throw('Database name cannot be the empty string');
       expect(() => new Db(client, 'te$t')).to.throw(
         "database names cannot contain the character '$'"
       );

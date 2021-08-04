@@ -1,13 +1,13 @@
 import * as crypto from 'crypto';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { Callback, ns } from '../../utils';
-import { MongoDriverError } from '../../error';
+import { MongoMissingCredentialsError } from '../../error';
 
 export class MongoCR extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     const username = credentials.username;
     const password = credentials.password;
@@ -24,7 +24,7 @@ export class MongoCR extends AuthProvider {
         let md5 = crypto.createHash('md5');
 
         // Generate keys used for authentication
-        md5.update(username + ':mongo:' + password, 'utf8');
+        md5.update(`${username}:mongo:${password}`, 'utf8');
         const hash_password = md5.digest('hex');
 
         // Final key

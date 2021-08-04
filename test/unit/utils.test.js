@@ -211,12 +211,12 @@ describe('utils', function () {
     context('read', function () {
       it('should throw an error if a negative size is requested', function () {
         const buffer = new BufferPool();
-        expect(() => buffer.read(-1)).to.throw(/Parameter size must be a non-negative number/);
+        expect(() => buffer.read(-1)).to.throw(/Argument "size" must be a non-negative number/);
       });
 
       it('should throw an error if a non-number size is requested', function () {
         const buffer = new BufferPool();
-        expect(() => buffer.read('256')).to.throw(/Parameter size must be a non-negative number/);
+        expect(() => buffer.read('256')).to.throw(/Argument "size" must be a non-negative number/);
       });
 
       it('exact size', function () {

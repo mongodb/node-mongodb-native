@@ -1,7 +1,12 @@
 import { Db, DbOptions } from './db';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
-import { AnyError, MongoDriverError } from './error';
+import {
+  AnyError,
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoNotConnectedError
+} from './error';
 import type { W, WriteConcern } from './write_concern';
 import {
   maybePromise,
@@ -174,6 +179,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   retryWrites?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
+  /** Instruct the driver it is connecting to a load balancer fronting a mongos like service */
+  loadBalanced?: boolean;
 
   /** The write concern w value */
   w?: W;
@@ -403,7 +410,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   connect(callback: Callback<MongoClient>): void;
   connect(callback?: Callback<MongoClient>): Promise<MongoClient> | void {
     if (callback && typeof callback !== 'function') {
-      throw new MongoDriverError('`connect` only accepts a callback');
+      throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
     }
 
     return maybePromise(callback, cb => {
@@ -521,7 +528,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
     if (!this.topology) {
-      throw new MongoDriverError('Must connect to a server before calling this method');
+      throw new MongoNotConnectedError('MongoClient must be connected to start a session');
     }
 
     return this.topology.startSession(options, this.s.options);
@@ -549,7 +556,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     if (callback == null) {
-      throw new MongoDriverError('Missing required callback parameter');
+      throw new MongoInvalidArgumentError('Missing required callback parameter');
     }
 
     const session = this.startSession(options);
@@ -654,6 +661,7 @@ export interface MongoOptions
   credentials?: MongoCredentials;
   readPreference: ReadPreference;
   readConcern: ReadConcern;
+  loadBalanced: boolean;
   serverApi: ServerApi;
   writeConcern: WriteConcern;
   dbName: string;

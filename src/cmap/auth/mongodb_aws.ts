@@ -4,7 +4,11 @@ import * as url from 'url';
 import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
-import { MongoDriverError } from '../../error';
+import {
+  MongoDriverError,
+  MongoMissingCredentialsError,
+  MongoCompatibilityError
+} from '../../error';
 import { maxWireVersion, Callback, ns } from '../../utils';
 import type { BSONSerializeOptions } from '../../bson';
 
@@ -32,7 +36,7 @@ export class MongoDBAWS extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
     if ('kModuleError' in aws4) {
@@ -42,7 +46,9 @@ export class MongoDBAWS extends AuthProvider {
 
     if (maxWireVersion(connection) < 9) {
       callback(
-        new MongoDriverError('MONGODB-AWS authentication requires MongoDB version 4.4 or later')
+        new MongoCompatibilityError(
+          'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
+        )
       );
       return;
     }
@@ -149,7 +155,9 @@ interface AWSCredentials {
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
   function done(creds: AWSCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
-      callback(new MongoDriverError('Could not obtain temporary MONGODB-AWS credentials'));
+      callback(
+        new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials')
+      );
       return;
     }
 

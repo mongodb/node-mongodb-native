@@ -39,13 +39,13 @@ class TestConfiguration {
     const url = new ConnectionString(uri);
     const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);
-    this.topologyType = context.topologyType;
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
     this.parameters = undefined;
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
     this.isServerless = !!process.env.SERVERLESS;
+    this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.options = {
       hosts,
       hostAddresses,
@@ -67,12 +67,12 @@ class TestConfiguration {
     }
   }
 
-  writeConcern() {
-    return { writeConcern: { w: 1 } };
-  }
-
   get isLoadBalanced() {
     return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
+  }
+
+  writeConcern() {
+    return { writeConcern: { w: 1 } };
   }
 
   get host() {
@@ -240,10 +240,20 @@ class TestConfiguration {
 
     let actualHostsString;
     if (options.useMultipleMongoses) {
-      expect(this.options.hostAddresses).to.have.length.greaterThan(1);
-      actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+      if (this.isLoadBalanced) {
+        const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
+        actualHostsString = multiUri.hosts[0].toString();
+      } else {
+        expect(this.options.hostAddresses).to.have.length.greaterThan(1);
+        actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
+      }
     } else {
-      actualHostsString = this.options.hostAddresses[0].toString();
+      if (this.isLoadBalanced) {
+        const singleUri = new ConnectionString(this.singleMongosLoadBalancerUri);
+        actualHostsString = singleUri.hosts[0].toString();
+      } else {
+        actualHostsString = this.options.hostAddresses[0].toString();
+      }
     }
 
     if (this.isServerless) {

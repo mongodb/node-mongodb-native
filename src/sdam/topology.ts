@@ -11,7 +11,7 @@ import {
 } from '../sessions';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { MongoServerSelectionError, MongoDriverError } from '../error';
+import { MongoServerSelectionError, MongoCompatibilityError, MongoDriverError } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
   makeStateMachine,
@@ -28,7 +28,7 @@ import {
   ServerType,
   ClusterTime,
   TimerQueue,
-  resolveClusterTime,
+  _advanceClusterTime,
   drainTimerQueue,
   clearAndRemoveTimerFrom,
   STATE_CLOSED,
@@ -146,6 +146,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
+  loadBalanced: boolean;
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
@@ -248,6 +249,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       retryWrites: DEFAULT_OPTIONS.get('retryWrites'),
       serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
       directConnection: DEFAULT_OPTIONS.get('directConnection'),
+      loadBalanced: DEFAULT_OPTIONS.get('loadBalanced'),
       metadata: DEFAULT_OPTIONS.get('metadata'),
       monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
       tls: DEFAULT_OPTIONS.get('tls'),
@@ -274,6 +276,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       } else if (seed instanceof HostAddress) {
         seedlist.push(seed);
       } else {
+        // FIXME(NODE-3484): May need to be a MongoParseError
         throw new MongoDriverError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
       }
     }
@@ -325,7 +328,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
 
-    if (options.srvHost) {
+    if (options.srvHost && !options.loadBalanced) {
       this.s.srvPoller =
         options.srvPoller ??
         new SrvPoller({
@@ -379,6 +382,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.description;
   }
 
+  get loadBalanced(): boolean {
+    return this.s.options.loadBalanced;
+  }
+
   get capabilities(): ServerCapabilities {
     return new ServerCapabilities(this.lastIsMaster());
   }
@@ -411,7 +418,19 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     );
 
     // connect all known servers, then attempt server selection to connect
-    connectServers(this, Array.from(this.s.description.servers.values()));
+    const serverDescriptions = Array.from(this.s.description.servers.values());
+    connectServers(this, serverDescriptions);
+
+    // In load balancer mode we need to fake a server description getting
+    // emitted from the monitor, since the monitor doesn't exist.
+    if (this.s.options.loadBalanced) {
+      for (const description of serverDescriptions) {
+        const newDescription = new ServerDescription(description.hostAddress, undefined, {
+          loadBalanced: this.s.options.loadBalanced
+        });
+        this.serverUpdateHandler(newDescription);
+      }
+    }
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
@@ -482,28 +501,30 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
-    for (const session of this.s.sessions) {
-      session.endSession();
-    }
+    eachAsync(
+      Array.from(this.s.sessions.values()),
+      (session, cb) => session.endSession(cb),
+      () => {
+        this.s.sessionPool.endAllPooledSessions(() => {
+          eachAsync(
+            Array.from(this.s.servers.values()),
+            (server, cb) => destroyServer(server, this, options, cb),
+            err => {
+              this.s.servers.clear();
 
-    this.s.sessionPool.endAllPooledSessions(() => {
-      eachAsync(
-        Array.from(this.s.servers.values()),
-        (server, cb) => destroyServer(server, this, options, cb),
-        err => {
-          this.s.servers.clear();
+              // emit an event for close
+              this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
 
-          // emit an event for close
-          this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
+              stateTransition(this, STATE_CLOSED);
 
-          stateTransition(this, STATE_CLOSED);
-
-          if (typeof callback === 'function') {
-            callback(err);
-          }
-        }
-      );
-    });
+              if (typeof callback === 'function') {
+                callback(err);
+              }
+            }
+          );
+        });
+      }
+    );
   }
 
   /**
@@ -610,7 +631,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @returns Whether sessions are supported on the current topology
    */
   hasSessionSupport(): boolean {
-    return this.description.logicalSessionTimeoutMinutes != null;
+    return this.loadBalanced || this.description.logicalSessionTimeoutMinutes != null;
   }
 
   /** Start a logical session */
@@ -680,7 +701,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // value of the clusterTime embedded field."
     const clusterTime = serverDescription.$clusterTime;
     if (clusterTime) {
-      resolveClusterTime(this, clusterTime);
+      _advanceClusterTime(this, clusterTime);
     }
 
     // If we already know all the information contained in this updated description, then
@@ -692,7 +713,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // first update the TopologyDescription
     this.s.description = this.s.description.update(serverDescription);
     if (this.s.description.compatibilityError) {
-      this.emit(Topology.ERROR, new MongoDriverError(this.s.description.compatibilityError));
+      this.emit(Topology.ERROR, new MongoCompatibilityError(this.s.description.compatibilityError));
       return;
     }
 
@@ -828,6 +849,10 @@ function topologyTypeFromOptions(options?: TopologyOptions) {
 
   if (options?.replicaSet) {
     return TopologyType.ReplicaSetNoPrimary;
+  }
+
+  if (options?.loadBalanced) {
+    return TopologyType.LoadBalanced;
   }
 
   return TopologyType.Unknown;

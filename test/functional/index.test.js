@@ -947,7 +947,10 @@ describe('Indexes', function () {
       var configuration = this.configuration;
       var started = [];
       var succeeded = [];
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
 
       client.on('commandStarted', function (event) {
         if (event.commandName === 'createIndexes') started.push(event);
@@ -1257,7 +1260,7 @@ describe('Indexes', function () {
           testCommand(db, collection, (err, result) => {
             expect(err).to.exist;
             expect(err.message).to.equal(
-              '`commitQuorum` option for `createIndexes` not supported on servers < 4.4'
+              'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
             );
             expect(result).to.not.exist;
             done();

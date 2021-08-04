@@ -2,6 +2,7 @@
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
+const { getSymbolFrom } = require('../tools/utils');
 const { parseOptions } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
@@ -448,6 +449,133 @@ describe('MongoOptions', function () {
       expect(() => parseOptions('mongodb://localhost/?serverApi=1')).to.throw(
         'URI cannot contain `serverApi`, it can only be passed to the client'
       );
+    });
+  });
+
+  describe('default options', () => {
+    const doNotCheckEq = Symbol('do not check equality');
+    const KNOWN_DEFAULTS = [
+      ['connecttimeoutms', 30000],
+      ['directconnection', false],
+      ['forceserverobjectid', false],
+      ['heartbeatfrequencyms', 10000],
+      ['keepalive', true],
+      ['keepaliveinitialdelay', 120000],
+      ['localthresholdms', 15],
+      ['logger', doNotCheckEq],
+      ['maxidletimems', 0],
+      ['maxpoolsize', 100],
+      ['minpoolsize', 0],
+      ['minheartbeatfrequencyms', 500],
+      ['monitorcommands', false], // NODE-3513
+      ['nodelay', true],
+      ['raw', false],
+      ['retryreads', true],
+      ['retrywrites', true],
+      ['serverselectiontimeoutms', 30000],
+      ['sockettimeoutms', 0],
+      ['waitqueuetimeoutms', 0],
+      ['zlibcompressionlevel', 0],
+
+      // map to objects that are not worth checking deep equality
+      ['compressors', doNotCheckEq],
+      ['readpreference', doNotCheckEq],
+      ['pkfactory', doNotCheckEq]
+    ];
+
+    const findMatchingKey = (o, searchKey) => {
+      return Object.keys(o).filter(key => {
+        return key.toLowerCase() === searchKey;
+      })[0];
+    };
+
+    it(`should define known defaults in client.options`, () => {
+      const client = new MongoClient('mongodb://localhost');
+      const clientOptions = client.options;
+
+      for (const [optionName, value] of KNOWN_DEFAULTS) {
+        const camelCaseName = findMatchingKey(clientOptions, optionName);
+        expect(camelCaseName, `did not find a camelcase match for ${optionName}`).to.be.a('string');
+
+        expect(clientOptions).to.have.property(camelCaseName);
+
+        if (value !== doNotCheckEq) {
+          expect(clientOptions).to.have.property(camelCaseName).that.deep.equals(value);
+        }
+      }
+    });
+
+    it('set monitorCommands to false (NODE-3513)', function () {
+      const client = new MongoClient('mongodb://localhost');
+      const clientOptions = client.options;
+
+      expect(clientOptions).to.have.property('monitorCommands', false);
+      expect(client.s.options).to.have.property('monitorCommands', false);
+      expect(client).to.have.property('monitorCommands', false);
+      const optionsSym = getSymbolFrom(client, 'options');
+      expect(client[optionsSym]).to.have.property('monitorCommands', false);
+    });
+
+    it('respects monitorCommands option passed in', function () {
+      const clientViaOpt = new MongoClient('mongodb://localhost', { monitorCommands: true });
+      const clientViaUri = new MongoClient('mongodb://localhost?monitorCommands=true');
+
+      const testTable = [
+        [clientViaOpt, clientViaOpt.options],
+        [clientViaUri, clientViaUri.options]
+      ];
+
+      for (const [client, clientOptions] of testTable) {
+        expect(clientOptions).to.have.property('monitorCommands', true);
+        expect(client.s.options).to.have.property('monitorCommands', true);
+        expect(client).to.have.property('monitorCommands', true);
+        const optionsSym = getSymbolFrom(client, 'options');
+        expect(client[optionsSym]).to.have.property('monitorCommands', true);
+      }
+    });
+  });
+
+  context('when loadBalanced=true is in the URI', function () {
+    it('sets the option', function () {
+      const options = parseOptions('mongodb://a/?loadBalanced=true');
+      expect(options.loadBalanced).to.be.true;
+    });
+
+    it('errors with multiple hosts', function () {
+      const parse = () => {
+        parseOptions('mongodb://a,b/?loadBalanced=true');
+      };
+      expect(parse).to.throw(/single host/);
+    });
+
+    it('errors with a replicaSet option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&replicaSet=test');
+      };
+      expect(parse).to.throw(/replicaSet/);
+    });
+
+    it('errors with a directConnection option', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/?loadBalanced=true&directConnection=true');
+      };
+      expect(parse).to.throw(/directConnection/);
+    });
+  });
+
+  context('when loadBalanced is in the options object', function () {
+    it('errors when the option is true', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: true });
+      };
+      expect(parse).to.throw(/URI/);
+    });
+
+    it('errors when the option is false', function () {
+      const parse = () => {
+        parseOptions('mongodb://a/', { loadBalanced: false });
+      };
+      expect(parse).to.throw(/URI/);
     });
   });
 });

@@ -4,7 +4,7 @@ import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import { maxWireVersion, MongoDBNamespace, Callback, decorateWithExplain } from '../utils';
 import type { ReadPreference } from '../read_preference';
 import { ClientSession, commandSupportsReadConcern } from '../sessions';
-import { MongoDriverError } from '../error';
+import { MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
 import type { Logger } from '../logger';
 import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
@@ -97,14 +97,14 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
-    } else if (options?.explain !== undefined) {
-      throw new MongoDriverError(`explain is not supported on this command`);
+    } else if (options?.explain != null) {
+      throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }
   }
 
   get canRetryWrite(): boolean {
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
-      return this.explain === undefined;
+      return this.explain == null;
     }
     return true;
   }
@@ -131,7 +131,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
       callback(
-        new MongoDriverError(
+        new MongoCompatibilityError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
         )
       );

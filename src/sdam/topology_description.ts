@@ -3,7 +3,7 @@ import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
-import { MongoDriverError, MongoError } from '../error';
+import { MongoError, MongoDriverError } from '../error';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -85,7 +85,13 @@ export class TopologyDescription {
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
-      if (serverDescription.type === ServerType.Unknown) continue;
+      // Load balancer mode is always compatible.
+      if (
+        serverDescription.type === ServerType.Unknown ||
+        serverDescription.type === ServerType.LoadBalancer
+      ) {
+        continue;
+      }
 
       if (serverDescription.minWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;
@@ -113,7 +119,7 @@ export class TopologyDescription {
           break;
         }
 
-        if (this.logicalSessionTimeoutMinutes === undefined) {
+        if (this.logicalSessionTimeoutMinutes == null) {
           // First server with a non null logicalSessionsTimeout
           this.logicalSessionTimeoutMinutes = server.logicalSessionTimeoutMinutes;
           continue;
@@ -431,7 +437,8 @@ function updateRsWithPrimaryFromMember(
   setName?: string
 ): TopologyType {
   if (setName == null) {
-    throw new MongoDriverError('setName is required');
+    // TODO(NODE-3483): should be an appropriate runtime error
+    throw new MongoDriverError('Argument "setName" is required if connected to a replica set');
   }
 
   if (

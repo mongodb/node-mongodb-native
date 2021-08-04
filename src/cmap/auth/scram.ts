@@ -1,6 +1,12 @@
 import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
-import { AnyError, MongoDriverError, MongoServerError } from '../../error';
+import {
+  AnyError,
+  MongoDriverError,
+  MongoServerError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../error';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { Callback, ns, emitWarning } from '../../utils';
 import type { MongoCredentials } from './mongo_credentials';
@@ -22,7 +28,7 @@ class ScramSHA extends AuthProvider {
     const cryptoMethod = this.cryptoMethod;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoDriverError('AuthContext must provide credentials.'));
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
     if (cryptoMethod === 'sha256' && saslprep == null) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
@@ -103,10 +109,12 @@ function makeFirstMessage(
 function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
   const { connection, credentials } = authContext;
   if (!credentials) {
-    return callback(new MongoDriverError('AuthContext must provide credentials.'));
+    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoDriverError('AuthContext must contain a valid nonce property'));
+    return callback(
+      new MongoInvalidArgumentError('AuthContext must contain a valid nonce property')
+    );
   }
   const nonce = authContext.nonce;
   const db = credentials.source;
@@ -131,10 +139,10 @@ function continueScramConversation(
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   if (!credentials) {
-    return callback(new MongoDriverError('AuthContext must provide credentials.'));
+    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
   }
   if (!authContext.nonce) {
-    return callback(new MongoDriverError('Unable to continue SCRAM without valid nonce'));
+    return callback(new MongoInvalidArgumentError('Unable to continue SCRAM without valid nonce'));
   }
   const nonce = authContext.nonce;
 
@@ -240,15 +248,15 @@ function parsePayload(payload: string) {
 
 function passwordDigest(username: string, password: string) {
   if (typeof username !== 'string') {
-    throw new MongoDriverError('username must be a string');
+    throw new MongoInvalidArgumentError('Username must be a string');
   }
 
   if (typeof password !== 'string') {
-    throw new MongoDriverError('password must be a string');
+    throw new MongoInvalidArgumentError('Password must be a string');
   }
 
   if (password.length === 0) {
-    throw new MongoDriverError('password cannot be empty');
+    throw new MongoInvalidArgumentError('Password cannot be empty');
   }
 
   const md5 = crypto.createHash('md5');
@@ -303,7 +311,7 @@ const hiLengthMap = {
 function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: CryptoMethod) {
   // omit the work if already generated
   const key = [data, salt.toString('base64'), iterations].join('_');
-  if (_hiCache[key] !== undefined) {
+  if (_hiCache[key] != null) {
     return _hiCache[key];
   }
 

@@ -33,6 +33,11 @@ export {
   MongoError,
   MongoServerError,
   MongoDriverError,
+  MongoAPIError,
+  MongoCompatibilityError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
+  MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoSystemError,
@@ -161,6 +166,7 @@ export type {
   GetMoreOptions,
   ConnectionEvents
 } from './cmap/connection';
+export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type {
   CloseOptions,
   ConnectionPoolOptions,
@@ -187,7 +193,7 @@ export type {
 } from './cursor/abstract_cursor';
 export type { DbPrivate, DbOptions } from './db';
 export type { AutoEncryptionOptions, AutoEncrypter } from './deps';
-export type { AnyError, ErrorDescription, MongoNetworkTimeoutErrorOptions } from './error';
+export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
   GridFSBucketReadStream,
@@ -334,6 +340,7 @@ export type {
   ClientSession,
   ClientSessionEvents,
   ClientSessionOptions,
+  EndSessionOptions,
   ServerSessionPool,
   ServerSession,
   ServerSessionId,

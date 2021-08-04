@@ -1,12 +1,7 @@
-import {
-  CommandOperation,
-  CommandOperationOptions,
-  OperationParent,
-  CollationOptions
-} from './command';
+import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
 import { ReadPreference } from '../read_preference';
-import { MongoDriverError } from '../error';
-import { maxWireVersion } from '../utils';
+import { MongoInvalidArgumentError } from '../error';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
@@ -47,14 +42,13 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   pipeline: Document[];
   hasWriteStage: boolean;
 
-  constructor(parent: OperationParent, pipeline: Document[], options?: AggregateOptions) {
-    super(parent, options);
+  constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
+    super(undefined, { ...options, dbName: ns.db });
 
     this.options = options ?? {};
-    this.target =
-      parent.s.namespace && parent.s.namespace.collection
-        ? parent.s.namespace.collection
-        : DB_AGGREGATE_COLLECTION;
+
+    // Covers when ns.collection is null, undefined or the empty string, use DB_AGGREGATE_COLLECTION
+    this.target = ns.collection || DB_AGGREGATE_COLLECTION;
 
     this.pipeline = pipeline;
 
@@ -75,11 +69,13 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
 
     if (this.explain && this.writeConcern) {
-      throw new MongoDriverError('"explain" cannot be used on an aggregate call with writeConcern');
+      throw new MongoInvalidArgumentError(
+        'Option "explain" cannot be used on an aggregate call with writeConcern'
+      );
     }
 
     if (options?.cursor != null && typeof options.cursor !== 'object') {
-      throw new MongoDriverError('cursor options must be an object');
+      throw new MongoInvalidArgumentError('Cursor options must be an object');
     }
   }
 
@@ -131,4 +127,9 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   }
 }
 
-defineAspects(AggregateOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(AggregateOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.CURSOR_CREATING
+]);

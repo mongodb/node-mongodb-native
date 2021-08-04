@@ -68,4 +68,8 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
   }
 }
 
-defineAspects(EstimatedDocumentCountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(EstimatedDocumentCountOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.CURSOR_CREATING
+]);

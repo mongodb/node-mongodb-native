@@ -67,7 +67,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     super();
 
     if (!options || !options.srvHost) {
-      throw new MongoDriverError('options for SrvPoller must exist and include srvHost');
+      // TODO(NODE-3483)
+      throw new MongoDriverError('Options for SrvPoller must exist and include srvHost');
     }
 
     this.srvHost = options.srvHost;

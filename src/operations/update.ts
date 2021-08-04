@@ -11,7 +11,7 @@ import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { ObjectId, Document } from '../bson';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError, MongoServerError } from '../error';
+import { MongoServerError, MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {
@@ -108,25 +108,29 @@ export class UpdateOperation extends CommandOperation<Document> {
       collationNotSupported(server, options) ||
       (statementWithCollation && collationNotSupported(server, statementWithCollation))
     ) {
-      callback(new MongoDriverError(`server ${server.name} does not support collation`));
+      callback(new MongoCompatibilityError(`Server ${server.name} does not support collation`));
       return;
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite || maxWireVersion(server) < 5) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoDriverError(`servers < 3.4 do not support hint on update`));
+        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on update`));
         return;
       }
     }
 
     if (this.explain && maxWireVersion(server) < 3) {
-      callback(new MongoDriverError(`server ${server.name} does not support explain on update`));
+      callback(
+        new MongoCompatibilityError(`Server ${server.name} does not support explain on update`)
+      );
       return;
     }
 
     if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
-      callback(new MongoDriverError('arrayFilters are only supported on MongoDB 3.6+'));
+      callback(
+        new MongoCompatibilityError('Option "arrayFilters" is only supported on MongoDB 3.6+')
+      );
       return;
     }
 
@@ -144,7 +148,7 @@ export class UpdateOneOperation extends UpdateOperation {
     );
 
     if (!hasAtomicOperators(update)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
@@ -155,7 +159,7 @@ export class UpdateOneOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
@@ -181,7 +185,7 @@ export class UpdateManyOperation extends UpdateOperation {
     );
 
     if (!hasAtomicOperators(update)) {
-      throw new MongoDriverError('Update document requires atomic operators');
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
@@ -192,7 +196,7 @@ export class UpdateManyOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
@@ -235,7 +239,7 @@ export class ReplaceOneOperation extends UpdateOperation {
     );
 
     if (hasAtomicOperators(replacement)) {
-      throw new MongoDriverError('Replacement document must not contain atomic operators');
+      throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
   }
 
@@ -246,7 +250,7 @@ export class ReplaceOneOperation extends UpdateOperation {
   ): void {
     super.execute(server, session, (err, res) => {
       if (err || !res) return callback(err);
-      if (typeof this.explain !== 'undefined') return callback(undefined, res);
+      if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
@@ -268,11 +272,11 @@ export function makeUpdateStatement(
   options: UpdateOptions & { multi?: boolean }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
-    throw new MongoDriverError('selector must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('Selector must be a valid JavaScript object');
   }
 
   if (update == null || typeof update !== 'object') {
-    throw new MongoDriverError('document must be a valid JavaScript object');
+    throw new MongoInvalidArgumentError('Document must be a valid JavaScript object');
   }
 
   const op: UpdateStatement = { q: filter, u: update };

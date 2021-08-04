@@ -54,6 +54,7 @@ export class AuthProvider {
    * @param callback - The callback to return the result from the authentication
    */
   auth(context: AuthContext, callback: Callback): void {
+    // TODO(NODE-3485): Replace this with MongoMethodOverrideError
     callback(new MongoDriverError('`auth` method must be overridden by subclass'));
   }
 }
