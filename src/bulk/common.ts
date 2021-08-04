@@ -689,7 +689,7 @@ export class MongoBulkWriteError extends MongoServerError {
   ) {
     super(x);
     if (x instanceof Error) Object.assign(this, x);
-    else if (x instanceof WriteConcernError) this.err = x.err;
+    else if (x instanceof WriteConcernError) this.err = x;
     else {
       this.message = x.message;
       this.code = x.code;
