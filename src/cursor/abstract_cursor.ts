@@ -743,6 +743,20 @@ function cleanupCursor(
   const error = options?.error;
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
+  function completeCleanup() {
+    cursor.emit(AbstractCursor.CLOSE);
+    if (session) {
+      if (session.owner === cursor) {
+        return session.endSession({ error }, callback);
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error, force: true });
+      }
+    }
+    return callback();
+  }
+
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {
       return completeCleanup();
@@ -753,38 +767,8 @@ function cleanupCursor(
     if (needsToEmitClosed) {
       cursor[kClosed] = true;
       cursor[kId] = Long.ZERO;
-      cursor.emit(AbstractCursor.CLOSE);
     }
-
-    if (session) {
-      if (session.owner === cursor) {
-        return session.endSession({ error }, callback);
-      }
-
-      if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error, force: true });
-      }
-    }
-
-    return callback();
-  }
-
-  function completeCleanup() {
-    if (session) {
-      if (session.owner === cursor) {
-        return session.endSession({ error }, () => {
-          cursor.emit(AbstractCursor.CLOSE);
-          callback();
-        });
-      }
-
-      if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error, force: true });
-      }
-    }
-
-    cursor.emit(AbstractCursor.CLOSE);
-    return callback();
+    return completeCleanup();
   }
 
   cursor[kKilled] = true;
