@@ -100,7 +100,7 @@ function triggerResumableError(changeStream, delay, onClose) {
  */
 function waitForStarted(changeStream, callback) {
   const timeout = setTimeout(() => {
-    throw new MongoChangeStreamError('Change stream never started');
+    expect.fail('Change stream never started');
   }, 2000);
 
   changeStream.cursor.once('init', () => {
@@ -874,7 +874,7 @@ describe('Change Streams', function () {
           .next()
           .then(function () {
             // We should never execute this line because calling changeStream.next() should throw an error
-            throw new MongoChangeStreamError(
+            expect.fail(
               'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
             );
           })
@@ -2007,7 +2007,7 @@ describe('Change Streams', function () {
           if (counter === 2) {
             changeStream.close(close);
           } else if (counter >= 3) {
-            close(new MongoChangeStreamError('should not have received more than 2 events'));
+            expect.fail('Should not have received more than 2 events');
           }
         });
         changeStream.on('error', err => close(err));
