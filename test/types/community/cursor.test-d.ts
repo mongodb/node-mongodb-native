@@ -90,10 +90,7 @@ expectType<{ listOfNumbers: number[] }[]>(
 
 // Using the override parameter works
 expectType<{ name: string }[]>(
-  await typedCollection
-    .find()
-    .project<{ name: string }>({ name: 1 })
-    .toArray()
+  await typedCollection.find().project<{ name: string }>({ name: 1 }).toArray()
 );
 
 void async function () {

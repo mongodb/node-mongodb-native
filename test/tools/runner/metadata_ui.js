@@ -134,12 +134,15 @@ module.exports = Mocha.interfaces.metadata_ui = function (suite) {
     /**
      * Pending describe.
      */
-    context.xdescribe = context.xcontext = context.describe.skip = function () {
-      return _create({
-        args: arguments,
-        pending: true
-      });
-    };
+    context.xdescribe =
+      context.xcontext =
+      context.describe.skip =
+        function () {
+          return _create({
+            args: arguments,
+            pending: true
+          });
+        };
 
     /**
      * Exclusive suite.
@@ -191,9 +194,12 @@ module.exports = Mocha.interfaces.metadata_ui = function (suite) {
      *
      * @param {any} title
      */
-    context.xit = context.xspecify = context.it.skip = function (title) {
-      context.it(title);
-    };
+    context.xit =
+      context.xspecify =
+      context.it.skip =
+        function (title) {
+          context.it(title);
+        };
 
     /**
      * Number of attempts to retry.

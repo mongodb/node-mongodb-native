@@ -274,7 +274,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 
   for (const k in command) {
     if (k === 'query') continue;
-    clonedCommand[k] = deepCopy(((command as unknown) as Record<string, unknown>)[k]);
+    clonedCommand[k] = deepCopy((command as unknown as Record<string, unknown>)[k]);
   }
   return command.query ? clonedQuery : clonedCommand;
 }

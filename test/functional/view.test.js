@@ -52,20 +52,21 @@ describe('Views', function () {
           var db = client.db(self.configuration.db);
 
           // Simple findAndModify command returning the new document
-          db.createCollection('test', { viewOn: 'users', pipeline: [{ $match: {} }] }, function (
-            err,
-            r
-          ) {
-            expect(r).to.exist;
-            expect(err).to.not.exist;
-            expect(commandResult).to.containSubset({
-              create: 'test',
-              viewOn: 'users',
-              pipeline: [{ $match: {} }]
-            });
+          db.createCollection(
+            'test',
+            { viewOn: 'users', pipeline: [{ $match: {} }] },
+            function (err, r) {
+              expect(r).to.exist;
+              expect(err).to.not.exist;
+              expect(commandResult).to.containSubset({
+                create: 'test',
+                viewOn: 'users',
+                pipeline: [{ $match: {} }]
+              });
 
-            client.close(done);
-          });
+              client.close(done);
+            }
+          );
         });
       });
     }

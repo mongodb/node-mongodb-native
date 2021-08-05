@@ -20,9 +20,7 @@ collection.aggregate().match({ bar: 1 }).limit(10);
 collection.aggregate().unwind('total');
 collection.aggregate().unwind({ path: 'total' });
 
-collection
-  .aggregate<Payment>([{ $match: { bar: 1 } }])
-  .limit(10);
+collection.aggregate<Payment>([{ $match: { bar: 1 } }]).limit(10);
 
 collection.aggregate<Payment>([]).match({ bar: 1 }).limit(10);
 

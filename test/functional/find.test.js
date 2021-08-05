@@ -691,19 +691,19 @@ describe('Find', function () {
       p_client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.createCollection('test_should_correctly_retrieve_one_record', function (
-          err,
-          collection
-        ) {
-          collection.insert({ a: 0 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-            const usercollection = db.collection('test_should_correctly_retrieve_one_record');
-            usercollection.findOne({ a: 0 }, function (err) {
+        db.createCollection(
+          'test_should_correctly_retrieve_one_record',
+          function (err, collection) {
+            collection.insert({ a: 0 }, configuration.writeConcernMax(), function (err) {
               expect(err).to.not.exist;
-              p_client.close(done);
+              const usercollection = db.collection('test_should_correctly_retrieve_one_record');
+              usercollection.findOne({ a: 0 }, function (err) {
+                expect(err).to.not.exist;
+                p_client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -817,60 +817,62 @@ describe('Find', function () {
                       test.equal(2, result.value.b);
 
                       // Test remove object on change
-                      collection.insert({ a: 3, b: 2 }, configuration.writeConcernMax(), function (
-                        err
-                      ) {
-                        expect(err).to.not.exist;
-                        // Let's modify the document in place
-                        collection.findOneAndUpdate(
-                          { a: 3 },
-                          { $set: { b: 3 } },
-                          { remove: true },
-                          function (err, updated_doc) {
-                            test.equal(3, updated_doc.value.a);
-                            test.equal(2, updated_doc.value.b);
+                      collection.insert(
+                        { a: 3, b: 2 },
+                        configuration.writeConcernMax(),
+                        function (err) {
+                          expect(err).to.not.exist;
+                          // Let's modify the document in place
+                          collection.findOneAndUpdate(
+                            { a: 3 },
+                            { $set: { b: 3 } },
+                            { remove: true },
+                            function (err, updated_doc) {
+                              test.equal(3, updated_doc.value.a);
+                              test.equal(2, updated_doc.value.b);
 
-                            // Let's upsert!
-                            collection.findOneAndUpdate(
-                              { a: 4 },
-                              { $set: { b: 3 } },
-                              { returnDocument: ReturnDocument.AFTER, upsert: true },
-                              function (err, updated_doc) {
-                                test.equal(4, updated_doc.value.a);
-                                test.equal(3, updated_doc.value.b);
+                              // Let's upsert!
+                              collection.findOneAndUpdate(
+                                { a: 4 },
+                                { $set: { b: 3 } },
+                                { returnDocument: ReturnDocument.AFTER, upsert: true },
+                                function (err, updated_doc) {
+                                  test.equal(4, updated_doc.value.a);
+                                  test.equal(3, updated_doc.value.b);
 
-                                // Test selecting a subset of fields
-                                collection.insert(
-                                  { a: 100, b: 101 },
-                                  configuration.writeConcernMax(),
-                                  function (err, r) {
-                                    expect(err).to.not.exist;
+                                  // Test selecting a subset of fields
+                                  collection.insert(
+                                    { a: 100, b: 101 },
+                                    configuration.writeConcernMax(),
+                                    function (err, r) {
+                                      expect(err).to.not.exist;
 
-                                    collection.findOneAndUpdate(
-                                      { a: 100 },
-                                      { $set: { b: 5 } },
-                                      {
-                                        returnDocument: ReturnDocument.AFTER,
-                                        projection: { b: 1 }
-                                      },
-                                      function (err, updated_doc) {
-                                        test.equal(2, Object.keys(updated_doc.value).length);
-                                        test.equal(
-                                          r.insertedIds[0].toHexString(),
-                                          updated_doc.value._id.toHexString()
-                                        );
-                                        test.equal(5, updated_doc.value.b);
-                                        test.equal('undefined', typeof updated_doc.value.a);
-                                        client.close(done);
-                                      }
-                                    );
-                                  }
-                                );
-                              }
-                            );
-                          }
-                        );
-                      });
+                                      collection.findOneAndUpdate(
+                                        { a: 100 },
+                                        { $set: { b: 5 } },
+                                        {
+                                          returnDocument: ReturnDocument.AFTER,
+                                          projection: { b: 1 }
+                                        },
+                                        function (err, updated_doc) {
+                                          test.equal(2, Object.keys(updated_doc.value).length);
+                                          test.equal(
+                                            r.insertedIds[0].toHexString(),
+                                            updated_doc.value._id.toHexString()
+                                          );
+                                          test.equal(5, updated_doc.value.b);
+                                          test.equal('undefined', typeof updated_doc.value.a);
+                                          client.close(done);
+                                        }
+                                      );
+                                    }
+                                  );
+                                }
+                              );
+                            }
+                          );
+                        }
+                      );
                     }
                   );
                 });
@@ -927,40 +929,40 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function (
-          err,
-          collection
-        ) {
-          // Test return new document on change
-          collection.insert(
-            {
-              title: 'Tobi',
-              author: 'Brian',
-              newTitle: 'Woot',
-              meta: { visitors: 0 }
-            },
-            configuration.writeConcernMax(),
-            function (err, r) {
-              // Fetch the id
-              var id = r.insertedIds[0];
+        db.createCollection(
+          'shouldCorrectlyExecuteFindOneWithAnInSearchTag',
+          function (err, collection) {
+            // Test return new document on change
+            collection.insert(
+              {
+                title: 'Tobi',
+                author: 'Brian',
+                newTitle: 'Woot',
+                meta: { visitors: 0 }
+              },
+              configuration.writeConcernMax(),
+              function (err, r) {
+                // Fetch the id
+                var id = r.insertedIds[0];
 
-              collection.update(
-                { _id: id },
-                { $inc: { 'meta.visitors': 1 } },
-                configuration.writeConcernMax(),
-                function (err, r) {
-                  expect(r).property('matchedCount').to.equal(1);
-                  expect(err).to.not.exist;
+                collection.update(
+                  { _id: id },
+                  { $inc: { 'meta.visitors': 1 } },
+                  configuration.writeConcernMax(),
+                  function (err, r) {
+                    expect(r).property('matchedCount').to.equal(1);
+                    expect(err).to.not.exist;
 
-                  collection.findOne({ _id: id }, function (err, item) {
-                    test.equal(1, item.meta.visitors);
-                    client.close(done);
-                  });
-                }
-              );
-            }
-          );
-        });
+                    collection.findOne({ _id: id }, function (err, item) {
+                      test.equal(1, item.meta.visitors);
+                      client.close(done);
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -981,30 +983,32 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         db.createCollection('findOneAndUpdateDuplicateKeyError', function (err, collection) {
           expect(err).to.not.exist;
-          collection.createIndex(['name', 1], { unique: true, writeConcern: { w: 1 } }, function (
-            err
-          ) {
-            expect(err).to.not.exist;
-            // Test return new document on change
-            collection.insert(
-              [{ name: 'test1' }, { name: 'test2' }],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                // Let's modify the document in place
-                collection.findOneAndUpdate(
-                  { name: 'test1' },
-                  { $set: { name: 'test2' } },
-                  {},
-                  function (err, updated_doc) {
-                    expect(err).to.exist;
-                    expect(updated_doc).to.not.exist;
-                    client.close(done);
-                  }
-                );
-              }
-            );
-          });
+          collection.createIndex(
+            ['name', 1],
+            { unique: true, writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
+              // Test return new document on change
+              collection.insert(
+                [{ name: 'test1' }, { name: 'test2' }],
+                configuration.writeConcernMax(),
+                function (err) {
+                  expect(err).to.not.exist;
+                  // Let's modify the document in place
+                  collection.findOneAndUpdate(
+                    { name: 'test1' },
+                    { $set: { name: 'test2' } },
+                    {},
+                    function (err, updated_doc) {
+                      expect(err).to.exist;
+                      expect(updated_doc).to.not.exist;
+                      client.close(done);
+                    }
+                  );
+                }
+              );
+            }
+          );
         });
       });
     }
@@ -1020,20 +1024,22 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('AttemptTofindOneAndUpdateNonExistingDocument', function (
-          err,
-          collection
-        ) {
-          // Let's modify the document in place
-          collection.findOneAndUpdate({ name: 'test1' }, { $set: { name: 'test2' } }, {}, function (
-            err,
-            updated_doc
-          ) {
-            expect(updated_doc.value).to.not.exist;
-            test.ok(err == null || err.errmsg.match('No matching object found'));
-            client.close(done);
-          });
-        });
+        db.createCollection(
+          'AttemptTofindOneAndUpdateNonExistingDocument',
+          function (err, collection) {
+            // Let's modify the document in place
+            collection.findOneAndUpdate(
+              { name: 'test1' },
+              { $set: { name: 'test2' } },
+              {},
+              function (err, updated_doc) {
+                expect(updated_doc.value).to.not.exist;
+                test.ok(err == null || err.errmsg.match('No matching object found'));
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1139,27 +1145,27 @@ describe('Find', function () {
       p_client.connect(function (err, client) {
         var db = client.db(configuration.db);
 
-        db.createCollection('shouldCorrectlyfindOneAndUpdateDocumentWithDBStrict', function (
-          err,
-          collection
-        ) {
-          // Test return old document on change
-          collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
+        db.createCollection(
+          'shouldCorrectlyfindOneAndUpdateDocumentWithDBStrict',
+          function (err, collection) {
+            // Test return old document on change
+            collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
+              expect(err).to.not.exist;
 
-            // Let's modify the document in place
-            collection.findOneAndUpdate(
-              { a: 2 },
-              { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
-              function (err, result) {
-                test.equal(2, result.value.a);
-                test.equal(3, result.value.b);
-                p_client.close(done);
-              }
-            );
-          });
-        });
+              // Let's modify the document in place
+              collection.findOneAndUpdate(
+                { a: 2 },
+                { $set: { b: 3 } },
+                { returnDocument: ReturnDocument.AFTER },
+                function (err, result) {
+                  test.equal(2, result.value.a);
+                  test.equal(3, result.value.b);
+                  p_client.close(done);
+                }
+              );
+            });
+          }
+        );
       });
     }
   });
@@ -1229,33 +1235,33 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('Should_correctly_return_new_modified_document', function (
-          err,
-          collection
-        ) {
-          var id = new ObjectId();
-          var doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
+        db.createCollection(
+          'Should_correctly_return_new_modified_document',
+          function (err, collection) {
+            var id = new ObjectId();
+            var doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
 
-          collection.insert(doc, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
+            collection.insert(doc, configuration.writeConcernMax(), function (err) {
+              expect(err).to.not.exist;
 
-            // Find and modify returning the new object
-            collection.findOneAndUpdate(
-              { _id: id },
-              { $set: { 'c.c': 100 } },
-              { returnDocument: ReturnDocument.AFTER },
-              function (err, item) {
-                test.equal(doc._id.toString(), item.value._id.toString());
-                test.equal(doc.a, item.value.a);
-                test.equal(doc.b, item.value.b);
-                test.equal(doc.c.a, item.value.c.a);
-                test.equal(doc.c.b, item.value.c.b);
-                test.equal(100, item.value.c.c);
-                client.close(done);
-              }
-            );
-          });
-        });
+              // Find and modify returning the new object
+              collection.findOneAndUpdate(
+                { _id: id },
+                { $set: { 'c.c': 100 } },
+                { returnDocument: ReturnDocument.AFTER },
+                function (err, item) {
+                  test.equal(doc._id.toString(), item.value._id.toString());
+                  test.equal(doc.a, item.value.a);
+                  test.equal(doc.b, item.value.b);
+                  test.equal(doc.c.a, item.value.c.a);
+                  test.equal(doc.c.b, item.value.c.b);
+                  test.equal(100, item.value.c.c);
+                  client.close(done);
+                }
+              );
+            });
+          }
+        );
       });
     }
   });
@@ -1305,38 +1311,42 @@ describe('Find', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('should_correctly_return_record_with_64bit_id', function (
-          err,
-          collection
-        ) {
-          var _lowerId = new ObjectId();
-          var _higherId = new ObjectId();
-          var lowerId = Long.fromString('133118461172916224', 10);
-          var higherId = Long.fromString('133118461172916225', 10);
+        db.createCollection(
+          'should_correctly_return_record_with_64bit_id',
+          function (err, collection) {
+            var _lowerId = new ObjectId();
+            var _higherId = new ObjectId();
+            var lowerId = Long.fromString('133118461172916224', 10);
+            var higherId = Long.fromString('133118461172916225', 10);
 
-          var lowerDoc = { _id: _lowerId, id: lowerId };
-          var higherDoc = { _id: _higherId, id: higherId };
+            var lowerDoc = { _id: _lowerId, id: lowerId };
+            var higherDoc = { _id: _higherId, id: higherId };
 
-          collection.insert([lowerDoc, higherDoc], configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
+            collection.insert(
+              [lowerDoc, higherDoc],
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
 
-            // Select record with id of 133118461172916225 using $gt directive
-            collection.find({ id: { $gt: lowerId } }, {}).toArray(function (err, arr) {
-              test.ok(err == null);
-              test.equal(
-                arr.length,
-                1,
-                'Selecting record via $gt directive on 64-bit integer should return a record with higher Id'
-              );
-              test.equal(
-                arr[0].id.toString(),
-                '133118461172916225',
-                'Returned Id should be equal to 133118461172916225'
-              );
-              client.close(done);
-            });
-          });
-        });
+                // Select record with id of 133118461172916225 using $gt directive
+                collection.find({ id: { $gt: lowerId } }, {}).toArray(function (err, arr) {
+                  test.ok(err == null);
+                  test.equal(
+                    arr.length,
+                    1,
+                    'Selecting record via $gt directive on 64-bit integer should return a record with higher Id'
+                  );
+                  test.equal(
+                    arr[0].id.toString(),
+                    '133118461172916225',
+                    'Returned Id should be equal to 133118461172916225'
+                  );
+                  client.close(done);
+                });
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1710,39 +1720,41 @@ describe('Find', function () {
         var db = client.db(configuration.db);
         expect(err).to.not.exist;
 
-        db.createCollection('shouldCorrectlyErrorOutfindOneAndUpdateOnDuplicateRecord', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
+        db.createCollection(
+          'shouldCorrectlyErrorOutfindOneAndUpdateOnDuplicateRecord',
+          function (err, collection) {
+            expect(err).to.not.exist;
 
-          // Test return old document on change
-          collection.insert(
-            [{ login: 'user1' }, { login: 'user2' }],
-            configuration.writeConcernMax(),
-            function (err, r) {
-              expect(err).to.not.exist;
-              var id = r.insertedIds[1];
-              // Set an index
-              collection.createIndex('login', { unique: true, writeConcern: { w: 1 } }, function (
-                err
-              ) {
+            // Test return old document on change
+            collection.insert(
+              [{ login: 'user1' }, { login: 'user2' }],
+              configuration.writeConcernMax(),
+              function (err, r) {
                 expect(err).to.not.exist;
-
-                // Attemp to modify document
-                collection.findOneAndUpdate(
-                  { _id: id },
-                  { $set: { login: 'user1' } },
-                  {},
+                var id = r.insertedIds[1];
+                // Set an index
+                collection.createIndex(
+                  'login',
+                  { unique: true, writeConcern: { w: 1 } },
                   function (err) {
-                    test.ok(err !== null);
-                    p_client.close(done);
+                    expect(err).to.not.exist;
+
+                    // Attemp to modify document
+                    collection.findOneAndUpdate(
+                      { _id: id },
+                      { $set: { login: 'user1' } },
+                      {},
+                      function (err) {
+                        test.ok(err !== null);
+                        p_client.close(done);
+                      }
+                    );
                   }
                 );
-              });
-            }
-          );
-        });
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1943,30 +1955,30 @@ describe('Find', function () {
         var db = client.db(configuration.db);
 
         // Create a collection we want to drop later
-        db.createCollection('shouldPerformQueryWithBatchSizeDifferentToStandard', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          var docs = [];
-          for (var i = 0; i < 1000; i++) {
-            docs.push({ a: i });
-          }
-
-          // Insert a bunch of documents for the testing
-          collection.insert(docs, configuration.writeConcernMax(), function (err) {
+        db.createCollection(
+          'shouldPerformQueryWithBatchSizeDifferentToStandard',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Perform a simple find and return all the documents
-            collection.find({}, { batchSize: 1000 }).toArray(function (err, docs) {
-              expect(err).to.not.exist;
-              test.equal(1000, docs.length);
+            var docs = [];
+            for (var i = 0; i < 1000; i++) {
+              docs.push({ a: i });
+            }
 
-              client.close(done);
+            // Insert a bunch of documents for the testing
+            collection.insert(docs, configuration.writeConcernMax(), function (err) {
+              expect(err).to.not.exist;
+
+              // Perform a simple find and return all the documents
+              collection.find({}, { batchSize: 1000 }).toArray(function (err, docs) {
+                expect(err).to.not.exist;
+                test.equal(1000, docs.length);
+
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -1991,8 +2003,7 @@ describe('Find', function () {
         for (var i = 0; i < 1000; i++) {
           docs.push({
             a: 1,
-            b:
-              'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
+            b: 'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
           });
         }
 
@@ -2035,8 +2046,7 @@ describe('Find', function () {
           for (var i = 0; i < 1000; i++) {
             docs1.push({
               a: 1,
-              b:
-                'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld',
+              b: 'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld',
               c: new Binary(Buffer.alloc(1024))
             });
           }
@@ -2049,8 +2059,7 @@ describe('Find', function () {
               var docs2 = [];
               docs2.push({
                 a: 1,
-                b:
-                  'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld',
+                b: 'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld',
                 c: new Binary(Buffer.alloc(1024))
               });
             }
@@ -2089,8 +2098,7 @@ describe('Find', function () {
         for (var i = 0; i < 1; i++) {
           docs.push({
             a: 1,
-            b:
-              'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
+            b: 'helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld'
           });
         }
 

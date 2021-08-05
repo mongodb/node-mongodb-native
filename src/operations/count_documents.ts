@@ -40,7 +40,7 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
       }
 
       // NOTE: We're avoiding creating a cursor here to reduce the callstack.
-      const response = (result as unknown) as Document;
+      const response = result as unknown as Document;
       if (response.cursor == null || response.cursor.firstBatch == null) {
         callback(undefined, 0);
         return;

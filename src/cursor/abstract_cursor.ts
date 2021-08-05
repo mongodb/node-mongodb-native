@@ -484,7 +484,7 @@ export abstract class AbstractCursor<
       this[kTransform] = transform;
     }
 
-    return (this as unknown) as AbstractCursor<T>;
+    return this as unknown as AbstractCursor<T>;
   }
 
   /**

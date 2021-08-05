@@ -362,36 +362,37 @@ describe('Insert', function () {
         // sys.puts(sys.inspect(context.motherOfAllDocuments))
         var motherOfAllDocuments = context.motherOfAllDocuments;
 
-        collection.insert(context.motherOfAllDocuments, configuration.writeConcernMax(), function (
-          err,
-          docs
-        ) {
-          test.ok(docs);
-          collection.findOne(function (err, doc) {
-            // Assert correct deserialization of the values
-            test.equal(motherOfAllDocuments.string, doc.string);
-            test.deepEqual(motherOfAllDocuments.array, doc.array);
-            test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-            test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-            test.equal(date.getTime(), doc.long);
-            test.equal(date.toString(), doc.date.toString());
-            test.equal(date.getTime(), doc.date.getTime());
-            test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-            test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+        collection.insert(
+          context.motherOfAllDocuments,
+          configuration.writeConcernMax(),
+          function (err, docs) {
+            test.ok(docs);
+            collection.findOne(function (err, doc) {
+              // Assert correct deserialization of the values
+              test.equal(motherOfAllDocuments.string, doc.string);
+              test.deepEqual(motherOfAllDocuments.array, doc.array);
+              test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+              test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+              test.equal(date.getTime(), doc.long);
+              test.equal(date.toString(), doc.date.toString());
+              test.equal(date.getTime(), doc.date.getTime());
+              test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+              test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
 
-            test.equal(motherOfAllDocuments.int, doc.int);
-            test.equal(motherOfAllDocuments.long, doc.long);
-            test.equal(motherOfAllDocuments.float, doc.float);
-            test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-            test.equal(motherOfAllDocuments.boolean, doc.boolean);
-            test.equal(motherOfAllDocuments.where.code, doc.where.code);
-            test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-            test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-            test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-            test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-            client.close(done);
-          });
-        });
+              test.equal(motherOfAllDocuments.int, doc.int);
+              test.equal(motherOfAllDocuments.long, doc.long);
+              test.equal(motherOfAllDocuments.float, doc.float);
+              test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+              test.equal(motherOfAllDocuments.boolean, doc.boolean);
+              test.equal(motherOfAllDocuments.where.code, doc.where.code);
+              test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+              test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+              test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+              test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -1145,19 +1146,20 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
         // Insert the update
-        collection.insert({ _id: 0, test: 'hello' }, configuration.writeConcernMax(), function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          test.ok(result);
+        collection.insert(
+          { _id: 0, test: 'hello' },
+          configuration.writeConcernMax(),
+          function (err, result) {
+            expect(err).to.not.exist;
+            test.ok(result);
 
-          collection.findOne({ _id: 0 }, function (err, item) {
-            test.equal(0, item._id);
-            test.equal('hello', item.test);
-            client.close(done);
-          });
-        });
+            collection.findOne({ _id: 0 }, function (err, item) {
+              test.equal(0, item._id);
+              test.equal('hello', item.test);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -1225,19 +1227,20 @@ describe('Insert', function () {
           string = string + 'a';
         }
 
-        collection.insert({ a: 1, string: string }, configuration.writeConcernMax(), function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          test.ok(result);
-
-          collection.findOne({ a: 1 }, function (err, doc) {
+        collection.insert(
+          { a: 1, string: string },
+          configuration.writeConcernMax(),
+          function (err, result) {
             expect(err).to.not.exist;
-            test.equal(50000, doc.string.length);
-            client.close(done);
-          });
-        });
+            test.ok(result);
+
+            collection.findOne({ a: 1 }, function (err, doc) {
+              expect(err).to.not.exist;
+              test.equal(50000, doc.string.length);
+              client.close(done);
+            });
+          }
+        );
       });
     }
   });
@@ -1326,31 +1329,32 @@ describe('Insert', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
 
-        collection.insert({ a: { b: { c: 1 } } }, configuration.writeConcernMax(), function (
-          err,
-          result
-        ) {
-          expect(err).to.not.exist;
-          test.ok(result);
+        collection.insert(
+          { a: { b: { c: 1 } } },
+          configuration.writeConcernMax(),
+          function (err, result) {
+            expect(err).to.not.exist;
+            test.ok(result);
 
-          // Dynamically build query
-          var query = {};
-          query['a'] = {};
-          query.a['b'] = {};
-          query.a.b['c'] = 1;
+            // Dynamically build query
+            var query = {};
+            query['a'] = {};
+            query.a['b'] = {};
+            query.a.b['c'] = 1;
 
-          // Update document
-          collection.update(
-            query,
-            { $set: { 'a.b.d': 1 } },
-            configuration.writeConcernMax(),
-            function (err, r) {
-              expect(err).to.not.exist;
-              expect(r).property('matchedCount').to.equal(1);
-              client.close(done);
-            }
-          );
-        });
+            // Update document
+            collection.update(
+              query,
+              { $set: { 'a.b.d': 1 } },
+              configuration.writeConcernMax(),
+              function (err, r) {
+                expect(err).to.not.exist;
+                expect(r).property('matchedCount').to.equal(1);
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -1497,32 +1501,32 @@ describe('Insert', function () {
                 expect(err).to.not.exist;
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
-                  err,
-                  doc
-                ) {
-                  expect(err).to.not.exist;
-                  test.equal('hello world', doc.binary.toString());
-
-                  collection.findOne({ minkey: new MinKey() }, function (err, doc) {
+                collection.findOne(
+                  { binary: new Binary(Buffer.from('hello world')) },
+                  function (err, doc) {
                     expect(err).to.not.exist;
-                    test.ok(doc.minkey._bsontype === 'MinKey');
+                    test.equal('hello world', doc.binary.toString());
 
-                    collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
+                    collection.findOne({ minkey: new MinKey() }, function (err, doc) {
                       expect(err).to.not.exist;
-                      test.ok(doc.maxkey._bsontype === 'MaxKey');
+                      test.ok(doc.minkey._bsontype === 'MinKey');
 
-                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
-                        err,
-                        doc
-                      ) {
+                      collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
                         expect(err).to.not.exist;
-                        test.ok(doc != null);
-                        client.close(done);
+                        test.ok(doc.maxkey._bsontype === 'MaxKey');
+
+                        collection.findOne(
+                          { code: new Code('function () {}', { a: 55 }) },
+                          function (err, doc) {
+                            expect(err).to.not.exist;
+                            test.ok(doc != null);
+                            client.close(done);
+                          }
+                        );
                       });
                     });
-                  });
-                });
+                  }
+                );
               });
             });
           });
@@ -1574,32 +1578,32 @@ describe('Insert', function () {
                 expect(err).to.not.exist;
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function (
-                  err,
-                  doc
-                ) {
-                  expect(err).to.not.exist;
-                  test.equal('hello world', doc.binary.toString());
-
-                  collection.findOne({ minkey: new MinKey() }, function (err, doc) {
+                collection.findOne(
+                  { binary: new Binary(Buffer.from('hello world')) },
+                  function (err, doc) {
                     expect(err).to.not.exist;
-                    test.ok(doc.minkey._bsontype === 'MinKey');
+                    test.equal('hello world', doc.binary.toString());
 
-                    collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
+                    collection.findOne({ minkey: new MinKey() }, function (err, doc) {
                       expect(err).to.not.exist;
-                      test.ok(doc.maxkey._bsontype === 'MaxKey');
+                      test.ok(doc.minkey._bsontype === 'MinKey');
 
-                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function (
-                        err,
-                        doc
-                      ) {
+                      collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
                         expect(err).to.not.exist;
-                        test.ok(doc != null);
-                        client.close(done);
+                        test.ok(doc.maxkey._bsontype === 'MaxKey');
+
+                        collection.findOne(
+                          { code: new Code('function () {}', { a: 55 }) },
+                          function (err, doc) {
+                            expect(err).to.not.exist;
+                            test.ok(doc != null);
+                            client.close(done);
+                          }
+                        );
                       });
                     });
-                  });
-                });
+                  }
+                );
               });
             });
           });
