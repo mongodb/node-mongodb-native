@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.11](https://github.com/mongodb/node-mongodb-native/compare/v3.6.10...v3.6.11) (2021-08-05)
+
+
+### Bug Fixes
+
+* **NODE-1843:** bulk operations ignoring provided sessions [PORT] ([#2898](https://github.com/mongodb/node-mongodb-native/issues/2898)) ([9244b17](https://github.com/mongodb/node-mongodb-native/commit/9244b1771e538f7b685fd6d4aa83d9da84b20093))
+* **NODE-3199:** unable to bundle driver due to uncaught require ([#2903](https://github.com/mongodb/node-mongodb-native/issues/2903)) ([60efe9d](https://github.com/mongodb/node-mongodb-native/commit/60efe9d0030477da462d326c2e2ddc5fe6c0ffff))
+
 ### [3.6.10](https://github.com/mongodb/node-mongodb-native/compare/v3.6.9...v3.6.10) (2021-07-06)
 
 
