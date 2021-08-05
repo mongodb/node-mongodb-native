@@ -751,14 +751,27 @@ function cleanupCursor(
 
   if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
     if (needsToEmitClosed) {
-      cursor[kClosed] = true;
       cursor[kId] = Long.ZERO;
-      cursor.emit(AbstractCursor.CLOSE);
+      emitClose();
     }
 
+    return completeCleanup();
+  }
+
+  function emitClose() {
+    if (!cursor[kClosed]) {
+      cursor[kClosed] = true;
+      cursor.emit(AbstractCursor.CLOSE);
+    }
+  }
+
+  function completeCleanup() {
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, callback);
+        return session.endSession({ error }, () => {
+          emitClose();
+          callback();
+        });
       }
 
       if (!session.inTransaction()) {
@@ -766,24 +779,7 @@ function cleanupCursor(
       }
     }
 
-    return callback();
-  }
-
-  function completeCleanup() {
-    if (session) {
-      if (session.owner === cursor) {
-        return session.endSession({ error }, () => {
-          cursor.emit(AbstractCursor.CLOSE);
-          callback();
-        });
-      }
-
-      if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error, force: true });
-      }
-    }
-
-    cursor.emit(AbstractCursor.CLOSE);
+    emitClose();
     return callback();
   }
 
