@@ -51,7 +51,8 @@ export const CURSOR_FLAGS = [
   'partial'
 ] as const;
 
-/** @public */
+/** @public
+ * @deprecated This interface is deprecated */
 export interface CursorCloseOptions {
   /** Bypass calling killCursors when closing the cursor. */
   /** @deprecated  the skipKillCursors option is deprecated*/
