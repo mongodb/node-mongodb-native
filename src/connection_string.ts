@@ -15,8 +15,7 @@ import {
   makeClientMetadata,
   setDifference,
   HostAddress,
-  emitWarning,
-  enumToString
+  emitWarning
 } from './utils';
 import type { Document } from './bson';
 import {
@@ -33,13 +32,9 @@ import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
+import { Compressor } from './cmap/wire_protocol/compression';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
-const VALID_COMPRESSION_MECHS = Object.freeze({
-  NONE: 'none',
-  SNAPPY: 'snappy',
-  ZLIB: 'zlib'
-});
 
 const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
@@ -619,12 +614,12 @@ export const OPTIONS = {
       const compressionList = new Set();
       for (const compVal of values as string[]) {
         for (const c of compVal.split(',')) {
-          if (Object.values(VALID_COMPRESSION_MECHS).includes(String(c))) {
+          if (Object.keys(Compressor).includes(String(c))) {
             compressionList.add(String(c));
           } else {
             throw new MongoInvalidArgumentError(
-              `${c} is not a valid compression mechanism. Must be one of: ${enumToString(
-                VALID_COMPRESSION_MECHS
+              `${c} is not a valid compression mechanism. Must be one of: ${Object.keys(
+                Compressor
               )}.`
             );
           }
