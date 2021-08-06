@@ -136,6 +136,7 @@ export class MongoServerError extends MongoError {
   codeName?: string;
   writeConcernError?: Document;
   ok?: number;
+  topologyVersion?: TopologyVersion;
   // [key: string]: any;
 
   constructor(message: ErrorDescription) {
@@ -148,8 +149,11 @@ export class MongoServerError extends MongoError {
     this.codeName = message.codeName;
     this.writeConcernError = message.writeConcernError;
     this.ok = message.ok;
+    this.topologyVersion = message.topologyVersion;
 
     // for (const [name, value] of Object.entries(message)) {
+    //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+    //   console.log(require('util').inspect(this, { depth: Infinity }));
     //   if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
     //     continue;
     //   }
