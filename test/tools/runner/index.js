@@ -139,3 +139,8 @@ function dumpAndExit() {
 
 process.on('SIGINT', dumpAndExit);
 process.on('SIGTERM', dumpAndExit);
+process.on('SIGUSR1', () => {
+  process.nextTick(() => {
+    wtfnode.dump();
+  });
+});

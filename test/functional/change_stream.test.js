@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
-const { MongoNetworkError, MongoDriverError } = require('../../src/error');
+const { MongoNetworkError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
@@ -1792,28 +1792,20 @@ describe('Change Streams', function () {
     }
   });
 
-  // FIXME: NODE-1797
   describe('should error when used as iterator and emitter concurrently', function () {
-    let client, coll, changeStream, repeatInsert, val;
-    val = 0;
+    this.timeout(30000); // These tests await change streams, we can fail earlier if they do not immediately return
+
+    let client, coll, changeStream;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
-      await client.connect().catch(() => expect.fail('Failed to connect to client'));
+      await client.connect();
 
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
-
-      repeatInsert = setInterval(async function () {
-        await coll.insertOne({ c: val }).catch('Failed to insert document');
-        val++;
-      }, 75);
     });
 
     afterEach(async function () {
-      if (repeatInsert) {
-        clearInterval(repeatInsert);
-      }
       if (changeStream) {
         await changeStream.close();
       }
@@ -1829,15 +1821,17 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          await new Promise(resolve => changeStream.on('change', resolve));
+          const change = new Promise(resolve => changeStream.on('change', resolve));
+          await coll.insertOne({ c: 1 });
+          expect(await change).to.be.an('object');
           try {
             await changeStream.hasNext().catch(err => {
               expect.fail(err.message);
             });
           } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
+            return expect(error.message).to.be.match(/Cannot use ChangeStream as iterator/);
           }
-          return expect.fail('Should not reach here');
+          expect.fail('Should not reach here');
         }
       }
     );
@@ -1847,15 +1841,15 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          await changeStream
-            .hasNext()
-            .catch(() => expect.fail('Failed to set changeStream to iterator'));
+          const hasNext = changeStream.hasNext();
+          await coll.insertOne({ c: 1 });
+          await hasNext;
           try {
             await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
+            return expect(error.message).to.match(/Cannot use ChangeStream as an EventEmitter/);
           }
-          return expect.fail('Should not reach here');
+          expect.fail('Should not reach here');
         }
       }
     );
@@ -1865,15 +1859,13 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          await new Promise(resolve => changeStream.once('change', resolve));
+          changeStream.once('change', () => {});
           try {
-            await changeStream.next().catch(err => {
-              expect.fail(err.message);
-            });
+            await changeStream.next(); // This will block if our error doesn't throw
           } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
+            return expect(error.message).to.match(/Cannot use ChangeStream as iterator/);
           }
-          return expect.fail('Should not reach here');
+          expect.fail('Should not reach here');
         }
       }
     );
@@ -1883,15 +1875,15 @@ describe('Change Streams', function () {
       {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
-          await changeStream
-            .tryNext()
-            .catch(() => expect.fail('Failed to set changeStream to iterator'));
+          const change = changeStream.tryNext();
+          await coll.insertOne({ c: 1 });
+          expect(await change).to.be.an('object');
           try {
             await new Promise(resolve => changeStream.on('change', resolve));
           } catch (error) {
-            return expect(error).to.be.instanceof(MongoDriverError);
+            return expect(error.message).to.match(/Cannot use ChangeStream as an EventEmitter/);
           }
-          return expect.fail('Should not reach here');
+          expect.fail('Should not reach here');
         }
       }
     );
@@ -1989,7 +1981,7 @@ describe('Change Streams', function () {
       }
     });
 
-    it('when invoked using eventEmitter API', {
+    it.skip('when invoked using eventEmitter API', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function (done) {
         let closed = false;
