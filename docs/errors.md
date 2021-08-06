@@ -21,12 +21,12 @@
   - [`MongoAPIError`](#MongoAPIError-1)
     - [`MongoInvalidArgumentError`](#MongoInvalidArgumentError-1)
     - [`MongoMissingCredentialsError`](#MongoMissingCredentialsError-1)
-  - [`MongoRuntimeError`](#MongoRuntimeError-1)
     - [`MongoNotConnectedError`](#MongoNotConnectedError-1)
-    - [`MongoServerClosedError`](#MongoServerClosedError-1)
-    - [`MongoStreamClosedError`](#MongoStreamClosedError-1)
     - [`MongoTopologyClosedError`](#MongoTopologyClosedError-1)
     - [`MongoCursorExhaustedError`](#MongoCursorExhaustedError-1)
+    - [`MongoServerClosedError`](#MongoServerClosedError-1)
+    - [`MongoStreamClosedError`](#MongoStreamClosedError-1)
+  - [`MongoRuntimeError`](#MongoRuntimeError-1)
   - [`MongoNetworkError`](#MongoNetworkError-1)
     - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
 
@@ -77,7 +77,7 @@ This class should **never** be directly instantiated.
 | **MongoNotConnectedError**         | Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.                           |
 | **MongoBatchReExecutionError**     | Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.                                              |
 | **MongoConnectionStringError**     | Thrown when a user supplies an incorrect URI to the driver.                                                                                            |
-| **MongoConnectionPoolClosedError** |                                                                                                                                                        |
+| **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that has expired or has been closed                                                        |
 | **MongoMessageStreamParseError**   |                                                                                                                                                        |
 | **MongoGridFSStreamClosedError**   |                                                                                                                                                        |
 | **MongoChangeStreamClosedError**   |                                                                                                                                                        |
@@ -137,12 +137,20 @@ The classes to be tested will be selected based on two characteristics:
 - Fail to provide credentials when authenticating with the x509 mechanism.
   - Assert that `MongoMissingCredentialsError` is thrown.
 
-### `MongoRuntimeError`
-
 #### `MongoNotConnectedError`
 
 - Attempt to access a database without establishing a connection to a MongoDB server.
   - Assert that `MongoNotConnectedError` is thrown.
+
+#### `MongoTopologyClosedError`
+
+- Attempt to execute `createCollection()` against a database that has been closed.
+  - Assert that `MongoTopologyClosedError` is thrown.
+
+#### `MongoCursorExhaustedError`
+
+- Attempt to continue reading a cursor after it has reached the end of the batch.
+  - Assert that `MongoCursorExhaustedError` is thrown.
 
 #### `MongoServerClosedError`
 
@@ -154,15 +162,7 @@ The classes to be tested will be selected based on two characteristics:
 - Attempt to execute `tryNext()` on a `ChangeStream` object that is closed.
   - Assert that `MongoStreamClosedError` is thrown.
 
-#### `MongoTopologyClosedError`
-
-- Attempt to execute `createCollection()` against a database that has been closed.
-  - Assert that `MongoTopologyClosedError` is thrown.
-
-#### `MongoCursorExhaustedError`
-
-- Attempt to continue reading a cursor after it has reached the end of the batch.
-  - Assert that `MongoCursorExhaustedError` is thrown.
+### `MongoRuntimeError`
 
 ### `MongoNetworkError`
 
