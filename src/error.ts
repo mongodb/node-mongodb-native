@@ -137,7 +137,7 @@ export class MongoServerError extends MongoError {
   writeConcernError?: Document;
   ok?: number;
   topologyVersion?: TopologyVersion;
-  // [key: string]: any;
+  [key: string]: any;
 
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
@@ -151,15 +151,13 @@ export class MongoServerError extends MongoError {
     this.ok = message.ok;
     this.topologyVersion = message.topologyVersion;
 
-    // for (const [name, value] of Object.entries(message)) {
-    //   // eslint-disable-next-line @typescript-eslint/no-var-requires
-    //   console.log(require('util').inspect(this, { depth: Infinity }));
-    //   if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-    //     continue;
-    //   }
+    for (const [name, value] of Object.entries(message)) {
+      if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
+        continue;
+      }
 
-    //   this[name] = value;
-    // }
+      this[name] = value;
+    }
   }
 
   get name(): string {
