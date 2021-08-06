@@ -151,11 +151,17 @@ export class MongoServerError extends MongoError {
     this.ok = message.ok;
     this.topologyVersion = message.topologyVersion;
 
-    for (const [name, value] of Object.entries(message)) {
-      if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-        continue;
-      }
+    const currentProps = Object.getOwnPropertyNames(this);
+    const filteredProps = Object.entries(message).filter(([name]) => {
+      return (
+        name !== 'errorLabels' &&
+        name !== 'errmsg' &&
+        name !== 'message' &&
+        !currentProps.includes(name)
+      );
+    });
 
+    for (const [name, value] of filteredProps) {
       this[name] = value;
     }
   }
