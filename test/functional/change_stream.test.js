@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { Transform, PassThrough } = require('stream');
-const { MongoNetworkError, MongoDriverError, MongoChangeStreamError } = require('../../src/error');
+const { MongoNetworkError, MongoDriverError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
