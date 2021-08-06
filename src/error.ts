@@ -60,12 +60,12 @@ export const GET_MORE_RESUMABLE_CODES = new Set<number>([
 ]);
 
 /** @public */
-export interface ErrorDescription {
+export interface ErrorDescription extends Document {
   message?: string;
   errmsg?: string;
   $err?: string;
   errorLabels?: string[];
-  [key: string]: any;
+  errInfo?: Document;
 }
 
 /**
@@ -134,6 +134,9 @@ export class MongoError extends Error {
 export class MongoServerError extends MongoError {
   code?: number;
   codeName?: string;
+  writeConcernError?: Document;
+  ok?: number;
+  // [key: string]: any;
 
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
@@ -141,13 +144,18 @@ export class MongoServerError extends MongoError {
       this[kErrorLabels] = new Set(message.errorLabels);
     }
 
-    for (const name in message) {
-      if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-        continue;
-      }
+    this.code = message.code;
+    this.codeName = message.codeName;
+    this.writeConcernError = message.writeConcernError;
+    this.ok = message.ok;
 
-      (this as any)[name] = message[name];
-    }
+    // for (const [name, value] of Object.entries(message)) {
+    //   if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
+    //     continue;
+    //   }
+
+    //   this[name] = value;
+    // }
   }
 
   get name(): string {
@@ -676,6 +684,7 @@ function makeWriteConcernResultObject(input: any) {
 export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
+  errInfo?: Document;
 
   constructor(message: ErrorDescription, result?: Document) {
     if (result && Array.isArray(result.errorLabels)) {
@@ -683,6 +692,7 @@ export class MongoWriteConcernError extends MongoServerError {
     }
 
     super(message);
+    this.errInfo = message.errInfo;
 
     if (result != null) {
       this.result = makeWriteConcernResultObject(result);
