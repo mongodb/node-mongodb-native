@@ -547,8 +547,7 @@ function mergeBatchResults(
   }
 
   if (result.writeConcernError) {
-    const { code, errmsg, errInfo } = result.writeConcernError;
-    bulkResult.writeConcernErrors.push(new WriteConcernError({ code, errmsg, errInfo }));
+    bulkResult.writeConcernErrors.push(new WriteConcernError(result.writeConcernError));
   }
 }
 
@@ -660,7 +659,6 @@ function handleMongoWriteConcernError(
 ) {
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
-  // TODO: Remove multiple levels of wrapping (NODE-3337)
   callback(
     new MongoBulkWriteError(
       {
@@ -684,19 +682,23 @@ export class MongoBulkWriteError extends MongoServerError {
 
   /** Creates a new MongoBulkWriteError */
   constructor(
-    x: { message: string; code: number; writeErrors?: WriteError[] } | WriteConcernError | AnyError,
+    error:
+      | { message: string; code: number; writeErrors?: WriteError[] }
+      | WriteConcernError
+      | AnyError,
     result: BulkWriteResult
   ) {
-    super(x);
-    if (x instanceof Error) Object.assign(this, x);
-    else if (x instanceof WriteConcernError) this.err = x;
-    else {
-      this.message = x.message;
-      this.code = x.code;
-      this.writeErrors = x.writeErrors ?? [];
+    super(error);
+
+    if (error instanceof WriteConcernError) this.err = error;
+    else if (!(error instanceof Error)) {
+      this.message = error.message;
+      this.code = error.code;
+      this.writeErrors = error.writeErrors ?? [];
     }
 
     this.result = result;
+    Object.assign(this, error);
   }
 
   get name(): string {

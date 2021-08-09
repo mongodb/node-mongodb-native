@@ -1,4 +1,4 @@
-import { MongoServerError, MongoInvalidArgumentError, MongoWriteConcernError } from '../error';
+import { MongoServerError, MongoInvalidArgumentError } from '../error';
 import { defineAspects, Aspect, AbstractOperation } from './operation';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
@@ -70,7 +70,7 @@ export class InsertOneOperation extends InsertOperation {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoWriteConcernError(res.writeErrors[0]));
+      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
 
       callback(undefined, {
         acknowledged: this.writeConcern?.w !== 0 ?? true,

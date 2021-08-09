@@ -135,6 +135,7 @@ export class MongoServerError extends MongoError {
   code?: number;
   codeName?: string;
   writeConcernError?: Document;
+  errInfo?: Document;
   ok?: number;
   topologyVersion?: TopologyVersion;
   [key: string]: any;
@@ -148,6 +149,7 @@ export class MongoServerError extends MongoError {
     this.code = message.code;
     this.codeName = message.codeName;
     this.writeConcernError = message.writeConcernError;
+    this.errInfo = message.errInfo;
     this.ok = message.ok;
     this.topologyVersion = message.topologyVersion;
 
