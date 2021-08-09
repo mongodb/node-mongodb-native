@@ -1,4 +1,4 @@
-import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, emitWarningOnce, maybePromise, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   normalizeHintField,
@@ -708,11 +708,14 @@ export class Collection<TSchema extends Document = Document> {
       (callback = filter as Callback<Document | undefined>), (filter = {}), (options = {});
     if (typeof options === 'function') (callback = options), (options = {});
 
-    filter ??= {};
-    return this.find(filter, options)
-      .limit(-1)
-      .batchSize(1)
-      .next(callback as TODO_NODE_3286);
+    const finalFilter = filter ?? {};
+    const finalOptions = options ?? {};
+    return maybePromise(callback, callback =>
+      this.find(finalFilter, finalOptions)
+        .limit(-1)
+        .batchSize(1)
+        .next((error, result) => callback(error, result ?? undefined))
+    );
   }
 
   /**
