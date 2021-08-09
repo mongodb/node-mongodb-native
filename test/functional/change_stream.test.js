@@ -1860,7 +1860,9 @@ describe('Change Streams', function () {
         expect(res).to.not.exist;
         expect(changeStream).to.have.property(kMode, 'iterator');
 
-        // This does not throw synchronously
+        // This does throw synchronously
+        // the newListener event is called sync
+        // which calls streamEvents, which calls setIsEmitter, which will throw
         expect(() => {
           changeStream.on('change', () => {});
         }).to.throw(/Cannot use ChangeStream as an EventEmitter/);
