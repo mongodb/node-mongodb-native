@@ -9,7 +9,6 @@ import type { Callback, MongoDBNamespace } from '../utils';
 import type { ClientSession } from '../sessions';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
-import type { Projection } from '../mongo_types';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -135,22 +134,43 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
    * In order to strictly type this function you must provide an interface
    * that represents the effect of your projection on the result documents.
    *
-   * **NOTE:** adding a projection changes the return type of the iteration of this cursor,
+   * By default chaining a projection to your cursor changes the returned type to the generic {@link Document} type.
+   * You should specify a parameterized type to have assertions on your final results.
+   *
+   * @example
+   * ```typescript
+   * // Best way
+   * const docs: AggregationCursor<{ a: number }> = cursor.project<{ a: number }>({ _id: 0, a: true });
+   * // Flexible way
+   * const docs: AggregationCursor<Document> = cursor.project({ _id: 0, a: true });
+   * ```
+   *
+   * @remarks
+   * In order to strictly type this function you must provide an interface
+   * that represents the effect of your projection on the result documents.
+   *
+   * Adding a projection changes the return type of the iteration of this cursor,
    * it **does not** return a new instance of a cursor. This means when calling project,
    * you should always assign the result to a new variable. Take note of the following example:
    *
    * @example
    * ```typescript
    * const cursor: AggregationCursor<{ a: number; b: string }> = coll.aggregate([]);
-   * const projectCursor = cursor.project<{ a: number }>({ a: true });
+   * const projectCursor = cursor.project<{ a: number }>({ _id: 0, a: true });
    * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   *
+   * // or always use chaining and save the final cursor
+   *
+   * const cursor = coll.aggregate().project<{ a: string }>({
+   *   _id: 0,
+   *   a: { $convert: { input: '$a', to: 'string' }
+   * }});
    * ```
    */
-  project<T = TSchema>($project: Projection<T>): AggregationCursor<T>;
-  project($project: Document): this {
+  project<T extends Document = Document>($project: Document): AggregationCursor<T> {
     assertUninitialized(this);
     this[kPipeline].push({ $project });
-    return this;
+    return (this as unknown) as AggregationCursor<T>;
   }
 
   /** Add a lookup stage to the aggregation pipeline */

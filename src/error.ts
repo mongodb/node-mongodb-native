@@ -136,12 +136,28 @@ export class MongoServerError extends MongoError {
   codeName?: string;
   writeConcernError?: Document;
   ok?: number;
-  // [key: string]: any;
+  topologyVersion?: TopologyVersion;
+  [key: string]: any;
 
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
     if (message.errorLabels) {
       this[kErrorLabels] = new Set(message.errorLabels);
+    }
+
+    this.code = message.code;
+    this.codeName = message.codeName;
+    this.writeConcernError = message.writeConcernError;
+    this.ok = message.ok;
+    this.topologyVersion = message.topologyVersion;
+
+    const propsToFilter = new Set(Object.getOwnPropertyNames(this));
+    propsToFilter.add('errorLabels');
+    propsToFilter.add('errmsg');
+    propsToFilter.add('message');
+
+    for (const name in message) {
+      if (!propsToFilter.has(name)) this[name] = message[name];
     }
 
     this.code = message.code;
