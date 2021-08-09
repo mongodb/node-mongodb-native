@@ -14,7 +14,6 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
-const { once } = require('events');
 
 chai.use(require('chai-subset'));
 
@@ -100,18 +99,6 @@ function triggerResumableError(changeStream, delay, onClose) {
  * @param {Function} callback
  */
 function waitForStarted(changeStream, callback) {
-  if (!callback) {
-    let timeout;
-    return Promise.race([
-      once(changeStream, 'init').then(() => clearTimeout(timeout)),
-      new Promise((_, reject) => {
-        timeout = setTimeout(() => {
-          reject(new Error('Change stream never started'));
-        }, 2000);
-      })
-    ]);
-  }
-
   const timeout = setTimeout(() => {
     expect.fail('Change stream never started');
   }, 2000);
@@ -1814,7 +1801,6 @@ describe('Change Streams', function () {
 
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
-      await waitForStarted(changeStream);
     });
 
     afterEach(async function () {
