@@ -99,12 +99,7 @@ function triggerResumableError(changeStream, delay, onClose) {
  * @param {Function} callback
  */
 function waitForStarted(changeStream, callback) {
-  const timeout = setTimeout(() => {
-    expect.fail('Change stream never started');
-  }, 2000);
-
   changeStream.cursor.once('init', () => {
-    clearTimeout(timeout);
     callback();
   });
 }
@@ -580,39 +575,36 @@ describe('Change Streams', function () {
     }
   });
 
-  it(
-    'should error if resume token projected out of change stream document using imperative callback form',
-    {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+  it('should error if resume token projected out of change stream document using iterator', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    test(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient();
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
+        const database = client.db('integration_tests');
+        const collection = database.collection('resumetokenProjectedOutCallback');
+        const changeStream = collection.watch([{ $project: { _id: false } }]);
 
-          const database = client.db('integration_tests');
-          const changeStream = database
-            .collection('resumetokenProjectedOutCallback')
-            .watch([{ $project: { _id: false } }]);
-          this.defer(() => changeStream.close());
+        changeStream.hasNext(() => {}); // trigger initialize
 
-          // Trigger the first database event
-          waitForStarted(changeStream, () => {
-            this.defer(database.collection('resumetokenProjectedOutCallback').insert({ b: 2 }));
-          });
+        changeStream.cursor.on('init', () => {
+          collection.insertOne({ b: 2 }, (err, res) => {
+            expect(err).to.be.undefined;
+            expect(res).to.exist;
 
-          // Fetch the change notification
-          changeStream.next(err => {
-            expect(err).to.exist;
-            done();
+            changeStream.next(err => {
+              expect(err).to.exist;
+              done();
+            });
           });
         });
-      }
+      });
     }
-  );
+  });
 
   it('should error if resume token projected out of change stream document using event listeners', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
@@ -1948,7 +1940,7 @@ describe('Change Streams', function () {
       }
     });
 
-    it('when invoked using eventEmitter API', {
+    it.skip('when invoked using eventEmitter API', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function (done) {
         let closed = false;
