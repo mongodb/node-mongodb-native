@@ -5,7 +5,7 @@ const { MongoNetworkError } = require('../../src/error');
 const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const co = require('co');
 const mock = require('../tools/mock');
-const { EventCollector } = require('../tools/utils');
+const { EventCollector, getSymbolFrom } = require('../tools/utils');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
@@ -103,13 +103,12 @@ function waitForStarted(changeStream, callback) {
   if (!callback) {
     let timeout;
     return Promise.race([
-      new Promise(resolve => {
+      once(changeStream, 'init').then(() => clearTimeout(timeout)),
+      new Promise((_, reject) => {
         timeout = setTimeout(() => {
-          clearTimeout(timeout);
-          resolve();
+          reject(new Error('Change stream never started'));
         }, 2000);
-      }),
-      once(changeStream, 'init').then(() => clearTimeout(timeout))
+      })
     ]);
   }
 
@@ -1807,8 +1806,6 @@ describe('Change Streams', function () {
   });
 
   describe('should error when used as iterator and emitter concurrently', function () {
-    this.timeout(30000); // These tests await change streams, we can fail earlier if they do not immediately return
-
     let client, coll, changeStream;
 
     beforeEach(async function () {
@@ -1831,77 +1828,44 @@ describe('Change Streams', function () {
       }
     });
 
-    it(
-      'should throw MongoDriverError when set as an emitter with "on" and used as an iterator with "hasNext"',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          const change = new Promise(resolve => changeStream.on('change', resolve));
-          await coll.insertOne({ c: 1 });
-          expect(await change).to.be.an('object');
-          try {
-            await changeStream.hasNext().catch(err => {
-              expect.fail(err.message);
-            });
-          } catch (error) {
-            return expect(error.message).to.be.match(/Cannot use ChangeStream as iterator/);
-          }
-          expect.fail('Should not reach here');
-        }
-      }
-    );
+    it(`should throw when mixing event listeners with iterator methods`, {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      async test() {
+        const kMode = getSymbolFrom(changeStream, 'mode');
+        expect(changeStream).to.have.property(kMode, false);
+        // ChangeStream detects emitter usage via 'newListener' event
+        // so this covers all emitter methods
+        changeStream.on('change', () => {});
+        expect(changeStream).to.have.property(kMode, 'emitter');
 
-    it(
-      'should throw MongoDriverError when set as an iterator with "hasNext" and used as an emitter with "on"',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          const hasNext = changeStream.hasNext();
-          await coll.insertOne({ c: 1 });
-          await hasNext;
-          try {
-            await new Promise(resolve => changeStream.on('change', resolve));
-          } catch (error) {
-            return expect(error.message).to.match(/Cannot use ChangeStream as an EventEmitter/);
-          }
-          expect.fail('Should not reach here');
-        }
+        // These all throw synchronously so it should be safe to not await the results
+        expect(() => {
+          changeStream.next();
+        }).to.throw(/Cannot use ChangeStream as iterator/);
+        expect(() => {
+          changeStream.hasNext();
+        }).to.throw(/Cannot use ChangeStream as iterator/);
+        expect(() => {
+          changeStream.tryNext();
+        }).to.throw(/Cannot use ChangeStream as iterator/);
       }
-    );
+    });
 
-    it(
-      'should throw MongoDriverError when set as an emitter with "once" and used as an iterator with "next"',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          changeStream.once('change', () => {});
-          try {
-            await changeStream.next(); // This will block if our error doesn't throw
-          } catch (error) {
-            return expect(error.message).to.match(/Cannot use ChangeStream as iterator/);
-          }
-          expect.fail('Should not reach here');
-        }
-      }
-    );
+    it(`should throw when mixing iterator methods with event listeners`, {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      async test() {
+        const kMode = getSymbolFrom(changeStream, 'mode');
+        expect(changeStream).to.have.property(kMode, false);
+        const res = await changeStream.tryNext();
+        expect(res).to.not.exist;
+        expect(changeStream).to.have.property(kMode, 'iterator');
 
-    it(
-      'should throw MongoDriverError when set as an iterator with "tryNext" and used as an emitter with "on"',
-      {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-        test: async function () {
-          const change = changeStream.tryNext();
-          await coll.insertOne({ c: 1 });
-          expect(await change).to.be.an('object');
-          try {
-            await new Promise(resolve => changeStream.on('change', resolve));
-          } catch (error) {
-            return expect(error.message).to.match(/Cannot use ChangeStream as an EventEmitter/);
-          }
-          expect.fail('Should not reach here');
-        }
+        // This does not throw synchronously
+        expect(() => {
+          changeStream.on('change', () => {});
+        }).to.throw(/Cannot use ChangeStream as an EventEmitter/);
       }
-    );
+    });
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function () {
