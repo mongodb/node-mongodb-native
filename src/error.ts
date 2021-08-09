@@ -159,19 +159,6 @@ export class MongoServerError extends MongoError {
     for (const name in message) {
       if (!propsToFilter.has(name)) this[name] = message[name];
     }
-
-    this.code = message.code;
-    this.codeName = message.codeName;
-    this.writeConcernError = message.writeConcernError;
-    this.ok = message.ok;
-
-    // for (const [name, value] of Object.entries(message)) {
-    //   if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-    //     continue;
-    //   }
-
-    //   this[name] = value;
-    // }
   }
 
   get name(): string {
