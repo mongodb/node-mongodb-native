@@ -1948,7 +1948,7 @@ describe('Change Streams', function () {
       }
     });
 
-    it.skip('when invoked using eventEmitter API', {
+    it('when invoked using eventEmitter API', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       test: function (done) {
         let closed = false;
