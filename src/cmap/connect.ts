@@ -8,7 +8,6 @@ import {
   MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoServerError,
-  MongoRuntimeError,
   MongoDriverError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
