@@ -70,7 +70,10 @@ export class InsertOneOperation extends InsertOperation {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
+      if (res.writeErrors) {
+        // This should be a WriteError but we can't change it now because of error hierarchy
+        return callback(new MongoServerError(res.writeErrors[0]));
+      }
 
       callback(undefined, {
         acknowledged: this.writeConcern?.w !== 0 ?? true,
