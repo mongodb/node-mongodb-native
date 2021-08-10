@@ -2007,7 +2007,7 @@ describe('Change Streams', function () {
           if (counter === 2) {
             changeStream.close(close);
           } else if (counter >= 3) {
-            expect.fail('Should not have received more than 2 events');
+            close(new Error('Should not have received more than 2 events'));
           }
         });
         changeStream.on('error', err => close(err));
