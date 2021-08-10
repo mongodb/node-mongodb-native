@@ -1,6 +1,6 @@
 import { Duplex, DuplexOptions } from 'stream';
 import { Response, Msg, BinMsg, Query, WriteProtocolMessageType, MessageHeader } from './commands';
-import { MongoDriverError, MongoParseError } from '../error';
+import { MongoDecompressionError, MongoParseError } from '../error';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 import {
   compress,
@@ -191,9 +191,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
     if (messageBody.length !== messageHeader.length) {
       callback(
-        new MongoDriverError(
-          'Decompressing a compressed message from the server failed. The message is corrupt.'
-        )
+        new MongoDecompressionError('Message body and message header must be the same length')
       );
 
       return;

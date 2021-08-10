@@ -189,7 +189,7 @@ export class MongoDriverError extends MongoError {
  */
 
 export class MongoAPIError extends MongoDriverError {
-  protected constructor(message: string) {
+  constructor(message: string) {
     super(message);
   }
 
@@ -209,7 +209,7 @@ export class MongoAPIError extends MongoDriverError {
  * @category Error
  */
 export class MongoRuntimeError extends MongoDriverError {
-  protected constructor(message: string) {
+  constructor(message: string) {
     super(message);
   }
 
@@ -232,39 +232,6 @@ export class MongoBatchReExecutionError extends MongoAPIError {
 
   get name(): string {
     return 'MongoBatchReExecutionError';
-  }
-}
-
-/**
- * An error generated when the user supplies an incorrect URI to the driver.
- *
- * @public
- * @category Error
- */
-export class MongoURIError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoURIError';
-  }
-}
-
-/**
- * An error generated when the driver fails to compress data
- * before sending it to the server.
- *
- * @public
- * @category Error
- */
-export class MongoCompressionError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoCompressionError';
   }
 }
 
