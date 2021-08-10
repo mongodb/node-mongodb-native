@@ -1,15 +1,8 @@
 import { Writable } from 'stream';
-import {
-  MongoError,
-  AnyError,
-  MongoAPIError,
-  MONGODB_ERROR_CODES,
-  MongoGridFSStreamError
-} from '../error';
+import { MongoError, AnyError, MongoAPIError, MONGODB_ERROR_CODES } from '../error';
 import { WriteConcern } from './../write_concern';
-import { PromiseProvider } from '../promise_provider';
 import { ObjectId } from '../bson';
-import type { Callback } from '../utils';
+import { Callback, maybePromise } from '../utils';
 import type { Document } from '../bson';
 import type { GridFSBucket } from './index';
 import type { GridFSFile } from './download';
@@ -149,27 +142,23 @@ export class GridFSBucketWriteStream extends Writable {
   abort(): Promise<void>;
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
-    const Promise = PromiseProvider.get();
-    let error: MongoGridFSStreamError;
-    if (this.state.streamEnd) {
-      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-      error = new MongoAPIError('Cannot abort a stream that has already completed');
-      if (typeof callback === 'function') {
-        return callback(error);
+    return maybePromise(callback, done => {
+      if (this.state.streamEnd) {
+        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+        return done(new MongoAPIError('Cannot abort a stream that has already completed'));
       }
-      return Promise.reject(error);
-    }
-    if (this.state.aborted) {
-      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-      error = new MongoAPIError('Cannot call abort() on a stream twice');
-      if (typeof callback === 'function') {
-        return callback(error);
+
+      if (this.state.aborted) {
+        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+        return done(new MongoAPIError('Cannot call abort() on a stream twice'));
       }
-      return Promise.reject(error);
-    }
-    this.state.aborted = true;
-    this.chunks.deleteMany({ files_id: this.id }, error => {
-      if (typeof callback === 'function') callback(error);
+
+      this.state.aborted = true;
+      this.chunks.deleteMany({ files_id: this.id }, error => {
+        return done(error);
+      });
+
+      return done();
     });
   }
 

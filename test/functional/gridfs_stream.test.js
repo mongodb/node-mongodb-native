@@ -463,13 +463,9 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 expect(c).to.equal(0);
                 uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal(
-                    'MongoStreamClosedError: Stream has been aborted'
-                  );
+                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
                   uploadStream.end('c', 'utf8', function (error) {
-                    expect(error.toString()).to.equal(
-                      'MongoStreamClosedError: Stream has been aborted'
-                    );
+                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
                       expect(error.toString()).to.equal(
@@ -517,13 +513,9 @@ describe('GridFS Stream', function () {
                 expect(error).to.not.exist;
                 expect(c).to.equal(0);
                 uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal(
-                    'MongoStreamClosedError: Stream has been aborted'
-                  );
+                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
                   uploadStream.end('c', 'utf8', function (error) {
-                    expect(error.toString()).to.equal(
-                      'MongoStreamClosedError: Stream has been aborted'
-                    );
+                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {
                       expect(error.toString()).to.equal(
@@ -1174,14 +1166,10 @@ describe('GridFS Stream', function () {
                 expect(c).to.equal(0);
 
                 uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal(
-                    'MongoStreamClosedError: Stream has been aborted'
-                  );
+                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
 
                   uploadStream.end(function (error) {
-                    expect(error.toString()).to.equal(
-                      'MongoStreamClosedError: Stream has been aborted'
-                    );
+                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
 
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function (error) {

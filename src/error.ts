@@ -409,7 +409,7 @@ export class MongoCursorInUseError extends MongoAPIError {
  * @category Error
  */
 export class MongoServerClosedError extends MongoAPIError {
-  constructor(message: string) {
+  constructor(message = 'Server has been closed') {
     super(message);
   }
 
@@ -442,7 +442,7 @@ export class MongoCursorExhaustedError extends MongoAPIError {
  * @category Error
  */
 export class MongoTopologyClosedError extends MongoAPIError {
-  constructor(message: string) {
+  constructor(message = 'Topology has been closed') {
     super(message);
   }
 
