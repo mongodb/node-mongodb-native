@@ -8,6 +8,7 @@ import { executeOperationAndCheck } from './operations';
 import { matchesEvents } from './match';
 import { satisfies as semverSatisfies } from 'semver';
 import { MongoClient } from '../../../src/mongo_client';
+import { TopologyType } from '../../../src/sdam/common';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
@@ -143,11 +144,8 @@ export async function runUnifiedTest(
     // test runners MUST execute a non-transactional distinct command on
     // each mongos server before running any test that might execute distinct within a transaction.
     // To ease the implementation, test runners MAY execute distinct before every test.
-    if (
-      ctx.topologyType === uni.TopologyType.sharded ||
-      ctx.topologyType === uni.TopologyType.shardedReplicaset ||
-      ctx.topologyType === uni.TopologyType.loadBalanced
-    ) {
+    const topologyType = ctx.configuration.topologyType;
+    if (topologyType === TopologyType.Sharded || topologyType === TopologyType.LoadBalanced) {
       for (const [, collection] of entities.mapOf('collection')) {
         await utilClient.db(ns(collection.namespace).db).command({
           distinct: collection.collectionName,
