@@ -16,8 +16,7 @@ import {
   MongoServerError,
   AnyError,
   MongoExpiredSessionError,
-  MongoTransactionError,
-  MongoAPIError
+  MongoTransactionError
 } from './error';
 import {
   now,
@@ -378,7 +377,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     assertAlive(this);
     if (this.inTransaction()) {
-      throw new MongoAPIError('Transaction already in progress');
+      throw new MongoTransactionError('Transaction already in progress');
     }
 
     if (this.isPinned && this.transaction.isCommitted) {
