@@ -16,7 +16,8 @@ import {
   MongoServerError,
   AnyError,
   MongoExpiredSessionError,
-  MongoTransactionError
+  MongoTransactionError,
+  MongoRuntimeError
 } from './error';
 import {
   now,
@@ -43,7 +44,7 @@ const minWireVersionForShardedTransactions = 8;
 
 function assertAlive(session: ClientSession, callback?: Callback): boolean {
   if (session.serverSession == null) {
-    const error = new MongoExpiredSessionError('Cannot use a session that has ended');
+    const error = new MongoExpiredSessionError();
     if (typeof callback === 'function') {
       callback(error);
       return false;
@@ -444,7 +445,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   toBSON(): never {
     // TODO(NODE-3484): Replace with MongoBSONParseError
-    throw new MongoDriverError('ClientSession cannot be serialized to BSON.');
+    throw new MongoRuntimeError('ClientSession cannot be serialized to BSON.');
   }
 
   /**
@@ -960,7 +961,7 @@ export function applySession(
 ): MongoDriverError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
-    return new MongoExpiredSessionError('Cannot use a session that has ended');
+    return new MongoExpiredSessionError();
   }
 
   const serverSession = session.serverSession;

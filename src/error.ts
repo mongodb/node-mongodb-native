@@ -294,7 +294,7 @@ export class MongoTransactionError extends MongoAPIError {
  * @category Error
  */
 export class MongoExpiredSessionError extends MongoAPIError {
-  constructor(message: string) {
+  constructor(message = 'Cannot use a session that has ended') {
     super(message);
   }
 
