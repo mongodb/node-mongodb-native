@@ -112,10 +112,9 @@ export class UnifiedMongoClient extends MongoClient {
     return connectionString.toString();
   }
 
-  constructor(url: string, description: ClientEntity) {
-    super(UnifiedMongoClient.connectionString(url, description.uriOptions), {
+  constructor(uri: string, description: ClientEntity) {
+    super(UnifiedMongoClient.connectionString(uri, description.uriOptions), {
       monitorCommands: true,
-      ...description.uriOptions,
       serverApi: description.serverApi ? description.serverApi : serverApiConfig()
     });
 
