@@ -49,7 +49,11 @@ export {
   MongoGridFSStreamError,
   MongoGridFSChunkError,
   MongoCompressionError,
-  MongoDecompressionError
+  MongoDecompressionError,
+  MongoBatchReExecutionError,
+  MongoCursorExhaustedError,
+  MongoCursorInUseError,
+  MongoNotConnectedError
 } from './error';
 export { MongoBulkWriteError, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
 export {
