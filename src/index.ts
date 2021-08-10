@@ -48,7 +48,6 @@ export {
   MongoChangeStreamError,
   MongoGridFSStreamError,
   MongoGridFSChunkError,
-  MongoCompressionError,
   MongoDecompressionError,
   MongoBatchReExecutionError,
   MongoCursorExhaustedError,

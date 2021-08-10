@@ -236,23 +236,6 @@ export class MongoBatchReExecutionError extends MongoAPIError {
 }
 
 /**
- * An error generated when the driver fails to compress data
- * before sending it to the server.
- *
- * @public
- * @category Error
- */
-export class MongoCompressionError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoCompressionError';
-  }
-}
-
-/**
  * An error generated when the driver fails to decompress
  * data received from the server.
  *
