@@ -774,7 +774,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @deprecated This function is deprecated and will be removed in the 5.0 driver.
    */
   unref(): void {
-    emitWarning('not implemented: `unref`');
+    emitWarning('`unref` is a noop and will be removed in the next major version');
   }
 
   // NOTE: There are many places in code where we explicitly check the last isMaster
