@@ -6,7 +6,7 @@ import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
-import { MongoAPIError, MongoInvalidArgumentError, MongoParseError, MongoURIError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
 import {
   AnyOptions,
   Callback,
@@ -79,12 +79,12 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
     if (err) return callback(err);
 
     if (addresses.length === 0) {
-      return callback(new MongoURIError('No addresses found at host'));
+      return callback(new MongoAPIError('No addresses found at host'));
     }
 
     for (const { name } of addresses) {
       if (!matchesParentDomain(name, lookupAddress)) {
-        return callback(new MongoURIError('Server record does not share hostname with parent URI'));
+        return callback(new MongoAPIError('Server record does not share hostname with parent URI'));
       }
     }
 
@@ -286,7 +286,7 @@ export function parseOptions(
     const values = [...url.searchParams.getAll(key)];
 
     if (values.includes('')) {
-      throw new MongoURIError('URI cannot contain options with no value');
+      throw new MongoAPIError('URI cannot contain options with no value');
     }
 
     if (key.toLowerCase() === 'serverapi') {
@@ -401,7 +401,7 @@ export function parseOptions(
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
   if (mongoOptions.directConnection && typeof mongoOptions.srvHost === 'string') {
-    throw new MongoURIError('SRV URI does not support directConnection');
+    throw new MongoAPIError('SRV URI does not support directConnection');
   }
 
   const lbError = validateLoadBalancedOptions(hosts, mongoOptions);

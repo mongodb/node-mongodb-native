@@ -236,22 +236,6 @@ export class MongoBatchReExecutionError extends MongoAPIError {
 }
 
 /**
- * An error generated when the user supplies an incorrect URI to the driver.
- *
- * @public
- * @category Error
- */
-export class MongoURIError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  get name(): string {
-    return 'MongoURIError';
-  }
-}
-
-/**
  * An error generated when the driver fails to compress data
  * before sending it to the server.
  *

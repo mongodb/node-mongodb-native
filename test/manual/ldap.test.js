@@ -1,11 +1,10 @@
 'use strict';
 const { MongoClient } = require('../../src');
 const { expect } = require('chai');
-const { MongoURIError } = require('../../src/error');
 
 describe('LDAP', function () {
   if (process.env.MONGODB_URI == null) {
-    throw new MongoURIError(`skipping SSL tests, MONGODB_URI environment variable is not defined`);
+    throw new Error(`skipping SSL tests, MONGODB_URI environment variable is not defined`);
   }
 
   it('Should correctly authenticate against ldap', function (done) {

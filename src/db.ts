@@ -737,7 +737,7 @@ export class Db {
   }
 }
 
-// TODO(NODE-3483): Refactor into MongoDBNamespace
+// TODO(NODE-3484): Refactor into MongoDBNamespace
 // Validate the database name
 function validateDatabaseName(databaseName: string) {
   if (typeof databaseName !== 'string')

@@ -548,7 +548,7 @@ const CHANGE_STREAM_EVENTS = [
 
 function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'iterator') {
-    // TODO(NODE-3484): Replace with MongoChangeStreamModeError
+    // TODO(NODE-3485): Replace with MongoChangeStreamModeError
     throw new MongoAPIError(
       'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
