@@ -770,6 +770,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.state === STATE_CLOSED;
   }
 
+  /**
+   * @deprecated This function is deprecated and will be removed in the 5.0 driver.
+   */
   unref(): void {
     emitWarning('not implemented: `unref`');
   }
