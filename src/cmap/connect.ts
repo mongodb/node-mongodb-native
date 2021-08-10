@@ -285,8 +285,7 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   } else {
     // This should never happen since we set up HostAddresses
     // But if we don't throw here the socket could hang until timeout
-    // TODO(NODE-3484): Replace with a child of MongoParseError
-    throw new MongoRuntimeError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
+    throw new MongoDriverError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
   }
 }
 
