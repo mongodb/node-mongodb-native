@@ -1,3 +1,4 @@
+import { ServerApiVersion } from '../../../src';
 import type { Document, ObjectId } from '../../../src/bson';
 import type { ReadConcernLevel } from '../../../src/read_concern';
 import type { ReadPreferenceMode } from '../../../src/read_preference';
@@ -96,7 +97,7 @@ export type EntityDescription =
   | { stream: StreamEntity }
   | { session: SessionEntity };
 export interface ServerApi {
-  version: string;
+  version: ServerApiVersion;
   strict?: boolean;
   deprecationErrors?: boolean;
 }

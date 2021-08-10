@@ -322,6 +322,10 @@ export class Db {
   collection<TSchema extends Document = Document>(name: string): Collection<TSchema>;
   collection<TSchema extends Document = Document>(
     name: string,
+    options: CollectionOptions
+  ): Collection<TSchema>;
+  collection<TSchema extends Document = Document>(
+    name: string,
     options?: CollectionOptions
   ): Collection<TSchema> {
     if (!options) {

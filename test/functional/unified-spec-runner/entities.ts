@@ -4,7 +4,8 @@ import {
   Collection,
   GridFSBucket,
   Document,
-  HostAddress
+  HostAddress,
+  ServerApiVersion
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { WriteConcern } from '../../../src/write_concern';
@@ -33,6 +34,7 @@ import type {
 import { patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration, trace } from './runner';
+import ConnectionString from 'mongodb-connection-string-url';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -53,7 +55,7 @@ export type CmapEvent =
 
 function serverApiConfig() {
   if (process.env.MONGODB_API_VERSION) {
-    return { version: process.env.MONGODB_API_VERSION };
+    return { version: process.env.MONGODB_API_VERSION as ServerApiVersion };
   }
 }
 
@@ -102,12 +104,21 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
+  static connectionString(uri: string, uriOptions = {}): string {
+    const connectionString = new ConnectionString(uri);
+    for (const [name, value] of Object.entries(uriOptions ?? {})) {
+      connectionString.searchParams.set(name, String(value));
+    }
+    return connectionString.toString();
+  }
+
   constructor(url: string, description: ClientEntity) {
-    super(url, {
+    super(UnifiedMongoClient.connectionString(url, description.uriOptions), {
       monitorCommands: true,
       ...description.uriOptions,
       serverApi: description.serverApi ? description.serverApi : serverApiConfig()
     });
+
     this.commandEvents = [];
     this.cmapEvents = [];
     this.failPoints = [];
