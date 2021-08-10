@@ -142,23 +142,19 @@ export class GridFSBucketWriteStream extends Writable {
   abort(): Promise<void>;
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
-    return maybePromise(callback, done => {
+    return maybePromise(callback, callback => {
       if (this.state.streamEnd) {
         // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
-        return done(new MongoAPIError('Cannot abort a stream that has already completed'));
+        return callback(new MongoAPIError('Cannot abort a stream that has already completed'));
       }
 
       if (this.state.aborted) {
         // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
-        return done(new MongoAPIError('Cannot call abort() on a stream twice'));
+        return callback(new MongoAPIError('Cannot call abort() on a stream twice'));
       }
 
       this.state.aborted = true;
-      this.chunks.deleteMany({ files_id: this.id }, error => {
-        return done(error);
-      });
-
-      return done();
+      this.chunks.deleteMany({ files_id: this.id }, error => callback(error));
     });
   }
 
