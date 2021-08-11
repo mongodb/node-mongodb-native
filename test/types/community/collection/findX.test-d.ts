@@ -1,7 +1,6 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document, Collection, Db } from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
-import type { PropExists } from '../../utility_types';
 
 // collection.findX tests
 const client = new MongoClient('');
@@ -91,16 +90,18 @@ expectType<Bag | undefined>(
   await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } })
 );
 
-const overrideFind = await collectionBag.findOne<{ cost: number }>(
-  { color: 'white' },
-  { projection: { cost: 1 } }
-);
-expectType<PropExists<typeof overrideFind, 'color'>>(false);
+// NODE-3468 Overriding the return type with a generic is not permitted
+// const overrideFind = await collectionBag.findOne<{ cost: number }>(
+//   { color: 'white' },
+//   { projection: { cost: 1 } }
+// );
+// expectType<PropExists<typeof overrideFind, 'color'>>(false);
 
 // Overriding findOne, makes the return that exact type
-expectType<{ cost: number } | undefined>(
-  await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
-);
+// NODE-3468 Overriding the return type with a generic is not permitted
+// expectType<{ cost: number } | undefined>(
+//   await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
+// );
 
 interface Car {
   make: string;
@@ -182,16 +183,22 @@ expectType<FindCursor<{ lists: ReadonlyArray<string> }>>(
 );
 
 // Before NODE-3452's fix we would get this strange result that included the filter shape joined with the actual schema
+// NODE-3468 Overriding the return type with a generic is not permitted
 expectNotType<FindCursor<{ color: string | { $in: ReadonlyArray<string> } }>>(
   colorCollection.find({ color: { $in: colorsFreeze } })
 );
 
-// This is related to another bug that will be fixed in NODE-3454
-expectType<FindCursor<{ color: { $in: number } }>>(colorCollection.find({ color: { $in: 3 } }));
+// NODE-3454: Using the incorrect $in value doesn't mess with the resulting schema
+expectNotType<FindCursor<{ color: { $in: number } }>>(
+  colorCollection.find({ color: { $in: 3 as any } }) // `as any` is to let us make this mistake and still show the result type isn't broken
+);
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: 3 as any } }));
 
 // When you use the override, $in doesn't permit readonly
-colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
-colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+// NODE-3468 Overriding the return type with a generic is not permitted
+// colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
+// colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+
 // This is a regression test that we don't remove the unused generic in FindOptions
 const findOptions: FindOptions<{ a: number }> = {};
 expectType<FindOptions>(findOptions);

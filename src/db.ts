@@ -289,7 +289,10 @@ export class Db {
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command
    */
-  aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
+  aggregate<T = Document>(
+    pipeline: Document[] = [],
+    options?: AggregateOptions
+  ): AggregationCursor<T> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError('Method "db.aggregate()" accepts at most two arguments');
     }
@@ -366,17 +369,12 @@ export class Db {
     filter: Document,
     options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: false }
   ): ListCollectionsCursor<CollectionInfo>;
-  listCollections<
-    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
-      | Pick<CollectionInfo, 'name' | 'type'>
-      | CollectionInfo
-  >(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor<T>;
-  listCollections<
-    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
-      | Pick<CollectionInfo, 'name' | 'type'>
-      | CollectionInfo
-  >(filter: Document = {}, options: ListCollectionsOptions = {}): ListCollectionsCursor<T> {
-    return new ListCollectionsCursor<T>(this, filter, resolveOptions(this, options));
+  listCollections(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor;
+  listCollections(
+    filter: Document = {},
+    options: ListCollectionsOptions = {}
+  ): ListCollectionsCursor {
+    return new ListCollectionsCursor(this, filter, resolveOptions(this, options));
   }
 
   /**
