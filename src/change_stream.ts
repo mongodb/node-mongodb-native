@@ -58,7 +58,7 @@ const CHANGE_DOMAIN_TYPES = {
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
-const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream has been closed';
+const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /** @public */
 export interface ResumeOptions {
@@ -558,8 +558,9 @@ function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
 
 function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'emitter') {
+    // TODO(NODE-3485): Replace with MongoChangeStreamModeError
     throw new MongoAPIError(
-      'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
+      'ChangeStream cannot be used as an iterator after being used as an EventEmitter'
     );
   }
   changeStream[kMode] = 'iterator';
@@ -683,7 +684,7 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
-    // TODO(NODE-3485): Replace with MongoChangeStreamStreamClosedError
+    // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
     if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }

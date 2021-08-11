@@ -444,7 +444,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * This is here to ensure that ClientSession is never serialized to BSON.
    */
   toBSON(): never {
-    // TODO(NODE-3484): Replace with MongoBSONParseError
     throw new MongoRuntimeError('ClientSession cannot be serialized to BSON.');
   }
 
