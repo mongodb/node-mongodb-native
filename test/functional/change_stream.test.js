@@ -1804,6 +1804,9 @@ describe('Change Streams', function () {
       if (client) {
         await client.close();
       }
+      client = undefined;
+      coll = undefined;
+      changeStream = undefined;
     });
 
     it(`should throw when mixing event listeners with iterator methods`, {
