@@ -1,5 +1,9 @@
 'use strict';
 
+require('source-map-support').install({
+  hookRequire: true
+});
+
 const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../src');

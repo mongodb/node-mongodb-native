@@ -326,29 +326,31 @@ export function expectErrorCheck(
     return;
   }
 
+  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+
   if (expected.errorContains != null) {
-    expect(error.message).to.include(expected.errorContains);
+    expect(error.message, expectMessage).to.include(expected.errorContains);
   }
 
   if (!(error instanceof MongoError)) {
     // if statement asserts type for TS, expect will always fail
-    expect(error).to.be.instanceOf(MongoError);
+    expect(error, expectMessage).to.be.instanceOf(MongoError);
     return;
   }
 
   if (expected.errorCode != null) {
-    expect(error).to.have.property('code', expected.errorCode);
+    expect(error, expectMessage).to.have.property('code', expected.errorCode);
   }
 
   if (expected.errorCodeName != null) {
-    expect(error).to.have.property('codeName', expected.errorCodeName);
+    expect(error, expectMessage).to.have.property('codeName', expected.errorCodeName);
   }
 
   if (expected.errorLabelsContain != null) {
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}]`
+        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
       ).to.be.true;
     }
   }
@@ -357,7 +359,7 @@ export function expectErrorCheck(
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
         error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}]`
+        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
       ).to.be.false;
     }
   }

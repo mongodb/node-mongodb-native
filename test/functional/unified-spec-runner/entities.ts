@@ -31,10 +31,9 @@ import type {
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { patchCollectionOptions, patchDbOptions } from './unified-utils';
+import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration, trace } from './runner';
-import ConnectionString from 'mongodb-connection-string-url';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -104,16 +103,8 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  static connectionString(uri: string, uriOptions = {}): string {
-    const connectionString = new ConnectionString(uri);
-    for (const [name, value] of Object.entries(uriOptions ?? {})) {
-      connectionString.searchParams.set(name, String(value));
-    }
-    return connectionString.toString();
-  }
-
   constructor(uri: string, description: ClientEntity) {
-    super(UnifiedMongoClient.connectionString(uri, description.uriOptions), {
+    super(uri, {
       monitorCommands: true,
       serverApi: description.serverApi ? description.serverApi : serverApiConfig()
     });
@@ -339,7 +330,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = config.url({ useMultipleMongoses });
+        const uri = makeConnectionString(
+          config.url({ useMultipleMongoses }),
+          entity.client.uriOptions
+        );
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);
