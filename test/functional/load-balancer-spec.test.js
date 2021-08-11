@@ -16,9 +16,8 @@ const SKIP = [
   'pinned connections are not returned after an network error during getMore',
   'pinned connections are not returned to the pool after a non-network error on getMore',
   'stale errors are ignored',
-  // NOTE: The driver correctly fails these 2 tests in non LB mode due to validation that
-  // loadBalanced=true is only valid as a URI option and not a regular driver option according
-  // to the spec. In versions that are 3.4 or less an error still occurs but a different one (connection closes).
+  // NOTE: The driver correctly fails these 2 tests in non LB mode for server versions greater than 3.4.
+  // In versions that are 3.4 or less an error still occurs but a different one (connection closes).
   // TODO(NODE-3543): fix the path-ing that will produce errors for older servers
   'operations against non-load balanced clusters fail if URI contains loadBalanced=true',
   'operations against non-load balanced clusters succeed if URI contains loadBalanced=false'
