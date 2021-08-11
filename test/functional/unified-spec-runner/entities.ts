@@ -4,7 +4,8 @@ import {
   Collection,
   GridFSBucket,
   Document,
-  HostAddress
+  HostAddress,
+  ServerApiVersion
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { WriteConcern } from '../../../src/write_concern';
@@ -30,7 +31,7 @@ import type {
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { patchCollectionOptions, patchDbOptions } from './unified-utils';
+import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { TestConfiguration, trace } from './runner';
 
@@ -53,7 +54,7 @@ export type CmapEvent =
 
 function serverApiConfig() {
   if (process.env.MONGODB_API_VERSION) {
-    return { version: process.env.MONGODB_API_VERSION };
+    return { version: process.env.MONGODB_API_VERSION as ServerApiVersion };
   }
 }
 
@@ -102,12 +103,12 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  constructor(url: string, description: ClientEntity) {
-    super(url, {
+  constructor(uri: string, description: ClientEntity) {
+    super(uri, {
       monitorCommands: true,
-      ...description.uriOptions,
       serverApi: description.serverApi ? description.serverApi : serverApiConfig()
     });
+
     this.commandEvents = [];
     this.cmapEvents = [];
     this.failPoints = [];
@@ -329,7 +330,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = config.url({ useMultipleMongoses });
+        const uri = makeConnectionString(
+          config.url({ useMultipleMongoses }),
+          entity.client.uriOptions
+        );
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);

@@ -169,7 +169,6 @@ functions:
           TOPOLOGY="${TOPOLOGY}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
-          TEST_NPM_SCRIPT="check:load-balancer" \
           FAKE_MONGODB_SERVICE_ID="true" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:

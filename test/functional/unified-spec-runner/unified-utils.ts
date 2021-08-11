@@ -5,6 +5,7 @@ import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
 import { TestConfiguration } from './runner';
+import ConnectionString from 'mongodb-connection-string-url';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
@@ -97,4 +98,15 @@ export function translateOptions(options: Document): Document {
     translatedOptions.returnDocument = options.returnDocument.toLowerCase();
   }
   return translatedOptions as Document;
+}
+
+export function makeConnectionString(
+  uri: string,
+  uriOptions: Record<string, unknown> = {}
+): string {
+  const connectionString = new ConnectionString(uri);
+  for (const [name, value] of Object.entries(uriOptions ?? {})) {
+    connectionString.searchParams.set(name, String(value));
+  }
+  return connectionString.toString();
 }
