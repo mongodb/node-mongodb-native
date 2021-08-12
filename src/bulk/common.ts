@@ -335,31 +335,25 @@ export class BulkWriteResult {
  * @category Error
  */
 export class WriteConcernError {
-  errCode: number;
-  errMsg: string;
-  errDetails?: Document;
-  [kErr]: { code: number; errmsg: string; errInfo?: Document };
+  [kErr]: Document;
 
   constructor(error: { code: number; errmsg: string; errInfo?: Document }) {
     this[kErr] = error;
-    this.errCode = error.code;
-    this.errMsg = error.errmsg;
-    this.errDetails = error.errInfo;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this.code;
+    return this[kErr].code;
   }
 
   /** Write concern error message. */
   get errmsg(): string | undefined {
-    return this.errmsg;
+    return this[kErr].errmsg;
   }
 
   /** Write concern error info. */
   get errInfo(): Document | undefined {
-    return this.errInfo;
+    return this[kErr].errInfo;
   }
 
   /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
