@@ -698,7 +698,10 @@ export class Db {
     );
   }
 
-  /** Unref all sockets */
+  /**
+   * Unref all sockets
+   * @deprecated This function is deprecated and will be removed in the next major version.
+   */
   unref(): void {
     getTopology(this).unref();
   }
