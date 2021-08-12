@@ -329,15 +329,23 @@ export class BulkWriteResult {
   }
 }
 
+/** @internal */
+export interface WriteConcernErrorData {
+  code: number;
+  errmsg: string;
+  errInfo?: Document;
+}
+
 /**
  * An error representing a failure by the server to apply the requested write concern to the bulk operation.
  * @public
  * @category Error
  */
 export class WriteConcernError {
-  [kErr]: Document;
+  [kErr]: WriteConcernErrorData;
 
-  constructor(error: { code: number; errmsg: string; errInfo?: Document }) {
+  /** @internal */
+  constructor(error: WriteConcernErrorData) {
     this[kErr] = error;
   }
 
@@ -357,12 +365,12 @@ export class WriteConcernError {
   }
 
   /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
-  get err(): { code: number; errmsg: string; errInfo?: Document } {
+  get err(): WriteConcernErrorData {
     return this[kErr];
   }
 
-  toJSON(): { code?: number; errmsg?: string; errInfo?: Document } {
-    return { code: this.code, errmsg: this.errmsg, errInfo: this.errInfo };
+  toJSON(): WriteConcernErrorData {
+    return this[kErr];
   }
 
   toString(): string {
