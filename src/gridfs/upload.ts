@@ -2,15 +2,8 @@ import { Writable } from 'stream';
 import type { Document } from '../bson';
 import { ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import {
-  AnyError,
-  MONGODB_ERROR_CODES,
-  MongoDriverError,
-  MongoError,
-  MongoGridFSStreamError
-} from '../error';
-import { PromiseProvider } from '../promise_provider';
-import type { Callback } from '../utils';
+import { AnyError, MONGODB_ERROR_CODES, MongoError, MongoAPIError } from '../error';
+import { Callback, maybePromise } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
@@ -149,27 +142,19 @@ export class GridFSBucketWriteStream extends Writable {
   abort(): Promise<void>;
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
-    const Promise = PromiseProvider.get();
-    let error: MongoGridFSStreamError;
-    if (this.state.streamEnd) {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      error = new MongoDriverError('Cannot abort a stream that has already completed');
-      if (typeof callback === 'function') {
-        return callback(error);
+    return maybePromise(callback, callback => {
+      if (this.state.streamEnd) {
+        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+        return callback(new MongoAPIError('Cannot abort a stream that has already completed'));
       }
-      return Promise.reject(error);
-    }
-    if (this.state.aborted) {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      error = new MongoDriverError('Cannot call abort() on a stream twice');
-      if (typeof callback === 'function') {
-        return callback(error);
+
+      if (this.state.aborted) {
+        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+        return callback(new MongoAPIError('Cannot call abort() on a stream twice'));
       }
-      return Promise.reject(error);
-    }
-    this.state.aborted = true;
-    this.chunks.deleteMany({ files_id: this.id }, error => {
-      if (typeof callback === 'function') callback(error);
+
+      this.state.aborted = true;
+      this.chunks.deleteMany({ files_id: this.id }, error => callback(error));
     });
   }
 
@@ -565,8 +550,8 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
 function checkAborted(stream: GridFSBucketWriteStream, callback?: Callback<void>): boolean {
   if (stream.state.aborted) {
     if (typeof callback === 'function') {
-      // TODO(NODE-3405): Replace with MongoStreamClosedError
-      callback(new MongoDriverError('this stream has been aborted'));
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
+      callback(new MongoAPIError('Stream has been aborted'));
     }
     return true;
   }
