@@ -226,8 +226,8 @@ export class MongoRuntimeError extends MongoDriverError {
  * @category Error
  */
 export class MongoBatchReExecutionError extends MongoAPIError {
-  constructor(message?: string) {
-    super(message || 'This batch has already been executed, create new batch to execute');
+  constructor(message = 'This batch has already been executed, create new batch to execute') {
+    super(message);
   }
 
   get name(): string {
@@ -343,8 +343,8 @@ export class MongoChangeStreamError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoTailableCursorError extends MongoAPIError {
-  constructor(message?: string) {
-    super(message || 'Tailable cursor does not support this operation');
+  constructor(message = 'Tailable cursor does not support this operation') {
+    super(message);
   }
 
   get name(): string {
@@ -392,8 +392,8 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoCursorInUseError extends MongoAPIError {
-  constructor(message?: string) {
-    super(message || 'Cursor is already initialized');
+  constructor(message = 'Cursor is already initialized') {
+    super(message);
   }
 
   get name(): string {
