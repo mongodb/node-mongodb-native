@@ -28,6 +28,9 @@ import type { CommandOperationOptions, CollationOptions } from '../operations/co
 import type { Hint } from '../operations/operation';
 import type { Filter, OneOrMore, OptionalId, UpdateFilter } from '../mongo_types';
 
+/** @internal */
+const kErr = Symbol('err');
+
 /** @public */
 export const BatchType = Object.freeze({
   INSERT: 1,
@@ -332,25 +335,36 @@ export class BulkWriteResult {
  * @category Error
  */
 export class WriteConcernError {
-  err: { code: number; errmsg: string; errInfo?: Document };
+  errCode: number;
+  errMsg: string;
+  errDetails?: Document;
+  [kErr]: { code: number; errmsg: string; errInfo?: Document };
 
-  constructor(err: { code: number; errmsg: string; errInfo?: Document }) {
-    this.err = err;
+  constructor(error: { code: number; errmsg: string; errInfo?: Document }) {
+    this[kErr] = error;
+    this.errCode = error.code;
+    this.errMsg = error.errmsg;
+    this.errDetails = error.errInfo;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this.err.code;
+    return this.code;
   }
 
   /** Write concern error message. */
   get errmsg(): string | undefined {
-    return this.err.errmsg;
+    return this.errmsg;
   }
 
   /** Write concern error info. */
   get errInfo(): Document | undefined {
-    return this.err.errInfo;
+    return this.errInfo;
+  }
+
+  /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
+  get err(): { code: number; errmsg: string; errInfo?: Document } {
+    return this[kErr];
   }
 
   toJSON(): { code?: number; errmsg?: string; errInfo?: Document } {

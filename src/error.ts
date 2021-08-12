@@ -146,20 +146,9 @@ export class MongoServerError extends MongoError {
       this[kErrorLabels] = new Set(message.errorLabels);
     }
 
-    this.code = message.code;
-    this.codeName = message.codeName;
-    this.writeConcernError = message.writeConcernError;
-    this.errInfo = message.errInfo;
-    this.ok = message.ok;
-    this.topologyVersion = message.topologyVersion;
-
-    const propsToFilter = new Set(Object.getOwnPropertyNames(this));
-    propsToFilter.add('errorLabels');
-    propsToFilter.add('errmsg');
-    propsToFilter.add('message');
-
     for (const name in message) {
-      if (!propsToFilter.has(name)) this[name] = message[name];
+      if (name !== 'errorLabels' && name !== 'errmsg' && name !== 'message')
+        this[name] = message[name];
     }
   }
 
