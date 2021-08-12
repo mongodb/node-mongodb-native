@@ -1956,7 +1956,7 @@ describe('Change Streams', function () {
 
         return Promise.all([read(), write()]).then(
           () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream has been closed')
+          err => expect(err.message).to.equal('ChangeStream is closed')
         );
       }
     });
@@ -1976,7 +1976,7 @@ describe('Change Streams', function () {
               try {
                 expect(err)
                   .property('message')
-                  .to.match(/ChangeStream has been closed/);
+                  .to.match(/ChangeStream is closed/);
                 Promise.all(ops).then(() => done(), done);
               } catch (e) {
                 done(e);
@@ -2887,7 +2887,7 @@ context('NODE-2626 - handle null changes without error', function () {
       changeStream.next((err, doc) => {
         expect(err).to.exist;
         expect(doc).to.not.exist;
-        expect(err.message).to.equal('ChangeStream has been closed');
+        expect(err.message).to.equal('ChangeStream is closed');
         changeStream.close(() => client.close(done));
       });
     });
