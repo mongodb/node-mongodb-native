@@ -33,7 +33,6 @@ import type {
 import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { getEnvironmentalOptions } from '../../tools/utils';
-import { MongoClientOptions } from '../../../src/mongo_client';
 import { TestConfiguration, trace } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
@@ -54,7 +53,7 @@ export type CmapEvent =
   | ConnectionPoolClearedEvent;
 
 function getClient(address) {
-  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions() as MongoClientOptions);
+  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
 type PushFunction = (e: CommandEvent | CmapEvent) => void;
