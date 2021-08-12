@@ -30,7 +30,7 @@ import type {
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { patchCollectionOptions, patchDbOptions } from './unified-utils';
+import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
 import { getEnvironmentalOptions } from '../../tools/utils';
 import { MongoClientOptions } from '../../../src/mongo_client';
@@ -97,13 +97,14 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  constructor(url: string, description: ClientEntity) {
-    super(url, {
+  constructor(uri: string, description: ClientEntity) {
+    super(uri, {
       monitorCommands: true,
       ...description.uriOptions,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
+
     this.commandEvents = [];
     this.cmapEvents = [];
     this.failPoints = [];
@@ -329,7 +330,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = config.url({ useMultipleMongoses });
+        const uri = makeConnectionString(
+          config.url({ useMultipleMongoses }),
+          entity.client.uriOptions
+        );
         const client = new UnifiedMongoClient(uri, entity.client);
         await client.connect();
         map.set(entity.client.id, client);

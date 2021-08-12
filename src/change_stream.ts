@@ -1,5 +1,12 @@
 import Denque = require('denque');
-import { MongoError, AnyError, isResumableError, MongoDriverError } from './error';
+import {
+  MongoError,
+  AnyError,
+  isResumableError,
+  MongoDriverError,
+  MongoAPIError,
+  MongoChangeStreamError
+} from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
   maxWireVersion,
@@ -259,9 +266,8 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
     } else {
-      // TODO(NODE-3404): Replace this with MongoChangeStreamError
-      throw new MongoDriverError(
-        'Parent provided to ChangeStream constructor must an instance of Collection, Db, or MongoClient'
+      throw new MongoChangeStreamError(
+        'Parent provided to ChangeStream constructor must be an instance of Collection, Db, or MongoClient'
       );
     }
 
@@ -365,8 +371,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    */
   stream(options?: CursorStreamOptions): Readable {
     this.streamOptions = options;
-    // TODO(NODE-3404): Replace this with MongoChangeStreamError
-    if (!this.cursor) throw new MongoDriverError(NO_CURSOR_ERROR);
+    if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
 
@@ -543,8 +548,9 @@ const CHANGE_STREAM_EVENTS = [
 
 function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'iterator') {
-    throw new MongoDriverError(
-      'Cannot use ChangeStream as an EventEmitter after using as an iterator'
+    // TODO(NODE-3485): Replace with MongoChangeStreamModeError
+    throw new MongoAPIError(
+      'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
   changeStream[kMode] = 'emitter';
@@ -552,8 +558,8 @@ function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
 
 function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'emitter') {
-    throw new MongoDriverError(
-      'Cannot use ChangeStream as iterator after using as an EventEmitter'
+    throw new MongoAPIError(
+      'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
     );
   }
   changeStream[kMode] = 'iterator';
@@ -630,6 +636,7 @@ function waitForTopologyConnected(
     }
 
     if (calculateDurationInMs(start) > timeout) {
+      // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
       return callback(new MongoDriverError('Timed out waiting for connection'));
     }
 
@@ -676,17 +683,23 @@ function processNewChange<TSchema>(
   callback?: Callback<ChangeStreamDocument<TSchema>>
 ) {
   if (changeStream[kClosed]) {
+    // TODO(NODE-3405): Replace with MongoStreamClosedError
     if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
 
   // a null change means the cursor has been notified, implicitly closing the change stream
   if (change == null) {
+    // TODO(NODE-3405): Replace with MongoStreamClosedError
     return closeWithError(changeStream, new MongoDriverError(CHANGESTREAM_CLOSED_ERROR), callback);
   }
 
   if (change && !change._id) {
-    return closeWithError(changeStream, new MongoDriverError(NO_RESUME_TOKEN_ERROR), callback);
+    return closeWithError(
+      changeStream,
+      new MongoChangeStreamError(NO_RESUME_TOKEN_ERROR),
+      callback
+    );
   }
 
   // cache the resume token
@@ -710,6 +723,7 @@ function processError<TSchema>(
 
   // If the change stream has been closed explicitly, do not process error.
   if (changeStream[kClosed]) {
+    // TODO(NODE-3405): Replace with MongoStreamClosedError
     if (callback) callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
@@ -770,6 +784,7 @@ function processError<TSchema>(
  */
 function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
   if (changeStream[kClosed]) {
+    // TODO(NODE-3405): Replace with MongoStreamClosedError
     callback(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
     return;
   }
@@ -795,11 +810,12 @@ function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: 
     const request = changeStream[kResumeQueue].pop();
     if (!err) {
       if (changeStream[kClosed]) {
+        // TODO(NODE-3405): Replace with MongoStreamClosedError
         request(new MongoDriverError(CHANGESTREAM_CLOSED_ERROR));
         return;
       }
       if (!changeStream.cursor) {
-        request(new MongoDriverError(NO_CURSOR_ERROR));
+        request(new MongoChangeStreamError(NO_CURSOR_ERROR));
         return;
       }
     }

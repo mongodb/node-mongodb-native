@@ -319,14 +319,11 @@ export class Db {
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance
    */
-  collection<TSchema extends Document = Document>(name: string): Collection<TSchema>;
   collection<TSchema extends Document = Document>(
     name: string,
-    options?: CollectionOptions
+    options: CollectionOptions = {}
   ): Collection<TSchema> {
-    if (!options) {
-      options = {};
-    } else if (typeof options === 'function') {
+    if (typeof options === 'function') {
       // TODO(NODE-3485): Replace this with MongoDeprecationError
       throw new MongoDriverError('The callback form of this helper has been removed.');
     }
@@ -737,6 +734,7 @@ export class Db {
   }
 }
 
+// TODO(NODE-3484): Refactor into MongoDBNamespace
 // Validate the database name
 function validateDatabaseName(databaseName: string) {
   if (typeof databaseName !== 'string')
@@ -748,7 +746,6 @@ function validateDatabaseName(databaseName: string) {
   const invalidChars = [' ', '.', '$', '/', '\\'];
   for (let i = 0; i < invalidChars.length; i++) {
     if (databaseName.indexOf(invalidChars[i]) !== -1)
-      // TODO(NODE-3405): Change this out for a child of MongoParseError
       throw new MongoDriverError(
         `database names cannot contain the character '${invalidChars[i]}'`
       );

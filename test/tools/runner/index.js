@@ -1,5 +1,9 @@
 'use strict';
 
+require('source-map-support').install({
+  hookRequire: true
+});
+
 const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../src');
@@ -66,7 +70,11 @@ before(function (_done) {
   //   )} topology`
   // );
 
-  const client = new MongoClient(MONGODB_URI, getEnvironmentalOptions());
+  const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
+  const client = new MongoClient(
+    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
+    getEnvironmentalOptions()
+  );
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {

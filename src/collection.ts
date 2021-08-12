@@ -1,4 +1,4 @@
-import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, emitWarningOnce, maybePromise, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   normalizeHintField,
@@ -40,7 +40,6 @@ import {
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import type { FindOptions } from './operations/find';
-import { FindOneOperation } from './operations/find_one';
 import {
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
@@ -676,10 +675,10 @@ export class Collection<TSchema extends Document = Document> {
   findOne(callback: Callback<TSchema | undefined>): void;
   findOne(filter: Filter<TSchema>): Promise<TSchema | undefined>;
   findOne(filter: Filter<TSchema>, callback: Callback<TSchema | undefined>): void;
-  findOne(filter: Filter<TSchema>, options: FindOptions<TSchema>): Promise<TSchema | undefined>;
+  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema | undefined>;
   findOne(
     filter: Filter<TSchema>,
-    options: FindOptions<TSchema>,
+    options: FindOptions,
     callback: Callback<TSchema | undefined>
   ): void;
 
@@ -687,16 +686,16 @@ export class Collection<TSchema extends Document = Document> {
   findOne<T = TSchema>(): Promise<T | undefined>;
   findOne<T = TSchema>(callback: Callback<T | undefined>): void;
   findOne<T = TSchema>(filter: Filter<T>): Promise<T | undefined>;
-  findOne<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): Promise<T | undefined>;
+  findOne<T = TSchema>(filter: Filter<T>, options?: FindOptions): Promise<T | undefined>;
   findOne<T = TSchema>(
     filter: Filter<T>,
-    options?: FindOptions<T>,
+    options?: FindOptions,
     callback?: Callback<T | undefined>
   ): void;
 
   findOne(
     filter?: Filter<TSchema> | Callback<TSchema | undefined>,
-    options?: FindOptions<TSchema> | Callback<TSchema | undefined>,
+    options?: FindOptions | Callback<TSchema | undefined>,
     callback?: Callback<TSchema>
   ): Promise<TSchema | undefined> | void {
     if (callback != null && typeof callback !== 'function') {
@@ -709,16 +708,13 @@ export class Collection<TSchema extends Document = Document> {
       (callback = filter as Callback<Document | undefined>), (filter = {}), (options = {});
     if (typeof options === 'function') (callback = options), (options = {});
 
-    filter ??= {};
-
-    return executeOperation(
-      getTopology(this),
-      new FindOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286,
-      callback as TODO_NODE_3286
+    const finalFilter = filter ?? {};
+    const finalOptions = options ?? {};
+    return maybePromise(callback, callback =>
+      this.find(finalFilter, finalOptions)
+        .limit(-1)
+        .batchSize(1)
+        .next((error, result) => callback(error, result ?? undefined))
     );
   }
 
@@ -728,9 +724,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema>;
-  find<T = TSchema>(filter: Filter<T>, options?: FindOptions<T>): FindCursor<T>;
-  find(filter?: Filter<TSchema>, options?: FindOptions<TSchema>): FindCursor<TSchema> {
+  find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema>;
+  find<T = TSchema>(filter: Filter<T>, options?: FindOptions): FindCursor<T>;
+  find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
         'Method "collection.find()" accepts at most two arguments'

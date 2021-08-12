@@ -6,7 +6,7 @@ import { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { W, WriteConcern } from './write_concern';
-import { MongoParseError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
 import {
   AnyOptions,
   Callback,
@@ -32,6 +32,7 @@ import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
+import { Compressor } from './cmap/wire_protocol/compression';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
@@ -64,11 +65,12 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  */
 export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoParseError('Cannot resolve empty srv string'));
+    return callback(new MongoAPIError('Option "srvHost" must not be empty'));
   }
 
   if (options.srvHost.split('.').length < 3) {
-    return callback(new MongoParseError('URI does not have hostname, domain name and tld'));
+    // TODO(NODE-3484): Replace with MongoConnectionStringError
+    return callback(new MongoAPIError('URI must include hostname, domain name, and tld'));
   }
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
@@ -77,14 +79,12 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
     if (err) return callback(err);
 
     if (addresses.length === 0) {
-      return callback(new MongoParseError('No addresses found at host'));
+      return callback(new MongoAPIError('No addresses found at host'));
     }
 
     for (const { name } of addresses) {
       if (!matchesParentDomain(name, lookupAddress)) {
-        return callback(
-          new MongoParseError('Server record does not share hostname with parent URI')
-        );
+        return callback(new MongoAPIError('Server record does not share hostname with parent URI'));
       }
     }
 
@@ -286,7 +286,7 @@ export function parseOptions(
     const values = [...url.searchParams.getAll(key)];
 
     if (values.includes('')) {
-      throw new MongoParseError('URI cannot contain options with no value');
+      throw new MongoAPIError('URI cannot contain options with no value');
     }
 
     if (key.toLowerCase() === 'serverapi') {
@@ -401,7 +401,7 @@ export function parseOptions(
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
   if (mongoOptions.directConnection && typeof mongoOptions.srvHost === 'string') {
-    throw new MongoParseError('directConnection not supported with SRV URI');
+    throw new MongoAPIError('SRV URI does not support directConnection');
   }
 
   const lbError = validateLoadBalancedOptions(hosts, mongoOptions);
@@ -614,10 +614,14 @@ export const OPTIONS = {
       const compressionList = new Set();
       for (const compVal of values as string[]) {
         for (const c of compVal.split(',')) {
-          if (['none', 'snappy', 'zlib'].includes(String(c))) {
+          if (Object.keys(Compressor).includes(String(c))) {
             compressionList.add(String(c));
           } else {
-            throw new MongoParseError(`${c} is not a valid compression mechanism`);
+            throw new MongoInvalidArgumentError(
+              `${c} is not a valid compression mechanism. Must be one of: ${Object.keys(
+                Compressor
+              )}.`
+            );
           }
         }
       }

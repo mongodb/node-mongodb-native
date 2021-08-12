@@ -5,10 +5,10 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   AnyError,
-  MongoDriverError,
   MongoCompatibilityError,
+  MongoInvalidArgumentError,
   MongoServerError,
-  MongoInvalidArgumentError
+  MongoDriverError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';

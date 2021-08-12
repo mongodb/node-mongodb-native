@@ -6,6 +6,8 @@ import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
 import { TestConfiguration } from './runner';
 import { shouldRunServerlessTest } from '../../tools/utils';
+import ConnectionString from 'mongodb-connection-string-url';
+
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
@@ -101,4 +103,15 @@ export function translateOptions(options: Document): Document {
     translatedOptions.returnDocument = options.returnDocument.toLowerCase();
   }
   return translatedOptions as Document;
+}
+
+export function makeConnectionString(
+  uri: string,
+  uriOptions: Record<string, unknown> = {}
+): string {
+  const connectionString = new ConnectionString(uri);
+  for (const [name, value] of Object.entries(uriOptions ?? {})) {
+    connectionString.searchParams.set(name, String(value));
+  }
+  return connectionString.toString();
 }

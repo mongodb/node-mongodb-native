@@ -1,5 +1,6 @@
-import { expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document } from '../../../../src';
+import type { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests
@@ -35,7 +36,7 @@ await collectionT.findOne(
   }
 );
 
-const optionsWithComplexProjection: FindOptions<TestModel> = {
+const optionsWithComplexProjection: FindOptions = {
   projection: {
     stringField: { $meta: 'textScore' },
     fruitTags: { $min: 'fruitTags' },
@@ -120,14 +121,15 @@ function printCar(car: Car | undefined) {
   console.log(car ? `A car of ${car.make} make` : 'No car');
 }
 
-const options: FindOptions<Car> = {};
-const optionsWithProjection: FindOptions<Car> = {
+const options: FindOptions = {};
+const optionsWithProjection: FindOptions = {
   projection: {
     make: 1
   }
 };
 
-expectNotType<FindOptions<Car>>({
+// this is changed in NODE-3454 to be the opposite test since Projection is flexible now
+expectAssignable<FindOptions>({
   projection: {
     make: 'invalid'
   }
@@ -190,3 +192,9 @@ expectType<FindCursor<{ color: { $in: number } }>>(colorCollection.find({ color:
 // When you use the override, $in doesn't permit readonly
 colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
 colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+// This is a regression test that we don't remove the unused generic in FindOptions
+const findOptions: FindOptions<{ a: number }> = {};
+expectType<FindOptions>(findOptions);
+// This is just to check that we still export these type symbols
+expectAssignable<Projection>({});
+expectAssignable<ProjectionOperators>({});

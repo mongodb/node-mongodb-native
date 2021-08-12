@@ -12,7 +12,6 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
-import type { Projection } from '../mongo_types';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -344,22 +343,42 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
    * In order to strictly type this function you must provide an interface
    * that represents the effect of your projection on the result documents.
    *
-   * **NOTE:** adding a projection changes the return type of the iteration of this cursor,
+   * By default chaining a projection to your cursor changes the returned type to the generic
+   * {@link Document} type.
+   * You should specify a parameterized type to have assertions on your final results.
+   *
+   * @example
+   * ```typescript
+   * // Best way
+   * const docs: FindCursor<{ a: number }> = cursor.project<{ a: number }>({ _id: 0, a: true });
+   * // Flexible way
+   * const docs: FindCursor<Document> = cursor.project({ _id: 0, a: true });
+   * ```
+   *
+   * @remarks
+   *
+   * Adding a projection changes the return type of the iteration of this cursor,
    * it **does not** return a new instance of a cursor. This means when calling project,
    * you should always assign the result to a new variable. Take note of the following example:
    *
    * @example
    * ```typescript
    * const cursor: FindCursor<{ a: number; b: string }> = coll.find();
-   * const projectCursor = cursor.project<{ a: number }>({ a: true });
+   * const projectCursor = cursor.project<{ a: number }>({ _id: 0, a: true });
    * const aPropOnlyArray: {a: number}[] = await projectCursor.toArray();
+   *
+   * // or always use chaining and save the final cursor
+   *
+   * const cursor = coll.find().project<{ a: string }>({
+   *   _id: 0,
+   *   a: { $convert: { input: '$a', to: 'string' }
+   * }});
    * ```
    */
-  project<T = TSchema>(value: Projection<T>): FindCursor<T>;
-  project(value: Projection<TSchema>): this {
+  project<T extends Document = Document>(value: Document): FindCursor<T> {
     assertUninitialized(this);
     this[kBuiltOptions].projection = value;
-    return this;
+    return (this as unknown) as FindCursor<T>;
   }
 
   /**
