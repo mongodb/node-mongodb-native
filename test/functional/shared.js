@@ -69,7 +69,7 @@ function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) throw err;
 }
 
-function setupDatabase(configuration, dbsToClean) {
+async function setupDatabase(configuration, dbsToClean) {
   dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
   var configDbName = configuration.db;
   var client = configuration.newClient(configuration.writeConcernMax(), {
@@ -78,23 +78,17 @@ function setupDatabase(configuration, dbsToClean) {
 
   dbsToClean.push(configDbName);
 
-  return client
-    .connect()
-    .then(() =>
-      dbsToClean.reduce(
-        (result, dbName) =>
-          result
-            .then(() =>
-              client.db(dbName).command({ dropAllUsersFromDatabase: 1, writeConcern: { w: 1 } })
-            )
-            .then(() => client.db(dbName).dropDatabase({ writeConcern: { w: 1 } })),
-        Promise.resolve()
-      )
-    )
-    .then(
-      () => client.close(),
-      err => client.close(() => Promise.reject(err))
-    );
+  await client.connect();
+
+  try {
+    for (const dbName of dbsToClean) {
+      const db = client.db(dbName);
+      await db.command({ dropAllUsersFromDatabase: 1, writeConcern: { w: 1 } });
+      await db.dropDatabase({ writeConcern: { w: 1 } });
+    }
+  } finally {
+    await client.close();
+  }
 }
 
 /** @typedef {(client: MongoClient) => Promise | (client: MongoClient, done: Function) => void} withClientCallback */

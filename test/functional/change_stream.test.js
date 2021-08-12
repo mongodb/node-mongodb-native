@@ -171,26 +171,25 @@ const pipeline = [
 ];
 
 describe('Change Streams', function () {
-  before(function () {
-    return setupDatabase(this.configuration, ['integration_tests']);
+  before(async function () {
+    return await setupDatabase(this.configuration, ['integration_tests']);
   });
 
-  beforeEach(function () {
+  beforeEach(async function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
 
-    return client
-      .connect()
-      .then(() => {
-        const db = client.db('integration_tests');
-        return db.createCollection('test');
-      })
-      .then(
-        () => client.close(),
-        () => client.close()
-      );
+    await client.connect();
+    const db = client.db('integration_tests');
+    try {
+      await db.createCollection('test');
+    } catch {
+      // ns already exists, don't care
+    } finally {
+      await client.close();
+    }
   });
-  afterEach(() => mock.cleanup());
+  afterEach(async () => await mock.cleanup());
 
   it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
@@ -1800,10 +1799,10 @@ describe('Change Streams', function () {
         await changeStream.close();
       }
 
-      await mock.cleanup();
       if (client) {
         await client.close();
       }
+
       client = undefined;
       coll = undefined;
       changeStream = undefined;
