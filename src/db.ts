@@ -703,7 +703,7 @@ export class Db {
 
   /**
    * Unref all sockets
-   * @deprecated This function is deprecated and will be removed in the 5.0 driver.
+   * @deprecated This function is deprecated and will be removed in the next major version.
    */
   unref(): void {
     getTopology(this).unref();

@@ -771,7 +771,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /**
-   * @deprecated This function is deprecated and will be removed in the 5.0 driver.
+   * @deprecated This function is deprecated and will be removed in the next major version.
    */
   unref(): void {
     emitWarning('`unref` is a noop and will be removed in the next major version');
