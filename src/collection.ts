@@ -681,6 +681,18 @@ export class Collection<TSchema extends Document = Document> {
     options: FindOptions,
     callback: Callback<TSchema | undefined>
   ): void;
+
+  // allow an override of the schema.
+  findOne<T = TSchema>(): Promise<T | undefined>;
+  findOne<T = TSchema>(callback: Callback<T | undefined>): void;
+  findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | undefined>;
+  findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | undefined>;
+  findOne<T = TSchema>(
+    filter: Filter<TSchema>,
+    options?: FindOptions,
+    callback?: Callback<T | undefined>
+  ): void;
+
   findOne(
     filter?: Filter<TSchema> | Callback<TSchema | undefined>,
     options?: FindOptions | Callback<TSchema | undefined>,
@@ -713,6 +725,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   find(): FindCursor<TSchema>;
   find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema>;
+  find<T>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
   find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
