@@ -29,7 +29,7 @@ import type { Hint } from '../operations/operation';
 import type { Filter, OneOrMore, OptionalId, UpdateFilter } from '../mongo_types';
 
 /** @internal */
-const kErr = Symbol('err');
+const kServerError = Symbol('serverError');
 
 /** @public */
 export const BatchType = Object.freeze({
@@ -342,35 +342,36 @@ export interface WriteConcernErrorData {
  * @category Error
  */
 export class WriteConcernError {
-  [kErr]: WriteConcernErrorData;
+  /** @internal */
+  [kServerError]: WriteConcernErrorData;
 
   /** @internal */
   constructor(error: WriteConcernErrorData) {
-    this[kErr] = error;
+    this[kServerError] = error;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this[kErr].code;
+    return this[kServerError].code;
   }
 
   /** Write concern error message. */
   get errmsg(): string | undefined {
-    return this[kErr].errmsg;
+    return this[kServerError].errmsg;
   }
 
   /** Write concern error info. */
   get errInfo(): Document | undefined {
-    return this[kErr].errInfo;
+    return this[kServerError].errInfo;
   }
 
   /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
   get err(): WriteConcernErrorData {
-    return this[kErr];
+    return this[kServerError];
   }
 
   toJSON(): WriteConcernErrorData {
-    return this[kErr];
+    return this[kServerError];
   }
 
   toString(): string {
