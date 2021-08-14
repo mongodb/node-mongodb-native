@@ -582,7 +582,6 @@ describe('Change Streams', function () {
 
       client.connect((err, client) => {
         expect(err).to.not.exist;
-        this.defer(() => client.close());
 
         const database = client.db('integration_tests');
         const collection = database.collection('resumetokenProjectedOutCallback');
@@ -597,7 +596,11 @@ describe('Change Streams', function () {
 
             changeStream.next(err => {
               expect(err).to.exist;
-              done();
+              changeStream.close(() => {
+                client.close(() => {
+                  done();
+                });
+              });
             });
           });
         });
@@ -1808,7 +1811,7 @@ describe('Change Streams', function () {
       changeStream = undefined;
     });
 
-    it(`should throw when mixing event listeners with iterator methods`, {
+    it.skip(`should throw when mixing event listeners with iterator methods`, {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       async test() {
         const kMode = getSymbolFrom(changeStream, 'mode');
