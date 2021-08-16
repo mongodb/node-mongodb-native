@@ -225,5 +225,5 @@ typedDb.collection('people').findOne({}, function (_err, person) {
 });
 
 typedDb.collection('things').findOne({}, function (_err, thing) {
-  expectType<Thing>(thing);
+  expectType<Thing | undefined>(thing);
 });
