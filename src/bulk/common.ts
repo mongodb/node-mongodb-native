@@ -329,7 +329,7 @@ export class BulkWriteResult {
   }
 }
 
-/** @internal */
+/** @public */
 export interface WriteConcernErrorData {
   code: number;
   errmsg: string;
@@ -345,7 +345,6 @@ export class WriteConcernError {
   /** @internal */
   [kServerError]: WriteConcernErrorData;
 
-  /** @internal */
   constructor(error: WriteConcernErrorData) {
     this[kServerError] = error;
   }
@@ -365,20 +364,12 @@ export class WriteConcernError {
     return this[kServerError].errInfo;
   }
 
-  /**
-   * @internal
-   * @deprecated The `err` prop that contained a MongoServerError has been deprecated.
-   */
+  /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
   get err(): WriteConcernErrorData {
     return this[kServerError];
   }
 
-  toJSON(): {
-    code: number;
-    errmsg: string;
-    errInfo?: Document;
-  } {
-    // WriteConcernErrorData has been inlined as the return to avoid making it public
+  toJSON(): WriteConcernErrorData {
     return this[kServerError];
   }
 
