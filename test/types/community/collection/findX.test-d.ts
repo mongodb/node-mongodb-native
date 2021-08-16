@@ -1,5 +1,5 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
-import { FindCursor, FindOptions, MongoClient, Document } from '../../../../src';
+import { FindCursor, FindOptions, MongoClient, Document, Collection, Db } from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
@@ -9,7 +9,7 @@ const db = client.db('test');
 const collection = db.collection('test.find');
 
 // Locate all the entries using find
-collection.find({}).toArray((err, fields) => {
+collection.find({}).toArray((_err, fields) => {
   expectType<Document[] | undefined>(fields);
 });
 
@@ -22,7 +22,7 @@ interface TestModel {
 }
 
 const collectionT = db.collection<TestModel>('testCollection');
-await collectionT.find({
+collectionT.find({
   $and: [{ numberField: { $gt: 0 } }, { numberField: { $lt: 100 } }],
   readonlyFruitTags: { $all: ['apple', 'pear'] }
 });
@@ -74,7 +74,7 @@ const collectionBag = db.collection<Bag>('bag');
 
 const cursor: FindCursor<Bag> = collectionBag.find({ color: 'black' });
 
-cursor.toArray((err, bags) => {
+cursor.toArray((_err, bags) => {
   expectType<Bag[] | undefined>(bags);
 });
 
@@ -198,3 +198,32 @@ expectType<FindOptions>(findOptions);
 // This is just to check that we still export these type symbols
 expectAssignable<Projection>({});
 expectAssignable<ProjectionOperators>({});
+
+// Ensure users can create a custom Db type that only contains specific
+// collections (which are, in turn, strongly typed):
+type Person = {
+  name: 'alice' | 'bob';
+  age: number;
+};
+
+type Thing = {
+  location: 'shelf' | 'cupboard';
+};
+
+interface TypedDb extends Db {
+  collection(name: 'people'): Collection<Person>;
+  collection(name: 'things'): Collection<Thing>;
+}
+
+const typedDb = client.db('test2') as TypedDb;
+
+const person = typedDb.collection('people').findOne({});
+expectType<Promise<Person | undefined>>(person);
+
+typedDb.collection('people').findOne({}, function (_err, person) {
+  expectType<Person | undefined>(person);
+});
+
+typedDb.collection('things').findOne({}, function (_err, thing) {
+  expectType<Thing | undefined>(thing);
+});
