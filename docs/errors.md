@@ -78,9 +78,6 @@ This class should **never** be directly instantiated.
 | **MongoBatchReExecutionError**     | Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.                                              |
 | **MongoConnectionStringError**     | Thrown when a user supplies an incorrect URI to the driver.                                                                                            |
 | **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that has expired or has been closed                                                        |
-| **MongoMessageStreamParseError**   |                                                                                                                                                        |
-| **MongoGridFSStreamClosedError**   |                                                                                                                                                        |
-| **MongoChangeStreamClosedError**   |                                                                                                                                                        |
 
 ### `MongoRuntimeError`
 
