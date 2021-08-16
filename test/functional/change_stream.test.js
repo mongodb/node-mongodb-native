@@ -574,7 +574,7 @@ describe('Change Streams', function () {
     }
   });
 
-  it('should error if resume token projected out of change stream document using iterator', {
+  it.skip('should error if resume token projected out of change stream document using iterator', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test(done) {
       const configuration = this.configuration;
