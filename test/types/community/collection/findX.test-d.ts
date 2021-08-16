@@ -218,7 +218,7 @@ interface TypedDb extends Db {
 const typedDb = client.db('test2') as TypedDb;
 
 const person = typedDb.collection('people').findOne({});
-expectType<Promise<Person>>(person);
+expectType<Promise<Person | undefined>>(person);
 
 typedDb.collection('people').findOne({}, function (_err, person) {
   expectType<Person>(person);
