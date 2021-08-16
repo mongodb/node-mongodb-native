@@ -221,7 +221,7 @@ const person = typedDb.collection('people').findOne({});
 expectType<Promise<Person | undefined>>(person);
 
 typedDb.collection('people').findOne({}, function (_err, person) {
-  expectType<Person>(person);
+  expectType<Person | undefined>(person);
 });
 
 typedDb.collection('things').findOne({}, function (_err, thing) {
