@@ -109,18 +109,18 @@ class TestConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
-    const defaultOptions = Object.assign(
+    serverOptions = Object.assign(
       { minHeartbeatFrequencyMS: 100 },
-      getEnvironmentalOptions()
+      getEnvironmentalOptions(),
+      serverOptions
     );
+
     // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new MongoClient(dbOptions, Object.assign({}, defaultOptions, serverOptions));
+      return new MongoClient(dbOptions, serverOptions);
     }
 
     dbOptions = dbOptions || {};
-    serverOptions = Object.assign({}, defaultOptions, serverOptions);
-
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
     const dbPort = (serverOptions && serverOptions.port) || this.options.port;

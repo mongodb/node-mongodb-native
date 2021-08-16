@@ -111,7 +111,7 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
-    // FIXME: hack to get tests passing, extra unexpected events otherwise
+    // FIXME(NODE-3549): hack to get tests passing, extra unexpected events otherwise
     if (process.env.SERVERLESS) {
       this.ignoredEvents.push('ping');
     }

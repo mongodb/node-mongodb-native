@@ -130,6 +130,7 @@ describe('Transactions Spec Legacy Tests', function () {
       specPath: path.join('transactions', 'convenient-api')
     });
   } else {
+    // FIXME(NODE-3550): these tests should pass on serverless but currently fail
     SKIP_TESTS.push(
       'abortTransaction only performs a single retry',
       'abortTransaction does not retry after Interrupted',
