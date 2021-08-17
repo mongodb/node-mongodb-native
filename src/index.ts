@@ -374,7 +374,13 @@ export type {
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
-export type { BulkOperationBase, BulkOperationPrivate, FindOperators, Batch } from './bulk/common';
+export type {
+  BulkOperationBase,
+  BulkOperationPrivate,
+  FindOperators,
+  Batch,
+  WriteConcernErrorData
+} from './bulk/common';
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type { Encrypter, EncrypterOptions } from './encrypter';

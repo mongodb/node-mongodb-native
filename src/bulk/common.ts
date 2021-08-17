@@ -26,7 +26,10 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter, OptionalId, UpdateFilter } from '../mongo_types';
+import type { Filter, OneOrMore, OptionalId, UpdateFilter } from '../mongo_types';
+
+/** @internal */
+const kServerError = Symbol('serverError');
 
 /** @public */
 export const BatchType = Object.freeze({
@@ -309,9 +312,7 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError(
-        new MongoServerError({ errmsg: errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed })
-      );
+      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed });
     }
   }
 
@@ -328,34 +329,52 @@ export class BulkWriteResult {
   }
 }
 
+/** @public */
+export interface WriteConcernErrorData {
+  code: number;
+  errmsg: string;
+  errInfo?: Document;
+}
+
 /**
  * An error representing a failure by the server to apply the requested write concern to the bulk operation.
  * @public
  * @category Error
  */
 export class WriteConcernError {
-  err: MongoServerError;
+  /** @internal */
+  [kServerError]: WriteConcernErrorData;
 
-  constructor(err: MongoServerError) {
-    this.err = err;
+  constructor(error: WriteConcernErrorData) {
+    this[kServerError] = error;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this.err.code;
+    return this[kServerError].code;
   }
 
   /** Write concern error message. */
-  get errmsg(): string {
-    return this.err.errmsg;
+  get errmsg(): string | undefined {
+    return this[kServerError].errmsg;
   }
 
-  toJSON(): { code?: number; errmsg: string } {
-    return { code: this.err.code, errmsg: this.err.errmsg };
+  /** Write concern error info. */
+  get errInfo(): Document | undefined {
+    return this[kServerError].errInfo;
+  }
+
+  /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
+  get err(): WriteConcernErrorData {
+    return this[kServerError];
+  }
+
+  toJSON(): WriteConcernErrorData {
+    return this[kServerError];
   }
 
   toString(): string {
-    return `WriteConcernError(${this.err.errmsg})`;
+    return `WriteConcernError(${this.errmsg})`;
   }
 }
 
@@ -656,17 +675,12 @@ function handleMongoWriteConcernError(
 ) {
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
-  // TODO: Remove multiple levels of wrapping (NODE-3337)
-  const wrappedWriteConcernError = new WriteConcernError(
-    new MongoServerError({
-      errmsg: err.result?.writeConcernError.errmsg,
-      code: err.result?.writeConcernError.result
-    })
-  );
-
   callback(
     new MongoBulkWriteError(
-      new MongoServerError(wrappedWriteConcernError),
+      {
+        message: err.result?.writeConcernError.errmsg,
+        code: err.result?.writeConcernError.result
+      },
       new BulkWriteResult(bulkResult)
     )
   );
@@ -679,13 +693,28 @@ function handleMongoWriteConcernError(
  */
 export class MongoBulkWriteError extends MongoServerError {
   result: BulkWriteResult;
+  writeErrors: OneOrMore<WriteError> = [];
+  err?: WriteConcernError;
 
   /** Creates a new MongoBulkWriteError */
-  constructor(error: AnyError, result: BulkWriteResult) {
-    super(error as Error);
-    Object.assign(this, error);
+  constructor(
+    error:
+      | { message: string; code: number; writeErrors?: WriteError[] }
+      | WriteConcernError
+      | AnyError,
+    result: BulkWriteResult
+  ) {
+    super(error);
+
+    if (error instanceof WriteConcernError) this.err = error;
+    else if (!(error instanceof Error)) {
+      this.message = error.message;
+      this.code = error.code;
+      this.writeErrors = error.writeErrors ?? [];
+    }
 
     this.result = result;
+    Object.assign(this, error);
   }
 
   get name(): string {
@@ -1225,11 +1254,11 @@ export abstract class BulkOperationBase {
 
       callback(
         new MongoBulkWriteError(
-          new MongoServerError({
+          {
             message: msg,
             code: this.s.bulkResult.writeErrors[0].code,
             writeErrors: this.s.bulkResult.writeErrors
-          }),
+          },
           writeResult
         )
       );
@@ -1239,7 +1268,7 @@ export abstract class BulkOperationBase {
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new MongoBulkWriteError(new MongoServerError(writeConcernError), writeResult));
+      callback(new MongoBulkWriteError(writeConcernError, writeResult));
       return true;
     }
   }

@@ -2,11 +2,10 @@
 const { Topology } = require('../../../src/sdam/topology');
 const mock = require('../../tools/mock');
 const { ReplSetFixture } = require('./common');
-const { MongoWriteConcernError } = require('../../../src/error');
+const { MongoServerError, MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
 const { ns } = require('../../../src/utils');
 const { once } = require('events');
-const { MongoServerError } = require('../../../src');
 
 describe('WriteConcernError', function () {
   let test;

@@ -60,12 +60,12 @@ export const GET_MORE_RESUMABLE_CODES = new Set<number>([
 ]);
 
 /** @public */
-export interface ErrorDescription {
+export interface ErrorDescription extends Document {
   message?: string;
   errmsg?: string;
   $err?: string;
   errorLabels?: string[];
-  [key: string]: any;
+  errInfo?: Document;
 }
 
 /**
@@ -84,7 +84,6 @@ export class MongoError extends Error {
   constructor(message: string | Error) {
     if (message instanceof Error) {
       super(message.message);
-      this.stack = message.stack;
     } else {
       super(message);
     }
@@ -136,23 +135,20 @@ export class MongoServerError extends MongoError {
   code?: number;
   codeName?: string;
   writeConcernError?: Document;
+  errInfo?: Document;
+  ok?: number;
+  topologyVersion?: TopologyVersion;
+  [key: string]: any;
 
-  constructor(message: Error | ErrorDescription) {
-    if (message instanceof Error) {
-      super(message);
-    } else {
-      super(message.message || message.errmsg || message.$err || 'n/a');
-      if (message.errorLabels) {
-        this[kErrorLabels] = new Set(message.errorLabels);
-      }
+  constructor(message: ErrorDescription) {
+    super(message.message || message.errmsg || message.$err || 'n/a');
+    if (message.errorLabels) {
+      this[kErrorLabels] = new Set(message.errorLabels);
+    }
 
-      for (const name in message) {
-        if (name === 'errorLabels' || name === 'errmsg' || name === 'message') {
-          continue;
-        }
-
-        (this as any)[name] = message[name];
-      }
+    for (const name in message) {
+      if (name !== 'errorLabels' && name !== 'errmsg' && name !== 'message')
+        this[name] = message[name];
     }
   }
 
@@ -649,13 +645,15 @@ function makeWriteConcernResultObject(input: any) {
 export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
+  errInfo?: Document;
 
-  constructor(message: ErrorDescription, result: Document) {
+  constructor(message: ErrorDescription, result?: Document) {
     if (result && Array.isArray(result.errorLabels)) {
       message.errorLabels = result.errorLabels;
     }
 
     super(message);
+    this.errInfo = message.errInfo;
 
     if (result != null) {
       this.result = makeWriteConcernResultObject(result);
