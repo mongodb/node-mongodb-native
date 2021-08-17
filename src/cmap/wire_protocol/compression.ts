@@ -1,5 +1,5 @@
 import * as zlib from 'zlib';
-import type { Callback } from '../../utils';
+import { Callback, isPromiseLike } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
 import { Snappy } from '../../deps';
@@ -39,12 +39,18 @@ export function compress(
 ): void {
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (self.options.agreedCompressor) {
-    case 'snappy':
+    case 'snappy': {
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.compress(dataToBeCompressed, callback);
+      const snappyResult = Snappy.compress(dataToBeCompressed, callback);
+
+      if (isPromiseLike(snappyResult)) {
+        // Using snappy 7.x
+        snappyResult.then(buffer => callback(undefined, buffer)).catch(error => callback(error));
+      }
       break;
+    }
     case 'zlib':
       // Determine zlibCompressionLevel
       if (self.options.zlibCompressionLevel) {
@@ -72,12 +78,18 @@ export function decompress(
   }
 
   switch (compressorID) {
-    case Compressor.snappy:
+    case Compressor.snappy: {
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.uncompress(compressedData, { asBuffer: true }, callback as Callback);
+      const snappyResult = Snappy.uncompress(compressedData, { asBuffer: true }, callback);
+
+      if (isPromiseLike(snappyResult)) {
+        // Using snappy 6.x
+        snappyResult.then(buffer => callback(undefined, buffer)).catch(error => callback(error));
+      }
       break;
+    }
     case Compressor.zlib:
       zlib.inflate(compressedData, callback as zlib.CompressCallback);
       break;

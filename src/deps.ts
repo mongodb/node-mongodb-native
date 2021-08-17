@@ -41,9 +41,33 @@ export interface KerberosClient {
   unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
 }
 
-export let Snappy:
-  | typeof import('snappy')
-  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+type SnappyLib = {
+  /**
+   * - Snappy 6.x takes a callback and returns void
+   * - Snappy 7.x returns a promise
+   *
+   * In order to support both we must check the return value of the function
+   * @param buf - Buffer to be compressed
+   * @param callback - ONLY USED IN SNAPPY 6.x
+   */
+  compress(buf: Buffer, callback: (error?: Error, buffer?: Buffer) => void): Promise<Buffer> | void;
+
+  /**
+   * - Snappy 6.x takes a callback and returns void
+   * - Snappy 7.x returns a promise
+   *
+   * In order to support both we must check the return value of the function
+   * @param buf - Buffer to be compressed
+   * @param callback - ONLY USED IN SNAPPY 6.x
+   */
+  uncompress(
+    buf: Buffer,
+    opt: { asBuffer: true },
+    callback: (error?: Error, buffer?: Buffer) => void
+  ): Promise<Buffer> | void;
+};
+
+export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
   new MongoMissingDependencyError(
     'Optional module `snappy` not found. Please install it to enable snappy compression'
   )
