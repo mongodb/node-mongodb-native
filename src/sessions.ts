@@ -12,7 +12,7 @@ import {
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
-  MongoDriverError,
+  MongoAPIError,
   MongoServerError,
   AnyError,
   MongoExpiredSessionError,
@@ -149,12 +149,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     if (topology == null) {
       // TODO(NODE-3483)
-      throw new MongoDriverError('ClientSession requires a topology');
+      throw new MongoAPIError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
       // TODO(NODE-3483)
-      throw new MongoDriverError('ClientSession requires a ServerSessionPool');
+      throw new MongoAPIError('ClientSession requires a ServerSessionPool');
     }
 
     options = options ?? {};
@@ -842,7 +842,7 @@ export class ServerSessionPool {
 
   constructor(topology: Topology) {
     if (topology == null) {
-      throw new MongoDriverError('ServerSessionPool requires a topology');
+      throw new MongoRuntimeError('ServerSessionPool requires a topology');
     }
 
     this.topology = topology;
