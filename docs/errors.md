@@ -25,8 +25,6 @@
     - [`MongoTopologyClosedError`](#MongoTopologyClosedError-1)
     - [`MongoCursorExhaustedError`](#MongoCursorExhaustedError-1)
     - [`MongoServerClosedError`](#MongoServerClosedError-1)
-    - [`MongoStreamClosedError`](#MongoStreamClosedError-1)
-  - [`MongoRuntimeError`](#MongoRuntimeError-1)
   - [`MongoNetworkError`](#MongoNetworkError-1)
     - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
 
@@ -86,15 +84,13 @@ This class should **never** be directly instantiated.
 
 **Children of MongoRuntimeError**
 
-| Error Name                    | Description                                                                               |
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| **MongoCompressionError**     | Thrown when the driver fails to compress data before sending it to the server             |
-| **MongoDecompressionError**   | Thrown when the driver fails to decompress data received from the server                  |
-| **MongoChangeStreamError**    | Thrown when an error is encountered when operating on a ChangeStream                      |
-| **MongoGridFSStreamError**    | Thrown when an unexpected state is reached when operating on a GridFS Stream              |
-| **MongoGridFSChunkError**     | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream |
-| **MongoServerSelectionError** | Thrown when the driver fails to select a server to complete an operation                  |
-| **MongoURIError**             | Thrown when a user supplies an incorrect URI to the driver                                |
+| Error Name                  | Description                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| **MongoDecompressionError** | Thrown when the driver fails to decompress data received from the server                  |
+| **MongoChangeStreamError**  | Thrown when an error is encountered when operating on a ChangeStream                      |
+| **MongoGridFSStreamError**  | Thrown when an unexpected state is reached when operating on a GridFS Stream              |
+| **MongoGridFSChunkError**   | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream |
+| **MongoURIError**           | Thrown when a user supplies an incorrect URI to the driver                                |
 
 ### `MongoNetworkError`
 
@@ -111,6 +107,9 @@ These are errors which wrap error responses received from the server.
 ### `MongoSystemError`
 
 These are errors which originate from faulty environment setup.
+
+- #### MongoServerSelectionError
+  - Thrown when the driver fails to select a server to complete an operation
 
 ## Test Plan
 
@@ -153,13 +152,6 @@ The classes to be tested will be selected based on two characteristics:
 
 - Attempt to execute a query against a server that has closed.
   - Assert that `MongoServerClosedError` is thrown.
-
-#### `MongoStreamClosedError`
-
-- Attempt to execute `tryNext()` on a `ChangeStream` object that is closed.
-  - Assert that `MongoStreamClosedError` is thrown.
-
-### `MongoRuntimeError`
 
 ### `MongoNetworkError`
 
