@@ -90,7 +90,6 @@ This class should **never** be directly instantiated.
 | **MongoChangeStreamError**  | Thrown when an error is encountered when operating on a ChangeStream                      |
 | **MongoGridFSStreamError**  | Thrown when an unexpected state is reached when operating on a GridFS Stream              |
 | **MongoGridFSChunkError**   | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream |
-| **MongoURIError**           | Thrown when a user supplies an incorrect URI to the driver                                |
 
 ### `MongoNetworkError`
 
