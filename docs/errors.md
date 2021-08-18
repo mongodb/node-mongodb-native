@@ -49,7 +49,7 @@ Children of `MongoError` include:
 
 ### `MongoDriverError`
 
-This class represents errors which originate in the driver itself or in the user's use of the driver. This class should **never** be directly instantiated.
+This class represents errors which originate in the driver itself or when the user incorrectly uses the driver. This class should **never** be directly instantiated.
 Its children are the main classes of errors that most users will interact with: [**`MongoAPIError`**](#MongoAPIError) and [**`MongoRuntimeError`**](#MongoRuntimeError).
 
 ### `MongoAPIError`
@@ -61,21 +61,21 @@ This class should **never** be directly instantiated.
 
 | Error Name                         | Description                                                                                                                                            |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **MongoInvalidArgumentError**      | Thrown when the user supplies malformed, unexpected arguments or failed to provide a required argument or field.                                       |
+| **MongoInvalidArgumentError**      | Thrown when the user supplies malformed or unexpected arguments or failed to provide a required argument or field.                                     |
 | **MongoCompatibilityError**        | Thrown when a feature that is not enabled or allowed for the current server configuration is used.                                                     |
-| **MongoMissingCredentialsError**   | Thrown when a user fails to provide authentication credentials before attempting to connect to the mongo server.                                       |
+| **MongoMissingCredentialsError**   | Thrown when a user fails to provide authentication credentials before attempting to connect.                                                           |
 | **MongoMissingDependencyError**    | Thrown when a required module or dependency is not present.                                                                                            |
-| **MongoExpiredSessionError**       | Thrown when the user attempts to operate on a session that has expired or has been closed.                                                             |
+| **MongoExpiredSessionError**       | Thrown when the user attempts to operate on a session that is expired or closed.                                                                       |
 | **MongoTransactionError**          | Thrown when the user makes a mistake in the usage of transactions (e.g.: attempting to commit a transaction with a readPreference other than primary). |
 | **MongoTailableCursorError**       | Thrown when the user calls a function or method that is not supported on a tailable cursor.                                                            |
-| **MongoCursorExhaustedError**      | Thrown when an attempt is made to read from a cursor that has been exhausted.                                                                          |
+| **MongoCursorExhaustedError**      | Thrown when an attempt is made to read from a cursor that is exhausted.                                                                                |
 | **MongoCursorInUseError**          | Thrown when the user attempts to add options to an already initialized cursor.                                                                         |
 | **MongoServerClosedError**         | Thrown when an attempt is made to operate on a closed server.                                                                                          |
 | **MongoTopologyClosedError**       | Thrown when an attempt is made to operate on a dropped, or otherwise unavailable, database.                                                            |
-| **MongoNotConnectedError**         | Thrown when the user attempts to operate on the data from a client that has not been connected to a MongoDB server instance.                           |
-| **MongoBatchReExecutionError**     | Thrown when a user attempts to reexecute a batch command when one of the constituent commands has failed.                                              |
+| **MongoNotConnectedError**         | Thrown when the user attempts to perform operations on a client that has not yet connected.                                                            |
+| **MongoBatchReExecutionError**     | Thrown when a user attempts to re-execute a batch command when one of the constituent commands has failed.                                             |
 | **MongoConnectionStringError**     | Thrown when a user supplies an incorrect URI to the driver.                                                                                            |
-| **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that has expired or has been closed                                                        |
+| **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that is expired or closed                                                                  |
 
 ### `MongoRuntimeError`
 
