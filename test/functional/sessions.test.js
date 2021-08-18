@@ -68,8 +68,7 @@ describe('Sessions', function () {
     describe('withSession', {
       metadata: {
         requires: {
-          mongodb: '>=3.6.0',
-          serverless: 'forbid' // UnhandledPromiseRejectionWarning: MongoServerError: CMD_NOT_ALLOWED: dropAllUsersFromDatabase
+          mongodb: '>=3.6.0'
         }
       },
       test: function () {

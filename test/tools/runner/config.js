@@ -236,6 +236,9 @@ class TestConfiguration {
       if (options.authSource) {
         url.searchParams.append('authSource', options.authSource);
       }
+    } else if (this.isServerless) {
+      url.searchParams.append('ssl', true);
+      url.searchParams.append('authSource', 'admin');
     }
 
     let actualHostsString;
@@ -254,11 +257,6 @@ class TestConfiguration {
       } else {
         actualHostsString = this.options.hostAddresses[0].toString();
       }
-    }
-
-    if (this.isServerless) {
-      url.searchParams.append('ssl', true);
-      url.searchParams.append('authSource', 'admin');
     }
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);
