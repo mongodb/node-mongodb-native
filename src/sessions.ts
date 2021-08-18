@@ -14,6 +14,7 @@ import {
   MONGODB_ERROR_CODES,
   MongoAPIError,
   MongoServerError,
+  MongoDriverError,
   AnyError,
   MongoExpiredSessionError,
   MongoTransactionError,
@@ -965,14 +966,14 @@ export function applySession(
 
   const serverSession = session.serverSession;
   if (serverSession == null) {
-    return new MongoDriverError('Unable to acquire server session');
+    return new MongoRuntimeError('Unable to acquire server session');
   }
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
   if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
-      return new MongoDriverError('Cannot have explicit session with unacknowledged writes');
+      return new MongoRuntimeError('Cannot have explicit session with unacknowledged writes');
     }
     return;
   }

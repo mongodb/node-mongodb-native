@@ -17,7 +17,7 @@ import {
   HostAddress
 } from '../utils';
 import {
-  MongoDriverError,
+  MongoRuntimeError,
   MongoMissingDependencyError,
   MongoCompatibilityError,
   MongoNetworkError,
@@ -363,7 +363,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): void {
     if (!(ns instanceof MongoDBNamespace)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoDriverError('Must provide a MongoDBNamespace instance');
+      throw new MongoRuntimeError('Must provide a MongoDBNamespace instance');
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -515,7 +515,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const wireVersion = maxWireVersion(this);
     if (!cursorId) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      callback(new MongoDriverError('Invalid internal cursor state, no known cursor id'));
+      callback(new MongoRuntimeError('Invalid internal cursor state, no known cursor id'));
       return;
     }
 
@@ -570,7 +570,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoDriverError(`Invalid list of cursor ids provided: ${cursorIds}`);
+      throw new MongoRuntimeError(`Invalid list of cursor ids provided: ${cursorIds}`);
     }
 
     if (maxWireVersion(this) < 4) {
@@ -600,7 +600,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (!Array.isArray(response.documents) || response.documents.length === 0) {
           return callback(
-            new MongoDriverError(
+            // TODO(NODE-3483)
+            new MongoRuntimeError(
               `invalid killCursors result returned for cursor id ${cursorIds[0]}`
             )
           );

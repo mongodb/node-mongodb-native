@@ -5,12 +5,7 @@ import { Logger } from '../logger';
 import { ConnectionPoolMetrics } from './metrics';
 import { connect } from './connect';
 import { eachAsync, makeCounter, Callback } from '../utils';
-import {
-  MongoError,
-  MongoInvalidArgumentError,
-  MongoDriverError,
-  MongoRuntimeError
-} from '../error';
+import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
 import {
   ConnectionPoolCreatedEvent,
@@ -355,7 +350,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // Only need to worry if the generation exists, since it should
       // always be there but typescript needs the check.
       if (generation == null) {
-        throw new MongoDriverError('Service generations are required in load balancer mode.');
+        // TODO(NODE-3483)
+        throw new MongoRuntimeError('Service generations are required in load balancer mode.');
       } else {
         // Increment the generation for the service id.
         this.serviceGenerations.set(sid, generation + 1);

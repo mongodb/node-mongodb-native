@@ -1,4 +1,4 @@
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
 import type { Callback } from '../utils';
@@ -41,7 +41,8 @@ export function connect(
       }
 
       // Return a more specific error message for MongoClient.connect
-      return callback(new MongoDriverError(warningMessage));
+      // TODO(NODE-3483)
+      return callback(new MongoRuntimeError(warningMessage));
     }
 
     callback(err, mongoClient);

@@ -1,5 +1,5 @@
 import { ReadPreference } from './read_preference';
-import { MongoDriverError, MongoTransactionError } from './error';
+import { MongoAPIError, MongoTransactionError } from './error';
 import { ReadConcern } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
@@ -164,7 +164,7 @@ export class Transaction {
       return;
     }
 
-    throw new MongoDriverError(
+    throw new MongoAPIError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
   }

@@ -5,7 +5,7 @@ import * as BSON from '../../bson';
 import { AuthProvider, AuthContext } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import {
-  MongoDriverError,
+  MongoRuntimeError,
   MongoMissingCredentialsError,
   MongoCompatibilityError
 } from '../../error';
@@ -88,19 +88,22 @@ export class MongoDBAWS extends AuthProvider {
         const serverNonce = serverResponse.s.buffer;
         if (serverNonce.length !== 64) {
           callback(
-            new MongoDriverError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
+            // TODO(NODE-3483)
+            new MongoRuntimeError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
           );
 
           return;
         }
 
         if (serverNonce.compare(nonce, 0, nonce.length, 0, nonce.length) !== 0) {
-          callback(new MongoDriverError('Server nonce does not begin with client nonce'));
+          // TODO(NODE-3483)
+          callback(new MongoRuntimeError('Server nonce does not begin with client nonce'));
           return;
         }
 
         if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
-          callback(new MongoDriverError(`Server returned an invalid host: "${host}"`));
+          // TODO(NODE-3483)
+          callback(new MongoRuntimeError(`Server returned an invalid host: "${host}"`));
           return;
         }
 
@@ -274,7 +277,8 @@ function request(uri: string, _options: RequestOptions | Callback, _callback?: C
         const parsed = JSON.parse(data);
         callback(undefined, parsed);
       } catch (err) {
-        callback(new MongoDriverError(`Invalid JSON response: "${data}"`));
+        // TODO(NODE-3483)
+        callback(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
       }
     });
   });

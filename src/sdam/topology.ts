@@ -15,7 +15,8 @@ import {
   MongoServerSelectionError,
   MongoCompatibilityError,
   MongoDriverError,
-  MongoTopologyClosedError
+  MongoTopologyClosedError,
+  MongoParseError
 } from '../error';
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import {
@@ -282,7 +283,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         seedlist.push(seed);
       } else {
         // FIXME(NODE-3484): May need to be a MongoParseError
-        throw new MongoDriverError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
+        throw new MongoParseError(`Topology cannot be constructed from ${JSON.stringify(seed)}`);
       }
     }
 

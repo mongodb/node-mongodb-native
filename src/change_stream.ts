@@ -3,10 +3,9 @@ import {
   MongoError,
   AnyError,
   isResumableError,
-  MongoDriverError,
+  MongoRuntimeError,
   MongoAPIError,
-  MongoChangeStreamError,
-  MongoRuntimeError
+  MongoChangeStreamError
 } from './error';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import {
@@ -639,7 +638,7 @@ function waitForTopologyConnected(
 
     if (calculateDurationInMs(start) > timeout) {
       // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
-      return callback(new MongoDriverError('Timed out waiting for connection'));
+      return callback(new MongoRuntimeError('Timed out waiting for connection'));
     }
 
     waitForTopologyConnected(topology, options, callback);

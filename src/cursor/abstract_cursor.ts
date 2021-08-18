@@ -3,7 +3,7 @@ import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from 
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import {
   AnyError,
-  MongoDriverError,
+  MongoRuntimeError,
   MongoNetworkError,
   MongoInvalidArgumentError,
   MongoCursorExhaustedError,
@@ -598,12 +598,12 @@ export abstract class AbstractCursor<
     const server = this[kServer];
 
     if (cursorId == null) {
-      callback(new MongoDriverError('Unable to iterate cursor with no id'));
+      callback(new MongoRuntimeError('Unable to iterate cursor with no id'));
       return;
     }
 
     if (server == null) {
-      callback(new MongoDriverError('Unable to iterate cursor without selected server'));
+      callback(new MongoRuntimeError('Unable to iterate cursor without selected server'));
       return;
     }
 
