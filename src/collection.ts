@@ -414,34 +414,39 @@ export class Collection<TSchema extends Document = Document> {
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>
-  ): Promise<UpdateResult | Document>;
+  ): Promise<UpdateResult>;
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
-    callback: Callback<UpdateResult | Document>
+    callback: Callback<UpdateResult>
   ): void;
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
     options: UpdateOptions
-  ): Promise<UpdateResult | Document>;
+  ): Promise<UpdateResult>;
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
     options: UpdateOptions,
-    callback: Callback<UpdateResult | Document>
+    callback: Callback<UpdateResult>
   ): void;
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
-    options?: UpdateOptions | Callback<UpdateResult | Document>,
-    callback?: Callback<UpdateResult | Document>
-  ): Promise<UpdateResult | Document> | void {
+    options?: UpdateOptions | Callback<UpdateResult>,
+    callback?: Callback<UpdateResult>
+  ): Promise<UpdateResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
       getTopology(this),
-      new UpdateOneOperation(this as TODO_NODE_3286, filter, update, resolveOptions(this, options)),
+      new UpdateOneOperation(
+        this as TODO_NODE_3286,
+        filter,
+        update,
+        resolveOptions(this, options)
+      ) as TODO_NODE_3286,
       callback
     );
   }
