@@ -1,5 +1,6 @@
 'use strict';
 
+const { expect } = require('chai');
 const mock = require('../tools/mock');
 const snappy = optionalRequire('snappy');
 const snappyVersion = optionalRequire('snappy/package.json').version;
@@ -47,6 +48,11 @@ describe('Compression', function () {
       // TODO(NODE-3560): Add more comprehensive round trip testing
       await client.connect();
       await client.db().collection('snappy').insertOne({ a: 1 });
+    });
+
+    it('should define a version number on the optional import', function () {
+      const { Snappy, PKG_VERSION } = require('../../src/deps');
+      expect(Snappy).to.have.property(PKG_VERSION, snappyVersion);
     });
   });
 });

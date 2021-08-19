@@ -1,8 +1,8 @@
 import * as zlib from 'zlib';
-import { Callback, isPromiseLike } from '../../utils';
+import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
-import { Snappy } from '../../deps';
+import { PKG_VERSION, Snappy } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 
 /** @public */
@@ -31,6 +31,8 @@ export const uncompressibleCommands = new Set([
   'copydb'
 ]);
 
+let SNAPPY_VERSION: number | undefined = undefined;
+
 // Facilitate compressing a message using an agreed compressor
 export function compress(
   self: { options: OperationDescription & zlib.ZlibOptions },
@@ -43,11 +45,17 @@ export function compress(
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      const snappyResult = Snappy.compress(dataToBeCompressed, callback);
 
-      if (isPromiseLike(snappyResult)) {
-        // Using snappy 7.x
-        snappyResult.then(buffer => callback(undefined, buffer)).catch(error => callback(error));
+      if (!SNAPPY_VERSION) {
+        SNAPPY_VERSION = Number.parseInt(Snappy[PKG_VERSION].split('.')[0]);
+      }
+
+      if (SNAPPY_VERSION <= 6) {
+        Snappy.compress(dataToBeCompressed, callback);
+      } else {
+        Snappy.compress(dataToBeCompressed)
+          .then(buffer => callback(undefined, buffer))
+          .catch(error => callback(error));
       }
       break;
     }
@@ -82,11 +90,17 @@ export function decompress(
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      const snappyResult = Snappy.uncompress(compressedData, { asBuffer: true }, callback);
 
-      if (isPromiseLike(snappyResult)) {
-        // Using snappy 7.x
-        snappyResult.then(buffer => callback(undefined, buffer)).catch(error => callback(error));
+      if (!SNAPPY_VERSION) {
+        SNAPPY_VERSION = Number.parseInt(Snappy[PKG_VERSION].split('.')[0]);
+      }
+
+      if (SNAPPY_VERSION <= 6) {
+        Snappy.uncompress(compressedData, { asBuffer: true }, callback);
+      } else {
+        Snappy.uncompress(compressedData, { asBuffer: true })
+          .then(buffer => callback(undefined, buffer))
+          .catch(error => callback(error));
       }
       break;
     }
