@@ -48,7 +48,6 @@ export abstract class AbstractOperation<TResult = any> {
   cmd!: Document;
   readPreference: ReadPreference;
   server!: Server;
-  fullResponse?: boolean;
   bypassPinningCheck: boolean;
 
   // BSON serialization options

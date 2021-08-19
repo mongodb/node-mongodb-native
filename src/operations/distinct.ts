@@ -80,7 +80,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
         return;
       }
 
-      callback(undefined, this.options.fullResponse || this.explain ? result : result.values);
+      callback(undefined, this.explain ? result : result.values);
     });
   }
 }
