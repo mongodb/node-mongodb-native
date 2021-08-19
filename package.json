@@ -38,7 +38,7 @@
     "bson-ext": "^2.0.0"
   },
   "dependencies": {
-    "bson": "^4.4.0",
+    "bson": "^4.5.0",
     "denque": "^1.5.0",
     "mongodb-connection-string-url": "^1.0.1"
   },
