@@ -75,7 +75,7 @@ This class should **never** be directly instantiated.
 | **MongoNotConnectedError**         | Thrown when the user attempts to perform operations on a client that has not yet connected.                                                            |
 | **MongoBatchReExecutionError**     | Thrown when a user attempts to re-execute a batch command when one of the constituent commands has failed.                                             |
 | **MongoConnectionStringError**     | Thrown when a user supplies an incorrect URI to the driver.                                                                                            |
-| **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that is expired or closed                                                                  |
+| **MongoConnectionPoolClosedError** | Thrown when a user attempts to operate on a connection pool that is expired or closed.                                                                 |
 
 ### `MongoRuntimeError`
 
@@ -84,12 +84,12 @@ This class should **never** be directly instantiated.
 
 **Children of MongoRuntimeError**
 
-| Error Name                  | Description                                                                               |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| **MongoDecompressionError** | Thrown when the driver fails to decompress data received from the server                  |
-| **MongoChangeStreamError**  | Thrown when an error is encountered when operating on a ChangeStream                      |
-| **MongoGridFSStreamError**  | Thrown when an unexpected state is reached when operating on a GridFS Stream              |
-| **MongoGridFSChunkError**   | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream |
+| Error Name                  | Description                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| **MongoDecompressionError** | Thrown when the driver fails to decompress data received from the server.                  |
+| **MongoChangeStreamError**  | Thrown when an error is encountered when operating on a ChangeStream.                      |
+| **MongoGridFSStreamError**  | Thrown when an unexpected state is reached when operating on a GridFS Stream.              |
+| **MongoGridFSChunkError**   | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream. |
 
 ### `MongoNetworkError`
 
