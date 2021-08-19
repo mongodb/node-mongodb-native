@@ -81,7 +81,7 @@ export interface QueryOptions extends BSONSerializeOptions {
   oplogReplay?: boolean;
 }
 
-/** @public */
+/** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: boolean;
   slaveOk?: boolean;
