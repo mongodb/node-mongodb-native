@@ -114,7 +114,7 @@ These are errors which originate from faulty environment setup.
 
 The test plan consists of a series of prose tests.
 As numerous errors are being introduced, select classes will be tested.
-The classes to be tested will be selected based on two characteristics:
+The classes to be tested will be selected based on three characteristics:
 
 1. The **frequency** with which users may encounter this error. Errors that users will likely run into, including but not limited to `MongoInvalidArgumentError` and `MongoNetworkTimeoutError`, are a part of the test plan. _Note:_ Error classes that should never be instantiated, such as `MongoAPIError` and `MongoRuntimeError`, will not be tested as the user should not encounter them.
 2. The **scope** of the error. Errors that tackle a large subset of issues, including but not limited to `MongoServerError` and `MongoSystemError`, will _not_ be a part of the test plan.
