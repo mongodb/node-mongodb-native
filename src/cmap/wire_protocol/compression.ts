@@ -85,7 +85,7 @@ export function decompress(
       const snappyResult = Snappy.uncompress(compressedData, { asBuffer: true }, callback);
 
       if (isPromiseLike(snappyResult)) {
-        // Using snappy 6.x
+        // Using snappy 7.x
         snappyResult.then(buffer => callback(undefined, buffer)).catch(error => callback(error));
       }
       break;
