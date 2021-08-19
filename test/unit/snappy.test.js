@@ -29,8 +29,8 @@ describe('Compression', function () {
 
   describe('Snappy', () => {
     it(`should compress messages sent with snappy ${snappyVersion}`, async function () {
-      // This test should not take any longer
-      // The failure case is hanging because new snappy never calls the callback
+      // the timeout is being set because the test should not take any longer than 5 seconds,
+      // and that if it doesn't complete, it will hang due to the callback never being called
       this.timeout(5000);
 
       server.setMessageHandler(request => {
@@ -44,7 +44,7 @@ describe('Compression', function () {
       });
       // The mock server uses snappy to decode messages so
       // if this passes we implicitly test snappy is working
-      // TODO(NODE-XXXX): Add more comprehensive round trip testing
+      // TODO(NODE-3560): Add more comprehensive round trip testing
       await client.connect();
       await client.db().collection('snappy').insertOne({ a: 1 });
     });
