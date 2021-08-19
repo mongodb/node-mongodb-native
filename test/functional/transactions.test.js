@@ -97,16 +97,50 @@ describe('Transactions Spec Unified Tests', function () {
   }
 });
 
-describe('Transactions', function () {
-  const testContext = new TransactionsRunnerContext();
+const SKIP_TESTS = [
+  // commitTransaction retry seems to be swallowed by mongos in these three cases
+  'commitTransaction retry succeeds on new mongos',
+  'commitTransaction retry fails on new mongos',
+  'unpin after transient error within a transaction and commit',
+  // FIXME(NODE-3074): unskip count tests when spec tests have been updated
+  'count',
+  // This test needs there to be multiple mongoses
+  // 'increment txnNumber',
+  // Skipping this until SPEC-1320 is resolved
+  // 'remain pinned after non-transient error on commit',
 
-  [
-    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
-    {
+  // Will be implemented as part of NODE-2034
+  'Client side error in command starting transaction',
+  'Client side error when transaction is in progress',
+
+  // Will be implemented as part of NODE-2538
+  'abortTransaction only retries once with RetryableWriteError from server',
+  'abortTransaction does not retry without RetryableWriteError label',
+  'commitTransaction does not retry error without RetryableWriteError label',
+  'commitTransaction retries once with RetryableWriteError from server'
+];
+
+describe('Transactions Spec Legacy Tests', function () {
+  const testContext = new TransactionsRunnerContext();
+  const suitesToRun = [{ name: 'spec tests', specPath: path.join('transactions', 'legacy') }];
+  // Note: convenient-api tests are skipped for serverless
+  if (!process.env.SERVERLESS) {
+    suitesToRun.push({
       name: 'withTransaction spec tests',
       specPath: path.join('transactions', 'convenient-api')
-    }
-  ].forEach(suiteSpec => {
+    });
+  } else {
+    // FIXME(NODE-3550): these tests should pass on serverless but currently fail
+    SKIP_TESTS.push(
+      'abortTransaction only performs a single retry',
+      'abortTransaction does not retry after Interrupted',
+      'abortTransaction does not retry after WriteConcernError Interrupted',
+      'commitTransaction does not retry error without RetryableWriteError label',
+      'commitTransaction is not retried after UnsatisfiableWriteConcern error',
+      'commitTransaction fails after Interrupted'
+    );
+  }
+  suitesToRun.forEach(suiteSpec => {
     describe(suiteSpec.name, function () {
       const testSuites = loadSpecTests(suiteSpec.specPath);
       after(() => testContext.teardown());
@@ -115,29 +149,6 @@ describe('Transactions', function () {
       });
 
       function testFilter(spec) {
-        const SKIP_TESTS = [
-          // commitTransaction retry seems to be swallowed by mongos in these three cases
-          'commitTransaction retry succeeds on new mongos',
-          'commitTransaction retry fails on new mongos',
-          'unpin after transient error within a transaction and commit',
-          // FIXME(NODE-3074): unskip count tests when spec tests have been updated
-          'count',
-          // This test needs there to be multiple mongoses
-          // 'increment txnNumber',
-          // Skipping this until SPEC-1320 is resolved
-          // 'remain pinned after non-transient error on commit',
-
-          // Will be implemented as part of NODE-2034
-          'Client side error in command starting transaction',
-          'Client side error when transaction is in progress',
-
-          // Will be implemented as part of NODE-2538
-          'abortTransaction only retries once with RetryableWriteError from server',
-          'abortTransaction does not retry without RetryableWriteError label',
-          'commitTransaction does not retry error without RetryableWriteError label',
-          'commitTransaction retries once with RetryableWriteError from server'
-        ];
-
         return SKIP_TESTS.indexOf(spec.description) === -1;
       }
 
@@ -158,7 +169,9 @@ describe('Transactions', function () {
     });
 
     it('should provide a useful error if a Promise is not returned', {
-      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5' } },
+      metadata: {
+        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5', serverless: 'forbid' }
+      },
       test: function (done) {
         function fnThatDoesntReturnPromise() {
           return false;
@@ -173,7 +186,10 @@ describe('Transactions', function () {
     });
 
     it('should return readable error if promise rejected with no reason', {
-      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' } },
+      metadata: {
+        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' },
+        serverless: 'forbid'
+      },
       test: function (done) {
         function fnThatReturnsBadPromise() {
           return Promise.reject();

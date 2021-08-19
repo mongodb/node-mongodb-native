@@ -134,6 +134,24 @@ functions:
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run serverless tests:
+    - command: timeout.update
+      params:
+        exec_timeout_secs: 1800
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          MONGODB_URI="${MONGODB_URI}" \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          AUTH="auth" SSL="ssl" SERVERLESS=1 \
+          SERVERLESS_ATLAS_USER="${SERVERLESS_ATLAS_USER}" \
+          SERVERLESS_ATLAS_PASSWORD="${SERVERLESS_ATLAS_PASSWORD}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
   start-load-balancer:
     - command: shell.exec
       params:
@@ -605,18 +623,12 @@ functions:
     - command: attach.xunit_results
       params:
         file: src/xunit.xml
-pre:
-  - func: fetch source
-  - func: prepare resources
-  - func: windows fix
-  - func: fix absolute paths
-  - func: make files executable
-post:
-  - func: upload test results
-  - func: cleanup
-ignore:
-  - '*.md'
 tasks:
+  - name: test-serverless
+    tags:
+      - serverless
+    commands:
+      - func: run serverless tests
   - name: test-latest-server
     tags:
       - latest
@@ -1689,6 +1701,51 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
+task_groups:
+  - name: serverless_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    setup_group:
+      - func: fetch source
+      - func: prepare resources
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |
+            ${PREPARE_SHELL}
+            set +o xtrace
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
+            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
+            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
+              bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
+      - command: expansions.update
+        params:
+          file: serverless-expansion.yml
+    teardown_group:
+      - func: upload test results
+      - command: shell.exec
+        params:
+          script: |
+            ${PREPARE_SHELL}
+            set +o xtrace
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
+            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
+            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
+            SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
+              bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
+    tasks:
+      - .serverless
+pre:
+  - func: fetch source
+  - func: prepare resources
+  - func: windows fix
+  - func: fix absolute paths
+  - func: make files executable
+post:
+  - func: upload test results
+  - func: cleanup
+ignore:
+  - '*.md'
 buildvariants:
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
@@ -1975,3 +2032,10 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-4.4-auth-test-run-aws-ECS-auth-test
+  - name: ubuntu1804-test-serverless
+    display_name: Serverless Test
+    run_on: ubuntu1804-test
+    expansions:
+      NODE_LTS_NAME: erbium
+    tasks:
+      - serverless_task_group

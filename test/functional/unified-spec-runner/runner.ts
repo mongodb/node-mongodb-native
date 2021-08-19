@@ -24,6 +24,10 @@ export function trace(message: string): void {
 }
 
 async function terminateOpenTransactions(client: MongoClient) {
+  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
+  if (process.env.SERVERLESS) {
+    return;
+  }
   // TODO(NODE-3491): on sharded clusters this has to be run on each mongos
   try {
     await client.db().admin().command({ killAllSessions: [] });

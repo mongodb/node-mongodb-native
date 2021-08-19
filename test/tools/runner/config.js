@@ -8,6 +8,7 @@ const { MongoClient } = require('../../../src/mongo_client');
 const { Topology } = require('../../../src/sdam/topology');
 const { TopologyType } = require('../../../src/sdam/common');
 const { HostAddress } = require('../../../src/utils');
+const { getEnvironmentalOptions } = require('../utils');
 
 /**
  * @typedef {Object} UrlOptions
@@ -40,10 +41,10 @@ class TestConfiguration {
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
-    this.serverApi = context.serverApi;
     this.parameters = undefined;
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
+    this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.options = {
       hosts,
@@ -59,6 +60,10 @@ class TestConfiguration {
         username: url.username,
         password: url.password
       };
+    }
+    if (context.serverlessCredentials) {
+      const { username, password } = context.serverlessCredentials;
+      this.options.auth = { username, password, authSource: 'admin' };
     }
   }
 
@@ -104,18 +109,18 @@ class TestConfiguration {
   }
 
   newClient(dbOptions, serverOptions) {
-    const defaultOptions = { minHeartbeatFrequencyMS: 100 };
-    if (this.serverApi) {
-      Object.assign(defaultOptions, { serverApi: this.serverApi });
-    }
+    serverOptions = Object.assign(
+      { minHeartbeatFrequencyMS: 100 },
+      getEnvironmentalOptions(),
+      serverOptions
+    );
+
     // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new MongoClient(dbOptions, Object.assign(defaultOptions, serverOptions));
+      return new MongoClient(dbOptions, serverOptions);
     }
 
     dbOptions = dbOptions || {};
-    serverOptions = Object.assign({}, defaultOptions, serverOptions);
-
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
     const dbPort = (serverOptions && serverOptions.port) || this.options.port;
@@ -231,6 +236,9 @@ class TestConfiguration {
       if (options.authSource) {
         url.searchParams.append('authSource', options.authSource);
       }
+    } else if (this.isServerless) {
+      url.searchParams.append('ssl', true);
+      url.searchParams.append('authSource', 'admin');
     }
 
     let actualHostsString;

@@ -66,7 +66,11 @@ describe('Sessions', function () {
     });
 
     describe('withSession', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: {
+        requires: {
+          mongodb: '>=3.6.0'
+        }
+      },
       test: function () {
         beforeEach(function () {
           return test.setup(this.configuration);

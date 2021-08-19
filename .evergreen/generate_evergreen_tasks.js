@@ -626,6 +626,17 @@ SINGLETON_TASKS.push({
   ]
 });
 
+// special case for serverless testing
+BUILD_VARIANTS.push({
+  name: 'ubuntu1804-test-serverless',
+  display_name: 'Serverless Test',
+  run_on: 'ubuntu1804-test',
+  expansions: {
+    NODE_LTS_NAME: LOWEST_LTS
+  },
+  tasks: ['serverless_task_group']
+});
+
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
 fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);

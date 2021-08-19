@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../src');
 const { TestConfiguration } = require('./config');
+const { getEnvironmentalOptions } = require('../utils');
 const { eachAsync } = require('../../../src/utils');
 const mock = require('../mock');
 const wtfnode = require('wtfnode');
@@ -69,9 +70,11 @@ before(function (_done) {
   //   )} topology`
   // );
 
-  const options = MONGODB_API_VERSION ? { serverApi: MONGODB_API_VERSION } : {};
   const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
-  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, options);
+  const client = new MongoClient(
+    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
+    getEnvironmentalOptions()
+  );
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {

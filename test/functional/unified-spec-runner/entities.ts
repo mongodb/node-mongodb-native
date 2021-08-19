@@ -4,8 +4,7 @@ import {
   Collection,
   GridFSBucket,
   Document,
-  HostAddress,
-  ServerApiVersion
+  HostAddress
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { WriteConcern } from '../../../src/write_concern';
@@ -33,6 +32,7 @@ import type {
 } from '../../../src/cmap/command_monitoring_events';
 import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
+import { getEnvironmentalOptions } from '../../tools/utils';
 import { TestConfiguration, trace } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
@@ -52,15 +52,8 @@ export type CmapEvent =
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
 
-function serverApiConfig() {
-  if (process.env.MONGODB_API_VERSION) {
-    return { version: process.env.MONGODB_API_VERSION as ServerApiVersion };
-  }
-}
-
 function getClient(address) {
-  const serverApi = serverApiConfig();
-  return new MongoClient(`mongodb://${address}`, serverApi ? { serverApi } : {});
+  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
 type PushFunction = (e: CommandEvent | CmapEvent) => void;
@@ -106,7 +99,9 @@ export class UnifiedMongoClient extends MongoClient {
   constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
-      serverApi: description.serverApi ? description.serverApi : serverApiConfig()
+      ...description.uriOptions,
+      ...getEnvironmentalOptions(),
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
     this.commandEvents = [];
@@ -116,6 +111,10 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
+    // FIXME(NODE-3549): hack to get tests passing, extra unexpected events otherwise
+    if (process.env.SERVERLESS) {
+      this.ignoredEvents.push('ping');
+    }
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);

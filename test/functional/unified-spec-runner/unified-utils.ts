@@ -5,6 +5,7 @@ import { gte as semverGte, lte as semverLte } from 'semver';
 import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
 import { isDeepStrictEqual } from 'util';
 import { TestConfiguration } from './runner';
+import { shouldRunServerlessTest } from '../../tools/utils';
 import ConnectionString from 'mongodb-connection-string-url';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
@@ -59,6 +60,10 @@ export async function topologySatisfies(
       !!utilClient.options.auth ||
       !!utilClient.options.authSource ||
       !!utilClient.options.authMechanism;
+  }
+
+  if (r.serverless) {
+    ok &&= shouldRunServerlessTest(r.serverless, config.isServerless);
   }
 
   return ok;

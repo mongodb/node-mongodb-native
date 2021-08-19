@@ -7,6 +7,7 @@ const { EJSON } = require('bson');
 const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
+const { shouldRunServerlessTest } = require('../../tools/utils');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -110,7 +111,12 @@ function parseRunOn(runOn) {
     }
 
     const mongodb = version.join(' ');
-    return { topology, mongodb, authEnabled: !!config.authEnabled };
+    return {
+      topology,
+      mongodb,
+      authEnabled: !!config.authEnabled,
+      serverless: config.serverless
+    };
   });
 }
 
@@ -168,6 +174,13 @@ function shouldRunSpecTest(configuration, requires, spec, filter) {
   }
 
   if (
+    requires.serverless &&
+    !shouldRunServerlessTest(requires.serverless, !!process.env.SERVERLESS)
+  ) {
+    return false;
+  }
+
+  if (
     spec.operations.some(
       op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
     )
@@ -191,20 +204,23 @@ function prepareDatabaseForSuite(suite, context) {
 
   if (context.skipPrepareDatabase) return Promise.resolve();
 
-  const setupPromise = db
-    .admin()
-    .command({ killAllSessions: [] })
-    .catch(err => {
-      if (
-        err.message.match(/no such (cmd|command)/) ||
-        err.message.match(/Failed to kill on some hosts/) ||
-        err.code === 11601
-      ) {
-        return;
-      }
+  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
+  const setupPromise = context.serverless
+    ? Promise.resolve()
+    : db
+        .admin()
+        .command({ killAllSessions: [] })
+        .catch(err => {
+          if (
+            err.message.match(/no such (cmd|command)/) ||
+            err.message.match(/Failed to kill on some hosts/) ||
+            err.code === 11601
+          ) {
+            return;
+          }
 
-      throw err;
-    });
+          throw err;
+        });
 
   if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;
