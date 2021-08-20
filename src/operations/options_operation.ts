@@ -1,5 +1,5 @@
 import { AbstractOperation, OperationOptions } from './operation';
-import { MongoRuntimeError } from '../error';
+import { MongoAPIError } from '../error';
 import type { Callback } from '../utils';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
@@ -28,8 +28,8 @@ export class OptionsOperation extends AbstractOperation<Document> {
       .toArray((err, collections) => {
         if (err || !collections) return callback(err);
         if (collections.length === 0) {
-          // TODO(NODE-3483)
-          return callback(new MongoRuntimeError(`collection ${coll.namespace} not found`));
+          // TODO(NODE-3485)
+          return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
         }
 
         callback(err, collections[0].options);

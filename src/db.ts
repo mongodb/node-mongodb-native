@@ -324,8 +324,7 @@ export class Db {
     options: CollectionOptions = {}
   ): Collection<TSchema> {
     if (typeof options === 'function') {
-      // TODO(NODE-3485): Replace this with MongoDeprecationError
-      throw new MongoAPIError('The callback form of this helper has been removed.');
+      throw new MongoInvalidArgumentError('The callback form of this helper has been removed.');
     }
     const finalOptions = resolveOptions(this, options);
     return new Collection<TSchema>(this, name, finalOptions);

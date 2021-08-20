@@ -14,6 +14,7 @@ import {
   MONGODB_ERROR_CODES,
   MongoServerError,
   MongoDriverError,
+  MongoAPIError,
   AnyError,
   MongoExpiredSessionError,
   MongoTransactionError,
@@ -972,7 +973,7 @@ export function applySession(
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
   if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
-      return new MongoRuntimeError('Cannot have explicit session with unacknowledged writes');
+      return new MongoAPIError('Cannot have explicit session with unacknowledged writes');
     }
     return;
   }
