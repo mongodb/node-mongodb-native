@@ -1,8 +1,22 @@
 graph TD
-    MongoError --> MongoDriverError
-    MongoError --> MongoNetworkError
-    MongoError --> MongoServerError
-    MongoError --> MongoSystemError
-    MongoDriverError --> MongoAPIError
-    MongoDriverError --> MongoRuntimeError
-    
+    MongoError --- MongoDriverError
+    MongoError --- MongoNetworkError
+    MongoError --- MongoServerError
+    MongoError --- MongoSystemError
+    MongoDriverError --- MongoAPIError
+    MongoDriverError --- MongoRuntimeError
+
+linkStyle 0 stroke:#116149
+linkStyle 1 stroke:#116149
+linkStyle 2 stroke:#116149
+linkStyle 3 stroke:#116149
+linkStyle 4 stroke:#116149
+linkStyle 5 stroke:#116149
+
+style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoSystemError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoNetworkError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
