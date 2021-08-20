@@ -5,7 +5,7 @@ import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/c
 import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 
 // Incrementing request id
 let _requestId = 0;
@@ -78,14 +78,14 @@ export class Query {
   constructor(ns: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
-    if (ns == null) throw new MongoDriverError('Namespace must be specified for query');
+    if (ns == null) throw new MongoRuntimeError('Namespace must be specified for query');
     // TODO(NODE-3483): Replace with MongoCommandError
-    if (query == null) throw new MongoDriverError('A query document must be specified for query');
+    if (query == null) throw new MongoRuntimeError('A query document must be specified for query');
 
     // Validate that we are not passing 0x00 in the collection name
     if (ns.indexOf('\x00') !== -1) {
       // TODO(NODE-3483): Use MongoNamespace static method
-      throw new MongoDriverError('Namespace cannot contain a null character');
+      throw new MongoRuntimeError('Namespace cannot contain a null character');
     }
 
     // Basic options
@@ -858,7 +858,7 @@ export class BinMsg {
         // It was decided that no driver makes use of payload type 1
 
         // TODO(NODE-3483): Replace with MongoDeprecationError
-        throw new MongoDriverError('OP_MSG Payload Type 1 detected unsupported protocol');
+        throw new MongoRuntimeError('OP_MSG Payload Type 1 detected unsupported protocol');
       }
     }
 

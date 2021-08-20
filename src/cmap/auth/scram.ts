@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { Binary, Document } from '../../bson';
 import {
   AnyError,
-  MongoDriverError,
+  MongoRuntimeError,
   MongoServerError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
@@ -169,7 +169,8 @@ function continueScramConversation(
   const iterations = parseInt(dict.i, 10);
   if (iterations && iterations < 4096) {
     callback(
-      new MongoDriverError(`Server returned an invalid iteration count ${iterations}`),
+      // TODO(NODE-3483)
+      new MongoRuntimeError(`Server returned an invalid iteration count ${iterations}`),
       false
     );
     return;
@@ -178,7 +179,8 @@ function continueScramConversation(
   const salt = dict.s;
   const rnonce = dict.r;
   if (rnonce.startsWith('nonce')) {
-    callback(new MongoDriverError(`Server returned an invalid nonce: ${rnonce}`), false);
+    // TODO(NODE-3483)
+    callback(new MongoRuntimeError(`Server returned an invalid nonce: ${rnonce}`), false);
     return;
   }
 
@@ -217,7 +219,7 @@ function continueScramConversation(
 
     const parsedResponse = parsePayload(r.payload.value());
     if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
-      callback(new MongoDriverError('Server returned an invalid signature'));
+      callback(new MongoRuntimeError('Server returned an invalid signature'));
       return;
     }
 

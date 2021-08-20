@@ -4,7 +4,7 @@ import { enumToString } from '../utils';
 import type { Server } from '../sdam/server';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError, MongoInvalidArgumentError } from '../error';
+import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 /** @public */
@@ -63,7 +63,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
       if (err == null && doc.ok === 1) return callback(undefined, level);
       return err != null
         ? callback(err)
-        : callback(new MongoDriverError('Error with profile command'));
+        : callback(new MongoRuntimeError('Error with profile command'));
     });
   }
 }

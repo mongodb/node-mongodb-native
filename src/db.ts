@@ -9,7 +9,7 @@ import {
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { MongoDriverError, MongoInvalidArgumentError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import { Collection, CollectionOptions } from './collection';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import * as CONSTANTS from './constants';
@@ -324,8 +324,7 @@ export class Db {
     options: CollectionOptions = {}
   ): Collection<TSchema> {
     if (typeof options === 'function') {
-      // TODO(NODE-3485): Replace this with MongoDeprecationError
-      throw new MongoDriverError('The callback form of this helper has been removed.');
+      throw new MongoInvalidArgumentError('The callback form of this helper has been removed.');
     }
     const finalOptions = resolveOptions(this, options);
     return new Collection<TSchema>(this, name, finalOptions);
@@ -749,8 +748,6 @@ function validateDatabaseName(databaseName: string) {
   const invalidChars = [' ', '.', '$', '/', '\\'];
   for (let i = 0; i < invalidChars.length; i++) {
     if (databaseName.indexOf(invalidChars[i]) !== -1)
-      throw new MongoDriverError(
-        `database names cannot contain the character '${invalidChars[i]}'`
-      );
+      throw new MongoAPIError(`database names cannot contain the character '${invalidChars[i]}'`);
   }
 }

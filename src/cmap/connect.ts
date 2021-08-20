@@ -8,7 +8,7 @@ import {
   MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoServerError,
-  MongoDriverError
+  MongoRuntimeError
 } from '../error';
 import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
 import { AuthContext } from './auth/auth_provider';
@@ -144,7 +144,7 @@ function performInitialHandshake(
         }
         if (!response.serviceId) {
           return callback(
-            new MongoDriverError(
+            new MongoCompatibilityError(
               'Driver attempted to initialize in load balancing mode, ' +
                 'but the server does not support this mode.'
             )
@@ -284,7 +284,8 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
   } else {
     // This should never happen since we set up HostAddresses
     // But if we don't throw here the socket could hang until timeout
-    throw new MongoDriverError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
+    // TODO(NODE-3483)
+    throw new MongoRuntimeError(`Unexpected HostAddress ${JSON.stringify(hostAddress)}`);
   }
 }
 

@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import {
-  MongoDriverError,
+  MongoRuntimeError,
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError
@@ -326,7 +326,8 @@ function init(stream: GridFSBucketReadStream): void {
         ? stream.s.filter._id.toString()
         : stream.s.filter.filename;
       const errmsg = `FileNotFound: file ${identifier} was not found`;
-      const err = new MongoDriverError(errmsg);
+      // TODO(NODE-3483)
+      const err = new MongoRuntimeError(errmsg);
       err.code = 'ENOENT'; // TODO: NODE-3338 set property as part of constructor
       return stream.emit(GridFSBucketReadStream.ERROR, err);
     }

@@ -4,7 +4,7 @@ import type { Document } from '../bson';
 import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError } from '../error';
+import { MongoRuntimeError } from '../error';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -41,13 +41,13 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
       if (err != null) return callback(err);
 
       // TODO(NODE-3483): Replace these with MongoUnexpectedServerResponseError
-      if (doc.ok === 0) return callback(new MongoDriverError('Error with validate command'));
+      if (doc.ok === 0) return callback(new MongoRuntimeError('Error with validate command'));
       if (doc.result != null && typeof doc.result !== 'string')
-        return callback(new MongoDriverError('Error with validation data'));
+        return callback(new MongoRuntimeError('Error with validation data'));
       if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-        return callback(new MongoDriverError(`Invalid collection ${collectionName}`));
+        return callback(new MongoRuntimeError(`Invalid collection ${collectionName}`));
       if (doc.valid != null && !doc.valid)
-        return callback(new MongoDriverError(`Invalid collection ${collectionName}`));
+        return callback(new MongoRuntimeError(`Invalid collection ${collectionName}`));
 
       return callback(undefined, doc);
     });

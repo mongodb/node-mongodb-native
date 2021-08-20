@@ -1,6 +1,6 @@
 import { AuthProvider, AuthContext } from './auth_provider';
 import {
-  MongoDriverError,
+  MongoRuntimeError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoError,
@@ -106,7 +106,8 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
       }
 
       initializeClient(spn, initOptions, (err: string, client: KerberosClient): void => {
-        if (err) return callback(new MongoDriverError(err));
+        // TODO(NODE-3483)
+        if (err) return callback(new MongoRuntimeError(err));
         callback(undefined, client);
       });
     }

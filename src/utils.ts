@@ -4,7 +4,7 @@ import { PromiseProvider } from './promise_provider';
 import {
   AnyError,
   MongoParseError,
-  MongoDriverError,
+  MongoRuntimeError,
   MongoCompatibilityError,
   MongoNotConnectedError,
   MongoInvalidArgumentError,
@@ -242,7 +242,7 @@ export function executeLegacyOperation(
 
   if (!Array.isArray(args)) {
     // TODO(NODE-3483)
-    throw new MongoDriverError('This method requires an array of arguments to apply');
+    throw new MongoRuntimeError('This method requires an array of arguments to apply');
   }
 
   options = options ?? {};
@@ -304,7 +304,7 @@ export function executeLegacyOperation(
   // Return a Promise
   if (args[args.length - 1] != null) {
     // TODO(NODE-3483)
-    throw new MongoDriverError('Final argument to `executeLegacyOperation` must be a callback');
+    throw new MongoRuntimeError('Final argument to `executeLegacyOperation` must be a callback');
   }
 
   return new Promise<any>((resolve, reject) => {
@@ -590,7 +590,7 @@ export class MongoDBNamespace {
   static fromString(namespace?: string): MongoDBNamespace {
     if (!namespace) {
       // TODO(NODE-3483): Replace with MongoNamespaceError
-      throw new MongoDriverError(`Cannot parse namespace from "${namespace}"`);
+      throw new MongoRuntimeError(`Cannot parse namespace from "${namespace}"`);
     }
 
     const [db, ...collection] = namespace.split('.');
@@ -850,7 +850,7 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   return function stateTransition(target, newState) {
     const legalStates = stateTable[target.s.state];
     if (legalStates && legalStates.indexOf(newState) < 0) {
-      throw new MongoDriverError(
+      throw new MongoRuntimeError(
         `illegal state transition from [${target.s.state}] => [${newState}], allowed: [${legalStates}]`
       );
     }

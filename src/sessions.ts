@@ -12,8 +12,9 @@ import {
   MongoNetworkError,
   MongoWriteConcernError,
   MONGODB_ERROR_CODES,
-  MongoDriverError,
   MongoServerError,
+  MongoDriverError,
+  MongoAPIError,
   AnyError,
   MongoExpiredSessionError,
   MongoTransactionError,
@@ -149,12 +150,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     if (topology == null) {
       // TODO(NODE-3483)
-      throw new MongoDriverError('ClientSession requires a topology');
+      throw new MongoRuntimeError('ClientSession requires a topology');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
       // TODO(NODE-3483)
-      throw new MongoDriverError('ClientSession requires a ServerSessionPool');
+      throw new MongoRuntimeError('ClientSession requires a ServerSessionPool');
     }
 
     options = options ?? {};
@@ -842,7 +843,7 @@ export class ServerSessionPool {
 
   constructor(topology: Topology) {
     if (topology == null) {
-      throw new MongoDriverError('ServerSessionPool requires a topology');
+      throw new MongoRuntimeError('ServerSessionPool requires a topology');
     }
 
     this.topology = topology;
@@ -965,14 +966,14 @@ export function applySession(
 
   const serverSession = session.serverSession;
   if (serverSession == null) {
-    return new MongoDriverError('Unable to acquire server session');
+    return new MongoRuntimeError('Unable to acquire server session');
   }
 
   // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
   // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
   if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
     if (session && session.explicit) {
-      return new MongoDriverError('Cannot have explicit session with unacknowledged writes');
+      return new MongoAPIError('Cannot have explicit session with unacknowledged writes');
     }
     return;
   }

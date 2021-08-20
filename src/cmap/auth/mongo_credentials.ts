@@ -1,7 +1,7 @@
 // Resolves the default auth mechanism according to
 
 import type { Document } from '../../bson';
-import { MongoDriverError, MongoMissingCredentialsError } from '../../error';
+import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { AuthMechanism } from './defaultAuthProviders';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -131,16 +131,16 @@ export class MongoCredentials {
       this.mechanism === AuthMechanism.MONGODB_X509
     ) {
       if (this.source != null && this.source !== '$external') {
-        // TODO(NODE-3483): Replace this with a MongoAuthValidationError
-        throw new MongoDriverError(
+        // TODO(NODE-3485): Replace this with a MongoAuthValidationError
+        throw new MongoAPIError(
           `Invalid source '${this.source}' for mechanism '${this.mechanism}' specified.`
         );
       }
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_PLAIN && this.source == null) {
-      // TODO(NODE-3483): Replace this with a MongoAuthValidationError
-      throw new MongoDriverError('PLAIN Authentication Mechanism needs an auth source');
+      // TODO(NODE-3485): Replace this with a MongoAuthValidationError
+      throw new MongoAPIError('PLAIN Authentication Mechanism needs an auth source');
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_X509 && this.password != null) {
@@ -148,8 +148,8 @@ export class MongoCredentials {
         Reflect.set(this, 'password', undefined);
         return;
       }
-      // TODO(NODE-3483): Replace this with a MongoAuthValidationError
-      throw new MongoDriverError(`Password not allowed for mechanism MONGODB-X509`);
+      // TODO(NODE-3485): Replace this with a MongoAuthValidationError
+      throw new MongoAPIError(`Password not allowed for mechanism MONGODB-X509`);
     }
   }
 

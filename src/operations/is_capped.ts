@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import { OperationOptions, AbstractOperation } from './operation';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { MongoDriverError } from '../error';
+import { MongoAPIError } from '../error';
 
 /** @internal */
 export class IsCappedOperation extends AbstractOperation<boolean> {
@@ -27,7 +27,8 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
       .toArray((err, collections) => {
         if (err || !collections) return callback(err);
         if (collections.length === 0) {
-          return callback(new MongoDriverError(`collection ${coll.namespace} not found`));
+          // TODO(NODE-3485)
+          return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
         }
 
         const collOptions = collections[0].options;

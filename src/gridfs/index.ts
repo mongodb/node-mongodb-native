@@ -1,4 +1,4 @@
-import { MongoDriverError } from '../error';
+import { MongoRuntimeError } from '../error';
 import {
   GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
@@ -229,7 +229,7 @@ function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): 
       if (!res?.deletedCount) {
         // TODO(NODE-3483): Replace with more appropriate error
         // Consider creating new error MongoGridFSFileNotFoundError
-        return callback(new MongoDriverError(`File not found for id ${id}`));
+        return callback(new MongoRuntimeError(`File not found for id ${id}`));
       }
 
       return callback();
@@ -251,7 +251,7 @@ function _rename(
     }
 
     if (!res?.matchedCount) {
-      return callback(new MongoDriverError(`File with id ${id} not found`));
+      return callback(new MongoRuntimeError(`File with id ${id} not found`));
     }
 
     return callback();

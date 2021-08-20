@@ -3,7 +3,7 @@ import { ChangeStream, ChangeStreamOptions } from './change_stream';
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
 import {
   AnyError,
-  MongoDriverError,
+  MongoRuntimeError,
   MongoInvalidArgumentError,
   MongoNotConnectedError
 } from './error';
@@ -565,7 +565,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     let cleanupHandler: CleanUpHandlerFunction = ((err, result, opts) => {
       // prevent multiple calls to cleanupHandler
       cleanupHandler = () => {
-        throw new MongoDriverError('cleanupHandler was called too many times');
+        // TODO(NODE-3483)
+        throw new MongoRuntimeError('cleanupHandler was called too many times');
       };
 
       opts = Object.assign({ throw: true }, opts);

@@ -3,7 +3,7 @@ import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 import type { HandshakeDocument } from '../connect';
 import type { ClientMetadataOptions, Callback } from '../../utils';
-import { MongoDriverError } from '../../error';
+import { MongoRuntimeError } from '../../error';
 
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
@@ -54,7 +54,7 @@ export class AuthProvider {
    * @param callback - The callback to return the result from the authentication
    */
   auth(context: AuthContext, callback: Callback): void {
-    // TODO(NODE-3485): Replace this with MongoMethodOverrideError
-    callback(new MongoDriverError('`auth` method must be overridden by subclass'));
+    // TODO(NODE-3483): Replace this with MongoMethodOverrideError
+    callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
   }
 }
