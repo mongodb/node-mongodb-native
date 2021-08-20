@@ -2,7 +2,7 @@
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
 import type { deserialize, Document, serialize } from './bson';
-import type { Callback } from './utils';
+import { Callback, parsePackageVersion } from './utils';
 
 export const PKG_VERSION = Symbol('kPkgVersion');
 
@@ -45,7 +45,7 @@ export interface KerberosClient {
 }
 
 type SnappyLib = {
-  [PKG_VERSION]: string;
+  [PKG_VERSION]: { major: number; minor: number; patch: number };
 
   /**
    * - Snappy 6.x takes a callback and returns void
@@ -93,7 +93,7 @@ try {
   // Ensure you always wrap an optional require in the try block NODE-3199
   Snappy = require('snappy');
   try {
-    (Snappy as any)[PKG_VERSION] = require('snappy/package.json').version;
+    (Snappy as any)[PKG_VERSION] = parsePackageVersion(require('snappy/package.json'));
   } catch {} // eslint-disable-line
 } catch {} // eslint-disable-line
 

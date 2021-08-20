@@ -31,8 +31,6 @@ export const uncompressibleCommands = new Set([
   'copydb'
 ]);
 
-let SNAPPY_VERSION: number | undefined = undefined;
-
 // Facilitate compressing a message using an agreed compressor
 export function compress(
   self: { options: OperationDescription & zlib.ZlibOptions },
@@ -46,11 +44,7 @@ export function compress(
         return callback(Snappy['kModuleError']);
       }
 
-      if (!SNAPPY_VERSION) {
-        SNAPPY_VERSION = Number.parseInt(Snappy[PKG_VERSION].split('.')[0]);
-      }
-
-      if (SNAPPY_VERSION <= 6) {
+      if (Snappy[PKG_VERSION].major <= 6) {
         Snappy.compress(dataToBeCompressed, callback);
       } else {
         Snappy.compress(dataToBeCompressed)
@@ -91,11 +85,7 @@ export function decompress(
         return callback(Snappy['kModuleError']);
       }
 
-      if (!SNAPPY_VERSION) {
-        SNAPPY_VERSION = Number.parseInt(Snappy[PKG_VERSION].split('.')[0]);
-      }
-
-      if (SNAPPY_VERSION <= 6) {
+      if (Snappy[PKG_VERSION].major <= 6) {
         Snappy.uncompress(compressedData, { asBuffer: true }, callback);
       } else {
         Snappy.uncompress(compressedData, { asBuffer: true })
