@@ -52,7 +52,11 @@ describe('Compression', function () {
 
     it('should define a version number on the optional import', function () {
       const { Snappy, PKG_VERSION } = require('../../src/deps');
-      expect(Snappy).to.have.property(PKG_VERSION, snappyVersion);
+      const [major, minor, patch] = snappyVersion.split('.').map(n => +n);
+      expect(Snappy).to.have.property(PKG_VERSION).that.is.an('object');
+      expect(Snappy[PKG_VERSION]).to.have.property('major', major);
+      expect(Snappy[PKG_VERSION]).to.have.property('minor', minor);
+      expect(Snappy[PKG_VERSION]).to.have.property('patch', patch);
     });
   });
 });
