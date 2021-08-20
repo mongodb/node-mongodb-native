@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import { PromiseProvider } from './promise_provider';
 import {
   AnyError,
-  MongoAPIError,
   MongoParseError,
   MongoRuntimeError,
   MongoCompatibilityError,
@@ -243,7 +242,7 @@ export function executeLegacyOperation(
 
   if (!Array.isArray(args)) {
     // TODO(NODE-3483)
-    throw new MongoAPIError('This method requires an array of arguments to apply');
+    throw new MongoRuntimeError('This method requires an array of arguments to apply');
   }
 
   options = options ?? {};
@@ -305,7 +304,7 @@ export function executeLegacyOperation(
   // Return a Promise
   if (args[args.length - 1] != null) {
     // TODO(NODE-3483)
-    throw new MongoAPIError('Final argument to `executeLegacyOperation` must be a callback');
+    throw new MongoRuntimeError('Final argument to `executeLegacyOperation` must be a callback');
   }
 
   return new Promise<any>((resolve, reject) => {
@@ -591,7 +590,7 @@ export class MongoDBNamespace {
   static fromString(namespace?: string): MongoDBNamespace {
     if (!namespace) {
       // TODO(NODE-3483): Replace with MongoNamespaceError
-      throw new MongoAPIError(`Cannot parse namespace from "${namespace}"`);
+      throw new MongoRuntimeError(`Cannot parse namespace from "${namespace}"`);
     }
 
     const [db, ...collection] = namespace.split('.');
