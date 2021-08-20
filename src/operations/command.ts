@@ -166,6 +166,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       }
     }
 
-    server.command(this.ns, cmd, { ...options }, callback);
+    server.command(this.ns, cmd, options, callback);
   }
 }
