@@ -1,6 +1,7 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document, Collection, Db } from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
+import { PropExists } from '../../utility_types';
 
 // collection.findX tests
 const client = new MongoClient('');
@@ -90,18 +91,33 @@ expectType<Bag | undefined>(
   await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } })
 );
 
-// NODE-3468 Overriding the return type with a generic is not permitted
-// const overrideFind = await collectionBag.findOne<{ cost: number }>(
-//   { color: 'white' },
-//   { projection: { cost: 1 } }
-// );
-// expectType<PropExists<typeof overrideFind, 'color'>>(false);
+const overrideFind = await collectionBag.findOne<{ cost: number }>(
+  { color: 'white' },
+  { projection: { cost: 1 } }
+);
+expectType<PropExists<typeof overrideFind, 'color'>>(false);
 
 // Overriding findOne, makes the return that exact type
-// NODE-3468 Overriding the return type with a generic is not permitted
-// expectType<{ cost: number } | undefined>(
-//   await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
-// );
+expectType<{ cost: number } | undefined>(
+  await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
+);
+
+// NODE-3468 The generic in find and findOne no longer effect the filter type
+// Could not find a way to use Parameters<pets.find<Type>> to check the actual filter argument type
+type Pet = { type: string; age: number };
+const pets = db.collection<Pet>('pets');
+
+expectType<{ crazy: number }[]>(
+  await pets
+    .find<{ crazy: number }>({ type: 'dog', age: 1 })
+    .toArray()
+);
+
+expectType<{ 'dot.keys': number }[]>(
+  await pets
+    .find<{ 'dot.keys': number }>({ 'dots.for.embedding': 23n })
+    .toArray()
+);
 
 interface Car {
   make: string;
@@ -183,7 +199,6 @@ expectType<FindCursor<{ lists: ReadonlyArray<string> }>>(
 );
 
 // Before NODE-3452's fix we would get this strange result that included the filter shape joined with the actual schema
-// NODE-3468 Overriding the return type with a generic is not permitted
 expectNotType<FindCursor<{ color: string | { $in: ReadonlyArray<string> } }>>(
   colorCollection.find({ color: { $in: colorsFreeze } })
 );
@@ -195,9 +210,8 @@ expectNotType<FindCursor<{ color: { $in: number } }>>(
 expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: 3 as any } }));
 
 // When you use the override, $in doesn't permit readonly
-// NODE-3468 Overriding the return type with a generic is not permitted
-// colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
-// colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
+colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
 
 // This is a regression test that we don't remove the unused generic in FindOptions
 const findOptions: FindOptions<{ a: number }> = {};

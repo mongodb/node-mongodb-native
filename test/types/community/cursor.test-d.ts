@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 import { expectNotType, expectType } from 'tsd';
-import { FindCursor, MongoClient, Document } from '../../../src/index';
+import { FindCursor, MongoClient, Db, Document } from '../../../src/index';
 
 // TODO(NODE-3346): Improve these tests to use expect assertions more
 
@@ -62,35 +62,25 @@ expectType<{ name: string }[]>(
 );
 
 // override the collection type
-// NODE-3468: Overriding the return type is no longer allowed
-// typedCollection
-//   .find<{ name2: string; age2: number }>({ name: '123' }, { projection: { age2: 1 } })
-//   .map(x => x.name2 && x.age2);
-
-// Chaining map calls changes the final cursor
-expectType<FindCursor<{ a: string }>>(
-  typedCollection
-    .find({ name: '123' })
-    .map(x => ({ name2: x.name, age2: x.age }))
-    .map(({ name2, age2 }) => ({ a: `${name2}_${age2}` }))
-);
-
+typedCollection
+  .find<{ name2: string; age2: number }>({ name: '123' }, { projection: { age2: 1 } })
+  .map(x => x.name2 && x.age2);
 typedCollection.find({ name: '123' }, { projection: { age: 1 } }).map(x => x.tag);
 
 // A known key with a constant projection
-// NODE-3468: projection returns a generic type and the override removal means no automatic type coercion
-// expectType<{ name: string }[]>(await typedCollection.find().project({ name: 1 }).toArray());
-//
 expectType<Document[]>(await typedCollection.find().project({ name: 1 }).toArray());
 expectNotType<{ age: number }[]>(await typedCollection.find().project({ name: 1 }).toArray());
 
-// An unknown key -- NODE-3468: when using the project, your default return type is Document
-expectNotType<{ notExistingField: unknown }[]>(
-  await typedCollection.find().project({ notExistingField: 1 }).toArray()
+// An unknown key
+expectType<Document[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
+expectType<{ a: bigint }[]>(
+  await typedCollection
+    .find()
+    .project<{ a: bigint }>({ notExistingField: 1 })
+    .toArray()
 );
-expectNotType<TypedDoc[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
 
-// Projection operator -- NODE-3468: it is recommended that users override the T in project<T>()
+// Projection operator
 expectType<{ listOfNumbers: number[] }[]>(
   await typedCollection
     .find()
@@ -141,7 +131,7 @@ const publicMemeProjection = {
   receiver: { $toString: '$receiver' },
   likes: '$totalLikes' // <== (NODE-3454) cause of TS2345 error: Argument of type T is not assignable to parameter of type U
 };
-const memeCollection = db.collection<InternalMeme>('memes');
+const memeCollection = new Db(new MongoClient(''), '').collection<InternalMeme>('memes');
 
 expectType<PublicMeme[]>(
   await memeCollection
@@ -158,19 +148,20 @@ expectNotType<InternalMeme[]>(
     .toArray()
 );
 
-expectType<FindCursor<Document>>(
-  memeCollection.find({ _id: { $in: [] } }).project(publicMemeProjection)
-);
-
-expectNotType<FindCursor<Document>>(memeCollection.find({ _id: { $in: [] } }));
-expectType<FindCursor<InternalMeme>>(memeCollection.find({ _id: { $in: [] } }));
-``;
-
 // Returns generic document when there is no schema
 expectType<Document[]>(
-  await db
+  await new Db(new MongoClient(''), '')
     .collection('memes')
     .find({ _id: { $in: [] } })
     .project(publicMemeProjection)
+    .toArray()
+);
+
+// Returns generic document when there is no schema
+expectType<InternalMeme[]>(
+  await new Db(new MongoClient(''), '')
+    .collection('memes')
+    .find({ _id: { $in: [] } })
+    .project<InternalMeme>(publicMemeProjection)
     .toArray()
 );
