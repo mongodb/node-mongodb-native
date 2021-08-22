@@ -369,12 +369,17 @@ export class Db {
     filter: Document,
     options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: false }
   ): ListCollectionsCursor<CollectionInfo>;
-  listCollections(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor;
-  listCollections(
-    filter: Document = {},
-    options: ListCollectionsOptions = {}
-  ): ListCollectionsCursor {
-    return new ListCollectionsCursor(this, filter, resolveOptions(this, options));
+  listCollections<
+    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
+      | Pick<CollectionInfo, 'name' | 'type'>
+      | CollectionInfo
+  >(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor<T>;
+  listCollections<
+    T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
+      | Pick<CollectionInfo, 'name' | 'type'>
+      | CollectionInfo
+  >(filter: Document = {}, options: ListCollectionsOptions = {}): ListCollectionsCursor<T> {
+    return new ListCollectionsCursor<T>(this, filter, resolveOptions(this, options));
   }
 
   /**
