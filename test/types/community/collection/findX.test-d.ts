@@ -1,7 +1,7 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { FindCursor, FindOptions, MongoClient, Document, Collection, Db } from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
-import { PropExists } from '../../utility_types';
+import type { PropExists } from '../../utility_types';
 
 // collection.findX tests
 const client = new MongoClient('');

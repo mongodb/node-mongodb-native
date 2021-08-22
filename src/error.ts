@@ -132,12 +132,10 @@ export class MongoError extends Error {
  * @category Error
  */
 export class MongoServerError extends MongoError {
-  code?: number;
   codeName?: string;
   writeConcernError?: Document;
   errInfo?: Document;
   ok?: number;
-  topologyVersion?: TopologyVersion;
   [key: string]: any;
 
   constructor(message: ErrorDescription) {
@@ -164,7 +162,6 @@ export class MongoServerError extends MongoError {
  * @category Error
  */
 export class MongoDriverError extends MongoError {
-  code?: string;
   constructor(message: string) {
     super(message);
   }
