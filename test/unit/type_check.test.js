@@ -5,7 +5,7 @@ const { expect } = require('chai');
 
 const REPO_ROOT = __dirname.replace('test/unit', '');
 
-describe('Typescript definitions', () => {
+describe.skip('Typescript definitions', () => {
   it('should pass assertions defined in test/types', async () => {
     const diagnostics = await tsd();
     if (diagnostics.length !== 0) {
