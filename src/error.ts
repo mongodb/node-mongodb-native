@@ -78,6 +78,11 @@ export interface ErrorDescription extends Document {
 export class MongoError extends Error {
   /** @internal */
   [kErrorLabels]: Set<string>;
+  /**
+   * This is a number in MongoServerError and a string in MongoDriverError
+   * @privateRemarks
+   * Define the type override on the subclasses when we can use the override keyword
+   */
   code?: number | string;
   topologyVersion?: TopologyVersion;
 
