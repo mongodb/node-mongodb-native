@@ -27,6 +27,40 @@ We now require node 12.9 or greater for version 4 of the driver.
 If that's outside your support matrix at this time, that's okay!
 Bug fix support for our 3.x branch will not be ending until summer 2022, which has support going back as far as Node.js v4!
 
+### CRUD results
+
+Our CRUD operations now return the drivers-wide spec-compliant results which are defined here:
+
+- [CRUD SPEC Write Results](https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#write-results)
+
+For example, `insertOne()` used to return an object that was shaped like:
+
+```typescript
+interface LegacyInsertOneResult {
+    insertedCount: number;
+    ops: InsertedDocument[];
+    insertedId: ObjectId;
+    connection: Connection;
+    result: { ok: number; n: number };
+}
+```
+
+and now returns:
+
+```typescript
+interface InsertOneResult {
+  /**
+   * Indicates whether this write result was acknowledged. If not, then all
+   * other members of this result will be undefined.
+   */
+  acknowledged: boolean;
+
+  /**
+   * The identifier that was inserted. */
+  insertedId: ObjectId;
+}
+```
+
 ### Cursor changes
 
 Affected classes:
