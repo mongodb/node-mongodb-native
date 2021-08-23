@@ -29,7 +29,7 @@ Bug fix support for our 3.x branch will not be ending until summer 2022, which h
 
 ### CRUD results
 
-Our CRUD operations now return the driver's wide spec compliant results which can be viewed here:
+Our CRUD operations now return the drivers-wide spec-compliant results which are defined here:
 
 - [CRUD SPEC Write Results](https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#write-results)
 
