@@ -457,11 +457,12 @@ export abstract class AbstractCursor<
    * Map all documents using the provided function
    * If there is a transform set on the cursor, that will be called first and the result passed to
    * this function's transform.
-   * @remarks
    *
-   * **NOTE:** adding a transform changes the return type of the iteration of this cursor, it **does not** return
-   * a new instance of a cursor. This means when calling map, you should always assign the result to a new
-   * variable. Take note of the following example:
+   * @remarks
+   * **Note for Typescript Users:** adding a transform changes the return type of the iteration of this cursor,
+   * it **does not** return a new instance of a cursor. This means when calling map,
+   * you should always assign the result to a new variable in order to get a correctly typed cursor variable.
+   * Take note of the following example:
    *
    * @example
    * ```typescript
