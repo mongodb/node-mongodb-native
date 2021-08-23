@@ -63,6 +63,8 @@ const kDescription = Symbol('description');
 const kIsMaster = Symbol('ismaster');
 /** @internal */
 const kAutoEncrypter = Symbol('autoEncrypter');
+/** @internal */
+const kFullResult = Symbol('fullResult');
 
 /** @internal */
 export interface QueryOptions extends BSONSerializeOptions {
@@ -81,7 +83,7 @@ export interface QueryOptions extends BSONSerializeOptions {
   oplogReplay?: boolean;
 }
 
-/** @public */
+/** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: boolean;
   slaveOk?: boolean;
@@ -89,7 +91,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
-  fullResult?: boolean;
+  [kFullResult]?: boolean;
   socketTimeoutMS?: number;
   /** Session to use for the operation */
   session?: ClientSession;
@@ -492,7 +494,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     write(
       this,
       query,
-      { fullResult: true, ...pluckBSONSerializeOptions(options) },
+      { [kFullResult]: true, ...pluckBSONSerializeOptions(options) },
       (err, result) => {
         if (err || !result) return callback(err, result);
         if (isExplain && result.documents && result.documents[0]) {
@@ -511,7 +513,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     options: GetMoreOptions,
     callback: Callback<Document>
   ): void {
-    const fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
+    const fullResult = !!options[kFullResult];
     const wireVersion = maxWireVersion(this);
     if (!cursorId) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
@@ -526,7 +528,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         Object.assign(options, { ...pluckBSONSerializeOptions(options) })
       );
 
-      queryOptions.fullResult = true;
+      queryOptions[kFullResult] = true;
       queryOptions.command = true;
       write(this, getMoreOp, queryOptions, (err, response) => {
         if (fullResult) return callback(err, response);
@@ -591,7 +593,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.command(
       ns,
       { killCursors: ns.collection, cursors: cursorIds },
-      { fullResult: true, ...options },
+      { [kFullResult]: true, ...options },
       (err, response) => {
         if (err || !response) return callback(err);
         if (response.cursorNotFound) {
@@ -774,7 +776,7 @@ function write(
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
+    fullResult: !!options[kFullResult],
     noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,

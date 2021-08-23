@@ -166,7 +166,6 @@ export class FindOperation extends CommandOperation<Document> {
       this.ns,
       findCommand,
       {
-        fullResult: !!this.fullResponse,
         ...this.options,
         ...this.bsonOptions,
         documentsReturnedIn: 'firstBatch',

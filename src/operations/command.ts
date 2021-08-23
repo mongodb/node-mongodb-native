@@ -31,7 +31,7 @@ export interface CommandOperationOptions
   extends OperationOptions,
     WriteConcernOptions,
     ExplainOptions {
-  /** Return the full server response for the command */
+  /** @deprecated This option does nothing */
   fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
@@ -66,7 +66,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   explain?: Explain;
-  fullResponse?: boolean;
   logger?: Logger;
 
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
@@ -87,8 +86,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
-    this.fullResponse =
-      options && typeof options.fullResponse === 'boolean' ? options.fullResponse : false;
 
     // TODO(NODE-2056): make logger another "inheritable" property
     if (parent && parent.logger) {
@@ -169,6 +166,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       }
     }
 
-    server.command(this.ns, cmd, { fullResult: !!this.fullResponse, ...options }, callback);
+    server.command(this.ns, cmd, options, callback);
   }
 }
