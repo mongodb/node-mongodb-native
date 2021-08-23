@@ -31,16 +31,10 @@
     "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"
   },
-  "peerOptionalDependencies": {
-    "kerberos": "^1.1.0",
-    "mongodb-client-encryption": "^1.0.0",
-    "snappy": "^6.1.1",
-    "bson-ext": "^2.0.0"
-  },
   "dependencies": {
     "bson": "^4.5.0",
     "denque": "^1.5.0",
-    "mongodb-connection-string-url": "^1.0.1"
+    "mongodb-connection-string-url": "^2.0.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
@@ -82,7 +76,6 @@
     "semver": "^5.5.0",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
-    "snappy": "^6.3.0",
     "source-map-support": "^0.5.19",
     "standard-version": "^9.3.0",
     "through2": "^3.0.1",

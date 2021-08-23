@@ -2,7 +2,7 @@ import * as zlib from 'zlib';
 import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
-import { Snappy } from '../../deps';
+import { PKG_VERSION, Snappy } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 
 /** @public */
@@ -39,12 +39,20 @@ export function compress(
 ): void {
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (self.options.agreedCompressor) {
-    case 'snappy':
+    case 'snappy': {
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.compress(dataToBeCompressed, callback);
+
+      if (Snappy[PKG_VERSION].major <= 6) {
+        Snappy.compress(dataToBeCompressed, callback);
+      } else {
+        Snappy.compress(dataToBeCompressed)
+          .then(buffer => callback(undefined, buffer))
+          .catch(error => callback(error));
+      }
       break;
+    }
     case 'zlib':
       // Determine zlibCompressionLevel
       if (self.options.zlibCompressionLevel) {
@@ -72,12 +80,20 @@ export function decompress(
   }
 
   switch (compressorID) {
-    case Compressor.snappy:
+    case Compressor.snappy: {
       if ('kModuleError' in Snappy) {
         return callback(Snappy['kModuleError']);
       }
-      Snappy.uncompress(compressedData, { asBuffer: true }, callback as Callback);
+
+      if (Snappy[PKG_VERSION].major <= 6) {
+        Snappy.uncompress(compressedData, { asBuffer: true }, callback);
+      } else {
+        Snappy.uncompress(compressedData, { asBuffer: true })
+          .then(buffer => callback(undefined, buffer))
+          .catch(error => callback(error));
+      }
       break;
+    }
     case Compressor.zlib:
       zlib.inflate(compressedData, callback as zlib.CompressCallback);
       break;

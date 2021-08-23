@@ -609,6 +609,17 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run custom snappy tests:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          MONGODB_URI: '${MONGODB_URI}'
+          PROJECT_DIRECTORY: '${PROJECT_DIRECTORY}'
+        binary: bash
+        args:
+          - '${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh'
   run bson-ext test:
     - command: shell.exec
       type: test
@@ -1677,26 +1688,38 @@ tasks:
       - func: run mongosh integration tests
   - name: run-custom-csfle-tests
     tags:
-      - run-custom-csfle-tests
+      - run-custom-dependency-tests
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: '4.4'
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run custom csfle tests
-  - name: run-bson-ext-test
+  - name: run-custom-snappy-tests
     tags:
-      - run-bson-ext-test
+      - run-custom-dependency-tests
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: '4.4'
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run custom snappy tests
+  - name: run-bson-ext-test
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run bson-ext test
         vars:
@@ -1993,16 +2016,6 @@ buildvariants:
     run_on: ubuntu1804-large
     tasks:
       - run-checks
-  - name: ubuntu1804-custom-csfle-tests
-    display_name: Custom FLE Version Test
-    run_on: ubuntu1804-large
-    tasks:
-      - run-custom-csfle-tests
-  - name: ubuntu1804-run-bson-ext-test
-    display_name: BSON EXT Test
-    run_on: ubuntu1804-large
-    tasks:
-      - run-bson-ext-test
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test
@@ -2032,6 +2045,13 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-4.4-auth-test-run-aws-ECS-auth-test
+  - name: ubuntu1804-custom-dependency-tests
+    display_name: Custom Dependency Version Test
+    run_on: ubuntu1804-large
+    tasks:
+      - run-custom-csfle-tests
+      - run-custom-snappy-tests
+      - run-bson-ext-test
   - name: ubuntu1804-test-serverless
     display_name: Serverless Test
     run_on: ubuntu1804-test
