@@ -1568,6 +1568,7 @@ tasks:
       - func: run custom csfle tests
         vars:
           UNIFIED: 1
+          NODE_LTS_NAME: erbium
   - name: run-custom-snappy-tests
     tags:
       - run-custom-dependency-tests
@@ -1582,6 +1583,7 @@ tasks:
       - func: run custom snappy tests
         vars:
           UNIFIED: 1
+          NODE_LTS_NAME: erbium
 buildvariants:
   - name: macos-1014-fermium
     display_name: macOS 10.14 Node Fermium

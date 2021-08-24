@@ -419,8 +419,8 @@ SINGLETON_TASKS.push({
 });
 
 const oneOffFuncs = [
-  { func: 'run custom csfle tests', vars: { UNIFIED: 1 } },
-  { func: 'run custom snappy tests', vars: { UNIFIED: 1 } }
+  { func: 'run custom csfle tests', vars: { UNIFIED: 1, NODE_LTS_NAME: 'erbium' } },
+  { func: 'run custom snappy tests', vars: { UNIFIED: 1, NODE_LTS_NAME: 'erbium' } }
 ];
 
 const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
