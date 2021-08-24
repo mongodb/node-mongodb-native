@@ -301,8 +301,8 @@ describe('Sessions', function () {
         controlSession = client.startSession();
 
         // set up sessions with two sets of cluster times
-        expect(await collection.findOne({}, { session: controlSession })).to.be.undefined;
-        expect(await collection.findOne({}, { session: testSession })).to.be.undefined;
+        expect(await collection.findOne({}, { session: controlSession })).to.be.null;
+        expect(await collection.findOne({}, { session: testSession })).to.be.null;
         await collection.insertOne({ apple: 'green' });
         expect(await collection.findOne({}, { session: otherSession }))
           .property('apple')
