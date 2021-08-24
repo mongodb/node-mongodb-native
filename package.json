@@ -32,7 +32,7 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "bson": "^4.5.0",
+    "bson": "^4.5.1",
     "denque": "^1.5.0",
     "mongodb-connection-string-url": "^2.0.0"
   },

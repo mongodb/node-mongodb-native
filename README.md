@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md)!**
+**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md)!**
 
 ## Quick Links
 
@@ -72,7 +72,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
@@ -231,6 +231,30 @@ console.log('index name =', indexName)
 
 For more detailed information, see the [indexing strategies page](https://docs.mongodb.com/manual/applications/indexes/).
 
+## Error Handling
+
+If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
+We expect `instanceof` checks to be maintained as our error API under semver as described in the hierarchy errors.md document.
+This means we can change the contents of error messages as we see fit to increase the helpfulness of a given message.
+Any new errors we add to the driver will directly extend or extend a child of `MongoError`.
+This means `instanceof` will always be able to capture the errors that our driver throws (or returns in a callback).
+
+```typescript
+const client = new MongoClient(url);
+await client.connect()
+const collection = client.db().collection('collection')
+
+try {
+  await collection.insertOne({ _id: 1 });
+  await collection.insertOne({ _id: 1 }); // duplicate key error
+} catch (error) {
+  if (error instanceof MongoServerError) {
+    console.log(`Error worth logging: ${error}`); // special case for some reason
+  }
+  throw error; // still want to crash
+}
+```
+
 ## Next Steps
 
 - [MongoDB Documentation](https://docs.mongodb.com/manual/)
@@ -243,4 +267,4 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 [Apache 2.0](LICENSE.md)
 
 © 2009-2012 Christian Amor Kvalheim
-© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.0/CONTRIBUTORS.md)
+© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.1/CONTRIBUTORS.md)
