@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.1](https://github.com/mongodb/node-mongodb-native/compare/v4.1.0...v4.1.1) (2021-08-24)
+
+
+### Bug Fixes
+
+* **NODE-3454:** projection types are too narrow ([#2924](https://github.com/mongodb/node-mongodb-native/issues/2924)) ([48d6da9](https://github.com/mongodb/node-mongodb-native/commit/48d6da99b7990b03df5043a879db3dece5615ad8))
+* **NODE-3468:** remove generic overrides from find ([#2935](https://github.com/mongodb/node-mongodb-native/issues/2935)) ([74bd7bd](https://github.com/mongodb/node-mongodb-native/commit/74bd7bdd7a9d02c81cafec1237cb477192778cd8))
+* **NODE-3511:** deprecate fullResponse and remove associated buggy code paths ([#2943](https://github.com/mongodb/node-mongodb-native/issues/2943)) ([dfc39d1](https://github.com/mongodb/node-mongodb-native/commit/dfc39d175b03b6f34568f92ffd0107b829015c7d))
+* **NODE-3528:** add support for snappy 7 ([#2939](https://github.com/mongodb/node-mongodb-native/issues/2939)) ([0f7f300](https://github.com/mongodb/node-mongodb-native/commit/0f7f3003b948d230edf1491fab775e7acc29381e))
+* **NODE-3546:** revert findOne not found result type to null ([#2945](https://github.com/mongodb/node-mongodb-native/issues/2945)) ([1c576e9](https://github.com/mongodb/node-mongodb-native/commit/1c576e9ff525a177ae886cf51e7b52e2e6a56676))
+
 ## [4.1.0](https://github.com/mongodb/node-mongodb-native/compare/v4.0.1...v4.1.0) (2021-08-03)
 
 
