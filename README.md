@@ -236,7 +236,7 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
 
 It is our recommendation to avoid relying on parsing error message strings in your code, preferring instanceof checks.
-We guarantee the class names of our errors won't change according to semver guidelines, but error messages are subject to change at any time, even patch releases, as we see fit to increase the helpfulness of a given message.
+We guarantee the class names of our errors won't change according to semver guidelines, but error messages are subject to change at any time, as well as creating new subclass errors, even patch releases, as we see fit to increase the helpfulness of the errors.
 
 Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
 This means `instanceof` will always be able to capture the errors that our driver throws (or returns in a callback).
