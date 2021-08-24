@@ -3,6 +3,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const withClient = require('./shared').withClient;
 const setupDatabase = require('./shared').setupDatabase;
+const MongoError = require('../../index').MongoError;
 
 describe('Explain', function() {
   before(function() {
@@ -762,4 +763,41 @@ describe('Explain', function() {
       });
     })
   );
+
+  it('should throw a catchable error with invalid explain string (promise)', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.4'
+      }
+    },
+    test: withClient(function(client, done) {
+      const db = client.db('shouldThrowCatchableError');
+      const collection = db.collection('test');
+      collection
+        .find({ a: 1 })
+        .explain('invalidExplain')
+        .catch(err => {
+          expect(err).to.exist;
+          expect(err).to.be.instanceOf(MongoError);
+          done();
+        });
+    })
+  });
+  it('should throw a catchable error with invalid explain string (callback)', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.4'
+      }
+    },
+    test: withClient(function(client, done) {
+      const db = client.db('shouldThrowCatchableError');
+      const collection = db.collection('test');
+      collection.find({ a: 1 }).explain('invalidExplain', (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
+        expect(err).to.be.instanceOf(MongoError);
+        done();
+      });
+    })
+  });
 });
