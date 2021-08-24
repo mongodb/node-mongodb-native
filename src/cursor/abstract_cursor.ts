@@ -297,6 +297,7 @@ export abstract class AbstractCursor<
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   next(): Promise<TSchema | null>;
   next(callback: Callback<TSchema | null>): void;
+  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void;
   next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {

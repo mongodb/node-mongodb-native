@@ -87,9 +87,7 @@ cursor.forEach(
   }
 );
 
-expectType<Bag | undefined>(
-  await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } })
-);
+expectType<Bag | null>(await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } }));
 
 const overrideFind = await collectionBag.findOne<{ cost: number }>(
   { color: 'white' },
@@ -98,7 +96,7 @@ const overrideFind = await collectionBag.findOne<{ cost: number }>(
 expectType<PropExists<typeof overrideFind, 'color'>>(false);
 
 // Overriding findOne, makes the return that exact type
-expectType<{ cost: number } | undefined>(
+expectType<{ cost: number } | null>(
   await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
 );
 
@@ -121,13 +119,13 @@ interface House {
 
 const car = db.collection<Car>('car');
 
-expectNotType<House | undefined>(await car.findOne({}));
+expectNotType<House | null>(await car.findOne({}));
 
 interface Car {
   make: string;
 }
 
-function printCar(car: Car | undefined) {
+function printCar(car: Car | null) {
   console.log(car ? `A car of ${car.make} make` : 'No car');
 }
 
@@ -232,12 +230,12 @@ interface TypedDb extends Db {
 const typedDb = client.db('test2') as TypedDb;
 
 const person = typedDb.collection('people').findOne({});
-expectType<Promise<Person | undefined>>(person);
+expectType<Promise<Person | null>>(person);
 
 typedDb.collection('people').findOne({}, function (_err, person) {
-  expectType<Person | undefined>(person);
+  expectType<Person | null | undefined>(person); // null is if nothing is found, undefined is when there is an error defined
 });
 
 typedDb.collection('things').findOne({}, function (_err, thing) {
-  expectType<Thing | undefined>(thing);
+  expectType<Thing | null | undefined>(thing);
 });

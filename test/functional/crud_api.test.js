@@ -1,7 +1,7 @@
 'use strict';
 const test = require('./shared').assert;
 const { expect } = require('chai');
-const { ReturnDocument } = require('../../src');
+const { ReturnDocument, ObjectId } = require('../../src');
 const setupDatabase = require('./shared').setupDatabase;
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
@@ -12,6 +12,27 @@ const setupDatabase = require('./shared').setupDatabase;
 describe('CRUD API', function () {
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  it('should correctly execute findOne method using crud api', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
+    await client.connect();
+    const db = client.db(configuration.db);
+    const collection = db.collection('t');
+
+    await collection.insertOne({ findOneTest: 1 });
+
+    const findOneResult = await collection.findOne({ findOneTest: 1 });
+
+    expect(findOneResult).to.have.property('findOneTest', 1);
+    expect(findOneResult).to.have.property('_id').that.is.instanceOf(ObjectId);
+
+    const findNoneResult = await collection.findOne({ findOneTest: 2 });
+    expect(findNoneResult).to.be.null;
+
+    await collection.drop();
+    await client.close();
   });
 
   it('should correctly execute find method using crud api', {
