@@ -103,19 +103,12 @@ expectType<{ cost: number } | undefined>(
 );
 
 // NODE-3468 The generic in find and findOne no longer affect the filter type
-// Could not find a way to use Parameters<pets.find<Type>> to check the actual filter argument type
 type Pet = { type: string; age: number };
 const pets = db.collection<Pet>('pets');
 
 expectType<{ crazy: number }[]>(
   await pets
     .find<{ crazy: number }>({ type: 'dog', age: 1 })
-    .toArray()
-);
-
-expectType<{ 'dot.keys': number }[]>(
-  await pets
-    .find<{ 'dot.keys': number }>({ 'dots.for.embedding': 23n })
     .toArray()
 );
 

@@ -69,7 +69,7 @@ typedCollection.find({ name: '123' }, { projection: { age: 1 } }).map(x => x.tag
 
 // A known key with a constant projection
 expectType<Document[]>(await typedCollection.find().project({ name: 1 }).toArray());
-expectNotType<{ age: number }[]>(await typedCollection.find().project({ name: 1 }).toArray());
+expectNotType<{ age: string }[]>(await typedCollection.find().project({ name: 1 }).toArray());
 
 // An unknown key
 expectType<Document[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
@@ -163,7 +163,7 @@ expectType<Document[]>(
     .toArray()
 );
 
-// Returns generic document when there is no schema
+// Returns projection override when one is specified on a collection with no schema
 expectType<InternalMeme[]>(
   await new Db(new MongoClient(''), '')
     .collection('memes')
