@@ -68,14 +68,17 @@ typedCollection
 typedCollection.find({ name: '123' }, { projection: { age: 1 } }).map(x => x.tag);
 
 // A known key with a constant projection
-expectType<{ name: string }[]>(await typedCollection.find().project({ name: 1 }).toArray());
-expectNotType<{ age: number }[]>(await typedCollection.find().project({ name: 1 }).toArray());
+expectType<Document[]>(await typedCollection.find().project({ name: 1 }).toArray());
+expectNotType<{ age: string }[]>(await typedCollection.find().project({ name: 1 }).toArray());
 
 // An unknown key
-expectType<{ notExistingField: unknown }[]>(
-  await typedCollection.find().project({ notExistingField: 1 }).toArray()
+expectType<Document[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
+expectType<{ a: bigint }[]>(
+  await typedCollection
+    .find()
+    .project<{ a: bigint }>({ notExistingField: 1 })
+    .toArray()
 );
-expectType<TypedDoc[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
 
 // Projection operator
 expectType<{ listOfNumbers: number[] }[]>(
@@ -137,8 +140,14 @@ expectType<PublicMeme[]>(
     .toArray()
 );
 
-// Returns generic document when no override given
+// Does not return whatever the publicMemeProjection states, returns generic Document
 expectNotType<InternalMeme[]>(
+  await memeCollection
+    .find({ _id: { $in: [] } })
+    .project(publicMemeProjection)
+    .toArray()
+);
+expectType<Document[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
     .project(publicMemeProjection)
@@ -151,5 +160,14 @@ expectType<Document[]>(
     .collection('memes')
     .find({ _id: { $in: [] } })
     .project(publicMemeProjection)
+    .toArray()
+);
+
+// Returns projection override when one is specified on a collection with no schema
+expectType<InternalMeme[]>(
+  await new Db(new MongoClient(''), '')
+    .collection('memes')
+    .find({ _id: { $in: [] } })
+    .project<InternalMeme>(publicMemeProjection)
     .toArray()
 );

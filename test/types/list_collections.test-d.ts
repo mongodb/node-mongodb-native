@@ -39,7 +39,3 @@ const overridden = await db
   .listCollections<Pick<CollectionInfo, 'name' | 'type'>>({}, { nameOnly: false })
   .toArray();
 expectType<Pick<CollectionInfo, 'name' | 'type'>[]>(overridden);
-const overriddenWithToArray = await db
-  .listCollections({}, { nameOnly: false })
-  .toArray<Pick<CollectionInfo, 'name' | 'type'>>();
-expectType<Pick<CollectionInfo, 'name' | 'type'>[]>(overriddenWithToArray);

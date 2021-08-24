@@ -102,6 +102,16 @@ expectType<{ cost: number } | undefined>(
   await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
 );
 
+// NODE-3468 The generic in find and findOne no longer affect the filter type
+type Pet = { type: string; age: number };
+const pets = db.collection<Pet>('pets');
+
+expectType<{ crazy: number }[]>(
+  await pets
+    .find<{ crazy: number }>({ type: 'dog', age: 1 })
+    .toArray()
+);
+
 interface Car {
   make: string;
 }
@@ -186,12 +196,16 @@ expectNotType<FindCursor<{ color: string | { $in: ReadonlyArray<string> } }>>(
   colorCollection.find({ color: { $in: colorsFreeze } })
 );
 
-// This is related to another bug that will be fixed in NODE-3454
-expectType<FindCursor<{ color: { $in: number } }>>(colorCollection.find({ color: { $in: 3 } }));
+// NODE-3454: Using the incorrect $in value doesn't mess with the resulting schema
+expectNotType<FindCursor<{ color: { $in: number } }>>(
+  colorCollection.find({ color: { $in: 3 as any } }) // `as any` is to let us make this mistake and still show the result type isn't broken
+);
+expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: 3 as any } }));
 
 // When you use the override, $in doesn't permit readonly
 colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
 colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
+
 // This is a regression test that we don't remove the unused generic in FindOptions
 const findOptions: FindOptions<{ a: number }> = {};
 expectType<FindOptions>(findOptions);

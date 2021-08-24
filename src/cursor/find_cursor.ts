@@ -357,9 +357,10 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
    *
    * @remarks
    *
-   * Adding a projection changes the return type of the iteration of this cursor,
+   * **Note for Typescript Users:** adding a transform changes the return type of the iteration of this cursor,
    * it **does not** return a new instance of a cursor. This means when calling project,
-   * you should always assign the result to a new variable. Take note of the following example:
+   * you should always assign the result to a new variable in order to get a correctly typed cursor variable.
+   * Take note of the following example:
    *
    * @example
    * ```typescript

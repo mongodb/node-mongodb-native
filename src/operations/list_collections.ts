@@ -115,7 +115,9 @@ export interface CollectionInfo extends Document {
 
 /** @public */
 export class ListCollectionsCursor<
-  T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo = CollectionInfo
+  T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
+    | Pick<CollectionInfo, 'name' | 'type'>
+    | CollectionInfo
 > extends AbstractCursor<T> {
   parent: Db;
   filter: Document;

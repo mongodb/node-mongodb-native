@@ -107,8 +107,9 @@
     "build:docs": "typedoc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run check:test",
-    "check:lint": "npm run build:dts && npm run check:dts && npm run check:eslint",
+    "check:lint": "npm run build:dts && npm run check:dts && npm run check:eslint && npm run check:tsd",
     "check:eslint": "eslint -v && eslint --max-warnings=0 --ext '.js,.ts' src test",
+    "check:tsd": "tsd --version && tsd",
     "check:dts": "tsc --noEmit mongodb.d.ts && tsd",
     "check:test": "mocha --recursive test/functional test/unit",
     "check:ts": "tsc -v && tsc --noEmit",
@@ -124,6 +125,12 @@
     "test": "npm run check:lint && npm run check:test"
   },
   "tsd": {
-    "directory": "test/types"
+    "directory": "test/types",
+    "compilerOptions": {
+      "strict": true,
+      "target": "esnext",
+      "module": "commonjs",
+      "moduleResolution": "node"
+    }
   }
 }

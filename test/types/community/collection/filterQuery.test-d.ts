@@ -50,6 +50,7 @@ const collectionT = db.collection<PetModel>('test.filterQuery');
 // Assert that collection.find uses the Filter helper like so:
 const filter: Filter<PetModel> = {};
 collectionT.find(filter);
+collectionT.find(spot); // a whole model definition is also a valid filter
 // Now tests below can directly test the Filter helper, and are implicitly checking collection.find
 
 /**
@@ -226,3 +227,7 @@ await collectionT.find({ playmates: { $elemMatch: { name: 'MrMeow' } } }).toArra
 expectNotType<Filter<PetModel>>({ name: { $all: ['world', 'world'] } });
 expectNotType<Filter<PetModel>>({ age: { $elemMatch: [1, 2] } });
 expectNotType<Filter<PetModel>>({ type: { $size: 2 } });
+
+// dot key case that shows it is assignable even when the referenced key is the wrong type
+expectAssignable<Filter<PetModel>>({ 'bestFriend.name': 23 }); // using dot notation permits any type for the key
+expectNotType<Filter<PetModel>>({ bestFriend: { name: 23 } });

@@ -289,7 +289,10 @@ export class Db {
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command
    */
-  aggregate(pipeline: Document[] = [], options?: AggregateOptions): AggregationCursor {
+  aggregate<T = Document>(
+    pipeline: Document[] = [],
+    options?: AggregateOptions
+  ): AggregationCursor<T> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError('Method "db.aggregate()" accepts at most two arguments');
     }
