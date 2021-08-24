@@ -126,33 +126,33 @@ Add code to connect to the server and the database **myProject**:
 > if a callback is provided a Promise will not be returned.
 
 ```js
-const { MongoClient } = require('mongodb')
+const { MongoClient } = require('mongodb');
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
 // Connection URL
-const url = 'mongodb://localhost:27017'
-const client = new MongoClient(url)
+const url = 'mongodb://localhost:27017';
+const client = new MongoClient(url);
 
 // Database Name
-const dbName = 'myProject'
+const dbName = 'myProject';
 
 async function main() {
   // Use connect method to connect to the server
-  await client.connect()
-  console.log('Connected successfully to server')
-  const db = client.db(dbName)
-  const collection = db.collection('documents')
+  await client.connect();
+  console.log('Connected successfully to server');
+  const db = client.db(dbName);
+  const collection = db.collection('documents');
 
   // the following code examples can be pasted here...
 
-  return 'done.'
+  return 'done.';
 }
 
 main()
   .then(console.log)
   .catch(console.error)
-  .finally(() => client.close())
+  .finally(() => client.close());
 ```
 
 Run your app from the command line with:
@@ -169,8 +169,8 @@ Add to **app.js** the following function which uses the **insertMany**
 method to add three documents to the **documents** collection.
 
 ```js
-const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }])
-console.log('Inserted documents =>', insertResult)
+const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+console.log('Inserted documents =>', insertResult);
 ```
 
 The **insertMany** command returns an object with information about the insert operations.
@@ -180,8 +180,8 @@ The **insertMany** command returns an object with information about the insert o
 Add a query that returns all the documents.
 
 ```js
-const findResult = await collection.find({}).toArray()
-console.log('Found documents =>', findResult)
+const findResult = await collection.find({}).toArray();
+console.log('Found documents =>', findResult);
 ```
 
 This query returns all the documents in the **documents** collection.
@@ -192,8 +192,8 @@ If you add this below the insertMany example you'll see the document's you've in
 Add a query filter to find only documents which meet the query criteria.
 
 ```js
-const filteredDocs = await collection.find({ a: 3 }).toArray()
-console.log('Found documents filtered by { a: 3 } =>', filteredDocs)
+const filteredDocs = await collection.find({ a: 3 }).toArray();
+console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
 ```
 
 Only the documents which match `'a' : 3` should be returned.
@@ -203,8 +203,8 @@ Only the documents which match `'a' : 3` should be returned.
 The following operation updates a document in the **documents** collection.
 
 ```js
-const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } })
-console.log('Updated documents =>', updateResult)
+const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
+console.log('Updated documents =>', updateResult);
 ```
 
 The method updates the first document where the field **a** is equal to **3** by adding a new field **b** to the document set to **1**. `updateResult` contains information about whether there was a matching document to update or not.
@@ -214,8 +214,8 @@ The method updates the first document where the field **a** is equal to **3** by
 Remove the document where the field **a** is equal to **3**.
 
 ```js
-const deleteResult = await collection.deleteMany({ a: 3 })
-console.log('Deleted documents =>', deleteResult)
+const deleteResult = await collection.deleteMany({ a: 3 });
+console.log('Deleted documents =>', deleteResult);
 ```
 
 ### Index a Collection
@@ -225,8 +225,8 @@ performance. The following function creates an index on the **a** field in the
 **documents** collection.
 
 ```js
-const indexName = await collection.createIndex({ a: 1 })
-console.log('index name =', indexName)
+const indexName = await collection.createIndex({ a: 1 });
+console.log('index name =', indexName);
 ```
 
 For more detailed information, see the [indexing strategies page](https://docs.mongodb.com/manual/applications/indexes/).
@@ -234,15 +234,16 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 ## Error Handling
 
 If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
-We expect `instanceof` checks to be maintained as our error API under semver as described in the hierarchy errors.md document.
-This means we can change the contents of error messages as we see fit to increase the helpfulness of a given message.
-Any new errors we add to the driver will directly extend or extend a child of `MongoError`.
+
+To make use of our error API, use `instanceof` checks, which will be maintained in our error API under semver as described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
+However, we can change the contents of error messages or further subclass errors as we see fit to increase the helpfulness of a given message.
+Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
 This means `instanceof` will always be able to capture the errors that our driver throws (or returns in a callback).
 
 ```typescript
 const client = new MongoClient(url);
-await client.connect()
-const collection = client.db().collection('collection')
+await client.connect();
+const collection = client.db().collection('collection');
 
 try {
   await collection.insertOne({ _id: 1 });
