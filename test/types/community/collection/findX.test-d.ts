@@ -102,7 +102,7 @@ expectType<{ cost: number } | undefined>(
   await collectionBag.findOne<{ cost: number }>({ color: 'red' }, { projection: { cost: 1 } })
 );
 
-// NODE-3468 The generic in find and findOne no longer effect the filter type
+// NODE-3468 The generic in find and findOne no longer affect the filter type
 // Could not find a way to use Parameters<pets.find<Type>> to check the actual filter argument type
 type Pet = { type: string; age: number };
 const pets = db.collection<Pet>('pets');

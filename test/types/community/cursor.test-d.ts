@@ -140,8 +140,14 @@ expectType<PublicMeme[]>(
     .toArray()
 );
 
-// Returns generic document when no override given
+// Does not return whatever the publicMemeProjection states, returns generic Document
 expectNotType<InternalMeme[]>(
+  await memeCollection
+    .find({ _id: { $in: [] } })
+    .project(publicMemeProjection)
+    .toArray()
+);
+expectType<Document[]>(
   await memeCollection
     .find({ _id: { $in: [] } })
     .project(publicMemeProjection)
