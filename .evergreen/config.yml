@@ -480,6 +480,17 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run custom snappy tests:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          MONGODB_URI: '${MONGODB_URI}'
+          PROJECT_DIRECTORY: '${PROJECT_DIRECTORY}'
+        binary: bash
+        args:
+          - '${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh'
   upload test results:
     - command: attach.xunit_results
       params:
@@ -1545,16 +1556,32 @@ tasks:
       - func: run checks
   - name: run-custom-csfle-tests
     tags:
-      - run-custom-csfle-tests
+      - run-custom-dependency-tests
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: '4.4'
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run custom csfle tests
+        vars:
+          UNIFIED: 1
+  - name: run-custom-snappy-tests
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run custom snappy tests
+        vars:
+          UNIFIED: 1
 buildvariants:
   - name: macos-1014-fermium
     display_name: macOS 10.14 Node Fermium
@@ -2109,11 +2136,12 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
-  - name: ubuntu1804-custom-csfle-tests
-    display_name: Custom FLE Version Test
-    run_on: ubuntu1804-test
+  - name: ubuntu1804-custom-dependency-tests
+    display_name: Custom Dependency Version Test
+    run_on: ubuntu1804-large
     tasks:
       - run-custom-csfle-tests
+      - run-custom-snappy-tests
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
