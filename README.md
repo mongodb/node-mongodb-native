@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md)!**
+**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md)!**
 
 ## Quick Links
 
@@ -72,7 +72,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
@@ -126,33 +126,33 @@ Add code to connect to the server and the database **myProject**:
 > if a callback is provided a Promise will not be returned.
 
 ```js
-const { MongoClient } = require('mongodb')
+const { MongoClient } = require('mongodb');
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
 // Connection URL
-const url = 'mongodb://localhost:27017'
-const client = new MongoClient(url)
+const url = 'mongodb://localhost:27017';
+const client = new MongoClient(url);
 
 // Database Name
-const dbName = 'myProject'
+const dbName = 'myProject';
 
 async function main() {
   // Use connect method to connect to the server
-  await client.connect()
-  console.log('Connected successfully to server')
-  const db = client.db(dbName)
-  const collection = db.collection('documents')
+  await client.connect();
+  console.log('Connected successfully to server');
+  const db = client.db(dbName);
+  const collection = db.collection('documents');
 
   // the following code examples can be pasted here...
 
-  return 'done.'
+  return 'done.';
 }
 
 main()
   .then(console.log)
   .catch(console.error)
-  .finally(() => client.close())
+  .finally(() => client.close());
 ```
 
 Run your app from the command line with:
@@ -169,8 +169,8 @@ Add to **app.js** the following function which uses the **insertMany**
 method to add three documents to the **documents** collection.
 
 ```js
-const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }])
-console.log('Inserted documents =>', insertResult)
+const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+console.log('Inserted documents =>', insertResult);
 ```
 
 The **insertMany** command returns an object with information about the insert operations.
@@ -180,8 +180,8 @@ The **insertMany** command returns an object with information about the insert o
 Add a query that returns all the documents.
 
 ```js
-const findResult = await collection.find({}).toArray()
-console.log('Found documents =>', findResult)
+const findResult = await collection.find({}).toArray();
+console.log('Found documents =>', findResult);
 ```
 
 This query returns all the documents in the **documents** collection.
@@ -192,8 +192,8 @@ If you add this below the insertMany example you'll see the document's you've in
 Add a query filter to find only documents which meet the query criteria.
 
 ```js
-const filteredDocs = await collection.find({ a: 3 }).toArray()
-console.log('Found documents filtered by { a: 3 } =>', filteredDocs)
+const filteredDocs = await collection.find({ a: 3 }).toArray();
+console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
 ```
 
 Only the documents which match `'a' : 3` should be returned.
@@ -203,8 +203,8 @@ Only the documents which match `'a' : 3` should be returned.
 The following operation updates a document in the **documents** collection.
 
 ```js
-const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } })
-console.log('Updated documents =>', updateResult)
+const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
+console.log('Updated documents =>', updateResult);
 ```
 
 The method updates the first document where the field **a** is equal to **3** by adding a new field **b** to the document set to **1**. `updateResult` contains information about whether there was a matching document to update or not.
@@ -214,8 +214,8 @@ The method updates the first document where the field **a** is equal to **3** by
 Remove the document where the field **a** is equal to **3**.
 
 ```js
-const deleteResult = await collection.deleteMany({ a: 3 })
-console.log('Deleted documents =>', deleteResult)
+const deleteResult = await collection.deleteMany({ a: 3 });
+console.log('Deleted documents =>', deleteResult);
 ```
 
 ### Index a Collection
@@ -225,11 +225,37 @@ performance. The following function creates an index on the **a** field in the
 **documents** collection.
 
 ```js
-const indexName = await collection.createIndex({ a: 1 })
-console.log('index name =', indexName)
+const indexName = await collection.createIndex({ a: 1 });
+console.log('index name =', indexName);
 ```
 
 For more detailed information, see the [indexing strategies page](https://docs.mongodb.com/manual/applications/indexes/).
+
+## Error Handling
+
+If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
+
+It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
+We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
+
+Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+This means `instanceof` will always be able to accurately capture the errors that our driver throws (or returns in a callback).
+
+```typescript
+const client = new MongoClient(url);
+await client.connect();
+const collection = client.db().collection('collection');
+
+try {
+  await collection.insertOne({ _id: 1 });
+  await collection.insertOne({ _id: 1 }); // duplicate key error
+} catch (error) {
+  if (error instanceof MongoServerError) {
+    console.log(`Error worth logging: ${error}`); // special case for some reason
+  }
+  throw error; // still want to crash
+}
+```
 
 ## Next Steps
 
@@ -243,4 +269,4 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 [Apache 2.0](LICENSE.md)
 
 © 2009-2012 Christian Amor Kvalheim
-© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.0/CONTRIBUTORS.md)
+© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.1/CONTRIBUTORS.md)
