@@ -1,4 +1,4 @@
-import { DEFAULT_PK_FACTORY, emitWarningOnce, maybePromise, resolveOptions } from './utils';
+import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   normalizeHintField,
@@ -99,7 +99,7 @@ import type {
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
-  value?: TSchema;
+  value: TSchema | null;
   lastErrorObject?: Document;
   ok: 0 | 1;
 }
@@ -676,51 +676,48 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOne(): Promise<TSchema | undefined>;
-  findOne(callback: Callback<TSchema | undefined>): void;
-  findOne(filter: Filter<TSchema>): Promise<TSchema | undefined>;
-  findOne(filter: Filter<TSchema>, callback: Callback<TSchema | undefined>): void;
-  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema | undefined>;
-  findOne(
-    filter: Filter<TSchema>,
-    options: FindOptions,
-    callback: Callback<TSchema | undefined>
-  ): void;
+  findOne(): Promise<TSchema | null>;
+  findOne(callback: Callback<TSchema | null>): void;
+  findOne(filter: Filter<TSchema>): Promise<TSchema | null>;
+  findOne(filter: Filter<TSchema>, callback: Callback<TSchema | null>): void;
+  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema | null>;
+  findOne(filter: Filter<TSchema>, options: FindOptions, callback: Callback<TSchema | null>): void;
 
   // allow an override of the schema.
-  findOne<T = TSchema>(): Promise<T | undefined>;
-  findOne<T = TSchema>(callback: Callback<T | undefined>): void;
-  findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | undefined>;
-  findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | undefined>;
+  findOne<T = TSchema>(): Promise<T | null>;
+  findOne<T = TSchema>(callback: Callback<T | null>): void;
+  findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
+  findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
   findOne<T = TSchema>(
     filter: Filter<TSchema>,
     options?: FindOptions,
-    callback?: Callback<T | undefined>
+    callback?: Callback<T | null>
   ): void;
 
   findOne(
-    filter?: Filter<TSchema> | Callback<TSchema | undefined>,
-    options?: FindOptions | Callback<TSchema | undefined>,
-    callback?: Callback<TSchema>
-  ): Promise<TSchema | undefined> | void {
+    filter?: Filter<TSchema> | Callback<TSchema | null>,
+    options?: FindOptions | Callback<TSchema | null>,
+    callback?: Callback<TSchema | null>
+  ): Promise<TSchema | null> | void {
     if (callback != null && typeof callback !== 'function') {
       throw new MongoInvalidArgumentError(
         'Third parameter to `findOne()` must be a callback or undefined'
       );
     }
 
-    if (typeof filter === 'function')
-      (callback = filter as Callback<Document | undefined>), (filter = {}), (options = {});
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (typeof filter === 'function') {
+      callback = filter as Callback<TSchema | null>;
+      filter = {};
+      options = {};
+    }
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
     const finalFilter = filter ?? {};
     const finalOptions = options ?? {};
-    return maybePromise(callback, callback =>
-      this.find(finalFilter, finalOptions)
-        .limit(-1)
-        .batchSize(1)
-        .next((error, result) => callback(error, result ?? undefined))
-    );
+    return this.find(finalFilter, finalOptions).limit(-1).batchSize(1).next(callback);
   }
 
   /**
