@@ -105,9 +105,7 @@ type Pet = { type: string; age: number };
 const pets = db.collection<Pet>('pets');
 
 expectType<{ crazy: number }[]>(
-  await pets
-    .find<{ crazy: number }>({ type: 'dog', age: 1 })
-    .toArray()
+  await pets.find<{ crazy: number }>({ type: 'dog', age: 1 }).toArray()
 );
 
 interface Car {

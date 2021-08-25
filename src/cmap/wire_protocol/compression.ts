@@ -1,5 +1,5 @@
 import * as zlib from 'zlib';
-import { Callback, isPromiseLike } from '../../utils';
+import type { Callback } from '../../utils';
 import type { OperationDescription } from '../message_stream';
 
 import { PKG_VERSION, Snappy } from '../../deps';
