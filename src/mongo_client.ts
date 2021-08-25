@@ -27,7 +27,7 @@ import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
 import type { Topology, TopologyEvents } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import type { TagSet } from './sdam/server_description';
-import type { MongoCredentials } from './cmap/auth/mongo_credentials';
+import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mongo_credentials';
 import { parseOptions } from './connection_string';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import type { TLSSocketOptions, ConnectionOptions as TLSConnectionOptions } from 'tls';
@@ -157,12 +157,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specify the authentication mechanism that MongoDB will use to authenticate the connection. */
   authMechanism?: AuthMechanism;
   /** Specify properties for the specified authMechanism as a comma-separated list of colon-separated key-value pairs. */
-  authMechanismProperties?: {
-    SERVICE_NAME?: string;
-    CANONICALIZE_HOST_NAME?: boolean;
-    SERVICE_REALM?: string;
-    [key: string]: any;
-  };
+  authMechanismProperties?: AuthMechanismProperties;
   /** The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances. */
   localThresholdMS?: number;
   /** Specifies how long (in milliseconds) to block for server selection before throwing an exception.  */

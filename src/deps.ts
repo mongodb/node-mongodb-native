@@ -109,12 +109,51 @@ try {
   saslprep = require('saslprep');
 } catch {} // eslint-disable-line
 
-export let aws4: typeof import('aws4') | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `aws4` not found. Please install it to enable AWS authentication'
-    )
-  );
+interface AWS4 {
+  /**
+   * Created these inline types to better assert future usage of this API
+   * @param options - options for request
+   * @param credentials - AWS credential details, sessionToken should be omitted entirely if its false-y
+   */
+  sign(
+    options: {
+      path: '/';
+      body: string;
+      host: string;
+      method: 'POST';
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded';
+        'Content-Length': number;
+        'X-MongoDB-Server-Nonce': string;
+        'X-MongoDB-GS2-CB-Flag': 'n';
+      };
+      service: string;
+      region: string;
+    },
+    credentials:
+      | {
+          accessKeyId: string;
+          secretAccessKey: string;
+          sessionToken: string;
+        }
+      | {
+          accessKeyId: string;
+          secretAccessKey: string;
+        }
+      | undefined
+  ): {
+    headers: {
+      Authorization: string;
+      'X-Amz-Date': string;
+    };
+  };
+}
+
+export let aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
+  new MongoMissingDependencyError(
+    'Optional module `aws4` not found. Please install it to enable AWS authentication'
+  )
+);
 
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
