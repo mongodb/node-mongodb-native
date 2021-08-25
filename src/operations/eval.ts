@@ -43,7 +43,7 @@ export class EvalOperation extends CommandOperation<Document> {
     let finalParameters: Document[] = [];
 
     // If not a code object translate to one
-    if (!(finalCode && ((finalCode as unknown) as { _bsontype: string })._bsontype === 'Code')) {
+    if (!(finalCode && (finalCode as unknown as { _bsontype: string })._bsontype === 'Code')) {
       finalCode = new Code(finalCode as never);
     }
 

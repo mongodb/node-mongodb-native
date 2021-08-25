@@ -23,6 +23,6 @@ type PermittedBSONOptionKeys =
   | 'fieldsAsRaw'
   | 'raw';
 
-const keys = (null as unknown) as PermittedBSONOptionKeys;
+const keys = null as unknown as PermittedBSONOptionKeys;
 // creates an explicit allow list assertion
 expectType<keyof BSONSerializeOptions>(keys);

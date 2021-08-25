@@ -171,7 +171,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   project<T extends Document = Document>($project: Document): AggregationCursor<T> {
     assertUninitialized(this);
     this[kPipeline].push({ $project });
-    return (this as unknown) as AggregationCursor<T>;
+    return this as unknown as AggregationCursor<T>;
   }
 
   /** Add a lookup stage to the aggregation pipeline */

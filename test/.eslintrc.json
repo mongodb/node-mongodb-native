@@ -28,6 +28,7 @@
     "jsdoc/require-returns-description": "off",
     "jsdoc/require-returns-type": "off",
     "jsdoc/valid-types": "off",
+    "jsdoc/require-yields": "off",
 
     // Since we use ts-node we should always require the TS code
     "no-restricted-modules": ["error", { "patterns": ["**/../lib/**", "mongodb-mock-server"] }],

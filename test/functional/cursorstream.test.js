@@ -33,51 +33,51 @@ describe('Cursor Streams', function () {
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching2', function (
-          err,
-          collection
-        ) {
-          var left = allDocs.length;
-          for (var i = 0; i < allDocs.length; i++) {
-            collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
-              expect(err).to.not.exist;
+        db.createCollection(
+          'test_streaming_function_with_limit_for_fetching2',
+          function (err, collection) {
+            var left = allDocs.length;
+            for (var i = 0; i < allDocs.length; i++) {
+              collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
+                expect(err).to.not.exist;
 
-              left = left - 1;
+                left = left - 1;
 
-              if (left === 0) {
-                // Perform a find to get a cursor
-                var stream = collection.find({}).stream();
-                var data = [];
+                if (left === 0) {
+                  // Perform a find to get a cursor
+                  var stream = collection.find({}).stream();
+                  var data = [];
 
-                // For each data item
-                stream.on('data', function () {
-                  data.push(1);
-                  j = j + 1;
-                  stream.pause();
+                  // For each data item
+                  stream.on('data', function () {
+                    data.push(1);
+                    j = j + 1;
+                    stream.pause();
 
-                  collection.findOne({}, function (err) {
-                    expect(err).to.not.exist;
-                    stream.resume();
+                    collection.findOne({}, function (err) {
+                      expect(err).to.not.exist;
+                      stream.resume();
+                    });
                   });
-                });
 
-                // When the stream is done
-                stream.on('end', function () {
-                  setTimeout(() => {
-                    let err;
-                    try {
-                      expect(data).to.have.length(3000);
-                    } catch (e) {
-                      err = e;
-                    }
+                  // When the stream is done
+                  stream.on('end', function () {
+                    setTimeout(() => {
+                      let err;
+                      try {
+                        expect(data).to.have.length(3000);
+                      } catch (e) {
+                        err = e;
+                      }
 
-                    client.close(() => done(err));
-                  }, 1000);
-                });
-              }
-            });
+                      client.close(() => done(err));
+                    }, 1000);
+                  });
+                }
+              });
+            }
           }
-        });
+        );
       });
     }
   });
@@ -108,50 +108,50 @@ describe('Cursor Streams', function () {
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching_2', function (
-          err,
-          collection
-        ) {
-          var left = allDocs.length;
-          for (var i = 0; i < allDocs.length; i++) {
-            collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
-              expect(err).to.not.exist;
-              left = left - 1;
+        db.createCollection(
+          'test_streaming_function_with_limit_for_fetching_2',
+          function (err, collection) {
+            var left = allDocs.length;
+            for (var i = 0; i < allDocs.length; i++) {
+              collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
+                expect(err).to.not.exist;
+                left = left - 1;
 
-              if (left === 0) {
-                // Perform a find to get a cursor
-                var stream = collection.find({}).stream();
-                var data = [];
+                if (left === 0) {
+                  // Perform a find to get a cursor
+                  var stream = collection.find({}).stream();
+                  var data = [];
 
-                // For each data item
-                stream.on('data', function () {
-                  j = j + 1;
-                  stream.pause();
-                  data.push(1);
+                  // For each data item
+                  stream.on('data', function () {
+                    j = j + 1;
+                    stream.pause();
+                    data.push(1);
 
-                  collection.findOne({}, function (err) {
-                    expect(err).to.not.exist;
-                    stream.resume();
+                    collection.findOne({}, function (err) {
+                      expect(err).to.not.exist;
+                      stream.resume();
+                    });
                   });
-                });
 
-                // When the stream is done
-                stream.on('end', function () {
-                  setTimeout(() => {
-                    let err;
-                    try {
-                      expect(data).to.have.length(10000);
-                    } catch (e) {
-                      err = e;
-                    }
+                  // When the stream is done
+                  stream.on('end', function () {
+                    setTimeout(() => {
+                      let err;
+                      try {
+                        expect(data).to.have.length(10000);
+                      } catch (e) {
+                        err = e;
+                      }
 
-                    client.close(err2 => done(err || err2));
-                  }, 1000);
-                });
-              }
-            });
+                      client.close(err2 => done(err || err2));
+                    }, 1000);
+                  });
+                }
+              });
+            }
           }
-        });
+        );
       });
     }
   });
@@ -177,32 +177,32 @@ describe('Cursor Streams', function () {
 
       client.connect(function (err, client) {
         var db = client.db(self.configuration.db);
-        db.createCollection('test_streaming_function_with_limit_for_fetching_3', function (
-          err,
-          collection
-        ) {
-          collection.insert(docs, { writeConcern: { w: 1 } }, function (err) {
-            expect(err).to.not.exist;
+        db.createCollection(
+          'test_streaming_function_with_limit_for_fetching_3',
+          function (err, collection) {
+            collection.insert(docs, { writeConcern: { w: 1 } }, function (err) {
+              expect(err).to.not.exist;
 
-            // Perform a find to get a cursor
-            var stream = collection.find({}).stream();
+              // Perform a find to get a cursor
+              var stream = collection.find({}).stream();
 
-            // For each data item
-            stream.on('data', function () {
-              counter++;
-              stream.pause();
-              stream.resume();
-              counter2++;
+              // For each data item
+              stream.on('data', function () {
+                counter++;
+                stream.pause();
+                stream.resume();
+                counter2++;
+              });
+
+              // When the stream is done
+              stream.on('end', function () {
+                expect(counter).to.equal(1000);
+                expect(counter2).to.equal(1000);
+                client.close(done);
+              });
             });
-
-            // When the stream is done
-            stream.on('end', function () {
-              expect(counter).to.equal(1000);
-              expect(counter2).to.equal(1000);
-              client.close(done);
-            });
-          });
-        });
+          }
+        );
       });
     }
   });

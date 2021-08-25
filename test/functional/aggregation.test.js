@@ -1247,28 +1247,29 @@ describe('Aggregation', function () {
         // Create a collection
         var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
         // Insert the docs
-        collection.insertMany([{ a: 1 }, { b: 1 }], { writeConcern: { w: 1 } }, function (
-          err,
-          result
-        ) {
-          expect(result).to.exist;
-          expect(err).to.not.exist;
-
-          // Execute aggregate, notice the pipeline is expressed as an Array
-          var cursor = collection.aggregate([
-            {
-              $match: {}
-            }
-          ]);
-
-          // Iterate over all the items in the cursor
-          cursor.hasNext(function (err, result) {
+        collection.insertMany(
+          [{ a: 1 }, { b: 1 }],
+          { writeConcern: { w: 1 } },
+          function (err, result) {
+            expect(result).to.exist;
             expect(err).to.not.exist;
-            expect(result).to.equal(true);
 
-            client.close(done);
-          });
-        });
+            // Execute aggregate, notice the pipeline is expressed as an Array
+            var cursor = collection.aggregate([
+              {
+                $match: {}
+              }
+            ]);
+
+            // Iterate over all the items in the cursor
+            cursor.hasNext(function (err, result) {
+              expect(err).to.not.exist;
+              expect(result).to.equal(true);
+
+              client.close(done);
+            });
+          }
+        );
       });
       // DOC_END
     }

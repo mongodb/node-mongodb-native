@@ -85,20 +85,21 @@ describe('Remove', function () {
               expect(err).to.not.exist;
 
               // Clear the collection
-              collection.remove({ address: /485 7th ave/ }, { writeConcern: { w: 1 } }, function (
-                err,
-                r
-              ) {
-                expect(r).property('deletedCount').to.equal(1);
+              collection.remove(
+                { address: /485 7th ave/ },
+                { writeConcern: { w: 1 } },
+                function (err, r) {
+                  expect(r).property('deletedCount').to.equal(1);
 
-                collection.count(function (err, count) {
-                  expect(err).to.not.exist;
-                  expect(count).to.equal(0);
+                  collection.count(function (err, count) {
+                    expect(err).to.not.exist;
+                    expect(count).to.equal(0);
 
-                  // Let's close the db
-                  client.close(done);
-                });
-              });
+                    // Let's close the db
+                    client.close(done);
+                  });
+                }
+              );
             }
           );
         });
@@ -133,17 +134,18 @@ describe('Remove', function () {
               expect(err).to.not.exist;
 
               // Remove the first
-              collection.remove({ a: 1 }, { writeConcern: { w: 1 }, single: true }, function (
-                err,
-                r
-              ) {
-                expect(r).property('deletedCount').to.equal(1);
+              collection.remove(
+                { a: 1 },
+                { writeConcern: { w: 1 }, single: true },
+                function (err, r) {
+                  expect(r).property('deletedCount').to.equal(1);
 
-                collection.find({ a: 1 }).count(function (err, result) {
-                  expect(result).to.equal(3);
-                  client.close(done);
-                });
-              });
+                  collection.find({ a: 1 }).count(function (err, result) {
+                    expect(result).to.equal(3);
+                    client.close(done);
+                  });
+                }
+              );
             }
           );
         });

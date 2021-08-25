@@ -25,7 +25,7 @@ export class CountOperation extends CommandOperation<number> {
   query: Document;
 
   constructor(namespace: MongoDBNamespace, filter: Document, options: CountOptions) {
-    super(({ s: { namespace: namespace } } as unknown) as Collection, options);
+    super({ s: { namespace: namespace } } as unknown as Collection, options);
 
     this.options = options;
     this.collectionName = namespace.collection;

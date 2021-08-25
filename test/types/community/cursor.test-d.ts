@@ -74,10 +74,7 @@ expectNotType<{ age: string }[]>(await typedCollection.find().project({ name: 1 
 // An unknown key
 expectType<Document[]>(await typedCollection.find().project({ notExistingField: 1 }).toArray());
 expectType<{ a: bigint }[]>(
-  await typedCollection
-    .find()
-    .project<{ a: bigint }>({ notExistingField: 1 })
-    .toArray()
+  await typedCollection.find().project<{ a: bigint }>({ notExistingField: 1 }).toArray()
 );
 
 // Projection operator
@@ -90,10 +87,7 @@ expectType<{ listOfNumbers: number[] }[]>(
 
 // Using the override parameter works
 expectType<{ name: string }[]>(
-  await typedCollection
-    .find()
-    .project<{ name: string }>({ name: 1 })
-    .toArray()
+  await typedCollection.find().project<{ name: string }>({ name: 1 }).toArray()
 );
 
 void async function () {
