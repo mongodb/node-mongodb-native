@@ -1821,16 +1821,18 @@ describe('Change Streams', function () {
         changeStream.on('change', () => {});
         expect(changeStream).to.have.property(kMode, 'emitter');
 
+        const errRegex = /ChangeStream cannot be used as an iterator/;
+
         // These all throw synchronously so it should be safe to not await the results
         expect(() => {
           changeStream.next();
-        }).to.throw(/Cannot use ChangeStream as iterator/);
+        }).to.throw(errRegex);
         expect(() => {
           changeStream.hasNext();
-        }).to.throw(/Cannot use ChangeStream as iterator/);
+        }).to.throw(errRegex);
         expect(() => {
           changeStream.tryNext();
-        }).to.throw(/Cannot use ChangeStream as iterator/);
+        }).to.throw(errRegex);
       }
     });
 
@@ -1848,7 +1850,7 @@ describe('Change Streams', function () {
         // which calls streamEvents, which calls setIsEmitter, which will throw
         expect(() => {
           changeStream.on('change', () => {});
-        }).to.throw(/Cannot use ChangeStream as an EventEmitter/);
+        }).to.throw(/ChangeStream cannot be used as an EventEmitter/);
       }
     });
   });
