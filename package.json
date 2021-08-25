@@ -71,7 +71,7 @@
     "mocha-sinon": "^2.1.0",
     "mongodb-mock-server": "^2.0.1",
     "nyc": "^15.1.0",
-    "prettier": "2.3.2",
+    "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "semver": "^5.5.0",
     "sinon": "^4.3.0",
