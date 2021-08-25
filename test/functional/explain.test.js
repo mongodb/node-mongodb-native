@@ -1,5 +1,6 @@
 'use strict';
 const { setupDatabase, withClient } = require('./shared');
+const { MongoServerError } = require('../../src');
 const chai = require('chai');
 const expect = chai.expect;
 
@@ -761,4 +762,43 @@ describe('Explain', function () {
       });
     })
   );
+
+  it('should throw a catchable error with invalid explain string (promise)', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.4'
+      }
+    },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldThrowCatchableError');
+      const collection = db.collection('test');
+      collection
+        .find({ a: 1 })
+        .explain('invalidExplain')
+        .then(() => done(new Error('expected explain to fail but it succeeded')))
+        .catch(err => {
+          expect(err).to.exist;
+          expect(err).to.be.instanceOf(MongoServerError);
+          done();
+        });
+    })
+  });
+
+  it('should throw a catchable error with invalid explain string (callback)', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.4'
+      }
+    },
+    test: withClient(function (client, done) {
+      const db = client.db('shouldThrowCatchableError');
+      const collection = db.collection('test');
+      collection.find({ a: 1 }).explain('invalidExplain', (err, result) => {
+        expect(err).to.exist;
+        expect(result).to.not.exist;
+        expect(err).to.be.instanceOf(MongoServerError);
+        done();
+      });
+    })
+  });
 });
