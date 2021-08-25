@@ -46,29 +46,29 @@ describe('Atlas Data Lake', function () {
     );
     it(
       'should connect with auth SCRAM-SHA-1',
-      withClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1', function (
-        client,
-        done
-      ) {
-        const db = client.db('admin');
-        db.command({ killCursors: 'kill_cursor_collection' }, err => {
-          expect(err).to.not.exist;
-          done();
-        });
-      })
+      withClient(
+        'mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1',
+        function (client, done) {
+          const db = client.db('admin');
+          db.command({ killCursors: 'kill_cursor_collection' }, err => {
+            expect(err).to.not.exist;
+            done();
+          });
+        }
+      )
     );
     it(
       'should connect with auth SCRAM-SHA-256',
-      withClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256', function (
-        client,
-        done
-      ) {
-        const db = client.db('admin');
-        db.command({ killCursors: 'kill_cursor_collection' }, err => {
-          expect(err).to.not.exist;
-          done();
-        });
-      })
+      withClient(
+        'mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256',
+        function (client, done) {
+          const db = client.db('admin');
+          db.command({ killCursors: 'kill_cursor_collection' }, err => {
+            expect(err).to.not.exist;
+            done();
+          });
+        }
+      )
     );
   });
 });

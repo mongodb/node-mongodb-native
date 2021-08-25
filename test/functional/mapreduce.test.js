@@ -33,19 +33,21 @@ describe('MapReduce', function () {
               var map = 'function() { emit(this.user_id, 1); }';
               var reduce = 'function(k,vals) { return 1; }';
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
-                err,
-                collection
-              ) {
-                collection.findOne({ _id: 1 }, function (err, result) {
-                  test.equal(1, result.value);
-
-                  collection.findOne({ _id: 2 }, function (err, result) {
+              collection.mapReduce(
+                map,
+                reduce,
+                { out: { replace: 'tempCollection' } },
+                function (err, collection) {
+                  collection.findOne({ _id: 1 }, function (err, result) {
                     test.equal(1, result.value);
-                    client.close(done);
+
+                    collection.findOne({ _id: 2 }, function (err, result) {
+                      test.equal(1, result.value);
+                      client.close(done);
+                    });
                   });
-                });
-              });
+                }
+              );
             }
           );
         });
@@ -103,41 +105,43 @@ describe('MapReduce', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('test_map_reduce_with_functions_as_arguments', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-          collection.insert(
-            [{ user_id: 1 }, { user_id: 2 }],
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
+        db.createCollection(
+          'test_map_reduce_with_functions_as_arguments',
+          function (err, collection) {
+            expect(err).to.not.exist;
+            collection.insert(
+              [{ user_id: 1 }, { user_id: 2 }],
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
 
-              // String functions
-              var map = function () {
+                // String functions
+                var map = function () {
                 emit(this.user_id, 1); // eslint-disable-line
-              };
-              var reduce = function () {
-                return 1;
-              };
+                };
+                var reduce = function () {
+                  return 1;
+                };
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
-                err,
-                collection
-              ) {
-                collection.findOne({ _id: 1 }, function (err, result) {
-                  test.equal(1, result.value);
+                collection.mapReduce(
+                  map,
+                  reduce,
+                  { out: { replace: 'tempCollection' } },
+                  function (err, collection) {
+                    collection.findOne({ _id: 1 }, function (err, result) {
+                      test.equal(1, result.value);
 
-                  collection.findOne({ _id: 2 }, function (err, result) {
-                    test.equal(1, result.value);
-                    client.close(done);
-                  });
-                });
-              });
-            }
-          );
-        });
+                      collection.findOne({ _id: 2 }, function (err, result) {
+                        test.equal(1, result.value);
+                        client.close(done);
+                      });
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -162,19 +166,21 @@ describe('MapReduce', function () {
               var map = new Code('function() { emit(this.user_id, 1); }');
               var reduce = new Code('function(k,vals) { return 1; }');
 
-              collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
-                err,
-                collection
-              ) {
-                collection.findOne({ _id: 1 }, function (err, result) {
-                  test.equal(1, result.value);
-
-                  collection.findOne({ _id: 2 }, function (err, result) {
+              collection.mapReduce(
+                map,
+                reduce,
+                { out: { replace: 'tempCollection' } },
+                function (err, collection) {
+                  collection.findOne({ _id: 1 }, function (err, result) {
                     test.equal(1, result.value);
-                    client.close(done);
+
+                    collection.findOne({ _id: 2 }, function (err, result) {
+                      test.equal(1, result.value);
+                      client.close(done);
+                    });
                   });
-                });
-              });
+                }
+              );
             }
           );
         });

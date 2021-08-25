@@ -379,7 +379,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   project<T extends Document = Document>(value: Document): FindCursor<T> {
     assertUninitialized(this);
     this[kBuiltOptions].projection = value;
-    return (this as unknown) as FindCursor<T>;
+    return this as unknown as FindCursor<T>;
   }
 
   /**

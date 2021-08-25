@@ -1990,43 +1990,44 @@ describe('Cursor', function () {
 
         const db = client.db(configuration.db);
         const options = { capped: true, size: 10000000 };
-        db.createCollection('test_if_dead_tailable_cursors_close', options, function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          let closeCount = 0;
-          const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
-          collection.insertMany(docs, { w: 'majority', wtimeoutMS: 5000 }, err => {
+        db.createCollection(
+          'test_if_dead_tailable_cursors_close',
+          options,
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            const cursor = collection.find({}, { tailable: true, awaitData: true });
-            const stream = cursor.stream();
-
-            stream.resume();
-
-            var validator = () => {
-              closeCount++;
-              if (closeCount === 2) {
-                done();
-              }
-            };
-
-            // we validate that the stream "ends" either cleanly or with an error
-            stream.on('end', validator);
-            stream.on('error', validator);
-
-            cursor.on('close', validator);
-
+            let closeCount = 0;
             const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
-            collection.insertMany(docs, err => {
+            collection.insertMany(docs, { w: 'majority', wtimeoutMS: 5000 }, err => {
               expect(err).to.not.exist;
 
-              setTimeout(() => client.close());
+              const cursor = collection.find({}, { tailable: true, awaitData: true });
+              const stream = cursor.stream();
+
+              stream.resume();
+
+              var validator = () => {
+                closeCount++;
+                if (closeCount === 2) {
+                  done();
+                }
+              };
+
+              // we validate that the stream "ends" either cleanly or with an error
+              stream.on('end', validator);
+              stream.on('error', validator);
+
+              cursor.on('close', validator);
+
+              const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
+              collection.insertMany(docs, err => {
+                expect(err).to.not.exist;
+
+                setTimeout(() => client.close());
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -2546,24 +2547,25 @@ describe('Cursor', function () {
           // Execute inserts
           for (i = 0; i < left; i++) {
             setTimeout(function () {
-              collection.insert(allDocs.shift(), configuration.writeConcernMax(), function (
-                err,
-                d
-              ) {
-                expect(err).to.not.exist;
+              collection.insert(
+                allDocs.shift(),
+                configuration.writeConcernMax(),
+                function (err, d) {
+                  expect(err).to.not.exist;
 
-                left = left - 1;
-                totalI = totalI + d.length;
+                  left = left - 1;
+                  totalI = totalI + d.length;
 
-                if (left === 0) {
-                  collection.find({}).toArray((err, items) => {
-                    expect(err).to.not.exist;
+                  if (left === 0) {
+                    collection.find({}).toArray((err, items) => {
+                      expect(err).to.not.exist;
 
-                    test.equal(30000, items.length);
-                    done();
-                  });
+                      test.equal(30000, items.length);
+                      done();
+                    });
+                  }
                 }
-              });
+              );
             }, timeout);
             timeout = timeout + 100;
           }
@@ -2938,36 +2940,36 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_2', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
+        db.createCollection(
+          'Should_correctly_execute_count_on_cursor_2',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Create a cursor for the content
-            var cursor = collection.find({});
-            cursor.limit(100);
-            cursor.skip(10);
-            cursor.count({ maxTimeMS: 1000 }, err => {
+            // insert all docs
+            collection.insert(docs, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
               // Create a cursor for the content
               var cursor = collection.find({});
               cursor.limit(100);
               cursor.skip(10);
-              cursor.maxTimeMS(100);
-
-              cursor.count(err => {
+              cursor.count({ maxTimeMS: 1000 }, err => {
                 expect(err).to.not.exist;
-                done();
+
+                // Create a cursor for the content
+                var cursor = collection.find({});
+                cursor.limit(100);
+                cursor.skip(10);
+                cursor.maxTimeMS(100);
+
+                cursor.count(err => {
+                  expect(err).to.not.exist;
+                  done();
+                });
               });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -2994,25 +2996,25 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_3', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
+        db.createCollection(
+          'Should_correctly_execute_count_on_cursor_3',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Create a cursor for the content
-            var cursor = collection.find({}, { maxTimeMS: 100 });
-            cursor.toArray(err => {
+            // insert all docs
+            collection.insert(docs, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
 
-              done();
+              // Create a cursor for the content
+              var cursor = collection.find({}, { maxTimeMS: 100 });
+              cursor.toArray(err => {
+                expect(err).to.not.exist;
+
+                done();
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -3328,34 +3330,35 @@ describe('Cursor', function () {
 
         const db = client.db(configuration.db);
         var options = { capped: true, size: 8 };
-        db.createCollection('should_await_data_max_awaittime_ms', options, function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
+        db.createCollection(
+          'should_await_data_max_awaittime_ms',
+          options,
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Create cursor with awaitData, and timeout after the period specified
-            var cursor = collection
-              .find({})
-              .addCursorFlag('tailable', true)
-              .addCursorFlag('awaitData', true)
-              .maxAwaitTimeMS(500);
+            collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
+              expect(err).to.not.exist;
 
-            const s = new Date();
-            cursor.forEach(
-              () => {
-                setTimeout(() => cursor.close(), 300);
-              },
-              () => {
-                test.ok(new Date().getTime() - s.getTime() >= 500);
-                done();
-              }
-            );
-          });
-        });
+              // Create cursor with awaitData, and timeout after the period specified
+              var cursor = collection
+                .find({})
+                .addCursorFlag('tailable', true)
+                .addCursorFlag('awaitData', true)
+                .maxAwaitTimeMS(500);
+
+              const s = new Date();
+              cursor.forEach(
+                () => {
+                  setTimeout(() => cursor.close(), 300);
+                },
+                () => {
+                  test.ok(new Date().getTime() - s.getTime() >= 500);
+                  done();
+                }
+              );
+            });
+          }
+        );
       });
     }
   });
@@ -3422,33 +3425,33 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          // ensure index of createdAt index
-          collection.createIndex({ createdAt: 1 }, err => {
+        db.createCollection(
+          'shouldCorrectlyExecuteEnsureIndexWithNoCallback',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
+            // ensure index of createdAt index
+            collection.createIndex({ createdAt: 1 }, err => {
               expect(err).to.not.exist;
 
-              // Find with sort
-              collection
-                .find()
-                .sort(['createdAt', 'asc'])
-                .toArray((err, items) => {
-                  expect(err).to.not.exist;
+              // insert all docs
+              collection.insert(docs, configuration.writeConcernMax(), err => {
+                expect(err).to.not.exist;
 
-                  test.equal(1, items.length);
-                  done();
-                });
+                // Find with sort
+                collection
+                  .find()
+                  .sort(['createdAt', 'asc'])
+                  .toArray((err, items) => {
+                    expect(err).to.not.exist;
+
+                    test.equal(1, items.length);
+                    done();
+                  });
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -3530,26 +3533,26 @@ describe('Cursor', function () {
         this.defer(() => client.close());
 
         const db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_1_', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
+        db.createCollection(
+          'Should_correctly_execute_count_on_cursor_1_',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Create a cursor for the content
-            var cursor = collection.find({});
-            cursor.batchSize(-10).next(err => {
+            // insert all docs
+            collection.insert(docs, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
-              test.ok(cursor.id.equals(BSON.Long.ZERO));
 
-              done();
+              // Create a cursor for the content
+              var cursor = collection.find({});
+              cursor.batchSize(-10).next(err => {
+                expect(err).to.not.exist;
+                test.ok(cursor.id.equals(BSON.Long.ZERO));
+
+                done();
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });

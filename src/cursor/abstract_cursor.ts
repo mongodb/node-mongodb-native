@@ -418,9 +418,11 @@ export abstract class AbstractCursor<
           docs.push(doc);
 
           // these do need to be transformed since they are copying the rest of the batch
-          const internalDocs = (transform
-            ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
-            : this[kDocuments].splice(0, this[kDocuments].length)) as TSchema[]; // TODO(NODE-3283): Improve transform typing
+          const internalDocs = (
+            transform
+              ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
+              : this[kDocuments].splice(0, this[kDocuments].length)
+          ) as TSchema[]; // TODO(NODE-3283): Improve transform typing
 
           if (internalDocs) {
             docs.push(...internalDocs);
@@ -484,7 +486,7 @@ export abstract class AbstractCursor<
       this[kTransform] = transform;
     }
 
-    return (this as unknown) as AbstractCursor<T>;
+    return this as unknown as AbstractCursor<T>;
   }
 
   /**

@@ -53,24 +53,27 @@ describe('Find and Modify', function () {
             succeeded = [];
 
             // Execute findOneAndReplace
-            collection.findOneAndReplace({}, { b: 1 }, { writeConcern: { fsync: 1 } }, function (
-              err
-            ) {
-              expect(err).to.not.exist;
-              test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
-
-              // Cleanup
-              started = [];
-              succeeded = [];
-
-              // Execute findOneAndReplace
-              collection.findOneAndDelete({}, { writeConcern: { fsync: 1 } }, function (err) {
+            collection.findOneAndReplace(
+              {},
+              { b: 1 },
+              { writeConcern: { fsync: 1 } },
+              function (err) {
                 expect(err).to.not.exist;
                 test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
 
-                client.close(done);
-              });
-            });
+                // Cleanup
+                started = [];
+                succeeded = [];
+
+                // Execute findOneAndReplace
+                collection.findOneAndDelete({}, { writeConcern: { fsync: 1 } }, function (err) {
+                  expect(err).to.not.exist;
+                  test.deepEqual({ fsync: 1 }, started[0].command.writeConcern);
+
+                  client.close(done);
+                });
+              }
+            );
           }
         );
       });

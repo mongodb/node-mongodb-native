@@ -23,14 +23,12 @@ const os = require('os');
  * @property {string} stdout - capture of stdout
  * @property {string} stderr - capture of stderr
  * @property {MongoMochaTest} test - capture of stderr
- *
  * @typedef {object} MongoMochaTestExtension
  * @property {Date} startTime - test start date
  * @property {Date} endTime - test end date
  * @property {number} elapsedTime - difference between end and start
  * @property {Error} [error] - The possible error from a test
  * @property {true} [skipped] - Set if test was skipped
- *
  * @typedef {MongoMochaSuiteExtension & Mocha.Suite} MongoMochaSuite
  * @typedef {MongoMochaTestExtension & Mocha.Test} MongoMochaTest
  */
@@ -245,8 +243,9 @@ function replaceIllegalXMLCharacters(string) {
     .split('&').join('﹠');
 }
 
-// eslint-disable-next-line no-control-regex
-const ANSI_ESCAPE_REGEX = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const ANSI_ESCAPE_REGEX =
+  // eslint-disable-next-line no-control-regex
+  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function outputToXML(output) {
   function cdata(str) {
     return `<![CDATA[${String(str)

@@ -61,20 +61,20 @@ describe('Unicode', function () {
             'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
         };
 
-        db.createCollection('test_should_correctly_insert_unicode_containing_document', function (
-          err,
-          collection
-        ) {
-          doc['_id'] = 'felixge';
+        db.createCollection(
+          'test_should_correctly_insert_unicode_containing_document',
+          function (err, collection) {
+            doc['_id'] = 'felixge';
 
-          collection.insertOne(doc, { writeConcern: { w: 1 } }, function (err) {
-            expect(err).to.not.exist;
-            collection.findOne(function (err, doc) {
-              test.equal('felixge', doc._id);
-              client.close(done);
+            collection.insertOne(doc, { writeConcern: { w: 1 } }, function (err) {
+              expect(err).to.not.exist;
+              collection.findOne(function (err, doc) {
+                test.equal('felixge', doc._id);
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });

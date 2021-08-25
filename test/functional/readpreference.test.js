@@ -625,26 +625,26 @@ describe('ReadPreference', function () {
 
   it('should respect readPreference from uri', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
-    test: withMonitoredClient('find', { queryOptions: { readPreference: 'secondary' } }, function (
-      client,
-      events,
-      done
-    ) {
-      expect(client.readPreference.mode).to.equal('secondary');
-      client
-        .db('test')
-        .collection('test')
-        .findOne({ a: 1 }, err => {
-          expect(err).to.not.exist;
-          expect(events).to.be.an('array').with.lengthOf(1);
-          expect(events[0]).to.containSubset({
-            commandName: 'find',
-            command: {
-              $readPreference: { mode: 'secondary' }
-            }
+    test: withMonitoredClient(
+      'find',
+      { queryOptions: { readPreference: 'secondary' } },
+      function (client, events, done) {
+        expect(client.readPreference.mode).to.equal('secondary');
+        client
+          .db('test')
+          .collection('test')
+          .findOne({ a: 1 }, err => {
+            expect(err).to.not.exist;
+            expect(events).to.be.an('array').with.lengthOf(1);
+            expect(events[0]).to.containSubset({
+              commandName: 'find',
+              command: {
+                $readPreference: { mode: 'secondary' }
+              }
+            });
+            done();
           });
-          done();
-        });
-    })
+      }
+    )
   });
 });

@@ -21,13 +21,12 @@ function makeErrorModule(error: any) {
   });
 }
 
-export let Kerberos:
-  | typeof import('kerberos')
-  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
-  )
-);
+export let Kerberos: typeof import('kerberos') | { kModuleError: MongoMissingDependencyError } =
+  makeErrorModule(
+    new MongoMissingDependencyError(
+      'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
+    )
+  );
 
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
@@ -97,27 +96,25 @@ try {
   } catch {} // eslint-disable-line
 } catch {} // eslint-disable-line
 
-export let saslprep:
-  | typeof import('saslprep')
-  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `saslprep` not found.' +
-      ' Please install it to enable Stringprep Profile for User Names and Passwords'
-  )
-);
+export let saslprep: typeof import('saslprep') | { kModuleError: MongoMissingDependencyError } =
+  makeErrorModule(
+    new MongoMissingDependencyError(
+      'Optional module `saslprep` not found.' +
+        ' Please install it to enable Stringprep Profile for User Names and Passwords'
+    )
+  );
 
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
   saslprep = require('saslprep');
 } catch {} // eslint-disable-line
 
-export let aws4:
-  | typeof import('aws4')
-  | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `aws4` not found. Please install it to enable AWS authentication'
-  )
-);
+export let aws4: typeof import('aws4') | { kModuleError: MongoMissingDependencyError } =
+  makeErrorModule(
+    new MongoMissingDependencyError(
+      'Optional module `aws4` not found. Please install it to enable AWS authentication'
+    )
+  );
 
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
@@ -134,7 +131,8 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type AutoEncryptionLoggerLevel = typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
+export type AutoEncryptionLoggerLevel =
+  typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
 export interface AutoEncryptionOptions {

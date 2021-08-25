@@ -12,7 +12,7 @@ import {
 
 type MongoDBImport = typeof import('../../../src');
 
-const mongodb: MongoDBImport = (null as unknown) as MongoDBImport;
+const mongodb: MongoDBImport = null as unknown as MongoDBImport;
 
 expectNotType<Function>(mongodb);
 expectType<PropExists<MongoDBImport, 'connect'>>(false);

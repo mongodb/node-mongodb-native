@@ -308,38 +308,40 @@ describe('Indexes', function () {
         db.createCollection('test_ensure_index', function (err, collection) {
           expect(err).to.not.exist;
           // Create an index on the collection
-          db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function (
-            err,
-            indexName
-          ) {
-            expect(err).to.not.exist;
-            test.equal('a_1', indexName);
-            // Let's fetch the index information
-            db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-              test.ok(collectionInfo['_id_'] != null);
-              test.equal('_id', collectionInfo['_id_'][0][0]);
-              test.ok(collectionInfo['a_1'] != null);
-              test.deepEqual([['a', 1]], collectionInfo['a_1']);
+          db.createIndex(
+            collection.collectionName,
+            'a',
+            configuration.writeConcernMax(),
+            function (err, indexName) {
+              expect(err).to.not.exist;
+              test.equal('a_1', indexName);
+              // Let's fetch the index information
+              db.indexInformation(collection.collectionName, function (err, collectionInfo) {
+                test.ok(collectionInfo['_id_'] != null);
+                test.equal('_id', collectionInfo['_id_'][0][0]);
+                test.ok(collectionInfo['a_1'] != null);
+                test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
-              db.createIndex(
-                collection.collectionName,
-                'a',
-                configuration.writeConcernMax(),
-                function (err, indexName) {
-                  test.equal('a_1', indexName);
-                  // Let's fetch the index information
-                  db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-                    test.ok(collectionInfo['_id_'] != null);
-                    test.equal('_id', collectionInfo['_id_'][0][0]);
-                    test.ok(collectionInfo['a_1'] != null);
-                    test.deepEqual([['a', 1]], collectionInfo['a_1']);
-                    // Let's close the db
-                    client.close(done);
-                  });
-                }
-              );
-            });
-          });
+                db.createIndex(
+                  collection.collectionName,
+                  'a',
+                  configuration.writeConcernMax(),
+                  function (err, indexName) {
+                    test.equal('a_1', indexName);
+                    // Let's fetch the index information
+                    db.indexInformation(collection.collectionName, function (err, collectionInfo) {
+                      test.ok(collectionInfo['_id_'] != null);
+                      test.equal('_id', collectionInfo['_id_'][0][0]);
+                      test.ok(collectionInfo['a_1'] != null);
+                      test.deepEqual([['a', 1]], collectionInfo['a_1']);
+                      // Let's close the db
+                      client.close(done);
+                    });
+                  }
+                );
+              });
+            }
+          );
         });
       });
     }
@@ -358,32 +360,34 @@ describe('Indexes', function () {
         db.createCollection('create_and_use_sparse_index_test', function (err) {
           expect(err).to.not.exist;
           const collection = db.collection('create_and_use_sparse_index_test');
-          collection.createIndex({ title: 1 }, { sparse: true, writeConcern: { w: 1 } }, function (
-            err
-          ) {
-            expect(err).to.not.exist;
-            collection.insert(
-              [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                collection
-                  .find({ title: { $ne: null } })
-                  .sort({ title: 1 })
-                  .toArray(function (err, items) {
-                    test.equal(1, items.length);
-                    test.equal('Sarah', items[0].name);
+          collection.createIndex(
+            { title: 1 },
+            { sparse: true, writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
+              collection.insert(
+                [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
+                configuration.writeConcernMax(),
+                function (err) {
+                  expect(err).to.not.exist;
+                  collection
+                    .find({ title: { $ne: null } })
+                    .sort({ title: 1 })
+                    .toArray(function (err, items) {
+                      test.equal(1, items.length);
+                      test.equal('Sarah', items[0].name);
 
-                    // Fetch the info for the indexes
-                    collection.indexInformation({ full: true }, function (err, indexInfo) {
-                      expect(err).to.not.exist;
-                      test.equal(2, indexInfo.length);
-                      client.close(done);
+                      // Fetch the info for the indexes
+                      collection.indexInformation({ full: true }, function (err, indexInfo) {
+                        expect(err).to.not.exist;
+                        test.equal(2, indexInfo.length);
+                        client.close(done);
+                      });
                     });
-                  });
-              }
-            );
-          });
+                }
+              );
+            }
+          );
         });
       });
     }
@@ -409,20 +413,24 @@ describe('Indexes', function () {
           const collection = db.collection('geospatial_index_test');
           collection.createIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
-            collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (
-              err
-            ) {
-              expect(err).to.not.exist;
+            collection.insert(
+              { loc: [-100, 100] },
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
 
-              collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
-                err
-              ) {
-                test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                test.ok(err.errmsg.indexOf('-180') !== -1);
-                test.ok(err.errmsg.indexOf('180') !== -1);
-                client.close(done);
-              });
-            });
+                collection.insert(
+                  { loc: [200, 200] },
+                  configuration.writeConcernMax(),
+                  function (err) {
+                    test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                    test.ok(err.errmsg.indexOf('-180') !== -1);
+                    test.ok(err.errmsg.indexOf('180') !== -1);
+                    client.close(done);
+                  }
+                );
+              }
+            );
           });
         });
       });
@@ -452,26 +460,30 @@ describe('Indexes', function () {
             { min: 0, max: 1024, writeConcern: { w: 1 } },
             function (err) {
               expect(err).to.not.exist;
-              collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (
-                err
-              ) {
-                expect(err).to.not.exist;
-                collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (
-                  err
-                ) {
+              collection.insert(
+                { loc: [100, 100] },
+                configuration.writeConcernMax(),
+                function (err) {
                   expect(err).to.not.exist;
                   collection.insert(
-                    { loc: [-200, -200] },
+                    { loc: [200, 200] },
                     configuration.writeConcernMax(),
                     function (err) {
-                      test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                      test.ok(err.errmsg.indexOf('0') !== -1);
-                      test.ok(err.errmsg.indexOf('1024') !== -1);
-                      client.close(done);
+                      expect(err).to.not.exist;
+                      collection.insert(
+                        { loc: [-200, -200] },
+                        configuration.writeConcernMax(),
+                        function (err) {
+                          test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                          test.ok(err.errmsg.indexOf('0') !== -1);
+                          test.ok(err.errmsg.indexOf('1024') !== -1);
+                          client.close(done);
+                        }
+                      );
                     }
                   );
-                });
-              });
+                }
+              );
             }
           );
         });
@@ -489,21 +501,27 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function (
-          err,
-          collection
-        ) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
+        db.createCollection(
+          'shouldThrowDuplicateKeyErrorWhenCreatingIndex',
+          function (err, collection) {
+            collection.insert(
+              [{ a: 1 }, { a: 1 }],
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
 
-            collection.createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
-              err
-            ) {
-              test.ok(err != null);
-              client.close(done);
-            });
-          });
-        });
+                collection.createIndex(
+                  { a: 1 },
+                  { unique: true, writeConcern: { w: 1 } },
+                  function (err) {
+                    test.ok(err != null);
+                    client.close(done);
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -518,21 +536,27 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function (
-          err,
-          collection
-        ) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
+        db.createCollection(
+          'shouldThrowDuplicateKeyErrorWhenDriverInStrictMode',
+          function (err, collection) {
+            collection.insert(
+              [{ a: 1 }, { a: 1 }],
+              configuration.writeConcernMax(),
+              function (err) {
+                expect(err).to.not.exist;
 
-            collection.createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } }, function (
-              err
-            ) {
-              test.ok(err != null);
-              client.close(done);
-            });
-          });
-        });
+                collection.createIndex(
+                  { a: 1 },
+                  { unique: true, writeConcern: { w: 1 } },
+                  function (err) {
+                    test.ok(err != null);
+                    client.close(done);
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -548,27 +572,29 @@ describe('Indexes', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Establish connection to db
-        db.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
+        db.createCollection(
+          'shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex',
+          function (err, collection) {
+            expect(err).to.not.exist;
 
-          collection.createIndex(
-            { loc: '2d' },
-            { min: 200, max: 1400, writeConcern: { w: 1 } },
-            function (err) {
-              expect(err).to.not.exist;
-
-              collection.insert({ loc: [600, 600] }, configuration.writeConcernMax(), function (
-                err
-              ) {
+            collection.createIndex(
+              { loc: '2d' },
+              { min: 200, max: 1400, writeConcern: { w: 1 } },
+              function (err) {
                 expect(err).to.not.exist;
-                client.close(done);
-              });
-            }
-          );
-        });
+
+                collection.insert(
+                  { loc: [600, 600] },
+                  configuration.writeConcernMax(),
+                  function (err) {
+                    expect(err).to.not.exist;
+                    client.close(done);
+                  }
+                );
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -584,22 +610,22 @@ describe('Indexes', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         // Establish connection to db
-        db.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function (
-          err,
-          collection
-        ) {
-          expect(err).to.not.exist;
-
-          collection.createIndex('name', { name: 'myfunky_name' }, function (err) {
+        db.createCollection(
+          'shouldCorrectlyCreateAnIndexWithOverridenName',
+          function (err, collection) {
             expect(err).to.not.exist;
 
-            // Fetch full index information
-            collection.indexInformation({ full: false }, function (err, indexInformation) {
-              test.ok(indexInformation['myfunky_name'] != null);
-              client.close(done);
+            collection.createIndex('name', { name: 'myfunky_name' }, function (err) {
+              expect(err).to.not.exist;
+
+              // Fetch full index information
+              collection.indexInformation({ full: false }, function (err, indexInformation) {
+                test.ok(indexInformation['myfunky_name'] != null);
+                client.close(done);
+              });
             });
-          });
-        });
+          }
+        );
       });
     }
   });
@@ -616,17 +642,21 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         var shared = require('./contexts');
 
-        db.collection('indexcontext').createIndex(shared.object, { background: true }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
-          db.collection('indexcontext').createIndex(shared.array, { background: true }, function (
-            err
-          ) {
+        db.collection('indexcontext').createIndex(
+          shared.object,
+          { background: true },
+          function (err) {
             expect(err).to.not.exist;
-            client.close(done);
-          });
-        });
+            db.collection('indexcontext').createIndex(
+              shared.array,
+              { background: true },
+              function (err) {
+                expect(err).to.not.exist;
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -648,12 +678,14 @@ describe('Indexes', function () {
           function (err) {
             expect(err).to.not.exist;
 
-            collection.createIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true }, function (
-              err
-            ) {
-              test.ok(err != null);
-              client.close(done);
-            });
+            collection.createIndex(
+              { a: 1 },
+              { writeConcern: { w: 1 }, unique: true },
+              function (err) {
+                test.ok(err != null);
+                client.close(done);
+              }
+            );
           }
         );
       });
@@ -737,29 +769,30 @@ describe('Indexes', function () {
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('should_correctly_set_language_override');
-        collection.insert([{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }], function (
-          err
-        ) {
-          expect(err).to.not.exist;
+        collection.insert(
+          [{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }],
+          function (err) {
+            expect(err).to.not.exist;
 
-          collection.createIndex(
-            { text: 'text' },
-            { language_override: 'langua', name: 'language_override_index' },
-            function (err) {
-              expect(err).to.not.exist;
-
-              collection.indexInformation({ full: true }, function (err, indexInformation) {
+            collection.createIndex(
+              { text: 'text' },
+              { language_override: 'langua', name: 'language_override_index' },
+              function (err) {
                 expect(err).to.not.exist;
-                for (var i = 0; i < indexInformation.length; i++) {
-                  if (indexInformation[i].name === 'language_override_index')
-                    test.equal(indexInformation[i].language_override, 'langua');
-                }
 
-                client.close(done);
-              });
-            }
-          );
-        });
+                collection.indexInformation({ full: true }, function (err, indexInformation) {
+                  expect(err).to.not.exist;
+                  for (var i = 0; i < indexInformation.length; i++) {
+                    if (indexInformation[i].name === 'language_override_index')
+                      test.equal(indexInformation[i].language_override, 'langua');
+                  }
+
+                  client.close(done);
+                });
+              }
+            );
+          }
+        );
       });
     }
   });
@@ -922,15 +955,16 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        db.collection('text_index').createIndex({ '$**': 'text' }, { name: 'TextIndex' }, function (
-          err,
-          r
-        ) {
-          expect(err).to.not.exist;
-          test.equal('TextIndex', r);
-          // Let's close the db
-          client.close(done);
-        });
+        db.collection('text_index').createIndex(
+          { '$**': 'text' },
+          { name: 'TextIndex' },
+          function (err, r) {
+            expect(err).to.not.exist;
+            test.equal('TextIndex', r);
+            // Let's close the db
+            client.close(done);
+          }
+        );
       });
     }
   });
@@ -1177,22 +1211,24 @@ describe('Indexes', function () {
         var db = client.db(configuration.db);
         var collection = db.collection('messed_up_options');
 
-        collection.createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false }, function (
-          err
-        ) {
-          expect(err).to.not.exist;
+        collection.createIndex(
+          { 'a.one': 1, 'a.two': 1 },
+          { name: 'n1', sparse: false },
+          function (err) {
+            expect(err).to.not.exist;
 
-          collection.createIndex(
-            { 'a.one': 1, 'a.two': 1 },
-            { name: 'n2', sparse: true },
-            function (err) {
-              test.ok(err);
-              test.equal(85, err.code);
+            collection.createIndex(
+              { 'a.one': 1, 'a.two': 1 },
+              { name: 'n2', sparse: true },
+              function (err) {
+                test.ok(err);
+                test.equal(85, err.code);
 
-              client.close(done);
-            }
-          );
-        });
+                client.close(done);
+              }
+            );
+          }
+        );
       });
     }
   });
