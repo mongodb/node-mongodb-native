@@ -776,6 +776,7 @@ describe('Explain', function() {
       collection
         .find({ a: 1 })
         .explain('invalidExplain')
+        .then(() => done(new Error('expected explain to fail but it succeeded')))
         .catch(err => {
           expect(err).to.exist;
           expect(err).to.be.instanceOf(MongoError);
@@ -783,6 +784,7 @@ describe('Explain', function() {
         });
     })
   });
+
   it('should throw a catchable error with invalid explain string (callback)', {
     metadata: {
       requires: {
