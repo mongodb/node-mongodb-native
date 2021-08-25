@@ -13,7 +13,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                 |
 | source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)               |
 | mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                             |
-| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/HISTORY.md)                  |
+| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md)                       |
 | upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md) |
 
 ### Bugs / Feature Requests
