@@ -71,9 +71,9 @@ export class MongoDBAWS extends AuthProvider {
 
     // If all three defined, include sessionToken, else include username and pass, else no credentials
     const awsCredentials =
-      accessKeyId != null && secretAccessKey != null && sessionToken != null
+      accessKeyId && secretAccessKey && sessionToken
         ? { accessKeyId, secretAccessKey, sessionToken }
-        : accessKeyId != null && secretAccessKey != null
+        : accessKeyId && secretAccessKey
         ? { accessKeyId, secretAccessKey }
         : undefined;
 
@@ -143,7 +143,7 @@ export class MongoDBAWS extends AuthProvider {
           a: options.headers.Authorization,
           d: options.headers['X-Amz-Date']
         };
-        if (sessionToken != null && sessionToken !== '') {
+        if (sessionToken) {
           payload.t = sessionToken;
         }
 
