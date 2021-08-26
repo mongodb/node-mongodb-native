@@ -55,7 +55,7 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="commandsucceededevent.html">CommandSucceededEvent</a>
+					<a href="CommandSucceededEvent.html">CommandSucceededEvent</a>
 				</li>
 			</ul>
 			<h1>Class CommandSucceededEvent</h1>
@@ -87,18 +87,18 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="commandsucceededevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="CommandSucceededEvent.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#address" class="tsd-kind-icon">address</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#commandname" class="tsd-kind-icon">command<wbr>Name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#connectionid" class="tsd-kind-icon">connection<wbr>Id</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#duration" class="tsd-kind-icon">duration</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#reply" class="tsd-kind-icon">reply</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="commandsucceededevent.html#requestid" class="tsd-kind-icon">request<wbr>Id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#address" class="tsd-kind-icon">address</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#commandName" class="tsd-kind-icon">command<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#connectionId" class="tsd-kind-icon">connection<wbr>Id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#duration" class="tsd-kind-icon">duration</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#reply" class="tsd-kind-icon">reply</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="CommandSucceededEvent.html#requestId" class="tsd-kind-icon">request<wbr>Id</a></li>
 							</ul>
 						</section>
 					</div>
@@ -110,13 +110,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Command<wbr>Succeeded<wbr>Event<span class="tsd-signature-symbol">(</span>pool<span class="tsd-signature-symbol">: </span><a href="connectionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a><span class="tsd-signature-symbol"> | </span><a href="connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a>, command<span class="tsd-signature-symbol">: </span><a href="../modules.html#writeprotocolmessagetype" class="tsd-signature-type" data-tsd-kind="Type alias">WriteProtocolMessageType</a>, reply<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a>, started<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="commandsucceededevent.html" class="tsd-signature-type" data-tsd-kind="Class">CommandSucceededEvent</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Command<wbr>Succeeded<wbr>Event<span class="tsd-signature-symbol">(</span>pool<span class="tsd-signature-symbol">: </span><a href="ConnectionPool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a><span class="tsd-signature-symbol"> | </span><a href="Connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a>, command<span class="tsd-signature-symbol">: </span><a href="../modules.html#WriteProtocolMessageType" class="tsd-signature-type" data-tsd-kind="Type alias">WriteProtocolMessageType</a>, reply<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/Document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a>, started<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="CommandSucceededEvent.html" class="tsd-signature-type" data-tsd-kind="Class">CommandSucceededEvent</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L59">src/cmap/command_monitoring_events.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L70">src/cmap/command_monitoring_events.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -131,31 +131,39 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>pool: <a href="connectionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a><span class="tsd-signature-symbol"> | </span><a href="connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a></h5>
+									<h5>pool: <a href="ConnectionPool.html" class="tsd-signature-type" data-tsd-kind="Class">ConnectionPool</a><span class="tsd-signature-symbol"> | </span><a href="Connection.html" class="tsd-signature-type" data-tsd-kind="Class">Connection</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>the pool that originated the command</p>
+										<div class="lead">
+											<p>the pool that originated the command</p>
+										</div>
 									</div>
 								</li>
 								<li>
-									<h5>command: <a href="../modules.html#writeprotocolmessagetype" class="tsd-signature-type" data-tsd-kind="Type alias">WriteProtocolMessageType</a></h5>
+									<h5>command: <a href="../modules.html#WriteProtocolMessageType" class="tsd-signature-type" data-tsd-kind="Type alias">WriteProtocolMessageType</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>the command</p>
+										<div class="lead">
+											<p>the command</p>
+										</div>
 									</div>
 								</li>
 								<li>
-									<h5>reply: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></h5>
+									<h5>reply: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/Document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>the reply for this command from the server</p>
+										<div class="lead">
+											<p>the reply for this command from the server</p>
+										</div>
 									</div>
 								</li>
 								<li>
 									<h5>started: <span class="tsd-signature-type">number</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>a high resolution tuple timestamp of when the command was first sent, to calculate duration</p>
+										<div class="lead">
+											<p>a high resolution tuple timestamp of when the command was first sent, to calculate duration</p>
+										</div>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="commandsucceededevent.html" class="tsd-signature-type" data-tsd-kind="Class">CommandSucceededEvent</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="CommandSucceededEvent.html" class="tsd-signature-type" data-tsd-kind="Class">CommandSucceededEvent</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -168,27 +176,27 @@
 					<div class="tsd-signature tsd-kind-icon">address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L54">src/cmap/command_monitoring_events.ts:54</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L54">src/cmap/command_monitoring_events.ts:54</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="commandname" class="tsd-anchor"></a>
+					<a name="commandName" class="tsd-anchor"></a>
 					<h3>command<wbr>Name</h3>
 					<div class="tsd-signature tsd-kind-icon">command<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L58">src/cmap/command_monitoring_events.ts:58</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L58">src/cmap/command_monitoring_events.ts:58</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="connectionid" class="tsd-anchor"></a>
+					<a name="connectionId" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> connection<wbr>Id</h3>
 					<div class="tsd-signature tsd-kind-icon">connection<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L55">src/cmap/command_monitoring_events.ts:55</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L55">src/cmap/command_monitoring_events.ts:55</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -198,7 +206,7 @@
 					<div class="tsd-signature tsd-kind-icon">duration<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L57">src/cmap/command_monitoring_events.ts:57</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L57">src/cmap/command_monitoring_events.ts:57</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -208,17 +216,17 @@
 					<div class="tsd-signature tsd-kind-icon">reply<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">unknown</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L59">src/cmap/command_monitoring_events.ts:59</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L59">src/cmap/command_monitoring_events.ts:59</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="requestid" class="tsd-anchor"></a>
+					<a name="requestId" class="tsd-anchor"></a>
 					<h3>request<wbr>Id</h3>
 					<div class="tsd-signature tsd-kind-icon">request<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/cmap/command_monitoring_events.ts#L56">src/cmap/command_monitoring_events.ts:56</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/cmap/command_monitoring_events.ts#L56">src/cmap/command_monitoring_events.ts:56</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -237,28 +245,28 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class">
-						<a href="commandsucceededevent.html" class="tsd-kind-icon">Command<wbr>Succeeded<wbr>Event</a>
+						<a href="CommandSucceededEvent.html" class="tsd-kind-icon">Command<wbr>Succeeded<wbr>Event</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="CommandSucceededEvent.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#address" class="tsd-kind-icon">address</a>
+								<a href="CommandSucceededEvent.html#address" class="tsd-kind-icon">address</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#commandname" class="tsd-kind-icon">command<wbr>Name</a>
+								<a href="CommandSucceededEvent.html#commandName" class="tsd-kind-icon">command<wbr>Name</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#connectionid" class="tsd-kind-icon">connection<wbr>Id</a>
+								<a href="CommandSucceededEvent.html#connectionId" class="tsd-kind-icon">connection<wbr>Id</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#duration" class="tsd-kind-icon">duration</a>
+								<a href="CommandSucceededEvent.html#duration" class="tsd-kind-icon">duration</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#reply" class="tsd-kind-icon">reply</a>
+								<a href="CommandSucceededEvent.html#reply" class="tsd-kind-icon">reply</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="commandsucceededevent.html#requestid" class="tsd-kind-icon">request<wbr>Id</a>
+								<a href="CommandSucceededEvent.html#requestId" class="tsd-kind-icon">request<wbr>Id</a>
 							</li>
 						</ul>
 					</li>
