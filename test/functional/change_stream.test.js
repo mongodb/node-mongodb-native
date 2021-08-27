@@ -1787,7 +1787,7 @@ describe('Change Streams', function () {
   });
 
   describe('should error when used as iterator and emitter concurrently', function () {
-    let client, coll, changeStream;
+    let client, coll, changeStream, initPromise;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
@@ -1795,10 +1795,15 @@ describe('Change Streams', function () {
 
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
+      initPromise = new Promise(resolve => waitForStarted(changeStream, resolve));
     });
 
     afterEach(async function () {
       if (changeStream) {
+        const kMode = getSymbolFrom(changeStream, 'mode');
+        if (changeStream[kMode] === 'emitter') {
+          await initPromise;
+        }
         await changeStream.close();
       }
 
