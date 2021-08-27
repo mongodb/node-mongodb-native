@@ -54,6 +54,14 @@ describe('Wire Protocol Version', () => {
   });
 
   describe('maximum is less than 2', () => {
+    after(() => {
+      // Hack since this is the last test that runs
+      setTimeout(() => {
+        const wtfnode = require('wtfnode');
+        wtfnode.dump();
+      }, 300 * 1000).unref();
+    });
+
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(1, 1);
 
