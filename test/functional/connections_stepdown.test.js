@@ -73,6 +73,8 @@ describe('Connections survive primary step down', function () {
     metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
 
     test: function () {
+      this.retries(3);
+
       return collection
         .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }], {
           writeConcern: { w: 'majority' }

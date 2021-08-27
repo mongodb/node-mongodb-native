@@ -439,6 +439,8 @@ describe('Connection Pool', function () {
 
     loadSpecTests('connection-monitoring-and-pooling').forEach(test => {
       it(test.description, function () {
+        this.retries(3);
+
         const operations = test.operations;
         const expectedEvents = test.events || [];
         const ignoreEvents = test.ignore || [];
@@ -469,7 +471,7 @@ describe('Connection Pool', function () {
 
             return Promise.resolve()
               .then(() => thread.run(op))
-              .then(() => new Promise(r => setTimeout(r)));
+              .then(() => new Promise(r => setTimeout(r, 100)));
           });
         }
 
