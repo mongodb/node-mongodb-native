@@ -5,10 +5,10 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const AWS_AUTH_VERSIONS = ['latest', '4.4'];
-const OCSP_VERSIONS = ['latest', '4.4'];
-const TLS_VERSIONS = ['latest', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
+const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
+const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
+const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2'];
 const NODE_VERSIONS = ['fermium', 'erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'].concat([
   'server-unified',
