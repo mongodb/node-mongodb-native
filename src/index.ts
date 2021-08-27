@@ -160,7 +160,11 @@ export type {
   OperationTime,
   ResumeOptions
 } from './change_stream';
-export type { MongoCredentials, MongoCredentialsOptions } from './cmap/auth/mongo_credentials';
+export type {
+  MongoCredentials,
+  AuthMechanismProperties,
+  MongoCredentialsOptions
+} from './cmap/auth/mongo_credentials';
 export type {
   WriteProtocolMessageType,
   Query,

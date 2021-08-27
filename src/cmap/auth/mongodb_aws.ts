@@ -14,6 +14,7 @@ import type { BSONSerializeOptions } from '../../bson';
 
 import { aws4 } from '../../deps';
 import { AuthMechanism } from './defaultAuthProviders';
+import type { Binary } from 'bson';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
@@ -64,10 +65,19 @@ export class MongoDBAWS extends AuthProvider {
       return;
     }
 
-    const username = credentials.username;
-    const password = credentials.password;
+    const accessKeyId = credentials.username;
+    const secretAccessKey = credentials.password;
+    const sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
+
+    // If all three defined, include sessionToken, else include username and pass, else no credentials
+    const awsCredentials =
+      accessKeyId && secretAccessKey && sessionToken
+        ? { accessKeyId, secretAccessKey, sessionToken }
+        : accessKeyId && secretAccessKey
+        ? { accessKeyId, secretAccessKey }
+        : undefined;
+
     const db = credentials.source;
-    const token = credentials.mechanismProperties.AWS_SESSION_TOKEN;
     crypto.randomBytes(32, (err, nonce) => {
       if (err) {
         callback(err);
@@ -83,7 +93,10 @@ export class MongoDBAWS extends AuthProvider {
       connection.command(ns(`${db}.$cmd`), saslStart, undefined, (err, res) => {
         if (err) return callback(err);
 
-        const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions);
+        const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions) as {
+          s: Binary;
+          h: string;
+        };
         const host = serverResponse.h;
         const serverNonce = serverResponse.s.buffer;
         if (serverNonce.length !== 64) {
@@ -123,18 +136,15 @@ export class MongoDBAWS extends AuthProvider {
             path: '/',
             body
           },
-          {
-            accessKeyId: username,
-            secretAccessKey: password,
-            token
-          }
+          awsCredentials
         );
 
-        const authorization = options.headers.Authorization;
-        const date = options.headers['X-Amz-Date'];
-        const payload: AWSSaslContinuePayload = { a: authorization, d: date };
-        if (token) {
-          payload.t = token;
+        const payload: AWSSaslContinuePayload = {
+          a: options.headers.Authorization,
+          d: options.headers['X-Amz-Date']
+        };
+        if (sessionToken) {
+          payload.t = sessionToken;
         }
 
         const saslContinue = {
@@ -149,14 +159,16 @@ export class MongoDBAWS extends AuthProvider {
   }
 }
 
-interface AWSCredentials {
+interface AWSTempCredentials {
   AccessKeyId?: string;
   SecretAccessKey?: string;
   Token?: string;
+  RoleArn?: string;
+  Expiration?: Date;
 }
 
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
-  function done(creds: AWSCredentials) {
+  function done(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
       callback(
         new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials')
@@ -183,6 +195,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
   if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
     request(
       `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
+      undefined,
       (err, res) => {
         if (err) return callback(err);
         done(res);
@@ -239,27 +252,15 @@ interface RequestOptions {
   headers?: http.OutgoingHttpHeaders;
 }
 
-function request(uri: string, callback: Callback): void;
-function request(uri: string, options: RequestOptions, callback: Callback): void;
-function request(uri: string, _options: RequestOptions | Callback, _callback?: Callback) {
-  let options = _options as RequestOptions;
-  if ('function' === typeof _options) {
-    options = {};
-  }
-
-  let callback: Callback = _options as Callback;
-  if (_callback) {
-    callback = _callback;
-  }
-
-  options = Object.assign(
+function request(uri: string, _options: RequestOptions | undefined, callback: Callback) {
+  const options = Object.assign(
     {
       method: 'GET',
       timeout: 10000,
       json: true
     },
     url.parse(uri),
-    options
+    _options
   );
 
   const req = http.request(options, res => {

@@ -26,13 +26,21 @@ function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
 }
 
 /** @public */
+export interface AuthMechanismProperties extends Document {
+  SERVICE_NAME?: string;
+  SERVICE_REALM?: string;
+  CANONICALIZE_HOST_NAME?: boolean;
+  AWS_SESSION_TOKEN?: string;
+}
+
+/** @public */
 export interface MongoCredentialsOptions {
   username: string;
   password: string;
   source: string;
   db?: string;
   mechanism?: AuthMechanism;
-  mechanismProperties: Document;
+  mechanismProperties: AuthMechanismProperties;
 }
 
 /**
@@ -49,7 +57,7 @@ export class MongoCredentials {
   /** The method used to authenticate */
   readonly mechanism: AuthMechanism;
   /** Special properties used by some types of auth mechanisms */
-  readonly mechanismProperties: Document;
+  readonly mechanismProperties: AuthMechanismProperties;
 
   constructor(options: MongoCredentialsOptions) {
     this.username = options.username;
@@ -70,7 +78,10 @@ export class MongoCredentials {
         this.password = process.env.AWS_SECRET_ACCESS_KEY;
       }
 
-      if (!this.mechanismProperties.AWS_SESSION_TOKEN && process.env.AWS_SESSION_TOKEN) {
+      if (
+        this.mechanismProperties.AWS_SESSION_TOKEN == null &&
+        process.env.AWS_SESSION_TOKEN != null
+      ) {
         this.mechanismProperties = {
           ...this.mechanismProperties,
           AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN

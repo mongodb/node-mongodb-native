@@ -40,4 +40,13 @@ describe('MONGODB-AWS', function () {
       });
     });
   });
+
+  it('should allow empty string in authMechanismProperties.AWS_SESSION_TOKEN to override AWS_SESSION_TOKEN environment variable', function () {
+    const client = this.configuration.newClient(this.configuration.url(), {
+      authMechanismProperties: { AWS_SESSION_TOKEN: '' }
+    });
+    expect(client)
+      .to.have.nested.property('options.credentials.mechanismProperties.AWS_SESSION_TOKEN')
+      .that.equals('');
+  });
 });
