@@ -1787,7 +1787,7 @@ describe('Change Streams', function () {
   });
 
   describe('should error when used as iterator and emitter concurrently', function () {
-    let client, coll, changeStream, initPromise;
+    let client, coll, changeStream, kMode, initPromise;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
@@ -1795,31 +1795,40 @@ describe('Change Streams', function () {
 
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
+      kMode = getSymbolFrom(changeStream, 'mode');
       initPromise = new Promise(resolve => waitForStarted(changeStream, resolve));
     });
 
     afterEach(async function () {
+      let err;
       if (changeStream) {
-        const kMode = getSymbolFrom(changeStream, 'mode');
-        if (changeStream[kMode] === 'emitter') {
-          await initPromise;
+        try {
+          if (changeStream[kMode] === 'emitter') {
+            // shutting down the client will end the session, if this happens before
+            // the stream initialization aggregate operation is processed, it will throw
+            // sa ession ended error, which can't be caught if we end the stream, so
+            // we need to wait for the stream to initialize before closing all the things
+            await initPromise;
+          }
+          await changeStream.close();
+        } catch (error) {
+          // don't throw before closing the client
+          err = error;
         }
-        await changeStream.close();
       }
 
       if (client) {
         await client.close();
       }
 
-      client = undefined;
-      coll = undefined;
-      changeStream = undefined;
+      if (err) {
+        throw err;
+      }
     });
 
     it(`should throw when mixing event listeners with iterator methods`, {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       async test() {
-        const kMode = getSymbolFrom(changeStream, 'mode');
         expect(changeStream).to.have.property(kMode, false);
         // ChangeStream detects emitter usage via 'newListener' event
         // so this covers all emitter methods
@@ -1844,7 +1853,6 @@ describe('Change Streams', function () {
     it(`should throw when mixing iterator methods with event listeners`, {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
       async test() {
-        const kMode = getSymbolFrom(changeStream, 'mode');
         expect(changeStream).to.have.property(kMode, false);
         const res = await changeStream.tryNext();
         expect(res).to.not.exist;
