@@ -11,7 +11,7 @@ describe('Client Metadata', function() {
     const ismasters = [];
     mockServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster) {
+      if (doc.ismaster || doc.hello) {
         ismasters.push(doc);
         request.reply(mock.DEFAULT_ISMASTER);
       } else {

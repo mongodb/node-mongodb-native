@@ -14,6 +14,7 @@ const mock = require('mongodb-mock-server');
 const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const filters = [];
 
 function initializeFilters(client, callback) {
@@ -64,8 +65,14 @@ before(function(_done) {
   //     usingUnifiedTopology ? 'unified' : 'legacy'
   //   )} topology`
   // );
-
-  const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  const options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  };
+  if (MONGODB_API_VERSION) {
+    options.serverApi = { version: MONGODB_API_VERSION };
+  }
+  const client = new MongoClient(MONGODB_URI, options);
   const done = err => client.close(err2 => _done(err || err2));
 
   client.connect(err => {
@@ -78,6 +85,11 @@ before(function(_done) {
       if (err) {
         done(err);
         return;
+      }
+
+      // Ensure test MongoClients set a serverApi parameter when required
+      if (MONGODB_API_VERSION) {
+        context.serverApi = MONGODB_API_VERSION;
       }
 
       // replace this when mocha supports dynamic skipping with `afterEach`

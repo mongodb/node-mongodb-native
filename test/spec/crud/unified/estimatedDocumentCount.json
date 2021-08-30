@@ -1,0 +1,562 @@
+{
+  "description": "estimatedDocumentCount",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "uriOptions": {
+          "retryReads": false
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "edc-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database0",
+        "collectionName": "coll1"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "edc-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "estimatedDocumentCount uses $collStats on 4.9.0 or greater",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount with maxTimeMS on 4.9.0 or greater",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "maxTimeMS": 6000
+          },
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ],
+                  "maxTimeMS": 6000
+                },
+                "commandName": "aggregate",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount on non-existent collection on 4.9.0 or greater",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection1",
+          "expectResult": 0
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll1",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount errors correctly on 4.9.0 or greater--command error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 8
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectError": {
+            "errorCode": 8
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount errors correctly on 4.9.0 or greater--socket error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$collStats": {
+                        "count": {}
+                      }
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": "$count"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount uses count on less than 4.9.0",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.8.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0"
+                },
+                "commandName": "count",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount with maxTimeMS on less than 4.9.0",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.8.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "maxTimeMS": 6000
+          },
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0",
+                  "maxTimeMS": 6000
+                },
+                "commandName": "count",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount on non-existent collection on less than 4.9.0",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.8.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection1",
+          "expectResult": 0
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll1"
+                },
+                "commandName": "count",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount errors correctly on less than 4.9.0--command error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.0",
+          "maxServerVersion": "4.8.99",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.2.0",
+          "maxServerVersion": "4.8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "errorCode": 8
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectError": {
+            "errorCode": 8
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0"
+                },
+                "commandName": "count",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount errors correctly on less than 4.9.0--socket error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.0",
+          "maxServerVersion": "4.8.99",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.2.0",
+          "maxServerVersion": "4.8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0"
+                },
+                "commandName": "count",
+                "databaseName": "edc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

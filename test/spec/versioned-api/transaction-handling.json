@@ -1,0 +1,348 @@
+{
+  "description": "Transaction handling",
+  "schemaVersion": "1.1",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.9",
+      "topologies": [
+        "replicaset",
+        "sharded-replicaset",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "serverApi": {
+          "version": "1"
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "versioned-api-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session",
+        "client": "client"
+      }
+    }
+  ],
+  "_yamlAnchors": {
+    "versions": [
+      {
+        "apiVersion": "1",
+        "apiStrict": {
+          "$$unsetOrMatches": false
+        },
+        "apiDeprecationErrors": {
+          "$$unsetOrMatches": false
+        }
+      }
+    ]
+  },
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "versioned-api-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        },
+        {
+          "_id": 5,
+          "x": 55
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "All commands in a transaction declare an API version",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset",
+            "load-balanced"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 6,
+              "x": 66
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 6
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 7,
+              "x": 77
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 7
+              }
+            }
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "startTransaction": true,
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 7,
+                      "x": 77
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "abortTransaction includes an API version",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset",
+            "load-balanced"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 6,
+              "x": 66
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 6
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 7,
+              "x": 77
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 7
+              }
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 6,
+                      "x": 66
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "startTransaction": true,
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 7,
+                      "x": 77
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "apiVersion": "1",
+                  "apiStrict": {
+                    "$$unsetOrMatches": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,14 +1,15 @@
 'use strict';
 
+const path = require('path');
 const chai = require('chai');
 const expect = chai.expect;
 const core = require('../../lib/core');
 const sessions = core.Sessions;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const loadSpecTests = require('../spec').loadSpecTests;
+const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const MongoNetworkError = require('../../lib/core').MongoNetworkError;
-const semver = require('semver');
 
 function ignoreNsNotFoundForListIndexes(err) {
   if (err.code !== 26) {
@@ -82,14 +83,30 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
+describe('Transactions Spec Unified Tests', function() {
+  for (const transactionTest of loadSpecTests(path.join('transactions', 'unified'))) {
+    expect(transactionTest).to.exist;
+    context(String(transactionTest.description), function() {
+      for (const test of transactionTest.tests) {
+        it(String(test.description), {
+          metadata: { sessions: { skipLeakTests: true } },
+          test() {
+            return runUnifiedTest(this, transactionTest, test);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('Transactions', function() {
   const testContext = new TransactionsRunnerContext();
 
   [
-    { name: 'spec tests', specPath: 'transactions' },
+    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
     {
       name: 'withTransaction spec tests',
-      specPath: 'transactions/convenient-api'
+      specPath: path.join('transactions', 'convenient-api')
     }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
@@ -99,17 +116,13 @@ describe('Transactions', function() {
         return testContext.setup(this.configuration);
       });
 
-      function testFilter(spec, config) {
-        // NODE-2574: remove this when HELP-15010 is resolved
-        if (config.topologyType === 'Sharded' && semver.satisfies(config.version, '>=4.4')) {
-          return false;
-        }
-
+      function testFilter(spec) {
         const SKIP_TESTS = [
           // commitTransaction retry seems to be swallowed by mongos in these three cases
           'commitTransaction retry succeeds on new mongos',
           'commitTransaction retry fails on new mongos',
           'unpin after transient error within a transaction and commit',
+          // FIXME(NODE-3369): unskip count tests when spec tests have been updated
           'count',
           // This test needs there to be multiple mongoses
           'increment txnNumber',

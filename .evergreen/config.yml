@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 1200
+exec_timeout_secs: 1500
 timeout:
   - command: shell.exec
     params:
@@ -79,6 +79,7 @@ functions:
           MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
           AUTH=${AUTH} SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
+          REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
@@ -111,8 +112,10 @@ functions:
             rm -f ./prepare_client_encryption.sh
           fi
 
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=1 NO_EXIT=1 \
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
@@ -507,39 +510,6 @@ post:
 ignore:
   - '*.md'
 tasks:
-  - name: test-latest-server
-    tags:
-      - latest
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-      - func: run tests
-  - name: test-latest-replica_set
-    tags:
-      - latest
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-      - func: run tests
-  - name: test-latest-sharded_cluster
-    tags:
-      - latest
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: sharded_cluster
-      - func: run tests
   - name: test-latest-server-unified
     tags:
       - latest
@@ -1227,6 +1197,23 @@ tasks:
       - func: run tests
         vars:
           UNIFIED: 1
+  - name: test-latest-server-v1-api
+    tags:
+      - latest
+      - server
+      - v1-api
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          REQUIRE_API_VERSION: '1'
+      - func: run tests
+        vars:
+          MONGODB_API_VERSION: '1'
+          UNIFIED: 1
+          NO_EXIT: ''
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -1853,9 +1840,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
     tasks: &ref_0
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
@@ -1913,6 +1897,7 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified
@@ -1978,9 +1963,6 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
     tasks: &ref_1
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
@@ -2038,6 +2020,7 @@ buildvariants:
       - test-2.6-server-unified
       - test-2.6-replica_set-unified
       - test-2.6-sharded_cluster-unified
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified
@@ -2180,9 +2163,6 @@ buildvariants:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
     tasks: &ref_3
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
@@ -2228,6 +2208,7 @@ buildvariants:
       - test-3.2-server-unified
       - test-3.2-replica_set-unified
       - test-3.2-sharded_cluster-unified
+      - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified

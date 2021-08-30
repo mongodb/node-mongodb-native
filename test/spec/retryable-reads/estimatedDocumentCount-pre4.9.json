@@ -2,6 +2,7 @@
   "runOn": [
     {
       "minServerVersion": "4.0",
+      "maxServerVersion": "4.8.99",
       "topology": [
         "single",
         "replicaset"
@@ -9,6 +10,7 @@
     },
     {
       "minServerVersion": "4.1.7",
+      "maxServerVersion": "4.8.99",
       "topology": [
         "sharded"
       ]

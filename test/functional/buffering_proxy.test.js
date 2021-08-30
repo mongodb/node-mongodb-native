@@ -138,7 +138,7 @@ describe.skip('Buffering Proxy', function() {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[currentIsMasterIndex]);
             } else if (doc.insert) {
               request.reply({ ok: 1, n: 1 });
@@ -156,7 +156,7 @@ describe.skip('Buffering Proxy', function() {
           if (die || dieSecondary) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[currentIsMasterIndex]);
             } else if (doc.endSessions) {
               request.reply({ ok: 1 });
@@ -170,7 +170,7 @@ describe.skip('Buffering Proxy', function() {
           if (die || dieSecondary) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(secondSecondary[currentIsMasterIndex]);
             } else if (doc.endSessions) {
               request.reply({ ok: 1 });
@@ -359,7 +359,7 @@ describe.skip('Buffering Proxy', function() {
           if (die || diePrimary) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(primary[currentIsMasterIndex]);
             } else if (doc.endSessions) {
               request.reply({ ok: 1 });
@@ -373,7 +373,7 @@ describe.skip('Buffering Proxy', function() {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(firstSecondary[currentIsMasterIndex]);
             } else if (doc.count) {
               request.reply({ ok: 1, n: 10 });
@@ -391,7 +391,7 @@ describe.skip('Buffering Proxy', function() {
           if (die) {
             request.connection.destroy();
           } else {
-            if (doc.ismaster) {
+            if (doc.ismaster || doc.hello) {
               request.reply(secondSecondary[currentIsMasterIndex]);
             } else if (doc.count) {
               request.reply({ ok: 1, n: 10 });

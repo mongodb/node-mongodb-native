@@ -4075,7 +4075,9 @@ describe('Cursor', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
@@ -4117,31 +4119,28 @@ describe('Cursor', function() {
     }
   });
 
-  it('Correctly decorate the collection cursor count command with skip, limit, hint, readConcern', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
+  it('Correctly decorate the collection count command with skip, limit, hint, readConcern', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'], mongodb: '<4.9.0' }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       var started = [];
 
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
       });
-
-      listener.on('started', function(event) {
+      client.on('commandStarted', function(event) {
         if (event.commandName === 'count') started.push(event);
       });
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
 
+        const db = client.db(configuration.db);
         db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
           {
             project: '123'
@@ -4152,8 +4151,8 @@ describe('Cursor', function() {
             skip: 5,
             hint: { project: 1 }
           },
-          function(err) {
-            test.equal(null, err);
+          err => {
+            expect(err).to.not.exist;
             test.equal(1, started.length);
             if (started[0].command.readConcern)
               test.deepEqual({ level: 'local' }, started[0].command.readConcern);
@@ -4161,9 +4160,7 @@ describe('Cursor', function() {
             test.equal(5, started[0].command.skip);
             test.equal(5, started[0].command.limit);
 
-            listener.uninstrument();
-
-            client.close(done);
+            done();
           }
         );
       });

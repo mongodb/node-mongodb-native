@@ -12,11 +12,7 @@ describe('Multiple Databases', function() {
    * @ignore
    */
   it('shouldCorrectlyEmitErrorOnAllDbsOnPoolClose', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
+    metadata: { requires: { topology: 'single', unifiedTopology: false } },
     test: function(done) {
       if (process.platform !== 'linux') {
         var configuration = this.configuration;
@@ -30,7 +26,6 @@ describe('Multiple Databases', function() {
           test.ok(err !== null);
           numberOfCloses = numberOfCloses + 1;
         });
-
         client.connect(function(err, client) {
           var db = client.db(configuration.db);
 
