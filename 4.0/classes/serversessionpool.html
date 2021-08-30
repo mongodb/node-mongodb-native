@@ -55,7 +55,7 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="ServerSessionPool.html">ServerSessionPool</a>
+					<a href="serversessionpool.html">ServerSessionPool</a>
 				</li>
 			</ul>
 			<h1>Class ServerSessionPool</h1>
@@ -92,22 +92,22 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="ServerSessionPool.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="serversessionpool.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ServerSessionPool.html#sessions" class="tsd-kind-icon">sessions</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ServerSessionPool.html#topology" class="tsd-kind-icon">topology</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="serversessionpool.html#sessions" class="tsd-kind-icon">sessions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="serversessionpool.html#topology" class="tsd-kind-icon">topology</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ServerSessionPool.html#acquire" class="tsd-kind-icon">acquire</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ServerSessionPool.html#endAllPooledSessions" class="tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ServerSessionPool.html#release" class="tsd-kind-icon">release</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="serversessionpool.html#acquire" class="tsd-kind-icon">acquire</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="serversessionpool.html#endallpooledsessions" class="tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="serversessionpool.html#release" class="tsd-kind-icon">release</a></li>
 							</ul>
 						</section>
 					</div>
@@ -119,22 +119,22 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Server<wbr>Session<wbr>Pool<span class="tsd-signature-symbol">(</span>topology<span class="tsd-signature-symbol">: </span><a href="Topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ServerSessionPool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Server<wbr>Session<wbr>Pool<span class="tsd-signature-symbol">(</span>topology<span class="tsd-signature-symbol">: </span><a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="serversessionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L693">src/sessions.ts:693</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L691">src/sessions.ts:691</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>topology: <a href="Topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a></h5>
+									<h5>topology: <a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="ServerSessionPool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="serversessionpool.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSessionPool</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -144,20 +144,20 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="sessions" class="tsd-anchor"></a>
 					<h3>sessions</h3>
-					<div class="tsd-signature tsd-kind-icon">sessions<span class="tsd-signature-symbol">:</span> <a href="ServerSession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a><span class="tsd-signature-symbol">[]</span></div>
+					<div class="tsd-signature tsd-kind-icon">sessions<span class="tsd-signature-symbol">:</span> <a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L691">src/sessions.ts:691</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L691">src/sessions.ts:691</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="topology" class="tsd-anchor"></a>
 					<h3>topology</h3>
-					<div class="tsd-signature tsd-kind-icon">topology<span class="tsd-signature-symbol">:</span> <a href="Topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a></div>
+					<div class="tsd-signature tsd-kind-icon">topology<span class="tsd-signature-symbol">:</span> <a href="topology.html" class="tsd-signature-type" data-tsd-kind="Class">Topology</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L690">src/sessions.ts:690</a></li>
+							<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L690">src/sessions.ts:690</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -168,13 +168,13 @@
 					<a name="acquire" class="tsd-anchor"></a>
 					<h3>acquire</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">acquire<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ServerSession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></li>
+						<li class="tsd-signature tsd-kind-icon">acquire<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L729">src/sessions.ts:729</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L729">src/sessions.ts:729</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -185,21 +185,21 @@
 									pool and returned. If no non-stale session is found, a new ServerSession is created.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="ServerSession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="endAllPooledSessions" class="tsd-anchor"></a>
+					<a name="endallpooledsessions" class="tsd-anchor"></a>
 					<h3>end<wbr>All<wbr>Pooled<wbr>Sessions</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">?: </span><a href="../modules.html#Callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">?: </span><a href="../modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L703">src/sessions.ts:703</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L703">src/sessions.ts:703</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -210,7 +210,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> callback: <a href="../modules.html#Callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> callback: <a href="../modules.html#callback" class="tsd-signature-type" data-tsd-kind="Type alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -221,13 +221,13 @@
 					<a name="release" class="tsd-anchor"></a>
 					<h3>release</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">release<span class="tsd-signature-symbol">(</span>session<span class="tsd-signature-symbol">: </span><a href="ServerSession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">release<span class="tsd-signature-symbol">(</span>session<span class="tsd-signature-symbol">: </span><a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/ac526055/src/sessions.ts#L749">src/sessions.ts:749</a></li>
+									<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/b67af3cd/src/sessions.ts#L749">src/sessions.ts:749</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -240,7 +240,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>session: <a href="ServerSession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></h5>
+									<h5>session: <a href="serversession.html" class="tsd-signature-type" data-tsd-kind="Class">ServerSession</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The session to release to the pool</p>
 									</div>
@@ -265,25 +265,25 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class">
-						<a href="ServerSessionPool.html" class="tsd-kind-icon">Server<wbr>Session<wbr>Pool</a>
+						<a href="serversessionpool.html" class="tsd-kind-icon">Server<wbr>Session<wbr>Pool</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="serversessionpool.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#sessions" class="tsd-kind-icon">sessions</a>
+								<a href="serversessionpool.html#sessions" class="tsd-kind-icon">sessions</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#topology" class="tsd-kind-icon">topology</a>
+								<a href="serversessionpool.html#topology" class="tsd-kind-icon">topology</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#acquire" class="tsd-kind-icon">acquire</a>
+								<a href="serversessionpool.html#acquire" class="tsd-kind-icon">acquire</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#endAllPooledSessions" class="tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions</a>
+								<a href="serversessionpool.html#endallpooledsessions" class="tsd-kind-icon">end<wbr>All<wbr>Pooled<wbr>Sessions</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="ServerSessionPool.html#release" class="tsd-kind-icon">release</a>
+								<a href="serversessionpool.html#release" class="tsd-kind-icon">release</a>
 							</li>
 						</ul>
 					</li>

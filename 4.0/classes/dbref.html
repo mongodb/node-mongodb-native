@@ -55,7 +55,7 @@
 					<a href="../modules.html">mongodb</a>
 				</li>
 				<li>
-					<a href="DBRef.html">DBRef</a>
+					<a href="dbref.html">DBRef</a>
 				</li>
 			</ul>
 			<h1>Class DBRef</h1>
@@ -87,23 +87,23 @@
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-external"><a href="dbref.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#_bsontype" class="tsd-kind-icon">_bsontype</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#collection" class="tsd-kind-icon">collection</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#db" class="tsd-kind-icon">db</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#fields" class="tsd-kind-icon">fields</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#oid" class="tsd-kind-icon">oid</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="dbref.html#_bsontype" class="tsd-kind-icon">_bsontype</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="dbref.html#collection" class="tsd-kind-icon">collection</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="dbref.html#db" class="tsd-kind-icon">db</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="dbref.html#fields" class="tsd-kind-icon">fields</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-external"><a href="dbref.html#oid" class="tsd-kind-icon">oid</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="DBRef.html#inspect" class="tsd-kind-icon">inspect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="dbref.html#inspect" class="tsd-kind-icon">inspect</a></li>
 							</ul>
 						</section>
 					</div>
@@ -115,13 +115,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">new DBRef<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, oid<span class="tsd-signature-symbol">: </span><a href="ObjectId.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a>, db<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, fields<span class="tsd-signature-symbol">?: </span><a href="../interfaces/Document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="DBRef.html" class="tsd-signature-type" data-tsd-kind="Class">DBRef</a></li>
+						<li class="tsd-signature tsd-kind-icon">new DBRef<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, oid<span class="tsd-signature-symbol">: </span><a href="objectid.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a>, db<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, fields<span class="tsd-signature-symbol">?: </span><a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dbref.html" class="tsd-signature-type" data-tsd-kind="Class">DBRef</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in node_modules/bson/bson.d.ts:242</li>
+									<li>Defined in node_modules/bson/bson.d.ts:236</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -129,32 +129,26 @@
 								<li>
 									<h5>collection: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>the collection name.</p>
-										</div>
+										<p>the collection name.</p>
 									</div>
 								</li>
 								<li>
-									<h5>oid: <a href="ObjectId.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a></h5>
+									<h5>oid: <a href="objectid.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>the reference ObjectId.</p>
-										</div>
+										<p>the reference ObjectId.</p>
 									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> db: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>optional db name, if omitted the reference is local to the current db.</p>
-										</div>
+										<p>optional db name, if omitted the reference is local to the current db.</p>
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> fields: <a href="../interfaces/Document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> fields: <a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="DBRef.html" class="tsd-signature-type" data-tsd-kind="Class">DBRef</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="dbref.html" class="tsd-signature-type" data-tsd-kind="Class">DBRef</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -194,7 +188,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-external">
 					<a name="fields" class="tsd-anchor"></a>
 					<h3>fields</h3>
-					<div class="tsd-signature tsd-kind-icon">fields<span class="tsd-signature-symbol">:</span> <a href="../interfaces/Document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
+					<div class="tsd-signature tsd-kind-icon">fields<span class="tsd-signature-symbol">:</span> <a href="../interfaces/document.html" class="tsd-signature-type" data-tsd-kind="Interface">Document</a></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in node_modules/bson/bson.d.ts:236</li>
@@ -204,7 +198,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-external">
 					<a name="oid" class="tsd-anchor"></a>
 					<h3>oid</h3>
-					<div class="tsd-signature tsd-kind-icon">oid<span class="tsd-signature-symbol">:</span> <a href="ObjectId.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a></div>
+					<div class="tsd-signature tsd-kind-icon">oid<span class="tsd-signature-symbol">:</span> <a href="objectid.html" class="tsd-signature-type" data-tsd-kind="Class">ObjectId</a></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in node_modules/bson/bson.d.ts:234</li>
@@ -246,28 +240,28 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-is-external">
-						<a href="DBRef.html" class="tsd-kind-icon">DBRef</a>
+						<a href="dbref.html" class="tsd-kind-icon">DBRef</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="dbref.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#_bsontype" class="tsd-kind-icon">_bsontype</a>
+								<a href="dbref.html#_bsontype" class="tsd-kind-icon">_bsontype</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#collection" class="tsd-kind-icon">collection</a>
+								<a href="dbref.html#collection" class="tsd-kind-icon">collection</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#db" class="tsd-kind-icon">db</a>
+								<a href="dbref.html#db" class="tsd-kind-icon">db</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#fields" class="tsd-kind-icon">fields</a>
+								<a href="dbref.html#fields" class="tsd-kind-icon">fields</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#oid" class="tsd-kind-icon">oid</a>
+								<a href="dbref.html#oid" class="tsd-kind-icon">oid</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
-								<a href="DBRef.html#inspect" class="tsd-kind-icon">inspect</a>
+								<a href="dbref.html#inspect" class="tsd-kind-icon">inspect</a>
 							</li>
 						</ul>
 					</li>
