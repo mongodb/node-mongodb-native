@@ -50,6 +50,7 @@ connect.Int32 = core.BSON.Int32;
 connect.Long = core.BSON.Long;
 connect.MinKey = core.BSON.MinKey;
 connect.MaxKey = core.BSON.MaxKey;
+/** @deprecated Please use `ObjectId` */
 connect.ObjectID = core.BSON.ObjectID;
 connect.ObjectId = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
