@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.12](https://github.com/mongodb/node-mongodb-native/compare/v3.6.11...v3.6.12) (2021-08-30)
+
+
+### Bug Fixes
+
+* **NODE-3487:** check for nullish aws mechanism property ([#2957](https://github.com/mongodb/node-mongodb-native/issues/2957)) ([5902b4c](https://github.com/mongodb/node-mongodb-native/commit/5902b4c13a977c659af94b1fbcbcfbe5e7ca4db4))
+* **NODE-3528:** add support for snappy v7 ([#2947](https://github.com/mongodb/node-mongodb-native/issues/2947)) ([54f5c2d](https://github.com/mongodb/node-mongodb-native/commit/54f5c2d682828bc751242cf4e90ea73f0342c842))
+
 ### [3.6.11](https://github.com/mongodb/node-mongodb-native/compare/v3.6.10...v3.6.11) (2021-08-05)
 
 
