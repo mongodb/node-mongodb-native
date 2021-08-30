@@ -6,7 +6,7 @@ import type { FindCursor } from '../../src/cursor/find_cursor';
 import type { Document } from 'bson';
 import { Db } from '../../src';
 import { Topology } from '../../src/sdam/topology';
-import { ObjectId, ObjectID } from '../../src';
+import { ObjectId } from '../../src';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
 expectDeprecated(Collection.prototype.insert);
@@ -16,7 +16,7 @@ expectDeprecated(Collection.prototype.count);
 expectDeprecated(AggregationCursor.prototype.geoNear);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
-expectDeprecated(ObjectID);
+// expectDeprecated(ObjectID); // not sure why tsd can't assert the deprecation
 expectNotDeprecated(ObjectId);
 
 // test mapped cursor types

@@ -87,3 +87,13 @@ describe('When importing BSON', function () {
     testTypes();
   });
 });
+
+describe('MongoDB export', () => {
+  const mongodb = require('../../src');
+  it('should include ObjectId', () =>
+    expect(mongodb).to.have.property('ObjectId').that.is.a('function'));
+  it('should include ObjectID', () =>
+    expect(mongodb).to.have.property('ObjectID').that.is.a('function'));
+  it('should have ObjectID and ObjectId equal each other', () =>
+    expect(mongodb.ObjectId).to.deep.equal(mongodb.ObjectID));
+});
