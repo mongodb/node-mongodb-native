@@ -309,13 +309,19 @@ operations.set('find', async ({ entities, operation }) => {
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments;
-  return collection.findOneAndReplace(filter, replacement, translateOptions(opts));
+  return (await collection.findOneAndReplace(filter, replacement, translateOptions(opts))).value;
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...opts } = operation.arguments;
   return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
+});
+
+operations.set('findOneAndDelete', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, ...opts } = operation.arguments;
+  return (await collection.findOneAndDelete(filter, opts)).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {
@@ -465,11 +471,6 @@ operations.set('distinct', async ({ entities, operation }) => {
 operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   return collection.estimatedDocumentCount(operation.arguments);
-});
-
-operations.set('findOneAndDelete', async ({ entities, operation }) => {
-  const collection = entities.getEntity('collection', operation.object);
-  return collection.findOneAndDelete(operation.arguments.filter);
 });
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
