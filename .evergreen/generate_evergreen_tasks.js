@@ -154,7 +154,8 @@ TASKS.push(
     tags: ['auth', 'kerberos', 'legacy'],
     commands: [
       { func: 'install dependencies' },
-      { func: 'run kerberos tests',
+      {
+        func: 'run kerberos tests',
         vars: {
           UNIFIED: 0
         }
@@ -166,7 +167,8 @@ TASKS.push(
     tags: ['auth', 'kerberos', 'unified'],
     commands: [
       { func: 'install dependencies' },
-      { func: 'run kerberos tests',
+      {
+        func: 'run kerberos tests',
         vars: {
           UNIFIED: 1
         }
@@ -325,7 +327,7 @@ OCSP_VERSIONS.forEach(VERSION => {
 const AWS_AUTH_TASKS = [];
 
 AWS_AUTH_VERSIONS.forEach(VERSION => {
-  const name = (ex) => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
+  const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   // AWS_AUTH_TASKS.push(name);
 
   const aws_funcs = [
@@ -354,10 +356,10 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
       { func: 'setup aws env' },
       fn
     ]
-  }))
+  }));
 
   TASKS.push(...aws_tasks);
-  AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name))
+  AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name));
 });
 
 const BUILD_VARIANTS = [];
@@ -371,31 +373,33 @@ const getTaskList = (() => {
       return memo[key];
     }
     const taskList = BASE_TASKS.concat(TASKS);
-    const ret = taskList.filter(task => {
-      if (task.name.match(/^aws/)) return false;
+    const ret = taskList
+      .filter(task => {
+        if (task.name.match(/^aws/)) return false;
 
-      // skip unsupported tasks on windows
-      if (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length) {
-        return false;
-      }
+        // skip unsupported tasks on windows
+        if (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length) {
+          return false;
+        }
 
-      const tasksWithVars = task.commands.filter(task => !!task.vars);
-      if (!tasksWithVars.length) {
-        return true;
-      }
+        const tasksWithVars = task.commands.filter(task => !!task.vars);
+        if (!tasksWithVars.length) {
+          return true;
+        }
 
-      // kerberos tests don't require mongo orchestration
-      if (task.tags.filter(tag => tag === 'kerberos').length) {
-        return true;
-      }
+        // kerberos tests don't require mongo orchestration
+        if (task.tags.filter(tag => tag === 'kerberos').length) {
+          return true;
+        }
 
-      const { VERSION } = tasksWithVars[0].vars || {};
-      if (VERSION === 'latest') {
-        return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
-      }
+        const { VERSION } = tasksWithVars[0].vars || {};
+        if (VERSION === 'latest') {
+          return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
+        }
 
-      return semver.satisfies(semver.coerce(VERSION), mongoVersion);
-    }).map(x => x.name);
+        return semver.satisfies(semver.coerce(VERSION), mongoVersion);
+      })
+      .map(x => x.name);
 
     memo[key] = ret;
     return ret;
@@ -448,38 +452,48 @@ SINGLETON_TASKS.push({
   ]
 });
 
-SINGLETON_TASKS.push({
-  name: 'run-custom-csfle-tests',
-  tags: ['run-custom-csfle-tests'],
+const oneOffFuncs = [
+  { func: 'run custom csfle tests', vars: { UNIFIED: 1, NODE_LTS_NAME: 'erbium' } },
+  { func: 'run custom snappy tests', vars: { UNIFIED: 1, NODE_LTS_NAME: 'erbium' } }
+];
+
+const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
+  name: `${oneOffFunc.func.split(' ').join('-')}`,
+  tags: ['run-custom-dependency-tests'],
   commands: [
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'erbium',
-      },
+        NODE_LTS_NAME: 'erbium'
+      }
     },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
-        VERSION: '4.4',
+        VERSION: '5.0',
         TOPOLOGY: 'server'
       }
     },
-    { func: 'run custom csfle tests' }
+    oneOffFunc
   ]
-});
+}));
 
-BUILD_VARIANTS.push({
-  name: 'lint',
-  display_name: 'lint',
-  run_on: 'rhel70',
-  tasks: ['run-checks']
-}, {
-  name: 'ubuntu1804-custom-csfle-tests',
-  display_name: 'Custom FLE Version Test',
-  run_on: 'ubuntu1804-test',
-  tasks: ['run-custom-csfle-tests']
-});
+SINGLETON_TASKS.push(...oneOffFuncAsTasks);
+
+BUILD_VARIANTS.push(
+  {
+    name: 'lint',
+    display_name: 'lint',
+    run_on: 'rhel70',
+    tasks: ['run-checks']
+  },
+  {
+    name: 'ubuntu1804-custom-dependency-tests',
+    display_name: 'Custom Dependency Version Test',
+    run_on: 'ubuntu1804-large',
+    tasks: oneOffFuncAsTasks.map(({ name }) => name)
+  }
+);
 
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
@@ -493,7 +507,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS, TASKS, SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.safeDump(fileData, { lineWidth: 120 }), 'utf8');

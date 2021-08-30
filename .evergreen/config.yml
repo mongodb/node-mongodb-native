@@ -483,6 +483,17 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           UNIFIED=${UNIFIED} MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run custom snappy tests:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          MONGODB_URI: '${MONGODB_URI}'
+          PROJECT_DIRECTORY: '${PROJECT_DIRECTORY}'
+        binary: bash
+        args:
+          - '${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh'
   upload test results:
     - command: attach.xunit_results
       params:
@@ -534,6 +545,78 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-5.0-server
+    tags:
+      - '5.0'
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run tests
+  - name: test-5.0-replica_set
+    tags:
+      - '5.0'
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: replica_set
+      - func: run tests
+  - name: test-5.0-sharded_cluster
+    tags:
+      - '5.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: sharded_cluster
+      - func: run tests
+  - name: test-5.0-server-unified
+    tags:
+      - '5.0'
+      - server-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-5.0-replica_set-unified
+    tags:
+      - '5.0'
+      - replica_set-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: replica_set
+      - func: run tests
+        vars:
+          UNIFIED: 1
+  - name: test-5.0-sharded_cluster-unified
+    tags:
+      - '5.0'
+      - sharded_cluster-unified
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
           TOPOLOGY: sharded_cluster
       - func: run tests
         vars:
@@ -1175,6 +1258,28 @@ tasks:
           SSL: ssl
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-tls-support-5.0
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
+  - name: test-tls-support-4.4
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-tls-support-4.2
     tags:
       - tls-support
@@ -1278,6 +1383,102 @@ tasks:
         vars:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-valid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-invalid-cert-server-staples
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-valid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-valid-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-invalid-cert-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-soft-fail
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 1
+  - name: test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: run-revoked-ocsp-server
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run-ocsp-test
+        vars:
+          OCSP_TLS_SHOULD_SUCCEED: 0
+  - name: test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+    tags:
+      - ocsp
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run-ocsp-test
         vars:
@@ -1450,6 +1651,78 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-5.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
@@ -1532,16 +1805,34 @@ tasks:
       - func: run checks
   - name: run-custom-csfle-tests
     tags:
-      - run-custom-csfle-tests
+      - run-custom-dependency-tests
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: '4.4'
+          VERSION: '5.0'
           TOPOLOGY: server
       - func: run custom csfle tests
+        vars:
+          UNIFIED: 1
+          NODE_LTS_NAME: erbium
+  - name: run-custom-snappy-tests
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+      - func: run custom snappy tests
+        vars:
+          UNIFIED: 1
+          NODE_LTS_NAME: erbium
 buildvariants:
   - name: macos-1014-fermium
     display_name: macOS 10.14 Node Fermium
@@ -1552,6 +1843,12 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-5.0-server-unified
+      - test-5.0-replica_set-unified
+      - test-5.0-sharded_cluster-unified
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
@@ -1606,6 +1903,8 @@ buildvariants:
       - test-auth-kerberos-unified
       - test-auth-ldap
       - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
@@ -1614,6 +1913,13 @@ buildvariants:
       - test-latest-ocsp-soft-fail
       - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
       - test-4.4-ocsp-valid-cert-server-staples
       - test-4.4-ocsp-invalid-cert-server-staples
       - test-4.4-ocsp-valid-cert-server-does-not-staple
@@ -1660,6 +1966,12 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-5.0-server-unified
+      - test-5.0-replica_set-unified
+      - test-5.0-sharded_cluster-unified
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
@@ -1714,6 +2026,8 @@ buildvariants:
       - test-auth-kerberos-unified
       - test-auth-ldap
       - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
@@ -1722,6 +2036,13 @@ buildvariants:
       - test-latest-ocsp-soft-fail
       - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
       - test-4.4-ocsp-valid-cert-server-staples
       - test-4.4-ocsp-invalid-cert-server-staples
       - test-4.4-ocsp-valid-cert-server-does-not-staple
@@ -1845,6 +2166,12 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-5.0-server-unified
+      - test-5.0-replica_set-unified
+      - test-5.0-sharded_cluster-unified
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
@@ -1887,6 +2214,8 @@ buildvariants:
       - test-auth-kerberos-unified
       - test-auth-ldap
       - test-tls-support-latest
+      - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
@@ -1895,6 +2224,13 @@ buildvariants:
       - test-latest-ocsp-soft-fail
       - test-latest-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-latest-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-valid-cert-server-staples
+      - test-5.0-ocsp-invalid-cert-server-staples
+      - test-5.0-ocsp-valid-cert-server-does-not-staple
+      - test-5.0-ocsp-invalid-cert-server-does-not-staple
+      - test-5.0-ocsp-soft-fail
+      - test-5.0-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
+      - test-5.0-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
       - test-4.4-ocsp-valid-cert-server-staples
       - test-4.4-ocsp-invalid-cert-server-staples
       - test-4.4-ocsp-valid-cert-server-does-not-staple
@@ -2090,11 +2426,12 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
-  - name: ubuntu1804-custom-csfle-tests
-    display_name: Custom FLE Version Test
-    run_on: ubuntu1804-test
+  - name: ubuntu1804-custom-dependency-tests
+    display_name: Custom Dependency Version Test
+    run_on: ubuntu1804-large
     tasks:
       - run-custom-csfle-tests
+      - run-custom-snappy-tests
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-test
@@ -2107,6 +2444,12 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-5.0-auth-test-run-aws-ECS-auth-test
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
