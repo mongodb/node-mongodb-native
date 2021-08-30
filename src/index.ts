@@ -29,6 +29,13 @@ export {
   Map
 } from './bson';
 
+import { ObjectId } from 'bson';
+/**
+ * @public
+ * @deprecated Please use `ObjectId`
+ */
+export const ObjectID = ObjectId;
+
 export {
   MongoError,
   MongoServerError,
