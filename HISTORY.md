@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.7.0](https://github.com/mongodb/node-mongodb-native/compare/v3.6.10...v3.7.0) (2021-08-31)
+
+
+### Features
+
+* **NODE-3191:** backport versioned api ([#2850](https://github.com/mongodb/node-mongodb-native/issues/2850)) ([93a47fd](https://github.com/mongodb/node-mongodb-native/commit/93a47fdbd92a27f0821cbcf59a951d581bfec9c0))
+
+
+### Bug Fixes
+
+* **NODE-3290:** versioned api validation and tests ([#2869](https://github.com/mongodb/node-mongodb-native/issues/2869)) ([238a4b0](https://github.com/mongodb/node-mongodb-native/commit/238a4b0e1adbf45f9e08b96ebb189bbde22f9182))
+* **NODE-3377:** driver should allow arbitrary explain levels ([#2961](https://github.com/mongodb/node-mongodb-native/issues/2961)) ([96c8ab4](https://github.com/mongodb/node-mongodb-native/commit/96c8ab41e38eb5a4c012b4cd5df3ab8c59a5d9fe))
+* **NODE-3463:** pass explain error through to callback ([#2949](https://github.com/mongodb/node-mongodb-native/issues/2949)) ([e5975af](https://github.com/mongodb/node-mongodb-native/commit/e5975af98615b2e0ef82b0031d4ec687d5a85109))
+* versioned api low node compat fix ([#2970](https://github.com/mongodb/node-mongodb-native/issues/2970)) ([1a76618](https://github.com/mongodb/node-mongodb-native/commit/1a7661885a5ec29a4d9418829439232e080ed983))
+
 ### [3.6.12](https://github.com/mongodb/node-mongodb-native/compare/v3.6.11...v3.6.12) (2021-08-30)
 
 
