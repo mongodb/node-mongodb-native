@@ -120,8 +120,8 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     return this;
   }
 
-  /** Add a out stage to the aggregation pipeline */
-  out($out: number): this {
+  /** Add an out stage to the aggregation pipeline */
+  out($out: string): this {
     assertUninitialized(this);
     this[kPipeline].push({ $out });
     return this;
