@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import type { CollectionOrDatabaseOptions, RunOnRequirement, Document } from './schema';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { MongoClient } from '../../../index';
-import { isDeepStrictEqual } from 'util';
 import { TestConfiguration } from './runner';
 
 export async function topologySatisfies(
@@ -41,7 +40,11 @@ export async function topologySatisfies(
     if (!config.parameters) throw new Error('Configuration does not have server parameters');
     for (const [name, value] of Object.entries(r.serverParameters)) {
       if (name in config.parameters) {
-        ok &&= isDeepStrictEqual(config.parameters[name], value);
+        try {
+          expect(config.parameters[name]).to.deep.equal(value);
+        } catch (_err) {
+          ok = false;
+        }
       }
     }
   }
