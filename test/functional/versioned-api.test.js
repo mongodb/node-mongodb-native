@@ -3,12 +3,13 @@
 const expect = require('chai').expect;
 const loadSpecTests = require('../spec/index').loadSpecTests;
 const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
-const ServerApiVersion = require('../../lib/core').ServerApiVersion;
+const ValidServerApiVersions = require('../../lib/core').ValidServerApiVersions;
 
 describe('Versioned API', function() {
+  const validVersions = ValidServerApiVersions;
+
   describe('client option validation', function() {
     it('is supported as a client option when it is a valid ServerApiVersion string', function() {
-      const validVersions = Object.values(ServerApiVersion);
       expect(validVersions.length).to.be.at.least(1);
       for (const version of validVersions) {
         const client = this.configuration.newClient('mongodb://localhost/', {
@@ -21,7 +22,6 @@ describe('Versioned API', function() {
     });
 
     it('is supported as a client option when it is an object with a valid version property', function() {
-      const validVersions = Object.values(ServerApiVersion);
       expect(validVersions.length).to.be.at.least(1);
       for (const version of validVersions) {
         const client = this.configuration.newClient('mongodb://localhost/', {
