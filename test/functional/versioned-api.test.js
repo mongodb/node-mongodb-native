@@ -3,11 +3,9 @@
 const expect = require('chai').expect;
 const loadSpecTests = require('../spec/index').loadSpecTests;
 const runUnifiedTest = require('./unified-spec-runner/runner').runUnifiedTest;
-const ValidServerApiVersions = require('../../lib/core').ValidServerApiVersions;
+const validVersions = require('../../lib/core').ValidServerApiVersions;
 
 describe('Versioned API', function() {
-  const validVersions = ValidServerApiVersions;
-
   describe('client option validation', function() {
     it('is supported as a client option when it is a valid ServerApiVersion string', function() {
       expect(validVersions.length).to.be.at.least(1);
