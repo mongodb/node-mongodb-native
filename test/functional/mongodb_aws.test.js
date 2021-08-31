@@ -46,7 +46,7 @@ describe('MONGODB-AWS', function() {
       authMechanismProperties: { AWS_SESSION_TOKEN: '' }
     });
     expect(client)
-      .to.have.nested.property('options.credentials.mechanismProperties.AWS_SESSION_TOKEN')
+      .to.have.nested.property('s.options.authMechanismProperties.AWS_SESSION_TOKEN')
       .that.equals('');
   });
 });

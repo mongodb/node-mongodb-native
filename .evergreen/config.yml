@@ -95,6 +95,9 @@ functions:
             cat <<EOT > prepare_client_encryption.sh
             export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
             export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+            export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
+            export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+            export AWS_DEFAULT_REGION='us-east-1'
           EOT
           fi
     - command: shell.exec
@@ -549,39 +552,6 @@ tasks:
       - func: run tests
         vars:
           UNIFIED: 1
-  - name: test-5.0-server
-    tags:
-      - '5.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-      - func: run tests
-  - name: test-5.0-replica_set
-    tags:
-      - '5.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-      - func: run tests
-  - name: test-5.0-sharded_cluster
-    tags:
-      - '5.0'
-      - sharded_cluster
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: sharded_cluster
-      - func: run tests
   - name: test-5.0-server-unified
     tags:
       - '5.0'
@@ -1843,9 +1813,6 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
       - test-5.0-server-unified
       - test-5.0-replica_set-unified
       - test-5.0-sharded_cluster-unified
@@ -1966,9 +1933,6 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
       - test-5.0-server-unified
       - test-5.0-replica_set-unified
       - test-5.0-sharded_cluster-unified
@@ -2166,9 +2130,6 @@ buildvariants:
       - test-latest-server-unified
       - test-latest-replica_set-unified
       - test-latest-sharded_cluster-unified
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
       - test-5.0-server-unified
       - test-5.0-replica_set-unified
       - test-5.0-sharded_cluster-unified
