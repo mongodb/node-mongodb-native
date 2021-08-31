@@ -1239,6 +1239,17 @@ tasks:
           SSL: ssl
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-tls-support-4.4
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-tls-support-4.2
     tags:
       - tls-support
@@ -1860,6 +1871,7 @@ buildvariants:
       - test-auth-ldap
       - test-tls-support-latest
       - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
@@ -1979,6 +1991,7 @@ buildvariants:
       - test-auth-ldap
       - test-tls-support-latest
       - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples
@@ -2163,6 +2176,7 @@ buildvariants:
       - test-auth-ldap
       - test-tls-support-latest
       - test-tls-support-5.0
+      - test-tls-support-4.4
       - test-tls-support-4.2
       - test-latest-ocsp-valid-cert-server-staples
       - test-latest-ocsp-invalid-cert-server-staples

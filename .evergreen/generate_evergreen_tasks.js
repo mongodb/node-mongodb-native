@@ -9,7 +9,7 @@ const LEGACY_MONGODB_VERSIONS = new Set(['4.4', '4.2', '4.0', '3.6', '3.4', '3.2
 const MONGODB_VERSIONS = ['latest', '5.0'].concat(Array.from(LEGACY_MONGODB_VERSIONS));
 const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
 const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
-const TLS_VERSIONS = ['latest', '5.0', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
+const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2']; // also test on 4.2 because 4.4+ currently skipped on windows
 const NODE_VERSIONS = ['fermium', 'erbium', 'dubnium', 'carbon', 'boron', 'argon'];
 const LEGACY_TOPOLOGIES = new Set(['server', 'replica_set', 'sharded_cluster']);
 const UNIFIED_TOPOLOGIES = Array.from(LEGACY_TOPOLOGIES).map(topology => `${topology}-unified`);
