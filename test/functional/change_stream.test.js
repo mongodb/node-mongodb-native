@@ -1806,7 +1806,7 @@ describe('Change Streams', function () {
           if (changeStream[kMode] === 'emitter') {
             // shutting down the client will end the session, if this happens before
             // the stream initialization aggregate operation is processed, it will throw
-            // sa ession ended error, which can't be caught if we end the stream, so
+            // a session ended error, which can't be caught if we end the stream, so
             // we need to wait for the stream to initialize before closing all the things
             await initPromise;
           }
