@@ -37,5 +37,11 @@ expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
 
 const builtCursor = coll.aggregate();
-expectType<AggregationCursor<Document>>(builtCursor.out('string')); // should allow string values for the out helper
-expectError(builtCursor.out(1)); // should error on non-string values
+// should allow string values for the out helper
+expectType<AggregationCursor<Document>>(builtCursor.out('collection'));
+// should also allow an object specifying db/coll (as of MongoDB 4.4)
+expectType<AggregationCursor<Document>>(builtCursor.out({ db: 'db', coll: 'collection' }));
+// should error on other object shapes
+expectError(builtCursor.out({ other: 'shape' }));
+// should error on non-object, non-string values
+expectError(builtCursor.out(1));
