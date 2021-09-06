@@ -57,7 +57,7 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
 export type Filter<TSchema> = {
-  [P in keyof WithId<TSchema>]?: Condition<WithId<TSchema>[P]>;
+  [P in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<PropertyType<WithId<TSchema>, P>>;
 } & RootFilterOperators<WithId<TSchema>>;
 
 /** @public */
@@ -423,3 +423,48 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 
 /** @public */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
+
+/**
+ * Helper types for dot-notation filter attributes
+ */
+
+/** @public */
+export type Join<T extends unknown[], D extends string> = T extends []
+  ? ''
+  : T extends [string | number]
+  ? `${T[0]}`
+  : T extends [string | number, ...infer R]
+  ? `${T[0]}${D}${Join<R, D>}`
+  : string | number;
+
+/** @public */
+export type PropertyType<Type, Property extends string> = string extends Property
+  ? unknown
+  : Property extends keyof Type
+  ? Type[Property]
+  : Property extends `${infer Key}.${infer Rest}`
+  ? Key extends `${number}`
+    ? Type extends Array<infer ArrayType>
+      ? PropertyType<ArrayType, Rest>
+      : Type extends ReadonlyArray<infer ArrayType>
+      ? PropertyType<ArrayType, Rest>
+      : unknown
+    : Key extends keyof Type
+    ? PropertyType<Type[Key], Rest>
+    : unknown
+  : unknown;
+
+// We dont't support nested circular references
+/** @public */
+export type NestedPaths<Type> = Type extends string | number | boolean | Date | ObjectId
+  ? []
+  : Type extends Array<infer ArrayType>
+  ? [number, ...NestedPaths<ArrayType>]
+  : Type extends ReadonlyArray<infer ArrayType>
+  ? [number, ...NestedPaths<ArrayType>]
+  : // eslint-disable-next-line @typescript-eslint/ban-types
+  Type extends object
+  ? {
+      [Key in Extract<keyof Type, string>]: [Key, ...NestedPaths<Type[Key]>];
+    }[Extract<keyof Type, string>]
+  : [];

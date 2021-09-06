@@ -16,6 +16,11 @@ const db = client.db('test');
  * Test the generic Filter using collection.find<T>() method
  */
 
+interface HumanModel {
+  _id: ObjectId;
+  name: string;
+}
+
 // a collection model for all possible MongoDB BSON types and TypeScript types
 interface PetModel {
   _id: ObjectId; // ObjectId field
@@ -24,13 +29,27 @@ interface PetModel {
   age: number; // number field
   type: 'dog' | 'cat' | 'fish'; // union field
   isCute: boolean; // boolean field
-  bestFriend?: PetModel; // object field (Embedded/Nested Documents)
+  bestFriend?: HumanModel; // object field (Embedded/Nested Documents)
   createdAt: Date; // date field
   treats: string[]; // array of string
   playTimePercent: Decimal128; // bson Decimal128 type
-  readonly friends?: ReadonlyArray<PetModel>; // readonly array of objects
-  playmates?: PetModel[]; // writable array of objects
+  readonly friends?: ReadonlyArray<HumanModel>; // readonly array of objects
+  playmates?: HumanModel[]; // writable array of objects
+  // Object with multiple nested levels
+  meta?: {
+    updatedAt?: Date;
+    deep?: {
+      nested?: {
+        level?: number;
+      };
+    };
+  };
 }
+
+const john = {
+  _id: new ObjectId('577fa2d90c4cc47e31cf4b6a'),
+  name: 'John'
+};
 
 const spot = {
   _id: new ObjectId('577fa2d90c4cc47e31cf4b6f'),
@@ -83,14 +102,29 @@ expectNotType<Filter<PetModel>>({ age: [23, 43] });
 
 /// it should query __nested document__ fields only by exact match
 // TODO: we currently cannot enforce field order but field order is important for mongo
-await collectionT.find({ bestFriend: spot }).toArray();
+await collectionT.find({ bestFriend: john }).toArray();
 /// nested documents query should contain all required fields
-expectNotType<Filter<PetModel>>({ bestFriend: { family: 'Andersons' } });
+expectNotType<Filter<PetModel>>({ bestFriend: { name: 'Andersons' } });
 /// it should not accept wrong types for nested document fields
 expectNotType<Filter<PetModel>>({ bestFriend: 21 });
 expectNotType<Filter<PetModel>>({ bestFriend: 'Andersons' });
 expectNotType<Filter<PetModel>>({ bestFriend: [spot] });
-expectNotType<Filter<PetModel>>({ bestFriend: [{ family: 'Andersons' }] });
+expectNotType<Filter<PetModel>>({ bestFriend: [{ name: 'Andersons' }] });
+
+/// it should query __nested document__ fields using dot-notation
+collectionT.find({ 'meta.updatedAt': new Date() });
+collectionT.find({ 'meta.deep.nested.level': 123 });
+collectionT.find({ 'friends.0.name': 'John' });
+collectionT.find({ 'playmates.0.name': 'John' });
+/// it should not accept wrong types for nested document fields
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 123 });
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': true });
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 'now' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': '123' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': true });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': new Date() });
+expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
+expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
 
 /// it should query __array__ fields by exact match
 await collectionT.find({ treats: ['kibble', 'bone'] }).toArray();
@@ -232,7 +266,3 @@ await collectionT.find({ playmates: { $elemMatch: { name: 'MrMeow' } } }).toArra
 expectNotType<Filter<PetModel>>({ name: { $all: ['world', 'world'] } });
 expectNotType<Filter<PetModel>>({ age: { $elemMatch: [1, 2] } });
 expectNotType<Filter<PetModel>>({ type: { $size: 2 } });
-
-// dot key case that shows it is assignable even when the referenced key is the wrong type
-expectAssignable<Filter<PetModel>>({ 'bestFriend.name': 23 }); // using dot notation permits any type for the key
-expectNotType<Filter<PetModel>>({ bestFriend: { name: 23 } });
