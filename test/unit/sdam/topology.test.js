@@ -70,7 +70,7 @@ describe('Topology (unit)', function () {
 
   describe('shouldCheckForSessionSupport', function () {
     beforeEach(function () {
-      this.sinon = sinon.sandbox.create();
+      this.sinon = sinon.createSandbox();
 
       // these are mocks we want across all tests
       this.sinon.stub(Server.prototype, 'requestCheck');
