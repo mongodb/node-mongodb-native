@@ -95,5 +95,5 @@ describe('MongoDB export', () => {
   it('should include ObjectID', () =>
     expect(mongodb).to.have.property('ObjectID').that.is.a('function'));
   it('should have ObjectID and ObjectId equal each other', () =>
-    expect(mongodb.ObjectId).to.deep.equal(mongodb.ObjectID));
+    expect(mongodb.ObjectId).to.equal(mongodb.ObjectID));
 });
