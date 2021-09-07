@@ -70,7 +70,7 @@
     "nyc": "^15.1.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
-    "semver": "^5.5.0",
+    "semver": "^7.3.5",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
     "source-map-support": "^0.5.19",
