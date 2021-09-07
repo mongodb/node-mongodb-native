@@ -1,4 +1,4 @@
-import { expectType, expectDeprecated, expectError } from 'tsd';
+import { expectType, expectDeprecated, expectNotDeprecated, expectError } from 'tsd';
 import { MongoClient } from '../../src/mongo_client';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
@@ -6,6 +6,7 @@ import type { FindCursor } from '../../src/cursor/find_cursor';
 import type { Document } from 'bson';
 import { Db } from '../../src';
 import { Topology } from '../../src/sdam/topology';
+import * as MongoDBDriver from '../../src';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
 expectDeprecated(Collection.prototype.insert);
@@ -15,6 +16,8 @@ expectDeprecated(Collection.prototype.count);
 expectDeprecated(AggregationCursor.prototype.geoNear);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
+expectDeprecated(MongoDBDriver.ObjectID);
+expectNotDeprecated(MongoDBDriver.ObjectId);
 
 // test mapped cursor types
 const client = new MongoClient('');
