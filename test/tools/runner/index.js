@@ -11,7 +11,6 @@ const TestConfiguration = require('./config');
 const parseConnectionString = require('../../../lib/core/uri_parser');
 const eachAsync = require('../../../lib/core/utils').eachAsync;
 const mock = require('mongodb-mock-server');
-const wtfnode = require('wtfnode');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
@@ -121,20 +120,3 @@ require('mocha-sinon');
 const chai = require('chai');
 chai.use(require('sinon-chai'));
 chai.use(require('../../functional/spec-runner/matcher').default);
-
-// install signal handlers for printing open/active handles
-function dumpAndExit() {
-  // let other potential handlers run before exiting
-  process.nextTick(function() {
-    try {
-      wtfnode.dump();
-    } catch (e) {
-      console.log(e);
-    }
-
-    process.exit();
-  });
-}
-
-process.on('SIGINT', dumpAndExit);
-process.on('SIGTERM', dumpAndExit);
