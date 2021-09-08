@@ -620,7 +620,6 @@ export interface MongoOptions
       Pick<
         MongoClientOptions,
         | 'autoEncryption'
-        | 'compressors'
         | 'connectTimeoutMS'
         | 'directConnection'
         | 'driverInfo'
@@ -659,6 +658,7 @@ export interface MongoOptions
   readConcern: ReadConcern;
   loadBalanced: boolean;
   serverApi: ServerApi;
+  compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
