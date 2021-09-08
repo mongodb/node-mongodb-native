@@ -38,7 +38,7 @@ describe('SCRAM-SHA-256 auth', function () {
   afterEach(() => test.sandbox.restore());
 
   before(function () {
-    test.sandbox = sinon.sandbox.create();
+    test.sandbox = sinon.createSandbox();
     return setupDatabase(this.configuration);
   });
 

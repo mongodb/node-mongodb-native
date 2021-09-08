@@ -210,7 +210,7 @@ export class ChangeStream<
   cursor?: ChangeStreamCursor<TSchema>;
   streamOptions?: CursorStreamOptions;
   /** @internal */
-  [kResumeQueue]: Denque;
+  [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema>>>;
   /** @internal */
   [kCursorStream]?: Readable;
   /** @internal */
@@ -809,6 +809,8 @@ function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeSt
 function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: Error) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
+    if (!request) break; // Should never occur but TS can't use the length check in the while condition
+
     if (!err) {
       if (changeStream[kClosed]) {
         // TODO(NODE-3485): Replace with MongoChangeStreamClosedError

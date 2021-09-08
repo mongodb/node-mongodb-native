@@ -7,7 +7,7 @@ const sinon = require('sinon');
 
 describe('selectServer', function () {
   beforeEach(function () {
-    this.sinon = sinon.sandbox.create();
+    this.sinon = sinon.createSandbox();
   });
 
   afterEach(function () {
