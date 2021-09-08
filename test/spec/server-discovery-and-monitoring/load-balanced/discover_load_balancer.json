@@ -1,0 +1,28 @@
+{
+  "description": "Load balancer can be discovered and only has the address property set",
+  "uri": "mongodb://a/?loadBalanced=true",
+  "phases": [
+    {
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "LoadBalancer",
+            "setName": null,
+            "setVersion": null,
+            "electionId": null,
+            "logicalSessionTimeoutMinutes": null,
+            "minWireVersion": null,
+            "maxWireVersion": null,
+            "topologyVersion": null
+          }
+        },
+        "topologyType": "LoadBalanced",
+        "setName": null,
+        "logicalSessionTimeoutMinutes": null,
+        "maxSetVersion": null,
+        "maxElectionId": null,
+        "compatible": true
+      }
+    }
+  ]
+}

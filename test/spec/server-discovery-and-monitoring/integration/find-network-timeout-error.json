@@ -1,0 +1,119 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "find-network-timeout-error",
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    }
+  ],
+  "tests": [
+    {
+      "description": "Ignore network timeout error on find",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "find"
+          ],
+          "blockConnection": true,
+          "blockTimeMS": 500,
+          "appName": "findNetworkTimeoutErrorTest"
+        }
+      },
+      "clientOptions": {
+        "retryWrites": false,
+        "retryReads": false,
+        "appname": "findNetworkTimeoutErrorTest",
+        "socketTimeoutMS": 250
+      },
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "error": true
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 3
+            }
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 0
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 0
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "find-network-timeout-error"
+            },
+            "command_name": "find",
+            "database_name": "sdam-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "find-network-timeout-error",
+              "documents": [
+                {
+                  "_id": 3
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

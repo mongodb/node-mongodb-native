@@ -10,7 +10,8 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true,
+                    helloOk: true,
+                    isWritablePrimary: true,
                     hosts: ["a:27017"],
                     setName: "rs",
                     minWireVersion: 0,
@@ -38,7 +39,8 @@ phases: [
         responses: [
                 ["a:27017", {
                     ok: 1,
-                    ismaster: false,
+                    helloOk: true,
+                    isWritablePrimary: false,
                     isreplicaset: true,
                     minWireVersion: 0,
                     maxWireVersion: 6

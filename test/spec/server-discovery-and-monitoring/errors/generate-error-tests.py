@@ -35,11 +35,12 @@ def write_test(filename, data):
 ERR_CODES = {
     'InterruptedAtShutdown': (11600,),
     'InterruptedDueToReplStateChange': (11602,),
-    'NotMasterOrSecondary': (13436,),
+    'NotPrimaryOrSecondary': (13436,),
     'PrimarySteppedDown': (189,),
     'ShutdownInProgress': (91,),
-    'NotMaster': (10107,),
-    'NotMasterNoSlaveOk': (13435,),
+    'NotWritablePrimary': (10107,),
+    'NotPrimaryNoSecondaryOk': (13435,),
+    'LegacyNotPrimary': (10058,),
 }
 
 
@@ -129,6 +130,7 @@ def create_stale_generation_tests():
     # Stale network errors
     for network_error_type, when in itertools.product(
             ['network', 'timeout'], WHEN):
+        error_name = network_error_type
         test_name = f'stale-generation-{when}-{network_error_type}'
         stale_error = STALE_GENERATION_NETWORK_ERROR.format(**locals())
         data = tmp.format(**locals())
@@ -137,7 +139,7 @@ def create_stale_generation_tests():
 
 def create_pre_42_tests():
     tmp = template('pre-42.yml.template')
-    # All "not master"/"node is recovering" clear the pool on <4.2
+    # All "not writable primary"/"node is recovering" clear the pool on <4.2
     for error_name in ERR_CODES:
         test_name = f'pre-42-{error_name}'
         error_code, = ERR_CODES[error_name]

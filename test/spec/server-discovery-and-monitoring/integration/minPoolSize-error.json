@@ -1,0 +1,102 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.9"
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "sdam-minPoolSize-error",
+  "data": [],
+  "tests": [
+    {
+      "description": "Network error on minPoolSize background creation",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "skip": 3
+        },
+        "data": {
+          "failCommands": [
+            "hello",
+            "isMaster"
+          ],
+          "appName": "SDAMminPoolSizeError",
+          "closeConnection": true
+        }
+      },
+      "clientOptions": {
+        "heartbeatFrequencyMS": 10000,
+        "appname": "SDAMminPoolSizeError",
+        "minPoolSize": 10,
+        "serverSelectionTimeoutMS": 1000,
+        "directConnection": true
+      },
+      "operations": [
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolReadyEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "ping",
+          "arguments": {
+            "command": {
+              "ping": {}
+            }
+          },
+          "error": true
+        },
+        {
+          "name": "configureFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "off"
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "ping",
+          "arguments": {
+            "command": {
+              "ping": 1
+            }
+          },
+          "error": false
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolReadyEvent",
+            "count": 2
+          }
+        }
+      ]
+    }
+  ]
+}
