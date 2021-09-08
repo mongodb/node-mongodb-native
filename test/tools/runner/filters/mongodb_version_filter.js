@@ -39,6 +39,9 @@ class MongoDBVersionFilter {
   }
 
   filter(test) {
+    if (!process.env.MONGODB_UNIFIED_TOPOLOGY && semver.satisfies(this.version, '>=5.0')) {
+      return false; // do not run any tests on 5.0 if unified topology isn't enabled.
+    }
     if (this.options.skip) return true;
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
