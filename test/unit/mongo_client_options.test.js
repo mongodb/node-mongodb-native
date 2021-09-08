@@ -78,7 +78,7 @@ describe('MongoOptions', function () {
     autoEncryption: { bypassAutoEncryption: true },
     checkKeys: true,
     checkServerIdentity: false,
-    compressors: 'snappy', // TODO
+    compressors: 'snappy,zlib',
     connectTimeoutMS: 123,
     directConnection: true,
     dbName: 'test',
@@ -383,6 +383,58 @@ describe('MongoOptions', function () {
     const optionsUndefined = parseOptions('mongodb://localhost/');
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
+  });
+
+  describe('compressors', function () {
+    it('can be set when passed in as an array in the options object', function () {
+      const clientViaOpt = new MongoClient('mongodb://localhost', {
+        compressors: ['zlib', 'snappy']
+      });
+      expect(clientViaOpt.options)
+        .to.have.property('compressors')
+        .deep.equal(['zlib', 'snappy', 'none']);
+    });
+
+    it('can be set when passed in as a comma-delimited string in the options object or URI', function () {
+      const clientViaOpt = new MongoClient('mongodb://localhost', {
+        compressors: 'zlib,snappy'
+      });
+      const clientViaUri = new MongoClient('mongodb://localhost?compressors=zlib,snappy');
+      expect(clientViaOpt.options)
+        .to.have.property('compressors')
+        .deep.equal(['zlib', 'snappy', 'none']);
+      expect(clientViaUri.options)
+        .to.have.property('compressors')
+        .deep.equal(['zlib', 'snappy', 'none']);
+    });
+
+    it('should validate that a string or an array of strings is provided as input', function () {
+      expect(
+        () =>
+          new MongoClient('mongodb://localhost', {
+            compressors: { zlib: true }
+          })
+      ).to.throw(/^compressors must be an array or a comma-delimited list of strings/);
+    });
+
+    it('should throw an error if an unrecognized compressor is specified', function () {
+      const expectedErrRegex = /not a valid compression mechanism/;
+      expect(
+        () =>
+          new MongoClient('mongodb://localhost', {
+            compressors: ['invalid']
+          })
+      ).to.throw(expectedErrRegex);
+      expect(
+        () =>
+          new MongoClient('mongodb://localhost', {
+            compressors: 'invalid'
+          })
+      ).to.throw(expectedErrRegex);
+      expect(() => new MongoClient('mongodb://localhost?compressors=invalid')).to.throw(
+        expectedErrRegex
+      );
+    });
   });
 
   describe('serverApi', function () {

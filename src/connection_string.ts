@@ -32,7 +32,7 @@ import type { TagSet } from './sdam/server_description';
 import { Logger, LoggerLevel } from './logger';
 import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
-import { Compressor } from './cmap/wire_protocol/compression';
+import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
@@ -612,8 +612,14 @@ export const OPTIONS = {
     target: 'compressors',
     transform({ values }) {
       const compressionList = new Set();
-      for (const compVal of values as string[]) {
-        for (const c of compVal.split(',')) {
+      for (const compVal of values as (CompressorName[] | string)[]) {
+        const compValArray = typeof compVal === 'string' ? compVal.split(',') : compVal;
+        if (!Array.isArray(compValArray)) {
+          throw new MongoInvalidArgumentError(
+            'compressors must be an array or a comma-delimited list of strings'
+          );
+        }
+        for (const c of compValArray) {
           if (Object.keys(Compressor).includes(String(c))) {
             compressionList.add(String(c));
           } else {

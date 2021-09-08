@@ -128,8 +128,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   connectTimeoutMS?: number;
   /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
   socketTimeoutMS?: number;
-  /** Comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
-  compressors?: CompressorName[];
+  /** An array or comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
+  compressors?: CompressorName[] | string;
   /** An integer that specifies the compression level if using zlib for network compression. */
   zlibCompressionLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /** The maximum number of connections in the connection pool. */
@@ -620,7 +620,6 @@ export interface MongoOptions
       Pick<
         MongoClientOptions,
         | 'autoEncryption'
-        | 'compressors'
         | 'connectTimeoutMS'
         | 'directConnection'
         | 'driverInfo'
@@ -659,6 +658,7 @@ export interface MongoOptions
   readConcern: ReadConcern;
   loadBalanced: boolean;
   serverApi: ServerApi;
+  compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
