@@ -1,6 +1,8 @@
 'use strict';
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const loadSpecTests = require('../spec').loadSpecTests;
+const path = require('path');
+const fs = require('fs');
+const EJSON = require('mongodb-extjson');
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 
 class SDAMRunnerContext extends TestRunnerContext {
@@ -39,10 +41,33 @@ class SDAMRunnerContext extends TestRunnerContext {
   }
 }
 
+// TODO -- NODE-2994
+const SKIP_SDAM_INTEGRATION_FILES = [
+  'auth-error.json',
+  'auth-misc-command-error.json',
+  'auth-network-error.json',
+  'auth-network-timeout-error.json',
+  'auth-shutdown-error.json',
+  'find-network-timeout-error.json',
+  'pool-cleared-error.json',
+  'minPoolSize-error.json'
+];
+
 describe('SDAM', function() {
   context('integration spec tests', function() {
     const testContext = new SDAMRunnerContext();
-    const testSuites = loadSpecTests('server-discovery-and-monitoring/integration');
+    const specPath = path.resolve(__dirname, '../spec/server-discovery-and-monitoring/integration');
+
+    const testSuites = fs
+      .readdirSync(specPath)
+      .filter(x => x.indexOf('.json') !== -1)
+      .filter(fn => SKIP_SDAM_INTEGRATION_FILES.indexOf(fn) === -1)
+      .map(x =>
+        Object.assign(EJSON.parse(fs.readFileSync(path.join(specPath, x)), { relaxed: true }), {
+          name: path.basename(x, '.json')
+        })
+      );
+
     after(() => testContext.teardown());
     before(function() {
       return testContext.setup(this.configuration);
