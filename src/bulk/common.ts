@@ -383,6 +383,7 @@ export interface BulkWriteOperationError {
   index: number;
   code: number;
   errmsg: string;
+  errInfo: Document;
   op: Document | UpdateStatement | DeleteStatement;
 }
 
@@ -411,6 +412,11 @@ export class WriteError {
   /** WriteError message. */
   get errmsg(): string | undefined {
     return this.err.errmsg;
+  }
+
+  /** WriteError details. */
+  get errInfo(): Document | undefined {
+    return this.err.errInfo;
   }
 
   /** Returns the underlying operation that caused the error */
@@ -453,6 +459,7 @@ function mergeBatchResults(
       index: 0,
       code: result.code || 0,
       errmsg: result.message,
+      errInfo: result.errInfo,
       op: batch.operations[0]
     };
 
@@ -555,6 +562,7 @@ function mergeBatchResults(
         index: batch.originalIndexes[result.writeErrors[i].index],
         code: result.writeErrors[i].code,
         errmsg: result.writeErrors[i].errmsg,
+        errInfo: result.writeErrors[i].errInfo,
         op: batch.operations[result.writeErrors[i].index]
       };
 
