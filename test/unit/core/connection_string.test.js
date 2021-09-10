@@ -136,7 +136,7 @@ describe('Connection String', function () {
     it('should validate non-equal tls values', function () {
       expect(() => parseOptions('mongodb://localhost/?tls=true&tls=false')).to.throw(
         MongoParseError,
-        'All values of tls must be the same.'
+        'All values of tls/ssl must be the same.'
       );
     });
   });
