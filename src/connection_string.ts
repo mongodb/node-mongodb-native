@@ -385,13 +385,13 @@ export function parseOptions(
   }
 
   if (allOptions.has('tls')) {
-    if (new Set(allOptions.get('tls')?.map(getBoolean)).size !== 1) {
+    if (new Set(allOptions.get('tls')?.map(getBoolean.bind(null,'tls'))).size !== 1) {
       throw new MongoParseError('All values of tls must be the same.');
     }
   }
 
   if (allOptions.has('ssl')) {
-    if (new Set(allOptions.get('ssl')?.map(getBoolean)).size !== 1) {
+    if (new Set(allOptions.get('ssl')?.map(getBoolean.bind(null,'ssl'))).size !== 1) {
       throw new MongoParseError('All values of ssl must be the same.');
     }
   }
