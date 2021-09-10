@@ -407,6 +407,42 @@ describe('MongoOptions', function () {
     });
   });
 
+  it('throws an error if multiple tls parameters are not all set to the same value', () => {
+    expect(() => parseOptions('mongodb://localhost?tls=true&tls=false')).to.throw(
+      'All values of tls/ssl must be the same.'
+    );
+  });
+
+  it('throws an error if multiple ssl parameters are not all set to the same value', () => {
+    expect(() => parseOptions('mongodb://localhost?ssl=true&ssl=false')).to.throw(
+      'All values of tls/ssl must be the same.'
+    );
+  });
+
+  it('throws an error if tls and ssl parameters are not all set to the same value', () => {
+    expect(() => parseOptions('mongodb://localhost?tls=true&ssl=false')).to.throw(
+      'All values of tls/ssl must be the same.'
+    );
+    expect(() => parseOptions('mongodb://localhost?tls=false&ssl=true')).to.throw(
+      'All values of tls/ssl must be the same.'
+    );
+  });
+
+  it('correctly sets tls if multiple tls parameters are all set to the same value', () => {
+    expect(parseOptions('mongodb://localhost?tls=true&tls=true')).to.have.property('tls', true);
+    expect(parseOptions('mongodb://localhost?tls=false&tls=false')).to.have.property('tls', false);
+  });
+
+  it('correctly sets tls if multiple ssl parameters are all set to the same value', () => {
+    expect(parseOptions('mongodb://localhost?ssl=true&ssl=true')).to.have.property('tls', true);
+    expect(parseOptions('mongodb://localhost?ssl=false&ssl=false')).to.have.property('tls', false);
+  });
+
+  it('correctly sets tls if tls and ssl parameters are all set to the same value', () => {
+    expect(parseOptions('mongodb://localhost?ssl=true&tls=true')).to.have.property('tls', true);
+    expect(parseOptions('mongodb://localhost?ssl=false&tls=false')).to.have.property('tls', false);
+  });
+
   it('transforms tlsInsecure correctly', function () {
     const optionsTrue = parseOptions('mongodb://localhost/', {
       tlsInsecure: true
