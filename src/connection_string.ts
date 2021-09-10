@@ -335,6 +335,10 @@ export function parseOptions(
     allOptions.set(key, values);
   }
 
+  if (allOptions.has('tlsCertificateKeyFile') && !allOptions.has('tlsCertificateFile')) {
+    allOptions.set('tlsCertificateFile', allOptions.get('tlsCertificateKeyFile'));
+  }
+
   const unsupportedOptions = setDifference(
     allKeys,
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())

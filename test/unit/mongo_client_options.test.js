@@ -366,6 +366,47 @@ describe('MongoOptions', function () {
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
 
+  describe('[tls certificate handling]', () => {
+    before(() => {
+      fs.writeFileSync('testCertKey.pem', 'cert key');
+      fs.writeFileSync('testKey.pem', 'test key');
+      fs.writeFileSync('testCert.pem', 'test cert');
+    });
+
+    after(() => {
+      fs.unlinkSync('testCertKey.pem');
+      fs.unlinkSync('testKey.pem');
+      fs.unlinkSync('testCert.pem');
+    });
+
+    it('correctly sets the cert and key if only tlsCertificateKeyFile is provided', function () {
+      const optsFromObject = parseOptions('mongodb://localhost/', {
+        tlsCertificateKeyFile: 'testCertKey.pem'
+      });
+      expect(optsFromObject).to.have.property('cert', 'cert key');
+      expect(optsFromObject).to.have.property('key', 'cert key');
+
+      const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
+      expect(optsFromUri).to.have.property('cert', 'cert key');
+      expect(optsFromUri).to.have.property('key', 'cert key');
+    });
+
+    it('correctly sets the cert and key if both tlsCertificateKeyFile and tlsCertificateFile is provided', function () {
+      const optsFromObject = parseOptions('mongodb://localhost/', {
+        tlsCertificateKeyFile: 'testKey.pem',
+        tlsCertificateFile: 'testCert.pem'
+      });
+      expect(optsFromObject).to.have.property('cert', 'test cert');
+      expect(optsFromObject).to.have.property('key', 'test key');
+
+      const optsFromUri = parseOptions(
+        'mongodb://localhost?tlsCertificateKeyFile=testKey.pem&tlsCertificateFile=testCert.pem'
+      );
+      expect(optsFromUri).to.have.property('cert', 'test cert');
+      expect(optsFromUri).to.have.property('key', 'test key');
+    });
+  });
+
   it('transforms tlsInsecure correctly', function () {
     const optionsTrue = parseOptions('mongodb://localhost/', {
       tlsInsecure: true
