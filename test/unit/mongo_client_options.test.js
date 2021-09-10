@@ -245,6 +245,18 @@ describe('MongoOptions', function () {
     expect(options).has.property('tls', false);
   });
 
+  it('ssl= can be used to set tls=true', function () {
+    const options = parseOptions('mongodb+srv://server.example.com/?ssl=true');
+    expect(options).has.property('srvHost', 'server.example.com');
+    expect(options).has.property('tls', true);
+  });
+
+  it('tls= can be used to set tls=true', function () {
+    const options = parseOptions('mongodb+srv://server.example.com/?tls=true');
+    expect(options).has.property('srvHost', 'server.example.com');
+    expect(options).has.property('tls', true);
+  });
+
   it('supports ReadPreference option in url', function () {
     const options = parseOptions('mongodb://localhost/?readPreference=nearest');
     expect(options.readPreference).to.be.an.instanceof(ReadPreference);
