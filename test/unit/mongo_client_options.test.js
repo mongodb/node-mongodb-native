@@ -128,7 +128,7 @@ describe('MongoOptions', function () {
     ssl: true,
     sslPass: 'pass',
     sslValidate: true,
-    tls: false,
+    tls: true,
     tlsAllowInvalidCertificates: true,
     tlsAllowInvalidHostnames: true,
     tlsCertificateKeyFilePassword: 'tls-pass',
