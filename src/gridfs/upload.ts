@@ -37,7 +37,7 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
  * @public
  */
-export class GridFSBucketWriteStream extends Writable {
+export class GridFSBucketWriteStream extends Writable implements NodeJS.WritableStream {
   bucket: GridFSBucket;
   chunks: Collection<GridFSChunk>;
   filename: string;
@@ -118,12 +118,16 @@ export class GridFSBucketWriteStream extends Writable {
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
    * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
-  write(chunk: Buffer): boolean;
-  write(chunk: Buffer, callback: Callback<void>): boolean;
-  write(chunk: Buffer, encoding: BufferEncoding | undefined): boolean;
-  write(chunk: Buffer, encoding: BufferEncoding | undefined, callback: Callback<void>): boolean;
+  write(chunk: Buffer | string): boolean;
+  write(chunk: Buffer | string, callback: Callback<void>): boolean;
+  write(chunk: Buffer | string, encoding: BufferEncoding | undefined): boolean;
   write(
-    chunk: Buffer,
+    chunk: Buffer | string,
+    encoding: BufferEncoding | undefined,
+    callback: Callback<void>
+  ): boolean;
+  write(
+    chunk: Buffer | string,
     encodingOrCallback?: Callback<void> | BufferEncoding,
     callback?: Callback<void>
   ): boolean {
@@ -417,7 +421,7 @@ function createFilesDoc(
 
 function doWrite(
   stream: GridFSBucketWriteStream,
-  chunk: Buffer,
+  chunk: Buffer | string,
   encoding?: BufferEncoding,
   callback?: Callback<void>
 ): boolean {

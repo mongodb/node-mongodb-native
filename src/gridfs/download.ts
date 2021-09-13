@@ -73,7 +73,7 @@ export interface GridFSBucketReadStreamPrivate {
  * Do not instantiate this class directly. Use `openDownloadStream()` instead.
  * @public
  */
-export class GridFSBucketReadStream extends Readable {
+export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableStream {
   /** @internal */
   s: GridFSBucketReadStreamPrivate;
 
