@@ -176,7 +176,7 @@ function getBoolean(name: string, value: unknown): boolean {
   const valueString = String(value).toLowerCase();
   if (TRUTHS.has(valueString)) return true;
   if (FALSEHOODS.has(valueString)) return false;
-  throw new MongoParseError(`For ${name} Expected stringified boolean value, got: ${value}`);
+  throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
 }
 
 function getInt(name: string, value: unknown): number {
@@ -335,6 +335,19 @@ export function parseOptions(
     allOptions.set(key, values);
   }
 
+  if (allOptions.has('tlsCertificateKeyFile') && !allOptions.has('tlsCertificateFile')) {
+    allOptions.set('tlsCertificateFile', allOptions.get('tlsCertificateKeyFile'));
+  }
+
+  if (allOptions.has('tls') || allOptions.has('ssl')) {
+    const tlsAndSslOpts = (allOptions.get('tls') || [])
+      .concat(allOptions.get('ssl') || [])
+      .map(getBoolean.bind(null, 'tls/ssl'));
+    if (new Set(tlsAndSslOpts).size !== 1) {
+      throw new MongoParseError('All values of tls/ssl must be the same.');
+    }
+  }
+
   const unsupportedOptions = setDifference(
     allKeys,
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
@@ -382,18 +395,6 @@ export function parseOptions(
   if (!mongoOptions.dbName) {
     // dbName default is applied here because of the credential validation above
     mongoOptions.dbName = 'test';
-  }
-
-  if (allOptions.has('tls')) {
-    if (new Set(allOptions.get('tls')?.map(getBoolean)).size !== 1) {
-      throw new MongoParseError('All values of tls must be the same.');
-    }
-  }
-
-  if (allOptions.has('ssl')) {
-    if (new Set(allOptions.get('ssl')?.map(getBoolean)).size !== 1) {
-      throw new MongoParseError('All values of ssl must be the same.');
-    }
   }
 
   checkTLSOptions(mongoOptions);

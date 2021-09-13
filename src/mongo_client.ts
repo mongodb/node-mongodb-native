@@ -112,7 +112,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   ssl?: boolean;
   /** Specifies the location of a local TLS Certificate */
   tlsCertificateFile?: string;
-  /** Specifies the location of a local .pem file that contains either the client’s TLS/SSL certificate or the client’s TLS/SSL certificate and key. */
+  /** Specifies the location of a local .pem file that contains either the client's TLS/SSL certificate and key or only the client's TLS/SSL key when tlsCertificateFile is used to provide the certificate. */
   tlsCertificateKeyFile?: string;
   /** Specifies the password to de-crypt the tlsCertificateKeyFile. */
   tlsCertificateKeyFilePassword?: string;
