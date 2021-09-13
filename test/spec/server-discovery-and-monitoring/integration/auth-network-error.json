@@ -1,0 +1,140 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4",
+      "authEnabled": true
+    }
+  ],
+  "database_name": "sdam-tests",
+  "collection_name": "auth-network-error",
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    }
+  ],
+  "tests": [
+    {
+      "description": "Reset server and pool after network error during authentication",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "saslContinue"
+          ],
+          "closeConnection": true,
+          "appName": "authNetworkErrorTest"
+        }
+      },
+      "clientOptions": {
+        "retryWrites": false,
+        "appname": "authNetworkErrorTest"
+      },
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ]
+          },
+          "error": true
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 5
+              },
+              {
+                "_id": 6
+              }
+            ]
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "ServerMarkedUnknownEvent",
+            "count": 1
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "event": "PoolClearedEvent",
+            "count": 1
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "auth-network-error",
+              "documents": [
+                {
+                  "_id": 5
+                },
+                {
+                  "_id": 6
+                }
+              ]
+            },
+            "command_name": "insert",
+            "database_name": "sdam-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 5
+            },
+            {
+              "_id": 6
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

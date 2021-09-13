@@ -9,7 +9,8 @@
           "a:27017",
           {
             "ok": 1,
-            "ismaster": true,
+            "helloOk": true,
+            "isWritablePrimary": true,
             "hosts": [
               "a:27017"
             ],
@@ -62,8 +63,9 @@
             "ok": 1,
             "writeErrors": [
               {
-                "errmsg": "NotMasterNoSlaveOk",
-                "code": 13435
+                "errmsg": "NotPrimaryNoSecondaryOk",
+                "code": 13435,
+                "index": 0
               }
             ]
           }

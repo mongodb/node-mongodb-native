@@ -1,0 +1,201 @@
+# Test SDAM error handling.
+runOn:
+    # This test requires retryable writes, failCommand appName, and
+    # failCommand blockConnection with closeConnection:true (SERVER-53512).
+    - minServerVersion: "4.9"
+      topology: ["replicaset", "sharded"]
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "pool-cleared-error"
+
+data: []
+
+tests:
+  - description: PoolClearedError does not mark server unknown
+    clientOptions:
+      retryWrites: true
+      maxPoolSize: 1
+      appname: poolClearedErrorTest
+    operations:
+      # Perform an operation to ensure the node is discovered.
+      - name: insertOne
+        object: collection
+        arguments:
+          document:
+            _id: 1
+      # Configure the next insert to fail with a network error which will
+      # clear the pool leaving it paused until the server is rediscovered.
+      - name: configureFailPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                failCommands: ["insert"]
+                blockConnection: true
+                blockTimeMS: 100
+                closeConnection: true
+                appName: poolClearedErrorTest
+      # Start threads.
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread1
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread2
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread3
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread4
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread5
+      - name: startThread
+        object: testRunner
+        arguments:
+          name: thread6
+      # Perform concurrent insert operations. The first one to execute will
+      # fail with a network error, mark the server Unknown, clear the pool,
+      # and retry.
+      # The other operations will either:
+      # - Notice the pool is paused, fail with a PoolClearedError, and retry.
+      # - Or block waiting in server selection until the server is
+      #   rediscovered.
+      #
+      # Note that this test does not guarantee that a PoolClearedError will be
+      # raised but it is likely since the initial insert is delayed.
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread1
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 2
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread2
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 3
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread3
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 4
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread4
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 5
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread5
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 6
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          name: thread6
+          operation:
+            name: insertOne
+            object: collection
+            arguments:
+              document:
+                _id: 7
+      # Stop threads.
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread1
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread2
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread3
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread4
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread5
+      - name: waitForThread
+        object: testRunner
+        arguments:
+          name: thread6
+      # The first shutdown error should mark the server Unknown and then clear
+      # the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+      # Perform an operation to ensure the node still useable.
+      - name: insertOne
+        object: collection
+        arguments:
+          document:
+            _id: 8
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+
+    # Order of operations is non-deterministic so we cannot check events.
+    outcome:
+      collection:
+        data:
+          - {_id: 1}
+          - {_id: 2}
+          - {_id: 3}
+          - {_id: 4}
+          - {_id: 5}
+          - {_id: 6}
+          - {_id: 7}
+          - {_id: 8}

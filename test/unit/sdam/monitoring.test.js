@@ -218,4 +218,74 @@ describe('monitoring', function() {
       monitor.connect();
     });
   });
+
+  it('should upgrade to hello from legacy hello when initial handshake contains helloOk', {
+    metadata: { requires: { unifiedTopology: true } },
+    test(done) {
+      const docs = [];
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        docs.push(doc);
+        if (docs.length === 2) {
+          expect(docs[0]).to.have.property('ismaster', true);
+          expect(docs[0]).to.have.property('helloOk', true);
+          expect(docs[1]).to.have.property('hello', true);
+          done();
+        } else if (doc.ismaster || doc.hello) {
+          request.reply(Object.assign({ helloOk: true }, mock.DEFAULT_ISMASTER));
+        }
+      });
+
+      const server = new MockServer(mockServer.address());
+      const monitor = new Monitor(server, { useUnifiedTopology: true });
+      this.defer(() => monitor.close());
+      monitor.connect();
+      monitor.once('serverHeartbeatSucceeded', () => {
+        const minHeartbeatFrequencyMS = 500;
+        setTimeout(() => {
+          // wait for minHeartbeatFrequencyMS, then request a check and verify another check occurred
+          monitor.once('serverHeartbeatSucceeded', () => {
+            monitor.close();
+          });
+
+          monitor.requestCheck();
+        }, minHeartbeatFrequencyMS);
+      });
+    }
+  });
+
+  it('should not upgrade to hello when using the legacy topology', {
+    metadata: { requires: { unifiedTopology: false } },
+    test(done) {
+      const docs = [];
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        docs.push(doc);
+        if (docs.length === 2) {
+          expect(docs[0]).to.have.property('ismaster', true);
+          expect(docs[0]).to.not.have.property('helloOk');
+          expect(docs[1]).to.not.have.property('hello');
+          done();
+        } else if (doc.ismaster || doc.hello) {
+          request.reply(Object.assign({ helloOk: true }, mock.DEFAULT_ISMASTER));
+        }
+      });
+
+      const server = new MockServer(mockServer.address());
+      const monitor = new Monitor(server, { useUnifiedTopology: false });
+      this.defer(() => monitor.close());
+      monitor.connect();
+      monitor.once('serverHeartbeatSucceeded', () => {
+        const minHeartbeatFrequencyMS = 500;
+        setTimeout(() => {
+          // wait for minHeartbeatFrequencyMS, then request a check and verify another check occurred
+          monitor.once('serverHeartbeatSucceeded', () => {
+            monitor.close();
+          });
+
+          monitor.requestCheck();
+        }, minHeartbeatFrequencyMS);
+      });
+    }
+  });
 });

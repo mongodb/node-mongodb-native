@@ -3,7 +3,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip"
-NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"
+NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
 
 NODE_LTS_NAME=${NODE_LTS_NAME:-carbon}
 MSVS_VERSION=${MSVS_VERSION:-2017}

@@ -43,36 +43,6 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  it('pass in server and db top level options', {
-    metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // skipped for direct legacy variable inspection
-        return this.skip();
-      }
-
-      const client = configuration.newClient(configuration.url(), {
-        autoReconnect: true,
-        poolSize: 4
-      });
-
-      client.connect(
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
-          client.close(done);
-        })
-      );
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should error on unexpected options', {
     metadata: { requires: { topology: 'single' } },
 
@@ -127,7 +97,11 @@ describe('MongoClient Options', function() {
           const ns = args[0];
           const command = args[1];
           const options = args[2];
-          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+          if (
+            ns === 'admin.$cmd' &&
+            (command.hello || command.ismaster) &&
+            options.exhaustAllowed
+          ) {
             stub.restore();
             expect(options)
               .property('socketTimeout')
@@ -155,7 +129,11 @@ describe('MongoClient Options', function() {
           const ns = args[0];
           const command = args[1];
           const options = args[2];
-          if (ns === 'admin.$cmd' && command.ismaster && options.exhaustAllowed) {
+          if (
+            ns === 'admin.$cmd' &&
+            (command.hello || command.ismaster) &&
+            options.exhaustAllowed
+          ) {
             stub.restore();
             expect(options)
               .property('socketTimeout')

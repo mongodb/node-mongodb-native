@@ -1,0 +1,77 @@
+# Test SDAM error handling.
+runOn:
+    # failCommand appName requirements
+    - minServerVersion: "4.9"
+
+database_name: &database_name "sdam-tests"
+collection_name: &collection_name "sdam-minPoolSize-error"
+
+data: []
+
+tests:
+  - description: Network error on minPoolSize background creation
+    # Configure the initial monitor handshake to succeed but the
+    # first or second background minPoolSize establishments to fail.
+    failPoint:
+      configureFailPoint: failCommand
+      mode: { skip: 3 }
+      data:
+        failCommands: ["hello", "isMaster"]
+        appName: SDAMminPoolSizeError
+        closeConnection: true
+    clientOptions:
+      heartbeatFrequencyMS: 10000
+      appname: SDAMminPoolSizeError
+      minPoolSize: 10
+      serverSelectionTimeoutMS: 1000
+      directConnection: true
+    operations:
+      # Wait for monitor to succeed handshake and mark the pool as ready.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolReadyEvent
+          count: 1
+      # Background connection establishment ensuring minPoolSize should fail,
+      # causing the pool to be cleared.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: PoolClearedEvent
+          count: 1
+      # The server should be marked as Unknown as part of this.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          event: ServerMarkedUnknownEvent
+          count: 1
+      # Executing a command should fail server selection due to not being able
+      # to find the primary.
+      - name: runCommand
+        object: database
+        command_name: ping
+        arguments:
+          command:
+            ping: {}
+        error: true
+      # Disable the failpoint, allowing the monitor to discover the primary again.
+      - name: configureFailPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode: off
+      # Perform an operation to ensure the node is discovered.
+      - name: runCommand
+        object: database
+        command_name: ping
+        arguments:
+          command:
+            ping: 1
+        error: false
+      # Assert that the monitor discovered the primary and mark the pool as ready again.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          event: PoolReadyEvent
+          count: 2

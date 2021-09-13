@@ -102,6 +102,7 @@ function executePhase(phase, state, callback) {
       });
     } else {
       var ismaster = x[1];
+      if (ismaster && ismaster.isWritablePrimary) ismaster.ismaster = ismaster.isWritablePrimary;
       if (ismaster.electionId) ismaster.electionId = new ObjectId(ismaster.electionId.$oid);
 
       state.update({

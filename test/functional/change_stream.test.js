@@ -1902,7 +1902,10 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with promises', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      metadata: {
+        requires: { topology: 'replicaset', mongodb: '>=3.6' },
+        sessions: { skipLeakTests: true }
+      },
       test: function() {
         const test = this;
 
@@ -1925,7 +1928,10 @@ describe('Change Streams', function() {
     });
 
     it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      metadata: {
+        requires: { topology: 'replicaset', mongodb: '>=3.6' },
+        sessions: { skipLeakTests: true }
+      },
       test: function(done) {
         changeStream.next(() => {
           changeStream.next(() => {
@@ -1952,7 +1958,10 @@ describe('Change Streams', function() {
     });
 
     it('when invoked using eventEmitter API', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+      metadata: {
+        requires: { topology: 'replicaset', mongodb: '>=3.6' },
+        sessions: { skipLeakTests: true }
+      },
       test: function(done) {
         let closed = false;
         const close = _err => {

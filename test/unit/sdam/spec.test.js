@@ -65,7 +65,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
-            executeSDAMTest(testData, done);
+            executeSDAMTest(this, testData, done);
           }
         });
       });
@@ -162,9 +162,15 @@ function cloneForCompare(event) {
   return result;
 }
 
-function executeSDAMTest(testData, testDone) {
+function executeSDAMTest(ctx, testData, testDone) {
   parse(testData.uri, (err, parsedUri) => {
-    if (err) return done(err);
+    if (err) {
+      if (err.message === 'Load balancer mode requires driver version 4+') {
+        // currently we do not support load balancer in this driver version
+        return ctx.skip();
+      }
+      return testDone(err);
+    }
 
     // create the topology
     const topology = new Topology(parsedUri.hosts, parsedUri.options);
@@ -196,9 +202,9 @@ function executeSDAMTest(testData, testDone) {
       topology.on(eventName, event => events.push(event));
     });
 
-    function done(err) {
+    const done = function(err) {
       topology.close(e => testDone(e || err));
-    }
+    };
 
     const incompatibilityHandler = err => {
       if (err.message.match(/but this version of the driver/)) return;
