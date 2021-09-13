@@ -65,7 +65,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
-            executeSDAMTest(testData, done);
+            executeSDAMTest(this, testData, done);
           }
         });
       });
@@ -162,14 +162,12 @@ function cloneForCompare(event) {
   return result;
 }
 
-function executeSDAMTest(testData, testDone) {
+function executeSDAMTest(ctx, testData, testDone) {
   parse(testData.uri, (err, parsedUri) => {
     if (err) {
-      if (err.message.toLowerCase().indexOf('load balancer') !== -1) {
+      if (err.message === 'Load balancer mode requires driver version 4+') {
         // currently we do not support load balancer in this driver version
-        // so we just report LB tests as passing without doing anything
-        // TODO: Actually mark these as skipped in mocha?
-        return testDone();
+        return ctx.skip();
       }
       return testDone(err);
     }
