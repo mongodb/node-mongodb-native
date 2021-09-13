@@ -159,7 +159,7 @@ function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescri
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractOperation<Document> {
+export class IndexesOperation extends AbstractOperation<Document[]> {
   options: IndexInformationOptions;
   collection: Collection;
 
@@ -169,7 +169,7 @@ export class IndexesOperation extends AbstractOperation<Document> {
     this.collection = collection;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  execute(server: Server, session: ClientSession, callback: Callback<Document[]>): void {
     const coll = this.collection;
     const options = this.options;
 

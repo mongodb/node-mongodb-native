@@ -1190,14 +1190,14 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  indexes(): Promise<Document>;
-  indexes(callback: Callback<Document>): void;
-  indexes(options: IndexInformationOptions): Promise<Document>;
-  indexes(options: IndexInformationOptions, callback: Callback<Document>): void;
+  indexes(): Promise<Document[]>;
+  indexes(callback: Callback<Document[]>): void;
+  indexes(options: IndexInformationOptions): Promise<Document[]>;
+  indexes(options: IndexInformationOptions, callback: Callback<Document[]>): void;
   indexes(
-    options?: IndexInformationOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
+    options?: IndexInformationOptions | Callback<Document[]>,
+    callback?: Callback<Document[]>
+  ): Promise<Document[]> | void {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
