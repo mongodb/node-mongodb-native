@@ -166,6 +166,9 @@ function executeSDAMTest(testData, testDone) {
   parse(testData.uri, (err, parsedUri) => {
     if (err) {
       if (err.message.toLowerCase().indexOf('load balancer') !== -1) {
+        // currently we do not support load balancer in this driver version
+        // so we just report LB tests as passing without doing anything
+        // TODO: Actually mark these as skipped in mocha?
         return testDone();
       }
       return testDone(err);
