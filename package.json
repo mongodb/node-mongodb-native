@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -32,7 +32,7 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "bson": "^4.5.1",
+    "bson": "^4.5.2",
     "denque": "^2.0.1",
     "mongodb-connection-string-url": "^2.0.0"
   },

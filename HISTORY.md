@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.2](https://github.com/mongodb/node-mongodb-native/compare/v4.1.1...v4.1.2) (2021-09-14)
+
+
+### Bug Fixes
+
+* **NODE-3434:** errInfo should be exposed on bulk write ([#2977](https://github.com/mongodb/node-mongodb-native/issues/2977)) ([6b3c161](https://github.com/mongodb/node-mongodb-native/commit/6b3c161675df30b728a9fecfdb7ac7dcb8461598))
+* **NODE-3467:** allow object type for aggregate out helper ([#2971](https://github.com/mongodb/node-mongodb-native/issues/2971)) ([cd603e8](https://github.com/mongodb/node-mongodb-native/commit/cd603e8c78f24422dcad4c65e9ca22eed94aa55e))
+* **NODE-3487:** check for nullish aws mechanism property ([#2951](https://github.com/mongodb/node-mongodb-native/issues/2951)) ([78ec0dd](https://github.com/mongodb/node-mongodb-native/commit/78ec0ddabb3c875b204abc748910515d8344d711))
+* **NODE-3559:** incorrect GridFS stream type ([#2981](https://github.com/mongodb/node-mongodb-native/issues/2981)) ([3915ea8](https://github.com/mongodb/node-mongodb-native/commit/3915ea83f546588817c291b6aa8c0e712c5bcdd8))
+* **NODE-3567:** correct typing on aggregation out helper ([#2967](https://github.com/mongodb/node-mongodb-native/issues/2967)) ([a299a0b](https://github.com/mongodb/node-mongodb-native/commit/a299a0bf30decef451b4fd3218ea2c9719fd962e))
+* **NODE-3574:** reintroduce ObjectID export ([#2965](https://github.com/mongodb/node-mongodb-native/issues/2965)) ([2291119](https://github.com/mongodb/node-mongodb-native/commit/2291119512160d6d0bef9215f95d60264cd225ab))
+* **NODE-3585:** MongoClientOptions#compressors has incorrect type ([#2976](https://github.com/mongodb/node-mongodb-native/issues/2976)) ([f1b896d](https://github.com/mongodb/node-mongodb-native/commit/f1b896de6cbea212cf877696977300c7fa394a1a))
+* **NODE-3591:** tlsCertificateKeyFile option does not default cert ([#2979](https://github.com/mongodb/node-mongodb-native/issues/2979)) ([6d42267](https://github.com/mongodb/node-mongodb-native/commit/6d42267925947793af88d8d810790cade3545ea8))
+* **NODE-3599:** incorrect indexes return type ([#2980](https://github.com/mongodb/node-mongodb-native/issues/2980)) ([122b9f3](https://github.com/mongodb/node-mongodb-native/commit/122b9f3045368f2bd71c635ed4fe12ddf4e16e4c))
+
 ### [4.1.1](https://github.com/mongodb/node-mongodb-native/compare/v4.1.0...v4.1.1) (2021-08-24)
 
 
