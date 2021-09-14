@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.7.1](https://github.com/mongodb/node-mongodb-native/compare/v3.7.0...v3.7.1) (2021-09-14)
+
+
+### Features
+
+* **NODE-3424:** use hello for monitoring commands ([#2964](https://github.com/mongodb/node-mongodb-native/issues/2964)) ([910c564](https://github.com/mongodb/node-mongodb-native/commit/910c56491f72b8ce4d94bf683a97e193b66c6985))
+
 ## [3.7.0](https://github.com/mongodb/node-mongodb-native/compare/v3.6.10...v3.7.0) (2021-08-31)
 
 
