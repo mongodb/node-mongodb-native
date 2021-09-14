@@ -49,12 +49,6 @@ We recommend using the latest version of typescript, however we do provide a [do
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
 If you run into any unexpected compiler failures please let us know and we will do our best to correct it.
 
-You will also need the Node.js types to use the driver's type definitions:
-
-```sh
-npm install -D @types/node
-```
-
 ## Installation
 
 The recommended way to get started using the Node.js 4.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
@@ -68,6 +62,12 @@ yarn add mongodb
 ```
 
 This will download the MongoDB driver and add a dependency entry in your `package.json` file.
+
+If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:
+
+```sh
+npm install -D @types/node
+```
 
 ## Troubleshooting
 
