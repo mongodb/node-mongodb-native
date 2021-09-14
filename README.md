@@ -9,12 +9,12 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | what          | where                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
 | documentation | [docs.mongodb.com/drivers/node](https://docs.mongodb.com/drivers/node)                                 |
-| api-doc       | [mongodb.github.io/node-mongodb-native/4.0/](https://mongodb.github.io/node-mongodb-native/4.0/)       |
+| api-doc       | [mongodb.github.io/node-mongodb-native/4.1/](https://mongodb.github.io/node-mongodb-native/4.1/)       |
 | npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                 |
 | source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)               |
 | mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                             |
 | changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md)                       |
-| upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md) |
+| upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md) |
 
 ### Bugs / Feature Requests
 
@@ -34,7 +34,7 @@ For issues with, questions about, or feedback for the Node.js driver, please loo
 
 ### Change Log
 
-Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/4.0/HISTORY.md).
+Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md).
 
 ### Compatibility
 
@@ -49,9 +49,15 @@ We recommend using the latest version of typescript, however we do provide a [do
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
 If you run into any unexpected compiler failures please let us know and we will do our best to correct it.
 
+You will also need the Node.js types to use the driver's type definitions:
+
+```sh
+npm install -D @types/node
+```
+
 ## Installation
 
-The recommended way to get started using the Node.js 4.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 4.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 After you've created your own project using `npm init`, you can run:
 
