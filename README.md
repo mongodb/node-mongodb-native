@@ -40,8 +40,8 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 For version compatibility matrices, please refer to the following links:
 
-- [MongoDB](https://docs.mongodb.com/drivers/node/compatibility#mongodb-compatibility)
-- [NodeJS](https://docs.mongodb.com/drivers/node/compatibility#language-compatibility)
+- [MongoDB](https://docs.mongodb.com/drivers/node/current/compatibility/#mongodb-compatibility)
+- [NodeJS](https://docs.mongodb.com/drivers/node/current/compatibility/#language-compatibility)
 
 #### Typescript Version
 
