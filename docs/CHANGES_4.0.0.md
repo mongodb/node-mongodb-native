@@ -63,6 +63,17 @@ interface InsertOneResult {
 
 ### Cursor changes
 
+#### Cursor returning functions
+
+The following methods used to accept a callback as well as return the relevant cursor.
+The callback parameter has now been removed and users should only use the returned cursor.
+
+- `Collection.find()`
+- `Collection.aggregate()`
+- `Db.aggregate()`
+
+#### Cursor classes
+
 Affected classes:
 
 - `AbstractCursor`
