@@ -8,7 +8,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 | what          | where                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
-| documentation | [docs.mongodb.com/drivers/node](https://docs.mongodb.com/drivers/node)                                 |
+| documentation | [docs.mongodb.com/drivers/node/current/](https://docs.mongodb.com/drivers/node/current/)               |
 | api-doc       | [mongodb.github.io/node-mongodb-native/4.1/](https://mongodb.github.io/node-mongodb-native/4.1/)       |
 | npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                 |
 | source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)               |
