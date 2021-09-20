@@ -7,7 +7,12 @@ import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 
 /** @public */
-export type ListDatabasesResult = string[] | Document[];
+export interface ListDatabasesResult {
+  databases: ({ name: string; sizeOnDisk?: number; empty?: boolean } & Document)[];
+  totalSize?: number;
+  totalSizeMb?: number;
+  ok: 1 | 0;
+}
 
 /** @public */
 export interface ListDatabasesOptions extends CommandOperationOptions {
