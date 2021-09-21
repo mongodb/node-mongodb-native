@@ -209,6 +209,13 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     return this;
   }
 
+  /** Add an addFields stage to the aggregation pipeline */
+  addFields($addFields: Document): this {
+    assertUninitialized(this);
+    this[kPipeline].push({ $addFields });
+    return this;
+  }
+
   // deprecated methods
   /** @deprecated Add a geoNear stage to the aggregation pipeline */
   geoNear($geoNear: Document): this {
