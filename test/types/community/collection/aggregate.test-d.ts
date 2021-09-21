@@ -1,5 +1,5 @@
-import { expectType } from 'tsd';
-import { AggregationCursor, MongoClient } from '../../../../src/index';
+import { expectNotType, expectType } from 'tsd';
+import { AggregationCursor, MongoClient, Document } from '../../../../src/index';
 
 // collection.aggregate tests
 const client = new MongoClient('');
@@ -10,6 +10,10 @@ interface Payment {
   total: number;
 }
 const cursor: AggregationCursor<Payment> = collection.aggregate<Payment>([{}]);
+
+const payments = db.collection<Payment>('banking');
+expectType<AggregationCursor<Document>>(payments.aggregate());
+expectNotType<AggregationCursor<Payment>>(payments.aggregate());
 
 cursor.match({ bar: 1 }).limit(10);
 

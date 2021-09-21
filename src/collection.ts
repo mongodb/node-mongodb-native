@@ -1366,7 +1366,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param pipeline - An array of aggregation pipelines to execute
    * @param options - Optional settings for the command
    */
-  aggregate<T = TSchema>(
+  aggregate<T = Document>(
     pipeline: Document[] = [],
     options?: AggregateOptions
   ): AggregationCursor<T> {
