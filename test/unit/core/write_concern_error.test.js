@@ -161,7 +161,8 @@ describe('WriteConcernError', function () {
     });
   });
 
-  describe('errInfo property', () => {
+  // TODO: move to functional tests
+  describe.skip('errInfo property', () => {
     let client;
 
     beforeEach(async function () {
