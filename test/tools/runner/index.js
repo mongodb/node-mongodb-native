@@ -114,10 +114,5 @@ require('./plugins/deferred');
 require('./plugins/session_leak_checker');
 require('./plugins/client_leak_checker');
 
-// configure mocha and chai
+// configure mocha
 require('mocha-sinon');
-const chai = require('chai');
-chai.use(require('sinon-chai'));
-chai.use(require('chai-subset'));
-chai.use(require('../../functional/spec-runner/matcher').default);
-chai.config.truncateThreshold = 0;
