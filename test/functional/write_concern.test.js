@@ -9,10 +9,9 @@ const { withMonitoredClient } = require('./shared');
 
 // WriteConcernError test requires
 const { once } = require('events');
-const { MongoServerError } = require('../../../src/error');
 
 const mock = require('../tools/mock');
-const { MongoClient } = require('../../src');
+const { MongoClient, MongoServerError } = require('../../src');
 
 describe('Write Concern', function () {
   describe('spec tests', function () {
