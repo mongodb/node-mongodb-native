@@ -132,8 +132,15 @@ stream.on('end', () => client.close());
 ### MongoClientOptions interface
 
 With type hinting users should find that the options passed to a MongoClient are completely enumerated and easily discoverable.
-In 3.x there were options, like `maxPoolSize`, that were only respected when `useUnifiedTopology=true` was enabled, vs `poolSize` when `useUnifiedTopology=false`.
-We've de-duped these options and put together some hefty validation to help process all options upfront to give early warnings about incompatible settings in order to help your app get up and running correctly quicker!
+
+#### Connection Pool Options
+In driver 3.5, we introduced some new connection pool-related options -- `maxPoolSize` and `minPoolSize` -- which were only respected when `useUnifiedTopology` was set to `true`. These options had legacy equivalents named `poolSize` and `minSize`, respectively, which could be used both with and without `useUnifiedTopology` set to `true`.
+
+In driver 4.0, the legacy options have been removed, and only `maxPoolSize` and `minPoolSize` are supported. We have added options validation which should help you identify any usages of the old names.
+
+Please note that the default value for the maximum pool size has changed over time. In driver 3.x **without** `useUnifiedTopology` set to `true`, the default value was 100. In driver 3.x **with** `useUnifiedTopology` set to true, the default was 10.
+
+In this release, we have changed the default value for `maxPoolSize` to 100, in compliance with the drivers [connection pooling specification](https://github.com/mongodb/specifications/blob/master/source/connection-monitoring-and-pooling/connection-monitoring-and-pooling.rst).
 
 #### Unified Topology Only
 
