@@ -21,4 +21,4 @@ shopt -s expand_aliases # needed for `urlencode` alias
 set -x
 
 npm install aws4
-npx mocha test/functional/mongodb_aws.test.js
+npm run check:aws
