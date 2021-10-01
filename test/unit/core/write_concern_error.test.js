@@ -2,10 +2,9 @@
 const { Topology } = require('../../../src/sdam/topology');
 const mock = require('../../tools/mock');
 const { ReplSetFixture } = require('./common');
-const { MongoServerError, MongoWriteConcernError } = require('../../../src/error');
+const { MongoWriteConcernError } = require('../../../src/error');
 const { expect } = require('chai');
 const { ns } = require('../../../src/utils');
-const { once } = require('events');
 
 describe('WriteConcernError', function () {
   let test;
@@ -158,58 +157,6 @@ describe('WriteConcernError', function () {
           }
         });
       });
-    });
-  });
-
-  describe('errInfo property', () => {
-    let client;
-
-    beforeEach(async function () {
-      client = this.configuration.newClient({ monitorCommands: true });
-      await client.connect();
-    });
-
-    afterEach(async () => {
-      if (client) {
-        await client.close();
-        client.removeAllListeners();
-      }
-    });
-
-    it('should always be accessible', {
-      metadata: { requires: { mongodb: '>=5.0.0' } },
-      async test() {
-        try {
-          await client.db().collection('wc_details').drop();
-        } catch {
-          // don't care
-        }
-
-        const collection = await client
-          .db()
-          .createCollection('wc_details', { validator: { x: { $type: 'string' } } });
-
-        const evCapture = once(client, 'commandSucceeded');
-
-        let errInfoFromError;
-        try {
-          await collection.insertOne({ x: /not a string/ });
-          expect.fail('The insert should fail the validation that x must be a string');
-        } catch (error) {
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(error).to.have.property('code', 121);
-          expect(error).to.have.property('errInfo').that.is.an('object');
-          errInfoFromError = error.errInfo;
-        }
-
-        const commandSucceededEvents = await evCapture;
-        expect(commandSucceededEvents).to.have.lengthOf(1);
-        const ev = commandSucceededEvents[0];
-        expect(ev).to.have.nested.property('reply.writeErrors[0].errInfo').that.is.an('object');
-
-        const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
-        expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
-      }
     });
   });
 });

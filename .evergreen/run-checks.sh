@@ -14,3 +14,5 @@ echo "Typescript $(npx tsc -v)"
 npx tsc --noEmit mongodb.ts34.d.ts
 # check that resolution uses the downleveled types
 echo "import * as mdb from '.'" > file.ts && npx tsc --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
+
+npm run check:unit
