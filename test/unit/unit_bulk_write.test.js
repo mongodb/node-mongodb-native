@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('../tools/mock');
+const { MongoClient } = require('../../src');
 
 describe('Bulk Writes', function () {
   const test = {};
@@ -21,7 +22,7 @@ describe('Bulk Writes', function () {
   afterEach(() => mock.cleanup());
 
   it('should propagate errors', function (done) {
-    const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+    const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
 
     let close = e => {
       close = () => {};
