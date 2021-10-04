@@ -2,11 +2,15 @@
 
 const expect = require('chai').expect;
 const mock = require('../tools/mock');
+const { MongoClient } = require('../../src');
 
 describe('Client (unit)', function () {
-  let server;
+  let server, client;
 
-  afterEach(() => mock.cleanup());
+  afterEach(async () => {
+    await client.close();
+    await mock.cleanup();
+  });
   beforeEach(() => {
     return mock.createServer().then(_server => (server = _server));
   });
@@ -23,7 +27,7 @@ describe('Client (unit)', function () {
       }
     });
 
-    const client = this.configuration.newClient(`mongodb://${server.uri()}/`, {
+    client = new MongoClient(`mongodb://${server.uri()}/`, {
       driverInfo: {
         name: 'mongoose',
         version: '5.7.10',
@@ -32,8 +36,6 @@ describe('Client (unit)', function () {
     });
 
     return client.connect().then(() => {
-      this.defer(() => client.close());
-
       expect(handshake).to.have.nested.property('client.driver');
       expect(handshake).nested.property('client.driver.name').to.equal('nodejs|mongoose');
       expect(handshake)
