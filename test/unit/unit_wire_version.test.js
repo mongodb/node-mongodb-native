@@ -2,7 +2,7 @@
 
 const mock = require('../tools/mock');
 const { expect } = require('chai');
-const { MongoServerSelectionError } = require('../../src/error');
+const { MongoServerSelectionError, MongoClient } = require('../../src');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
@@ -11,7 +11,7 @@ const maxCompatErrMsg = `reports maximum wire version 1, but this version of the
 
 describe('Wire Protocol Version', () => {
   /** @type {mock.MockServer} */
-  let server;
+  let server, client;
 
   function setWireProtocolMessageHandler(min, max) {
     server.setMessageHandler(req => {
@@ -31,6 +31,7 @@ describe('Wire Protocol Version', () => {
     server = await mock.createServer();
   });
   afterEach(async () => {
+    await client.close();
     await mock.cleanup();
   });
 
@@ -39,7 +40,7 @@ describe('Wire Protocol Version', () => {
       setWireProtocolMessageHandler(Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER);
 
       /** @type {import('../../src/mongo_client').MongoClient} */
-      const client = this.configuration.newClient(
+      client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );
       try {
@@ -49,7 +50,6 @@ describe('Wire Protocol Version', () => {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
         expect(error).to.have.property('message').that.includes(minCompatErrMsg);
       }
-      await client.close();
     });
   });
 
@@ -58,7 +58,7 @@ describe('Wire Protocol Version', () => {
       setWireProtocolMessageHandler(1, 1);
 
       /** @type {import('../../src/mongo_client').MongoClient} */
-      const client = this.configuration.newClient(
+      client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );
       try {
@@ -68,7 +68,6 @@ describe('Wire Protocol Version', () => {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
         expect(error).to.have.property('message').that.includes(maxCompatErrMsg);
       }
-      await client.close();
     });
   });
 });
