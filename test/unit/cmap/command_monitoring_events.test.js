@@ -65,7 +65,6 @@ describe('Command Monitoring Events - unit/cmap', function () {
   describe('CommandStartedEvent', function () {
     const conn = { id: '<some id>', address: '<some address>' };
 
-    // Only run on single topology since these are unit tests
     it('should wrap a basic query option', function () {
       const db = 'test1';
       const coll = 'testingQuery';
