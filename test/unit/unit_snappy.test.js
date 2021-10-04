@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const mock = require('../tools/mock');
 const snappy = optionalRequire('snappy');
 const snappyVersion = optionalRequire('snappy/package.json').version;
+const { MongoClient } = require('../../src');
 
 function optionalRequire(mod) {
   try {
@@ -20,7 +21,7 @@ describe('Compression', function () {
   before(async function () {
     if (!snappy) this.skip();
     server = await mock.createServer();
-    client = this.configuration.newClient(`mongodb://${server.uri()}`, { compressors: 'snappy' });
+    client = new MongoClient(`mongodb://${server.uri()}`, { compressors: 'snappy' });
   });
 
   after(async function () {
