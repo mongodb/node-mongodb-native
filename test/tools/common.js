@@ -1,11 +1,11 @@
 'use strict';
 
-const mock = require('../../tools/mock');
-const { ObjectId, Timestamp, Binary } = require('bson');
+const mock = require('./mock');
+const BSON = require('../../src/bson');
 
 class ReplSetFixture {
   constructor() {
-    this.electionIds = [new ObjectId(), new ObjectId()];
+    this.electionIds = [new BSON.ObjectId(), new BSON.ObjectId()];
   }
 
   uri(dbName) {
@@ -132,11 +132,8 @@ class MongosFixture {
  */
 function genClusterTime(time) {
   return {
-    clusterTime: new Timestamp(time),
-    signature: {
-      hash: new Binary(Buffer.from('testing')),
-      keyId: 42
-    }
+    clusterTime: new BSON.Timestamp(time),
+    signature: { hash: new BSON.Binary('test'), keyId: new BSON.Long(1) }
   };
 }
 

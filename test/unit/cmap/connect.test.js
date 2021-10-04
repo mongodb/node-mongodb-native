@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 
 const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
-const { genClusterTime } = require('./common');
+const { genClusterTime } = require('../../tools/common');
 const { MongoNetworkError } = require('../../../src/error');
 const { HostAddress } = require('../../../src/utils');
 

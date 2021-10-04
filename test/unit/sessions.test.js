@@ -1,21 +1,13 @@
 'use strict';
 
-const mock = require('../../tools/mock');
-const BSON = require('../../../src/bson');
+const mock = require('../tools/mock');
 const { expect } = require('chai');
-const { genClusterTime, sessionCleanupHandler } = require('./common');
-const { Topology } = require('../../../src/sdam/topology');
-const { ServerSessionPool, ServerSession, ClientSession } = require('../../../src/sessions');
-const { now } = require('../../../src/utils');
+const { genClusterTime, sessionCleanupHandler } = require('../tools/common');
+const { Topology } = require('../../src/sdam/topology');
+const { ServerSessionPool, ServerSession, ClientSession } = require('../../src/sessions');
+const { now } = require('../../src/utils');
 
 let test = {};
-
-const generateClusterTime = time => {
-  return {
-    clusterTime: new BSON.Timestamp(time),
-    signature: { hash: new BSON.Binary('test'), keyId: new BSON.Long(1) }
-  };
-};
 
 describe('Sessions - unit/core', function () {
   describe('ClientSession', function () {
@@ -120,7 +112,7 @@ describe('Sessions - unit/core', function () {
           test: function () {
             const invalidInputs = Array(5)
               .fill(1)
-              .map(time => generateClusterTime(time));
+              .map(time => genClusterTime(time));
 
             delete invalidInputs[0].clusterTime;
             invalidInputs[1].clusterTime = null;
@@ -145,7 +137,7 @@ describe('Sessions - unit/core', function () {
         test: function () {
           const invalidInputs = Array(9)
             .fill(1)
-            .map(time => generateClusterTime(time));
+            .map(time => genClusterTime(time));
 
           // null types
           delete invalidInputs[0].signature;
@@ -174,7 +166,7 @@ describe('Sessions - unit/core', function () {
 
       it('should set the session clusterTime to the one provided if the existing session clusterTime is null', () => {
         expect(session).property('clusterTime').to.be.undefined;
-        const validTime = generateClusterTime(100);
+        const validTime = genClusterTime(100);
         session.advanceClusterTime(validTime);
         expect(session).property('clusterTime').to.equal(validTime);
 
@@ -184,7 +176,7 @@ describe('Sessions - unit/core', function () {
         expect(session).property('clusterTime').to.equal(validTime);
 
         // extra test case for valid alternative keyId type in signature
-        const alsoValidTime = generateClusterTime(200);
+        const alsoValidTime = genClusterTime(200);
         alsoValidTime.signature.keyId = 10;
         session.clusterTime = null;
         expect(session).property('clusterTime').to.be.null;
@@ -193,8 +185,8 @@ describe('Sessions - unit/core', function () {
       });
 
       it('should set the session clusterTime to the one provided if it is greater than the the existing session clusterTime', () => {
-        const validInitialTime = generateClusterTime(100);
-        const validGreaterTime = generateClusterTime(200);
+        const validInitialTime = genClusterTime(100);
+        const validGreaterTime = genClusterTime(200);
 
         session.advanceClusterTime(validInitialTime);
         expect(session).property('clusterTime').to.equal(validInitialTime);
@@ -204,9 +196,9 @@ describe('Sessions - unit/core', function () {
       });
 
       it('should leave the session clusterTime unchanged if it is less than or equal to the the existing session clusterTime', () => {
-        const validInitialTime = generateClusterTime(100);
-        const validEqualTime = generateClusterTime(100);
-        const validLesserTime = generateClusterTime(50);
+        const validInitialTime = genClusterTime(100);
+        const validEqualTime = genClusterTime(100);
+        const validLesserTime = genClusterTime(50);
 
         session.advanceClusterTime(validInitialTime);
         expect(session).property('clusterTime').to.equal(validInitialTime);
