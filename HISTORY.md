@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.3](https://github.com/mongodb/node-mongodb-native/compare/v4.1.2...v4.1.3) (2021-10-05)
+
+
+### Bug Fixes
+
+* **NODE-3609:** correct listDatabases return type ([#2986](https://github.com/mongodb/node-mongodb-native/issues/2986)) ([a8e9938](https://github.com/mongodb/node-mongodb-native/commit/a8e9938abcb00b67816438fb7c9db890e35d63c9))
+* **NODE-3624:** Incorrect default aggregation generic type ([#2987](https://github.com/mongodb/node-mongodb-native/issues/2987)) ([440517e](https://github.com/mongodb/node-mongodb-native/commit/440517edb3980135dd9fcdbc9e96b5fec8baa067))
+
 ### [4.1.2](https://github.com/mongodb/node-mongodb-native/compare/v4.1.1...v4.1.2) (2021-09-14)
 
 
