@@ -55,8 +55,7 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
 export type Filter<TSchema> = {
   [P in keyof TSchema]?: Condition<TSchema[P]>;
-} &
-  RootFilterOperators<TSchema>;
+} & RootFilterOperators<TSchema>;
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
@@ -255,8 +254,7 @@ export type SetFields<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
     | OptionalId<Flatten<TSchema[key]>>
     | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
-} &
-  NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>) & {
+} & NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>) & {
   readonly [key: string]: AddToSetOperators<any> | any;
 };
 
@@ -265,8 +263,7 @@ export type PushOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
     | Flatten<TSchema[key]>
     | ArrayOperator<Array<Flatten<TSchema[key]>>>;
-} &
-  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+} & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: ArrayOperator<any> | any;
 };
 
@@ -275,16 +272,14 @@ export type PullOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
     | Partial<Flatten<TSchema[key]>>
     | FilterOperations<Flatten<TSchema[key]>>;
-} &
-  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+} & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: FilterOperators<any> | any;
 };
 
 /** @public */
 export type PullAllOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?: TSchema[key];
-} &
-  NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
+} & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: ReadonlyArray<any>;
 };
 
