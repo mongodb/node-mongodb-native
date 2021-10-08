@@ -90,8 +90,7 @@ describe('ReplSet (mocks)', function () {
       requires: {
         generators: true,
         topology: 'single'
-      },
-      ignore: { travis: true }
+      }
     },
 
     test: function (done) {

@@ -26,7 +26,10 @@
     "inlineSources": false,
     // Prevents web types from being suggested by vscode.
     "types": ["node"],
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // TODO(NODE-3659): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
+    "useUnknownInCatchVariables": false
   },
   "ts-node": {
     "transpileOnly": true,

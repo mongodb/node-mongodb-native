@@ -5,6 +5,8 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 npm run check:lint
 
+npm run check:unit
+
 echo "Typescript $(npx tsc -v)"
 # check resolution uses the default latest types
 echo "import * as mdb from '.'" > file.ts && npx tsc --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
@@ -14,5 +16,3 @@ echo "Typescript $(npx tsc -v)"
 npx tsc --noEmit mongodb.ts34.d.ts
 # check that resolution uses the downleveled types
 echo "import * as mdb from '.'" > file.ts && npx tsc --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
-
-npm run check:unit

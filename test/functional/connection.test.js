@@ -85,8 +85,7 @@ describe('Connection - functional', function () {
 
   it('should correctly connect to server using big connection pool', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
-      ignore: { travis: true }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function (done) {

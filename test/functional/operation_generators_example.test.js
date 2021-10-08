@@ -4528,8 +4528,7 @@ describe('Operation (Generators)', function () {
         generators: true,
         mongodb: '>=3.2.0',
         topology: 'single'
-      },
-      ignore: { travis: true }
+      }
     },
 
     test: function () {
