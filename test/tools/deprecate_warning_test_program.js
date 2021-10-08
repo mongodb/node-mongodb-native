@@ -2,7 +2,7 @@
 
 // prevent this file from being imported; it is only for use in functional/deprecate_warning_tests.js
 if (require.main !== module) {
-  return;
+  throw new Error('This file is not meant to be imported');
 }
 
 const deprecateOptions = require('../../src/utils').deprecateOptions;
