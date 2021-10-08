@@ -28,7 +28,7 @@
     "types": ["node"],
     "forceConsistentCasingInFileNames": true,
 
-    // TODO(NODE-): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
+    // TODO(NODE-3659): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
     "useUnknownInCatchVariables": false
   },
   "ts-node": {
