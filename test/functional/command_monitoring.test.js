@@ -6,10 +6,10 @@ const {
   filterOutCommands,
   ignoreNsNotFound
 } = require('./shared');
-const { loadSpecTests } = require('../spec');
+const { loadSpecTests } = require('../../spec');
 const { expect } = require('chai');
-const { ReadPreference } = require('../../src/read_preference');
-const { runUnifiedTest } = require('./unified-spec-runner/runner');
+const { ReadPreference } = require('../../../src/read_preference');
+const { runUnifiedTest } = require('./../unified-spec-runner/runner');
 
 describe('APM', function () {
   before(function () {
