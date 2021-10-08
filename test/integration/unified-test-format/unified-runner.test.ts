@@ -1,5 +1,5 @@
 import { loadSpecTests } from '../../spec/index';
-import { runUnifiedSuite } from './runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const SKIPPED_TESTS = [
   // commitTransaction retry seems to be swallowed by mongos in this case

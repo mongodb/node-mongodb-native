@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const { loadSpecTests } = require('../spec/index');
-const { runUnifiedTest } = require('./unified-spec-runner/runner');
+const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
 
 describe('Versioned API', function () {
   it('should throw an error if serverApi version is provided via the uri', {
