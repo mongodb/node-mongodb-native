@@ -1,5 +1,11 @@
 'use strict';
-const { eachAsync, now, makeInterruptibleAsyncInterval, BufferPool } = require('../../src/utils');
+const {
+  eachAsync,
+  executeLegacyOperation,
+  now,
+  makeInterruptibleAsyncInterval,
+  BufferPool
+} = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
 
@@ -245,6 +251,49 @@ describe('utils', function () {
         expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
         expect(buffer).property('length').to.equal(1);
         expect(buffer.read(1)).to.eql(Buffer.from([5]));
+      });
+    });
+  });
+
+  context('executeLegacyOperation', function () {
+    it('should call callback with errors on throw errors, and rethrow error', function () {
+      const expectedError = new Error('THIS IS AN ERROR');
+      let callbackError, caughtError;
+
+      const topology = {
+        logicalSessionTimeoutMinutes: null
+      };
+      const operation = () => {
+        throw expectedError;
+      };
+
+      const callback = err => (callbackError = err);
+      const options = { skipSessions: true };
+
+      try {
+        executeLegacyOperation(topology, operation, [{}, callback], options);
+      } catch (e) {
+        caughtError = e;
+      }
+
+      expect(callbackError).to.equal(expectedError);
+      expect(caughtError).to.equal(expectedError);
+    });
+
+    it('should reject promise with errors on throw errors, and rethrow error', function () {
+      const expectedError = new Error('THIS IS AN ERROR');
+
+      const topology = {
+        logicalSessionTimeoutMinutes: null
+      };
+      const operation = () => {
+        throw expectedError;
+      };
+
+      const options = { skipSessions: true };
+
+      return executeLegacyOperation(topology, operation, [{}, null], options).then(null, err => {
+        expect(err).to.equal(expectedError);
       });
     });
   });

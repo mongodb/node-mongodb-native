@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('../../tools/mock');
-const { ReplSetFixture } = require('../../unit/core/common');
+const { ReplSetFixture } = require('../../tools/common');
 
 const test = {};
 describe('Sessions - client/unit', function () {

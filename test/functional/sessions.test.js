@@ -6,7 +6,7 @@ const { MongoServerError } = require('../../src');
 const { setupDatabase, withMonitoredClient } = require('./shared');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
-const { runUnifiedTest } = require('./unified-spec-runner/runner');
+const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
 
 const ignoredCommands = ['ismaster'];
 const test = {

@@ -6,7 +6,7 @@ const { Topology } = require('../../src/sdam/topology');
 const { ClientSession } = require('../../src/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
-const { runUnifiedTest } = require('./unified-spec-runner/runner');
+const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
 const { MongoNetworkError } = require('../../src/error');
 
 function ignoreNsNotFoundForListIndexes(err) {

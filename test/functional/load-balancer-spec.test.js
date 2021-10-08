@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 const { loadSpecTests } = require('../spec/index');
-const { runUnifiedSuite } = require('../functional/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../tools/unified-spec-runner/runner');
 
 const SKIP = [
   // Verified they use the same connection but the Node implementation executes
