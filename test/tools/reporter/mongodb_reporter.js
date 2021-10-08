@@ -132,7 +132,10 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
         timestamp = timestamp ? timestamp.toISOString().split('.')[0] : '';
 
         output.testSuites.push({
-          package: suite.file.includes('functional') ? 'Functional' : 'Unit',
+          package:
+            suite.file.includes('functional') || suite.file.includes('integration')
+              ? 'Functional'
+              : 'Unit',
           id,
           name: className,
           timestamp,
