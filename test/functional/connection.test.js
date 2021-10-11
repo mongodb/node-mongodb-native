@@ -83,7 +83,7 @@ describe('Connection - functional', function () {
     client.connect();
   });
 
-  it('should correctly connect to server using big connection pool', {
+  it.skip('should correctly connect to server using big connection pool', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

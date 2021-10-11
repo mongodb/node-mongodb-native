@@ -4520,7 +4520,7 @@ describe('Operation (Generators)', function () {
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
    */
-  it('Correctly handle sample aggregation', {
+  it.skip('Correctly handle sample aggregation', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
