@@ -42,23 +42,6 @@ export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 export type AnyOptions = Document;
 
 /**
- * Add a readonly enumerable property.
- * @internal
- */
-export function getSingleProperty(
-  obj: AnyOptions,
-  name: string | number | symbol,
-  value: unknown
-): void {
-  Object.defineProperty(obj, name, {
-    enumerable: true,
-    get() {
-      return value;
-    }
-  });
-}
-
-/**
  * Throws if collectionName is not a valid mongodb collection namespace.
  * @internal
  */
@@ -183,17 +166,6 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function isObject(arg: unknown): arg is object {
   return '[object Object]' === Object.prototype.toString.call(arg);
-}
-
-/** @internal */
-export function decorateCommand(command: Document, options: Document, exclude: string[]): Document {
-  for (const name in options) {
-    if (!exclude.includes(name)) {
-      command[name] = options[name];
-    }
-  }
-
-  return command;
 }
 
 /** @internal */
@@ -655,11 +627,6 @@ export function maybePromise<T>(
 /** @internal */
 export function databaseNamespace(ns: string): string {
   return ns.split('.')[0];
-}
-
-/** @internal */
-export function collectionNamespace(ns: string): string {
-  return ns.split('.').slice(1).join('.');
 }
 
 /**
