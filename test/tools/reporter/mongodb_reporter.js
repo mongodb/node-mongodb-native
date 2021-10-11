@@ -157,6 +157,8 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
       console.log(chalk.bold('wrote xunit.xml'));
     } catch (error) {
       console.error(chalk.red(`Failed to output xunit report! ${error}`));
+    } finally {
+      if (ctrlC) process.exit(1);
     }
   }
 
