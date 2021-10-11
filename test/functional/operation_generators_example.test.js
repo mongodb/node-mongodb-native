@@ -4519,6 +4519,7 @@ describe('Operation (Generators)', function () {
 
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+   * TODO(NODE-3664): Unskip
    */
   it.skip('Correctly handle sample aggregation', {
     // Add a tag that our runner can trigger on

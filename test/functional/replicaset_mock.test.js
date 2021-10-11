@@ -85,6 +85,7 @@ describe('ReplSet (mocks)', function () {
     }
   });
 
+  // TODO(NODE-3664): Unskip
   it.skip('Should correctly print warning and error when no mongos proxies in seed list', {
     metadata: {
       requires: {
