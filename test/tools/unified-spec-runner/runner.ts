@@ -9,6 +9,7 @@ import { matchesEvents } from './match';
 import { satisfies as semverSatisfies } from 'semver';
 import { MongoClient } from '../../../src/mongo_client';
 import { TopologyType } from '../../../src/sdam/common';
+import { ejson } from '../utils';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
@@ -77,7 +78,14 @@ export async function runUnifiedTest(
   let entities;
   try {
     trace('\n starting test:');
-    await utilClient.connect();
+    try {
+      await utilClient.connect();
+    } catch (error) {
+      console.error(
+        ejson`failed to connect utilClient ${utilClient.s.url} - ${utilClient.options}`
+      );
+      throw error;
+    }
 
     // terminate all sessions before each test suite
     await terminateOpenTransactions(utilClient);

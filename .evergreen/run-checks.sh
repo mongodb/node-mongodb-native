@@ -3,6 +3,14 @@ set -o errexit # Exit the script with error if any of the commands fail
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
+set -o xtrace
+
+## Attempt to update our EVG config
+# if it changes, crash so that any gen script changes are forced to be run before pushing
+npm run build:config
+git diff --exit-code ./.evergreen/config.yml
+
+## Checks typescript, eslint, and prettier
 npm run check:lint
 
 npm run check:unit

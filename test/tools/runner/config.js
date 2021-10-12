@@ -150,6 +150,10 @@ class TestConfiguration {
       delete dbOptions.writeConcern;
     }
 
+    if (this.topologyType === TopologyType.LoadBalanced) {
+      dbOptions.loadBalanced = true;
+    }
+
     const urlOptions = {
       protocol: 'mongodb',
       slashes: true,
@@ -245,6 +249,9 @@ class TestConfiguration {
     if (options.useMultipleMongoses) {
       if (this.isLoadBalanced) {
         const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
+        if (multiUri.isSRV) {
+          throw new Error('You cannot pass an SRV connection string to multiMongosLoadBalancerUri');
+        }
         actualHostsString = multiUri.hosts[0].toString();
       } else {
         expect(this.options.hostAddresses).to.have.length.greaterThan(1);

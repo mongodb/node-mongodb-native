@@ -7,6 +7,7 @@ const util = require('util');
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
+const { EJSON } = require('bson');
 chai.use(sinonChai);
 
 function makeTestFunction(config) {
@@ -295,7 +296,37 @@ function shouldRunServerlessTest(testRequirement, isServerless) {
   }
 }
 
+/**
+ * Use as a template string tag to stringify objects in the template string
+ * Attempts to use EJSON (to make type information obvious)
+ * falls back to util.inspect if there's an error (circular reference)
+ */
+function ejson(strings, ...values) {
+  const sb = [strings[0]];
+  for (const [idx, value] of values.entries()) {
+    if (typeof value === 'object') {
+      let stringifiedObject;
+      try {
+        stringifiedObject = EJSON.stringify(value, { relaxed: false });
+      } catch (error) {
+        stringifiedObject = util.inspect(value, {
+          depth: Infinity,
+          showHidden: true,
+          compact: true
+        });
+      }
+      sb.push(stringifiedObject);
+    } else {
+      sb.push(String(value));
+    }
+    sb.push(strings[idx + 1]);
+  }
+
+  return sb.join('');
+}
+
 module.exports = {
+  ejson,
   EventCollector,
   makeTestFunction,
   ensureCalledWith,
