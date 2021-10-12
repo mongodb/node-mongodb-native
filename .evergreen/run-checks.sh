@@ -7,7 +7,7 @@ set -o xtrace
 
 ## Attempt to update our EVG config
 # if it changes, crash so that any gen script changes are forced to be run before pushing
-npm run build:config
+npm run build:evergreen
 git diff --exit-code ./.evergreen/config.yml
 
 ## Checks typescript, eslint, and prettier
