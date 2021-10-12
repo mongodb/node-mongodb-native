@@ -240,6 +240,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: pinned connection is released after a transient non-network CRUD error
+    runOnRequirements:
+      - serverless: forbid # (CLOUDP-88216) Serverless does not append error labels to errors triggered by failpoints.
     operations:
       - name: failPoint
         object: testRunner
@@ -280,6 +282,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: pinned connection is released after a transient network CRUD error
+    runOnRequirements:
+      - serverless: forbid # (CLOUDP-88216) Serverless does not append error labels to errors triggered by failpoints.
     operations:
       - name: failPoint
         object: testRunner
@@ -323,6 +327,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: pinned connection is released after a transient non-network commit error
+    runOnRequirements:
+      - serverless: forbid # (CLOUDP-88216) Serverless does not append error labels to errors triggered by failpoints.
     operations:
       - name: failPoint
         object: testRunner

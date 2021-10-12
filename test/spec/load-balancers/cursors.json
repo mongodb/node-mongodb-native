@@ -902,6 +902,11 @@
     },
     {
       "description": "listCollections pins the cursor to a connection",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "listCollections",
@@ -991,6 +996,11 @@
     },
     {
       "description": "listIndexes pins the cursor to a connection",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "createIndex",
@@ -1151,6 +1161,11 @@
     },
     {
       "description": "change streams pin to a connection",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "createChangeStream",

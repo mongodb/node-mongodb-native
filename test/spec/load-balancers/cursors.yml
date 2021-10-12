@@ -357,6 +357,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: listCollections pins the cursor to a connection
+    runOnRequirements:
+      - serverless: forbid # CLOUDP-98562 listCollections batchSize is ignored on serverless.
     operations:
       - name: listCollections
         object: *database0
@@ -396,6 +398,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: listIndexes pins the cursor to a connection
+    runOnRequirements:
+      - serverless: forbid
     operations:
       # There is an automatic index on _id so we create two more indexes to force multiple batches with batchSize=2.
       - name: createIndex
@@ -464,6 +468,8 @@ tests:
           - connectionCheckedInEvent: {}
 
   - description: change streams pin to a connection
+    runOnRequirements:
+      - serverless: forbid # Serverless does not support change streams.
     operations:
       - name: createChangeStream
         object: *collection0
