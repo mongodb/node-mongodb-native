@@ -293,6 +293,54 @@ functions:
           export NODE_LTS_NAME='${NODE_LTS_NAME}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+  run socks5 tests:
+    - command: shell.exec
+      type: test
+      params:
+        silent: true
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          cat <<EOT > prepare_client_encryption.sh
+          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
+          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: >
+          ${PREPARE_SHELL}
+
+
+          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo
+          "/opt/mongodbtoolchain/v3/bin/python3")
+
+          export PROJECT_DIRECTORY="$(pwd)"
+
+          export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
+
+          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+
+          export MONGODB_URI="${MONGODB_URI}"
+
+          export SSL="${SSL}"
+
+
+          # Disable xtrace (just in case it was accidentally set).
+
+          set +x
+
+          . ./prepare_client_encryption.sh
+
+          rm -f ./prepare_client_encryption.sh
+
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-socks5-tests.sh
   run kerberos tests:
     - command: shell.exec
       type: test
@@ -907,6 +955,27 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
+  - name: test-socks5
+    tags: []
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: run socks5 tests
+  - name: test-socks5-tls
+    tags: []
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          SSL: ssl
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: run socks5 tests
+        vars:
+          SSL: ssl
   - name: test-ocsp-valid-cert-server-staples
     tags:
       - ocsp
@@ -1683,6 +1752,8 @@ buildvariants:
       - test-atlas-data-lake
       - test-auth-kerberos
       - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -1753,6 +1824,8 @@ buildvariants:
       - test-load-balancer
       - test-auth-kerberos
       - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple
@@ -1819,6 +1892,8 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
+      - test-socks5
+      - test-socks5-tls
       - test-ocsp-valid-cert-server-staples
       - test-ocsp-invalid-cert-server-staples
       - test-ocsp-valid-cert-server-does-not-staple

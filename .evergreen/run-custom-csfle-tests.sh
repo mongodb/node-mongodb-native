@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+set +o xtrace # Do not write AWS credentials to stderr
+
 # Initiail checks for running these tests
 if [ -z ${AWS_ACCESS_KEY_ID+omitted} ]; then echo "AWS_ACCESS_KEY_ID is unset" && exit 1; fi
 if [ -z ${AWS_SECRET_ACCESS_KEY+omitted} ]; then echo "AWS_SECRET_ACCESS_KEY is unset" && exit 1; fi
@@ -34,10 +36,12 @@ pushd ../csfle-deps-tmp
 
 rm -rf libmongocrypt mongo-c-driver
 
-git clone https://github.com/mongodb/libmongocrypt.git
+#git clone https://github.com/mongodb/libmongocrypt.git
+git clone https://github.com/mongodb-js/libmongocrypt.git
 pushd libmongocrypt
 git fetch --tags
-git checkout "$CSFLE_GIT_REF" -b csfle-custom
+#git checkout "$CSFLE_GIT_REF" -b csfle-custom
+git checkout "ea3f6252b55cf235e8adf3a04930479d6e5ed11f" -b csfle-custom
 popd # libmongocrypt
 
 git clone https://github.com/mongodb/mongo-c-driver.git

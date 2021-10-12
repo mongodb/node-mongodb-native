@@ -46,6 +46,10 @@ export class Encrypter {
       options.autoEncryption.metadataClient = this.getInternalClient(client, uri, options);
     }
 
+    if (options.proxyOptions) {
+      options.autoEncryption.proxyOptions = options.proxyOptions;
+    }
+
     options.autoEncryption.bson = Object.create(null);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     options.autoEncryption.bson!.serialize = serialize;

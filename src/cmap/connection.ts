@@ -125,6 +125,14 @@ export interface GetMoreOptions extends CommandOptions {
 }
 
 /** @public */
+export interface ProxyOptions {
+  host: string;
+  port?: number;
+  username?: string;
+  password?: string;
+}
+
+/** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
     StreamDescriptionOptions {
@@ -146,6 +154,7 @@ export interface ConnectionOptions
   noDelay?: boolean;
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
+  proxyOptions?: ProxyOptions;
 
   metadata: ClientMetadata;
 }
@@ -216,7 +225,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
     this.id = options.id;
-    this.address = streamIdentifier(stream);
+    this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
@@ -757,7 +766,13 @@ function messageHandler(conn: Connection) {
   };
 }
 
-function streamIdentifier(stream: Stream) {
+function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
+  if (options.proxyOptions) {
+    // If proxy options are specified, the properties of `stream` itself
+    // will not accurately reflect what endpoint this is connected to.
+    return options.hostAddress.toString();
+  }
+
   if (typeof stream.address === 'function') {
     return `${stream.remoteAddress}:${stream.remotePort}`;
   }

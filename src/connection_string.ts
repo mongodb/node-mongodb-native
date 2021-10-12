@@ -6,6 +6,7 @@ import { URLSearchParams } from 'url';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
+import type { ProxyOptions } from './cmap/connection';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
@@ -454,6 +455,23 @@ export function parseOptions(
     }
   }
 
+  if (mongoOptions.proxyOptions) {
+    const { proxyOptions } = mongoOptions;
+    if (
+      !proxyOptions.host &&
+      (proxyOptions.port || proxyOptions.username || proxyOptions.password)
+    ) {
+      throw new MongoParseError('Must specify proxyHost if other proxy options are passed');
+    }
+
+    if (
+      (proxyOptions.username && !proxyOptions.password) ||
+      (!proxyOptions.username && proxyOptions.password)
+    ) {
+      throw new MongoParseError('Can only specify both of proxy username/password or neither');
+    }
+  }
+
   return mongoOptions;
 }
 
@@ -860,6 +878,33 @@ export const OPTIONS = {
   promoteValues: {
     type: 'boolean'
   },
+  proxyHost: {
+    target: 'proxyOptions',
+    transform({ values: [value], options }): ProxyOptions {
+      return { ...options.proxyOptions, host: String(value) };
+    }
+  } as OptionDescriptor,
+  proxyOptions: {
+    type: 'record'
+  },
+  proxyPassword: {
+    target: 'proxyOptions',
+    transform({ values: [value], options }): ProxyOptions {
+      return { host: '', ...options.proxyOptions, password: String(value) || undefined };
+    }
+  } as OptionDescriptor,
+  proxyPort: {
+    target: 'proxyOptions',
+    transform({ values: [value], options }): ProxyOptions {
+      return { host: '', ...options.proxyOptions, port: Number(value) };
+    }
+  } as OptionDescriptor,
+  proxyUsername: {
+    target: 'proxyOptions',
+    transform({ values: [value], options }): ProxyOptions {
+      return { host: '', ...options.proxyOptions, username: String(value) || undefined };
+    }
+  } as OptionDescriptor,
   raw: {
     default: false,
     type: 'boolean'

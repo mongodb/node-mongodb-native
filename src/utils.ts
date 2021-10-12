@@ -1356,8 +1356,15 @@ export class HostAddress {
     return new HostAddress(s);
   }
 
+  static fromHostPort(host: string, port: number): HostAddress {
+    if (host.includes(':')) {
+      host = `[${host}]`; // IPv6 address
+    }
+    return HostAddress.fromString(`${host}:${port}`);
+  }
+
   static fromSrvRecord({ name, port }: SrvRecord): HostAddress {
-    return HostAddress.fromString(`${name}:${port}`);
+    return HostAddress.fromHostPort(name, port);
   }
 }
 
