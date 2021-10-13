@@ -36,17 +36,18 @@ describe('Tailable cursor tests', function () {
           expect(res).property('insertedId').to.exist;
 
           const cursor = collection.find({}, { batchSize: 2, tailable: true, awaitData: true });
-          const doc = await cursor.next();
-          expect(doc).to.exist;
+          const doc0 = await cursor.next();
+          expect(doc0).to.have.property('a', 1);
 
           // After 300ms make an insert
           const later = runLater(async () => {
-            const res = await collection.insertOne({ a: 1 });
+            const res = await collection.insertOne({ b: 2 });
             expect(res).property('insertedId').to.exist;
           }, 300);
 
           const start = new Date();
-          await cursor.next();
+          const doc1 = await cursor.next();
+          expect(doc1).to.have.property('b', 2);
           const end = new Date();
 
           await later; // make sure this finished, without a failure
