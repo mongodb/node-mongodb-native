@@ -153,7 +153,6 @@ Reviewers should use the following questions to evaluate the implementation for 
      - Have the external documentation requirements been captured in jira?
 
 [conventional-commit-style]: https://www.conventionalcommits.org/en/v1.0.0/
-[changelog]: CHANGELOG.md
 [code-of-conduct]: CODE_OF_CONDUCT.md
 [github-perfect-pr]: https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/
 [mdb-core-values]: https://www.mongodb.com/company/
