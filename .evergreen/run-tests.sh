@@ -52,7 +52,8 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  if [[ $NODE_VERSION -ge 12 ]]; then
+  NODE_MAJOR_VERSION=$(echo $NODE_VERSION |  cut -d. -f1)
+  if [[ $NODE_MAJOR_VERSION -ge 12 ]]; then
     npm install mongodb-client-encryption@">=2.0.0-beta.0"
   else
     npm install mongodb-client-encryption@"^1.2.7"
