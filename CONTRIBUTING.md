@@ -117,7 +117,40 @@ Below are some conventions that aren't enforced by any of our tooling but we non
    wish to make, if applicable.
 1. Add any appropriate tests.
 1. Make your code or other changes.
-1. Review guidelines such as [How to write the perfect pull request][github-perfect-pr], thanks!
+1. Please adhere to the guidelines in [How to write the perfect pull request][github-perfect-pr], thanks!
+1. Please perform a self-review using the reviewer guidelines below prior to taking the PR out of draft state.
+
+### Reviewer Guidelines
+
+Reviewers should use the following questions to evaluate the implementation for correctness/completeness and ensure all housekeeping items have been addressed prior to merging the code.
+
+- Correctness/completeness
+  1. Do you fully understand the implementation? (Would you be comfortable explaining how this code works to someone else?)
+  1. Does the code meet the acceptance criteria?
+     - If there is an associated spec, does the code match the spec?
+  1. Is the intention of the code captured in relevant tests?
+     - Does the description of each test accurately represent the assertions?
+     - For any test explicitly called out on the ticket as desirable to implement, was it implemented?
+     - If there are prose spec tests, were they implemented?
+     - If there are associated automated spec tests, were they all pulled in and are they all running and correctly interpreting the spec inputs?
+       - Are any runner changes needed to process new input types?
+  1. Could these changes impact any adjacent functionality?
+  1. Are there any errors that might not be correctly caught or propagated?
+  1. Is there anything that could impact performance?
+  1. Are there any race conditions in the functional code or tests?
+  1. Can you think of a better way to implement any of the functional code or tests? "Better" means any combination of:
+     - more performant
+     - better organized / easier to understand
+     - easier to maintain (easier to change, harder to accidentally break)
+- Housekeeping
+  1. Does the title and description of the PR reference the correct jira ticket and does it use the correct conventional commit type (e.g., fix, feat, test, breaking change etc)?
+     - If the change is breaking, ensure there is an exclamation mark after the scope (e.g., "fix(NODE-xxx)!: \<description\>" )
+  1. If there are new TODOs, has a related JIRA ticket been created?
+  1. Are symbols correctly marked as internal or public?
+  1. Do the Typescript types match expected runtime usage? Are there tests for new or updated types?
+  1. Should any documentation be updated?
+     - Has the relevant internal documentation been updated as part of the PR?
+     - Have the external documentation requirements been captured in jira?
 
 [conventional-commit-style]: https://www.conventionalcommits.org/en/v1.0.0/
 [changelog]: CHANGELOG.md
