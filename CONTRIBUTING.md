@@ -119,8 +119,6 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 1. Make your code or other changes.
 1. Review guidelines such as [How to write the perfect pull request][github-perfect-pr], thanks!
 
-Take a look at [Github Flow][github-flow] for a more detailed explanation of this process.
-
 [conventional-commit-style]: https://www.conventionalcommits.org/en/v1.0.0/
 [changelog]: CHANGELOG.md
 [code-of-conduct]: CODE_OF_CONDUCT.md
@@ -130,5 +128,4 @@ Take a look at [Github Flow][github-flow] for a more detailed explanation of thi
 [nvm-windows]: https://github.com/coreybutler/nvm-windows#installation--upgrades
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
 [macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
-[github-flow]: https://guides.github.com/introduction/flow/
 [workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
