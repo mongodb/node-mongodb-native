@@ -22,7 +22,7 @@ While it isn't required we have a minimum node version requirement (look in [pac
 ### VSCode Setup
 
 - Save the the workspace file [mongodbNodeDriver.code-workspace][workspace-file] next to where you have the driver cloned to and open this in VSCode.
-Double check that the `folders.path` at the top of the file's json is correct.
+  Double check that the `folders.path` at the top of the file's json is correct.
 
 - We recommended these extensions:
   - [eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
@@ -62,25 +62,29 @@ If you just want to get formatting and linting working automatically use these s
   - You can prefix the npm test with a MONGODB_URI environment variable to point the tests to the correct deployment
     - `env MONGODB_URI=mongodb://localhost:27017 npm test`
   - If you are running against more than a standalone make sure your ulimit settings are in accordance with mongo's recommendations
-  - Changing the settings on the latest versions of [macos can be tricky read here][macos-ulimt] (unless you know you need it you shouldn't have to do the complicated maxproc steps)
+  - Changing the settings on the latest versions of macos can be tricky: [read here][macos-ulimt] (unless you know you need it you shouldn't have to do the complicated maxproc steps)
 - How can I run just one test?
   - To run a single test, use mocha's grep flag: `npm run test -- -g 'test name'`
   - If it's easier you can also isolate tests by adding `.only` Example: `it.only(‘cool test’, function() {})`
 
 ### Commit messages
 
-Please follow the [Angular commit style][angular-commit-style].
+Please follow the [conventional commit style][conventional-commit-style].
 The format should look something like this (note the blank lines):
 
 ```txt
 <type>(<scope>): <subject>
 
 <body>
-
-NODE-XXXX
 ```
 
-If there is a relevant NODE ticket number it should be in the footer section of the Angular style commit.
+If there is a relevant NODE ticket number it should be referenced in the scope portion of the commit.
+
+Note that a BREAKING CHANGE commit should include an exclamation mark after the scope, for example:
+
+```text
+feat(NODE-xxxx)!: created new version api, removed support for old version
+```
 
 This helps the team automate [HISTORY.md](HISTORY.md) generation.
 These are the commit types we make use of:
@@ -98,14 +102,11 @@ These are the commit types we make use of:
 
 Below are some conventions that aren't enforced by any of our tooling but we nonetheless do our best to adhere to:
 
-- **Ensure Promise usage is optional**
-  - There is a measurable overhead to Promise usage vs callbacks.
-  To support the broadest of driver usage scenarios we maintain an internal callback api while exposing a surface layer Promise API.
 - **Disallow `export default` syntax**
   - For our use case it is best if all imports / exports remain named.
 - **As of 4.0 all code in src is in Typescript**
   - Typescript provides a nice developer experience
-  As a product of using TS we should be using es6 syntax features whenever possible.
+    As a product of using TS we should be using es6 syntax features whenever possible.
 - **Errors**
   - Error messages should be sentence case, and have no periods at the end.
   - Use driver-specific error types where possible (not just `Error`, but classes that extend `MongoError`, e.g. `MongoNetworkError`)
@@ -120,7 +121,7 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 
 Take a look at [Github Flow][github-flow] for a more detailed explanation of this process.
 
-[angular-commit-style]: https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits
+[conventional-commit-style]: https://www.conventionalcommits.org/en/v1.0.0/
 [changelog]: CHANGELOG.md
 [code-of-conduct]: CODE_OF_CONDUCT.md
 [github-perfect-pr]: https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/
