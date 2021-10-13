@@ -26,12 +26,13 @@ const SKIP = [
 
   ...(process.env.SERVERLESS
     ? [
+        // TODO(NODE-2471): Unskip these when there isn't a ping command sent when credentials are defined
         'no connection is pinned if all documents are returned in the initial batch',
         'pinned connections are returned when the cursor is drained',
         'pinned connections are returned to the pool when the cursor is closed',
         'pinned connections are returned after a network error during a killCursors request',
         'aggregate pins the cursor to a connection',
-        //'errors during the initial connection hello are ignored',
+        'errors during the initial connection hello are ignored',
         'all operations go to the same mongos',
         'transaction can be committed multiple times',
         'pinned connection is not released after a non-transient CRUD error',

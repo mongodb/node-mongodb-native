@@ -325,7 +325,20 @@ function ejson(strings, ...values) {
   return sb.join('');
 }
 
+/**
+ * Run an async function after some set timeout
+ * @param {() => Promise<void>} fn - function to run
+ * @param {number} ms - timeout in MS
+ * @returns {Promise<void>}
+ */
+const runLater = (fn, ms) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => fn().then(resolve).catch(reject), ms);
+  });
+};
+
 module.exports = {
+  runLater,
   ejson,
   EventCollector,
   makeTestFunction,
