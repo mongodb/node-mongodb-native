@@ -51,11 +51,11 @@
 - Senmiao Liu
 - heroic
 - gitfy
+- Eric Adum
 
 ## Maintainers
 
 - Neal Beeken <<neal.beeken@mongodb.com>>
-- Eric Adum <<eric.adum@mongodb.com>>
 - Durran Jordan <<durran@gmail.com>>
 - Daria Pardue <<daria.pardue@mongodb.com>>
 
