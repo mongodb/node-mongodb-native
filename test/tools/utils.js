@@ -302,7 +302,7 @@ function shouldRunServerlessTest(testRequirement, isServerless) {
  * falls back to util.inspect if there's an error (circular reference)
  */
 function ejson(strings, ...values) {
-  const sb = [strings[0]];
+  const stringParts = [strings[0]];
   for (const [idx, value] of values.entries()) {
     if (typeof value === 'object') {
       let stringifiedObject;
@@ -315,14 +315,14 @@ function ejson(strings, ...values) {
           compact: true
         });
       }
-      sb.push(stringifiedObject);
+      stringParts.push(stringifiedObject);
     } else {
-      sb.push(String(value));
+      stringParts.push(String(value));
     }
-    sb.push(strings[idx + 1]);
+    stringParts.push(strings[idx + 1]);
   }
 
-  return sb.join('');
+  return stringParts.join('');
 }
 
 /**
