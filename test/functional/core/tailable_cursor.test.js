@@ -1,6 +1,5 @@
 'use strict';
 const { expect } = require('chai');
-const { MongoClient } = require('../../../src');
 const { runLater } = require('../../tools/utils');
 
 describe('Tailable cursor tests', function () {
@@ -8,7 +7,7 @@ describe('Tailable cursor tests', function () {
     let client;
 
     beforeEach(async function () {
-      client = new MongoClient(this.configuration.url());
+      client = this.configuration.newClient();
       await client.connect();
     });
 
