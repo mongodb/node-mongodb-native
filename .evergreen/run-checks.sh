@@ -12,6 +12,7 @@ npm run build:evergreen
 if ! git diff --exit-code ./.evergreen/config.yml; then
     echo "Evergreen unexpectedly changed!"
     echo "Did you run: node .evergreen/generate_evergreen_tasks.js"
+    exit 1
 fi
 
 ## Checks typescript, eslint, and prettier
