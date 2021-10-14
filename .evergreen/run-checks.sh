@@ -5,10 +5,14 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 set -o xtrace
 
-## Attempt to update our EVG config
+# Attempt to update our EVG config
 # if it changes, crash so that any gen script changes are forced to be run before pushing
+echo "Running evergreen config generation, expecting no changes..."
 npm run build:evergreen
-git diff --exit-code ./.evergreen/config.yml
+if ! git diff --exit-code ./.evergreen/config.yml; then
+    echo "Evergreen unexpectedly changed!"
+    echo "Did you run: node .evergreen/generate_evergreen_tasks.js"
+fi
 
 ## Checks typescript, eslint, and prettier
 npm run check:lint
