@@ -5,13 +5,14 @@ const { runLater } = require('../../tools/utils');
 describe('Tailable cursor tests', function () {
   describe('awaitData', () => {
     let client;
+    let cursor;
 
     beforeEach(async function () {
-      client = this.configuration.newClient();
-      await client.connect();
+      client = await this.configuration.newClient().connect();
     });
 
     afterEach(async () => {
+      if (cursor) await cursor.close();
       await client.close();
     });
 
@@ -35,7 +36,7 @@ describe('Tailable cursor tests', function () {
           const res = await collection.insertOne({ a: 1 });
           expect(res).property('insertedId').to.exist;
 
-          const cursor = collection.find({}, { batchSize: 2, tailable: true, awaitData: true });
+          cursor = collection.find({}, { batchSize: 2, tailable: true, awaitData: true });
           const doc0 = await cursor.next();
           expect(doc0).to.have.property('a', 1);
 
@@ -54,7 +55,6 @@ describe('Tailable cursor tests', function () {
 
           // We should see here that cursor.next blocked for at least 300ms
           expect(end.getTime() - start.getTime()).to.be.at.least(300);
-          await cursor.close();
         }
       }
     );
