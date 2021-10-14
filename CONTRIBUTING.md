@@ -140,7 +140,7 @@ Reviewers should use the following questions to evaluate the implementation for 
   1. Are there any race conditions in the functional code or tests?
   1. Can you think of a better way to implement any of the functional code or tests? "Better" means any combination of:
      - more performant
-     - better organized / easier to understand
+     - better organized / easier to understand / clearer separation of concerns
      - easier to maintain (easier to change, harder to accidentally break)
 - Housekeeping
   1. Does the title and description of the PR reference the correct jira ticket and does it use the correct conventional commit type (e.g., fix, feat, test, breaking change etc)?
