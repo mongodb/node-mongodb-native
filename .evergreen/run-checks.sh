@@ -10,7 +10,7 @@ echo "Running evergreen config generation, expecting no changes..."
 npm run build:evergreen
 if ! git diff --exit-code ./.evergreen/config.yml; then
     echo "Detected .evergreen/config.yml not up to date"
-    echo "Did you run: node .evergreen/generate_evergreen_tasks.js"
+    echo "Make sure to run: node .evergreen/generate_evergreen_tasks.js"
     exit 1
 fi
 set -o xtrace
