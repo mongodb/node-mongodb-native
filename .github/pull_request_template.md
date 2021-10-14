@@ -23,7 +23,7 @@ You can do that here: https://jira.mongodb.org/projects/NODE
 
 ### Double check the following
 
-- [ ] Completed self-review using the [steps outlined here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md#reviewer-guidelines)
+- [ ] Self-review completed using the [steps outlined here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md#reviewer-guidelines)
 - [ ] PR title follows the correct format: `<type>(NODE-xxxx)<!>: <description>`
-- [ ] Changes sufficiently covered by new or existing tests
+- [ ] Changes are covered by tests
 - [ ] New TODOs have a related JIRA ticket
