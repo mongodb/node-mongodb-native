@@ -23,12 +23,16 @@ echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p ${KRB5_PRINCIPAL}
 
 set -o xtrace
-npm install kerberos@">=2.0.0-beta.0"
-npm run check:kerberos
-
-npm install kerberos@"^1.1.7"
-npm run check:kerberos
+if [ -z ${NODE_VERSION+omitted} ]; then echo "NODE_VERSION is unset" && exit 1; fi
+NODE_MAJOR_VERSION=$(echo "$NODE_VERSION" |  cut -d. -f1)
+if [[ $NODE_MAJOR_VERSION -ge 12 ]]; then
+  npm install kerberos@">=2.0.0-beta.0"
+else
+  npm install kerberos@"^1.1.7"
+fi
 set +o xtrace
+
+npm run check:kerberos
 
 # destroy ticket
 kdestroy
