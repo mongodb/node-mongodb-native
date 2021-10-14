@@ -19,8 +19,13 @@ fi
 echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p ${KRB5_PRINCIPAL}
 
-npm install kerberos
+set -o xtrace
+npm install kerberos@">=2.0.0-beta.0"
 npm run check:kerberos
+
+npm install kerberos@"^1.1.7"
+npm run check:kerberos
+set +o xtrace
 
 # destroy ticket
 kdestroy
