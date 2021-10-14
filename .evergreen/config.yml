@@ -206,7 +206,7 @@ functions:
         script: |
           KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
           MONGODB_URI='${gssapi_auth_mongodb_uri}' UNIFIED=${UNIFIED} \
-          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
+          NODE_LTS_NAME='${NODE_LTS_NAME}' NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   run ldap tests:
     - command: shell.exec
       type: test

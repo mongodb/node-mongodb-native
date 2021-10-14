@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
@@ -52,8 +52,12 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  npm install mongodb-client-encryption@latest
-
+  NODE_MAJOR_VERSION=$(echo $NODE_VERSION |  cut -d. -f1)
+  if [[ $NODE_MAJOR_VERSION -ge 12 ]]; then
+    npm install mongodb-client-encryption@">=2.0.0-beta.0"
+  else
+    npm install mongodb-client-encryption@"^1.2.7"
+  fi
   # Get access to the AWS temporary credentials:
   echo "adding temporary AWS credentials to environment"
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
