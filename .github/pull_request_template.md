@@ -4,15 +4,10 @@
 
 ##### Is there new documentation needed for these changes?
 
-#### Why does this need changes? Bug? or Feature?
+#### What is the motivation for this change?
 
-##### 🙁 Actual behavior
-
-<!-- What happened, and why it was wrong -->
-
-##### 🙂 Expected behavior
-
-<!-- What you expected to happen instead, and why -->
+<!-- If this is a bug, it helps to describe the current behavior and a clear outline of the expected behavior -->
+<!-- If this is a feature, it helps to describe the new use case enabled by this change -->
 
 <!--
 Contributors!
@@ -23,6 +18,7 @@ You can do that here: https://jira.mongodb.org/projects/NODE
 
 ### Double check the following
 
+- [ ] Ran `npm run check:lint` script
 - [ ] Self-review completed using the [steps outlined here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md#reviewer-guidelines)
 - [ ] PR title follows the correct format: `<type>(NODE-xxxx)<!>: <description>`
 - [ ] Changes are covered by tests
