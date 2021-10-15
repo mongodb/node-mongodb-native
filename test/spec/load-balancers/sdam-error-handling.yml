@@ -65,6 +65,10 @@ initialData:
 
 tests:
   - description: only connections for a specific serviceId are closed when pools are cleared
+    runOnRequirements:
+    # This test assumes that two sequential connections receive different serviceIDs.
+    # Sequential connections to a serverless instance may receive the same serviceID.
+    - serverless: forbid
     operations:
       # Create two cursors to force two connections.
       - name: createFindCursor
@@ -135,7 +139,7 @@ tests:
 
   # This test uses singleClient to ensure that connection attempts are routed
   # to the same mongos on which the failpoint is set.
-  - description: errors during the initial connection hello are ignore 
+  - description: errors during the initial connection hello are ignored
     runOnRequirements:
       # Server version 4.9+ is needed to set a fail point on the initial
       # connection handshake with the appName filter due to SERVER-49336.
@@ -149,7 +153,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-              failCommands: [isMaster]
+              failCommands: [isMaster, hello]
               closeConnection: true
               appName: *singleClientAppName
       - name: insertOne

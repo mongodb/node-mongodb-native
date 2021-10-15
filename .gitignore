@@ -60,3 +60,5 @@ lib/
 
 .vscode
 output
+
+serverless-expansion.yml

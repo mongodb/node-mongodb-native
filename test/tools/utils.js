@@ -7,6 +7,7 @@ const util = require('util');
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
+const { EJSON } = require('bson');
 chai.use(sinonChai);
 
 function makeTestFunction(config) {
@@ -295,7 +296,50 @@ function shouldRunServerlessTest(testRequirement, isServerless) {
   }
 }
 
+/**
+ * Use as a template string tag to stringify objects in the template string
+ * Attempts to use EJSON (to make type information obvious)
+ * falls back to util.inspect if there's an error (circular reference)
+ */
+function ejson(strings, ...values) {
+  const stringParts = [strings[0]];
+  for (const [idx, value] of values.entries()) {
+    if (typeof value === 'object') {
+      let stringifiedObject;
+      try {
+        stringifiedObject = EJSON.stringify(value, { relaxed: false });
+      } catch (error) {
+        stringifiedObject = util.inspect(value, {
+          depth: Infinity,
+          showHidden: true,
+          compact: true
+        });
+      }
+      stringParts.push(stringifiedObject);
+    } else {
+      stringParts.push(String(value));
+    }
+    stringParts.push(strings[idx + 1]);
+  }
+
+  return stringParts.join('');
+}
+
+/**
+ * Run an async function after some set timeout
+ * @param {() => Promise<void>} fn - function to run
+ * @param {number} ms - timeout in MS
+ * @returns {Promise<void>}
+ */
+const runLater = (fn, ms) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => fn().then(resolve).catch(reject), ms);
+  });
+};
+
 module.exports = {
+  runLater,
+  ejson,
   EventCollector,
   makeTestFunction,
   ensureCalledWith,

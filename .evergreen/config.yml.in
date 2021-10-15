@@ -167,12 +167,26 @@ functions:
           ${PREPARE_SHELL}
           # Disable xtrace (just in case it was accidentally set).
           set +x
-          MONGODB_URI="${MONGODB_URI}" \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          AUTH="auth" SSL="ssl" SERVERLESS=1 \
-          SERVERLESS_ATLAS_USER="${SERVERLESS_ATLAS_USER}" \
-          SERVERLESS_ATLAS_PASSWORD="${SERVERLESS_ATLAS_PASSWORD}" \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
+
+          export MONGODB_API_VERSION="${MONGODB_API_VERSION}"
+          export AUTH="auth"
+          export SSL="ssl"
+          export SERVERLESS="1"
+          export SERVERLESS_ATLAS_USER="${SERVERLESS_ATLAS_USER}"
+          export SERVERLESS_ATLAS_PASSWORD="${SERVERLESS_ATLAS_PASSWORD}"
+
+          export SINGLE_ATLASPROXY_SERVERLESS_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
+          export MULTI_ATLASPROXY_SERVERLESS_URI="${MULTI_ATLASPROXY_SERVERLESS_URI}"
+
+          export MONGODB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
+          export SINGLE_MONGOS_LB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
+
+          # Setting MULTI_MONGOS to the SINGLE_ATLAS is intentional
+          # LB tests pick one host out of the comma separated list
+          # so just passing the one host is equivalent
+          export MULTI_MONGOS_LB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
 
   "start-load-balancer":
     - command: shell.exec
@@ -698,6 +712,7 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
+            LOADBALANCED=ON \
             SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
             SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
             SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \

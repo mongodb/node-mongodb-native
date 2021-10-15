@@ -1,42 +1,62 @@
 'use strict';
 const { expect } = require('chai');
-const { setupDatabase, withClientV2 } = require('../shared');
+const { runLater } = require('../../tools/utils');
 
 describe('Tailable cursor tests', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
-  });
+  describe('awaitData', () => {
+    let client;
+    let cursor;
 
-  it('should correctly perform awaitData', {
-    metadata: { requires: { mongodb: '>=3.2' } },
-    test: withClientV2((client, done) => {
-      const db = client.db();
-      db.collection('cursor_tailable').drop(() => {
-        db.createCollection('cursor_tailable', { capped: true, size: 10000 }, (err, coll) => {
-          expect(err).to.not.exist;
+    beforeEach(async function () {
+      client = await this.configuration.newClient().connect();
+    });
 
-          coll.insertOne({ a: 1 }, (err, res) => {
-            expect(err).to.not.exist;
-            expect(res).property('insertedId').to.exist;
+    afterEach(async () => {
+      if (cursor) await cursor.close();
+      await client.close();
+    });
 
-            const cursor = coll.find({}, { batchSize: 2, tailable: true, awaitData: true });
-            cursor.next((err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.exist;
+    it(
+      'should block waiting for new data to arrive when the cursor reaches the end of the capped collection',
+      {
+        metadata: { requires: { mongodb: '>=3.2' } },
+        async test() {
+          const db = client.db('cursor_tailable');
 
-              const s = new Date();
-              cursor.next(() => {
-                const e = new Date();
-                expect(e.getTime() - s.getTime()).to.be.at.least(300);
+          try {
+            await db.collection('cursor_tailable').drop();
+            // eslint-disable-next-line no-empty
+          } catch (_) {}
 
-                done();
-              });
-
-              setTimeout(() => cursor.close(), 300);
-            });
+          const collection = await db.createCollection('cursor_tailable', {
+            capped: true,
+            size: 10000
           });
-        });
-      });
-    })
+
+          const res = await collection.insertOne({ a: 1 });
+          expect(res).property('insertedId').to.exist;
+
+          cursor = collection.find({}, { batchSize: 2, tailable: true, awaitData: true });
+          const doc0 = await cursor.next();
+          expect(doc0).to.have.property('a', 1);
+
+          // After 300ms make an insert
+          const later = runLater(async () => {
+            const res = await collection.insertOne({ b: 2 });
+            expect(res).property('insertedId').to.exist;
+          }, 300);
+
+          const start = new Date();
+          const doc1 = await cursor.next();
+          expect(doc1).to.have.property('b', 2);
+          const end = new Date();
+
+          await later; // make sure this finished, without a failure
+
+          // We should see here that cursor.next blocked for at least 300ms
+          expect(end.getTime() - start.getTime()).to.be.at.least(300);
+        }
+      }
+    );
   });
 });

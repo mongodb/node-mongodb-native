@@ -32,7 +32,7 @@ import type {
 } from '../../../src/cmap/command_monitoring_events';
 import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 import { expect } from 'chai';
-import { getEnvironmentalOptions } from '../../tools/utils';
+import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import { TestConfiguration, trace } from './runner';
 
 interface UnifiedChangeStream extends ChangeStream {
@@ -178,7 +178,12 @@ export class FailPointMap extends Map<string, Document> {
       // create a new client
       address = addressOrClient.toString();
       client = getClient(address);
-      await client.connect();
+      try {
+        await client.connect();
+      } catch (error) {
+        console.error(`failed to connect enableFailPoint ${address}`);
+        throw error;
+      }
     }
 
     const admin = client.db('admin');
@@ -198,8 +203,14 @@ export class FailPointMap extends Map<string, Document> {
     const entries = Array.from(this.entries());
     await Promise.all(
       entries.map(async ([hostAddress, configureFailPoint]) => {
+        if (process.env.SERVERLESS) hostAddress += '?loadBalanced=true';
         const client = getClient(hostAddress);
-        await client.connect();
+        try {
+          await client.connect();
+        } catch (error) {
+          console.error(`failed to connect disableFailPoints ${hostAddress}`);
+          throw error;
+        }
         const admin = client.db('admin');
         const result = await admin.command({ configureFailPoint, mode: 'off' });
         expect(result).to.have.property('ok', 1);
@@ -334,7 +345,12 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           entity.client.uriOptions
         );
         const client = new UnifiedMongoClient(uri, entity.client);
-        await client.connect();
+        try {
+          await client.connect();
+        } catch (error) {
+          console.error(ejson`failed to connect entity ${entity}`);
+          throw error;
+        }
         map.set(entity.client.id, client);
       } else if ('database' in entity) {
         const client = map.getEntity('client', entity.database.client);
