@@ -49,7 +49,7 @@ describe('monitoring', function () {
   });
 
   // TODO(NODE-3600): Unskip flaky test
-  it.skip('should recover on error during initial connect', function (done) {
+  it('should recover on error during initial connect', function (done) {
     // This test should take ~1s because initial server selection fails and an immediate check
     // is requested. If the behavior of the immediate check is broken, the test will take ~10s
     // to complete. We want to ensure validation of the immediate check behavior, and therefore
@@ -59,10 +59,19 @@ describe('monitoring', function () {
     let acceptConnections = false;
     mockServer.setMessageHandler(request => {
       if (!acceptConnections) {
+        console.log('destroy', request.document);
         request.connection.destroy();
+
+        // NOTE (NODE-3600): This test initially set acceptConnections to true on a timer
+        // outside this block of 250ms, which seemed to cause the test to randomly fail.
+        // What it looks like we really needed to be testing is that the *first* request
+        // fails and any subsequent request passes, handling the case of the immediate
+        // check.
+        acceptConnections = true;
         return;
       }
 
+      console.log('success', request.document);
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
         request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
@@ -71,12 +80,9 @@ describe('monitoring', function () {
       }
     });
 
-    setTimeout(() => {
-      acceptConnections = true;
-    }, 250);
-
     const topology = new Topology(mockServer.hostAddress(), {});
     topology.connect(err => {
+      console.log('connected');
       expect(err).to.not.exist;
       expect(topology).property('description').property('servers').to.have.length(1);
 
