@@ -140,8 +140,11 @@ describe('utils', function () {
 
             // needs to happen on the third call because `wake` checks
             // the `currentTime` at the beginning of the function
+            // The value of now() is not actually negative in the case of
+            // the unreliable check so we force to a negative value now
+            // for this test.
             if (clockCalled === 3) {
-              return now() - 100000;
+              return -1;
             }
 
             return now();

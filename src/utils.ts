@@ -976,6 +976,15 @@ export function makeInterruptibleAsyncInterval(
     // never completes, the `timeUntilNextCall` will continue to grow
     // negatively unbounded, so it will never trigger a reschedule here.
 
+    // This is possible in virtualized environments like AWS Lambda where our
+    // clock is unreliable. In these cases the timer is "running" but never
+    // actually completes, so we want to execute immediately and then attempt
+    // to reschedule.
+    if (timeUntilNextCall < 0) {
+      executeAndReschedule();
+      return;
+    }
+
     // debounce multiple calls to wake within the `minInterval`
     if (timeSinceLastWake < minInterval) {
       return;
@@ -985,14 +994,6 @@ export function makeInterruptibleAsyncInterval(
     // faster than the `minInterval`
     if (timeUntilNextCall > minInterval) {
       reschedule(minInterval);
-    }
-
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
-      executeAndReschedule();
     }
   }
 
