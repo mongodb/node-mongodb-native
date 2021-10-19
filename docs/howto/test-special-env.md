@@ -84,6 +84,12 @@ npm run check:test
 
 Take note of the `[ topology type: load-balanced ]` print out from mocha to make sure it picked up the environment as expected.
 
+When you are done testing you can shutdown the haproxy load balancer with:
+
+```sh
+$DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
+```
+
 ## CSFLE
 
 As long as certain environment variables are present, and mongodb-client-encryption is installed, FLE will run with a regular mocha execution: `npm run check:tests`.
