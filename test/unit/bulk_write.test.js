@@ -2,7 +2,11 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const BulkWriteResult = require('../../lib/bulk/common').BulkWriteResult;
+const Long = require('../../lib/core').BSON.Long;
+const Timestamp = require('../../lib/core').BSON.Timestamp;
+const common = require('../../lib/bulk/common');
+const BulkWriteResult = common.BulkWriteResult;
+const mergeBatchResults = common.mergeBatchResults;
 
 describe('Bulk Writes', function() {
   const test = {};
@@ -130,5 +134,49 @@ describe('Bulk Writes', function() {
     // or either cached object then they will throw in these expects:
 
     expect(() => result.insertedIds).to.not.throw();
+  });
+
+  describe('#mergeBatchResults', function() {
+    context('when opTime is an object', function() {
+      context('when the lastOp is a Timestamp', function() {
+        const batch = [];
+        const bulkResult = {
+          ok: 1,
+          writeErrors: [],
+          writeConcernErrors: [],
+          insertedIds: [],
+          nInserted: 0,
+          nUpserted: 0,
+          nMatched: 0,
+          nModified: 0,
+          nRemoved: 1,
+          upserted: [],
+          lastOp: {
+            ts: 7020546605669417496,
+            t: 10
+          }
+        };
+        const result = {
+          n: 8,
+          nModified: 8,
+          opTime: Timestamp.fromNumber(8020546605669417496),
+          electionId: '7fffffff0000000000000028',
+          ok: 1,
+          $clusterTime: {
+            clusterTime: '7020546605669417498',
+            signature: {
+              hash: 'AAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+              keyId: 0
+            }
+          },
+          operationTime: '7020546605669417498'
+        };
+
+        it('replaces the lastOp with the properly formatted timestamp', function() {
+          mergeBatchResults(batch, bulkResult, null, result);
+          expect(bulkResult.lastOp.t).to.equal(Long.ZERO);
+        });
+      });
+    });
   });
 });
