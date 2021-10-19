@@ -1,8 +1,10 @@
 # How to test
 
+## Special Environments
+
 Some tests require specialized environments, sometimes local debugging is required so look for the topic you are trying to test and follow the steps to get started.
 
-## Serverless
+### Serverless
 
 Find the following script in driver-evergreen-tools and make sure you have the following environment variables defined.
 _**Remember**_ some of these are sensitive credentials so keep them safe and only put them in your environment when you need them.
@@ -46,7 +48,7 @@ before sourcing `serverless.env`, make some adjustments that are equivalent to w
 
 Lastly, comment out the `source` of `install-dependencies.sh` command in `.evergreen/run-serverless-tests.sh` and you can run that script directly to test serverless instances from your local machine.
 
-## Load Balanced
+### Load Balanced
 
 You'll first need to start a sharded cluster, use your favorite MongoDB orchestration tool of choice.
 The tool should create a cluster with two mongos so you have a uri like `MONGODB_URI=mongodb://host1,host2/`
@@ -90,7 +92,7 @@ When you are done testing you can shutdown the haproxy load balancer with:
 $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
 ```
 
-## CSFLE
+### CSFLE
 
 As long as certain environment variables are present, and mongodb-client-encryption is installed, FLE will run with a regular mocha execution: `npm run check:tests`.
 
@@ -102,7 +104,7 @@ Define the following variables in your environment:
 - `AWS_REGION`
 - `AWS_CMK_ID`
 
-## TODO Sections
+### TODO Special Env Sections
 
 - Kerberos
 - AWS Authentication
