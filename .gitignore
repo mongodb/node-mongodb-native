@@ -66,4 +66,3 @@ serverless.env
 
 lb-expansion.yml
 lb.env
-!docs/howto/test-*
