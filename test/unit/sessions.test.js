@@ -80,7 +80,7 @@ describe('Sessions - unit/core', function () {
           session = new ClientSession(client, sessionPool, { snapshot: true });
           expect(session.snapshotEnabled).to.equal(true);
           expect(() => session.startTransaction()).to.throw(
-            'Transactions are not allowed with snapshot sessions'
+            'Transactions are not supported in snapshot sessions'
           );
         }
       });

@@ -116,25 +116,12 @@ const SKIP_TESTS = [
 
 describe('Transactions Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();
-  const suitesToRun = [{ name: 'spec tests', specPath: path.join('transactions', 'legacy') }];
-  // Note: convenient-api tests are skipped for serverless
-  if (!process.env.SERVERLESS) {
-    suitesToRun.push({
-      name: 'withTransaction spec tests',
-      specPath: path.join('transactions', 'convenient-api')
-    });
-  } else {
-    // FIXME(NODE-3550): these tests should pass on serverless but currently fail
-    SKIP_TESTS.push(
-      'abortTransaction only performs a single retry',
-      'abortTransaction does not retry after Interrupted',
-      'abortTransaction does not retry after WriteConcernError Interrupted',
-      'commitTransaction does not retry error without RetryableWriteError label',
-      'commitTransaction is not retried after UnsatisfiableWriteConcern error',
-      'commitTransaction fails after Interrupted'
-    );
-  }
-  suitesToRun.forEach(suiteSpec => {
+  const suitesToRun = [
+    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
+    { name: 'withTransaction spec tests', specPath: path.join('transactions', 'convenient-api') }
+  ];
+
+  for (const suiteSpec of suitesToRun) {
     describe(suiteSpec.name, function () {
       const testSuites = loadSpecTests(suiteSpec.specPath);
       after(() => testContext.teardown());
@@ -148,7 +135,7 @@ describe('Transactions Spec Legacy Tests', function () {
 
       generateTopologyTests(testSuites, testContext, testFilter);
     });
-  });
+  }
 
   describe('withTransaction', function () {
     let session, sessionPool;

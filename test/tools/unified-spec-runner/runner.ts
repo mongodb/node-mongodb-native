@@ -75,7 +75,7 @@ export async function runUnifiedTest(
     utilClient = ctx.configuration.newClient();
   }
 
-  let entities;
+  let entities: EntitiesMap;
   try {
     trace('\n starting test:');
     try {
@@ -199,6 +199,21 @@ export async function runUnifiedTest(
           actualEvents = clientCommandEvents.get(clientId);
         }
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
+        const wasProvidedCredentials = !!entities.getEntity('client', clientId).options.credentials;
+
+        // TODO(NODE-2471): Currently the node driver executes a ping command when credentials are provided
+        // Here, we need to filter out two extra events from a set of CMAP events.
+        if (
+          wasProvidedCredentials &&
+          actualEvents.length > 4 &&
+          actualEvents[0].constructor.name.toLowerCase() === 'ConnectionReadyEvent'.toLowerCase()
+        ) {
+          // This is a set of CMAP events, remove the out event at index 1 and the in event at index 2
+          expect(actualEvents[1].constructor.name).to.equal('ConnectionCheckedOutEvent');
+          expect(actualEvents[2].constructor.name).to.equal('ConnectionCheckedInEvent');
+          actualEvents.splice(1, 2);
+        }
+
         matchesEvents(expectedEventList.events, actualEvents, entities);
       }
     }

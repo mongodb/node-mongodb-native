@@ -1,6 +1,15 @@
 import { expect } from 'chai';
 import { inspect } from 'util';
-import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
+import {
+  Binary,
+  Document,
+  Long,
+  ObjectId,
+  MongoError,
+  MongoDriverError,
+  MongoServerError,
+  MongoNetworkError
+} from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
@@ -321,9 +330,12 @@ export function expectErrorCheck(
   expected: ExpectedError,
   entities: EntitiesMap
 ): boolean {
-  if (Object.keys(expected)[0] === 'isClientError' || Object.keys(expected)[0] === 'isError') {
-    // FIXME: We cannot tell if Error arose from driver and not from server
-    return;
+  if (expected.isClientError === true) {
+    expect(error).to.satisfy(
+      (error: unknown) => error instanceof MongoDriverError || error instanceof MongoNetworkError
+    );
+  } else if (expected.isClientError === false) {
+    expect(error).to.be.instanceOf(MongoServerError);
   }
 
   const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;

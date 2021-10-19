@@ -121,7 +121,7 @@ function parseRunOn(runOn) {
 }
 
 function generateTopologyTests(testSuites, testContext, filter) {
-  testSuites.forEach(testSuite => {
+  for (const testSuite of testSuites) {
     // TODO: remove this when SPEC-1255 is completed
     let runOn = testSuite.runOn;
     if (!testSuite.runOn) {
@@ -132,38 +132,36 @@ function generateTopologyTests(testSuites, testContext, filter) {
     }
     const environmentRequirementList = parseRunOn(runOn);
 
-    environmentRequirementList.forEach(requires => {
+    for (const requires of environmentRequirementList) {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
       describe(suiteName, {
         metadata: { requires },
-        test: function () {
+        test() {
           beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
           afterEach(() => testContext.cleanupAfterSuite());
-          testSuite.tests.forEach(spec => {
+
+          for (const spec of testSuite.tests) {
             const maybeIt = shouldRunSpecTest(this.configuration, requires, spec, filter)
               ? it
               : it.skip;
-            maybeIt(spec.description, function () {
-              let testPromise = Promise.resolve();
+
+            maybeIt(spec.description, async function () {
               if (spec.failPoint) {
-                testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
+                await testContext.enableFailPoint(spec.failPoint);
               }
 
-              // run the actual test
-              testPromise = testPromise.then(() =>
-                runTestSuiteTest(this.configuration, spec, testContext)
-              );
+              await runTestSuiteTest(this.configuration, spec, testContext);
 
               if (spec.failPoint) {
-                testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
+                await testContext.disableFailPoint(spec.failPoint);
               }
-              return testPromise.then(() => validateOutcome(spec, testContext));
+              return await validateOutcome(spec, testContext);
             });
-          });
+          }
         }
       });
-    });
-  });
+    }
+  }
 }
 
 function shouldRunSpecTest(configuration, requires, spec, filter) {

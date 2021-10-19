@@ -34,7 +34,6 @@ const SKIP = [
         'aggregate pins the cursor to a connection',
         'errors during the initial connection hello are ignored',
         'all operations go to the same mongos',
-        'transaction can be committed multiple times',
         'pinned connection is not released after a non-transient CRUD error',
         'pinned connection is not released after a non-transient commit error',
         'pinned connection is released after a non-transient abort error',
@@ -42,10 +41,9 @@ const SKIP = [
         'pinned connection is released after a transient non-network abort error',
         'pinned connection is released after a transient network abort error',
         'pinned connection is released on successful abort',
-        'pinned connection is returned when a new transaction is started',
-        'pinned connection is returned when a non-transaction operation uses the session',
-        'a connection can be shared by a transaction and a cursor',
         'wait queue timeout errors include cursor statistics',
+        // This is supposed to fail, but on a command that we are try catching.
+        // Instead it fails on that first ping
         'wait queue timeout errors include transaction statistics'
       ]
     : [])

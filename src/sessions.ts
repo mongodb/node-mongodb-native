@@ -375,7 +375,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    */
   startTransaction(options?: TransactionOptions): void {
     if (this[kSnapshotEnabled]) {
-      throw new MongoCompatibilityError('Transactions are not allowed with snapshot sessions');
+      throw new MongoCompatibilityError('Transactions are not supported in snapshot sessions');
     }
 
     assertAlive(this);
