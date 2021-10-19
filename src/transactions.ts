@@ -1,6 +1,6 @@
 import { ReadPreference } from './read_preference';
 import { MongoRuntimeError, MongoTransactionError } from './error';
-import { ReadConcern } from './read_concern';
+import { ReadConcern, ReadConcernLike } from './read_concern';
 import { WriteConcern } from './write_concern';
 import type { Server } from './sdam/server';
 import type { CommandOperationOptions } from './operations/command';
@@ -63,7 +63,7 @@ const COMMITTED_STATES: Set<TxnState> = new Set([
 export interface TransactionOptions extends CommandOperationOptions {
   // TODO(NODE-3344): These options use the proper class forms of these settings, it should accept the basic enum values too
   /** A default read concern for commands in this transaction */
-  readConcern?: ReadConcern;
+  readConcern?: ReadConcernLike;
   /** A default writeConcern for commands in this transaction */
   writeConcern?: WriteConcern;
   /** A default read preference for commands in this transaction */
