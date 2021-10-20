@@ -5,7 +5,7 @@ const { mergeBatchResults } = require('../../../src/bulk/common');
 const { Timestamp, Long } = require('../../../src/bson');
 
 describe('bulk/common', function () {
-  describe.only('#mergeBatchResults', function () {
+  describe('#mergeBatchResults', function () {
     let opTime;
     let lastOp;
     const bulkResult = {
