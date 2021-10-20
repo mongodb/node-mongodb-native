@@ -205,7 +205,7 @@ export async function runUnifiedTest(
         // Here, we need to filter out two extra events from a set of CMAP events.
         if (
           wasProvidedCredentials &&
-          actualEvents.length > 4 &&
+          actualEvents.length > 0 &&
           actualEvents[0].constructor.name.toLowerCase() === 'ConnectionReadyEvent'.toLowerCase()
         ) {
           // This is a set of CMAP events, remove the out event at index 1 and the in event at index 2
