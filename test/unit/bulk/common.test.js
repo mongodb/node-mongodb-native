@@ -60,7 +60,7 @@ describe('bulk/common', function () {
             result.opTime = opTime;
           });
 
-          it('replaces the lastOp with the new opTime', function () {
+          it('replaces the opTime with the new opTime', function () {
             mergeBatchResults(batch, bulkResult, null, result);
             expect(bulkResult.opTime).to.deep.equal(opTime);
           });
@@ -75,7 +75,7 @@ describe('bulk/common', function () {
               result.opTime = opTime;
             });
 
-            it('replaces the lastOp with the new opTime', function () {
+            it('replaces the opTime with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
               expect(bulkResult.opTime).to.deep.equal(opTime);
             });
@@ -89,7 +89,7 @@ describe('bulk/common', function () {
               result.opTime = opTime;
             });
 
-            it('does not replace the lastOp with the new opTime', function () {
+            it('does not replace the opTime with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
               expect(bulkResult.opTime).to.deep.equal(lastOp);
             });
@@ -103,7 +103,7 @@ describe('bulk/common', function () {
               result.opTime = opTime;
             });
 
-            it('does not replace the lastOp with the new opTime', function () {
+            it('does not replace the opTime with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
               expect(bulkResult.opTime).to.deep.equal(lastOp);
             });
@@ -118,7 +118,7 @@ describe('bulk/common', function () {
             result.opTime = opTime;
           });
 
-          it('does not replace the lastOp with the new opTime', function () {
+          it('does not replace the opTime with the new opTime', function () {
             mergeBatchResults(batch, bulkResult, null, result);
             expect(bulkResult.opTime).to.deep.equal(lastOp);
           });
